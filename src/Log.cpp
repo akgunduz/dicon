@@ -5,7 +5,7 @@
 
 #include "Log.h"
 
-#ifdef USE_WXWIDGETS
+#ifdef __WXWIDGETS__
 #include "UserInterface.h"
 extern UserInterface *g_ui;
 #endif
@@ -151,7 +151,7 @@ void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ..
 
 void Log::update_ui(int id, void *data) {
 
-#ifdef USE_WXWIDGETS
+#ifdef __WXWIDGETS__
 	if (g_ui) {
 		g_ui->updateUIEvent(id, data);
 	}

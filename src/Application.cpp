@@ -4,7 +4,7 @@
 //
 
 #include "Log.h"
-#ifdef USE_WXWIDGETS
+#ifdef __WXWIDGETS__
 #include "UserInterface.h"
 #endif
 #include "Console.h"
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-#ifdef USE_WXWIDGETS
+#ifdef __WXWIDGETS__
 	return wxEntry(argc, argv);
 #else
 	return 0;
