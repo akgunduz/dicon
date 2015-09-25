@@ -1,0 +1,126 @@
+//
+// Created by Haluk AKGUNDUZ on 29/05/14.
+// Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
+//
+
+#include "Scheduler.h"
+
+Scheduler::Scheduler(int capacity) {
+	mCapacity = capacity;
+	int res = pthread_mutex_init(&mMutex, NULL);
+	if (res) {
+		LOG_E("Mutex init failed");
+		throw std::runtime_error("Scheduler : Mutex init failed");
+	}
+
+	res = pthread_cond_init (&mCond, NULL);
+	if (res) {
+		LOG_E("Condition init fail");
+		pthread_mutex_destroy(&mMutex);
+		throw std::runtime_error("Scheduler : Condition init failed");
+	}
+
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	int pthr = pthread_create(&mThread, &attr, run, (void *)this);
+	pthread_attr_destroy(&attr);
+	if (pthr) {
+		LOG_E("Problem with run thread");
+		pthread_cond_destroy(&mCond);
+		pthread_mutex_destroy(&mMutex);
+		throw std::runtime_error("Scheduler : Problem with run thread");
+	}
+
+	mInitialized = true;
+}
+
+Scheduler::~Scheduler() {
+	if (!mInitialized) {
+		return;
+	}
+
+	end();
+	pthread_join(mThread, nullptr);
+
+	for (std::list<struct Capsule>::iterator itr = mMessages.begin(); itr != mMessages.end(); itr++) {
+		delete itr->msg;
+	}
+	mMessages.clear();
+	pthread_cond_destroy(&mCond);
+	pthread_mutex_destroy(&mMutex);
+}
+
+bool Scheduler::push(int type, uint64_t target, Message *msg) {
+	if (pthread_mutex_lock(&mMutex) != 0) { //replaced with trylock
+		LOG_E("Can not push, system is BUSY!!!");
+		return false;
+	}
+
+	if (mMessages.size() < mCapacity) {
+		msg->normalizePriority();
+		struct Capsule capsule = {type, target, msg};
+		mMessages.push_back(capsule);
+		pthread_mutex_unlock(&mMutex);
+		pthread_cond_signal(&mCond);
+		return true;
+	}
+
+	pthread_mutex_unlock(&mMutex);
+	return false;
+}
+
+void *Scheduler::run(void *arg) {
+	Scheduler *scheduler = (Scheduler *) arg;
+	bool thread_started = true;
+
+	while(thread_started) {
+		pthread_mutex_lock(&scheduler->mMutex);
+		if (scheduler->mMessages.empty()) {
+			pthread_cond_wait(&scheduler->mCond, &scheduler->mMutex);
+			if (scheduler->endstate) {
+				thread_started = false;
+				pthread_mutex_unlock(&scheduler->mMutex);
+				continue;
+			}
+
+		}
+
+		std::list<struct Capsule>::iterator ref = scheduler->mMessages.begin();
+		for (std::list<struct Capsule>::iterator itr = ref;
+			 	itr != scheduler->mMessages.end(); itr++) {
+			if (itr->msg->getPriority() < ref->msg->getPriority()) {
+				ref = itr;
+			}
+			itr->msg->iteratePriority();
+		}
+		struct Capsule refCapsule = *(ref);
+		scheduler->mMessages.erase(ref);
+		pthread_mutex_unlock(&scheduler->mMutex);
+
+		scheduler->mCB[refCapsule.type]->cb(
+				scheduler->mCB[refCapsule.type]->arg,
+				refCapsule.address, refCapsule.msg);
+	}
+	return nullptr;
+}
+
+bool Scheduler::end() {
+	pthread_mutex_lock(&mMutex);
+	endstate = true;
+	pthread_mutex_unlock(&mMutex);
+	pthread_cond_signal(&mCond);
+	return false;
+}
+
+void Scheduler::setReceiveCB(const CallBack *callBack) {
+
+	mCB[MESSAGE_RECEIVE] = callBack;
+
+}
+
+void Scheduler::setSendCB(uint16_t interfaceID, const CallBack *callBack) {
+
+	mCB[MESSAGE_SEND + interfaceID] = callBack;
+
+}

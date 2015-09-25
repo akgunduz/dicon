@@ -1,0 +1,47 @@
+{
+    "Rule": {
+        "files": [
+            ["benchtool_c15", ""],
+            ["matrix.cl", ""],
+            ["matrix/MatrixInput_1", ""],
+            ["matrix/MatrixInput_2", ""],
+            ["matrix/MatrixInput_3", ""],
+            ["conv.cl", ""],
+            ["conv/ConvInput_1", ""],
+            ["conv/ConvInput_2", ""],
+            ["conv/ConvInput_3", ""],
+            ["conv/ConvInput_4", ""],
+            ["scan.cl", ""],
+            ["scan/ScanInput_1", ""],
+            ["scan/ScanInput_2", ""],
+            ["scan/ScanInput_3", ""],
+        ],
+
+        "parameters": [
+            "l:20"
+        ],
+
+        "executors": [
+            "$F0 -a m -m 2 -r 10 1",
+            "$F0 -a m -m 4 -r 10 1",
+            "$F0 -a m -m 2 -r 5 2",
+            "$F0 -a m -m 4 -r 5 2",
+            "$F0 -a m -m 2 -r 3 3",
+            "$F0 -a m -m 4 -r 3 3",
+            "$F0 -a c -m 1 -r 100 1",
+            "$F0 -a c -m 3 -r 100 1",
+            "$F0 -a c -m 1 -r 100 2",
+            "$F0 -a c -m 3 -r 100 2",
+            "$F0 -a c -m 1 -r 100 3",
+            "$F0 -a c -m 3 -r 100 3",
+            "$F0 -a c -m 1 -r 100 4",
+            "$F0 -a c -m 3 -r 100 4",
+            "$F0 -a s -m 0 -r 10000 1",
+            "$F0 -a s -m 1 -r 10000 1",
+            "$F0 -a s -m 0 -r 10000 2",
+            "$F0 -a s -m 1 -r 10000 2",
+            "$F0 -a s -m 0 -r 10000 3",
+            "$F0 -a s -m 1 -r 10000 3",
+        ]
+    }
+}

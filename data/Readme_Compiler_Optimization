@@ -1,0 +1,210 @@
+
+Finding the best compiler options
+Unread postby Cooper » Wed Jul 03, 2013 1:22 am
+
+Looking over the forum I've seen a number of announcements for pieces of software compiled with certain compiler and program parameters in an attempt to squeeze out the very last drop of performance from the platform. The problem is that none of the posts back up their claim that the settings used are, in fact, optimal.
+
+So, I'm starting this thread in an attempt to do 2 things:
+1. Find the best general settings for gcc (CFLAGS) where general means you must be able to compile a complete working system with those exact settings.
+2. Find out what people use their Odroid-U2 for and then determine which benchmarks can best be used to test the performance under this usage scenario.
+
+I'm using multiple versions of GCC to see if any changes are achieved here and I'll update this post each time a new test is included, a new set of benchmark values is computed or a new setting is pointed out which does, in fact, provide a measurable difference in one of the tests.
+If you know of a compiler- or package option that I should include when running these tests, or even an alternative test, please say so and I will try to include them!
+
+Tests are run on an Odroid-U2 at stock speeds using a 16GB eMMC card and running the original 3.0.63 linux kernel
+CODE: SELECT ALL
+odroid ~ # uname -a
+Linux odroid 3.0.63 #5 SMP PREEMPT Tue Feb 12 21:05:56 EST 2013 armv7l ARMv7 Processor rev 0 (v7l) ODROIDU2 GNU/Linux
+
+I used to enable the "ondemand" CPUFreq governor but this results in the shutting down of CPU cores which gives some programs the impression that our quad-core platform only has 1 or 2 cores resulting in much poorer performance than one should expect. It's been set to "performance" for all listed testresults.
+
+I've installed Gentoo on my Odroid and installed GCC versions 4.6.4, 4.7.3 and 4.8.1.
+The CFLAGS I provide will always contain -O3 -pipe -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=hard
+
+There are a number of options that you can provide in the CFLAGS which I will discuss and most of the time you will find benchmark results below to prove the statements made here.
+-mthumb
+When provided, the compiler is instructed to generate a binary using the THUMB instructionset of the ARM processor. THUMB instructions are 16-bit (relative to the 32-bit ARM instruction set) and result in more compact code meaning a 15-25% reduction in binary size and potentially better cache behaviour. On the other hand, the ARM instruction set, being more descriptive, allows more work to be done in a single clock, if the program in question allows it.
+It turns out that the thumb instruction set is unsupported by certain programs, most notably GMP, a 'multiple precision' math library used by quite a few pieces of software such as PHP, making it unsuitable as a general CFLAGS option. Tests have shown that software that does work using the THUMB ISA end up being roughly 15% smaller for libraries, 25% smaller for executables and result in a consistent performance drop of roughly 3%.
+-mfpu={vfpv3-d16,vfpv3,neon}
+The ARM processor on the Odroid-U2 has version 3 of the Vector Floating Point unit built in and also supports the NEON instructions which is similar to MMX/SSE on x86 platforms in that it allows multiple operations to be performed in a single instruction. ARM designed the v3 VFP with 32 registers, but because an implementation is allowed to restrict this to 16 GCC has an option to support that. NEON is a superset of VFPv3, so activating NEON implies the availability of VFPv3 with 32 registers.
+To put this another way, vfpv3 is vfpv3-d16 with an additional 16 registers and more registers result in better performance. Neon is vfpv3 with a number of extra instructions that can be used to drastically increase performance. Modern compilers are capable of automatically exploiting this capability in otherwise unoptimised code to yield even better results, but the improvements here are not particularly significant. When a program provides NEON optimised code, or even better, hand-crafted NEON ASM routines, vast performance increases can be observed and these routines will only be made available when this fpu setting is set to neon. So if your platform supports it, like the Odroid-U2 does, use -mfpu=neon as it will at a minimum be as good as -mfpu=vfpv3 and potentially much, much better.
+-fassociative-math
+This option allows GCC to cut some corners with mathematical operations on floats which potentially yields faster code at the expense of some precision and standards compliance. This is generally considered the safer version of -ffast-math.
+Thus far this option hasn't been applied with any of our tests. Certain programs provide this option or its more aggressive sibling already. We'll have to see if this setting will have any kind of impact on the system.
+-mvectorize-with-neon-quad / --param preferred-vector-size=64
+Using this option you can inform GCC of the vector sizes the cpu supports. The Odroid-U2's CPU supports 128-bit vectors, but executes 64-bits at a time. In GCC 4.6 you use the -mvectorize-with-neon-quad for this and in GCC 4.7 and up the setting has been replaced with the "--param preferred-vector-size=64" attribute. It is suggested that GCC 4.6 has a default vector size of 64-bit whereas GCC 4.7 defaults to 128-bit.
+The original naming of this setting is more expressive about it, but this option requires you to specify -mfpu=neon and might help the compiler make better decisions here. Since the programs that benefit the most from the NEON instructions tend to be hand-optimised, we'll have to test to see to what extent this setting can have any impact on the performance of the programs in question.
+
+So, on with the tests. Keep in mind that all the delta numbers are percentages, relative to the bare "-mfpu=vfpv3-d16" run. Positive numbers are speedups, negative are slowdowns.
+
+FFMPEG
+The backbone of many pieces of HTPC software, I'm testing FFMpeg using a public domain movie called Horror Hotel/City Of The Dead (imdb) which is available as 2.5GB mpeg, 307.2MB ogv and 315.4MB mp4.
+Testing method is the command
+CODE: SELECT ALL
+time ffmpeg -i <movie_file> -f framecrc - > /dev/null
+which is executed for each of the 3 movies and the processing times are reported. Note that FFMpeg complains a lot about the .ogv file indicating "Broken file, keyframe not correctly marked". Simply ignore for now.
+USE flags for FFMpeg were
+CODE: SELECT ALL
+aac aacplus libass mp3 mp4 network openal openssl pulseaudio static-libs theora threads vorbis x264 xvid zlib X
+except when -mfpu=neon is specified in the CFLAGS at which point I also added the "neon" USE flag.
+When I recompile FFMpeg, i emerge the following: ffmpeg libass libogg libtheora libvorbis pulseaudio openal openssl vo-aacenc x264 xvid zlib
+
+I'm using the FFMpeg 1.2.1 for this, which is the latest version at the time of this writing.
+
+Previously I reported the accumulation of these numbers, but MPEG accounts for over 70% of the total number and is probably the one format you WON'T be playing from your HTPC.
+I also removed the "total" column as it seems I misunderstood the output, which is best explained like this:
+Real is wall clock time spent performing the test.
+User is the total CPU processing time for all utilised cores used by the program during the test.
+Sys is the total CPU processing time for all utilised cores used by the kernel during the test.
+
+The results - MPEG:
+CODE: SELECT ALL
+Real      Δ        User       Δ        Sys      Δ        GCC     Options
+762.160   0.000    1188.088   0.000    86.197   0.000    4.6.4   -mfpu=vfpv3-d16
+760.353   0.237    1183.755   0.365D   87.227   -1.195   4.6.4   -mfpu=vfpv3
+676.989   11.175   1024.183   13.796   81.517   5.429    4.6.4   -mfpu=neon
+
+The results - OGV
+CODE: SELECT ALL
+Real      Δ        User       Δ        Sys      Δ        GCC     Options
+226.468   0.000    488.052    0.000    33.475   0.000    4.6.4   -mfpu=vfpv3-d16
+226.181   0.127    477.283    0.161    33.137   1.011    4.6.4   -mfpu=vfpv3
+194.204   14.247   378.037    22.542   31.298   6.502    4.6.4   -mfpu=neon
+
+The results - MP4
+CODE: SELECT ALL
+Real      Δ        User       Δ        Sys      Δ        GCC     Options
+213.700   0.000    461.035    0.000    13.370   0.000    4.6.4   -mfpu=vfpv3-d16
+213.77   -0.0378   461.638    -0.131   13.118   1.882    4.6.4   -mfpu=vfpv3
+185.955   12.983   326.713    29.135   11.788   11.830   4.6.4   -mfpu=neon
+
+A few things to point out here.
+First, when you're using CPUFreq, make sure you use a governor that does not deactivate any cores otherwise FFMpeg will operate in the belief that the inactive cores actually don't exist which can result in drastically different numbers.
+Second, if you're planning to build a mediacenter/HTPC right now, grab the bleeding edge latest version of FFMpeg. It contains a NEON implementation of the h264 decoder which will improve the performance of this format on the Odroid by over 12.5% (in numbers, the MP4 would get a 'real' of about 150...).
+And finally, FFMpeg 1.2.1 fails to compile with GCC 4.8. This issue has also been fixed in the current development version of FFMpeg. At the moment GCC 4.6.4 appears to be the better compiler overall, but some people tend to prefer the latest of everything.
+
+OpenSSL
+Either during internet browsing or for accessing your Odroid in a secure manner across the network, OpenSSL is there for you to keep your session secure.
+To test OpenSSL, I've copied a benchmark command from here. The command is
+CODE: SELECT ALL
+openssl speed md5 sha1 sha256 sha512 des des-ede3 aes-128-cbc aes-192-cbc aes-256-cbc rsa2048 dsa2048 | sed -e "s/\([0-9]*\)\.\(..\)k/+ \1.\2/g" -e "s/\([^+]*\)+\(.*\)/echo \"\1\" \`echo \"\2\" | bc -l\` >> result.txt/"
+the output of which is for each algorithm a command that gives a simple sum of the numbers which you can run to get the number in the result.txt file. For rsa and dsa I simply copy over the sign/s and verify/s columns. I run this 3 times and take the average of the 3 runs.
+OpenSSL doesn't support many USE flags, so I simply use the same set as specified in the FFMpeg test. This is useful since, for the FFMpeg test, I'm re-emerging openssl anyways. :-D
+
+I'm using version 1.0.1e for this. The latest version at the time of this writing.
+
+The results part 1:
+CODE: SELECT ALL
+DES CBC     Δ        DES EDE3   Δ        AES-128 CBC   Δ        AES-192 CBC   Δ        AES-256 CBC   Δ        GCC     Options
+126161.76   0.000    47864.35   0.000    281731.14     0.000    241934.71     0.000    210787.73     0.000    4.6.4   -mfpu=vfpv3-d16
+126216.24   0.043    47944.36   0.167    281793.65     0.022    242183.27     0.103    211006.89     0.104    4.6.4   -mfpu=vfpv3
+125852.91   -0.245   47769.16   -0.199   281697.32     -0.012   241933.97     0.000    211924.52     0.539    4.6.4   -mfpu=neon
+126895.56   0.582    48006.55   0.297    288062.40     2.247    239775.16     -0.893   210188.04     -0.284   4.7.3   -mfpu=vfpv3-d16
+126805.15   0.510    48004.31   0.292    288186.42     2.291    239824.49     -0.872   209964.50     -0.391   4.7.3   -mfpu=vfpv3
+126505.47   0.272    47989.60   0.262    288241.05     2.311    239642.43     -0.947   209915.03     -0.414   4.7.3   -mfpu=neon
+
+The results part 2:
+CODE: SELECT ALL
+MD5         Δ        SHA1        Δ        SHA256      Δ       SHA512      Δ        GCC     Options
+532406.58   0.000    344817.44   0.000    230742.21   0.000   181591.30   0.000    4.6.4   -mfpu=vfpv3-d16
+532192.14   -0.040   344595.72   -0.064   230792.62   0.022   181553.76   -0.021   4.6.4   -mfpu=vfpv3
+531128.05   -0.240   339335.95   -1.590   230811.40   0.030   181484.33   -0.059   4.6.4   -mfpu=neon
+512444.41   -3.749   339961.83   -1.408   231209.78   0.203   181705.92   0.063    4.7.3   -mfpu=vfpv3-d16
+512730.42   -3.696   340064.98   -1.378   231239.58   0.216   181657.03   0.036    4.7.3   -mfpu=vfpv3
+515979.83   -3.085   343221.55   -0.463   231157.36   0.180   181605.39   0.008    4.7.3   -mfpu=neon
+
+The results part 3:
+CODE: SELECT ALL
+RSA 2048 Sign/s   Δ        RSA 2048 Verify/s   Δ        DSA 2048 Sign/s    Δ        DSA 2048 Verify/s   Δ        GCC     Options
+48.37             0.000    1608.20             0.000    163.80             0.000    138.37              0.000    4.6.4   -mfpu=vfpv3-d16
+48.37             0.000    1607.30             -0.056   163.87             0.041    139.00              0.458    4.6.4   -mfpu=vfpv3
+48.30             -0.138   1595.73             -0.775   163.73             -0.041   139.33              0.699    4.6.4   -mfpu=neon
+48.30             -0.138   1588.70             -1.213   163.47             -0.204   137.77              -0.434   4.7.3   -mfpu=vfpv3-d16
+48.37             0.000    1589.23             -1.179   163.63             -0.102   138.73              0.265    4.7.3   -mfpu=vfpv3
+48.37             0.000    1580.47             -1.724   163.47             -0.204   139.50              0.819    4.7.3   -mfpu=neon
+
+As it turns out, OpenSSL contains ARM asm implementations for many of its routines which are used regardless of the GCC CFLAGS settings, making this test fairly useless. By default on an ARM system the OpenSSL code configures itself for 'linux-armv4' which enables this asm. The alternative target to configure for is 'linux-generic32' which results in a considerably slower implementation with the exception of the two DES routines. They somehow become roughly 5% slower - an issue I intend to raise with the OpenSSL developers.
+
+PHP
+It would appear that people use their Odroid-U2 as a general purpose webserver. While the straightforward file-serving is mainly IO-bound and thus not particularly interesting to test, the more demanding task of producing dynamically generated PHP output is worthy of a test.
+To test PHP, I'm using the benchmark script bench.php from within the Zend folder of php's own source distribution.
+To run the test, I invoke
+CODE: SELECT ALL
+for iteration in {1..5} ; do php bench.php | tail -1 ; done
+That will run the benchmark 5 times, producing the time spent in seconds per iteration. I'll be reporting the average of those 5 runs of this test along with the deviation in seconds.
+
+The USE flags I'm using are the same as for the FFMpeg test, except that I've added the gmp and pgo flags, the first of which makes php use the advanced GNU Multi Precision library for math operations and the second makes gmp perform some tests during compilation to produce a faster library. Also, I included the flags -exif -truetype since they picked up some irrelevant dependencies.
+To recompile php, I emerge php gmp openssl zlib
+
+I'm using PHP version 5.5.0 for this. The latest stable version at the time of this writing.
+The results:
+CODE: SELECT ALL
+Time     +/-     Δ perf  gcc     CFLAGS variations.
+14.119   0.032   0.000   4.6.4   -mfpu=vfpv3-d16
+14.013   0.027   0.755   4.6.4   -mfpu=vfpv3
+13.968   0.030   1.074   4.6.4   -mfpu=neon
+14.733   0.028   -4.347  4.7.3   -mfpu=vfpv3-d16
+14.523   0.035   -2.858  4.7.3   -mfpu=vfpv3
+14.399   0.006   -1.983  4.7.3   -mfpu=neon
+
+
+Phoronix test suite
+The Phoronix test suite is used by the website of the same name to test various parts of the system and then distill the result down to a single number. It runs from PHP so its result can be likened to the result above with the exception that the Phoronix test takes just over 15 minutes whereas the test above takes just 15 seconds...
+To run the suite, I issue the command
+CODE: SELECT ALL
+phoronix-test-suite benchmark smallpt
+
+The only appliccable USE flags are those understood by PHP, so look at the previous test to see what they are.
+
+The results:
+CODE: SELECT ALL
+Avg       +/-     +/- %   Δ        GCC     Options
+914.333   1.000   0.109   0.000    4.6.4   -mfpu=vfpv3-d16
+915.000   1.000   0.109   0.073    4.6.4   -mfpu=vfpv3
+914.667   0.500   0.055   0.036    4.6.4   -mfpu=neon
+
+
+POVRay
+I don't really believe people will be using their Odroid-U2 for raytracing, but then, it does show off what this little system can achieve, and perhaps the results will show that a small(ish) cluster of Odroids can provide a decent level of performance while using less power than the typical rendering powerhouses. You can compare the numbers below to other machines here
+To test povray run the following command
+CODE: SELECT ALL
+povray -benchmark
+. I run this test 3 times and take the average of those 3 runs.
+POVRay provides very little to configure via the USE flags, so I once again use the ones from the FFMPEG test.
+To recompile povray, I emerge povray boost jpeg png zlib
+
+For this test I will be using POVRay version 3.7.0_rc7. I would've preferred to use an actual release version, but 3.6 doesn't support multiprocessing which would mean that the test simply takes almost an hour and a half instead of roughly 25 minutes for really no good reason.
+The results:
+CODE: SELECT ALL
+Trace      Δ       CPU        Δ       GCC     Options
+1460.963   0.000   5835.376   0.000   4.6.4   -mfpu=vfpv3-d16
+1397.745   4.327   5583.050   4.324   4.6.4   -mfpu=vfpv3
+1402.951   3.971   5601.131   4.014   4.6.4   -mfpu=neon
+
+It's odd that with NEON enabled the processing is slightly slower. I'm currently suspecting the system of running sufficiently hot during the benchmark that it throttles itself. Investigating.
+
+NBench
+A rather dated CPU benchmark that started out as BYTEMark way back in 1990 (!) this test does appear to thoroughly test the various common operations of a program so while on its own it's fairly meaningless the routines tested makes the outcome relevant. The benchmark produces intermediate results aswell as an overall memory-, integer- and fpu index. I'll restrict the results to those numbers.
+There are no USE flags to apply to this program - just compile and go.
+To run, simply invoke
+CODE: SELECT ALL
+nbench
+.
+
+The results
+CODE: SELECT ALL
+Memory   Δ       Integer   Δ       FPU      Δ       GCC     Options
+10.124   0.000   10.581    0.000   10.173   0.000   4.6.4   -mfpu=vfpv3-d16
+9.894   -2.278   10.544   -0.347   10.197   0.233   4.6.4   -mfpu=vfpv3
+9.830   -2.907   10.622    0.391   10.188   0.144   4.6.4   -mfpu=neon
+
+Again, strange to see performance drops relative to the vfpv3-d16 run. This is due to the "STRING SORT" test (5% slower with neon) and the "ASSIGNMENT" test (6% slower with vfpv3, 3% with neon) which just makes no sense at all. Neither of these options uses the FPU. The compiler might auto-vectorise the code resulting in slowing down the process, but I find the difference too substantial to blame only that.
+Last edited by Cooper on Tue Jul 09, 2013 6:33 pm, edited 14 times in total.
+User avatar
+Cooper
+ 
+Posts: 91
+Joined: Tue Jun 25, 2013 7:41 am
+Location: The Netherlands
+languages_spoken: english, dutch, some german and french if pushed
+ODROIDs: Odroid-U2 + 16GB eMMC
