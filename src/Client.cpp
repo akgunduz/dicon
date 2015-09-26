@@ -9,7 +9,7 @@
 
 Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const std::string &rootPath) {
 
-	mCallback = new CallBack(receiveCB, this);
+	mCallback = new InterfaceCallback(receiveCB, this);
 
 	try {
 
@@ -46,7 +46,7 @@ Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const s
 
 	}
 
-	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
+	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR)->getAddress(), getAddress(HOST_COLLECTOR)->getAddress());
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
 
 	mDistributorAddress = 0;
@@ -79,7 +79,7 @@ INTERFACES Client::getInterfaceType(HOST host) {
 
 }
 
-uint64_t Client::getAddress(HOST host) {
+Address* Client::getAddress(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
 		return mDistributorConnector->getAddress();
@@ -89,37 +89,36 @@ uint64_t Client::getAddress(HOST host) {
 
 }
 
-bool Client::receiveCB(void *arg, uint64_t address, Message *msg) {
+bool Client::receiveCB(void *arg, Address* address, Message *msg) {
 
 	Client *client = (Client *) arg;
 
 	switch(msg->getOwner()) {
 
 		case HOST_DISTRIBUTOR:
-			if (client->mDistributorConnector->getInterfaceType() == Tools::getInterface(address)) {
+			if (client->mDistributorConnector->getInterfaceType() == address->getInterface()) {
 				client->processDistributorMsg(address, msg);
 			}
 			break;
 
 		case HOST_COLLECTOR:
-			if (client->mCollectorConnector->getInterfaceType() == Tools::getInterface(address)) {
+			if (client->mCollectorConnector->getInterfaceType() == address->getInterface()) {
 				client->processCollectorMsg(address, msg);
 			}
 			break;
 
 		default:
 			LOG_W("Wrong message received with owner ID: %d from %s, disgarding!!!",
-					msg->getOwner(), Tools::getAddressStr(address).c_str());
+					msg->getOwner(), address->getString().c_str());
 			delete msg;
 			break;
 	}
 	return true;
 }
 
-bool Client::processCollectorMsg(uint64_t address, Message *msg) {
+bool Client::processCollectorMsg(Address* address, Message *msg) {
 
 	bool status = false;
-	msg->display();
 
 	switch(msg->getType()) {
 
@@ -129,8 +128,7 @@ bool Client::processCollectorMsg(uint64_t address, Message *msg) {
 			status = send2DistributorMsg(mDistributorAddress, MSGTYPE_BUSY);
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"RULE\" msg from collector: %s",
-					Tools::getAddressStr(address).c_str());
+					"\"RULE\" msg from collector: %s", address->getString().c_str());
 
 			mRule = msg->mRule;
 
@@ -155,7 +153,7 @@ bool Client::processCollectorMsg(uint64_t address, Message *msg) {
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s with \"%d\" file binary",
-					Tools::getAddressStr(address).c_str(), msg->getReceivedBinaryCount());
+				  address->getString().c_str(), 0/*msg->getReceivedBinaryCount()*/);
 
 			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
 
@@ -173,10 +171,9 @@ bool Client::processCollectorMsg(uint64_t address, Message *msg) {
 	return status;
 }
 
-bool Client::processDistributorMsg(uint64_t address, Message *msg) {
+bool Client::processDistributorMsg(Address* address, Message *msg) {
 
 	bool status = false;
-	msg->display();
 
 	switch(msg->getType()) {
 
@@ -185,8 +182,7 @@ bool Client::processDistributorMsg(uint64_t address, Message *msg) {
 			mDistributorAddress = address;
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"WAKEUP\" msg from distributor: %s",
-					Tools::getAddressStr(address).c_str());
+					"\"WAKEUP\" msg from distributor: %s", address->getString().c_str());
 
 			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
 			break;
@@ -199,12 +195,9 @@ bool Client::processDistributorMsg(uint64_t address, Message *msg) {
 	return status;
 }
 
-bool Client::send2DistributorMsg(uint64_t address, uint8_t type) {
+bool Client::send2DistributorMsg(Address* address, uint8_t type) {
 
-	Message *msg = new Message(mRootPath);
-	msg->setOwner(HOST_CLIENT);
-	msg->setTarget(HOST_DISTRIBUTOR);
-	msg->setType(type);
+	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
 
 	switch(type) {
 
@@ -212,21 +205,21 @@ bool Client::send2DistributorMsg(uint64_t address, uint8_t type) {
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"READY\" msg sent to distributor: %s",
-					Tools::getAddressStr(address).c_str());
+				  address->getString().c_str());
 			break;
 
 		case MSGTYPE_ALIVE:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"ALIVE\" msg sent to distributor: %s",
-					Tools::getAddressStr(address).c_str());
+				  address->getString().c_str());
 			break;
 
 		case MSGTYPE_BUSY:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BUSY\" msg sent to distributor: %s",
-					Tools::getAddressStr(address).c_str());
+				  address->getString().c_str());
 			break;
 
 		default:
@@ -238,12 +231,9 @@ bool Client::send2DistributorMsg(uint64_t address, uint8_t type) {
 
 }
 
-bool Client::send2CollectorMsg(uint64_t address, uint8_t type) {
+bool Client::send2CollectorMsg(Address* address, uint8_t type) {
 
-	Message *msg = new Message(mRootPath);
-	msg->setOwner(HOST_CLIENT);
-	msg->setTarget(HOST_COLLECTOR);
-	msg->setType(type);
+	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
 
 	switch(type) {
 
@@ -252,7 +242,7 @@ bool Client::send2CollectorMsg(uint64_t address, uint8_t type) {
 			msg->setRule(STREAM_MD5ONLY, mRule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-					Tools::getAddressStr(address).c_str(), mRule->getFlaggedFileCount());
+				  address->getString().c_str(), mRule->getFlaggedFileCount());
 			break;
 
 		default:

@@ -10,6 +10,8 @@
 #include <string>
 #include "Common.h"
 
+#define BUFFER_SIZE 512
+
 enum CONTENT_TYPES {
 	CONTENT_FILE,
 	CONTENT_PARAM,

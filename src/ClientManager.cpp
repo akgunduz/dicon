@@ -8,10 +8,10 @@
 ClientManager::ClientManager(Connector *connector,
 		fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) {
 
-	mClientConnector = connector;
-	mTimeoutCB = timeoutCB;
-	mWakeupCB = wakeupCB;
-	mBackupRate = backupRate;
+	clientConnector = connector;
+	this->timeoutCB = timeoutCB;
+	this->wakeupCB = wakeupCB;
+	this->backupRate = backupRate;
 
 	LOG_I("ClientManager is created!!!");
 };
@@ -19,20 +19,20 @@ ClientManager::ClientManager(Connector *connector,
 ClientManager::~ClientManager() {
 
 	stopClientChecker();
-	pthread_join(mThreadClientChecker, nullptr);
+	pthread_join(threadClientChecker, nullptr);
 
-	for (std::map<uint64_t, ClientMap*>::iterator i = mClients.begin(); i != mClients.end(); i++) {
+	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
 		ClientMap* client = i->second;
 		if (client->is_timer_active) {
 			stopClientTimer(client);
-			pthread_join(client->mThread, nullptr);
+			pthread_join(client->thread, nullptr);
 		}
 	}
 }
 
-bool ClientManager::initClientTimer(ClientMap *clientMap, uint64_t collectorAddress) {
+bool ClientManager::initClientTimer(ClientMap *clientMap, Address* collectorAddress) {
 
-	if (mClientConnector == nullptr) {
+	if (clientConnector == nullptr) {
 		LOG_I("Client Connector is not initiated");
 		return false;
 	}
@@ -43,32 +43,32 @@ bool ClientManager::initClientTimer(ClientMap *clientMap, uint64_t collectorAddr
 	}
 
 	clientMap->is_timer_active = true;
-	int res = pthread_mutex_init(&clientMap->mMutex, NULL);
+	int res = pthread_mutex_init(&clientMap->mutex, NULL);
 	if (res) {
 		LOG_E("Mutex init failed");
 		return false;
 	}
 
-	res = pthread_cond_init(&clientMap->mCond, NULL);
+	res = pthread_cond_init(&clientMap->cond, NULL);
 	if (res) {
 		LOG_E("Condition init fail");
-		pthread_mutex_destroy(&clientMap->mMutex);
+		pthread_mutex_destroy(&clientMap->mutex);
 		return false;
 	}
 
 	struct ClientManagerArgument *argument =
-			new ClientManagerArgument(mClientConnector,
-					mTimeoutCB, clientMap, collectorAddress);
+			new ClientManagerArgument(clientConnector,
+									  timeoutCB, clientMap, collectorAddress);
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	int pthr = pthread_create(&clientMap->mThread, &attr, runClientTimer, (void *)argument);
+	int pthr = pthread_create(&clientMap->thread, &attr, runClientTimer, (void *)argument);
 	pthread_attr_destroy(&attr);
 	if (pthr) {
 		LOG_E("Problem with run thread");
-		pthread_cond_destroy(&clientMap->mCond);
-		pthread_mutex_destroy(&clientMap->mMutex);
+		pthread_cond_destroy(&clientMap->cond);
+		pthread_mutex_destroy(&clientMap->mutex);
 		clientMap->is_timer_active = false;
 		return false;
 	}
@@ -78,7 +78,7 @@ bool ClientManager::initClientTimer(ClientMap *clientMap, uint64_t collectorAddr
 
 bool ClientManager::stopClientTimer(ClientMap *clientMap) {
 
-	pthread_cond_signal(&clientMap->mCond);
+	pthread_cond_signal(&clientMap->cond);
 	return true;
 }
 
@@ -94,20 +94,20 @@ void *ClientManager::runClientTimer(void *arg) {
 
 	struct ClientManagerArgument *argument = (ClientManagerArgument *) arg;
 
-	pthread_mutex_lock(&argument->clientMap->mMutex);
-	int res = pthread_cond_timedwait(&argument->clientMap->mCond,
-			&argument->clientMap->mMutex, &timer);
+	pthread_mutex_lock(&argument->clientMap->mutex);
+	int res = pthread_cond_timedwait(&argument->clientMap->cond,
+			&argument->clientMap->mutex, &timer);
 	if (res == ETIMEDOUT) {
 		LOG_E("Could not get a response for a specific time");
 		argument->timeoutCB(argument->clientConnector,
-				argument->clientMap->address, argument->collectorAddress);
+				Address::newInstance(argument->clientMap->address), argument->collectorAddress);
 
 	}
 
-	pthread_mutex_unlock(&argument->clientMap->mMutex);
+	pthread_mutex_unlock(&argument->clientMap->mutex);
 
-	pthread_cond_destroy(&argument->clientMap->mCond);
-	pthread_mutex_destroy(&argument->clientMap->mMutex);
+	pthread_cond_destroy(&argument->clientMap->cond);
+	pthread_mutex_destroy(&argument->clientMap->mutex);
 
 	argument->clientMap->is_timer_active = false;
 
@@ -118,33 +118,33 @@ void *ClientManager::runClientTimer(void *arg) {
 
 bool ClientManager::initClientChecker() {
 
-	if (mClientConnector == nullptr) {
+	if (clientConnector == nullptr) {
 		LOG_I("Client Connector is not initiated");
 		return false;
 	}
 
-	int res = pthread_mutex_init(&mMutexClientChecker, NULL);
+	int res = pthread_mutex_init(&mutexClientChecker, NULL);
 	if (res) {
-		LOG_E("mMutexClientChecker init failed");
+		LOG_E("mutexClientChecker init failed");
 		return false;
 	}
 
-	res = pthread_cond_init (&mCondClientChecker, NULL);
+	res = pthread_cond_init (&condClientChecker, NULL);
 	if (res) {
-		LOG_E("mCondClientChecker init fail");
-		pthread_mutex_destroy(&mMutexClientChecker);
+		LOG_E("condClientChecker init fail");
+		pthread_mutex_destroy(&mutexClientChecker);
 		return false;
 	}
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	int pthr = pthread_create(&mThreadClientChecker, &attr, runClientChecker, this);
+	int pthr = pthread_create(&threadClientChecker, &attr, runClientChecker, this);
 	pthread_attr_destroy(&attr);
 	if (pthr) {
-		LOG_E("Problem with run mThreadClientChecker");
-		pthread_cond_destroy(&mCondClientChecker);
-		pthread_mutex_destroy(&mMutexClientChecker);
+		LOG_E("Problem with run threadClientChecker");
+		pthread_cond_destroy(&condClientChecker);
+		pthread_mutex_destroy(&mutexClientChecker);
 		return false;
 	}
 	return true;
@@ -164,21 +164,21 @@ void *ClientManager::runClientChecker(void *arg) {
 		timer.tv_sec = now.tv_sec + CHECK_INTERVAL;
 		timer.tv_nsec = 0;
 
-		pthread_mutex_lock(&clientManager->mMutexClientChecker);
-		int res = pthread_cond_timedwait(&clientManager->mCondClientChecker,
-				&clientManager->mMutexClientChecker, &timer);
+		pthread_mutex_lock(&clientManager->mutexClientChecker);
+		int res = pthread_cond_timedwait(&clientManager->condClientChecker,
+				&clientManager->mutexClientChecker, &timer);
 		if (res == ETIMEDOUT) {
 			LOG_I("Sending Wakeupssss!!!");
-			clientManager->mWakeupCB(clientManager->mClientConnector);
+			clientManager->wakeupCB(clientManager->clientConnector);
 		} else {
 			break;
 		}
 
-		pthread_mutex_unlock(&clientManager->mMutexClientChecker);
+		pthread_mutex_unlock(&clientManager->mutexClientChecker);
 
 	}
-	pthread_cond_destroy(&clientManager->mCondClientChecker);
-	pthread_mutex_destroy(&clientManager->mMutexClientChecker);
+	pthread_cond_destroy(&clientManager->condClientChecker);
+	pthread_mutex_destroy(&clientManager->mutexClientChecker);
 	LOG_I("Ending Client Checking!!!");
 
 	return nullptr;
@@ -186,22 +186,22 @@ void *ClientManager::runClientChecker(void *arg) {
 
 bool ClientManager::stopClientChecker() {
 
-	pthread_cond_signal(&mCondClientChecker);
+	pthread_cond_signal(&condClientChecker);
 	return true;
 }
 
-bool ClientManager::setClientIdle(uint64_t address, double totalTime) {
+bool ClientManager::setClientIdle(Address* address, double totalTime) {
 
 	try {
 
-		ClientMap *clientMap = mClients.at(address);
+		ClientMap *clientMap = clients.at(address->getAddress());
 		clientMap->state = IDLE;
-		LOG_T("Client at address : %s switch to state : %s", Tools::getAddressStr(address).c_str(), sStates[IDLE]);
+		LOG_T("Client at address : %s switch to state : %s", address->getString().c_str(), sStates[IDLE]);
 
 		if (clientMap->diffTime.isInitiated()) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"Client at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
-					Tools::getAddressStr(address).c_str(), clientMap->diffTime.stop(), totalTime);
+				  address->getString().c_str(), clientMap->diffTime.stop(), totalTime);
 		}
 
 	} catch (const std::out_of_range e) {
@@ -214,32 +214,32 @@ bool ClientManager::setClientIdle(uint64_t address, double totalTime) {
 
 }
 
-bool ClientManager::setClientValidate(uint64_t address) {
+bool ClientManager::setClientValidate(Address* address) {
 
-	std::map<uint64_t, ClientMap*>::iterator i = mClients.find(address);
-	if (i == mClients.end()) {
+	std::map<long, ClientMap*>::iterator i = clients.find(address->getAddress());
+	if (i == clients.end()) {
 		addClient(address);
 		return false;
 	}
 
-	LOG_T("Client at address : %s is Alive", Tools::getAddressStr(address).c_str());
+	LOG_T("Client at address : %s is Alive", address->getString().c_str());
 	return true;
 
 }
 
-bool ClientManager::setClientBusy(uint64_t address) {
+bool ClientManager::setClientBusy(Address* address) {
 
 	try {
 
-		ClientMap *clientMap = mClients.at(address);
+		ClientMap *clientMap = clients.at(address->getAddress());
 		stopClientTimer(clientMap);
 		clientMap->state = BUSY;
 		clientMap->usage++;
 		clientMap->diffTime.start();
-		LOG_T("Client at address : %s switch to state : %s", Tools::getAddressStr(address).c_str(), sStates[BUSY]);
+		LOG_T("Client at address : %s switch to state : %s", address->getString().c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", Tools::getAddressStr(address).c_str());
+		LOG_E("Could not found a client with address : %s", address->getString().c_str());
 		return false;
 	}
 
@@ -247,21 +247,21 @@ bool ClientManager::setClientBusy(uint64_t address) {
 
 }
 
-bool ClientManager::setClientRemove(uint64_t address) {
+bool ClientManager::setClientRemove(Address* address) {
 
 	try {
 
-		ClientMap *clientMap = mClients.at(address);
-		mClients.erase(address);
+		ClientMap *clientMap = clients.at(address->getAddress());
+		clients.erase(address->getAddress());
 		delete clientMap;
 
-		mReadyBackup = (uint32_t) fmin(mTotalBackup, mReadyBackup + 1);
+		readyBackup = (uint32_t) fmin(totalBackup, readyBackup + 1);
 
-		LOG_U(UI_UPDATE_DIST_BACKUP, mTotalBackup, mReadyBackup);
-		LOG_T("Client at address %s removed from the list", Tools::getAddressStr(address).c_str());
+		LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
+		LOG_T("Client at address %s removed from the list", address->getString().c_str());
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", Tools::getAddressStr(address).c_str());
+		LOG_E("Could not found a client with address : %s", address->getString().c_str());
 		return false;
 	}
 
@@ -269,27 +269,27 @@ bool ClientManager::setClientRemove(uint64_t address) {
 
 }
 
-bool ClientManager::addClient(uint64_t address) {
+bool ClientManager::addClient(Address* address) {
 
-	mClients[address] = new ClientMap(IDLE, 0, address);
+	clients[address->getAddress()] = new ClientMap(IDLE, 0, address->getAddress());
 
-	mTotalBackup = mClients.size() == 1 ? 0 : (uint32_t) ceil(mClients.size() * mBackupRate);
+	totalBackup = clients.size() == 1 ? 0 : (uint32_t) ceil(clients.size() * backupRate);
 
-	mReadyBackup = 0;
+	readyBackup = 0;
 
-	LOG_U(UI_UPDATE_DIST_BACKUP, mTotalBackup, mReadyBackup);
-	LOG_T("Client at address : %s added to the list", Tools::getAddressStr(address).c_str());
+	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
+	LOG_T("Client at address : %s added to the list", address->getString().c_str());
 
 	return true;
 }
 
-uint64_t ClientManager::getIdleClient(uint64_t collectorAddress) {
+Address* ClientManager::getIdleClient(Address* collectorAddress) {
 
 	ClientMap *leastUsedClient = nullptr;
 
 	int idleCount = 0;
 
-	for (std::map<uint64_t, ClientMap*>::iterator i = mClients.begin(); i != mClients.end(); i++) {
+	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
 		ClientMap *clientMap = i->second;
 		if (clientMap->state != IDLE) {
 			continue;
@@ -307,15 +307,17 @@ uint64_t ClientManager::getIdleClient(uint64_t collectorAddress) {
 		}
 	}
 
-	if (leastUsedClient != nullptr && idleCount - mTotalBackup + mReadyBackup > 0) {
+	if (leastUsedClient != nullptr && idleCount - totalBackup + readyBackup > 0) {
 		leastUsedClient->state = PREBUSY;
 
 		initClientTimer(leastUsedClient, collectorAddress);
 
-		LOG_T("Client at address : %s returned to collector",
-				Tools::getAddressStr(leastUsedClient->address).c_str());
+		Address *address = Address::newInstance(leastUsedClient->address);
 
-		return leastUsedClient->address;
+		LOG_T("Client at address : %s returned to collector",
+			  address->getString().c_str());
+
+		return address;
 
 	} else {
 		LOG_W("No available client right now.");
@@ -326,7 +328,7 @@ uint64_t ClientManager::getIdleClient(uint64_t collectorAddress) {
 
 bool ClientManager::resetDiffTimes() {
 
-	for (std::map<uint64_t, ClientMap*>::iterator i = mClients.begin(); i != mClients.end(); i++) {
+	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
 		i->second->diffTime.reset();
 	}
 	return true;
@@ -334,7 +336,7 @@ bool ClientManager::resetDiffTimes() {
 
 void ClientManager::clear() {
 
-	mClients.clear();
-	mReadyBackup = 0;
-	mTotalBackup = 0;
+	clients.clear();
+	readyBackup = 0;
+	totalBackup = 0;
 }

@@ -32,6 +32,20 @@
 #include <complex>
 #include <stdexcept>
 
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <strings.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <sys/errno.h>
+#include <stdexcept>
+#include <ifaddrs.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
 #ifdef __APPLE__
 #include <CommonCrypto/CommonDigest.h>
 #include "Common_apple.h"
@@ -62,10 +76,7 @@
 #define LOOPBACK_ADDRESS 0x7F000001
 #define IPADDRESS_MASK 0xFFFFFFFF
 #define IS_LOOPBACK(address) (((address) & IPADDRESS_MASK) == LOOPBACK_ADDRESS)
-#define GEN_ADDRESS(ip, port) ((((uint64_t)ip) & IPADDRESS_MASK) | (((uint64_t)port) << 32))
-
-static uint32_t BUFFER_SIZE = 512;
-
+#define GEN_ADDRESS(ip, port) ((((long)ip) & IPADDRESS_MASK) | (((long)port) << 32))
 
 enum HOST {
 	HOST_DISTRIBUTOR,
@@ -136,9 +147,9 @@ public:
 	static uint32_t initInterfaces();
 	static uint32_t getInterfaceCount();
 	static uint32_t getNetInterfaceAddress(uint32_t);
-	static uint32_t getNetInterfaceNetwork(uint64_t);
+	static uint32_t getNetInterfaceNetwork(long);
 	static uint32_t getNetInterfaceInfo(uint32_t, uint32_t&);
-	static uint32_t getNetInterfaceInfo(uint64_t, uint32_t&);
+	static uint32_t getNetInterfaceInfo(long, uint32_t&);
 };
 
 class EventData {

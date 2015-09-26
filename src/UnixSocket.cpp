@@ -3,85 +3,70 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <strings.h>
-#include <pthread.h>
-#include <fcntl.h>
-#include <sys/errno.h>
-#include <stdexcept>
-#include <ifaddrs.h>
-#include <sys/stat.h>
-#include <dirent.h>
 #include "UnixSocket.h"
-#include "Tools.h"
+#include "UnixSocketAddress.h"
 
 uint16_t UnixSocket::gOffset = 1001;
 
-UnixSocket::UnixSocket(uint32_t interfaceIndex, const CallBack *cb, const std::string &rootPath)
+UnixSocket::UnixSocket(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
 		: Interface(INTERFACE_UNIXSOCKET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
-	LOG_I("Instance is created, Socket : %d!!!", mSocket);
+	LOG_I("Instance is created, Socket : %d!!!", unixSocket);
 
 }
 
 bool UnixSocket::init(uint32_t interfaceIndex) {
-	mSocket = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (mSocket < 0) {
+
+	unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (unixSocket < 0) {
 		LOG_E("Socket receiver open with err : %d!!!", errno);
 		return false;
 	}
 
+    address = new UnixSocketAddress(0);
+
 	setAddress(interfaceIndex);
 
-	struct sockaddr_un serv_addr;
-	bzero((char *) &serv_addr, sizeof(serv_addr));
-	serv_addr.sun_family = AF_UNIX;
-	sprintf(serv_addr.sun_path, "%s%s%d%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
-			(uint32_t)mAddress, UNIXSOCKET_FILE_SUFFIX);
-	unlink(serv_addr.sun_path);
+    sockaddr_un serverAddress = ((UnixSocketAddress *) address)->getUnixAddress();
 
-	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(serv_addr.sun_path);
+	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(serverAddress.sun_path);
 
 	int on = 1;
-	if (setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+	if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
 		LOG_E("Socket option with err : %d!!!", errno);
-		close(mSocket);
+		close(unixSocket);
 		return false;
 	}
 	LOG_T("Socket set option is OK!!!");
 
-	if (bind(mSocket, (struct sockaddr *) &serv_addr, len) < 0) {
+	if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
 		LOG_E("Socket bind with err : %d!!!", errno);
-		close(mSocket);
+		close(unixSocket);
 		return false;
 	}
 	LOG_T("Socket binding is OK!!!");
 
-	if (listen(mSocket, MAX_SIMUL_CLIENTS) < 0) {
+	if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
 		LOG_E("Socket listen with err : %d!!!", errno);
-		close(mSocket);
+		close(unixSocket);
 		return false;
 	}
 	LOG_T("Socket listen is OK!!!");
 
-	if(fcntl(mSocket, F_SETFD, O_NONBLOCK) < 0) {
+	if(fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
 		LOG_E("Could not set socket Non-Blocking!!!");
-		close(mSocket);
+		close(unixSocket);
 		return false;
 	}
 	LOG_T("Set socket Non-Blocking is OK!!!");
 
 	if (!initThread()) {
 		LOG_E("Problem with Server thread");
-		close(mSocket);
+		close(unixSocket);
 		return false;
 	}
 
@@ -92,13 +77,13 @@ void UnixSocket::runReceiver() {
 
 	bool thread_started = true;
 
-	int maxfd = std::max(mSocket, mNotifierPipe[0]) + 1;
+	int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
 
 	fd_set readfs, orjreadfs;
 
 	FD_ZERO(&orjreadfs);
-	FD_SET(mSocket, &orjreadfs);
-	FD_SET(mNotifierPipe[0], &orjreadfs);
+	FD_SET(unixSocket, &orjreadfs);
+	FD_SET(notifierPipe[0], &orjreadfs);
 
 	while(thread_started) {
 
@@ -110,9 +95,9 @@ void UnixSocket::runReceiver() {
 			return;
 		}
 
-		if (FD_ISSET(mSocket, &readfs)) {
+		if (FD_ISSET(unixSocket, &readfs)) {
 
-			int acceptfd = accept(mSocket, nullptr, nullptr);
+			int acceptfd = accept(unixSocket, nullptr, nullptr);
 			if (acceptfd < 0) {
 				LOG_E("Client Socket open with err : %d!!!", errno);
 				return;
@@ -130,10 +115,10 @@ void UnixSocket::runReceiver() {
 			}
 		}
 
-		if (FD_ISSET(mNotifierPipe[0], &readfs)) {
+		if (FD_ISSET(notifierPipe[0], &readfs)) {
 
 			char data;
-			read(mNotifierPipe[0], &data, 1);
+			read(notifierPipe[0], &data, 1);
 			switch(data) {
 				case SHUTDOWN_NOTIFIER:
 					thread_started = false;
@@ -149,56 +134,53 @@ void *UnixSocket::runAccepter(void *arg) {
 
 	struct Argument *argument = (struct Argument *) arg;
 
-	Message *msg = new Message(argument->interface->mRootPath);
+	Message *msg = new Message(argument->interface->rootPath);
 	if (msg->readFromStream(argument->var.acceptSocket)) {
-		argument->interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+		argument->interface->push(MESSAGE_RECEIVE, new UnixSocketAddress(msg->getOwnerAddress()), msg);
 	}
 
 	delete argument;
 	return nullptr;
 }
 
-void UnixSocket::runSender(uint64_t target, Message *msg) {
+void UnixSocket::runSender(Address* target, Message *msg) {
 
-	int clisocket = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (clisocket < 0) {
+	int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
+	if (clientSocket < 0) {
 		LOG_E("Socket sender open with err : %d!!!", errno);
 		return;
 	}
-	LOG_T("Socket sender %d is opened !!!", clisocket);
 
-	struct sockaddr_un cli_addr;
-	bzero((char *) &cli_addr, sizeof(cli_addr));
+	LOG_T("Socket sender %d is opened !!!", clientSocket);
 
-	cli_addr.sun_family = AF_UNIX;
+    sockaddr_un clientAddress = ((UnixSocketAddress *) target)->getUnixAddress();
 
-	sprintf(cli_addr.sun_path, "%s%s%d%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
-			(uint32_t)target, UNIXSOCKET_FILE_SUFFIX);
+	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
 
-	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(cli_addr.sun_path);
-
-	if (connect(clisocket, (struct sockaddr *)&cli_addr, len) == -1) {
+	if (connect(clientSocket, (struct sockaddr *)&clientAddress, len) == -1) {
 		LOG_E("Socket can not connect!!!");
-		close(clisocket);
+		close(clientSocket);
 		return;
 	}
-	LOG_T("Socket sender %d is connected !!!", clisocket);
 
-	msg->setOwnerAddress(mAddress);
-	msg->writeToStream(clisocket);
+	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	shutdown(clisocket, SHUT_RDWR);
-	close(clisocket);
+	msg->setOwnerAddress(address->getAddress());
+	msg->writeToStream(clientSocket);
+
+	shutdown(clientSocket, SHUT_RDWR);
+	close(clientSocket);
 }
 
 UnixSocket::~UnixSocket() {
 	end();
-	close(mSocket);
+	close(unixSocket);
 }
 
 
 void UnixSocket::setAddress(uint32_t index) {
-	mAddress = (((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++;
+
+	address->set((((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++);
 }
 
 INTERFACES UnixSocket::getType() {
@@ -207,13 +189,9 @@ INTERFACES UnixSocket::getType() {
 
 }
 
-std::vector<uint64_t> UnixSocket::getAddressList() {
+std::vector<long> UnixSocket::getAddressList() {
 
-	std::vector<uint64_t> list;
-
-	if (mAddress == 0) {
-		return list;
-	}
+	std::vector<long> list;
 
 	DIR *unixdir = opendir(UNIXSOCKET_PATH);
 	if (!unixdir) {
@@ -224,7 +202,7 @@ std::vector<uint64_t> UnixSocket::getAddressList() {
 	std::string path1 = "";
 
 	path1 = UNIXSOCKET_FILE_PREFIX;
-	path1.append(Tools::getAddressStr(mAddress));
+	path1.append(address->getString());
 	path1.append(UNIXSOCKET_FILE_SUFFIX);
 
 	dirent *entry;
@@ -243,7 +221,7 @@ std::vector<uint64_t> UnixSocket::getAddressList() {
 
 		uint32_t start = (uint32_t)path.find('_') + 1;
 		std::string saddress = path.substr(start, path.find('.') - start);
-		uint64_t address = (unsigned)atol(saddress.c_str());
+		long address = (unsigned)atol(saddress.c_str());
 
 		list.push_back(address);
 

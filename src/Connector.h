@@ -10,19 +10,20 @@
 #include "Scheduler.h"
 #include "Interface.h"
 #include "Message.h"
+#include "Address.h"
 
 class Connector {
-	bool mInitialized = false;
-	Interface* mInterface;
+	bool initialized = false;
+	Interface* interface;
 public:
-	Connector(uint32_t, const CallBack *, const std::string &);
-	bool send(uint64_t, Message*);
-	uint64_t getAddress();
+	Connector(uint32_t, const InterfaceCallback *, const std::string &);
+	bool send(Address*, Message*);
+	Address* getAddress();
 	INTERFACES getInterfaceType();
 	Interface* getInterface();
 	int getNotifier(NOTIFIER_TYPE);
 	void setRootPath(std::string&);
-	std::vector<uint64_t> getAddressList();
+	std::vector<long> getAddressList();
 	std::string getRootPath();
 	virtual ~Connector();
 };

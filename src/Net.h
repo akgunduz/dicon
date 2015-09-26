@@ -18,18 +18,18 @@
 
 class Net : public Interface {
 private :
-	int mSocket;
+	int netSocket;
 	bool init(uint32_t);
 	void runReceiver();
 	static void *runAccepter(void *);
-	void runSender(uint64_t, Message *);
+	void runSender(Address*, Message *);
 	void setAddress(uint32_t);
 	INTERFACES getType();
 
 public :
 	static uint16_t gOffset;
-	Net(uint32_t, const CallBack *, const std::string &);
-	std::vector<uint64_t> getAddressList();
+	Net(uint32_t, const InterfaceCallback *, const std::string &);
+	std::vector<long> getAddressList();
 	~Net();
 };
 

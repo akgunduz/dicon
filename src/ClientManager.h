@@ -11,24 +11,25 @@
 #include "Connector.h"
 #include "Tools.h"
 
-#define CHECK_INTERVAL 30
-#define CLIENT_TIMEOUT 10
+#define CHECK_INTERVAL 600
+#define CLIENT_TIMEOUT 300
 
-typedef bool (*fTimeoutCB)(Connector *, uint64_t, uint64_t);
+typedef bool (*fTimeoutCB)(Connector *, Address* , Address*);
 typedef bool (*fWakeupCB)(Connector *);
 
 struct ClientMap {
+
 	volatile bool is_timer_active = false;
 
-	pthread_mutex_t mMutex;
-	pthread_cond_t mCond;
-	pthread_t mThread;
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	pthread_t thread;
 
 	STATES state = IDLE;
 	int usage;
-	uint64_t address;
+	long address;
 	DiffTime diffTime;
-	ClientMap(STATES s, int u, uint64_t a) : state(s), usage(u), address(a){
+	ClientMap(STATES s, int u, long a) : state(s), usage(u), address(a){
 		diffTime.reset();
 	}
 };
@@ -36,22 +37,22 @@ struct ClientMap {
 class ClientManager {
 private:
 
-	Connector *mClientConnector;
+	Connector *clientConnector;
 
-	std::map<uint64_t, ClientMap*> mClients;
+	std::map<long, ClientMap*> clients;
 
-	uint32_t mReadyBackup = 0;
-	uint32_t mTotalBackup = 0;
-	double mBackupRate = 0;
+	uint32_t readyBackup = 0;
+	uint32_t totalBackup = 0;
+	double backupRate = 0;
 
-	fTimeoutCB mTimeoutCB;
-	fWakeupCB mWakeupCB;
+	fTimeoutCB timeoutCB;
+	fWakeupCB wakeupCB;
 
-	pthread_mutex_t mMutexClientChecker;
-	pthread_cond_t mCondClientChecker;
-	pthread_t mThreadClientChecker;
+	pthread_mutex_t mutexClientChecker;
+	pthread_cond_t condClientChecker;
+	pthread_t threadClientChecker;
 
-	bool initClientTimer(ClientMap *, uint64_t);
+	bool initClientTimer(ClientMap *, Address*);
 	bool stopClientTimer(ClientMap *);
 	static void *runClientTimer(void *);
 	static void *runClientChecker(void *);
@@ -66,13 +67,13 @@ public:
 	bool initClientChecker();
 
 	bool resetDiffTimes();
-	bool setClientIdle(uint64_t, double);
-	bool setClientBusy(uint64_t);
-	bool setClientRemove(uint64_t);
-	bool setClientValidate(uint64_t);
-	bool addClient(uint64_t);
+	bool setClientIdle(Address*, double);
+	bool setClientBusy(Address*);
+	bool setClientRemove(Address*);
+	bool setClientValidate(Address*);
+	bool addClient(Address*);
 
-	uint64_t getIdleClient(uint64_t);
+	Address* getIdleClient(Address*);
 
 	void clear();
 
@@ -81,9 +82,9 @@ public:
 struct ClientManagerArgument {
 	Connector *clientConnector;
 	ClientMap *clientMap;
-	uint64_t collectorAddress;
+	Address* collectorAddress;
 	fTimeoutCB timeoutCB;
-	ClientManagerArgument(Connector *cc, fTimeoutCB cb, ClientMap *c, uint64_t a) :
+	ClientManagerArgument(Connector *cc, fTimeoutCB cb, ClientMap *c, Address* a) :
 			clientConnector(cc), timeoutCB(cb), clientMap(c), collectorAddress(a) {}
 };
 

@@ -8,29 +8,40 @@
 
 #include "Common.h"
 #include "Message.h"
+#include "Address.h"
 
-#define MAX_SCHEDULER_CAPACITY 1000
+#define MAX_SCHEDULER_CAPACITY 100
 
 #define MAX_INTERFACE 10
 
 enum MESSAGE_DIRECTION {
+	MESSAGE_END,
 	MESSAGE_RECEIVE,
 	MESSAGE_SEND
 };
 
-typedef bool (*fSchedulerCB)(void*, uint64_t, Message *);
+typedef bool (*fSchedulerCB)(void*, Address*, Message *);
 
-struct Capsule {
-	int type;
-	uint64_t address;
+class Capsule {
+
+public:
+
+	MESSAGE_DIRECTION type;
+	Address *address;
 	Message *msg;
+
+	Capsule(MESSAGE_DIRECTION type, Address *address, Message *msg) {
+		this->type = type;
+		this->address = address;
+		this->msg = msg;
+	}
 };
 
-class CallBack {
+class InterfaceCallback {
 public:
 	fSchedulerCB cb;
 	void *arg;
-	CallBack(fSchedulerCB _cb, void *_arg) : cb(_cb), arg(_arg) {}
+	InterfaceCallback(fSchedulerCB _cb, void *_arg) : cb(_cb), arg(_arg) {}
 };
 
 class Scheduler {
@@ -41,15 +52,14 @@ private:
 	std::list<struct Capsule> mMessages;
 	int mCapacity;
 	bool mInitialized = false;
-	const CallBack* mCB[MAX_INTERFACE];
-	bool endstate = false;
+	const InterfaceCallback* mCB[MAX_INTERFACE];
 	static void* run(void *);
 public:
 	Scheduler(int);
-	void setReceiveCB(const CallBack *);
-	void setSendCB(uint16_t, const CallBack *);
-	bool push(int type, uint64_t, Message *data);
-	bool end();
+	void setReceiveCB(const InterfaceCallback *);
+	void setSendCB(uint16_t, const InterfaceCallback *);
+	bool push(MESSAGE_DIRECTION type, Address*, Message *data);
+	void end();
     virtual ~Scheduler();
 private:
 

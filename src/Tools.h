@@ -11,9 +11,9 @@
 
 class Tools {
 public:
-	static std::string getIPStr(uint64_t);
-	static std::string getAddressStr(uint64_t);
-	static INTERFACES getInterface(uint64_t);
+	static std::string getIPStr(long);
+	static std::string getAddressStr(long);
+	static INTERFACES getInterface(long);
 	static std::string getMD5Str(uint8_t *);
 	static std::string hex2str(const uint8_t *ca, int len);
 	static bool str2hex(uint8_t *buf, const char *s, uint32_t len);

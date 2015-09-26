@@ -14,15 +14,15 @@
 
 class Pipe : public Interface {
 private :
-	int mDesc[2];
+	int desc[2];
 	bool init(uint32_t);
 	void runReceiver();
-	void runSender(uint64_t, Message *);
+	void runSender(Address*, Message *);
 	void setAddress(uint32_t);
 	INTERFACES getType();
 public :
-	Pipe(uint32_t, const CallBack *, const std::string &);
-	std::vector<uint64_t> getAddressList();
+	Pipe(uint32_t, const InterfaceCallback *, const std::string &);
+	std::vector<long> getAddressList();
 	~Pipe();
 };
 

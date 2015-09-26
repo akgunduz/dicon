@@ -14,55 +14,54 @@
 #include <stdexcept>
 #include <ifaddrs.h>
 #include "Net.h"
+#include "NetAddress.h"
 
 uint16_t Net::gOffset = 0;
 
 
-Net::Net(uint32_t interfaceIndex, const CallBack *cb, const std::string &rootPath)
+Net::Net(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
 		: Interface(INTERFACE_NET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
-	LOG_I("Instance is created, Socket : %d!!!", mSocket);
+
+	LOG_I("Instance is created, Socket : %d!!!", socket);
 
 }
 
 bool Net::init(uint32_t interfaceIndex) {
 
-	mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (mSocket < 0) {
+	netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (netSocket < 0) {
 		LOG_E("Socket receiver open with err : %d!!!", errno);
 		return false;
 	}
 
 	int on = 1;
-	if (setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+	if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
 		LOG_E("Socket option with err : %d!!!", errno);
-		close(mSocket);
+		close(netSocket);
 		return false;
 	}
 	LOG_T("Socket set option is OK!!!");
 
-	int trycount = 0;
+    address = new NetAddress(0);
+
+	int tryCount = 0;
 
 	do {
 
-		trycount++;
+        tryCount++;
 
 		setAddress(interfaceIndex);
+        struct sockaddr_in serverAddress = ((NetAddress *) address)->getInetAddress();
 
-		struct sockaddr_in serv_addr;
-		bzero((char *) &serv_addr, sizeof(serv_addr));
-		serv_addr.sin_family = AF_INET;
-		serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		serv_addr.sin_port = htons((uint16_t) (mAddress >> 32));
-
-		if (bind(mSocket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+		if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
 			LOG_E("Socket bind with err : %d!!!", errno);
-			if (errno != EADDRINUSE || trycount == 10) {
-				close(mSocket);
+			if (errno != EADDRINUSE || tryCount == 10) {
+				close(netSocket);
 				return false;
 			}
 			continue;
@@ -74,23 +73,23 @@ bool Net::init(uint32_t interfaceIndex) {
 
 	LOG_T("Socket binding is OK!!!");
 
-	if (listen(mSocket, MAX_SIMUL_CLIENTS) < 0) {
+	if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
 		LOG_E("Socket listen with err : %d!!!", errno);
-		close(mSocket);
+		close(netSocket);
 		return false;
 	}
 	LOG_T("Socket listen is OK!!!");
 
-	if(fcntl(mSocket, F_SETFD, O_NONBLOCK) < 0) {
+	if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
 		LOG_E("Could not set socket Non-Blocking!!!");
-		close(mSocket);
+		close(netSocket);
 		return false;
 	}
 	LOG_T("Set socket Non-Blocking is OK!!!");
 
 	if (!initThread()) {
 		LOG_E("Problem with Server thread");
-		close(mSocket);
+		close(netSocket);
 		return false;
 	}
 
@@ -101,15 +100,15 @@ void Net::runReceiver() {
 
 	bool thread_started = true;
 
-	int maxfd = std::max(mSocket, mNotifierPipe[0]) + 1;
+	int maxfd = std::max(netSocket, notifierPipe[0]) + 1;
 
 	struct sockaddr_in cli_addr;
 	socklen_t clilen = sizeof(cli_addr);
 
 	fd_set readfs, orjreadfs;
 	FD_ZERO(&orjreadfs);
-	FD_SET(mSocket, &orjreadfs);
-	FD_SET(mNotifierPipe[0], &orjreadfs);
+	FD_SET(netSocket, &orjreadfs);
+	FD_SET(notifierPipe[0], &orjreadfs);
 
 	while(thread_started) {
 
@@ -121,9 +120,9 @@ void Net::runReceiver() {
 			return;
 		}
 
-		if (FD_ISSET(mSocket, &readfs)) {
+		if (FD_ISSET(netSocket, &readfs)) {
 
-			int acceptfd = accept(mSocket, (struct sockaddr *) &cli_addr, &clilen);
+			int acceptfd = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
 			if (acceptfd < 0) {
 				LOG_E("Client Socket open with err : %d!!!", errno);
 				return;
@@ -131,7 +130,7 @@ void Net::runReceiver() {
 
 			struct Argument *argument = new struct Argument(this);
 			argument->var.acceptSocket = acceptfd;
-			argument->address = ntohl(cli_addr.sin_addr.s_addr);
+			argument->address->set(ntohl(cli_addr.sin_addr.s_addr));
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
@@ -142,10 +141,10 @@ void Net::runReceiver() {
 			}
 		}
 
-		if (FD_ISSET(mNotifierPipe[0], &readfs)) {
+		if (FD_ISSET(notifierPipe[0], &readfs)) {
 
 			char data;
-			read(mNotifierPipe[0], &data, 1);
+			read(notifierPipe[0], &data, 1);
 			switch(data) {
 				case SHUTDOWN_NOTIFIER:
 					thread_started = false;
@@ -161,55 +160,53 @@ void *Net::runAccepter(void *arg) {
 
 	struct Argument *argument = (struct Argument *) arg;
 
-	Message *msg = new Message(argument->interface->mRootPath);
+	Message *msg = new Message(argument->interface->rootPath);
 	if (msg->readFromStream(argument->var.acceptSocket)) {
-		argument->interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+		argument->interface->push(MESSAGE_RECEIVE, new NetAddress(msg->getOwnerAddress()), msg);
 	}
 
 	delete argument;
 	return nullptr;
 }
 
-void Net::runSender(uint64_t target, Message *msg) {
+void Net::runSender(Address *target, Message *msg) {
 
-	int clisocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (clisocket < 0) {
+	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (clientSocket < 0) {
 		LOG_E("Socket sender open with err : %d!!!", errno);
 		return;
 	}
-	LOG_T("Socket sender %d is opened !!!", clisocket);
 
-	struct sockaddr_in cli_addr;
-	bzero((char *) &cli_addr, sizeof(cli_addr));
-	cli_addr.sin_family = AF_INET;
-	cli_addr.sin_port = htons((uint16_t)(target >> 32));
-	cli_addr.sin_addr.s_addr = htonl((uint32_t)target);
+	LOG_T("Socket sender %d is opened !!!", clientSocket);
 
-	if (connect(clisocket, (struct sockaddr *)&cli_addr, sizeof(cli_addr)) == -1) {
+    sockaddr_in clientAddress = ((NetAddress *) target)->getInetAddress();
+
+	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
 		LOG_E("Socket can not connect!!!");
-		close(clisocket);
+		close(clientSocket);
 		return;
 	}
-	LOG_T("Socket sender %d is connected !!!", clisocket);
 
-	msg->setOwnerAddress(mAddress);
-	msg->writeToStream(clisocket);
+	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	shutdown(clisocket, SHUT_RDWR);
-	close(clisocket);
+	msg->setOwnerAddress(address->getAddress());
+	msg->writeToStream(clientSocket);
+
+	shutdown(clientSocket, SHUT_RDWR);
+	close(clientSocket);
 }
 
 
 
 void Net::setAddress(uint32_t index) {
 
-	mAddress = GEN_ADDRESS(ConnInterface::getNetInterfaceAddress(index), DEFAULT_PORT + gOffset++);
+	((NetAddress*)address)->set(ConnInterface::getNetInterfaceAddress(index), DEFAULT_PORT + gOffset++);
 
 }
 
 Net::~Net() {
 	end();
-	close(mSocket);
+	close(netSocket);
 }
 
 
@@ -219,21 +216,17 @@ INTERFACES Net::getType() {
 
 }
 
-std::vector<uint64_t> Net::getAddressList() {
+std::vector<long> Net::getAddressList() {
 
-	std::vector<uint64_t> list;
+	std::vector<long> list;
 
-	if (mAddress == 0) {
-		return list;
-	}
-
-	if (IS_LOOPBACK(mAddress)) {
+	if (((NetAddress*)address)->isLoopback()) {
 
 		for (uint32_t i = 0; i < LOOPBACK_RANGE; i++) {
 
-			uint64_t destAddress = GEN_ADDRESS(mAddress, DEFAULT_PORT + i);
+			long destAddress = GEN_ADDRESS(address->getAddress(), DEFAULT_PORT + i);
 
-			if (destAddress != mAddress) {
+			if (destAddress != address->getAddress()) {
 
 				list.push_back(destAddress);
 
@@ -245,15 +238,15 @@ std::vector<uint64_t> Net::getAddressList() {
 
 		uint32_t startIP = 0;
 
-		uint32_t range = ConnInterface::getNetInterfaceInfo(mAddress, startIP);
+		uint32_t range = ConnInterface::getNetInterfaceInfo(address->getAddress(), startIP);
 
-		uint32_t ownAddress = (uint32_t)(mAddress & IPADDRESS_MASK);
+		uint32_t ownAddress = (uint32_t)(address->getAddress() & IPADDRESS_MASK);
 
 		for (uint32_t i = 0; i < range; i++) {
 
 			if (startIP != ownAddress) {
 
-				uint64_t destAddress = GEN_ADDRESS(startIP, DEFAULT_PORT);
+				long destAddress = GEN_ADDRESS(startIP, DEFAULT_PORT);
 
 				list.push_back(destAddress);
 

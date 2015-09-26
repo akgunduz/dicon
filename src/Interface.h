@@ -8,6 +8,7 @@
 #include <sys/un.h>
 #include "Scheduler.h"
 #include "Message.h"
+#include "Address.h"
 
 class Interface;
 
@@ -17,12 +18,16 @@ enum NOTIFIER_TYPE {
 };
 
 struct Argument {
+
 	union {
 		int acceptSocket;
 		Message *msg;
 	} var;
-	uint64_t address;
+
+	Address *address;
+
 	Interface *interface;
+
 	Argument(Interface *c) : interface(c){}
 };
 /*
@@ -37,29 +42,29 @@ class Interface {
 private :
 	static void* runReceiver(void *);
 	static void* runSender(void *);
-	static bool senderCB(void *, uint64_t, Message *);
+	static bool senderCB(void *, Address*, Message *);
 protected :
-	bool mInitialized = false;
-	uint64_t mAddress;
-	Scheduler *mScheduler;
-	pthread_t mThread;
-	int mNotifierPipe[2];
+	bool initialized = false;
+	Address *address;
+	Scheduler *scheduler;
+	pthread_t thread;
+	int notifierPipe[2];
 	virtual bool init(uint32_t) = 0;
 	virtual void runReceiver() = 0;
-	virtual void runSender(uint64_t, Message *) = 0;
+	virtual void runSender(Address*, Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(INTERFACES type, const CallBack *, const std::string &);
+	Interface(INTERFACES type, const InterfaceCallback *, const std::string &);
 	virtual void setAddress(uint32_t) = 0;
 
 public :
-	std::string mRootPath;
-	bool push(int, uint64_t, Message *);
+	std::string rootPath;
+	bool push(MESSAGE_DIRECTION, Address*, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
 	virtual INTERFACES getType() = 0;
-	virtual uint64_t getAddress();
-	virtual std::vector<uint64_t> getAddressList() = 0;
+	virtual Address* getAddress();
+	virtual std::vector<long> getAddressList() = 0;
 	virtual ~Interface();
 };
 

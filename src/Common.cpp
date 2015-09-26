@@ -103,7 +103,7 @@ bool ConnInterface::isInterfaceLoopback(uint32_t index) {
 
 }
 
-uint32_t ConnInterface::getNetInterfaceNetwork(uint64_t refAddress) {
+uint32_t ConnInterface::getNetInterfaceNetwork(long refAddress) {
 
 	uint32_t refIPAddress = (uint32_t)(refAddress & IPADDRESS_MASK);
 
@@ -141,7 +141,7 @@ uint32_t ConnInterface::getNetInterfaceInfo(uint32_t index, uint32_t &startIP) {
 	return (uint32_t) ~ci->mNetmask - 1;
 }
 
-uint32_t ConnInterface::getNetInterfaceInfo(uint64_t refAddress, uint32_t &startIP) {
+uint32_t ConnInterface::getNetInterfaceInfo(long refAddress, uint32_t &startIP) {
 
 	uint32_t refIPAddress = (uint32_t)(refAddress & IPADDRESS_MASK);
 

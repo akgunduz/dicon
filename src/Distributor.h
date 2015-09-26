@@ -15,40 +15,40 @@
 class Distributor {
 private:
 
-	Connector *mCollectorConnector;
-	Connector *mClientConnector;
+	Connector *collectorConnector;
+	Connector *clientConnector;
 
-	std::string mRootPath;
+	std::string rootPath;
 
-	CallBack *mCallback;
+	InterfaceCallback *callback;
 
-	ClientManager *mClientManager;
+	ClientManager *clientManager;
 
-	std::deque<uint64_t> mCollectorWaitingList;
+	std::deque<long> collectorWaitingList;
 
-	DiffTime mCollStartTime;
+	DiffTime collStartTime;
 
-	static bool receiveCB(void *, uint64_t, Message *);
+	static bool receiveCB(void *, Address*, Message *);
 
 public:
 
 	Distributor(uint32_t, uint32_t, const std::string &, double);
 
 	virtual ~Distributor();
-	uint64_t getAddress(HOST);
+	Address* getAddress(HOST);
 	INTERFACES getInterfaceType(HOST);
 
-	static bool timeoutCallback(Connector *, uint64_t, uint64_t);
+	static bool timeoutCallback(Connector *, Address*, Address*);
 
 	bool reset();
 
-	bool send2ClientMsg(uint64_t, uint8_t);
-	bool send2CollectorMsg(uint64_t, uint8_t);
+	bool send2ClientMsg(Address*, uint8_t);
+	bool send2CollectorMsg(Address*, uint8_t);
 	static bool sendWakeupMessage(Connector *);
 	bool sendWakeupMessagesAll();
 
-	bool processCollectorMsg(uint64_t, Message *);
-	bool processClientMsg(uint64_t, Message *);
+	bool processCollectorMsg(Address*, Message *);
+	bool processClientMsg(Address*, Message *);
 
 	std::string getRootPath();
 };

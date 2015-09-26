@@ -6,10 +6,9 @@
 #include "Connector.h"
 #include "Net.h"
 #include "Pipe.h"
-#include "Tools.h"
 #include "UnixSocket.h"
 
-Connector::Connector(uint32_t interfaceIndex, const CallBack *cb, const std::string &rootPath) {
+Connector::Connector(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath) {
 
 	INTERFACES  interfaceType = ConnInterface::getInterfaceType(interfaceIndex);
 
@@ -18,15 +17,15 @@ Connector::Connector(uint32_t interfaceIndex, const CallBack *cb, const std::str
 		switch(interfaceType) {
 
 			case INTERFACE_NET:
-				mInterface = new Net(interfaceIndex, cb, rootPath);
+				interface = new Net(interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_PIPE:
-				mInterface = new Pipe(interfaceIndex, cb, rootPath);
+				interface = new Pipe(interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_UNIXSOCKET:
-				mInterface = new UnixSocket(interfaceIndex, cb, rootPath);
+				interface = new UnixSocket(interfaceIndex, cb, rootPath);
 				break;
 
 			default:
@@ -39,81 +38,78 @@ Connector::Connector(uint32_t interfaceIndex, const CallBack *cb, const std::str
 		throw std::runtime_error("Connector : Interface Init failed!!!");
 	}
 
-	mInitialized = true;
+	initialized = true;
 }
 
-bool Connector::send(uint64_t target, Message *msg) {
+bool Connector::send(Address* target, Message *msg) {
 
-	if (target == 0) {
-		LOG_E("Invalid target : %d", target);
+	if (!initialized) {
 		return false;
 	}
 
-	INTERFACES interface = Tools::getInterface(target);
-
-	return mInterface->push((int)MESSAGE_SEND + (uint16_t)interface, target, msg);
+	return interface->push(MESSAGE_SEND, target, msg);
 
 }
 
-uint64_t Connector::getAddress() {
+Address* Connector::getAddress() {
 
-	if (!mInitialized) {
+	if (!initialized) {
 		return 0;
 	}
 
-	return mInterface->getAddress();
+	return interface->getAddress();
 
 }
 
-std::vector<uint64_t> Connector::getAddressList() {
+std::vector<long> Connector::getAddressList() {
 
-	if (!mInitialized) {
+	if (!initialized) {
 
-		std::vector<uint64_t> list;
+		std::vector<long> list;
 		return list;
 	}
 
-	return mInterface->getAddressList();
+	return interface->getAddressList();
 
 }
 
 int Connector::getNotifier(NOTIFIER_TYPE type) {
 
-	if (!mInitialized) {
+	if (!initialized) {
 		return 0;
 	}
 
-	return mInterface->getNotifier(type);
+	return interface->getNotifier(type);
 
 }
 
 Connector::~Connector() {
 
-	delete mInterface;
-	mInterface = nullptr;
+	delete interface;
+	interface = nullptr;
 
 }
 
 
 INTERFACES Connector::getInterfaceType() {
 
-	return mInterface->getType();
+	return interface->getType();
 
 }
 
 void Connector::setRootPath(std::string &path) {
 
-	mInterface->mRootPath = path;
+	interface->rootPath = path;
 
 }
 
 std::string Connector::getRootPath() {
 
-	return mInterface->mRootPath;
+	return interface->rootPath;
 }
 
 Interface *Connector::getInterface() {
 
-	return mInterface;
+	return interface;
 
 }

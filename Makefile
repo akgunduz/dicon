@@ -33,13 +33,18 @@ FILES = \
 		$(SOURCE_PATH)/Distributor.cpp \
 		$(SOURCE_PATH)/Interface.cpp \
 		$(SOURCE_PATH)/Log.cpp \
+		$(SOURCE_PATH)/BaseMessage.cpp \
 		$(SOURCE_PATH)/Message.cpp \
 		$(SOURCE_PATH)/Net.cpp \
 		$(SOURCE_PATH)/Pipe.cpp \
 		$(SOURCE_PATH)/Rule.cpp \
 		$(SOURCE_PATH)/Scheduler.cpp \
 		$(SOURCE_PATH)/Tools.cpp \
-		$(SOURCE_PATH)/UnixSocket.cpp
+		$(SOURCE_PATH)/UnixSocket.cpp \
+		$(SOURCE_PATH)/Address.cpp \
+		$(SOURCE_PATH)/NetAddress.cpp \
+		$(SOURCE_PATH)/PipeAddress.cpp \
+		$(SOURCE_PATH)/UnixSocketAddress.cpp \
 
 WX_FILES = \
 		$(SOURCE_PATH)/UserInterface.cpp \

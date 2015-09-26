@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include "Tools.h"
 
-std::string Tools::getIPStr(uint64_t ip) {
+std::string Tools::getIPStr(long ip) {
 	struct in_addr addr;
 	addr.s_addr = htonl((uint32_t)ip);
 	char cIP[INET_ADDRSTRLEN];
@@ -84,7 +84,7 @@ void Tools::mkpath(const char *path) {
         mkdir(tmp, S_IRWXU);
 }
 
-std::string Tools::getAddressStr(uint64_t address) {
+std::string Tools::getAddressStr(long address) {
 	INTERFACES interfaces = getInterface(address);
 	if (interfaces == INTERFACE_NET) {
 		return getIPStr(address);
@@ -93,7 +93,7 @@ std::string Tools::getAddressStr(uint64_t address) {
 }
 
 
-INTERFACES Tools::getInterface(uint64_t address) {
+INTERFACES Tools::getInterface(long address) {
 
 	if (address > 0xFFFFFF) {
 		return INTERFACE_NET;

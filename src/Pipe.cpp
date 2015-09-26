@@ -4,8 +4,9 @@
 //
 
 #include "Pipe.h"
+#include "PipeAddress.h"
 
-Pipe::Pipe(uint32_t interfaceIndex, const CallBack *cb, const std::string &rootPath)
+Pipe::Pipe(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
 		: Interface(INTERFACE_PIPE, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
@@ -13,31 +14,33 @@ Pipe::Pipe(uint32_t interfaceIndex, const CallBack *cb, const std::string &rootP
 		throw std::runtime_error("Pipe : Instance create failed!!!");
 	}
 
-	LOG_I("Instance is created Read : %d Write : %d !!!", mDesc[0], mDesc[1]);
+	LOG_I("Instance is created Read : %d Write : %d !!!", desc[0], desc[1]);
 
 }
 
 bool Pipe::init(uint32_t interfaceIndex) {
 
-	if (pipe(mDesc) < 0) {
+	if (pipe(desc) < 0) {
 		LOG_E("Init failed with err : %d!!!", errno);
 		return false;
 	}
-	LOG_T("Pipe receiver %d is opened !!!", mDesc[1]);
+	LOG_T("Pipe receiver %d is opened !!!", desc[1]);
+
+	address = new PipeAddress(0);
 
 	setAddress(interfaceIndex);
 
-	if (fcntl(mDesc[0], F_SETFL, O_NONBLOCK) == -1) {
+	if (fcntl(desc[0], F_SETFL, O_NONBLOCK) == -1) {
 		LOG_E("Problem with Pipe States with err : %d!!!", errno);
-		close(mDesc[1]);
-		close(mDesc[0]);
+		close(desc[1]);
+		close(desc[0]);
 	}
 
 
 	if (!initThread()) {
 		LOG_E("Problem with Pipe thread");
-		close(mDesc[1]);
-		close(mDesc[0]);
+		close(desc[1]);
+		close(desc[0]);
 		return false;
 	}
 
@@ -48,11 +51,11 @@ bool Pipe::init(uint32_t interfaceIndex) {
 void Pipe::runReceiver() {
 
 	bool thread_started = true;
-	int maxfd = std::max(mDesc[0], mNotifierPipe[0]) + 1;
+	int maxfd = std::max(desc[0], notifierPipe[0]) + 1;
 	fd_set readfs, orjreadfs;
 	FD_ZERO(&orjreadfs);
-	FD_SET(mDesc[0], &orjreadfs);
-	FD_SET(mNotifierPipe[0], &orjreadfs);
+	FD_SET(desc[0], &orjreadfs);
+	FD_SET(notifierPipe[0], &orjreadfs);
 	while(thread_started) {
 		readfs = orjreadfs;
 		int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
@@ -61,19 +64,19 @@ void Pipe::runReceiver() {
 			return;
 		}
 
-		if (FD_ISSET(mDesc[0], &readfs)) {
-			LOG_T("New data arrived from Pipe : %d !!!", mDesc[0]);
+		if (FD_ISSET(desc[0], &readfs)) {
+			LOG_T("New data arrived from Pipe : %d !!!", desc[0]);
 
-			Message *msg = new Message(mRootPath);
-			if (msg->readFromStream(mDesc[0])) {
-				push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+			Message *msg = new Message(rootPath);
+			if (msg->readFromStream(desc[0])) {
+				push(MESSAGE_RECEIVE, new PipeAddress(msg->getOwnerAddress()), msg);
 			}
 		}
 
-		if (FD_ISSET(mNotifierPipe[0], &readfs)) {
+		if (FD_ISSET(notifierPipe[0], &readfs)) {
 			LOG_T("New data arrived from Notifier!!!");
 			char data;
-			read(mNotifierPipe[0], &data, 1);
+			read(notifierPipe[0], &data, 1);
 			switch(data) {
 				case SHUTDOWN_NOTIFIER:
 					thread_started = false;
@@ -85,28 +88,28 @@ void Pipe::runReceiver() {
 	}
 }
 
-void Pipe::runSender(uint64_t target, Message *msg) {
+void Pipe::runSender(Address* target, Message *msg) {
 
 	if (target <= 0) {
 		return;
 	}
 
-	msg->setOwnerAddress((uint64_t)mDesc[1]);
-	msg->writeToStream((int)target);
+	msg->setOwnerAddress(address->getAddress());
+	msg->writeToStream((int)target->getAddress());
 
 }
 
 void Pipe::setAddress(uint32_t index) {
 
-	mAddress = (uint64_t)mDesc[1];
+	address->set((long) desc[1]);
 
 }
 
 Pipe::~Pipe() {
 
 	end();
-	close(mDesc[1]);
-	close(mDesc[0]);
+	close(desc[1]);
+	close(desc[0]);
 
 }
 
@@ -116,9 +119,9 @@ INTERFACES Pipe::getType() {
 
 }
 
-std::vector<uint64_t> Pipe::getAddressList() {
+std::vector<long> Pipe::getAddressList() {
 
-	std::vector<uint64_t> list;
+	std::vector<long> list;
 
 	return list;
 

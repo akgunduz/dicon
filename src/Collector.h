@@ -12,27 +12,27 @@
 
 class Collector {
 
-	Connector *mDistributorConnector;
-	Connector *mClientConnector;
+	Connector *distributorConnector;
+	Connector *clientConnector;
 
-	std::map<uint64_t , Rule*> mRules;
-	std::string mRootPath;
-	CallBack *mCallback;
-	uint64_t mDistributorAddress;
+	std::map<long , Rule*> rules;
+	std::string rootPath;
+	InterfaceCallback *callback;
+	Address* distributorAddress;
 
-	static bool receiveCB(void *, uint64_t, Message *);
+	static bool receiveCB(void *, Address*, Message *);
 
-	bool processDistributorMsg(uint64_t address, Message *msg);
-	bool processClientMsg(uint64_t address, Message *msg);
+	bool processDistributorMsg(Address* address, Message *msg);
+	bool processClientMsg(Address* address, Message *msg);
 
-	bool send2DistributorMsg(uint64_t, uint8_t);
-	bool send2ClientMsg(uint64_t, uint8_t);
+	bool send2DistributorMsg(Address*, int);
+	bool send2ClientMsg(Address*, int);
 
 public:
 	Collector(uint32_t, uint32_t, const std::string &rootPath);
 
 	virtual ~Collector();
-	uint64_t getAddress(HOST);
+	Address* getAddress(HOST);
 	INTERFACES getInterfaceType(HOST);
 
 	bool reset();
