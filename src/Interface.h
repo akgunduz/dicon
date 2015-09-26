@@ -17,8 +17,9 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-struct Argument {
+class Argument {
 
+public:
 	union {
 		int acceptSocket;
 		Message *msg;
@@ -28,7 +29,9 @@ struct Argument {
 
 	Interface *interface;
 
-	Argument(Interface *c) : interface(c){}
+	Argument(Interface *c) : interface(c){
+
+	}
 };
 /*
 class InitArgument {

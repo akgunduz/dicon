@@ -76,7 +76,7 @@
 #define LOOPBACK_ADDRESS 0x7F000001
 #define IPADDRESS_MASK 0xFFFFFFFF
 #define IS_LOOPBACK(address) (((address) & IPADDRESS_MASK) == LOOPBACK_ADDRESS)
-#define GEN_ADDRESS(ip, port) ((((long)ip) & IPADDRESS_MASK) | (((long)port) << 32))
+#define GEN_ADDRESS(ip, port) ((((long)ip) & IPADDRESS_MASK) | (((long)port) << 40))
 
 enum HOST {
 	HOST_DISTRIBUTOR,

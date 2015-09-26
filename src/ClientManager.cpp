@@ -323,7 +323,7 @@ Address* ClientManager::getIdleClient(Address* collectorAddress) {
 		LOG_W("No available client right now.");
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool ClientManager::resetDiffTimes() {

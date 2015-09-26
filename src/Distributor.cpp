@@ -272,13 +272,18 @@ bool Distributor::send2CollectorMsg(Address* address, uint8_t type) {
 		case MSGTYPE_CLIENT: {
 				msg->setPriority(PRIORITY_2);
 				Address* clientaddress = clientManager->getIdleClient(address);
-				if (clientaddress->getAddress() != 0) {
+
+				if (clientaddress != nullptr) {
 
 					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, clientaddress->getAddress(), PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG,
 							"\"CLIENT\" msg sent to collector: %s with available client: %s",
 						  address->getString().c_str(),
                           clientaddress->getString().c_str());
+
+                    msg->setVariant(0, clientaddress->getAddress());
+
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), clientaddress->getAddress());
 
 				} else {
 					collectorWaitingList.push_back(address->getAddress());
@@ -287,10 +292,10 @@ bool Distributor::send2CollectorMsg(Address* address, uint8_t type) {
 							"\"CLIENT\" msg sent to collector: %s with no available client",
 						  address->getString().c_str());
 
-				}
-				msg->setVariant(0, clientaddress->getAddress());
+                    msg->setVariant(0, 0);
 
-				LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), clientaddress->getAddress());
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), (long)0L);
+				}
 
 			}
 			break;

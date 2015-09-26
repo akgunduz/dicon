@@ -128,9 +128,9 @@ void Net::runReceiver() {
 				return;
 			}
 
-			struct Argument *argument = new struct Argument(this);
+			Argument *argument = new Argument(this);
 			argument->var.acceptSocket = acceptfd;
-			argument->address->set(ntohl(cli_addr.sin_addr.s_addr));
+			argument->address = Address::newInstance((ntohl(cli_addr.sin_addr.s_addr)));
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);

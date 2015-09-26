@@ -21,7 +21,7 @@ std::string Tools::getIPStr(long ip) {
 	}
 
 	std::string sIP = cIP;
-	sIP += ":" + std::to_string(ip >> 32);
+	sIP += ":" + std::to_string(ip >> 40);
 	return sIP;
 }
 
