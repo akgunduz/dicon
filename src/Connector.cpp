@@ -17,15 +17,15 @@ Connector::Connector(uint32_t interfaceIndex, const InterfaceCallback *cb, const
 		switch(interfaceType) {
 
 			case INTERFACE_NET:
-				interface = new Net(interfaceIndex, cb, rootPath);
+				_interface = new Net(interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_PIPE:
-				interface = new Pipe(interfaceIndex, cb, rootPath);
+				_interface = new Pipe(interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_UNIXSOCKET:
-				interface = new UnixSocket(interfaceIndex, cb, rootPath);
+				_interface = new UnixSocket(interfaceIndex, cb, rootPath);
 				break;
 
 			default:
@@ -41,23 +41,23 @@ Connector::Connector(uint32_t interfaceIndex, const InterfaceCallback *cb, const
 	initialized = true;
 }
 
-bool Connector::send(Address* target, Message *msg) {
+bool Connector::send(long target, Message *msg) {
 
 	if (!initialized) {
 		return false;
 	}
 
-	return interface->push(MESSAGE_SEND, target, msg);
+	return _interface->push(MESSAGE_SEND, target, msg);
 
 }
 
-Address* Connector::getAddress() {
+long Connector::getAddress() {
 
 	if (!initialized) {
 		return 0;
 	}
 
-	return interface->getAddress();
+	return _interface->getAddress();
 
 }
 
@@ -69,7 +69,7 @@ std::vector<long> Connector::getAddressList() {
 		return list;
 	}
 
-	return interface->getAddressList();
+	return _interface->getAddressList();
 
 }
 
@@ -79,37 +79,37 @@ int Connector::getNotifier(NOTIFIER_TYPE type) {
 		return 0;
 	}
 
-	return interface->getNotifier(type);
+	return _interface->getNotifier(type);
 
 }
 
 Connector::~Connector() {
 
-	delete interface;
-	interface = nullptr;
+	delete _interface;
+	_interface = nullptr;
 
 }
 
 
 INTERFACES Connector::getInterfaceType() {
 
-	return interface->getType();
+	return _interface->getType();
 
 }
 
 void Connector::setRootPath(std::string &path) {
 
-	interface->rootPath = path;
+	_interface->rootPath = path;
 
 }
 
 std::string Connector::getRootPath() {
 
-	return interface->rootPath;
+	return _interface->rootPath;
 }
 
 Interface *Connector::getInterface() {
 
-	return interface;
+	return _interface;
 
 }

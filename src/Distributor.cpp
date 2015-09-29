@@ -45,7 +45,7 @@ Distributor::Distributor(uint32_t collInterfaceIndex,
 
 	}
 
-	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR)->getAddress(), getAddress(HOST_CLIENT)->getAddress());
+	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_CLIENT));
 
 	this->rootPath = rootPath;
 
@@ -69,26 +69,26 @@ Distributor::~Distributor() {
 	delete callback;
 }
 
-bool Distributor::receiveCB(void *arg, Address* address, Message *msg) {
+bool Distributor::receiveCB(void *arg, long address, Message *msg) {
 
 	Distributor *dist = (Distributor *) arg;
 
 	switch(msg->getOwner()) {
 
 		case HOST_CLIENT:
-			if (dist->clientConnector->getInterfaceType() == address->getInterface()) {
+			if (dist->clientConnector->getInterfaceType() == Address::getInterface(address)) {
 				dist->processClientMsg(address, msg);
 			}
 			break;
 
 		case HOST_COLLECTOR:
-			if (dist->collectorConnector->getInterfaceType() == address->getInterface()) {
+			if (dist->collectorConnector->getInterfaceType() == Address::getInterface(address)) {
 				dist->processCollectorMsg(address, msg);
 			}
 			break;
 
 		default:
-			LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), address->getString().c_str());
+			LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
 			delete msg;
 			break;
 	}
@@ -106,7 +106,7 @@ INTERFACES Distributor::getInterfaceType(HOST host) {
 
 }
 
-Address* Distributor::getAddress(HOST host) {
+long Distributor::getAddress(HOST host) {
 
 	if (host == HOST_COLLECTOR) {
 		return collectorConnector->getAddress();
@@ -116,21 +116,21 @@ Address* Distributor::getAddress(HOST host) {
 
 }
 
-bool Distributor::processCollectorMsg(Address* address, Message *msg) {
+bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 	bool status = false;
 
 	switch(msg->getType()) {
 
 		case MSGTYPE_READY:
-			LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), (long)0);
+			LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from collector: %s", address->getString().c_str());
+					"\"READY\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_CLIENT:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"CLIENT\" msg from collector: %s", address->getString().c_str());
+					"\"CLIENT\" msg from collector: %s", Address::getString(address).c_str());
 
 			status = send2CollectorMsg(address, MSGTYPE_CLIENT);
 			break;
@@ -139,7 +139,7 @@ bool Distributor::processCollectorMsg(Address* address, Message *msg) {
 			collStartTime.start();
 			clientManager->resetDiffTimes();
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"TIME\" msg from collector: %s", address->getString().c_str());
+					"\"TIME\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
 		default:
@@ -151,7 +151,7 @@ bool Distributor::processCollectorMsg(Address* address, Message *msg) {
 
 }
 
-bool Distributor::processClientMsg(Address* address, Message *msg) {
+bool Distributor::processClientMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -159,20 +159,20 @@ bool Distributor::processClientMsg(Address* address, Message *msg) {
 
 		case MSGTYPE_READY:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from client: %s", address->getString().c_str());
+					"\"READY\" msg from client: %s", Address::getString(address).c_str());
 
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address->getAddress(), IDLE);
+			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
 			clientManager->setClientIdle(address, collStartTime.stop());
 
 			if (collectorWaitingList.size() > 0) {
 
-				Address *collectorAddress = Address::newInstance(collectorWaitingList.front());
+				long collectorAddress = collectorWaitingList.front();
 				collectorWaitingList.pop_front();
 
 				LOG_U(UI_UPDATE_DIST_LOG,
                       "Processing a collector from the waiting list: %s",
-                      collectorAddress->getString().c_str());
+					  Address::getString(collectorAddress).c_str());
 
 				status = send2CollectorMsg(collectorAddress, MSGTYPE_CLIENT);
 
@@ -184,32 +184,32 @@ bool Distributor::processClientMsg(Address* address, Message *msg) {
 
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"ALIVE\" msg from client: %s", address->getString().c_str());
+					"\"ALIVE\" msg from client: %s", Address::getString(address).c_str());
 
 			if (!clientManager->setClientValidate(address)
 					&& collectorWaitingList.size() > 0) {
 
-                Address *collectorAddress = Address::newInstance(collectorWaitingList.front());
+                long collectorAddress = collectorWaitingList.front();
 				collectorWaitingList.pop_front();
 
 				LOG_U(UI_UPDATE_DIST_LOG,
-						"Processing a collector from the waiting list: %s", address->getString().c_str());
+						"Processing a collector from the waiting list: %s", Address::getString(collectorAddress).c_str());
 
 				status = send2CollectorMsg(collectorAddress, MSGTYPE_CLIENT);
 			} else {
 				status = true;
 			}
 
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address->getAddress(), IDLE);
+			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
 			break;
 
 		case MSGTYPE_BUSY:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"BUSY\" msg from client: %s", address->getString().c_str());
+					"\"BUSY\" msg from client: %s", Address::getString(address).c_str());
 
 			clientManager->setClientBusy(address);
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address->getAddress(), BUSY);
+			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, BUSY);
 
 
 			status = true;
@@ -217,12 +217,12 @@ bool Distributor::processClientMsg(Address* address, Message *msg) {
 
 		case MSGTYPE_TIMEOUT:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"TIMEOUT\" msg from client: %s", address->getString().c_str());
+					"\"TIMEOUT\" msg from client: %s", Address::getString(address).c_str());
 
 			clientManager->setClientRemove(address);
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address->getAddress(), REMOVE);
+			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, REMOVE);
 
-			status = send2CollectorMsg(Address::newInstance(msg->getVariant(0)), MSGTYPE_CLIENT);
+			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_CLIENT);
 
 			break;
 
@@ -235,7 +235,7 @@ bool Distributor::processClientMsg(Address* address, Message *msg) {
 
 }
 
-bool Distributor::send2ClientMsg(Address* address, uint8_t type) {
+bool Distributor::send2ClientMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_DISTRIBUTOR, type, rootPath);
 
@@ -244,7 +244,7 @@ bool Distributor::send2ClientMsg(Address* address, uint8_t type) {
 		case MSGTYPE_WAKEUP:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"WAKEUP\" msg sent to client: %s", address->getString().c_str());
+					"\"WAKEUP\" msg sent to client: %s", Address::getString(address).c_str());
 			break;
 
 		default:
@@ -257,7 +257,7 @@ bool Distributor::send2ClientMsg(Address* address, uint8_t type) {
 
 }
 
-bool Distributor::send2CollectorMsg(Address* address, uint8_t type) {
+bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_DISTRIBUTOR, type, rootPath);
 
@@ -266,35 +266,35 @@ bool Distributor::send2CollectorMsg(Address* address, uint8_t type) {
 		case MSGTYPE_WAKEUP:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"WAKEUP\" msg sent to collector: %s", address->getString().c_str());
+					"\"WAKEUP\" msg sent to collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_CLIENT: {
 				msg->setPriority(PRIORITY_2);
-				Address* clientaddress = clientManager->getIdleClient(address);
+				long clientAddress = clientManager->getIdleClient(address);
 
-				if (clientaddress != nullptr) {
+				if (clientAddress != 0) {
 
-					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, clientaddress->getAddress(), PREBUSY);
+					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, clientAddress, PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG,
 							"\"CLIENT\" msg sent to collector: %s with available client: %s",
-						  address->getString().c_str(),
-                          clientaddress->getString().c_str());
+						  Address::getString(address).c_str(),
+						  Address::getString(clientAddress).c_str());
 
-                    msg->setVariant(0, clientaddress->getAddress());
+                    msg->setVariant(0, clientAddress);
 
-                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), clientaddress->getAddress());
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, clientAddress);
 
 				} else {
-					collectorWaitingList.push_back(address->getAddress());
+					collectorWaitingList.push_back(address);
 
 					LOG_U(UI_UPDATE_DIST_LOG,
 							"\"CLIENT\" msg sent to collector: %s with no available client",
-						  address->getString().c_str());
+						  Address::getString(address).c_str());
 
                     msg->setVariant(0, 0);
 
-                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address->getAddress(), (long)0L);
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
 				}
 
 			}
@@ -334,10 +334,10 @@ bool Distributor::reset() {
 }
 
 bool Distributor::timeoutCallback(Connector *connector,
-								  Address* address, Address* collectorAddress) {
+								  long address, long collectorAddress) {
 
 	Message *msg = new Message(HOST_CLIENT, MSGTYPE_TIMEOUT, connector->getRootPath());
-	msg->setVariant(0, collectorAddress->getAddress());
+	msg->setVariant(0, collectorAddress);
 	connector->getInterface()->
 			push(MESSAGE_RECEIVE, address, msg);
 
@@ -352,8 +352,7 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
 
 		Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
 		msg->setPriority(PRIORITY_1);
-        Address *address = Address::newInstance(list[i]);
-		connector->send(address, msg);
+		connector->send(list[i], msg);
 
 	}
 

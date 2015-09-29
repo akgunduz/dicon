@@ -7,60 +7,36 @@
 #include "UnixSocketAddress.h"
 #include "PipeAddress.h"
 
-Address::Address() {
+INTERFACES Address::getInterface(long address) {
+
+    if (address > 0xFFFFFF) {
+        return INTERFACE_NET;
+
+    } else if (address > 1000) {
+        return INTERFACE_UNIXSOCKET;
+    }
+
+    return INTERFACE_PIPE;
+}
+
+inline std::string Address::getStdString(long address) {
+
+    char sAddress[50];
+    sprintf(sAddress, "%ld", address);
+    return std::string(sAddress);
 
 }
 
-Address::Address(long address) {
-    this->address = address;
-}
+std::string Address::getString(long address) {
 
-long Address::getAddress() {
-    return address;
-}
+    INTERFACES _interface = getInterface(address);
 
-
-void Address::set(long address) {
-    this->address = address;
-}
-
-Address *Address::newInstance(INTERFACES interface, long refAddress) {
-
-    Address *newAddress = nullptr;
-
-    switch(interface) {
+    switch (_interface) {
 
         case INTERFACE_NET:
-            newAddress = new NetAddress(refAddress);
-            break;
-
-        case INTERFACE_PIPE:
-            newAddress = new PipeAddress(refAddress);
-            break;
-
-        case INTERFACE_UNIXSOCKET:
-            newAddress = new UnixSocketAddress(refAddress);
-            break;
+            return NetAddress::getString(address);
 
         default:
-            break;
-
+            return getStdString(address);
     }
-
-    return newAddress;
 }
-
-Address *Address::newInstance(long refAddress) {
-
-    INTERFACES interface = INTERFACE_PIPE;
-
-    if (refAddress > 0xFFFFFF) {
-        interface = INTERFACE_NET;
-
-    } else if (refAddress > 1000) {
-        interface = INTERFACE_UNIXSOCKET;
-    }
-
-    return newInstance(interface, refAddress);
-}
-

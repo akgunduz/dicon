@@ -1,82 +1,101 @@
 cmake_minimum_required(VERSION 3.3)
 project(Bankor)
-
-set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+set(SOURCE_PATH "src")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mavx")
 
-set(CMAKE_EXE_LINKER_FLAGS "-ljson-c")
+#set(CMAKE_EXE_LINKER_FLAGS " /bin/cygjson-c-2.dll -lssl -lcrypto")
 
-add_definitions(-D__WXWIDGETS__ -D__APPLE__ -D__IDE__)
+if (APPLE)
 
-set(SOURCE_FILES
-        src/Application.cpp
-        src/Application.cpp
-        src/Application.h
-        src/Client.cpp
-        src/Client.h
-        src/ClientManager.cpp
-        src/ClientManager.h
-        src/Collector.cpp
-        src/Collector.h
-        src/Common.cpp
-        src/Common.h
-        src/Common_apple.h
-        src/Common_linux.h
-        src/Connector.cpp
-        src/Connector.h
-        src/Console.cpp
-        src/Console.h
-        src/ConsoleClient.cpp
-        src/Content.cpp
-        src/Content.h
-        src/Distributor.cpp
-        src/Distributor.h
-        src/Interface.cpp
-        src/Interface.h
-        src/Log.cpp
-        src/Log.h
-        src/BaseMessage.cpp
-        src/BaseMessage.h
-        src/Message.cpp
-        src/Message.h
-        src/Net.cpp
-        src/Net.h
-        src/Pipe.cpp
-        src/Pipe.h
-        src/Rule.cpp
-        src/Rule.h
-        src/Scheduler.cpp
-        src/Scheduler.h
-        src/Tools.cpp
-        src/Tools.h
-        src/UnixSocket.cpp
-        src/UnixSocket.h
-        src/UserInterface.cpp
-        src/UserInterface.h
-        src/UserInterfaceApp.cpp
-        src/UserInterfaceApp.h
-        src/UserInterfaceClient.cpp
-        src/UserInterfaceCollector.cpp
-        src/UserInterfaceDistributor.cpp
-        src/UserInterfaceGenerated.cpp
-        src/UserInterfaceGenerated.h
-        src/Address.cpp
-        src/Address.h
-        src/NetAddress.cpp
-        src/NetAddress.h
-        src/PipeAddress.cpp
-        src/PipeAddress.h
-        src/UnixSocketAddress.cpp
-        src/UnixSocketAddress.h)
+    set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+    add_definitions(-D__APPLE__)
 
-include_directories(src)
+elseif(CYGWIN)
 
-add_executable(Bankor ${SOURCE_FILES})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0
+        -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
+    add_definitions(-DUNICODE -DCYGWIN)
 
-find_package(Threads REQUIRED)
-find_package(Json REQUIRED)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /bin/cygjson-c-2.dll /bin/cygcrypto-1.0.0.dll
+        -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_webview-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0
+        -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0")
 
-find_package(wxWidgets REQUIRED)
-include(${wxWidgets_USE_FILE})
-target_link_libraries(Bankor ${wxWidgets_LIBRARIES})
+endif()
+
+#add_definitions(-D__WXWIDGETS__ -D__IDE__)
+add_definitions(-D__IDE__)
+
+set(FILES
+        ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/Application.h
+        ${SOURCE_PATH}/Client.cpp
+        ${SOURCE_PATH}/Client.h
+        ${SOURCE_PATH}/ClientManager.cpp
+        ${SOURCE_PATH}/ClientManager.h
+        ${SOURCE_PATH}/Collector.cpp
+        ${SOURCE_PATH}/Collector.h
+        ${SOURCE_PATH}/Common.cpp
+        ${SOURCE_PATH}/Common.h
+        ${SOURCE_PATH}/Common_apple.h
+        ${SOURCE_PATH}/Common_linux.h
+        ${SOURCE_PATH}/Connector.cpp
+        ${SOURCE_PATH}/Connector.h
+        ${SOURCE_PATH}/Console.cpp
+        ${SOURCE_PATH}/Console.h
+        ${SOURCE_PATH}/ConsoleClient.cpp
+        ${SOURCE_PATH}/Content.cpp
+        ${SOURCE_PATH}/Content.h
+        ${SOURCE_PATH}/Distributor.cpp
+        ${SOURCE_PATH}/Distributor.h
+        ${SOURCE_PATH}/Interface.cpp
+        ${SOURCE_PATH}/Interface.h
+        ${SOURCE_PATH}/Log.cpp
+        ${SOURCE_PATH}/Log.h
+        ${SOURCE_PATH}/BaseMessage.cpp
+        ${SOURCE_PATH}/BaseMessage.h
+        ${SOURCE_PATH}/Message.cpp
+        ${SOURCE_PATH}/Message.h
+        ${SOURCE_PATH}/Net.cpp
+        ${SOURCE_PATH}/Net.h
+        ${SOURCE_PATH}/Pipe.cpp
+        ${SOURCE_PATH}/Pipe.h
+        ${SOURCE_PATH}/Rule.cpp
+        ${SOURCE_PATH}/Rule.h
+        ${SOURCE_PATH}/Scheduler.cpp
+        ${SOURCE_PATH}/Scheduler.h
+        ${SOURCE_PATH}/Tools.cpp
+        ${SOURCE_PATH}/Tools.h
+        ${SOURCE_PATH}/UnixSocket.cpp
+        ${SOURCE_PATH}/UnixSocket.h
+        ${SOURCE_PATH}/Address.cpp
+        ${SOURCE_PATH}/Address.h
+        ${SOURCE_PATH}/NetAddress.cpp
+        ${SOURCE_PATH}/NetAddress.h
+        ${SOURCE_PATH}/PipeAddress.cpp
+        ${SOURCE_PATH}/PipeAddress.h
+        ${SOURCE_PATH}/UnixSocketAddress.cpp
+        ${SOURCE_PATH}/UnixSocketAddress.h)
+
+set(WX_FILES
+        ${SOURCE_PATH}/UserInterface.cpp
+        ${SOURCE_PATH}/UserInterface.h
+        ${SOURCE_PATH}/UserInterfaceApp.cpp
+        ${SOURCE_PATH}/UserInterfaceApp.h
+        ${SOURCE_PATH}/UserInterfaceClient.cpp
+        ${SOURCE_PATH}/UserInterfaceCollector.cpp
+        ${SOURCE_PATH}/UserInterfaceDistributor.cpp
+        ${SOURCE_PATH}/UserInterfaceGenerated.cpp
+        ${SOURCE_PATH}/UserInterfaceGenerated.h)
+
+include_directories(${SOURCE_PATH})
+
+#add_executable(Bankor ${FILES} ${WX_FILES})
+add_executable(Bankor ${FILES})
+
+#find_package(Threads REQUIRED)
+#find_package(Json REQUIRED)
+
+#find_package(wxWidgets COMPONENTS core base REQUIRED)
+#target_link_libraries(Bankor ${wxWidgets_LIBRARIES})

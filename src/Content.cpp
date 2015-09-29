@@ -27,7 +27,7 @@ void Content::setValid(bool valid) {
 
 FileContent::FileContent() {
 
-	bzero(mMD5, MD5_DIGEST_LENGTH);
+	memset(mMD5, 0, MD5_DIGEST_LENGTH);
 	setValid(false);
 	mFlaggedToSent = true;
 	mPath = "";
@@ -170,7 +170,7 @@ ExecutorContent::ExecutorContent(const char *line) {
 
 	setValid(true);
 
-	mExec = line;
+	exec = line;
 }
 
 CONTENT_TYPES ExecutorContent::getType() {
@@ -178,11 +178,11 @@ CONTENT_TYPES ExecutorContent::getType() {
 }
 
 std::string ExecutorContent::getExec() {
-	return mExec;
+	return exec;
 }
 
 void ExecutorContent::setExec(const std::string &exec) {
-	mExec = exec;
+	this->exec = exec;
 }
 
 
@@ -195,8 +195,8 @@ std::string ExecutorContent::getParsed(void *pRule) {
 	int cmdIndex = 0;
 	RULE_TYPES cmdType = RULE_FILES;
 
-	for (uint32_t i = 0; i < mExec.size(); i++) {
-		switch(mExec.at(i)) {
+	for (uint32_t i = 0; i < exec.size(); i++) {
+		switch(exec[i]) {
 			case '$':
 				if (!cmdMode) {
 					cmdMode = true;
@@ -231,7 +231,7 @@ std::string ExecutorContent::getParsed(void *pRule) {
 			case '8':
 			case '9':
 				if (cmdMode) {
-					cmdIndex = cmdIndex * 10 + (mExec.at(i) - '0');
+					cmdIndex = cmdIndex * 10 + (exec[i] - '0');
 					break;
 				}
 				//no break
@@ -242,7 +242,7 @@ std::string ExecutorContent::getParsed(void *pRule) {
 				}
 				//no break
 			default:
-				parsed += mExec.at(i);
+				parsed += exec[i];
 				break;
 
 		}
@@ -271,10 +271,10 @@ bool ExecutorContent::parseCommand(std::string &parsed, void *pRule, int cmdType
 		if (content != nullptr) {
 			switch(content->getParamType()) {
 				case PARAM_LONG:
-					parsed += std::to_string(content->getParam().latom);
-					break;
+                    parsed += content->getParam().latom;
+                    break;
 				case PARAM_DOUBLE:
-					parsed += std::to_string(content->getParam().datom);
+					parsed += content->getParam().datom;
 					break;
 				case PARAM_STRING:
 					parsed += content->getParam().sPtr;

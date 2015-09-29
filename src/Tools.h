@@ -7,7 +7,6 @@
 #define __Tools_H_
 
 #include "Log.h"
-#include <sys/time.h>
 
 class Tools {
 public:

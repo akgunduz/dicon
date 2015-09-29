@@ -6,8 +6,6 @@
 #ifndef __Content_H_
 #define __Content_H_
 
-#include <iosfwd>
-#include <string>
 #include "Common.h"
 
 #define BUFFER_SIZE 512
@@ -73,7 +71,7 @@ public:
 };
 
 class ExecutorContent : public Content {
-	std::string mExec;
+	std::string exec;
 	bool parseCommand(std::string&, void *, int, int);
 public:
 	ExecutorContent(){};

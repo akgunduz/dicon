@@ -27,11 +27,9 @@ bool UnixSocket::init(uint32_t interfaceIndex) {
 		return false;
 	}
 
-    address = new UnixSocketAddress(0);
-
 	setAddress(interfaceIndex);
 
-    sockaddr_un serverAddress = ((UnixSocketAddress *) address)->getUnixAddress();
+    sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
 
 	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(serverAddress.sun_path);
 
@@ -134,16 +132,16 @@ void *UnixSocket::runAccepter(void *arg) {
 
 	struct Argument *argument = (struct Argument *) arg;
 
-	Message *msg = new Message(argument->interface->rootPath);
+	Message *msg = new Message(argument->_interface->rootPath);
 	if (msg->readFromStream(argument->var.acceptSocket)) {
-		argument->interface->push(MESSAGE_RECEIVE, new UnixSocketAddress(msg->getOwnerAddress()), msg);
+		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
 
 	delete argument;
 	return nullptr;
 }
 
-void UnixSocket::runSender(Address* target, Message *msg) {
+void UnixSocket::runSender(long target, Message *msg) {
 
 	int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (clientSocket < 0) {
@@ -153,7 +151,7 @@ void UnixSocket::runSender(Address* target, Message *msg) {
 
 	LOG_T("Socket sender %d is opened !!!", clientSocket);
 
-    sockaddr_un clientAddress = ((UnixSocketAddress *) target)->getUnixAddress();
+    sockaddr_un clientAddress = UnixSocketAddress::getUnixAddress(target);
 
 	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
 
@@ -165,7 +163,7 @@ void UnixSocket::runSender(Address* target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->setOwnerAddress(address->getAddress());
+	msg->setOwnerAddress(address);
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
@@ -180,7 +178,7 @@ UnixSocket::~UnixSocket() {
 
 void UnixSocket::setAddress(uint32_t index) {
 
-	address->set((((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++);
+	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++;
 }
 
 INTERFACES UnixSocket::getType() {
@@ -202,7 +200,7 @@ std::vector<long> UnixSocket::getAddressList() {
 	std::string path1 = "";
 
 	path1 = UNIXSOCKET_FILE_PREFIX;
-	path1.append(address->getString());
+	path1.append(Address::getString(address));
 	path1.append(UNIXSOCKET_FILE_SUFFIX);
 
 	dirent *entry;

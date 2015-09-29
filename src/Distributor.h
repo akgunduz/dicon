@@ -6,7 +6,6 @@
 #ifndef DISTRIBUTOR_H
 #define	DISTRIBUTOR_H
 
-#include <atomic>
 #include "Client.h"
 #include "Connector.h"
 #include "Tools.h"
@@ -28,27 +27,27 @@ private:
 
 	DiffTime collStartTime;
 
-	static bool receiveCB(void *, Address*, Message *);
+	static bool receiveCB(void *, long, Message *);
 
 public:
 
 	Distributor(uint32_t, uint32_t, const std::string &, double);
 
 	virtual ~Distributor();
-	Address* getAddress(HOST);
+	long getAddress(HOST);
 	INTERFACES getInterfaceType(HOST);
 
-	static bool timeoutCallback(Connector *, Address*, Address*);
+	static bool timeoutCallback(Connector *, long, long);
 
 	bool reset();
 
-	bool send2ClientMsg(Address*, uint8_t);
-	bool send2CollectorMsg(Address*, uint8_t);
+	bool send2ClientMsg(long, uint8_t);
+	bool send2CollectorMsg(long, uint8_t);
 	static bool sendWakeupMessage(Connector *);
 	bool sendWakeupMessagesAll();
 
-	bool processCollectorMsg(Address*, Message *);
-	bool processClientMsg(Address*, Message *);
+	bool processCollectorMsg(long, Message *);
+	bool processClientMsg(long, Message *);
 
 	std::string getRootPath();
 };

@@ -3,8 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <sys/stat.h>
-#include <dirent.h>
 #include "Console.h"
 
 bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
@@ -59,7 +57,7 @@ void Console::clientRemoveDir(const char *dirpath) {
 	while ((entry = readdir(dir)) != nullptr) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
 			snprintf(path, (size_t) PATH_MAX, "%s/%s", dirpath, entry->d_name);
-			if (entry->d_type == DT_DIR) {
+            if (entry->d_type == DT_DIR) {
 				clientRemoveDir(path);
 			} else {
 				unlink(path);
@@ -160,12 +158,12 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 
 		switch(content->getParamType()) {
 			case PARAM_LONG:
-				LOG_S("Client Parameter --> Type : %s, Value : %s",
-						sParamTypes[content->getParamType()], std::to_string(content->getParam().latom).c_str());
+				LOG_S("Client Parameter --> Type : %s, Value : %ld",
+						sParamTypes[content->getParamType()], content->getParam().latom);
 				break;
 			case PARAM_DOUBLE:
-				LOG_S("Client Parameter --> Type : %s, Value : %s",
-						sParamTypes[content->getParamType()], std::to_string(content->getParam().datom).c_str());
+				LOG_S("Client Parameter --> Type : %s, Value : %lf",
+						sParamTypes[content->getParamType()], content->getParam().datom);
 				break;
 			case PARAM_STRING:
 				LOG_S("Client Parameter --> Type : %s, Value : %s",

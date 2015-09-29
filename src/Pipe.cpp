@@ -26,8 +26,6 @@ bool Pipe::init(uint32_t interfaceIndex) {
 	}
 	LOG_T("Pipe receiver %d is opened !!!", desc[1]);
 
-	address = new PipeAddress(0);
-
 	setAddress(interfaceIndex);
 
 	if (fcntl(desc[0], F_SETFL, O_NONBLOCK) == -1) {
@@ -69,7 +67,7 @@ void Pipe::runReceiver() {
 
 			Message *msg = new Message(rootPath);
 			if (msg->readFromStream(desc[0])) {
-				push(MESSAGE_RECEIVE, new PipeAddress(msg->getOwnerAddress()), msg);
+				push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 			}
 		}
 
@@ -88,20 +86,20 @@ void Pipe::runReceiver() {
 	}
 }
 
-void Pipe::runSender(Address* target, Message *msg) {
+void Pipe::runSender(long target, Message *msg) {
 
 	if (target <= 0) {
 		return;
 	}
 
-	msg->setOwnerAddress(address->getAddress());
-	msg->writeToStream((int)target->getAddress());
+	msg->setOwnerAddress(address);
+	msg->writeToStream((int)target);
 
 }
 
 void Pipe::setAddress(uint32_t index) {
 
-	address->set((long) desc[1]);
+	address = (long) desc[1];
 
 }
 

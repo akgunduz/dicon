@@ -18,21 +18,21 @@ class Collector {
 	std::map<long , Rule*> rules;
 	std::string rootPath;
 	InterfaceCallback *callback;
-	Address* distributorAddress;
+	long distributorAddress;
 
-	static bool receiveCB(void *, Address*, Message *);
+	static bool receiveCB(void *, long, Message *);
 
-	bool processDistributorMsg(Address* address, Message *msg);
-	bool processClientMsg(Address* address, Message *msg);
+	bool processDistributorMsg(long address, Message *msg);
+	bool processClientMsg(long address, Message *msg);
 
-	bool send2DistributorMsg(Address*, int);
-	bool send2ClientMsg(Address*, int);
+	bool send2DistributorMsg(long, int);
+	bool send2ClientMsg(long, int);
 
 public:
 	Collector(uint32_t, uint32_t, const std::string &rootPath);
 
 	virtual ~Collector();
-	Address* getAddress(HOST);
+	long getAddress(HOST);
 	INTERFACES getInterfaceType(HOST);
 
 	bool reset();

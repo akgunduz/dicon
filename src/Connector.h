@@ -14,11 +14,11 @@
 
 class Connector {
 	bool initialized = false;
-	Interface* interface;
+	Interface* _interface;
 public:
 	Connector(uint32_t, const InterfaceCallback *, const std::string &);
-	bool send(Address*, Message*);
-	Address* getAddress();
+	bool send(long, Message*);
+	long getAddress();
 	INTERFACES getInterfaceType();
 	Interface* getInterface();
 	int getNotifier(NOTIFIER_TYPE);

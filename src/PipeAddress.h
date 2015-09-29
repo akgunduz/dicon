@@ -9,17 +9,7 @@
 #include "Common.h"
 #include "Address.h"
 
-class PipeAddress : public Address {
-
-public:
-
-    PipeAddress(long address);
-    ~PipeAddress(){}
-
-    INTERFACES getInterface();
-    std::string getString();
-
-    void set(long address);
+class PipeAddress {
 
 };
 

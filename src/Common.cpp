@@ -3,11 +3,9 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <ifaddrs.h>
 #include "Common.h"
-#include "Tools.h"
 
-std::vector<ConnInterface> ConnInterface::mInterfaceList;
+std::vector<ConnInterface> ConnInterface::interfaceList;
 
 const char* sStates[] = {
 		"IDLE",
@@ -28,15 +26,15 @@ const char* sInterfaces[] = {
 };
 
 
-uint32_t ConnInterface::initInterfaces() {
+int ConnInterface::initInterfaces() {
 
-	struct ifaddrs * ifAddrStruct = nullptr;
-	struct ifaddrs * loop = nullptr;
+	struct ifaddrs* ifAddrStruct = nullptr;
+    struct ifaddrs* loop = nullptr;
 
-	getifaddrs(&ifAddrStruct);
-	if (ifAddrStruct == nullptr) {
-		return 0;
-	}
+    getifaddrs(&ifAddrStruct);
+    if (ifAddrStruct == nullptr) {
+        return 0;
+    }
 
 	for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
 
@@ -47,7 +45,7 @@ uint32_t ConnInterface::initInterfaces() {
 					strncmp(loop->ifa_name, "br", 2) == 0 ||
 					strncmp(loop->ifa_name, "lo", 2) == 0) {
 
-				mInterfaceList.push_back(ConnInterface(loop->ifa_name,
+				interfaceList.push_back(ConnInterface(loop->ifa_name,
 						ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
 						ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)));
 
@@ -55,69 +53,67 @@ uint32_t ConnInterface::initInterfaces() {
 		}
 	};
 
-	mInterfaceList.push_back(ConnInterface("us", INTERFACE_UNIXSOCKET));
-	mInterfaceList.push_back(ConnInterface("pp", INTERFACE_PIPE));
+	interfaceList.push_back(ConnInterface("us", INTERFACE_UNIXSOCKET));
+	interfaceList.push_back(ConnInterface("pp", INTERFACE_PIPE));
 
-	freeifaddrs(ifAddrStruct);
+    freeifaddrs(ifAddrStruct);
 
-	return (uint32_t)mInterfaceList.size();
+	return (int)interfaceList.size();
 }
 
 
-uint32_t ConnInterface::getInterfaceCount() {
+int ConnInterface::getInterfaceCount() {
 
-	return (uint32_t)mInterfaceList.size();
+	return (int)interfaceList.size();
 
 }
 
 ConnInterface* ConnInterface::getInterface(uint32_t index) {
 
-	return &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	return &interfaceList[index >= interfaceList.size() ?
+						   interfaceList.size() - 1 : index];
 
 }
 
 std::string ConnInterface::getInterfaceName(uint32_t index) {
 
-	ConnInterface *ci = &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	ConnInterface *ci = &interfaceList[index >= interfaceList.size() ?
+									   interfaceList.size() - 1 : index];
 
-	return ci->mName;
+	return ci->name;
 }
 
 INTERFACES ConnInterface::getInterfaceType(uint32_t index) {
 
-	ConnInterface *ci = &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	ConnInterface *ci = &interfaceList[index >= interfaceList.size() ? interfaceList.size() - 1 : index];
 
-	return ci->mType;
+	return ci->type;
 
 }
 
 bool ConnInterface::isInterfaceLoopback(uint32_t index) {
 
-	ConnInterface *ci = &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	ConnInterface *ci = &interfaceList[index >= interfaceList.size() ? interfaceList.size() - 1 : index];
 
-	return strncmp(ci->mName.c_str(), "lo", 2) == 0;
+	return strncmp(ci->name.c_str(), "lo", 2) == 0;
 
 }
 
-uint32_t ConnInterface::getNetInterfaceNetwork(long refAddress) {
+long ConnInterface::getNetInterfaceNetwork(long refAddress) {
 
 	uint32_t refIPAddress = (uint32_t)(refAddress & IPADDRESS_MASK);
 
-	for (uint32_t i = 0; i < mInterfaceList.size(); i++) {
+	for (uint32_t i = 0; i < interfaceList.size(); i++) {
 
-		ConnInterface *ci = &mInterfaceList[i];
+		ConnInterface *ci = &interfaceList[i];
 
-		if (ci->mType != INTERFACE_NET) {
+		if (ci->type != INTERFACE_NET) {
 			continue;
 		}
 
-		if (refIPAddress == ci->mIPAddress) {
+		if (refIPAddress == ci->ipAddress) {
 
-			return ci->mIPAddress & ci->mNetmask;
+			return ci->ipAddress & ci->netmask;
 
 		}
 	}
@@ -125,41 +121,40 @@ uint32_t ConnInterface::getNetInterfaceNetwork(long refAddress) {
 	return 0;
 }
 
-uint32_t ConnInterface::getNetInterfaceInfo(uint32_t index, uint32_t &startIP) {
+long ConnInterface::getNetInterfaceInfo(int index, long &startIP) {
 
-	ConnInterface *ci = &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	ConnInterface *ci = &interfaceList[index >= interfaceList.size() ? interfaceList.size() - 1 : index];
 
-	if (ci->mType != INTERFACE_NET) {
+	if (ci->type != INTERFACE_NET) {
 		return 0;
 	}
 
-	uint32_t network = ci->mIPAddress & ci->mNetmask;
+	long network = ci->ipAddress & ci->netmask;
 
 	startIP = network + 1;
 
-	return (uint32_t) ~ci->mNetmask - 1;
+	return (long) ~ci->netmask - 1;
 }
 
-uint32_t ConnInterface::getNetInterfaceInfo(long refAddress, uint32_t &startIP) {
+long ConnInterface::getNetInterfaceInfo(long refAddress, long &startIP) {
 
-	uint32_t refIPAddress = (uint32_t)(refAddress & IPADDRESS_MASK);
+	long refIPAddress = (long)(refAddress & IPADDRESS_MASK);
 
-	for (uint32_t i = 0; i < mInterfaceList.size(); i++) {
+	for (uint32_t i = 0; i < interfaceList.size(); i++) {
 
-		ConnInterface *ci = &mInterfaceList[i];
+		ConnInterface *ci = &interfaceList[i];
 
-		if (ci->mType != INTERFACE_NET) {
+		if (ci->type != INTERFACE_NET) {
 			continue;
 		}
 
-		if (refIPAddress == ci->mIPAddress) {
+		if (refIPAddress == ci->ipAddress) {
 
-			uint32_t network = ci->mIPAddress & ci->mNetmask;
+			long network = ci->ipAddress & ci->netmask;
 
 			startIP = network + 1;
 
-			return (uint32_t) ~ci->mNetmask - 1;
+			return ~ci->netmask - 1;
 		}
 	}
 
@@ -168,14 +163,14 @@ uint32_t ConnInterface::getNetInterfaceInfo(long refAddress, uint32_t &startIP) 
 	return 0;
 }
 
-uint32_t ConnInterface::getNetInterfaceAddress(uint32_t index) {
+long ConnInterface::getNetInterfaceAddress(int index) {
 
-	ConnInterface *ci = &mInterfaceList[index >= mInterfaceList.size() ?
-			mInterfaceList.size() - 1 : index];
+	ConnInterface *ci = &interfaceList[index >= interfaceList.size() ?
+			interfaceList.size() - 1 : index];
 
-	if (ci->mType != INTERFACE_NET) {
+	if (ci->type != INTERFACE_NET) {
 		return 0;
 	}
 
-	return ci->mIPAddress;
+	return ci->ipAddress;
 }

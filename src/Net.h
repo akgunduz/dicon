@@ -22,7 +22,7 @@ private :
 	bool init(uint32_t);
 	void runReceiver();
 	static void *runAccepter(void *);
-	void runSender(Address*, Message *);
+	void runSender(long, Message *);
 	void setAddress(uint32_t);
 	INTERFACES getType();
 

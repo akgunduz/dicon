@@ -7,44 +7,45 @@
 #ifndef __Common_H_
 #define __Common_H_
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <netinet/in.h>
-#include <sys/errno.h>
-#include <sys/fcntl.h>
-#include <json-c/json.h>
-
+#include <limits.h>
 #include <iostream>
 #include <iosfwd>
 #include <fstream>
 #include <string>
-
 #include <assert.h>
-
 #include <cstdarg>
 #include <cstring>
-
 #include <list>
 #include <vector>
 #include <queue>
 #include <map>
-
 #include <complex>
 #include <stdexcept>
-
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <strings.h>
-#include <pthread.h>
-#include <fcntl.h>
 #include <sys/errno.h>
-#include <stdexcept>
 #include <ifaddrs.h>
-#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/time.h>
 #include <dirent.h>
+#include <json-c/json.h>
+
+#ifdef __WXWIDGETS__
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+#include <wx/app.h>
+#include <wx/event.h>
+#endif
 
 #ifdef __APPLE__
 #include <CommonCrypto/CommonDigest.h>
@@ -75,8 +76,6 @@
 #define LOOPBACK_RANGE 256
 #define LOOPBACK_ADDRESS 0x7F000001
 #define IPADDRESS_MASK 0xFFFFFFFF
-#define IS_LOOPBACK(address) (((address) & IPADDRESS_MASK) == LOOPBACK_ADDRESS)
-#define GEN_ADDRESS(ip, port) ((((long)ip) & IPADDRESS_MASK) | (((long)port) << 40))
 
 enum HOST {
 	HOST_DISTRIBUTOR,
@@ -128,28 +127,28 @@ enum UI_UPDATE {
 
 class ConnInterface {
 public:
-	std::string mName;
-	INTERFACES mType;
-	uint32_t mIPAddress;
-	uint32_t mNetmask;
-	static std::vector<ConnInterface>mInterfaceList;
+	std::string name;
+	INTERFACES type;
+	long ipAddress;
+	long netmask;
+	static std::vector<ConnInterface>interfaceList;
 
-	ConnInterface(std::string name, INTERFACES type) :
-			mName(name), mType(type), mIPAddress(0), mNetmask(0)  {};
-	ConnInterface(std::string name, uint32_t ipAddress, uint32_t netmask) :
-			mName(name), mType(INTERFACE_NET), mIPAddress(ipAddress), mNetmask(netmask) {};
+	ConnInterface(std::string _name, INTERFACES _type) :
+			name(_name), type(_type), ipAddress(0), netmask(0)  {};
+	ConnInterface(std::string _name, long _ipAddress, long _netmask) :
+			name(_name), type(INTERFACE_NET), ipAddress(ipAddress), netmask(_netmask) {};
 
 	static ConnInterface* getInterface(uint32_t);
 	static std::string getInterfaceName(uint32_t);
 	static INTERFACES getInterfaceType(uint32_t);
 	static bool isInterfaceLoopback(uint32_t);
 
-	static uint32_t initInterfaces();
-	static uint32_t getInterfaceCount();
-	static uint32_t getNetInterfaceAddress(uint32_t);
-	static uint32_t getNetInterfaceNetwork(long);
-	static uint32_t getNetInterfaceInfo(uint32_t, uint32_t&);
-	static uint32_t getNetInterfaceInfo(long, uint32_t&);
+	static int initInterfaces();
+	static int getInterfaceCount();
+	static long getNetInterfaceAddress(int);
+	static long getNetInterfaceNetwork(long);
+	static long getNetInterfaceInfo(int, long&);
+	static long getNetInterfaceInfo(long, long&);
 };
 
 class EventData {

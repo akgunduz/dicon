@@ -47,7 +47,7 @@ Collector::Collector(uint32_t distInterfaceIndex, uint32_t clientInterfaceIndex,
 	}
 
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR)->getAddress(), getAddress(HOST_CLIENT)->getAddress());
+	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_CLIENT));
 
 	distributorAddress = 0;
 	this->rootPath = rootPath;
@@ -83,7 +83,7 @@ INTERFACES Collector::getInterfaceType(HOST host) {
 
 }
 
-Address* Collector::getAddress(HOST host) {
+long Collector::getAddress(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
 		return distributorConnector->getAddress();
@@ -94,26 +94,26 @@ Address* Collector::getAddress(HOST host) {
 }
 
 
-bool Collector::receiveCB(void *arg, Address* address, Message *msg) {
+bool Collector::receiveCB(void *arg, long address, Message *msg) {
 
 	Collector *collector = (Collector *) arg;
 
 	switch(msg->getOwner()) {
 
 		case HOST_DISTRIBUTOR:
-			if (collector->distributorConnector->getInterfaceType() == address->getInterface()) {
+			if (collector->distributorConnector->getInterfaceType() == Address::getInterface(address)) {
 				collector->processDistributorMsg(address, msg);
 			}
 			break;
 
 		case HOST_CLIENT:
-			if (collector->clientConnector->getInterfaceType() == address->getInterface()) {
+			if (collector->clientConnector->getInterfaceType() == Address::getInterface(address)) {
 				collector->processClientMsg(address, msg);
 			}
 			break;
 
 		default:
-			LOG_W("Wrong message received : %d from %s, disgarding", msg->getOwner(), address->getString().c_str());
+			LOG_W("Wrong message received : %d from %s, disgarding", msg->getOwner(), Address::getString(address).c_str());
 			delete msg;
 			return false;
 
@@ -121,7 +121,7 @@ bool Collector::receiveCB(void *arg, Address* address, Message *msg) {
 	return true;
 }
 
-bool Collector::processDistributorMsg(Address* address, Message *msg) {
+bool Collector::processDistributorMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -134,39 +134,39 @@ bool Collector::processDistributorMsg(Address* address, Message *msg) {
 			LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"WAKEUP\" msg from distributor: %s", address->getString().c_str());
+					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
 
 			status = send2DistributorMsg(address, MSGTYPE_READY);
 			break;
 
 		case MSGTYPE_CLIENT: {
 
-            Address *clientAddress = new NetAddress(msg->getVariant(0));
+            long clientAddress = msg->getVariant(0);
 
-			if (clientAddress->getAddress() == 0) {
+			if (clientAddress == 0) {
 				LOG_W("No available client right now.");
 				status = false;
 				LOG_U(UI_UPDATE_COLL_LOG,
-						"\"CLIENT\" msg from distributor: %s, no Available Client", address->getString().c_str());
+						"\"CLIENT\" msg from distributor: %s, no Available Client", Address::getString(address).c_str());
 				break;
 			}
 
-			rules[clientAddress->getAddress()] = new Rule(getRootPath(), RULE_FILE);
-			if (!rules[clientAddress->getAddress()]) {
+			rules[clientAddress] = new Rule(getRootPath(), RULE_FILE);
+			if (!rules[clientAddress]) {
 				LOG_E("Could not create a rule from path : %s", getRootPath().c_str());
 				return false;
 			}
 
 			LOG_T("New Rule created from path : %s", getRootPath().c_str());
 
-			LOG_U(UI_UPDATE_COLL_FILE_LIST, rules[clientAddress->getAddress()]);
-			LOG_U(UI_UPDATE_COLL_PARAM_LIST, rules[clientAddress->getAddress()]);
-			LOG_U(UI_UPDATE_COLL_EXEC_LIST, rules[clientAddress->getAddress()]);
+			LOG_U(UI_UPDATE_COLL_FILE_LIST, rules[clientAddress]);
+			LOG_U(UI_UPDATE_COLL_PARAM_LIST, rules[clientAddress]);
+			LOG_U(UI_UPDATE_COLL_EXEC_LIST, rules[clientAddress]);
 
-			LOG_U(UI_UPDATE_COLL_ATT_CLIENT_ADDRESS, clientAddress->getAddress());
+			LOG_U(UI_UPDATE_COLL_ATT_CLIENT_ADDRESS, clientAddress);
 			LOG_U(UI_UPDATE_COLL_LOG,
                   "\"CLIENT\" msg from distributor: %s, available client: %s",
-                  address->getString().c_str(), clientAddress->getString().c_str());
+				  Address::getString(address).c_str(), Address::getString(clientAddress).c_str());
 
 			status = send2ClientMsg(clientAddress, MSGTYPE_RULE);
 			break;
@@ -179,7 +179,7 @@ bool Collector::processDistributorMsg(Address* address, Message *msg) {
 	return status;
 }
 
-bool Collector::processClientMsg(Address* address, Message *msg) {
+bool Collector::processClientMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -188,9 +188,9 @@ bool Collector::processClientMsg(Address* address, Message *msg) {
 		case MSGTYPE_MD5: {
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
-                  address->getString().c_str(), msg->mMD5List.size());
+				  Address::getString(address).c_str(), msg->mMD5List.size());
 
-			std::map<long, Rule *>::iterator ruleItr = rules.find(address->getAddress());
+			std::map<long, Rule *>::iterator ruleItr = rules.find(address);
 			if (ruleItr == rules.end()) {
 				LOG_W("Could not find a rule for address : %lld", address);
 				break;
@@ -224,7 +224,7 @@ bool Collector::processClientMsg(Address* address, Message *msg) {
 	return status;
 }
 
-bool Collector::send2DistributorMsg(Address* address, int type) {
+bool Collector::send2DistributorMsg(long address, int type) {
 
 	Message *msg = new Message(HOST_COLLECTOR, type, rootPath);
 
@@ -234,21 +234,21 @@ bool Collector::send2DistributorMsg(Address* address, int type) {
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"READY\" msg sent to distributor: %s",
-                  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_CLIENT:
 			msg->setPriority(PRIORITY_2);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"CLIENT\" msg sent to distributor: %s",
-                  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_TIME:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"TIME\" msg sent to distributor: %s",
-                  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		default:
@@ -261,11 +261,11 @@ bool Collector::send2DistributorMsg(Address* address, int type) {
 
 }
 
-bool Collector::send2ClientMsg(Address* address, int type) {
+bool Collector::send2ClientMsg(long address, int type) {
 
 	Message *msg = new Message(HOST_COLLECTOR, type, rootPath);
 
-	std::map<long, Rule*>::iterator ruleItr = rules.find(address->getAddress());
+	std::map<long, Rule*>::iterator ruleItr = rules.find(address);
 	if (ruleItr == rules.end()) {
 		LOG_W("Could not find a rule for address : %lld", address);
 		delete msg;
@@ -280,7 +280,7 @@ bool Collector::send2ClientMsg(Address* address, int type) {
 			msg->setRule(STREAM_RULE, ruleItr->second);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"RULE\" msg sent to client: %s",
-                  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_BINARY:
@@ -288,7 +288,7 @@ bool Collector::send2ClientMsg(Address* address, int type) {
 			msg->setRule(STREAM_BINARY, ruleItr->second);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"BINARY\" msg sent to client: %s with \"%d\" file binary",
-                  address->getString().c_str(), ruleItr->second->getFlaggedFileCount());
+				  Address::getString(address).c_str(), ruleItr->second->getFlaggedFileCount());
 			break;
 
 		default:

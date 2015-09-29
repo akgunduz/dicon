@@ -10,25 +10,15 @@
 
 class Address {
 
-protected:
+    Address(){};
 
-    long address;
+    static std::string getStdString(long address);
 
 public:
 
-    Address();
-    virtual ~Address(){};
+    static INTERFACES getInterface(long address);
+    static std::string getString(long address);
 
-    Address(long address);
-
-    virtual INTERFACES getInterface() = 0;
-    virtual std::string getString() = 0;
-
-    long getAddress();
-    void set(long address);
-
-    static Address* newInstance(INTERFACES, long refAddress = 0);
-    static Address* newInstance(long);
 };
 
 

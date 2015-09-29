@@ -6,7 +6,6 @@
 #ifndef CLIENTMANAGER_H
 #define	CLIENTMANAGER_H
 
-#include <atomic>
 #include "Client.h"
 #include "Connector.h"
 #include "Tools.h"
@@ -14,7 +13,7 @@
 #define CHECK_INTERVAL 600
 #define CLIENT_TIMEOUT 300
 
-typedef bool (*fTimeoutCB)(Connector *, Address* , Address*);
+typedef bool (*fTimeoutCB)(Connector *, long , long);
 typedef bool (*fWakeupCB)(Connector *);
 
 struct ClientMap {
@@ -52,7 +51,7 @@ private:
 	pthread_cond_t condClientChecker;
 	pthread_t threadClientChecker;
 
-	bool initClientTimer(ClientMap *, Address*);
+	bool initClientTimer(ClientMap *, long);
 	bool stopClientTimer(ClientMap *);
 	static void *runClientTimer(void *);
 	static void *runClientChecker(void *);
@@ -67,13 +66,13 @@ public:
 	bool initClientChecker();
 
 	bool resetDiffTimes();
-	bool setClientIdle(Address*, double);
-	bool setClientBusy(Address*);
-	bool setClientRemove(Address*);
-	bool setClientValidate(Address*);
-	bool addClient(Address*);
+	bool setClientIdle(long, double);
+	bool setClientBusy(long);
+	bool setClientRemove(long);
+	bool setClientValidate(long);
+	bool addClient(long);
 
-	Address* getIdleClient(Address*);
+	long getIdleClient(long);
 
 	void clear();
 
@@ -82,9 +81,9 @@ public:
 struct ClientManagerArgument {
 	Connector *clientConnector;
 	ClientMap *clientMap;
-	Address* collectorAddress;
+	long collectorAddress;
 	fTimeoutCB timeoutCB;
-	ClientManagerArgument(Connector *cc, fTimeoutCB cb, ClientMap *c, Address* a) :
+	ClientManagerArgument(Connector *cc, fTimeoutCB cb, ClientMap *c, long a) :
 			clientConnector(cc), timeoutCB(cb), clientMap(c), collectorAddress(a) {}
 };
 

@@ -23,27 +23,27 @@ private:
 	std::string mRootPath;
 	InterfaceCallback *mCallback;
 	bool mRegistered;
-	Address* mDistributorAddress;
-	Address* mCollectorAddress;
+	long mDistributorAddress;
+	long mCollectorAddress;
 
-	static bool receiveCB(void *, Address *, Message *);
+	static bool receiveCB(void *, long, Message *);
 
 public:
 	Client(uint32_t, uint32_t, const std::string &rootPath);
 
 	virtual ~Client();
-	Address* getAddress(HOST);
+	long getAddress(HOST);
 	INTERFACES getInterfaceType(HOST);
 
 	bool processRule();
 	void processExecutor(std::string);
 	bool processMD5();
 
-	bool send2DistributorMsg(Address*, uint8_t);
-	bool send2CollectorMsg(Address*, uint8_t);
+	bool send2DistributorMsg(long, uint8_t);
+	bool send2CollectorMsg(long, uint8_t);
 
-	bool processCollectorMsg(Address*, Message *);
-	bool processDistributorMsg(Address*, Message *);
+	bool processCollectorMsg(long, Message *);
+	bool processDistributorMsg(long, Message *);
 
 	std::string getRootPath();
 

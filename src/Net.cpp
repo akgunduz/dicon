@@ -3,16 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <strings.h>
-#include <pthread.h>
-#include <fcntl.h>
-#include <sys/errno.h>
-#include <stdexcept>
-#include <ifaddrs.h>
 #include "Net.h"
 #include "NetAddress.h"
 
@@ -47,8 +37,6 @@ bool Net::init(uint32_t interfaceIndex) {
 	}
 	LOG_T("Socket set option is OK!!!");
 
-    address = new NetAddress(0);
-
 	int tryCount = 0;
 
 	do {
@@ -56,7 +44,7 @@ bool Net::init(uint32_t interfaceIndex) {
         tryCount++;
 
 		setAddress(interfaceIndex);
-        struct sockaddr_in serverAddress = ((NetAddress *) address)->getInetAddress();
+        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
 
 		if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
 			LOG_E("Socket bind with err : %d!!!", errno);
@@ -130,7 +118,7 @@ void Net::runReceiver() {
 
 			Argument *argument = new Argument(this);
 			argument->var.acceptSocket = acceptfd;
-			argument->address = Address::newInstance((ntohl(cli_addr.sin_addr.s_addr)));
+			argument->address = (ntohl(cli_addr.sin_addr.s_addr));
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
@@ -160,16 +148,16 @@ void *Net::runAccepter(void *arg) {
 
 	struct Argument *argument = (struct Argument *) arg;
 
-	Message *msg = new Message(argument->interface->rootPath);
+	Message *msg = new Message(argument->_interface->rootPath);
 	if (msg->readFromStream(argument->var.acceptSocket)) {
-		argument->interface->push(MESSAGE_RECEIVE, new NetAddress(msg->getOwnerAddress()), msg);
+		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
 
 	delete argument;
 	return nullptr;
 }
 
-void Net::runSender(Address *target, Message *msg) {
+void Net::runSender(long target, Message *msg) {
 
 	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket < 0) {
@@ -179,7 +167,7 @@ void Net::runSender(Address *target, Message *msg) {
 
 	LOG_T("Socket sender %d is opened !!!", clientSocket);
 
-    sockaddr_in clientAddress = ((NetAddress *) target)->getInetAddress();
+    sockaddr_in clientAddress = NetAddress::getInetAddress(target);
 
 	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
 		LOG_E("Socket can not connect!!!");
@@ -189,7 +177,7 @@ void Net::runSender(Address *target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->setOwnerAddress(address->getAddress());
+	msg->setOwnerAddress(address);
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
@@ -200,7 +188,7 @@ void Net::runSender(Address *target, Message *msg) {
 
 void Net::setAddress(uint32_t index) {
 
-	((NetAddress*)address)->set(ConnInterface::getNetInterfaceAddress(index), DEFAULT_PORT + gOffset++);
+    address = NetAddress::parseAddress(ConnInterface::getNetInterfaceAddress(index), DEFAULT_PORT + gOffset++);
 
 }
 
@@ -220,13 +208,13 @@ std::vector<long> Net::getAddressList() {
 
 	std::vector<long> list;
 
-	if (((NetAddress*)address)->isLoopback()) {
+	if (NetAddress::isLoopback(address)) {
 
 		for (uint32_t i = 0; i < LOOPBACK_RANGE; i++) {
 
-			long destAddress = GEN_ADDRESS(address->getAddress(), DEFAULT_PORT + i);
+			long destAddress = NetAddress::parseAddress(address, DEFAULT_PORT + i);
 
-			if (destAddress != address->getAddress()) {
+			if (destAddress != address) {
 
 				list.push_back(destAddress);
 
@@ -236,17 +224,17 @@ std::vector<long> Net::getAddressList() {
 
 	} else {
 
-		uint32_t startIP = 0;
+		long startIP = 0;
 
-		uint32_t range = ConnInterface::getNetInterfaceInfo(address->getAddress(), startIP);
+		long range = ConnInterface::getNetInterfaceInfo(address, startIP);
 
-		uint32_t ownAddress = (uint32_t)(address->getAddress() & IPADDRESS_MASK);
+		long ownAddress = (long)(address & IPADDRESS_MASK);
 
 		for (uint32_t i = 0; i < range; i++) {
 
 			if (startIP != ownAddress) {
 
-				long destAddress = GEN_ADDRESS(startIP, DEFAULT_PORT);
+				long destAddress = NetAddress::parseAddress(startIP, DEFAULT_PORT);
 
 				list.push_back(destAddress);
 

@@ -3,8 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
-#include <iosfwd>
 #include "Common.h"
 
 #ifndef __APPLICATION_H_

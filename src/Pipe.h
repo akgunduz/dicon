@@ -17,7 +17,7 @@ private :
 	int desc[2];
 	bool init(uint32_t);
 	void runReceiver();
-	void runSender(Address*, Message *);
+	void runSender(long, Message *);
 	void setAddress(uint32_t);
 	INTERFACES getType();
 public :

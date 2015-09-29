@@ -62,15 +62,15 @@ bool Interface::initThread() {
 
 void *Interface::runReceiver(void *arg) {
 
-	Interface *interface = (Interface *)arg;
-	interface->runReceiver();
+	Interface *_interface = (Interface *)arg;
+	_interface->runReceiver();
 	return nullptr;
 
 }
 
-bool Interface::senderCB(void *arg, Address *address, Message *msg) {
+bool Interface::senderCB(void *arg, long address, Message *msg) {
 
-	struct Argument *argument = new struct Argument((Interface*)arg);
+	Argument *argument = new Argument((Interface*)arg);
 	argument->var.msg = msg;
 	argument->address = address;
 
@@ -87,8 +87,8 @@ bool Interface::senderCB(void *arg, Address *address, Message *msg) {
 
 void* Interface::runSender(void *arg) {
 
-	struct Argument *argument = (struct Argument *) arg;
-	argument->interface->runSender(argument->address, argument->var.msg);
+	Argument *argument = (Argument *) arg;
+	argument->_interface->runSender(argument->address, argument->var.msg);
 	delete argument;
 	return nullptr;
 
@@ -98,13 +98,12 @@ Interface::~Interface() {
 
 	close(notifierPipe[1]);
 	close(notifierPipe[0]);
-	delete address;
 
 }
 
-bool Interface::push(MESSAGE_DIRECTION type, Address *target, Message *msg) {
+bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
-	if (target->getInterface() == getType()) {
+	if (Address::getInterface(target) == getType()) {
 
 		scheduler->push(type, target, msg);
 		return true;
@@ -120,7 +119,7 @@ int Interface::getNotifier(NOTIFIER_TYPE type) {
 	return notifierPipe[type];
 }
 
-Address* Interface::getAddress() {
+long Interface::getAddress() {
 
 	if (!initialized) {
 		return 0;

@@ -3,10 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <arpa/inet.h>
-#include <limits.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include "Tools.h"
 
 std::string Tools::getIPStr(long ip) {
@@ -21,7 +17,7 @@ std::string Tools::getIPStr(long ip) {
 	}
 
 	std::string sIP = cIP;
-	sIP += ":" + std::to_string(ip >> 40);
+	sIP += ":" + (ip >> 40);
 	return sIP;
 }
 
@@ -67,21 +63,22 @@ std::string Tools::getMD5Str(uint8_t *md5) {
 }
 
 void Tools::mkpath(const char *path) {
-        char tmp[PATH_MAX];
-        char *p = NULL;
-        size_t len;
-        
-        const char *pos = strrchr(path, '/');
+    char tmp[PATH_MAX];
+    char *p = NULL;
+    size_t len;
 
-        snprintf(tmp, pos - path + 1, "%s", path);
+    const char *pos = strrchr(path, '/');
 
-        for(p = tmp + 1; *p; p++)
-                if(*p == '/') {
-                        *p = 0;
-                        mkdir(tmp, S_IRWXU);
-                        *p = '/';
-                }
-        mkdir(tmp, S_IRWXU);
+    snprintf(tmp, pos - path + 1, "%s", path);
+
+    for(p = tmp + 1; *p; p++) {
+        if (*p == '/') {
+            *p = 0;
+            mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+    }
+    mkdir(tmp, S_IRWXU);
 }
 
 std::string Tools::getAddressStr(long address) {
@@ -89,7 +86,7 @@ std::string Tools::getAddressStr(long address) {
 	if (interfaces == INTERFACE_NET) {
 		return getIPStr(address);
 	}
-	return std::to_string(address);
+	return "" + address;
 }
 
 

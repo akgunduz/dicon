@@ -1,8 +1,6 @@
 #ifndef __UserInterface__
 #define __UserInterface__
 
-#include <wx/app.h>
-#include <wx/event.h>
 #include "UserInterfaceGenerated.h"
 #include "Distributor.h"
 #include "Collector.h"

@@ -162,10 +162,10 @@ void UserInterface::clientUpdateParamList(wxCommandEvent &event) {
 		clientParamList->SetItem(index, 0, sParamTypes[content->getParamType()]);
 		switch(content->getParamType()) {
 			case PARAM_LONG:
-				clientParamList->SetItem(index, 1, std::to_string(content->getParam().latom));
+				clientParamList->SetItem(index, 1, wxString::Format(wxT("%i"), content->getParam().latom));
 				break;
 			case PARAM_DOUBLE:
-				clientParamList->SetItem(index, 1, std::to_string(content->getParam().datom));
+				clientParamList->SetItem(index, 1, wxString::Format(wxT("%f"), content->getParam().datom));
 				break;
 			case PARAM_STRING:
 				clientParamList->SetItem(index, 1, content->getParam().sPtr);

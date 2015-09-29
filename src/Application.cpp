@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 				LOG_S("Listing Interfaces .....");
 				for (uint32_t i = 0; i < ConnInterface::getInterfaceCount(); i++) {
 					ConnInterface *ci = ConnInterface::getInterface(i);
-					LOG_S("%s : %s", sInterfaces[ci->mType], ci->mName.c_str());
+					LOG_S("%s : %s", sInterfaces[ci->type], ci->name.c_str());
 				}
 				break;
 			case 'd':

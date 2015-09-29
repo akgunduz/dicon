@@ -30,7 +30,7 @@ ClientManager::~ClientManager() {
 	}
 }
 
-bool ClientManager::initClientTimer(ClientMap *clientMap, Address* collectorAddress) {
+bool ClientManager::initClientTimer(ClientMap *clientMap, long collectorAddress) {
 
 	if (clientConnector == nullptr) {
 		LOG_I("Client Connector is not initiated");
@@ -100,7 +100,7 @@ void *ClientManager::runClientTimer(void *arg) {
 	if (res == ETIMEDOUT) {
 		LOG_E("Could not get a response for a specific time");
 		argument->timeoutCB(argument->clientConnector,
-				Address::newInstance(argument->clientMap->address), argument->collectorAddress);
+				argument->clientMap->address, argument->collectorAddress);
 
 	}
 
@@ -190,18 +190,18 @@ bool ClientManager::stopClientChecker() {
 	return true;
 }
 
-bool ClientManager::setClientIdle(Address* address, double totalTime) {
+bool ClientManager::setClientIdle(long address, double totalTime) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address->getAddress());
+		ClientMap *clientMap = clients.at(address);
 		clientMap->state = IDLE;
-		LOG_T("Client at address : %s switch to state : %s", address->getString().c_str(), sStates[IDLE]);
+		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
 
 		if (clientMap->diffTime.isInitiated()) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"Client at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
-				  address->getString().c_str(), clientMap->diffTime.stop(), totalTime);
+				  Address::getString(address).c_str(), clientMap->diffTime.stop(), totalTime);
 		}
 
 	} catch (const std::out_of_range e) {
@@ -214,32 +214,32 @@ bool ClientManager::setClientIdle(Address* address, double totalTime) {
 
 }
 
-bool ClientManager::setClientValidate(Address* address) {
+bool ClientManager::setClientValidate(long address) {
 
-	std::map<long, ClientMap*>::iterator i = clients.find(address->getAddress());
+	std::map<long, ClientMap*>::iterator i = clients.find(address);
 	if (i == clients.end()) {
 		addClient(address);
 		return false;
 	}
 
-	LOG_T("Client at address : %s is Alive", address->getString().c_str());
+	LOG_T("Client at address : %s is Alive", Address::getString(address).c_str());
 	return true;
 
 }
 
-bool ClientManager::setClientBusy(Address* address) {
+bool ClientManager::setClientBusy(long address) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address->getAddress());
+		ClientMap *clientMap = clients.at(address);
 		stopClientTimer(clientMap);
 		clientMap->state = BUSY;
 		clientMap->usage++;
 		clientMap->diffTime.start();
-		LOG_T("Client at address : %s switch to state : %s", address->getString().c_str(), sStates[BUSY]);
+		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", address->getString().c_str());
+		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
 		return false;
 	}
 
@@ -247,21 +247,21 @@ bool ClientManager::setClientBusy(Address* address) {
 
 }
 
-bool ClientManager::setClientRemove(Address* address) {
+bool ClientManager::setClientRemove(long address) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address->getAddress());
-		clients.erase(address->getAddress());
+		ClientMap *clientMap = clients.at(address);
+		clients.erase(address);
 		delete clientMap;
 
 		readyBackup = (uint32_t) fmin(totalBackup, readyBackup + 1);
 
 		LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-		LOG_T("Client at address %s removed from the list", address->getString().c_str());
+		LOG_T("Client at address %s removed from the list", Address::getString(address).c_str());
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", address->getString().c_str());
+		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
 		return false;
 	}
 
@@ -269,21 +269,21 @@ bool ClientManager::setClientRemove(Address* address) {
 
 }
 
-bool ClientManager::addClient(Address* address) {
+bool ClientManager::addClient(long address) {
 
-	clients[address->getAddress()] = new ClientMap(IDLE, 0, address->getAddress());
+	clients[address] = new ClientMap(IDLE, 0, address);
 
 	totalBackup = clients.size() == 1 ? 0 : (uint32_t) ceil(clients.size() * backupRate);
 
 	readyBackup = 0;
 
 	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-	LOG_T("Client at address : %s added to the list", address->getString().c_str());
+	LOG_T("Client at address : %s added to the list", Address::getString(address).c_str());
 
 	return true;
 }
 
-Address* ClientManager::getIdleClient(Address* collectorAddress) {
+long ClientManager::getIdleClient(long collectorAddress) {
 
 	ClientMap *leastUsedClient = nullptr;
 
@@ -312,18 +312,16 @@ Address* ClientManager::getIdleClient(Address* collectorAddress) {
 
 		initClientTimer(leastUsedClient, collectorAddress);
 
-		Address *address = Address::newInstance(leastUsedClient->address);
-
 		LOG_T("Client at address : %s returned to collector",
-			  address->getString().c_str());
+			  Address::getString(leastUsedClient->address).c_str());
 
-		return address;
+		return leastUsedClient->address;
 
 	} else {
 		LOG_W("No available client right now.");
 	}
 
-	return nullptr;
+	return 0;
 }
 
 bool ClientManager::resetDiffTimes() {

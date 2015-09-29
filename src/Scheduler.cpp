@@ -59,7 +59,7 @@ Scheduler::~Scheduler() {
 
 }
 
-bool Scheduler::push(MESSAGE_DIRECTION type, Address* target, Message *msg) {
+bool Scheduler::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
 	if (pthread_mutex_lock(&mMutex) != 0) { //replaced with trylock
 		LOG_E("Can not push, system is BUSY!!!");
@@ -105,7 +105,7 @@ void *Scheduler::run(void *arg) {
 			itr->msg->iteratePriority();
 		}
 
-		struct Capsule refCapsule = *(ref);
+		Capsule refCapsule = *(ref);
 		scheduler->mMessages.erase(ref);
 
 		pthread_mutex_unlock(&scheduler->mMutex);
@@ -114,7 +114,7 @@ void *Scheduler::run(void *arg) {
             break;
         }
 
-		int interfaceType = refCapsule.type + refCapsule.address->getInterface();
+		int interfaceType = refCapsule.type + Address::getInterface(refCapsule.address);
 
 		scheduler->mCB[interfaceType]->cb(scheduler->mCB[interfaceType]->arg, refCapsule.address, refCapsule.msg);
 	}

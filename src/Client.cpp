@@ -3,9 +3,7 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <sys/wait.h>
 #include "Client.h"
-#include "Tools.h"
 
 Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const std::string &rootPath) {
 
@@ -46,7 +44,7 @@ Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const s
 
 	}
 
-	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR)->getAddress(), getAddress(HOST_COLLECTOR)->getAddress());
+	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
 
 	mDistributorAddress = 0;
@@ -79,7 +77,7 @@ INTERFACES Client::getInterfaceType(HOST host) {
 
 }
 
-Address* Client::getAddress(HOST host) {
+long Client::getAddress(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
 		return mDistributorConnector->getAddress();
@@ -89,34 +87,34 @@ Address* Client::getAddress(HOST host) {
 
 }
 
-bool Client::receiveCB(void *arg, Address* address, Message *msg) {
+bool Client::receiveCB(void *arg, long address, Message *msg) {
 
 	Client *client = (Client *) arg;
 
 	switch(msg->getOwner()) {
 
 		case HOST_DISTRIBUTOR:
-			if (client->mDistributorConnector->getInterfaceType() == address->getInterface()) {
+			if (client->mDistributorConnector->getInterfaceType() == Address::getInterface(address)) {
 				client->processDistributorMsg(address, msg);
 			}
 			break;
 
 		case HOST_COLLECTOR:
-			if (client->mCollectorConnector->getInterfaceType() == address->getInterface()) {
+			if (client->mCollectorConnector->getInterfaceType() == Address::getInterface(address)) {
 				client->processCollectorMsg(address, msg);
 			}
 			break;
 
 		default:
 			LOG_W("Wrong message received with owner ID: %d from %s, disgarding!!!",
-					msg->getOwner(), address->getString().c_str());
+					msg->getOwner(), Address::getString(address).c_str());
 			delete msg;
 			break;
 	}
 	return true;
 }
 
-bool Client::processCollectorMsg(Address* address, Message *msg) {
+bool Client::processCollectorMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -128,7 +126,7 @@ bool Client::processCollectorMsg(Address* address, Message *msg) {
 			status = send2DistributorMsg(mDistributorAddress, MSGTYPE_BUSY);
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"RULE\" msg from collector: %s", address->getString().c_str());
+					"\"RULE\" msg from collector: %s", Address::getString(address).c_str());
 
 			mRule = msg->mRule;
 
@@ -153,7 +151,7 @@ bool Client::processCollectorMsg(Address* address, Message *msg) {
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s with \"%d\" file binary",
-				  address->getString().c_str(), 0/*msg->getReceivedBinaryCount()*/);
+				  Address::getString(address).c_str(), 0/*msg->getReceivedBinaryCount()*/);
 
 			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
 
@@ -171,7 +169,7 @@ bool Client::processCollectorMsg(Address* address, Message *msg) {
 	return status;
 }
 
-bool Client::processDistributorMsg(Address* address, Message *msg) {
+bool Client::processDistributorMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -182,7 +180,7 @@ bool Client::processDistributorMsg(Address* address, Message *msg) {
 			mDistributorAddress = address;
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"WAKEUP\" msg from distributor: %s", address->getString().c_str());
+					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
 
 			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
 			break;
@@ -195,7 +193,7 @@ bool Client::processDistributorMsg(Address* address, Message *msg) {
 	return status;
 }
 
-bool Client::send2DistributorMsg(Address* address, uint8_t type) {
+bool Client::send2DistributorMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
 
@@ -205,21 +203,21 @@ bool Client::send2DistributorMsg(Address* address, uint8_t type) {
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"READY\" msg sent to distributor: %s",
-				  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_ALIVE:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"ALIVE\" msg sent to distributor: %s",
-				  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_BUSY:
 			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BUSY\" msg sent to distributor: %s",
-				  address->getString().c_str());
+				  Address::getString(address).c_str());
 			break;
 
 		default:
@@ -231,7 +229,7 @@ bool Client::send2DistributorMsg(Address* address, uint8_t type) {
 
 }
 
-bool Client::send2CollectorMsg(Address* address, uint8_t type) {
+bool Client::send2CollectorMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
 
@@ -242,7 +240,7 @@ bool Client::send2CollectorMsg(Address* address, uint8_t type) {
 			msg->setRule(STREAM_MD5ONLY, mRule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-				  address->getString().c_str(), mRule->getFlaggedFileCount());
+				  Address::getString(address).c_str(), mRule->getFlaggedFileCount());
 			break;
 
 		default:
@@ -326,7 +324,9 @@ bool Client::processRule() {
 			std::string cmd = content->getParsed(mRule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"Executing %s command", cmd.c_str());
-
+#ifdef CYGWIN
+			LOG_I("Simulating fork in Windows!!!");
+#else
 			pid_t pid = fork();
 
 			if (pid == -1) {
@@ -341,7 +341,7 @@ bool Client::processRule() {
 				//child part
 				processExecutor(cmd);
 			}
-
+#endif
 		}
 
 		return true;
@@ -354,6 +354,9 @@ bool Client::processRule() {
 		LOG_U(UI_UPDATE_CLIENT_LOG,
 				"Executing %s command", cmd.c_str());
 
+#ifdef CYGWIN
+		LOG_I("Simulating fork in Windows!!!");
+#else
 		pid_t pid = fork();
 
 		if (pid == -1) {
@@ -365,9 +368,12 @@ bool Client::processRule() {
 			processExecutor(cmd);
 
 		}
-
+#endif
 	}
 
+#ifdef CYGWIN
+    LOG_I("Simulating wait in Windows!!!");
+#else
 	while (true) {
 
 		pid_t pid = wait(&status);
@@ -383,7 +389,7 @@ bool Client::processRule() {
 			}
 		}
 	}
-
+#endif
 	return true;
 }
 

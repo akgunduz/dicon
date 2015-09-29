@@ -20,17 +20,17 @@ enum MESSAGE_DIRECTION {
 	MESSAGE_SEND
 };
 
-typedef bool (*fSchedulerCB)(void*, Address*, Message *);
+typedef bool (*fSchedulerCB)(void*, long, Message *);
 
 class Capsule {
 
 public:
 
 	MESSAGE_DIRECTION type;
-	Address *address;
+	long address;
 	Message *msg;
 
-	Capsule(MESSAGE_DIRECTION type, Address *address, Message *msg) {
+	Capsule(MESSAGE_DIRECTION type, long address, Message *msg) {
 		this->type = type;
 		this->address = address;
 		this->msg = msg;
@@ -49,7 +49,7 @@ private:
 	pthread_mutex_t mMutex;
 	pthread_cond_t mCond;
 	pthread_t mThread;
-	std::list<struct Capsule> mMessages;
+	std::list<Capsule> mMessages;
 	int mCapacity;
 	bool mInitialized = false;
 	const InterfaceCallback* mCB[MAX_INTERFACE];
@@ -58,7 +58,7 @@ public:
 	Scheduler(int);
 	void setReceiveCB(const InterfaceCallback *);
 	void setSendCB(uint16_t, const InterfaceCallback *);
-	bool push(MESSAGE_DIRECTION type, Address*, Message *data);
+	bool push(MESSAGE_DIRECTION type, long, Message *data);
 	void end();
     virtual ~Scheduler();
 private:

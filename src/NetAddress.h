@@ -11,36 +11,17 @@
 #define LOOPBACK_ADDRESS 0x7F000001
 #define IPADDRESS_MASK 0xFFFFFFFF
 
-class NetAddress : public Address {
-
-    long debug_ip;
-    int debug_port;
-
-    sockaddr_in inet_addr;
+class NetAddress {
 
 public:
-
-    NetAddress(long address);
-    NetAddress(long ip, int port);
-    NetAddress(const std::string &ip, int port);
-
-    ~NetAddress(){}
-    void init();
-
-    virtual void set(long address);
-    void set(long ip, int port);
-    void set(const std::string &ip, int port);
-
-    std::string getString();
-    long parseIP(const std::string &ip);
-    long getIP();
-    void setIP(const std::string &ip);
-    std::string getIPstr();
-    int getPort();
-    void setPort(int port);
-    INTERFACES getInterface();
-    sockaddr_in getInetAddress();
-    bool isLoopback();
+    static std::string getString(long);
+    static long getIP(long);
+    static std::string getIPstr(long);
+    static int getPort(long);
+    static sockaddr_in getInetAddress(long);
+    static bool isLoopback(long);
+    static long parseIP(const std::string &ip);
+    static long parseAddress(long ip, int port);
 };
 
 

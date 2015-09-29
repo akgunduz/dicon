@@ -5,7 +5,6 @@
 #ifndef __Interface_H_
 #define __Interface_H_
 
-#include <sys/un.h>
 #include "Scheduler.h"
 #include "Message.h"
 #include "Address.h"
@@ -25,11 +24,11 @@ public:
 		Message *msg;
 	} var;
 
-	Address *address;
+	long address;
 
-	Interface *interface;
+	Interface *_interface;
 
-	Argument(Interface *c) : interface(c){
+	Argument(Interface *c) : _interface(c){
 
 	}
 };
@@ -45,16 +44,16 @@ class Interface {
 private :
 	static void* runReceiver(void *);
 	static void* runSender(void *);
-	static bool senderCB(void *, Address*, Message *);
+	static bool senderCB(void *, long, Message *);
 protected :
 	bool initialized = false;
-	Address *address;
+	long address;
 	Scheduler *scheduler;
 	pthread_t thread;
 	int notifierPipe[2];
 	virtual bool init(uint32_t) = 0;
 	virtual void runReceiver() = 0;
-	virtual void runSender(Address*, Message *) = 0;
+	virtual void runSender(long, Message *) = 0;
 
 	bool initThread();
 	void end();
@@ -63,10 +62,10 @@ protected :
 
 public :
 	std::string rootPath;
-	bool push(MESSAGE_DIRECTION, Address*, Message *);
+	bool push(MESSAGE_DIRECTION, long, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
 	virtual INTERFACES getType() = 0;
-	virtual Address* getAddress();
+	virtual long getAddress();
 	virtual std::vector<long> getAddressList() = 0;
 	virtual ~Interface();
 };

@@ -10,21 +10,8 @@
 
 class UnixSocketAddress  : public Address {
 
-    sockaddr_un unix_addr;
-
 public:
-
-    UnixSocketAddress(long address);
-    ~UnixSocketAddress(){}
-
-    void init();
-
-    INTERFACES getInterface();
-    std::string getString();
-
-    void set(long address);
-
-    sockaddr_un getUnixAddress();
+    static sockaddr_un getUnixAddress(long);
 
 };
 
