@@ -88,22 +88,22 @@ void UserInterface::onCollInitClick( wxCommandEvent& event ) {
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	collDistInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_1));
-	collClientInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_2));
+	collDistInterfaceAddress->SetLabel(Address::getString(data->data64_1));
+	collClientInterfaceAddress->SetLabel(Address::getString(data->data64_2));
 
 }
 
 void UserInterface::collUpdateAttachedDistAddress(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	collDistAddress->SetLabel(Tools::getAddressStr(data->data64_1));
+	collDistAddress->SetLabel(Address::getString(data->data64_1));
 
 }
 
 void UserInterface::collUpdateAttachedClientAddress(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	collClientAddress->SetLabel(Tools::getAddressStr(data->data64_1));
+	collClientAddress->SetLabel(Address::getString(data->data64_1));
 
 }
 

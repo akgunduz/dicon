@@ -2,28 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mavx")
-
-#set(CMAKE_EXE_LINKER_FLAGS " /bin/cygjson-c-2.dll -lssl -lcrypto")
-
-if (APPLE)
-
-    set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
-    add_definitions(-D__APPLE__)
-
-elseif(CYGWIN)
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0
-        -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
-    add_definitions(-DUNICODE -DCYGWIN)
-
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /bin/cygjson-c-2.dll /bin/cygcrypto-1.0.0.dll
-        -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_webview-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0
-        -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0")
-
-endif()
-
-#add_definitions(-D__WXWIDGETS__ -D__IDE__)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native")
 add_definitions(-D__IDE__)
 
 set(FILES
@@ -91,11 +70,31 @@ set(WX_FILES
 
 include_directories(${SOURCE_PATH})
 
-#add_executable(Bankor ${FILES} ${WX_FILES})
-add_executable(Bankor ${FILES})
+if (APPLE)
 
-#find_package(Threads REQUIRED)
-#find_package(Json REQUIRED)
+    set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+    add_definitions(-DAPPLE -D__WXWIDGETS__)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/Cellar/wxmac/3.0.1/lib/wx/include/osx_cocoa-unicode-3.0 \
+        -I/usr/local/Cellar/wxmac/3.0.1/include/wx-3.0 -D_FILE_OFFSET_BITS=64 \
+        -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__")
+    set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/Cellar/wxmac/3.0.1/lib -framework IOKit -framework Carbon -framework Cocoa \
+        -framework System \
+        -lwx_osx_cocoau_xrc-3.0 -lwx_osx_cocoau_webview-3.0 -lwx_osx_cocoau_html-3.0 \
+        -lwx_osx_cocoau_qa-3.0 -lwx_osx_cocoau_adv-3.0 -lwx_osx_cocoau_core-3.0 \
+        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto")
 
-#find_package(wxWidgets COMPONENTS core base REQUIRED)
-#target_link_libraries(Bankor ${wxWidgets_LIBRARIES})
+    add_executable(Bankor ${FILES} ${WX_FILES})
+
+elseif(CYGWIN)
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0
+        -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
+    add_definitions(-DUNICODE -DCYGWIN)
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /bin/cygjson-c-2.dll /bin/cygcrypto-1.0.0.dll
+        -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_webview-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0
+        -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0")
+
+    add_executable(Bankor ${FILES})
+
+endif()

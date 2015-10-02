@@ -196,7 +196,7 @@ CMD_DEPENDENCIES = $(patsubst $(SOURCE_PATH)/%.cpp, $(CMD_OBJECTS_PATH)/%.d, $(C
 
 
 
-UI_CC = g++
+UI_CC = /usr/local/bin/clang-omp++
 
 UI_OBJECTS_PATH = Objects/ui
 

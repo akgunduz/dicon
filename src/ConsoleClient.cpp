@@ -101,8 +101,8 @@ void Console::clientUpdateAddresses(ConsoleEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
 	LOG_S("Client Interface Addresses --> Distributor : %s, Collector : %s",
-			Tools::getAddressStr(data->data64_1).c_str(),
-			Tools::getAddressStr(data->data64_2).c_str());
+		  Address::getString(data->data64_1).c_str(),
+		  Address::getString(data->data64_2).c_str());
 
 }
 
@@ -116,7 +116,7 @@ void Console::clientUpdateState(ConsoleEvent &event) {
 void Console::clientUpdateAttachedCollAddress(ConsoleEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	LOG_S("Client Attached Collector : %s", Tools::getAddressStr(data->data64_1).c_str());
+	LOG_S("Client Attached Collector : %s", Address::getString(data->data64_1).c_str());
 
 }
 

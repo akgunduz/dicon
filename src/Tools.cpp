@@ -5,22 +5,6 @@
 
 #include "Tools.h"
 
-std::string Tools::getIPStr(long ip) {
-	struct in_addr addr;
-	addr.s_addr = htonl((uint32_t)ip);
-	char cIP[INET_ADDRSTRLEN];
-
-	const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
-	if (!dst) {
-		LOG_E("Ip is invalid");
-		return "";
-	}
-
-	std::string sIP = cIP;
-	sIP += ":" + (ip >> 40);
-	return sIP;
-}
-
 std::string Tools::hex2str(const uint8_t *in, int len) {
 	static const char* const lut = "0123456789ABCDEF";
 	std::string output;
@@ -79,29 +63,6 @@ void Tools::mkpath(const char *path) {
         }
     }
     mkdir(tmp, S_IRWXU);
-}
-
-std::string Tools::getAddressStr(long address) {
-	INTERFACES interfaces = getInterface(address);
-	if (interfaces == INTERFACE_NET) {
-		return getIPStr(address);
-	}
-	return "" + address;
-}
-
-
-INTERFACES Tools::getInterface(long address) {
-
-	if (address > 0xFFFFFF) {
-		return INTERFACE_NET;
-
-	} else if (address > 1000) {
-		return INTERFACE_UNIXSOCKET;
-
-	}
-
-	return INTERFACE_PIPE;
-
 }
 
 void DiffTime::start() {

@@ -12,5 +12,5 @@ sockaddr_un UnixSocketAddress::getUnixAddress(long address) {
     sprintf(unix_addr.sun_path, "%s%s%d%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
             (uint32_t)address, UNIXSOCKET_FILE_SUFFIX);
     unlink(unix_addr.sun_path);
-
+    return unix_addr;
 }

@@ -88,8 +88,8 @@ void UserInterface::onClientInitClick( wxCommandEvent& event ) {
 void UserInterface::clientUpdateAddresses(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	clientDistInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_1));
-	clientCollInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_2));
+	clientDistInterfaceAddress->SetLabel(Address::getString(data->data64_1));
+	clientCollInterfaceAddress->SetLabel(Address::getString(data->data64_2));
 
 }
 
@@ -103,7 +103,7 @@ void UserInterface::clientUpdateState(wxCommandEvent &event) {
 void UserInterface::clientUpdateAttachedCollAddress(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	clientCollAddress->SetLabel(Tools::getAddressStr(data->data64_1));
+	clientCollAddress->SetLabel(Address::getString(data->data64_1));
 
 }
 

@@ -88,8 +88,8 @@ void UserInterface::onDistInitClick( wxCommandEvent& event ) {
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	distCollInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_1));
-	distClientInterfaceAddress->SetLabel(Tools::getAddressStr(data->data64_2));
+	distCollInterfaceAddress->SetLabel(Address::getString(data->data64_1));
+	distClientInterfaceAddress->SetLabel(Address::getString(data->data64_2));
 
 }
 
@@ -122,11 +122,11 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 		i = distCollList->InsertItem(distCollList->GetItemCount(), 0);
 	}
 
-	distCollList->SetItem(i, 0, Tools::getAddressStr(data->data64_1));
+	distCollList->SetItem(i, 0, Address::getString(data->data64_1));
 	distCollList->SetItem(i, 2, wxString::Format(wxT("%i"), data->data64_1));
 
 	if (data->data64_2 > 0) {
-		distCollList->SetItem(i, 1, Tools::getAddressStr(data->data64_2));
+		distCollList->SetItem(i, 1, Address::getString(data->data64_2));
 	} else {
 		distCollList->SetItem(i, 1, "No Available Client!!");
 	}
@@ -153,7 +153,7 @@ void UserInterface::distAddtoClientList(wxCommandEvent &event) {
 		i = distClientList->InsertItem(distClientList->GetItemCount(), 0);
 	}
 
-	distClientList->SetItem(i, 0, Tools::getAddressStr(data->data64_1));
+	distClientList->SetItem(i, 0, Address::getString(data->data64_1));
 	distClientList->SetItem(i, 1, sStates[data->data64_2]);
 	distClientList->SetItem(i, 2, wxString::Format(wxT("%i"), data->data64_1));
 

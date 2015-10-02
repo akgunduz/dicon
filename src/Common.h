@@ -47,7 +47,7 @@
 #include <wx/event.h>
 #endif
 
-#ifdef __APPLE__
+#ifdef APPLE
 #include <CommonCrypto/CommonDigest.h>
 #include "Common_apple.h"
 
@@ -136,7 +136,7 @@ public:
 	ConnInterface(std::string _name, INTERFACES _type) :
 			name(_name), type(_type), ipAddress(0), netmask(0)  {};
 	ConnInterface(std::string _name, long _ipAddress, long _netmask) :
-			name(_name), type(INTERFACE_NET), ipAddress(ipAddress), netmask(_netmask) {};
+			name(_name), type(INTERFACE_NET), ipAddress(_ipAddress), netmask(_netmask) {};
 
 	static ConnInterface* getInterface(uint32_t);
 	static std::string getInterfaceName(uint32_t);
