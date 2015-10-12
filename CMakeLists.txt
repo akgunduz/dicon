@@ -74,10 +74,10 @@ if (APPLE)
 
     set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
     add_definitions(-DAPPLE -D__WXWIDGETS__)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/Cellar/wxmac/3.0.1/lib/wx/include/osx_cocoa-unicode-3.0 \
-        -I/usr/local/Cellar/wxmac/3.0.1/include/wx-3.0 -D_FILE_OFFSET_BITS=64 \
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 \
+        -I/usr/local/include/wx-3.0 -D_FILE_OFFSET_BITS=64 \
         -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__")
-    set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/Cellar/wxmac/3.0.1/lib -framework IOKit -framework Carbon -framework Cocoa \
+    set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -framework IOKit -framework Carbon -framework Cocoa \
         -framework System \
         -lwx_osx_cocoau_xrc-3.0 -lwx_osx_cocoau_webview-3.0 -lwx_osx_cocoau_html-3.0 \
         -lwx_osx_cocoau_qa-3.0 -lwx_osx_cocoau_adv-3.0 -lwx_osx_cocoau_core-3.0 \
