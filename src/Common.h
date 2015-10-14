@@ -73,9 +73,10 @@
 #define RULE_FILE "Rule.json"
 
 #define SHUTDOWN_NOTIFIER 'Q'
-#define LOOPBACK_RANGE 256
+/*#define LOOPBACK_RANGE 256
 #define LOOPBACK_ADDRESS 0x7F000001
 #define IPADDRESS_MASK 0xFFFFFFFF
+#define DEFAULT_PORT 61001*/
 
 enum HOST {
 	HOST_DISTRIBUTOR,
@@ -123,32 +124,6 @@ enum UI_UPDATE {
 	UI_UPDATE_CLIENT_LOG,
 
 	UI_UPDATE_MAX
-};
-
-class ConnInterface {
-public:
-	std::string name;
-	INTERFACES type;
-	long ipAddress;
-	long netmask;
-	static std::vector<ConnInterface>interfaceList;
-
-	ConnInterface(std::string _name, INTERFACES _type) :
-			name(_name), type(_type), ipAddress(0), netmask(0)  {};
-	ConnInterface(std::string _name, long _ipAddress, long _netmask) :
-			name(_name), type(INTERFACE_NET), ipAddress(_ipAddress), netmask(_netmask) {};
-
-	static ConnInterface* getInterface(uint32_t);
-	static std::string getInterfaceName(uint32_t);
-	static INTERFACES getInterfaceType(uint32_t);
-	static bool isInterfaceLoopback(uint32_t);
-
-	static int initInterfaces();
-	static int getInterfaceCount();
-	static long getNetInterfaceAddress(int);
-	static long getNetInterfaceNetwork(long);
-	static long getNetInterfaceInfo(int, long&);
-	static long getNetInterfaceInfo(long, long&);
 };
 
 class EventData {

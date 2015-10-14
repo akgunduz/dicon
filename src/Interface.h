@@ -8,6 +8,7 @@
 #include "Scheduler.h"
 #include "Message.h"
 #include "Address.h"
+#include "ConnectInterface.h"
 
 class Interface;
 
@@ -19,19 +20,17 @@ enum NOTIFIER_TYPE {
 class Argument {
 
 public:
-	union {
-		int acceptSocket;
-		Message *msg;
-	} var;
 
-	long address;
+	int acceptSocket = 0;
+	Message *msg = nullptr;
+
+	long address = 0;
 
 	Interface *_interface;
 
-	Argument(Interface *c) : _interface(c){
-
-	}
+	Argument(Interface *c) : _interface(c){}
 };
+
 /*
 class InitArgument {
 public:
@@ -51,17 +50,17 @@ protected :
 	Scheduler *scheduler;
 	pthread_t thread;
 	int notifierPipe[2];
-	virtual bool init(uint32_t) = 0;
+	virtual bool init(int) = 0;
 	virtual void runReceiver() = 0;
 	virtual void runSender(long, Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(INTERFACES type, const InterfaceCallback *, const std::string &);
-	virtual void setAddress(uint32_t) = 0;
+	Interface(INTERFACES type, const InterfaceCallback *, const char *);
+	virtual void setAddress(int) = 0;
 
 public :
-	std::string rootPath;
+	char rootPath[PATH_MAX];
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
 	virtual INTERFACES getType() = 0;

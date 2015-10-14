@@ -5,51 +5,16 @@
 
 #include "Distributor.h"
 
-Distributor::Distributor(uint32_t collInterfaceIndex,
-		uint32_t clientInterfaceIndex, const std::string &rootPath, double backupRate) {
+Distributor::Distributor(int collectorIndex,
+		int nodeIndex, const char *rootPath, double backupRate) :
+            Component(collectorIndex, nodeIndex, rootPath){
 
-	callback = new InterfaceCallback(receiveCB, this);
-
-	try {
-
-		collectorConnector = new Connector(collInterfaceIndex, callback, rootPath);
-
-	} catch (const std::runtime_error e) {
-
-		LOG_E("Connector Init failed!!!");
-
-		delete callback;
-
-		throw std::runtime_error("Distributor : Connector Init failed!!!");
-	}
-
-	if (collInterfaceIndex != clientInterfaceIndex) {
-
-		try {
-
-			clientConnector = new Connector(clientInterfaceIndex, callback, rootPath);
-
-		} catch (const std::runtime_error e) {
-
-			LOG_E("Connector Init failed!!!");
-
-			delete collectorConnector;
-			delete callback;
-
-			throw std::runtime_error("Distributor : Connector Init failed!!!");
-		}
-
-	} else {
-
-		clientConnector = collectorConnector;
-
-	}
+	this->collectorIndex = 0;
+	this->nodeIndex = 1;
 
 	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_CLIENT));
 
-	this->rootPath = rootPath;
-
-	clientManager = new ClientManager(clientConnector,
+	clientManager = new ClientManager(connectors[nodeIndex],
 			timeoutCallback, sendWakeupMessage, backupRate);
 	clientManager->initClientChecker();
 
@@ -59,31 +24,21 @@ Distributor::Distributor(uint32_t collInterfaceIndex,
 Distributor::~Distributor() {
 
 	delete clientManager;
-
-	if (collectorConnector != clientConnector) {
-		delete clientConnector;
-	}
-
-	delete collectorConnector;
-
-	delete callback;
 }
 
-bool Distributor::receiveCB(void *arg, long address, Message *msg) {
-
-	Distributor *dist = (Distributor *) arg;
+bool Distributor::onReceive(long address, Message *msg) {
 
 	switch(msg->getOwner()) {
 
 		case HOST_CLIENT:
-			if (dist->clientConnector->getInterfaceType() == Address::getInterface(address)) {
-				dist->processClientMsg(address, msg);
+			if (connectors[nodeIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processClientMsg(address, msg);
 			}
 			break;
 
 		case HOST_COLLECTOR:
-			if (dist->collectorConnector->getInterfaceType() == Address::getInterface(address)) {
-				dist->processCollectorMsg(address, msg);
+			if (connectors[collectorIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processCollectorMsg(address, msg);
 			}
 			break;
 
@@ -99,9 +54,9 @@ bool Distributor::receiveCB(void *arg, long address, Message *msg) {
 INTERFACES Distributor::getInterfaceType(HOST host) {
 
 	if (host == HOST_COLLECTOR) {
-		return collectorConnector->getInterfaceType();
+		return connectors[collectorIndex]->getInterfaceType();
 	} else {
-		return clientConnector->getInterfaceType();
+		return connectors[nodeIndex]->getInterfaceType();
 	}
 
 }
@@ -109,9 +64,9 @@ INTERFACES Distributor::getInterfaceType(HOST host) {
 long Distributor::getAddress(HOST host) {
 
 	if (host == HOST_COLLECTOR) {
-		return collectorConnector->getAddress();
+		return connectors[collectorIndex]->getAddress();
 	} else {
-		return clientConnector->getAddress();
+		return connectors[nodeIndex]->getAddress();
 	}
 
 }
@@ -237,7 +192,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 
 bool Distributor::send2ClientMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_DISTRIBUTOR, type, rootPath);
+	Message *msg = new Message(HOST_DISTRIBUTOR, type, getRootPath());
 
 	switch(type) {
 
@@ -253,13 +208,13 @@ bool Distributor::send2ClientMsg(long address, uint8_t type) {
 
 	}
 
-	return clientConnector->send(address, msg);
+	return connectors[nodeIndex]->send(address, msg);
 
 }
 
 bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_DISTRIBUTOR, type, rootPath);
+	Message *msg = new Message(HOST_DISTRIBUTOR, type, getRootPath());
 
 	switch(type) {
 
@@ -305,21 +260,15 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return collectorConnector->send(address, msg);
-
-}
-
-std::string Distributor::getRootPath() {
-
-	return rootPath;
+	return connectors[collectorIndex]->send(address, msg);
 
 }
 
 bool Distributor::sendWakeupMessagesAll() {
 
-	sendWakeupMessage(clientConnector);
-	if (collectorConnector != clientConnector) {
-		sendWakeupMessage(collectorConnector);
+	sendWakeupMessage(connectors[nodeIndex]);
+	if (connectors[collectorIndex] != connectors[nodeIndex]) {
+		sendWakeupMessage(connectors[collectorIndex]);
 	}
 	return true;
 }
@@ -352,6 +301,7 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
 
 		Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
 		msg->setPriority(PRIORITY_1);
+		//LOG_I("\"WAKEUP\" messages sent to : %s", Address::getString(list[i]).c_str());
 		connector->send(list[i], msg);
 
 	}

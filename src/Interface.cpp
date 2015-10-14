@@ -5,7 +5,7 @@
 
 #include "Interface.h"
 
-Interface::Interface(INTERFACES type, const InterfaceCallback *callBack, const std::string &rootPath) {
+Interface::Interface(INTERFACES type, const InterfaceCallback *callBack, const char *rootPath) {
 
 	try {
 
@@ -21,7 +21,7 @@ Interface::Interface(INTERFACES type, const InterfaceCallback *callBack, const s
 	scheduler->setReceiveCB(callBack);
 	scheduler->setSendCB(type, interfaceCallback);
 
-	this->rootPath = rootPath;
+	strcpy(this->rootPath, rootPath);
 }
 
 void Interface::end() {
@@ -71,7 +71,7 @@ void *Interface::runReceiver(void *arg) {
 bool Interface::senderCB(void *arg, long address, Message *msg) {
 
 	Argument *argument = new Argument((Interface*)arg);
-	argument->var.msg = msg;
+	argument->msg = msg;
 	argument->address = address;
 
 	pthread_t thread;
@@ -88,7 +88,7 @@ bool Interface::senderCB(void *arg, long address, Message *msg) {
 void* Interface::runSender(void *arg) {
 
 	Argument *argument = (Argument *) arg;
-	argument->_interface->runSender(argument->address, argument->var.msg);
+	argument->_interface->runSender(argument->address, argument->msg);
 	delete argument;
 	return nullptr;
 

@@ -8,7 +8,7 @@
 
 uint16_t UnixSocket::gOffset = 1001;
 
-UnixSocket::UnixSocket(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
+UnixSocket::UnixSocket(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(INTERFACE_UNIXSOCKET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
@@ -19,7 +19,7 @@ UnixSocket::UnixSocket(uint32_t interfaceIndex, const InterfaceCallback *cb, con
 
 }
 
-bool UnixSocket::init(uint32_t interfaceIndex) {
+bool UnixSocket::init(int interfaceIndex) {
 
 	unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (unixSocket < 0) {
@@ -101,8 +101,8 @@ void UnixSocket::runReceiver() {
 				return;
 			}
 
-			struct Argument *argument = new struct Argument(this);
-			argument->var.acceptSocket = acceptfd;
+			Argument *argument = new Argument(this);
+			argument->acceptSocket = acceptfd;
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
@@ -130,10 +130,10 @@ void UnixSocket::runReceiver() {
 
 void *UnixSocket::runAccepter(void *arg) {
 
-	struct Argument *argument = (struct Argument *) arg;
+	Argument *argument = (Argument *) arg;
 
 	Message *msg = new Message(argument->_interface->rootPath);
-	if (msg->readFromStream(argument->var.acceptSocket)) {
+	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
 
@@ -176,7 +176,7 @@ UnixSocket::~UnixSocket() {
 }
 
 
-void UnixSocket::setAddress(uint32_t index) {
+void UnixSocket::setAddress(int index) {
 
 	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++;
 }

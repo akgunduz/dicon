@@ -51,9 +51,9 @@ void UserInterface::collInit() {
 	uiUpdater[UI_UPDATE_COLL_EXEC_LIST] = &UserInterface::collUpdateExecList;
 	uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
-	for (uint32_t i = 0; i < ConnInterface::getInterfaceCount(); i++) {
-		collDistInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
-		collClientInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
+	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
+		collDistInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+		collClientInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
 	}
 
 }
@@ -63,8 +63,9 @@ void UserInterface::onCollInitClick( wxCommandEvent& event ) {
 	if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
 
 		try {
-			std::string path = std::string(getcwd(nullptr, 0)) + "/" + COLLECTOR_PATH + "/";
-                        mkdir(path.c_str(), 0777);
+			char path[PATH_MAX];
+			sprintf(path, "%s/%s/", getcwd(nullptr, 0), COLLECTOR_PATH);
+			mkdir(path, 0777);
 
 			collObject = new Collector((uint32_t)collDistInterface->GetSelection(),
 					(uint32_t)collClientInterface->GetSelection(), path);

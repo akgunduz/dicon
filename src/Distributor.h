@@ -6,20 +6,17 @@
 #ifndef DISTRIBUTOR_H
 #define	DISTRIBUTOR_H
 
+#include "Component.h"
 #include "Client.h"
 #include "Connector.h"
 #include "Tools.h"
 #include "ClientManager.h"
 
-class Distributor {
+class Distributor : public Component {
 private:
 
-	Connector *collectorConnector;
-	Connector *clientConnector;
-
-	std::string rootPath;
-
-	InterfaceCallback *callback;
+    int collectorIndex;
+    int nodeIndex;
 
 	ClientManager *clientManager;
 
@@ -27,11 +24,11 @@ private:
 
 	DiffTime collStartTime;
 
-	static bool receiveCB(void *, long, Message *);
+	virtual bool onReceive(long, Message *);
 
 public:
 
-	Distributor(uint32_t, uint32_t, const std::string &, double);
+	Distributor(int, int, const char *, double);
 
 	virtual ~Distributor();
 	long getAddress(HOST);
@@ -48,8 +45,6 @@ public:
 
 	bool processCollectorMsg(long, Message *);
 	bool processClientMsg(long, Message *);
-
-	std::string getRootPath();
 };
 
 #endif	/* DISTRIBUTOR_H */

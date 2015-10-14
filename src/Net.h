@@ -12,23 +12,22 @@
 #include "Interface.h"
 #include "Message.h"
 
-#define DEFAULT_PORT 61001
 #define DEFAULT_IPRANGE 100
 #define MAX_SIMUL_CLIENTS 10
 
 class Net : public Interface {
 private :
 	int netSocket;
-	bool init(uint32_t);
+	bool init(int);
 	void runReceiver();
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
-	void setAddress(uint32_t);
+	void setAddress(int);
 	INTERFACES getType();
 
 public :
 	static uint16_t gOffset;
-	Net(uint32_t, const InterfaceCallback *, const std::string &);
+	Net(int, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~Net();
 };

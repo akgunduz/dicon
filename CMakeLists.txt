@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -march=native")
 add_definitions(-D__IDE__)
 
 set(FILES
@@ -19,6 +19,10 @@ set(FILES
         ${SOURCE_PATH}/Common.h
         ${SOURCE_PATH}/Common_apple.h
         ${SOURCE_PATH}/Common_linux.h
+        ${SOURCE_PATH}/Component.cpp
+        ${SOURCE_PATH}/Component.h
+        ${SOURCE_PATH}/ConnectInterface.cpp
+        ${SOURCE_PATH}/ConnectInterface.h
         ${SOURCE_PATH}/Connector.cpp
         ${SOURCE_PATH}/Connector.h
         ${SOURCE_PATH}/Console.cpp
@@ -72,16 +76,17 @@ include_directories(${SOURCE_PATH})
 
 if (APPLE)
 
-    set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+   #set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+    set(CMAKE_CXX_COMPILER /usr/bin/clang++)
     add_definitions(-DAPPLE -D__WXWIDGETS__)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 \
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 \
         -I/usr/local/include/wx-3.0 -D_FILE_OFFSET_BITS=64 \
         -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__")
     set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib -framework IOKit -framework Carbon -framework Cocoa \
         -framework System \
         -lwx_osx_cocoau_xrc-3.0 -lwx_osx_cocoau_webview-3.0 -lwx_osx_cocoau_html-3.0 \
         -lwx_osx_cocoau_qa-3.0 -lwx_osx_cocoau_adv-3.0 -lwx_osx_cocoau_core-3.0 \
-        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto")
+        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto -stdlib=libc++")
 
     add_executable(Bankor ${FILES} ${WX_FILES})
 

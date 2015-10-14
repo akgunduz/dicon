@@ -51,9 +51,9 @@ void UserInterface::clientInit() {
 	uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &UserInterface::clientUpdateExecList;
 	uiUpdater[UI_UPDATE_CLIENT_LOG] = &UserInterface::clientUpdateLog;
 
-	for (uint32_t i = 0; i < ConnInterface::getInterfaceCount(); i++) {
-		clientDistInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
-		clientCollInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
+	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
+		clientDistInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+		clientCollInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
 	}
 
 }
@@ -63,8 +63,9 @@ void UserInterface::onClientInitClick( wxCommandEvent& event ) {
 	if (wxStrcmp(clientInitBtn->GetLabel(), "Init") == 0) {
 
 		try {
-			std::string path = std::string(getcwd(nullptr, 0)) + "/" + CLIENT_PATH + "/";
-                        mkdir(path.c_str(), 0777);
+			char path[PATH_MAX];
+			sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
+			mkdir(path, 0777);
 
 			clientObject = new Client((uint32_t)clientDistInterface->GetSelection(),
 					(uint32_t)clientCollInterface->GetSelection(), path);

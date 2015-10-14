@@ -6,21 +6,21 @@
 #ifndef COLLECTOR_H
 #define	COLLECTOR_H
 
+#include "Component.h"
 #include "Rule.h"
 #include "Connector.h"
 #include "Message.h"
 
-class Collector {
+class Collector : public Component {
 
-	Connector *distributorConnector;
-	Connector *clientConnector;
+    int distributorIndex;
+    int nodeIndex;
 
 	std::map<long , Rule*> rules;
-	std::string rootPath;
-	InterfaceCallback *callback;
+
 	long distributorAddress;
 
-	static bool receiveCB(void *, long, Message *);
+	virtual bool onReceive(long, Message *);
 
 	bool processDistributorMsg(long address, Message *msg);
 	bool processClientMsg(long address, Message *msg);
@@ -29,7 +29,7 @@ class Collector {
 	bool send2ClientMsg(long, int);
 
 public:
-	Collector(uint32_t, uint32_t, const std::string &rootPath);
+	Collector(int, int, const char *rootPath);
 
 	virtual ~Collector();
 	long getAddress(HOST);
@@ -41,9 +41,6 @@ public:
 	bool syncTime();
 
 	void display();
-
-	std::string getRootPath();
-	void setRootPath(const std::string&);
 };
 
 #endif	/* COLLECTOR_H */

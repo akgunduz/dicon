@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 	Log::setLogLevel(LEVEL_INFO);
 
-	ConnInterface::initInterfaces();
+	ConnectInterface::getInterfaces();
 
 	if (argc > 1) {
 
@@ -26,8 +26,8 @@ int main(int argc, char** argv) {
 		switch(cmd) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
-				for (uint32_t i = 0; i < ConnInterface::getInterfaceCount(); i++) {
-					ConnInterface *ci = ConnInterface::getInterface(i);
+				for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
+					ConnectInterface *ci = ConnectInterface::getInterface(i);
 					LOG_S("%s : %s", sInterfaces[ci->type], ci->name.c_str());
 				}
 				break;

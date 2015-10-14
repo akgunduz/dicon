@@ -8,8 +8,10 @@
 #include "Common.h"
 #include "Address.h"
 
-#define LOOPBACK_ADDRESS 0x7F000001
+#define LOOPBACK_RANGE 256
+#define LOOPBACK_ADDRESS 0x0100007F
 #define IPADDRESS_MASK 0xFFFFFFFF
+#define DEFAULT_PORT 61001
 
 class NetAddress {
 
@@ -18,10 +20,13 @@ public:
     static long getIP(long);
     static std::string getIPstr(long);
     static int getPort(long);
+    static int getNetmask(long);
     static sockaddr_in getInetAddress(long);
     static bool isLoopback(long);
     static long parseIP(const std::string &ip);
-    static long parseAddress(long ip, int port);
+    static long parseAddress(long ip, int port, int netmask);
+    static std::vector<long> getAddressList(long address);
+    static int address2prefix(long address);
 };
 
 

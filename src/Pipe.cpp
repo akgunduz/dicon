@@ -6,7 +6,7 @@
 #include "Pipe.h"
 #include "PipeAddress.h"
 
-Pipe::Pipe(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
+Pipe::Pipe(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(INTERFACE_PIPE, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
@@ -18,7 +18,7 @@ Pipe::Pipe(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::stri
 
 }
 
-bool Pipe::init(uint32_t interfaceIndex) {
+bool Pipe::init(int interfaceIndex) {
 
 	if (pipe(desc) < 0) {
 		LOG_E("Init failed with err : %d!!!", errno);
@@ -97,7 +97,7 @@ void Pipe::runSender(long target, Message *msg) {
 
 }
 
-void Pipe::setAddress(uint32_t index) {
+void Pipe::setAddress(int index) {
 
 	address = (long) desc[1];
 

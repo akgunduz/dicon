@@ -8,8 +8,7 @@
 
 uint16_t Net::gOffset = 0;
 
-
-Net::Net(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath)
+Net::Net(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(INTERFACE_NET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
@@ -17,11 +16,11 @@ Net::Net(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
 
-	LOG_I("Instance is created, Socket : %d!!!", socket);
+	LOG_I("Instance is created, Socket : %d!!!", netSocket);
 
 }
 
-bool Net::init(uint32_t interfaceIndex) {
+bool Net::init(int interfaceIndex) {
 
 	netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (netSocket < 0) {
@@ -117,8 +116,8 @@ void Net::runReceiver() {
 			}
 
 			Argument *argument = new Argument(this);
-			argument->var.acceptSocket = acceptfd;
-			argument->address = (ntohl(cli_addr.sin_addr.s_addr));
+			argument->acceptSocket = acceptfd;
+			argument->address = (cli_addr.sin_addr.s_addr);
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
@@ -146,10 +145,10 @@ void Net::runReceiver() {
 
 void *Net::runAccepter(void *arg) {
 
-	struct Argument *argument = (struct Argument *) arg;
+	Argument *argument = (Argument *) arg;
 
 	Message *msg = new Message(argument->_interface->rootPath);
-	if (msg->readFromStream(argument->var.acceptSocket)) {
+	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
 
@@ -161,7 +160,7 @@ void Net::runSender(long target, Message *msg) {
 
 	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket < 0) {
-		LOG_E("Socket sender open with err : %d!!!", errno);
+        LOG_T("Socket sender open with err : %d!!!", errno);
 		return;
 	}
 
@@ -170,7 +169,7 @@ void Net::runSender(long target, Message *msg) {
     sockaddr_in clientAddress = NetAddress::getInetAddress(target);
 
 	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
-		LOG_E("Socket can not connect!!!");
+        LOG_T("Socket can not connect!!!");
 		close(clientSocket);
 		return;
 	}
@@ -186,9 +185,10 @@ void Net::runSender(long target, Message *msg) {
 
 
 
-void Net::setAddress(uint32_t index) {
+void Net::setAddress(int index) {
 
-    address = NetAddress::parseAddress(ConnInterface::getNetInterfaceAddress(index), DEFAULT_PORT + gOffset++);
+    address = NetAddress::parseAddress(ConnectInterface::getAddress(index),
+			DEFAULT_PORT + gOffset++, (int)ConnectInterface::getHelper(index));
 
 }
 
@@ -206,44 +206,5 @@ INTERFACES Net::getType() {
 
 std::vector<long> Net::getAddressList() {
 
-	std::vector<long> list;
-
-	if (NetAddress::isLoopback(address)) {
-
-		for (uint32_t i = 0; i < LOOPBACK_RANGE; i++) {
-
-			long destAddress = NetAddress::parseAddress(address, DEFAULT_PORT + i);
-
-			if (destAddress != address) {
-
-				list.push_back(destAddress);
-
-			}
-
-		}
-
-	} else {
-
-		long startIP = 0;
-
-		long range = ConnInterface::getNetInterfaceInfo(address, startIP);
-
-		long ownAddress = (long)(address & IPADDRESS_MASK);
-
-		for (uint32_t i = 0; i < range; i++) {
-
-			if (startIP != ownAddress) {
-
-				long destAddress = NetAddress::parseAddress(startIP, DEFAULT_PORT);
-
-				list.push_back(destAddress);
-
-			}
-
-			startIP++;
-		}
-
-	}
-
-	return list;
+    return NetAddress::getAddressList(address);
 }

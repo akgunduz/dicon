@@ -15,11 +15,11 @@ bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
 	uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &Console::clientUpdateExecList;
 	uiUpdater[UI_UPDATE_CLIENT_LOG] = &Console::clientUpdateLog;
 
-	std::string path = std::string(getcwd(nullptr, 0)) + "/" + CLIENT_PATH + "/";
+	char path[PATH_MAX];
+	sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
 
-
-	clientRemoveDir(path.c_str());
-	mkdir(path.c_str(), 0777);
+	clientRemoveDir(path);
+	mkdir(path, 0777);
 
 	clientObject = nullptr;
 

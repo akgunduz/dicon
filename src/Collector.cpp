@@ -7,50 +7,16 @@
 #include "Tools.h"
 #include "NetAddress.h"
 
-Collector::Collector(uint32_t distInterfaceIndex, uint32_t clientInterfaceIndex, const std::string &rootPath) {
+Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) :
+        Component(distributorIndex, nodeIndex, rootPath){
 
-	callback = new InterfaceCallback(receiveCB, this);
-
-	try {
-
-		distributorConnector = new Connector(distInterfaceIndex, callback, rootPath);
-
-	} catch (const std::runtime_error e) {
-
-		LOG_E("Connector Init failed!!!");
-
-		delete callback;
-
-		throw std::runtime_error("Collector : Connector Init failed!!!");
-	}
-
-	if (distInterfaceIndex != clientInterfaceIndex) {
-
-		try {
-
-			clientConnector = new Connector(clientInterfaceIndex, callback, rootPath);
-
-		} catch (const std::runtime_error e) {
-
-			LOG_E("Connector Init failed!!!");
-
-			delete distributorConnector;
-			delete callback;
-
-			throw std::runtime_error("Distributor : Connector Init failed!!!");
-		}
-
-	} else {
-
-		clientConnector = distributorConnector;
-
-	}
-
+	this->distributorIndex = 0;
+	this->nodeIndex = 1;
+    printf("Collector %p\n", this);
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_CLIENT));
 
 	distributorAddress = 0;
-	this->rootPath = rootPath;
 
 	LOG_I("Instance is created!!!");
 
@@ -58,17 +24,10 @@ Collector::Collector(uint32_t distInterfaceIndex, uint32_t clientInterfaceIndex,
 
 Collector::~Collector() {
 
-	if (distributorConnector != clientConnector) {
-		delete clientConnector;
-	}
-
-	delete distributorConnector;
 	for (int i = 0; i < rules.size(); i++) {
 //		Rule *rule = mRules[i];
 //		delete rule;
 	}
-
-	delete callback;
 
 }
 
@@ -76,9 +35,9 @@ Collector::~Collector() {
 INTERFACES Collector::getInterfaceType(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
-		return distributorConnector->getInterfaceType();
+		return connectors[distributorIndex]->getInterfaceType();
 	} else {
-		return clientConnector->getInterfaceType();
+		return connectors[nodeIndex]->getInterfaceType();
 	}
 
 }
@@ -86,34 +45,31 @@ INTERFACES Collector::getInterfaceType(HOST host) {
 long Collector::getAddress(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
-		return distributorConnector->getAddress();
+		return connectors[distributorIndex]->getAddress();
 	} else {
-		return clientConnector->getAddress();
+		return connectors[nodeIndex]->getAddress();
 	}
 
 }
 
-
-bool Collector::receiveCB(void *arg, long address, Message *msg) {
-
-	Collector *collector = (Collector *) arg;
+bool Collector::onReceive(long address, Message *msg) {
 
 	switch(msg->getOwner()) {
 
 		case HOST_DISTRIBUTOR:
-			if (collector->distributorConnector->getInterfaceType() == Address::getInterface(address)) {
-				collector->processDistributorMsg(address, msg);
+			if (connectors[distributorIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processDistributorMsg(address, msg);
 			}
 			break;
 
 		case HOST_CLIENT:
-			if (collector->clientConnector->getInterfaceType() == Address::getInterface(address)) {
-				collector->processClientMsg(address, msg);
+			if (connectors[nodeIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processClientMsg(address, msg);
 			}
 			break;
 
 		default:
-			LOG_W("Wrong message received : %d from %s, disgarding", msg->getOwner(), Address::getString(address).c_str());
+			LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
 			delete msg;
 			return false;
 
@@ -153,11 +109,11 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			rules[clientAddress] = new Rule(getRootPath(), RULE_FILE);
 			if (!rules[clientAddress]) {
-				LOG_E("Could not create a rule from path : %s", getRootPath().c_str());
+				LOG_E("Could not create a rule from path : %s", getRootPath());
 				return false;
 			}
 
-			LOG_T("New Rule created from path : %s", getRootPath().c_str());
+			LOG_T("New Rule created from path : %s", getRootPath());
 
 			LOG_U(UI_UPDATE_COLL_FILE_LIST, rules[clientAddress]);
 			LOG_U(UI_UPDATE_COLL_PARAM_LIST, rules[clientAddress]);
@@ -226,7 +182,7 @@ bool Collector::processClientMsg(long address, Message *msg) {
 
 bool Collector::send2DistributorMsg(long address, int type) {
 
-	Message *msg = new Message(HOST_COLLECTOR, type, rootPath);
+	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
 
 	switch(type) {
 
@@ -257,13 +213,13 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 	}
 
-	return distributorConnector->send(address, msg);
+	return connectors[distributorIndex]->send(address, msg);
 
 }
 
 bool Collector::send2ClientMsg(long address, int type) {
 
-	Message *msg = new Message(HOST_COLLECTOR, type, rootPath);
+	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
 
 	std::map<long, Rule*>::iterator ruleItr = rules.find(address);
 	if (ruleItr == rules.end()) {
@@ -297,15 +253,15 @@ bool Collector::send2ClientMsg(long address, int type) {
 
 	}
 
-	return clientConnector->send(address, msg);
+	return connectors[nodeIndex]->send(address, msg);
 
 }
 
 bool Collector::processRule(const std::string &path) {
 
-	if (path.compare(getRootPath()) != 0) {
-		setRootPath(path);
-	}
+//	if (path.compare(getRootPath()) != 0) {
+//		setRootPath(path);
+//	}
 
 	return send2DistributorMsg(distributorAddress, MSGTYPE_CLIENT);
 }
@@ -319,20 +275,6 @@ bool Collector::processRule() {
 bool Collector::syncTime() {
 
 	return send2DistributorMsg(distributorAddress, MSGTYPE_TIME);
-
-}
-
-std::string Collector::getRootPath() {
-
-	return rootPath;
-
-}
-
-void Collector::setRootPath(const std::string &path) {
-
-	rootPath = path;
-//	mDistributorConnector->setRootPath(path);
-//	mClientConnector->setRootPath(path);
 
 }
 

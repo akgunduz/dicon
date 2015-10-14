@@ -5,51 +5,17 @@
 
 #include "Client.h"
 
-Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const std::string &rootPath) {
+Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
+        Component(distributorIndex, collectorIndex, rootPath) {
 
-	mCallback = new InterfaceCallback(receiveCB, this);
-
-	try {
-
-		mDistributorConnector = new Connector(distInterfaceIndex, mCallback, rootPath);
-
-	} catch (const std::runtime_error e) {
-
-		LOG_E("Connector Init failed!!!");
-
-		delete mCallback;
-
-		throw std::runtime_error("Collector : Connector Init failed!!!");
-	}
-
-	if (distInterfaceIndex != collInterfaceIndex) {
-
-		try {
-
-			mCollectorConnector = new Connector(collInterfaceIndex, mCallback, rootPath);
-
-		} catch (const std::runtime_error e) {
-
-			LOG_E("Connector Init failed!!!");
-
-			delete mDistributorConnector;
-			delete mCallback;
-
-			throw std::runtime_error("Distributor : Connector Init failed!!!");
-		}
-
-	} else {
-
-		mCollectorConnector = mDistributorConnector;
-
-	}
+	this->distributorIndex = 0;
+	this->collectorIndex = 1;
 
 	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
 
 	mDistributorAddress = 0;
 	mState = IDLE;
-	mRootPath = rootPath;
 
 	LOG_I("Instance is created!!!");
 
@@ -57,22 +23,14 @@ Client::Client(uint32_t distInterfaceIndex, uint32_t collInterfaceIndex, const s
 
 Client::~Client() {
 
-	if (mDistributorConnector != mCollectorConnector) {
-		delete mCollectorConnector;
-	}
-
-	delete mDistributorConnector;
-
-	delete mCallback;
-
 }
 
 INTERFACES Client::getInterfaceType(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
-		return mDistributorConnector->getInterfaceType();
+		return connectors[distributorIndex]->getInterfaceType();
 	} else {
-		return mCollectorConnector->getInterfaceType();
+		return connectors[collectorIndex]->getInterfaceType();
 	}
 
 }
@@ -80,28 +38,26 @@ INTERFACES Client::getInterfaceType(HOST host) {
 long Client::getAddress(HOST host) {
 
 	if (host == HOST_DISTRIBUTOR) {
-		return mDistributorConnector->getAddress();
+		return connectors[distributorIndex]->getAddress();
 	} else {
-		return mCollectorConnector->getAddress();
+		return connectors[collectorIndex]->getAddress();
 	}
 
 }
 
-bool Client::receiveCB(void *arg, long address, Message *msg) {
-
-	Client *client = (Client *) arg;
+bool Client::onReceive(long address, Message *msg) {
 
 	switch(msg->getOwner()) {
 
 		case HOST_DISTRIBUTOR:
-			if (client->mDistributorConnector->getInterfaceType() == Address::getInterface(address)) {
-				client->processDistributorMsg(address, msg);
+			if (connectors[distributorIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processDistributorMsg(address, msg);
 			}
 			break;
 
 		case HOST_COLLECTOR:
-			if (client->mCollectorConnector->getInterfaceType() == Address::getInterface(address)) {
-				client->processCollectorMsg(address, msg);
+			if (connectors[collectorIndex]->getInterfaceType() == Address::getInterface(address)) {
+				processCollectorMsg(address, msg);
 			}
 			break;
 
@@ -146,7 +102,7 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 
 			mRule = msg->mRule;
 			if (mRule == nullptr) {
-				mRule = new Rule(mRootPath, RULE_FILE);
+				mRule = new Rule(getRootPath(), RULE_FILE);
 			}
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
@@ -195,7 +151,7 @@ bool Client::processDistributorMsg(long address, Message *msg) {
 
 bool Client::send2DistributorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
+	Message *msg = new Message(HOST_CLIENT, type, getRootPath());
 
 	switch(type) {
 
@@ -225,13 +181,13 @@ bool Client::send2DistributorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return mDistributorConnector->send(address, msg);
+	return connectors[distributorIndex]->send(address, msg);
 
 }
 
 bool Client::send2CollectorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_CLIENT, type, mRootPath);
+	Message *msg = new Message(HOST_CLIENT, type, getRootPath());
 
 	switch(type) {
 
@@ -248,7 +204,7 @@ bool Client::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return mCollectorConnector->send(address, msg);
+	return connectors[collectorIndex]->send(address, msg);
 }
 
 bool Client::processMD5() {
@@ -257,7 +213,7 @@ bool Client::processMD5() {
 
 		FileContent *content = (FileContent *)mRule->getContent(RULE_FILES, i);
 
-		std::string abspath = mRootPath + content->getPath();
+		std::string abspath = getRootPath() + content->getPath();
 
 		//Burada ters lojik var,
 		//	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
@@ -391,12 +347,6 @@ bool Client::processRule() {
 	}
 #endif
 	return true;
-}
-
-std::string Client::getRootPath() {
-
-	return mRootPath;
-
 }
 
 

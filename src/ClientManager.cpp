@@ -169,7 +169,7 @@ void *ClientManager::runClientChecker(void *arg) {
 				&clientManager->mutexClientChecker, &timer);
 		if (res == ETIMEDOUT) {
 			LOG_I("Sending Wakeupssss!!!");
-			clientManager->wakeupCB(clientManager->clientConnector);
+		//	clientManager->wakeupCB(clientManager->clientConnector);
 		} else {
 			break;
 		}

@@ -8,12 +8,14 @@
 
 BaseMessage::BaseMessage() {
 
+	memset(&header, 0, sizeof(MessageHeader));
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
 }
 
 BaseMessage::BaseMessage(long time, long deviceID, int type) {
 
+	memset(&header, 0, sizeof(MessageHeader));
 	header.time = time;
 	header.deviceID = deviceID;
 	header.messageID = 0;//new Random(time).nextLong();
@@ -203,14 +205,14 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 
 bool BaseMessage::readSignature(int in) {
 
-	uint8_t buf[2];
-
-	if (!readBlock(in, buf, 2)) {
+	if (!readBlock(in, tmpBuf, 2)) {
 		LOG_E("Can not read correct signature from stream");
 		return false;
 	}
 
-    if (buf[0] != (SIGNATURE & 0xFF) || buf[1] != (SIGNATURE >> 8)) {
+	short signature = ntohs(*((short *) tmpBuf));
+
+    if (signature != SIGNATURE) {
         LOG_E("Can not read correct signature from stream");
         return false;
     }
@@ -226,14 +228,14 @@ bool BaseMessage::readHeader(int in, MessageHeader *header) {
 	}
 
 	uint8_t *p = tmpBuf;
-    header->type = *((int *) p); p += 4;
-	header->priority = *((int *) p); p += 4;
-    header->ownerAddress = *((long *) p); p += 8;
-    header->time = *((long *) p); p += 8;
-    header->deviceID = *((long *) p); p += 8;
-    header->messageID = *((long *) p); p += 8;
+    header->type = ntohl(*((int *) p)); p += 4;
+	header->priority = ntohl(*((int *) p)); p += 4;
+    header->ownerAddress = ntohll(*((long *) p)); p += 8;
+    header->time = ntohll(*((long *) p)); p += 8;
+    header->deviceID = ntohll(*((long *) p)); p += 8;
+    header->messageID = ntohll(*((long *) p)); p += 8;
     for (int i = 0; i < MAX_VARIANT; i++) {
-        header->variant[i] = *((long *) p); p += 8;
+        header->variant[i] = ntohll(*((long *) p)); p += 8;
     }
 
 	return true;
@@ -246,9 +248,9 @@ bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
 		return false;
 	}
 
-	unsigned char *p = tmpBuf;
-	header->blockType = *((int *) p); p += 4;
-	header->blockCount = *((int *) p); p += 4;
+	uint8_t *p = tmpBuf;
+	header->blockType = ntohl(*((int *) p)); p += 4;
+	header->blockCount = ntohl(*((int *) p)); p += 4;
 
     if (header->blockCount > 0) {
 
@@ -261,7 +263,7 @@ bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
 
         p = tmpBuf;
         for (int i = 0; i < header->blockCount; i++) {
-            header->sizes[i] = *((int *) p); p += 4;
+            header->sizes[i] = ntohl(*((int *) p)); p += 4;
         }
     }
 
@@ -425,8 +427,7 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
 bool BaseMessage::writeSignature(int out) {
 
-    tmpBuf[0] = SIGNATURE & 0xFF;
-    tmpBuf[1] = SIGNATURE >> 8;
+	*((short *) tmpBuf) = htons(SIGNATURE);
 
     if (!writeBlock(out, tmpBuf, 2)) {
         LOG_E("Can not write signature to stream");
@@ -438,7 +439,18 @@ bool BaseMessage::writeSignature(int out) {
 
 bool BaseMessage::writeHeader(int out, MessageHeader *header) {
 
-	if (!writeBlock(out, (uint8_t *)header, sizeof(MessageHeader))) {
+	uint8_t *p = tmpBuf;
+	*((int *) p) = htonl(header->type); p += 4;
+	*((int *) p) = htonl(header->priority); p += 4;
+	*((long *) p) = htonll(header->ownerAddress); p += 8;
+	*((long *) p) = htonll(header->time); p += 8;
+	*((long *) p) = htonll(header->deviceID); p += 8;
+	*((long *) p) = htonll(header->messageID); p += 8;
+    for (int i = 0; i < MAX_VARIANT; i++) {
+        *((long *) p) = htonll(header->variant[i]); p += 8;
+    }
+
+	if (!writeBlock(out, tmpBuf, sizeof(MessageHeader))) {
 		LOG_E("Can not write message header to stream");
 		return false;
 	}
@@ -449,10 +461,10 @@ bool BaseMessage::writeHeader(int out, MessageHeader *header) {
 bool BaseMessage::writeBlockHeader(int out, BlockHeader *header) {
 
     uint8_t *p = tmpBuf;
-    *((int *) p) = header->blockType; p += 4;
-    *((int *) p) = header->blockCount; p += 4;
+    *((int *) p) = htonl(header->blockType); p += 4;
+    *((int *) p) = htonl(header->blockCount); p += 4;
     for (int i = 0; i < header->blockCount; i++) {
-        *((int *) p) = header->sizes[i]; p += 4;
+        *((int *) p) = htonl(header->sizes[i]); p += 4;
     }
 
     if (!writeBlock(out, tmpBuf, BLOCK_HEADER_SIZE + header->blockCount * 4)) {

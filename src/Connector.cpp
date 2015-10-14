@@ -8,9 +8,9 @@
 #include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(uint32_t interfaceIndex, const InterfaceCallback *cb, const std::string &rootPath) {
+Connector::Connector(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath) {
 
-	INTERFACES  interfaceType = ConnInterface::getInterfaceType(interfaceIndex);
+	INTERFACES  interfaceType = ConnectInterface::getType(interfaceIndex);
 
 	try {
 
@@ -97,13 +97,7 @@ INTERFACES Connector::getInterfaceType() {
 
 }
 
-void Connector::setRootPath(std::string &path) {
-
-	_interface->rootPath = path;
-
-}
-
-std::string Connector::getRootPath() {
+const char *Connector::getRootPath() {
 
 	return _interface->rootPath;
 }

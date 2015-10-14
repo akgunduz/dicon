@@ -44,9 +44,9 @@ void UserInterface::distInit() {
 	uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
 	uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
-	for (uint32_t i = 0; i < ConnInterface::getInterfaceCount(); i++) {
-		distCollInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
-		distClientInterface->Insert(wxString(sInterfaces[ConnInterface::getInterfaceType(i)]) + " --> " + ConnInterface::getInterfaceName(i), i);
+	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
+		distCollInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+		distClientInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
 	}
 
 }
@@ -56,9 +56,11 @@ void UserInterface::onDistInitClick( wxCommandEvent& event ) {
 	if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
 
 		try {
-                        distCollList->DeleteAllItems();
-			std::string path = std::string(getcwd(nullptr, 0)) + "/" + DISTRIBUTOR_PATH + "/";
-                        mkdir(path.c_str(), 0777);
+			distCollList->DeleteAllItems();
+
+			char path[PATH_MAX];
+			sprintf(path, "%s/%s/", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
+			mkdir(path, 0777);
 
 			double backupRate = 0;
 			distBackupRate->GetLineText(0).ToDouble(&backupRate);
@@ -123,7 +125,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 	}
 
 	distCollList->SetItem(i, 0, Address::getString(data->data64_1));
-	distCollList->SetItem(i, 2, wxString::Format(wxT("%i"), data->data64_1));
+	distCollList->SetItem(i, 2, wxString::Format(wxT("%li"), data->data64_1));
 
 	if (data->data64_2 > 0) {
 		distCollList->SetItem(i, 1, Address::getString(data->data64_2));
@@ -155,7 +157,7 @@ void UserInterface::distAddtoClientList(wxCommandEvent &event) {
 
 	distClientList->SetItem(i, 0, Address::getString(data->data64_1));
 	distClientList->SetItem(i, 1, sStates[data->data64_2]);
-	distClientList->SetItem(i, 2, wxString::Format(wxT("%i"), data->data64_1));
+	distClientList->SetItem(i, 2, wxString::Format(wxT("%li"), data->data64_1));
 
 }
 

@@ -15,13 +15,13 @@
 class Pipe : public Interface {
 private :
 	int desc[2];
-	bool init(uint32_t);
+	bool init(int);
 	void runReceiver();
 	void runSender(long, Message *);
-	void setAddress(uint32_t);
+	void setAddress(int);
 	INTERFACES getType();
 public :
-	Pipe(uint32_t, const InterfaceCallback *, const std::string &);
+	Pipe(int, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~Pipe();
 };

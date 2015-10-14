@@ -7,29 +7,28 @@
 #ifndef __Client_H_
 #define __Client_H_
 
-#include "Common.h"
+#include "Component.h"
 #include "Connector.h"
 
-class Client {
+class Client : public Component {
 private:
 
-	Connector *mDistributorConnector;
-	Connector *mCollectorConnector;
+    int distributorIndex;
+    int collectorIndex;
 
 	enum STATES mState;
 	std::list<std::string> mMD5s;
 
 	Rule* mRule;
-	std::string mRootPath;
-	InterfaceCallback *mCallback;
+
 	bool mRegistered;
 	long mDistributorAddress;
 	long mCollectorAddress;
 
-	static bool receiveCB(void *, long, Message *);
+	virtual bool onReceive(long, Message *);
 
 public:
-	Client(uint32_t, uint32_t, const std::string &rootPath);
+	Client(int, int, const char *rootPath);
 
 	virtual ~Client();
 	long getAddress(HOST);
@@ -44,9 +43,6 @@ public:
 
 	bool processCollectorMsg(long, Message *);
 	bool processDistributorMsg(long, Message *);
-
-	std::string getRootPath();
-
 };
 
 

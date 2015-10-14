@@ -17,16 +17,16 @@
 class UnixSocket : public Interface {
 private :
 	int unixSocket;
-	bool init(uint32_t);
+	bool init(int);
 	void runReceiver();
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
-	void setAddress(uint32_t);
+	void setAddress(int);
 	INTERFACES getType();
 
 public :
 	static uint16_t gOffset;
-	UnixSocket(uint32_t, const InterfaceCallback *, const std::string &);
+	UnixSocket(int, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~UnixSocket();
 };
