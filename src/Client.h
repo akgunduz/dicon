@@ -16,14 +16,9 @@ private:
     int distributorIndex;
     int collectorIndex;
 
-	enum STATES mState;
-	std::list<std::string> mMD5s;
+	Rule* rule;
 
-	Rule* mRule;
-
-	bool mRegistered;
-	long mDistributorAddress;
-	long mCollectorAddress;
+	long distributorAddress;
 
 	virtual bool onReceive(long, Message *);
 

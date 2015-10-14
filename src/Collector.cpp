@@ -12,7 +12,6 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
 
 	this->distributorIndex = 0;
 	this->nodeIndex = 1;
-    printf("Collector %p\n", this);
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_CLIENT));
 

@@ -14,8 +14,7 @@ Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
 	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
 
-	mDistributorAddress = 0;
-	mState = IDLE;
+	distributorAddress = 0;
 
 	LOG_I("Instance is created!!!");
 
@@ -79,42 +78,42 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 		case MSGTYPE_RULE:
 
 			LOG_U(UI_UPDATE_CLIENT_STATE, BUSY);
-			status = send2DistributorMsg(mDistributorAddress, MSGTYPE_BUSY);
+			status = send2DistributorMsg(distributorAddress, MSGTYPE_BUSY);
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"RULE\" msg from collector: %s", Address::getString(address).c_str());
 
-			mRule = msg->mRule;
+			rule = msg->mRule;
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
 				break;
 			}
 
-			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
-			LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, mRule);
-			LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, mRule);
+			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
+			LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, rule);
+			LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, rule);
 
 			status &= send2CollectorMsg(address, MSGTYPE_MD5);
 			break;
 
 		case MSGTYPE_BINARY:
 
-			mRule = msg->mRule;
-			if (mRule == nullptr) {
-				mRule = new Rule(getRootPath(), RULE_FILE);
+			rule = msg->mRule;
+			if (rule == nullptr) {
+				rule = new Rule(getRootPath(), RULE_FILE);
 			}
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s with \"%d\" file binary",
 				  Address::getString(address).c_str(), 0/*msg->getReceivedBinaryCount()*/);
 
-			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
+			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
 
 			processRule();
 
 			LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
-			status = send2DistributorMsg(mDistributorAddress, MSGTYPE_READY);
+			status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
 			break;
 
 		default :
@@ -133,7 +132,7 @@ bool Client::processDistributorMsg(long address, Message *msg) {
 
 		case MSGTYPE_WAKEUP:
 
-			mDistributorAddress = address;
+			distributorAddress = address;
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
@@ -193,10 +192,10 @@ bool Client::send2CollectorMsg(long address, uint8_t type) {
 
 		case MSGTYPE_MD5:
 			msg->setPriority(PRIORITY_2);
-			msg->setRule(STREAM_MD5ONLY, mRule);
+			msg->setRule(STREAM_MD5ONLY, rule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-				  Address::getString(address).c_str(), mRule->getFlaggedFileCount());
+				  Address::getString(address).c_str(), rule->getFlaggedFileCount());
 			break;
 
 		default:
@@ -209,9 +208,9 @@ bool Client::send2CollectorMsg(long address, uint8_t type) {
 
 bool Client::processMD5() {
 
-	for (uint16_t i = 0; i < mRule->getContentCount(RULE_FILES); i++) {
+	for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
 
-		FileContent *content = (FileContent *)mRule->getContent(RULE_FILES, i);
+		FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
 
 		std::string abspath = getRootPath() + content->getPath();
 
@@ -273,11 +272,11 @@ bool Client::processRule() {
 
 	int status;
 
-	if (mRule->getRunType() == RUN_SEQUENTIAL) {
+	if (rule->getRunType() == RUN_SEQUENTIAL) {
 
-		for (int i = 0; i < mRule->getContentCount(RULE_EXECUTORS); i++) {
-			ExecutorContent *content = (ExecutorContent *) mRule->getContent(RULE_EXECUTORS, i);
-			std::string cmd = content->getParsed(mRule);
+		for (int i = 0; i < rule->getContentCount(RULE_EXECUTORS); i++) {
+			ExecutorContent *content = (ExecutorContent *) rule->getContent(RULE_EXECUTORS, i);
+			std::string cmd = content->getParsed(rule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"Executing %s command", cmd.c_str());
 #ifdef CYGWIN
@@ -304,9 +303,9 @@ bool Client::processRule() {
 	}
 
 	//parallel process
-	for (int i = 0; i < mRule->getContentCount(RULE_EXECUTORS); i++) {
-		ExecutorContent *content = (ExecutorContent *)mRule->getContent(RULE_EXECUTORS, i);
-		std::string cmd = content->getParsed(mRule);
+	for (int i = 0; i < rule->getContentCount(RULE_EXECUTORS); i++) {
+		ExecutorContent *content = (ExecutorContent *)rule->getContent(RULE_EXECUTORS, i);
+		std::string cmd = content->getParsed(rule);
 		LOG_U(UI_UPDATE_CLIENT_LOG,
 				"Executing %s command", cmd.c_str());
 
