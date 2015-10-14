@@ -7,12 +7,9 @@
 
 Distributor::Distributor(int collectorIndex,
 		int nodeIndex, const char *rootPath, double backupRate) :
-            Component(collectorIndex, nodeIndex, rootPath){
+            Component(generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath){
 
-	this->collectorIndex = 0;
-	this->nodeIndex = 1;
-
-	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_CLIENT));
+	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_NODE));
 
 	clientManager = new ClientManager(connectors[nodeIndex],
 			timeoutCallback, sendWakeupMessage, backupRate);
@@ -26,49 +23,8 @@ Distributor::~Distributor() {
 	delete clientManager;
 }
 
-bool Distributor::onReceive(long address, Message *msg) {
-
-	switch(msg->getOwner()) {
-
-		case HOST_CLIENT:
-			if (connectors[nodeIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processClientMsg(address, msg);
-			}
-			break;
-
-		case HOST_COLLECTOR:
-			if (connectors[collectorIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processCollectorMsg(address, msg);
-			}
-			break;
-
-		default:
-			LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
-			delete msg;
-			break;
-	}
-
-	return true;
-}
-
-INTERFACES Distributor::getInterfaceType(HOST host) {
-
-	if (host == HOST_COLLECTOR) {
-		return connectors[collectorIndex]->getInterfaceType();
-	} else {
-		return connectors[nodeIndex]->getInterfaceType();
-	}
-
-}
-
-long Distributor::getAddress(HOST host) {
-
-	if (host == HOST_COLLECTOR) {
-		return connectors[collectorIndex]->getAddress();
-	} else {
-		return connectors[nodeIndex]->getAddress();
-	}
-
+bool Distributor::processDistributorMsg(long address, Message *msg) {
+	return false;
 }
 
 bool Distributor::processCollectorMsg(long address, Message *msg) {
@@ -208,7 +164,7 @@ bool Distributor::send2ClientMsg(long address, uint8_t type) {
 
 	}
 
-	return connectors[nodeIndex]->send(address, msg);
+	return connectors[HOST_NODE]->send(address, msg);
 
 }
 
@@ -260,15 +216,15 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[collectorIndex]->send(address, msg);
+	return connectors[HOST_COLLECTOR]->send(address, msg);
 
 }
 
 bool Distributor::sendWakeupMessagesAll() {
 
-	sendWakeupMessage(connectors[nodeIndex]);
-	if (connectors[collectorIndex] != connectors[nodeIndex]) {
-		sendWakeupMessage(connectors[collectorIndex]);
+	sendWakeupMessage(connectors[HOST_NODE]);
+	if (connectors[HOST_COLLECTOR] != connectors[HOST_NODE]) {
+		sendWakeupMessage(connectors[HOST_COLLECTOR]);
 	}
 	return true;
 }
@@ -285,7 +241,7 @@ bool Distributor::reset() {
 bool Distributor::timeoutCallback(Connector *connector,
 								  long address, long collectorAddress) {
 
-	Message *msg = new Message(HOST_CLIENT, MSGTYPE_TIMEOUT, connector->getRootPath());
+	Message *msg = new Message(HOST_NODE, MSGTYPE_TIMEOUT, connector->getRootPath());
 	msg->setVariant(0, collectorAddress);
 	connector->getInterface()->
 			push(MESSAGE_RECEIVE, address, msg);

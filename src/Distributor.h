@@ -15,24 +15,17 @@
 class Distributor : public Component {
 private:
 
-    int collectorIndex;
-    int nodeIndex;
-
 	ClientManager *clientManager;
 
 	std::deque<long> collectorWaitingList;
 
 	DiffTime collStartTime;
 
-	virtual bool onReceive(long, Message *);
-
 public:
 
 	Distributor(int, int, const char *, double);
 
 	virtual ~Distributor();
-	long getAddress(HOST);
-	INTERFACES getInterfaceType(HOST);
 
 	static bool timeoutCallback(Connector *, long, long);
 
@@ -43,8 +36,9 @@ public:
 	static bool sendWakeupMessage(Connector *);
 	bool sendWakeupMessagesAll();
 
-	bool processCollectorMsg(long, Message *);
-	bool processClientMsg(long, Message *);
+	virtual bool processDistributorMsg(long, Message *);
+	virtual bool processCollectorMsg(long, Message *);
+	virtual bool processClientMsg(long, Message *);
 };
 
 #endif	/* DISTRIBUTOR_H */

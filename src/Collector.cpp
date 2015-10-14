@@ -8,12 +8,9 @@
 #include "NetAddress.h"
 
 Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) :
-        Component(distributorIndex, nodeIndex, rootPath){
+        Component(generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath){
 
-	this->distributorIndex = 0;
-	this->nodeIndex = 1;
-
-	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_CLIENT));
+	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_NODE));
 
 	distributorAddress = 0;
 
@@ -28,52 +25,6 @@ Collector::~Collector() {
 //		delete rule;
 	}
 
-}
-
-
-INTERFACES Collector::getInterfaceType(HOST host) {
-
-	if (host == HOST_DISTRIBUTOR) {
-		return connectors[distributorIndex]->getInterfaceType();
-	} else {
-		return connectors[nodeIndex]->getInterfaceType();
-	}
-
-}
-
-long Collector::getAddress(HOST host) {
-
-	if (host == HOST_DISTRIBUTOR) {
-		return connectors[distributorIndex]->getAddress();
-	} else {
-		return connectors[nodeIndex]->getAddress();
-	}
-
-}
-
-bool Collector::onReceive(long address, Message *msg) {
-
-	switch(msg->getOwner()) {
-
-		case HOST_DISTRIBUTOR:
-			if (connectors[distributorIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processDistributorMsg(address, msg);
-			}
-			break;
-
-		case HOST_CLIENT:
-			if (connectors[nodeIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processClientMsg(address, msg);
-			}
-			break;
-
-		default:
-			LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
-			delete msg;
-			return false;
-
-	}
-	return true;
 }
 
 bool Collector::processDistributorMsg(long address, Message *msg) {
@@ -132,6 +83,10 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 	delete msg;
 	return status;
+}
+
+bool Collector::processCollectorMsg(long address, Message *msg) {
+    return false;
 }
 
 bool Collector::processClientMsg(long address, Message *msg) {
@@ -212,7 +167,7 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 	}
 
-	return connectors[distributorIndex]->send(address, msg);
+	return connectors[HOST_DISTRIBUTOR]->send(address, msg);
 
 }
 
@@ -252,7 +207,7 @@ bool Collector::send2ClientMsg(long address, int type) {
 
 	}
 
-	return connectors[nodeIndex]->send(address, msg);
+	return connectors[HOST_NODE]->send(address, msg);
 
 }
 

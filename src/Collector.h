@@ -13,17 +13,13 @@
 
 class Collector : public Component {
 
-    int distributorIndex;
-    int nodeIndex;
-
 	std::map<long , Rule*> rules;
 
 	long distributorAddress;
 
-	virtual bool onReceive(long, Message *);
-
-	bool processDistributorMsg(long address, Message *msg);
-	bool processClientMsg(long address, Message *msg);
+	virtual bool processDistributorMsg(long, Message *);
+	virtual bool processCollectorMsg(long, Message *);
+	virtual bool processClientMsg(long, Message *);
 
 	bool send2DistributorMsg(long, int);
 	bool send2ClientMsg(long, int);
@@ -32,8 +28,6 @@ public:
 	Collector(int, int, const char *rootPath);
 
 	virtual ~Collector();
-	long getAddress(HOST);
-	INTERFACES getInterfaceType(HOST);
 
 	bool reset();
 	bool processRule();

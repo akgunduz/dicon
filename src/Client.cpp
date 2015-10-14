@@ -6,10 +6,7 @@
 #include "Client.h"
 
 Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
-        Component(distributorIndex, collectorIndex, rootPath) {
-
-	this->distributorIndex = 0;
-	this->collectorIndex = 1;
+        Component(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
 
 	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
@@ -24,49 +21,28 @@ Client::~Client() {
 
 }
 
-INTERFACES Client::getInterfaceType(HOST host) {
+bool Client::processDistributorMsg(long address, Message *msg) {
 
-	if (host == HOST_DISTRIBUTOR) {
-		return connectors[distributorIndex]->getInterfaceType();
-	} else {
-		return connectors[collectorIndex]->getInterfaceType();
-	}
+    bool status = false;
 
-}
+    switch(msg->getType()) {
 
-long Client::getAddress(HOST host) {
+        case MSGTYPE_WAKEUP:
 
-	if (host == HOST_DISTRIBUTOR) {
-		return connectors[distributorIndex]->getAddress();
-	} else {
-		return connectors[collectorIndex]->getAddress();
-	}
+            distributorAddress = address;
 
-}
+            LOG_U(UI_UPDATE_CLIENT_LOG,
+                  "\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
 
-bool Client::onReceive(long address, Message *msg) {
+            status = send2DistributorMsg(address, MSGTYPE_ALIVE);
+            break;
 
-	switch(msg->getOwner()) {
+        default :
+            break;
+    }
 
-		case HOST_DISTRIBUTOR:
-			if (connectors[distributorIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processDistributorMsg(address, msg);
-			}
-			break;
-
-		case HOST_COLLECTOR:
-			if (connectors[collectorIndex]->getInterfaceType() == Address::getInterface(address)) {
-				processCollectorMsg(address, msg);
-			}
-			break;
-
-		default:
-			LOG_W("Wrong message received with owner ID: %d from %s, disgarding!!!",
-					msg->getOwner(), Address::getString(address).c_str());
-			delete msg;
-			break;
-	}
-	return true;
+    delete msg;
+    return status;
 }
 
 bool Client::processCollectorMsg(long address, Message *msg) {
@@ -124,33 +100,13 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 	return status;
 }
 
-bool Client::processDistributorMsg(long address, Message *msg) {
-
-	bool status = false;
-
-	switch(msg->getType()) {
-
-		case MSGTYPE_WAKEUP:
-
-			distributorAddress = address;
-
-			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
-
-			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
-			break;
-
-		default :
-			break;
-	}
-
-	delete msg;
-	return status;
+bool Client::processClientMsg(long address, Message *msg) {
+	return false;
 }
 
 bool Client::send2DistributorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_CLIENT, type, getRootPath());
+	Message *msg = new Message(HOST_NODE, type, getRootPath());
 
 	switch(type) {
 
@@ -180,13 +136,13 @@ bool Client::send2DistributorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[distributorIndex]->send(address, msg);
+	return connectors[HOST_DISTRIBUTOR]->send(address, msg);
 
 }
 
 bool Client::send2CollectorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_CLIENT, type, getRootPath());
+	Message *msg = new Message(HOST_NODE, type, getRootPath());
 
 	switch(type) {
 
@@ -203,7 +159,7 @@ bool Client::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[collectorIndex]->send(address, msg);
+	return connectors[HOST_COLLECTOR]->send(address, msg);
 }
 
 bool Client::processMD5() {
@@ -347,5 +303,3 @@ bool Client::processRule() {
 #endif
 	return true;
 }
-
-

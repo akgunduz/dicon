@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native")
 add_definitions(-D__IDE__)
 
 set(FILES
@@ -76,8 +76,8 @@ include_directories(${SOURCE_PATH})
 
 if (APPLE)
 
-   #set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
-    set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+    set(CMAKE_CXX_COMPILER /usr/local/bin/clang-omp++)
+    #set(CMAKE_CXX_COMPILER /usr/bin/clang++)
     add_definitions(-DAPPLE -D__WXWIDGETS__)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 \
         -I/usr/local/include/wx-3.0 -D_FILE_OFFSET_BITS=64 \
