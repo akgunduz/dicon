@@ -23,7 +23,6 @@ public:
     static int getNetmask(long);
     static sockaddr_in getInetAddress(long);
     static bool isLoopback(long);
-    static long parseIP(const std::string &ip);
     static long parseAddress(long ip, int port, int netmask);
     static std::vector<long> getAddressList(long address);
     static int address2prefix(long address);

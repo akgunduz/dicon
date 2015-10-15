@@ -44,6 +44,8 @@ bool Net::init(int interfaceIndex) {
 
 		setAddress(interfaceIndex);
         struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
+        in_addr_t a = inet_addr("127.0.0.1");
+        struct sockaddr_in ccc;
 
 		if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
 			LOG_E("Socket bind with err : %d!!!", errno);

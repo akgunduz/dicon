@@ -65,7 +65,7 @@ Component::Component(long index, const char* rootPath) {
 
             try {
 
-                connectors[HOST_NODE] = new Connector(indexCollector, callback, rootPath);
+                connectors[HOST_NODE] = new Connector(indexNode, callback, rootPath);
                 this->rootPath = connectors[HOST_NODE]->getRootPath();
 
             } catch (const std::runtime_error e) {
@@ -146,9 +146,9 @@ bool Component::onReceive(long address, Message *msg) {
     }
 }
 
-long Component::generateIndex(int indexFirst, int indexSecond, int indexThird) {
+long Component::generateIndex(int indexDist, int indexCollector, int indexNode) {
 
-    return ((long)indexFirst) | ((long)indexSecond << 16) | ((long)indexThird << 32) ;
+    return ((long)indexDist) | ((long)indexCollector << 16) | ((long)indexNode << 32) ;
 }
 
 INTERFACES Component::getInterfaceType(HOST host) {

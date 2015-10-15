@@ -32,8 +32,8 @@ std::vector<ConnectInterface> ConnectInterface::getInterfaces() {
                 strncmp(loop->ifa_name, "lo", 2) == 0) {
 
                 interfaceList.push_back(ConnectInterface(loop->ifa_name,
-                    ((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr,
-                    NetAddress::address2prefix(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)));
+                    ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                    ntohl(NetAddress::address2prefix(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
 
             }
         }
