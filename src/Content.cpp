@@ -40,7 +40,6 @@ FileContent::FileContent(const std::string &rootpath,
 
 	std::string abspath = rootpath + path;
 
-
 	FILE *execfile = fopen(abspath.c_str(), "r");
 	if (execfile == nullptr) {
 		LOG_T("FileContent %s could not opened", abspath.c_str());
@@ -49,6 +48,7 @@ FileContent::FileContent(const std::string &rootpath,
 	}
 
 	setValid(true);
+    mFlaggedToSent = true;
 	LOG_T("FileContent is opened");
 
 	if (smd5 != nullptr && strcmp(smd5, "") != 0) {

@@ -31,8 +31,8 @@ enum MSG_TYPE {
 //Send md5
 #define STREAM_MD5ONLY 0x03
 
-#define BLOCK_FILE_BINARY 0x02
-#define BLOCK_FILE_MD5 0x03
+#define BLOCK_FILE_BINARY 0x01
+#define BLOCK_FILE_MD5 0x02
 
 struct MD5Wrapper {
 	uint8_t mMD5[MD5_DIGEST_LENGTH];

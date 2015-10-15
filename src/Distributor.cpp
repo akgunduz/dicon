@@ -15,7 +15,6 @@ Distributor::Distributor(int collectorIndex,
 			timeoutCallback, sendWakeupMessage, backupRate);
 	clientManager->initClientChecker();
 
-	LOG_I("Instance is created!!!");
 };
 
 Distributor::~Distributor() {
