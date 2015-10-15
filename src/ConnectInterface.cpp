@@ -33,7 +33,7 @@ std::vector<ConnectInterface> ConnectInterface::getInterfaces() {
 
                 interfaceList.push_back(ConnectInterface(loop->ifa_name,
                     ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                    ntohl(NetAddress::address2prefix(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
+                    NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
 
             }
         }

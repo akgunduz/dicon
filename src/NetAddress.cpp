@@ -14,28 +14,13 @@ std::string NetAddress::getString(long address) {
 
 long NetAddress::parseAddress(long ip, int port, int netmask) {
 
-    return ((long)netmask << 48) | ((long)port << 32) | ip;
+    return ((long)netmask << 48) | ((long)port << 32) | htonl(ip);
 
 }
 
 long NetAddress::getIP(long address) {
 
-    return address & IPADDRESS_MASK;
-}
-
-std::string NetAddress::getIPstr(long address) {
-
-    struct in_addr addr;
-    addr.s_addr = htonl((uint32_t)getIP(address));
-    char cIP[INET_ADDRSTRLEN];
-
-    const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
-    if (!dst) {
-        LOG_E("Ip is invalid");
-        return "";
-    }
-
-    return std::string(cIP);
+    return ntohl(address & IPADDRESS_MASK);
 }
 
 int NetAddress::getPort(long address) {
@@ -48,6 +33,21 @@ int NetAddress::getNetmask(long address) {
 
     return (int)((address >> 48) & 0xFFFF);
 
+}
+
+std::string NetAddress::getIPstr(long address) {
+
+    struct in_addr addr;
+    addr.s_addr = htonl(getIP(address));
+    char cIP[INET_ADDRSTRLEN];
+
+    const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
+    if (!dst) {
+        LOG_E("Ip is invalid");
+        return "";
+    }
+
+    return std::string(cIP);
 }
 
 sockaddr_in NetAddress::getInetAddress(long address) {
@@ -63,7 +63,7 @@ sockaddr_in NetAddress::getInetAddress(long address) {
 
 bool NetAddress::isLoopback(long address) {
 
-    return  (((address) & IPADDRESS_MASK) == ntohl(LOOPBACK_ADDRESS));
+    return  (((address) & IPADDRESS_MASK) == LOOPBACK_ADDRESS);
 }
 
 std::vector<long> NetAddress::getAddressList(long address) {
