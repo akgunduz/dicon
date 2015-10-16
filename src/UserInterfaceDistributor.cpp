@@ -57,6 +57,7 @@ void UserInterface::onDistInitClick( wxCommandEvent& event ) {
 
 		try {
 			distCollList->DeleteAllItems();
+			distClientList->DeleteAllItems();
 
 			char path[PATH_MAX];
 			sprintf(path, "%s/%s/", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
@@ -98,6 +99,7 @@ void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 void UserInterface::onDistPollClick(wxCommandEvent &event) {
 
 	distObject->reset();
+	distCollList->DeleteAllItems();
 	distClientList->DeleteAllItems();
 
 	distObject->sendWakeupMessagesAll();
