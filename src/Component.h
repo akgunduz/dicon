@@ -17,7 +17,7 @@ protected :
     const char* rootPath;
 
 public:
-    Component(long index, const char* rootPath);
+    Component(Unit host, long index, const char* rootPath);
     ~Component();
     const char* getRootPath();
     INTERFACES getInterfaceType(HOST host);

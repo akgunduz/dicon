@@ -4,30 +4,25 @@
 //
 
 #include "Message.h"
+#include "Util.h"
 
-Message::Message(const std::string& root) {
+Message::Message(Unit host, const char* rootPath)
+		: BaseMessage(host, rootPath) {
 
-	mRule = nullptr;
-
-    mRootPath = root;
+	rule = nullptr;
 }
 
-Message::Message(HOST owner, int type, const std::string& root) : BaseMessage(0, owner, type) {
+Message::Message(Unit owner, int type, const char* rootPath)
+		: BaseMessage(owner, type, rootPath) {
 
-    mRule = nullptr;
-
-    mRootPath = root;
-}
-
-HOST Message::getOwner() {
-    return (HOST) getDeviceID();
+	rule = nullptr;
 }
 
 void Message::setRule(int streamFlag, Rule *rule) {
 
     setStreamFlag(streamFlag);
 
-    mRule = rule;
+    this->rule = rule;
 }
 
 bool Message::readMD5(int desc, uint8_t *md5) {
@@ -40,14 +35,14 @@ bool Message::readMD5(int desc, uint8_t *md5) {
 	return true;
 }
 
-bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader *header, const std::string &rootPath) {
+bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader *header) {
 
 	if (header->blockType != BLOCK_FILE_BINARY) {
 		LOG_E("readFileBinary can not read other blocks");
 		return false;
 	}
 
-	std::string path;
+	char path[PATH_MAX];
 	if (!readString(desc, path, header->sizes[0])) {
 		LOG_E("readFileBinary can not read path data");
 		return false;
@@ -67,7 +62,13 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
 	content->setMD5(md5);
 
 	uint8_t calcmd5[MD5_DIGEST_LENGTH];
-	if (!readBinary(desc, rootPath + path, calcmd5, header->sizes[2])) {
+
+    char absPath[PATH_MAX];
+    char md5Path[PATH_MAX];
+
+    Util::getAbsolutePath(getHost(), getOwner(), FILE_RULE, getRootPath(), path, absPath, md5Path);
+
+	if (!readBinary(desc, absPath, calcmd5, md5Path, header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}
@@ -88,7 +89,7 @@ bool Message::readFileMD5(int desc, MD5Wrapper *content, struct BlockHeader* hea
 		return false;
 	}
 
-	if (!readMD5(desc, content->mMD5)) {
+	if (!readMD5(desc, content->md5)) {
 		LOG_E("Can not read md5");
 		return false;
 	}
@@ -104,19 +105,19 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
             FileContent *fileContent = new FileContent();
 
-            if (!readFileBinary(in, fileContent, blockHeader, mRootPath)) {
+            if (!readFileBinary(in, fileContent, blockHeader)) {
                 return false;
             }
 
-            if (mRule == nullptr) {
+            if (rule == nullptr) {
 
-                mRule = new Rule(mRootPath, RULE_FILE);
+                rule = new Rule(Unit(getHost()), Unit(getOwner()), getRootPath());
 
             }
 
-            if (mRule->isValid() && fileContent->getPath().compare(RULE_FILE)) {
+            if (rule->isValid() && strcmp(fileContent->getPath(), RULE_FILE) == 0) {
 
-                mRule->updateFileContent(fileContent);
+                rule->updateFileContent(fileContent);
 
             }
 
@@ -130,7 +131,7 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
                 return false;
             }
 
-            mMD5List.push_back(md5);
+            md5List.push_back(md5);
         }
             break;
 
@@ -151,13 +152,13 @@ bool Message::writeMD5(int desc, uint8_t *md5) {
 	return true;
 }
 
-bool Message::writeFileBinary(int desc, FileContent *content, const std::string &rootpath) {
+bool Message::writeFileBinary(int desc, FileContent *content) {
 
 	BlockHeader blockHeader = {3, BLOCK_FILE_BINARY};
 
-    blockHeader.sizes[0] = (uint32_t)content->getPath().length();
+    blockHeader.sizes[0] = (uint32_t)strlen(content->getPath());
     blockHeader.sizes[1] = MD5_DIGEST_LENGTH;
-    blockHeader.sizes[2] = getBinarySize(rootpath + content->getPath());
+    blockHeader.sizes[2] = getBinarySize(content->getAbsPath());
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
@@ -172,7 +173,7 @@ bool Message::writeFileBinary(int desc, FileContent *content, const std::string 
 	}
 
 	uint8_t calcmd5[MD5_DIGEST_LENGTH];
-	if (!writeBinary(desc, rootpath + content->getPath(), calcmd5)) {
+	if (!writeBinary(desc, content->getAbsPath(), calcmd5)) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}
@@ -204,17 +205,17 @@ bool Message::writeMessageStream(int out, int streamFlag) {
     switch(streamFlag) {
 
         case STREAM_RULE:
-            if (!writeFileBinary(out, mRule->getRuleFile(), mRootPath)) {
+            if (!writeFileBinary(out, rule->getContent())) {
                 return false;
             }
 
             break;
 
         case STREAM_BINARY:
-            for (uint16_t i = 0; i < mRule->getContentCount(RULE_FILES); i++) {
-                FileContent *content = (FileContent *)mRule->getContent(RULE_FILES, i);
+            for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
+                FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
                 if (content->isFlaggedToSent()) {
-                    if (!writeFileBinary(out, content, mRootPath)) {
+                    if (!writeFileBinary(out, content)) {
                         return false;
                     }
                 }
@@ -222,8 +223,8 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             break;
 
         case STREAM_MD5ONLY:
-            for (uint16_t i = 0; i < mRule->getContentCount(RULE_FILES); i++) {
-                FileContent *content = (FileContent *)mRule->getContent(RULE_FILES, i);
+            for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
+                FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
                 if (content->isFlaggedToSent()) {
                     if (!writeFileMD5(out, content)) {
                         return false;

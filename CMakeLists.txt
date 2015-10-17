@@ -56,6 +56,8 @@ set(FILES
         ${SOURCE_PATH}/Scheduler.h
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Util.h
+        ${SOURCE_PATH}/Unit.cpp
+        ${SOURCE_PATH}/Unit.h
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/StopWatch.h
         ${SOURCE_PATH}/UnixSocket.cpp

@@ -6,21 +6,26 @@
 #include "BaseMessage.h"
 #include "Util.h"
 
-BaseMessage::BaseMessage() {
+BaseMessage::BaseMessage(Unit host, const char* rootPath) {
 
 	memset(&header, 0, sizeof(MessageHeader));
+    strcpy(this->rootPath, rootPath);
+    setHost(host);
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
 }
 
-BaseMessage::BaseMessage(long time, long deviceID, int type) {
+BaseMessage::BaseMessage(Unit owner, int type, const char* rootPath) {
 
 	memset(&header, 0, sizeof(MessageHeader));
-	header.time = time;
-	header.deviceID = deviceID;
+    strcpy(this->rootPath, rootPath);
+	header.time = 0;
+	header.deviceID = 0;
 	header.messageID = 0;//new Random(time).nextLong();
 	header.type = type;
 
+    setHost(owner);
+    setOwner(owner);
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
 }
@@ -31,6 +36,22 @@ void BaseMessage::setStreamFlag(int flag) {
 
 int BaseMessage::getType() {
 	return header.type;
+}
+
+Unit BaseMessage::getHost() {
+    return this->host;
+}
+
+void BaseMessage::setHost(Unit host) {
+    this->host = host;
+}
+
+Unit BaseMessage::getOwner() {
+	return Unit(header.owner);
+}
+
+void BaseMessage::setOwner(Unit owner) {
+	header.owner = owner.getUnit();
 }
 
 long BaseMessage::getOwnerAddress() {
@@ -92,11 +113,11 @@ void BaseMessage::normalizePriority() {
 	header.priority *= PRIORITY_COEFFICIENT;
 }
 
-int BaseMessage::getBinarySize(const std::string &path) {
+int BaseMessage::getBinarySize(const char* path) {
 
-    FILE *fd = fopen(path.c_str(), "rb");
+    FILE *fd = fopen(path, "rb");
     if (!fd) {
-        LOG_E("File %s could not found", path.c_str());
+        LOG_E("File %s could not found", path);
         return 0;
     }
 
@@ -230,6 +251,7 @@ bool BaseMessage::readHeader(int in, MessageHeader *header) {
 	uint8_t *p = tmpBuf;
     header->type = ntohl(*((int *) p)); p += 4;
 	header->priority = ntohl(*((int *) p)); p += 4;
+	header->owner = ntohl(*((int *) p)); p += 4;
     header->ownerAddress = ntohll(*((long *) p)); p += 8;
     header->time = ntohll(*((long *) p)); p += 8;
     header->deviceID = ntohll(*((long *) p)); p += 8;
@@ -270,9 +292,9 @@ bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
 	return true;
 }
 
-bool BaseMessage::readString(int in, std::string &object, int size) {
+bool BaseMessage::readString(int in, char* object, int size) {
 
-	object.assign("");
+    strcpy(object, "");
 
 	while(size > TMP_BUFFER_SIZE - 1) {
 
@@ -282,7 +304,7 @@ bool BaseMessage::readString(int in, std::string &object, int size) {
 		}
 
         tmpBuf[TMP_BUFFER_SIZE - 1] = '\0';
-		object.append((char *)tmpBuf);
+		strcat(object, (char *)tmpBuf);
 
 		size -= TMP_BUFFER_SIZE + 1;
 	}
@@ -293,7 +315,7 @@ bool BaseMessage::readString(int in, std::string &object, int size) {
 	}
 
     tmpBuf[size] = '\0';
-	object.append((char *)tmpBuf);
+    strcat(object, (char *)tmpBuf);
 
 	return true;
 }
@@ -309,13 +331,13 @@ bool BaseMessage::readNumber(int in, long *number) {
 	return true;
 }
 
-bool BaseMessage::readBinary(int in, const std::string &path, uint8_t *md5, int size) {
+bool BaseMessage::readBinary(int in, const char* path, uint8_t *md5, const char* md5Path, int size) {
 
-	Util::mkPath(path.c_str());
+	Util::mkPath(path);
 
-	int out = open(path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
+	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
-		LOG_E("File %s could not created or opened", path.c_str());
+		LOG_E("File %s could not created or opened", path);
 		return false;
 	}
 
@@ -325,11 +347,9 @@ bool BaseMessage::readBinary(int in, const std::string &path, uint8_t *md5, int 
 
 	if (status) {
 
-		std::string sMD5Path = path + ".md5";
-
-        out = open(sMD5Path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
+        out = open(md5Path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
         if (out == -1) {
-            LOG_E("File %s could not created or opened", sMD5Path.c_str());
+            LOG_E("File %s could not created or opened", md5Path);
             return false;
         }
 
@@ -444,6 +464,7 @@ bool BaseMessage::writeHeader(int out, MessageHeader *header) {
 	uint8_t *p = tmpBuf;
 	*((int *) p) = htonl(header->type); p += 4;
 	*((int *) p) = htonl(header->priority); p += 4;
+	*((int *) p) = htonl(header->owner); p += 4;
 	*((long *) p) = htonll(header->ownerAddress); p += 8;
 	*((long *) p) = htonll(header->time); p += 8;
 	*((long *) p) = htonll(header->deviceID); p += 8;
@@ -477,9 +498,9 @@ bool BaseMessage::writeBlockHeader(int out, BlockHeader *header) {
 	return true;
 }
 
-bool BaseMessage::writeString(int out, const std::string &str) {
+bool BaseMessage::writeString(int out, const char* str) {
 
-	if (!writeBlock(out, (uint8_t*)str.c_str(), (uint32_t)str.length())) {
+	if (!writeBlock(out, (uint8_t*)str, (int)strlen(str))) {
 		LOG_E("Can not write string to stream");
 		return false;
 	}
@@ -496,13 +517,13 @@ bool BaseMessage::writeNumber(int out, long number) {
 	return true;
 }
 
-bool BaseMessage::writeBinary(int out, const std::string &path, uint8_t *md5) {
+bool BaseMessage::writeBinary(int out, const char* path, uint8_t *md5) {
 
     int size = getBinarySize(path);
 
-	int in = open(path.c_str(), O_RDONLY);
+	int in = open(path, O_RDONLY);
 	if (in == -1) {
-		LOG_E("File %s could not created or opened", path.c_str());
+		LOG_E("File %s could not created or opened", path);
 		return false;
 	}
 
@@ -541,4 +562,8 @@ bool BaseMessage::writeToStream(int out) {
     writeEndStream(out);
 
 	return true;
+}
+
+const char *BaseMessage::getRootPath() {
+    return rootPath;
 }

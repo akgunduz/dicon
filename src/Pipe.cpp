@@ -6,8 +6,8 @@
 #include "Pipe.h"
 #include "PipeAddress.h"
 
-Pipe::Pipe(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(INTERFACE_PIPE, cb, rootPath) {
+Pipe::Pipe(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, INTERFACE_PIPE, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
 		LOG_E("Instance create failed!!!");
@@ -46,7 +46,7 @@ bool Pipe::init(int interfaceIndex) {
 
 }
 
-void Pipe::runReceiver() {
+void Pipe::runReceiver(Unit host) {
 
 	bool thread_started = true;
 	int maxfd = std::max(desc[0], notifierPipe[0]) + 1;
@@ -65,7 +65,7 @@ void Pipe::runReceiver() {
 		if (FD_ISSET(desc[0], &readfs)) {
 			LOG_T("New data arrived from Pipe : %d !!!", desc[0]);
 
-			Message *msg = new Message(rootPath);
+			Message *msg = new Message(host, getRootPath());
 			if (msg->readFromStream(desc[0])) {
 				push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 			}

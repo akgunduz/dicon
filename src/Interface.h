@@ -9,6 +9,7 @@
 #include "Message.h"
 #include "Address.h"
 #include "ConnectInterface.h"
+#include "Unit.h"
 
 class Interface;
 
@@ -21,6 +22,7 @@ class Argument {
 
 public:
 
+	Unit host;
 	int acceptSocket = 0;
 	Message *msg = nullptr;
 
@@ -46,23 +48,26 @@ private :
 	static bool senderCB(void *, long, Message *);
 protected :
 	bool initialized = false;
+    Unit host;
 	long address;
+    char rootPath[PATH_MAX];
 	Scheduler *scheduler;
 	pthread_t thread;
 	int notifierPipe[2];
 	virtual bool init(int) = 0;
-	virtual void runReceiver() = 0;
+	virtual void runReceiver(Unit host) = 0;
 	virtual void runSender(long, Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(INTERFACES type, const InterfaceCallback *, const char *);
+	Interface(Unit host, INTERFACES type, const InterfaceCallback *, const char *);
 	virtual void setAddress(int) = 0;
 
 public :
-	char rootPath[PATH_MAX];
+
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
+    const char* getRootPath();
 	virtual INTERFACES getType() = 0;
 	virtual long getAddress();
 	virtual std::vector<long> getAddressList() = 0;

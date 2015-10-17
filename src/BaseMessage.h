@@ -8,6 +8,7 @@
 #define __BaseMessage_H_
 
 #include "Common.h"
+#include "Unit.h"
 
 #define BUFFER_SIZE 512
 
@@ -46,6 +47,7 @@ struct MessageHeader {
 
     int type;
     int priority;
+    int owner;
     long ownerAddress;
     long time;
     long deviceID;
@@ -87,18 +89,27 @@ class BaseMessage {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE];
 
+    Unit host;
+
+    char rootPath[PATH_MAX];
+
 	struct MessageHeader header;
 
     int streamFlag;
 
 public:
 
-    BaseMessage();
-    BaseMessage(long time, long deviceID, int type = 0);
+    BaseMessage(Unit host, const char* rootPath);
+    BaseMessage(Unit owner, int type, const char* rootPath);
 
     void setStreamFlag(int);
 
 	int getType();
+
+    Unit getHost();
+	void setHost(Unit);
+    Unit getOwner();
+	void setOwner(Unit);
 
     long getOwnerAddress();
 	void setOwnerAddress(long);
@@ -109,21 +120,23 @@ public:
     long getDeviceID();
     long getMessageID();
 
+    const char* getRootPath();
+
     PRIORITIES getPriority();
     void setPriority(PRIORITIES);
     void normalizePriority();
     PRIORITIES iteratePriority();
 
-    int getBinarySize(const std::string&);
+    int getBinarySize(const char*);
     bool transferBinary(int, int, uint8_t *, int);
 
 	bool readBlock(int, uint8_t *, int);
-	bool readBinary(int, const std::string&, uint8_t *, int);
+	bool readBinary(int, const char*, uint8_t *, const char*, int);
 
 	bool readSignature(int);
 	bool readHeader(int, MessageHeader *);
 	bool readBlockHeader(int, BlockHeader *);
-	bool readString(int, std::string&, int);
+	bool readString(int, char*, int);
 	bool readNumber(int, long*);
 
 	bool readFromStream(int);
@@ -135,9 +148,9 @@ public:
 	bool writeSignature(int);
 	bool writeHeader(int, struct MessageHeader *);
 	bool writeBlockHeader(int, struct BlockHeader *);
-	bool writeString(int, const std::string&);
+	bool writeString(int, const char*);
 	bool writeNumber(int, long);
-	bool writeBinary(int, const std::string&, uint8_t *);
+	bool writeBinary(int, const char*, uint8_t *);
 
 	bool writeEndStream(int);
 

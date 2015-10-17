@@ -9,20 +9,26 @@
 #include "Content.h"
 
 class FileContent : public Content {
-	std::string mPath;
-	uint8_t mMD5[MD5_DIGEST_LENGTH];
-	bool mFlaggedToSent;
+	char path[PATH_MAX];
+	char absPath[PATH_MAX];
+	uint8_t md5[MD5_DIGEST_LENGTH];
+	bool flaggedToSent;
+	FILETYPE fileType;
 
 public:
 	FileContent();
-	FileContent(const std::string&, const std::string&, const char *);
+	FileContent(const char*, const char*, const char*, FILETYPE);
 	~FileContent(){};
-	const bool isFlaggedToSent();
+	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
+	FILETYPE getFileType();
+	void setFileType(FILETYPE);
 	uint8_t* getMD5();
 	void setMD5(uint8_t*);
-	std::string getPath();
-	void setPath(const std::string&);
+    const char* getPath();
+    const char* getAbsPath();
+	void setPath(const char*);
+	void setAbsPath(const char *path);
 	void set(FileContent *);
 	virtual CONTENT_TYPES getType();
 };

@@ -6,34 +6,36 @@
 #include "Rule.h"
 #include "ParameterContent.h"
 #include "ExecutorContent.h"
+#include "Util.h"
 
-Rule::Rule(const std::string &rootpath, const std::string &path) {
+Rule::Rule(Unit host, Unit node, const char* rootPath) {
 
-	mRootPath = rootpath;
-	mIsValid = false;
-	mRunType = RUN_SEQUENTIAL;
+    this->unitHost = host;
+    this->unitNode = node;
+	strcpy(this->rootPath, rootPath);
+	valid = false;
+	parallel = false;
 
-	if (path.empty()) {
-		return;
-	}
+    char absPath[PATH_MAX];
+    char md5Path[PATH_MAX];
 
-	std::string abspath = rootpath + path;
+    Util::getAbsolutePath(unitHost, unitNode, FILE_RULE, getRootPath(), RULE_FILE, absPath, md5Path);
 
-	mRuleFile = new FileContent(rootpath, path, nullptr);
-	if (!mRuleFile->isValid()) {
-		LOG_E("Can not read rule file %s!!!", abspath.c_str());
+    content = new FileContent(absPath, RULE_FILE, md5Path, FILE_RULE);
+	if (!content->isValid()) {
+		LOG_E("Can not read rule file %s!!!", RULE_FILE);
 		return;
 	}
 
 	char *ruleBuffer = nullptr;
 
-	if (!readFile(abspath, &ruleBuffer)) {
-		LOG_E("Read problem in rule file %s!!!", abspath.c_str());
+	if (!readFile(absPath, &ruleBuffer)) {
+		LOG_E("Read problem in rule file %s!!!", absPath);
 		return;
 	}
 
 	if (ruleBuffer == nullptr) {
-		LOG_E("Read problem in rule file %s!!!", abspath.c_str());
+		LOG_E("Read problem in rule file %s!!!", absPath);
 		return;
 	}
 
@@ -45,59 +47,75 @@ Rule::Rule(const std::string &rootpath, const std::string &path) {
 
 	delete[] ruleBuffer;
 
-	mRuleFile->setFlaggedToSent(true);
+	content->setFlaggedToSent(true);
 
-	mIsValid = true;
-	LOG_I("Rule instance is created!!!");
+	valid = true;
 
 }
 
 Rule::~Rule() {
 
-	if (mRuleFile != nullptr) {
-		delete mRuleFile;
-		mRuleFile = nullptr;
+	if (content != nullptr) {
+		delete content;
+        content = nullptr;
 	}
 
 	for (int i = 0; i < RULE_MAX; i++) {
-		for (int j = 0; j < mContentList[i].size(); j++) {
-			Content *item = mContentList[i][j];
+		for (int j = 0; j < contentList[i].size(); j++) {
+			Content *item = contentList[i][j];
 			delete item;
 		}
 	}
 }
 
-bool Rule::readFile(const std::string &path, char **pbuf) {
+bool Rule::readFile(const char* path, char **pbuf) {
 
-	int readdesc = open(path.c_str(), O_RDONLY);
-	if (readdesc == -1) {
-		LOG_E("Rule File %s could not created or opened", path.c_str());
+	int desc = open(path, O_RDONLY);
+	if (desc == -1) {
+		LOG_E("Rule File %s could not created or opened", path);
 		return false;
 	}
 
 	LOG_T("Rule File is opened");
 
-	off_t len = lseek(readdesc, 0, SEEK_END);
+	off_t len = lseek(desc, 0, SEEK_END);
 	if (len == -1) {
 		LOG_E("Rule File : Error %d happened in lseek", errno);
-		close(readdesc);
+		close(desc);
 		return false;
 	}
 
-	lseek(readdesc, 0, SEEK_SET);
+	lseek(desc, 0, SEEK_SET);
 
 	*pbuf = new char[len];
 
-	long count = read(readdesc, *pbuf, (size_t)len);
+	long count = read(desc, *pbuf, (size_t)len);
 	if (count == -1) {
 		LOG_E("Rule File : Error %d happened in read \"Rules.json\"", errno);
 		delete[] *pbuf;
-		close(readdesc);
+		close(desc);
 		return false;
 	}
 
-	close(readdesc);
-	LOG_T("Rule file is read");
+	close(desc);
+
+    return true;
+}
+
+
+bool Rule::parseRunTypeNode(json_object *node) {
+
+    enum json_type type = json_object_get_type(node);
+    if (type != json_type_int) {
+        LOG_E("Invalid JSON Files Node");
+        return false;
+    }
+
+    const char *runType = json_object_get_string(node);
+
+    if (strcmp(runType, "P") == 0 || strcmp(runType, "p") == 0) {
+        parallel = true;
+    }
 
     return true;
 }
@@ -124,15 +142,22 @@ bool Rule::parseFileNode(json_object *node) {
 			return false;
 		}
 
-		json_object *pathnode = json_object_array_get_idx(child, 0);
-		json_object *md5node = json_object_array_get_idx(child, 1);
+		json_object *pathNode = json_object_array_get_idx(child, 0);
+		json_object *typeNode = json_object_array_get_idx(child, 1);
 
-		std::string path(json_object_get_string(pathnode));
-		const char *md5 = json_object_get_string(md5node);
+		const char* path = json_object_get_string(pathNode);
+		const char* sFileType = json_object_get_string(typeNode);
 
-		FileContent *content = new FileContent(mRootPath, path, md5);
+        FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
 
-		mContentList[RULE_FILES].push_back(content);
+        char absPath[PATH_MAX];
+        char md5Path[PATH_MAX];
+
+        Util::getAbsolutePath(unitHost, unitNode, fileType, getRootPath(), path, absPath, md5Path);
+
+		FileContent *content = new FileContent(absPath, path, md5Path, fileType);
+
+		contentList[RULE_FILES].push_back(content);
 
 	}
 	return true;
@@ -159,7 +184,7 @@ bool Rule::parseParamNode(json_object *node) {
 
 		ParameterContent *content = new ParameterContent(param);
 		if (content->isValid()) {
-			mContentList[RULE_PARAMETERS].push_back(content);
+            contentList[RULE_PARAMETERS].push_back(content);
 		}
 
 	}
@@ -167,26 +192,6 @@ bool Rule::parseParamNode(json_object *node) {
 	return true;
 }
 
-bool Rule::parseRunTypeNode(json_object *node) {
-
-	enum json_type type = json_object_get_type(node);
-	if (type != json_type_int) {
-		LOG_E("Invalid JSON Files Node");
-		return false;
-	}
-
-	const char *runtype = json_object_get_string(node);
-	if (strcmp(runtype, "S") == 0 || strcmp(runtype, "s") == 0) {
-		mRunType = RUN_SEQUENTIAL;
-	} else if (strcmp(runtype, "P") == 0 || strcmp(runtype, "p") == 0) {
-		mRunType = RUN_PARALLEL;
-	} else  {
-		LOG_E("Invalid Run Type Value");
-		return false;
-	}
-
-	return true;
-}
 
 bool Rule::parseExecutorNode(json_object *node) {
 
@@ -209,7 +214,7 @@ bool Rule::parseExecutorNode(json_object *node) {
 
 		ExecutorContent *content = new ExecutorContent(exec);
 		if (content->isValid()) {
-			mContentList[RULE_EXECUTORS].push_back(content);
+			contentList[RULE_EXECUTORS].push_back(content);
 		}
 
 	}
@@ -237,8 +242,8 @@ bool Rule::parseBuffer(char *buf) {
 
 	json_object_object_foreach(header, key, val) {
 
-		std::map<std::string, RULE_TYPES>::iterator itr = mRuleMap.find(key);
-		if (itr == mRuleMap.end()) {
+		std::map<std::string, RULE_TYPES>::iterator itr = ruleMap.find(key);
+		if (itr == ruleMap.end()) {
 			LOG_W("Unrecognized JSON Node, skipping to next");
 			continue;
 
@@ -252,21 +257,21 @@ bool Rule::parseBuffer(char *buf) {
 }
 
 Content* Rule::getContent(RULE_TYPES type, int index) {
-	return mContentList[type][index];
+	return contentList[type][index];
 }
 
-ssize_t Rule::getContentCount(RULE_TYPES type) {
-	return mContentList[type].size();
+int Rule::getContentCount(RULE_TYPES type) {
+	return (int) contentList[type].size();
 }
 
 bool Rule::addContent(RULE_TYPES types, Content *content) {
-	mContentList[types].push_back(content);
+	contentList[types].push_back(content);
 	return true;
 }
 
 void Rule::reset() {
 	for (int i = RULE_FILES; i < RULE_MAX; i++) {
-		mContentList[i].clear();
+		contentList[i].clear();
 	}
 }
 
@@ -279,7 +284,7 @@ void Rule::display() {
 			switch(cnt->getType()) {
 				case CONTENT_FILE: {
 					FileContent *fcnt = (FileContent *)cnt;
-					LOG_S("\t\tFile : %s", fcnt->getPath().c_str());
+					LOG_S("\t\tFile : %s", fcnt->getPath());
 				}
 					break;
 				case CONTENT_PARAM: {
@@ -309,13 +314,13 @@ void Rule::display() {
 	}
 }
 
-FileContent *Rule::getRuleFile() {
-	return mRuleFile;
+FileContent *Rule::getContent() {
+	return content;
 }
 
-ssize_t Rule::getFlaggedFileCount() {
+int Rule::getFlaggedFileCount() {
 
-	ssize_t count = 0;
+	int count = 0;
 
 	for (uint16_t i = 0; i < getContentCount(RULE_FILES); i++) {
 		FileContent *content = (FileContent *)getContent(RULE_FILES, i);
@@ -328,31 +333,25 @@ ssize_t Rule::getFlaggedFileCount() {
 }
 
 bool Rule::isValid() {
-
-	return mIsValid;
-
+	return valid;
 }
 
-bool Rule::updateFileContent(FileContent *refcontent) {
+bool Rule::updateFileContent(FileContent *refContent) {
 
 	for (uint16_t i = 0; i < getContentCount(RULE_FILES); i++) {
 		FileContent *content = (FileContent *)getContent(RULE_FILES, i);
-		if (refcontent->getPath().compare(content->getPath()) == 0) {
-			content->set(refcontent);
+		if (strcmp(refContent->getPath(), content->getPath()) == 0) {
+			content->set(refContent);
 		}
 	}
 
 	return true;
 }
 
-std::string Rule::getRootPath() {
-
-	return mRootPath;
-
+const char* Rule::getRootPath() {
+	return rootPath;
 }
 
-RUN_TYPE Rule::getRunType() {
-
-	return mRunType;
-
+bool Rule::isParallel() {
+	return parallel;
 }

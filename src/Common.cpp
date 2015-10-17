@@ -5,6 +5,17 @@
 
 #include "Common.h"
 
+const char* sArchs[] = {
+		"osx",
+		"win",
+		"lin",
+		"arm11",
+		"a7",
+		"a8",
+		"a9",
+		"a15",
+};
+
 const char* sStates[] = {
 		"IDLE",
 		"BUSY",

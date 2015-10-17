@@ -190,7 +190,7 @@ bool ClientManager::stopClientChecker() {
 	return true;
 }
 
-bool ClientManager::setClientIdle(long address, double totalTime) {
+bool ClientManager::setClientIdle(long address, short id, double totalTime) {
 
 	try {
 
@@ -206,7 +206,7 @@ bool ClientManager::setClientIdle(long address, double totalTime) {
 
 	} catch (const std::out_of_range e) {
 
-		addClient(address);
+		addClient(address, id);
 		return false;
 	}
 
@@ -214,11 +214,11 @@ bool ClientManager::setClientIdle(long address, double totalTime) {
 
 }
 
-bool ClientManager::setClientValidate(long address) {
+bool ClientManager::setClientValidate(long address, short id) {
 
 	std::map<long, ClientMap*>::iterator i = clients.find(address);
 	if (i == clients.end()) {
-		addClient(address);
+		addClient(address, id);
 		return false;
 	}
 
@@ -269,9 +269,9 @@ bool ClientManager::setClientRemove(long address) {
 
 }
 
-bool ClientManager::addClient(long address) {
+bool ClientManager::addClient(long address, short id) {
 
-	clients[address] = new ClientMap(IDLE, 0, address);
+	clients[address] = new ClientMap(IDLE, 0, address, id);
 
 	totalBackup = clients.size() == 1 ? 0 : (uint32_t) ceil(clients.size() * backupRate);
 
@@ -283,7 +283,9 @@ bool ClientManager::addClient(long address) {
 	return true;
 }
 
-long ClientManager::getIdleClient(long collectorAddress) {
+ClientMap* ClientManager::getIdleClient(long collectorAddress) {
+
+//TODO coklu collector de burada thread korumasi olmasi lazim
 
 	ClientMap *leastUsedClient = nullptr;
 
@@ -315,13 +317,13 @@ long ClientManager::getIdleClient(long collectorAddress) {
 		LOG_T("Client at address : %s returned to collector",
 			  Address::getString(leastUsedClient->address).c_str());
 
-		return leastUsedClient->address;
+		return leastUsedClient;
 
 	} else {
 		LOG_W("No available client right now.");
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool ClientManager::resetDiffTimes() {

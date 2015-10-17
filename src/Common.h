@@ -72,6 +72,10 @@
 
 #define RULE_FILE "Rule.json"
 
+#define MD5_PATH "md5"
+#define ARCH_PATH "arch"
+#define COMMON_PATH "common"
+
 #define SHUTDOWN_NOTIFIER 'Q'
 /*#define LOOPBACK_RANGE 256
 #define LOOPBACK_ADDRESS 0x7F000001
@@ -97,6 +101,23 @@ enum STATES {
 	BUSY,
 	PREBUSY,
 	REMOVE
+};
+
+enum FILETYPE {
+    FILE_RULE,
+	FILE_COMMON,
+	FILE_ARCH
+};
+
+enum ARCHIDS {
+	ARCH_OSX,
+	ARCH_WIN,
+	ARCH_LIN,
+	ARCH_ARM11,
+	ARCH_A7,
+	ARCH_A8,
+	ARCH_A9,
+	ARCH_A15
 };
 
 enum UI_UPDATE {
@@ -141,6 +162,7 @@ public:
 	EventData(const char *data) : dataStr(data) {}
 };
 
+extern const char* sArchs[];
 extern const char* sStates[];
 extern const char* sParamTypes[];
 extern const char* sInterfaces[];

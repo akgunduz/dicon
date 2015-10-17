@@ -8,8 +8,8 @@
 
 uint16_t Net::gOffset = 0;
 
-Net::Net(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(INTERFACE_NET, cb, rootPath) {
+Net::Net(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, INTERFACE_NET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
 		LOG_E("Instance create failed!!!");
@@ -82,7 +82,7 @@ bool Net::init(int interfaceIndex) {
 	return true;
 }
 
-void Net::runReceiver() {
+void Net::runReceiver(Unit host) {
 
 	bool thread_started = true;
 
@@ -115,6 +115,7 @@ void Net::runReceiver() {
 			}
 
 			Argument *argument = new Argument(this);
+			argument->host = host;
 			argument->acceptSocket = acceptfd;
 			argument->address = (cli_addr.sin_addr.s_addr);
 
@@ -146,7 +147,7 @@ void *Net::runAccepter(void *arg) {
 
 	Argument *argument = (Argument *) arg;
 
-	Message *msg = new Message(argument->_interface->rootPath);
+	Message *msg = new Message(argument->host, argument->_interface->getRootPath());
 	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}

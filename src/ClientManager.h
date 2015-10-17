@@ -28,8 +28,9 @@ struct ClientMap {
 	STATES state = IDLE;
 	int usage;
 	long address;
+	short id;
 	StopWatch stopWatch;
-	ClientMap(STATES s, int u, long a) : state(s), usage(u), address(a){
+	ClientMap(STATES s, int u, long a, short i) : state(s), usage(u), address(a), id(i) {
 		stopWatch.reset();
 	}
 };
@@ -67,13 +68,13 @@ public:
 	bool initClientChecker();
 
 	bool resetDiffTimes();
-	bool setClientIdle(long, double);
+	bool setClientIdle(long, short, double);
 	bool setClientBusy(long);
 	bool setClientRemove(long);
-	bool setClientValidate(long);
-	bool addClient(long);
+	bool setClientValidate(long, short);
+	bool addClient(long, short);
 
-	long getIdleClient(long);
+	ClientMap* getIdleClient(long);
 
 	void clear();
 

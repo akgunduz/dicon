@@ -9,6 +9,7 @@
 
 #include "Log.h"
 #include "FileContent.h"
+#include "Unit.h"
 
 #define RULE_HEADER "Rule"
 #define SRULE_RUNTYPE "runtype"
@@ -43,18 +44,20 @@ static std::string sRuleTypes[RULE_MAX] = {
 
 class Rule {
 
-	FileContent* mRuleFile;
-	std::string mRootPath;
-	bool mIsValid;
-	enum RUN_TYPE mRunType;
+	Unit unitHost;
+	Unit unitNode;
+	FileContent* content;
+	char rootPath[PATH_MAX];
+	bool valid;
+	bool parallel;
 
-	std::map<std::string, RULE_TYPES> mRuleMap = {
+	std::map<std::string, RULE_TYPES> ruleMap = {
 			{sRuleTypes[RULE_RUNTYPE], RULE_RUNTYPE},
 			{sRuleTypes[RULE_FILES], RULE_FILES},
 			{sRuleTypes[RULE_PARAMETERS], RULE_PARAMETERS},
 			{sRuleTypes[RULE_EXECUTORS], RULE_EXECUTORS}
 	};
-	std::vector<Content*> mContentList[RULE_MAX];
+	std::vector<Content*> contentList[RULE_MAX];
 
 	fRuleParser parserNodeList[RULE_MAX] = {
 			&Rule::parseRunTypeNode,
@@ -63,7 +66,7 @@ class Rule {
 			&Rule::parseExecutorNode
 	};
 
-	bool readFile(const std::string &, char **);
+	bool readFile(const char*, char **);
 	bool parseBuffer(char *buf);
 	bool parseRunTypeNode(json_object *node);
 	bool parseFileNode(json_object *node);
@@ -72,15 +75,15 @@ class Rule {
 
 public:
 
-	Rule(const std::string&, const std::string&);
+	Rule(Unit, Unit, const char*);
 	~Rule();
 	bool isValid();
-	RUN_TYPE getRunType();
-	FileContent* getRuleFile();
-	std::string getRootPath();
+	bool isParallel();
+	FileContent* getContent();
+	const char* getRootPath();
 	Content* getContent(RULE_TYPES type, int index);
-	ssize_t getContentCount(RULE_TYPES type);
-	ssize_t getFlaggedFileCount();
+	int getContentCount(RULE_TYPES type);
+	int getFlaggedFileCount();
 	bool updateFileContent(FileContent*);
 	bool addContent(RULE_TYPES, Content *);
 	void reset();

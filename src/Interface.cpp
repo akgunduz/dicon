@@ -5,7 +5,7 @@
 
 #include "Interface.h"
 
-Interface::Interface(INTERFACES type, const InterfaceCallback *callBack, const char *rootPath) {
+Interface::Interface(Unit host, INTERFACES type, const InterfaceCallback *callBack, const char *rootPath) {
 
 	try {
 
@@ -18,6 +18,7 @@ Interface::Interface(INTERFACES type, const InterfaceCallback *callBack, const c
 
 	InterfaceCallback *interfaceCallback = new InterfaceCallback(senderCB, this);
 
+    this->host = host;
 	scheduler->setReceiveCB(callBack);
 	scheduler->setSendCB(type, interfaceCallback);
 
@@ -47,7 +48,11 @@ bool Interface::initThread() {
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-	int pthr = pthread_create(&thread, &attr, runReceiver, (void *)this);
+	Argument *argument = new Argument(this);
+	argument->host = host;
+    argument->_interface = this;
+
+	int pthr = pthread_create(&thread, &attr, runReceiver, (void *)argument);
 	pthread_attr_destroy(&attr);
 	if (pthr) {
 		LOG_E("Problem with run thread");
@@ -62,8 +67,10 @@ bool Interface::initThread() {
 
 void *Interface::runReceiver(void *arg) {
 
-	Interface *_interface = (Interface *)arg;
-	_interface->runReceiver();
+    Argument *argument = (Argument *) arg;
+	argument->_interface->runReceiver(argument->host);
+
+    delete argument;
 	return nullptr;
 
 }
@@ -126,4 +133,8 @@ long Interface::getAddress() {
 	}
 
 	return address;
+}
+
+const char *Interface::getRootPath() {
+	return rootPath;
 }

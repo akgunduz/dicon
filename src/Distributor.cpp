@@ -7,7 +7,8 @@
 
 Distributor::Distributor(int collectorIndex,
 		int nodeIndex, const char *rootPath, double backupRate) :
-            Component(generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath){
+            Component(Unit(HOST_DISTRIBUTOR, Util::getID()),
+					  generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath){
 
 	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_NODE));
 
@@ -73,7 +74,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
-			clientManager->setClientIdle(address, collStartTime.stop());
+			clientManager->setClientIdle(address, msg->getOwner().getID(), collStartTime.stop());
 
 			if (collectorWaitingList.size() > 0) {
 
@@ -96,7 +97,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"ALIVE\" msg from client: %s", Address::getString(address).c_str());
 
-			if (!clientManager->setClientValidate(address)
+			if (!clientManager->setClientValidate(address, msg->getOwner().getID())
 					&& collectorWaitingList.size() > 0) {
 
                 long collectorAddress = collectorWaitingList.front();
@@ -181,19 +182,20 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 		case MSGTYPE_CLIENT: {
 				msg->setPriority(PRIORITY_2);
-				long clientAddress = clientManager->getIdleClient(address);
+				ClientMap* client = clientManager->getIdleClient(address);
 
-				if (clientAddress != 0) {
+				if (client != nullptr) {
 
-					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, clientAddress, PREBUSY);
+					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, client->address, PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG,
 							"\"CLIENT\" msg sent to collector: %s with available client: %s",
 						  Address::getString(address).c_str(),
-						  Address::getString(clientAddress).c_str());
+						  Address::getString(client->address).c_str());
 
-                    msg->setVariant(0, clientAddress);
+                    msg->setVariant(0, client->address);
+                    msg->setVariant(1, client->id);
 
-                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, clientAddress);
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, client->address);
 
 				} else {
 					collectorWaitingList.push_back(address);

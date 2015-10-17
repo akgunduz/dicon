@@ -141,7 +141,7 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 		}
 
 		LOG_S("Client File --> Path : %s, MD5 : %s, Validity : %s, Flag : %s",
-				content->getPath().c_str(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
+				content->getPath(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
 				content->isValid() ? "V" : "I", content->isFlaggedToSent() ? "Y" : "N");
 	}
 

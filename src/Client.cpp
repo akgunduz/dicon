@@ -5,9 +5,11 @@
 
 #include "Client.h"
 #include "ExecutorContent.h"
+#include "Util.h"
 
 Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
-        Component(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
+        Component(Unit(HOST_NODE),
+				  generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
 
 	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
 	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
@@ -60,7 +62,7 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"RULE\" msg from collector: %s", Address::getString(address).c_str());
 
-			rule = msg->mRule;
+			rule = msg->rule;
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
@@ -76,9 +78,9 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_BINARY:
 
-			rule = msg->mRule;
+			rule = msg->rule;
 			if (rule == nullptr) {
-				rule = new Rule(getRootPath(), RULE_FILE);
+				rule = new Rule(Unit(HOST_NODE), Unit(HOST_NODE), getRootPath());
 			}
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
@@ -107,7 +109,7 @@ bool Client::processClientMsg(long address, Message *msg) {
 
 bool Client::send2DistributorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_NODE, type, getRootPath());
+	Message *msg = new Message(Unit(HOST_NODE), type, getRootPath());
 
 	switch(type) {
 
@@ -169,12 +171,13 @@ bool Client::processMD5() {
 
 		FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
 
-		std::string abspath = getRootPath() + content->getPath();
+		char absPath[PATH_MAX];
+		sprintf(absPath, "%s%s", getRootPath(), content->getPath());
 
 		//Burada ters lojik var,
 		//	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
 		//	true -> collectordan dosyayi isteme, md5 i set EDEREK
-		if (access(abspath.c_str(), F_OK ) == -1) {
+		if (access(absPath, F_OK ) == -1) {
                         //printf("error %d\n", errno);
 			content->setFlaggedToSent(false);
 		}
@@ -229,7 +232,7 @@ bool Client::processRule() {
 
 	int status;
 
-	if (rule->getRunType() == RUN_SEQUENTIAL) {
+	if (!rule->isParallel()) {
 
 		for (int i = 0; i < rule->getContentCount(RULE_EXECUTORS); i++) {
 			ExecutorContent *content = (ExecutorContent *) rule->getContent(RULE_EXECUTORS, i);

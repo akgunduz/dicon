@@ -16,12 +16,12 @@ class Pipe : public Interface {
 private :
 	int desc[2];
 	bool init(int);
-	void runReceiver();
+	void runReceiver(Unit);
 	void runSender(long, Message *);
 	void setAddress(int);
 	INTERFACES getType();
 public :
-	Pipe(int, const InterfaceCallback *, const char *);
+	Pipe(Unit, int, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~Pipe();
 };

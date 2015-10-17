@@ -19,7 +19,7 @@ class Net : public Interface {
 private :
 	int netSocket;
 	bool init(int);
-	void runReceiver();
+	void runReceiver(Unit host);
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
 	void setAddress(int);
@@ -27,7 +27,7 @@ private :
 
 public :
 	static uint16_t gOffset;
-	Net(int, const InterfaceCallback *, const char *);
+	Net(Unit, int, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~Net();
 };

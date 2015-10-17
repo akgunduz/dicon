@@ -10,7 +10,7 @@
 
 class ExecutorContent : public Content {
 	std::string exec;
-	bool parseCommand(std::string&, void *, int, int);
+	bool parseCommand(char*, void *, int, int);
 public:
 	ExecutorContent(){};
 	ExecutorContent(const char *exec);

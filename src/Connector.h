@@ -16,7 +16,7 @@ class Connector {
 	bool initialized = false;
 	Interface* _interface;
 public:
-	Connector(int, const InterfaceCallback *, const char *);
+	Connector(Unit, int, const InterfaceCallback *, const char *);
 	bool send(long, Message*);
 	long getAddress();
 	INTERFACES getInterfaceType();

@@ -30,7 +30,7 @@ void ExecutorContent::setExec(const std::string &exec) {
 std::string ExecutorContent::getParsed(void *pRule) {
 
 //	Rule *refRule = (Rule *)pRule;
-	std::string parsed = "";
+	char parsed[PATH_MAX] = "";
 	bool cmdMode = false;
 
 	int cmdIndex = 0;
@@ -83,7 +83,7 @@ std::string ExecutorContent::getParsed(void *pRule) {
 				}
 				//no break
 			default:
-				parsed += exec[i];
+                sprintf(parsed, "%s%c", parsed, exec[i]);
 				break;
 
 		}
@@ -97,14 +97,14 @@ std::string ExecutorContent::getParsed(void *pRule) {
 	return parsed;
 }
 
-bool ExecutorContent::parseCommand(std::string &parsed, void *pRule, int cmdType, int cmdIndex) {
+bool ExecutorContent::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
 
 	Rule *refRule = (Rule *)pRule;
 
 	if (cmdType == RULE_FILES) {
 		FileContent *content = (FileContent *) refRule->getContent(RULE_FILES, cmdIndex);
 		if (content != nullptr) {
-			parsed += refRule->getRootPath() + content->getPath();
+            sprintf(parsed, "%s%s%s", parsed, refRule->getRootPath(), content->getPath());
 		}
 
 	} else if (cmdType == RULE_PARAMETERS) {
@@ -112,13 +112,13 @@ bool ExecutorContent::parseCommand(std::string &parsed, void *pRule, int cmdType
 		if (content != nullptr) {
 			switch(content->getParamType()) {
 				case PARAM_LONG:
-                    parsed += content->getParam().latom;
+                    sprintf(parsed, "%s%ld", parsed, content->getParam().latom);
                     break;
 				case PARAM_DOUBLE:
-					parsed += content->getParam().datom;
+                    sprintf(parsed, "%s%lf", parsed, content->getParam().datom);
 					break;
 				case PARAM_STRING:
-					parsed += content->getParam().sPtr;
+                    strcat(parsed, content->getParam().sPtr);
 					break;
 			}
 		}

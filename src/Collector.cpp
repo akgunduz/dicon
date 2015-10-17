@@ -8,7 +8,7 @@
 #include "NetAddress.h"
 
 Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) :
-        Component(generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath){
+        Component(Unit(HOST_COLLECTOR, Util::getID()), generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath){
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_NODE));
 
@@ -20,11 +20,9 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
 
 Collector::~Collector() {
 
-	for (int i = 0; i < rules.size(); i++) {
-//		Rule *rule = mRules[i];
-//		delete rule;
+	for (std::map<long , Rule*>::iterator i = rules.begin(); i != rules.end(); i++) {
+        delete i->second;
 	}
-
 }
 
 bool Collector::processDistributorMsg(long address, Message *msg) {
@@ -48,6 +46,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 		case MSGTYPE_CLIENT: {
 
             long clientAddress = msg->getVariant(0);
+			short clientID = (short) msg->getVariant(1);
 
 			if (clientAddress == 0) {
 				LOG_W("No available client right now.");
@@ -57,7 +56,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				break;
 			}
 
-			rules[clientAddress] = new Rule(getRootPath(), RULE_FILE);
+			rules[clientAddress] = new Rule(Unit(HOST_COLLECTOR), Unit(HOST_NODE, clientID), getRootPath());
 			if (!rules[clientAddress]) {
 				LOG_E("Could not create a rule from path : %s", getRootPath());
 				return false;
@@ -98,7 +97,7 @@ bool Collector::processClientMsg(long address, Message *msg) {
 		case MSGTYPE_MD5: {
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
-				  Address::getString(address).c_str(), msg->mMD5List.size());
+				  Address::getString(address).c_str(), msg->md5List.size());
 
 			std::map<long, Rule *>::iterator ruleItr = rules.find(address);
 			if (ruleItr == rules.end()) {
@@ -107,12 +106,12 @@ bool Collector::processClientMsg(long address, Message *msg) {
 
 			}
 
-			for (int i = 0; i < msg->mMD5List.size(); i++) {
+			for (int i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
 				for (uint16_t j = 0; j < ruleItr->second->getContentCount(RULE_FILES); j++) {
 					FileContent *content = (FileContent *) ruleItr->second->getContent(RULE_FILES, j);
 					//TODO 64 bit le coz
-					if (memcmp(content->getMD5(), msg->mMD5List[i].mMD5, MD5_DIGEST_LENGTH) == 0) {
+					if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
 						//TODO bu clientte var, gonderme
 						content->setFlaggedToSent(false);
 					}

@@ -8,7 +8,7 @@
 #include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath) {
+Connector::Connector(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath) {
 
 	INTERFACES  interfaceType = ConnectInterface::getType(interfaceIndex);
 
@@ -17,15 +17,15 @@ Connector::Connector(int interfaceIndex, const InterfaceCallback *cb, const char
 		switch(interfaceType) {
 
 			case INTERFACE_NET:
-				_interface = new Net(interfaceIndex, cb, rootPath);
+				_interface = new Net(host, interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_PIPE:
-				_interface = new Pipe(interfaceIndex, cb, rootPath);
+				_interface = new Pipe(host, interfaceIndex, cb, rootPath);
 				break;
 
 			case INTERFACE_UNIXSOCKET:
-				_interface = new UnixSocket(interfaceIndex, cb, rootPath);
+				_interface = new UnixSocket(host, interfaceIndex, cb, rootPath);
 				break;
 
 			default:
@@ -99,7 +99,7 @@ INTERFACES Connector::getInterfaceType() {
 
 const char *Connector::getRootPath() {
 
-	return _interface->rootPath;
+	return _interface->getRootPath();
 }
 
 Interface *Connector::getInterface() {

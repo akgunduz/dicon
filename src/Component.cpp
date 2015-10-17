@@ -4,7 +4,7 @@
 
 #include "Component.h"
 
-Component::Component(long index, const char* rootPath) {
+Component::Component(Unit host, long index, const char* rootPath) {
 
     memset(connectors, 0, sizeof(connectors));
 
@@ -18,7 +18,7 @@ Component::Component(long index, const char* rootPath) {
 
         try {
 
-            connectors[HOST_DISTRIBUTOR] = new Connector(indexDist, callback, rootPath);
+            connectors[HOST_DISTRIBUTOR] = new Connector(host, indexDist, callback, rootPath);
             this->rootPath = connectors[HOST_DISTRIBUTOR]->getRootPath();
 
         } catch (const std::runtime_error e) {
@@ -37,7 +37,7 @@ Component::Component(long index, const char* rootPath) {
 
             try {
 
-                connectors[HOST_COLLECTOR] = new Connector(indexCollector, callback, rootPath);
+                connectors[HOST_COLLECTOR] = new Connector(host, indexCollector, callback, rootPath);
                 this->rootPath = connectors[HOST_COLLECTOR]->getRootPath();
 
             } catch (const std::runtime_error e) {
@@ -65,7 +65,7 @@ Component::Component(long index, const char* rootPath) {
 
             try {
 
-                connectors[HOST_NODE] = new Connector(indexNode, callback, rootPath);
+                connectors[HOST_NODE] = new Connector(host, indexNode, callback, rootPath);
                 this->rootPath = connectors[HOST_NODE]->getRootPath();
 
             } catch (const std::runtime_error e) {
@@ -122,13 +122,13 @@ bool Component::receiveCB(void *arg, long address, Message *msg) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    if (connectors[msg->getOwner()]->getInterfaceType() != Address::getInterface(address)) {
+    if (connectors[msg->getOwner().getType()]->getInterfaceType() != Address::getInterface(address)) {
         LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
         delete msg;
         return false;
     }
 
-    switch(msg->getOwner()) {
+    switch(msg->getOwner().getType()) {
 
         case HOST_DISTRIBUTOR:
             return processDistributorMsg(address, msg);

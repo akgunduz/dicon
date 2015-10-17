@@ -8,8 +8,8 @@
 
 uint16_t UnixSocket::gOffset = 1001;
 
-UnixSocket::UnixSocket(int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(INTERFACE_UNIXSOCKET, cb, rootPath) {
+UnixSocket::UnixSocket(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, INTERFACE_UNIXSOCKET, cb, rootPath) {
 
 	if (!init(interfaceIndex)) {
 		LOG_E("Instance create failed!!!");
@@ -71,7 +71,7 @@ bool UnixSocket::init(int interfaceIndex) {
 	return true;
 }
 
-void UnixSocket::runReceiver() {
+void UnixSocket::runReceiver(Unit host) {
 
 	bool thread_started = true;
 
@@ -102,6 +102,7 @@ void UnixSocket::runReceiver() {
 			}
 
 			Argument *argument = new Argument(this);
+			argument->host = host;
 			argument->acceptSocket = acceptfd;
 
 			pthread_t thread;
@@ -132,7 +133,7 @@ void *UnixSocket::runAccepter(void *arg) {
 
 	Argument *argument = (Argument *) arg;
 
-	Message *msg = new Message(argument->_interface->rootPath);
+	Message *msg = new Message(argument->host, argument->_interface->getRootPath());
 	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}

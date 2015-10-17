@@ -59,3 +59,47 @@ void Util::mkPath(const char *path) {
     }
     mkdir(tmp, S_IRWXU);
 }
+
+short Util::getID() {
+	return ARCH_OSX;
+}
+
+const char* Util::getIDDir(enum ARCHIDS id) {
+	return sArchs[id];
+}
+
+bool Util::getAbsolutePath(Unit host, Unit node, FILETYPE fileType, const char *rootPath,
+                           const char *path, char *absPath, char *md5Path) {
+
+    if (host.getType() == HOST_COLLECTOR) {
+
+        switch(fileType) {
+            case FILE_RULE:
+                sprintf(absPath, "%s%s", rootPath, path);
+                break;
+            case FILE_COMMON:
+                sprintf(absPath, "%scommon/%s", rootPath, path);
+                break;
+            case FILE_ARCH:
+                sprintf(absPath, "%sarch/%s/%s", rootPath, (char*)sArchs[node.getID()], path);
+                break;
+        }
+
+    } else {
+        sprintf(absPath, "%s%s", rootPath, path);
+    }
+
+    if (access(absPath, F_OK ) == -1) {
+        mkPath(absPath);
+    }
+
+    char *ptr = absPath + strlen(rootPath);
+
+    sprintf(md5Path, "%smd5/%s.md5", rootPath, ptr);
+
+    if (access(md5Path, F_OK ) == -1) {
+        mkPath(md5Path);
+    }
+
+    return true;
+}

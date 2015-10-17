@@ -9,48 +9,36 @@
 
 FileContent::FileContent() {
 
-	memset(mMD5, 0, MD5_DIGEST_LENGTH);
+	memset(md5, 0, MD5_DIGEST_LENGTH);
 	setValid(false);
-	mFlaggedToSent = true;
-	mPath = "";
+	flaggedToSent = true;
+	strcpy(path, "");
+	strcpy(absPath, "");
 }
 
-FileContent::FileContent(const std::string &rootpath,
-		const std::string &path, const char *smd5) : FileContent() {
+FileContent::FileContent(const char *absPath,
+		const char* path, const char* md5Path, FILETYPE type) : FileContent() {
 
-	mPath = path;
-
-	std::string abspath = rootpath + path;
-
-	FILE *execfile = fopen(abspath.c_str(), "r");
-	if (execfile == nullptr) {
-		LOG_T("FileContent %s could not opened", abspath.c_str());
+	FILE *file = fopen(absPath, "r");
+	if (file == nullptr) {
+		LOG_T("FileContent %s could not opened", absPath);
 		setValid(false);
 		return;
 	}
 
-	setValid(true);
-    mFlaggedToSent = true;
-	LOG_T("FileContent is opened");
-
-	if (smd5 != nullptr && strcmp(smd5, "") != 0) {
-		Util::str2hex(mMD5, smd5, (uint32_t)strlen(smd5));
-		fclose(execfile);
-		return;
-	}
+    setPath(path);
+    setAbsPath(absPath);
+    setValid(true);
+    setFlaggedToSent(true);
+    setFileType(type);
 
 	char buf[BUFFER_SIZE];
 
-	//Check for md5 file
-
-//	std::string smdf = abspath.substr(0, abspath.rfind('.')) + ".md5";
-	std::string smdf = abspath + ".md5";
-
-	FILE *md5file = fopen(smdf.c_str(), "r");
+	FILE *md5file = fopen(md5Path, "r");
 	if (md5file != nullptr) {
 		fgets(buf, MD5_DIGEST_LENGTH * 2 + 1, md5file);
-		if (Util::str2hex(mMD5, buf, MD5_DIGEST_LENGTH * 2)) {
-			fclose(execfile);
+		if (Util::str2hex(md5, buf, MD5_DIGEST_LENGTH * 2)) {
+			fclose(file);
 			fclose(md5file);
 			return;
 		}
@@ -62,56 +50,73 @@ FileContent::FileContent(const std::string &rootpath,
 	MD5_Init(&ctx);
 
 	while(true) {
-		int count = fread(buf, 1, BUFFER_SIZE, execfile);
+		int count = (int)fread(buf, 1, BUFFER_SIZE, file);
 		if (count != BUFFER_SIZE) {
 			MD5_Update(&ctx, buf, (unsigned)count);
 			break;
 		}
 		MD5_Update(&ctx, buf, (unsigned)BUFFER_SIZE);
 	}
-	fclose(execfile);
-	MD5_Final(mMD5, &ctx);
+	fclose(file);
+	MD5_Final(md5, &ctx);
 
 	// and write back
 
-	md5file = fopen(smdf.c_str(), "w");
-	fwrite(Util::hex2str(mMD5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
-	fputc('\0', md5file);
+	md5file = fopen(md5Path, "w");
+	fwrite(Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
+//	fputc('\0', md5file);
 	fclose(md5file);
-
 };
 
 CONTENT_TYPES FileContent::getType() {
 	return CONTENT_FILE;
 }
 
-std::string FileContent::getPath() {
-	return mPath;
+const char* FileContent::getPath() {
+	return path;
 }
 
-void FileContent::setPath(const std::string &path) {
-	mPath = path;
+void FileContent::setPath(const char *path) {
+    strcpy(this->path, path);
+}
+
+const char* FileContent::getAbsPath() {
+    return absPath;
+}
+
+void FileContent::setAbsPath(const char *path) {
+    strcpy(this->absPath, path);
 }
 
 uint8_t* FileContent::getMD5() {
-	return mMD5;
+	return md5;
 }
 
 void FileContent::setMD5(uint8_t *md5) {
-	memcpy(mMD5, md5, MD5_DIGEST_LENGTH);
+	memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
 }
 
-const bool FileContent::isFlaggedToSent() {
-	return mFlaggedToSent;
+bool FileContent::isFlaggedToSent() {
+	return flaggedToSent;
 }
 
 void FileContent::setFlaggedToSent(bool flaggedToSent) {
-	mFlaggedToSent = flaggedToSent;
+	this->flaggedToSent = flaggedToSent;
+}
+
+FILETYPE FileContent::getFileType() {
+    return fileType;
+}
+
+void FileContent::setFileType(FILETYPE fileType) {
+    this->fileType = fileType;
 }
 
 void FileContent::set(FileContent *content) {
-	mPath = content->getPath();
-	memcpy(mMD5, content->getMD5(), MD5_DIGEST_LENGTH);
+
+    setPath(content->getPath());
+    setMD5(content->getMD5());
 	setValid(content->isValid());
-	mFlaggedToSent = content->isFlaggedToSent();
+	setFlaggedToSent(content->isFlaggedToSent());
+    setFileType(content->getFileType());
 }
