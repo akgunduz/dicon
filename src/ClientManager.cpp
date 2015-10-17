@@ -198,10 +198,10 @@ bool ClientManager::setClientIdle(long address, double totalTime) {
 		clientMap->state = IDLE;
 		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
 
-		if (clientMap->diffTime.isInitiated()) {
+		if (clientMap->stopWatch.isInitiated()) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"Client at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
-				  Address::getString(address).c_str(), clientMap->diffTime.stop(), totalTime);
+				  Address::getString(address).c_str(), clientMap->stopWatch.stop(), totalTime);
 		}
 
 	} catch (const std::out_of_range e) {
@@ -235,7 +235,7 @@ bool ClientManager::setClientBusy(long address) {
 		stopClientTimer(clientMap);
 		clientMap->state = BUSY;
 		clientMap->usage++;
-		clientMap->diffTime.start();
+		clientMap->stopWatch.start();
 		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
@@ -327,7 +327,7 @@ long ClientManager::getIdleClient(long collectorAddress) {
 bool ClientManager::resetDiffTimes() {
 
 	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
-		i->second->diffTime.reset();
+		i->second->stopWatch.reset();
 	}
 	return true;
 }

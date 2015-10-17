@@ -9,7 +9,7 @@
 #include "Component.h"
 #include "Client.h"
 #include "Connector.h"
-#include "Tools.h"
+#include "Util.h"
 #include "ClientManager.h"
 
 class Distributor : public Component {
@@ -19,7 +19,7 @@ private:
 
 	std::deque<long> collectorWaitingList;
 
-	DiffTime collStartTime;
+	StopWatch collStartTime;
 
 public:
 

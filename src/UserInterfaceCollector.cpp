@@ -1,6 +1,8 @@
 #include <wx/event.h>
 #include "UserInterface.h"
-#include "Tools.h"
+#include "Util.h"
+#include "ParameterContent.h"
+#include "ExecutorContent.h"
 //
 
 void UserInterface::collInit() {
@@ -141,7 +143,7 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 		}
 
 		collFileList->SetItem(i, 0, content->getPath());
-		collFileList->SetItem(i, 1, Tools::getMD5Str(content->getMD5()));
+		collFileList->SetItem(i, 1, Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH));
 		collFileList->SetItem(i, 2, content->isValid() ? "V" : "I");
 		collFileList->SetItem(i, 3, content->isFlaggedToSent() ? "Y" : "N");
 	}
@@ -154,7 +156,7 @@ void UserInterface::collUpdateParamList(wxCommandEvent &event) {
 
 	for (int j = 0; j < rule->getContentCount(RULE_PARAMETERS); j++) {
 
-		ParamContent *content = (ParamContent *) rule->getContent(RULE_PARAMETERS, j);
+		ParameterContent *content = (ParameterContent *) rule->getContent(RULE_PARAMETERS, j);
 		if (content == nullptr) {
 			return;
 		}

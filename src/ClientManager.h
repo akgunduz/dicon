@@ -8,7 +8,8 @@
 
 #include "Client.h"
 #include "Connector.h"
-#include "Tools.h"
+#include "Util.h"
+#include "StopWatch.h"
 
 #define CHECK_INTERVAL 600
 #define CLIENT_TIMEOUT 300
@@ -27,9 +28,9 @@ struct ClientMap {
 	STATES state = IDLE;
 	int usage;
 	long address;
-	DiffTime diffTime;
+	StopWatch stopWatch;
 	ClientMap(STATES s, int u, long a) : state(s), usage(u), address(a){
-		diffTime.reset();
+		stopWatch.reset();
 	}
 };
 

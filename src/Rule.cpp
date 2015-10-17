@@ -4,7 +4,8 @@
 //
 
 #include "Rule.h"
-#include "Tools.h"
+#include "ParameterContent.h"
+#include "ExecutorContent.h"
 
 Rule::Rule(const std::string &rootpath, const std::string &path) {
 
@@ -156,7 +157,7 @@ bool Rule::parseParamNode(json_object *node) {
 
 		const char *param = json_object_get_string(child);
 
-		ParamContent *content = new ParamContent(param);
+		ParameterContent *content = new ParameterContent(param);
 		if (content->isValid()) {
 			mContentList[RULE_PARAMETERS].push_back(content);
 		}
@@ -278,11 +279,11 @@ void Rule::display() {
 			switch(cnt->getType()) {
 				case CONTENT_FILE: {
 					FileContent *fcnt = (FileContent *)cnt;
-					LOG_S("\t\tFile : %s with MD5 : %s", fcnt->getPath().c_str(), Tools::getMD5Str(fcnt->getMD5()).c_str());
+					LOG_S("\t\tFile : %s", fcnt->getPath().c_str());
 				}
 					break;
 				case CONTENT_PARAM: {
-					ParamContent *pcnt = (ParamContent *)cnt;
+					ParameterContent *pcnt = (ParameterContent *)cnt;
 					PARAM_TYPES type = pcnt->getParamType();
 					switch(type) {
 						case PARAM_LONG:

@@ -8,7 +8,6 @@
 #define __Client_H_
 
 #include "Component.h"
-#include "Connector.h"
 
 class Client : public Component {
 private:

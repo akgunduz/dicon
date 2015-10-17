@@ -4,7 +4,7 @@
 //
 
 #include "BaseMessage.h"
-#include "Tools.h"
+#include "Util.h"
 
 BaseMessage::BaseMessage() {
 
@@ -311,7 +311,7 @@ bool BaseMessage::readNumber(int in, long *number) {
 
 bool BaseMessage::readBinary(int in, const std::string &path, uint8_t *md5, int size) {
 
-	Tools::mkpath(path.c_str());
+	Util::mkPath(path.c_str());
 
 	int out = open(path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
@@ -325,15 +325,17 @@ bool BaseMessage::readBinary(int in, const std::string &path, uint8_t *md5, int 
 
 	if (status) {
 
-		std::string sMD5 = path + ".md5";
+		std::string sMD5Path = path + ".md5";
 
-        out = open(sMD5.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
+        out = open(sMD5Path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
         if (out == -1) {
-            LOG_E("File %s could not created or opened", sMD5.c_str());
+            LOG_E("File %s could not created or opened", sMD5Path.c_str());
             return false;
         }
 
-		if (!writeBlock(out, (const uint8_t*)Tools::getMD5Str(md5).c_str(), MD5_DIGEST_LENGTH * 2)) {
+        const uint8_t* sMD5 = (const uint8_t*)Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str();
+
+		if (!writeBlock(out, sMD5, MD5_DIGEST_LENGTH * 2)) {
 			LOG_E("Can not write md5 to file system in readBinary");
 			status = false;
 		}

@@ -30,6 +30,12 @@ set(FILES
         ${SOURCE_PATH}/ConsoleClient.cpp
         ${SOURCE_PATH}/Content.cpp
         ${SOURCE_PATH}/Content.h
+        ${SOURCE_PATH}/FileContent.cpp
+        ${SOURCE_PATH}/FileContent.h
+        ${SOURCE_PATH}/ParameterContent.cpp
+        ${SOURCE_PATH}/ParameterContent.h
+        ${SOURCE_PATH}/ExecutorContent.cpp
+        ${SOURCE_PATH}/ExecutorContent.h
         ${SOURCE_PATH}/Distributor.cpp
         ${SOURCE_PATH}/Distributor.h
         ${SOURCE_PATH}/Interface.cpp
@@ -48,8 +54,10 @@ set(FILES
         ${SOURCE_PATH}/Rule.h
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/Scheduler.h
-        ${SOURCE_PATH}/Tools.cpp
-        ${SOURCE_PATH}/Tools.h
+        ${SOURCE_PATH}/Util.cpp
+        ${SOURCE_PATH}/Util.h
+        ${SOURCE_PATH}/StopWatch.cpp
+        ${SOURCE_PATH}/StopWatch.h
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/UnixSocket.h
         ${SOURCE_PATH}/Address.cpp

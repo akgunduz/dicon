@@ -8,7 +8,7 @@
 #define __Rule_H_
 
 #include "Log.h"
-#include "Content.h"
+#include "FileContent.h"
 
 #define RULE_HEADER "Rule"
 #define SRULE_RUNTYPE "runtype"

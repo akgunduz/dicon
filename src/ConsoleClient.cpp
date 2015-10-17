@@ -4,6 +4,8 @@
 //
 
 #include "Console.h"
+#include "ParameterContent.h"
+#include "ExecutorContent.h"
 
 bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
 
@@ -139,7 +141,7 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 		}
 
 		LOG_S("Client File --> Path : %s, MD5 : %s, Validity : %s, Flag : %s",
-				content->getPath().c_str(), Tools::getMD5Str(content->getMD5()).c_str(),
+				content->getPath().c_str(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
 				content->isValid() ? "V" : "I", content->isFlaggedToSent() ? "Y" : "N");
 	}
 
@@ -151,7 +153,7 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 
 	for (int j = 0; j < rule->getContentCount(RULE_PARAMETERS); j++) {
 
-		ParamContent *content = (ParamContent *) rule->getContent(RULE_PARAMETERS, j);
+		ParameterContent *content = (ParameterContent *) rule->getContent(RULE_PARAMETERS, j);
 		if (content == nullptr) {
 			return;
 		}

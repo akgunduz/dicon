@@ -4,7 +4,7 @@
 //
 
 #include "Collector.h"
-#include "Tools.h"
+#include "Util.h"
 #include "NetAddress.h"
 
 Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) :

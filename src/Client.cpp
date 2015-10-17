@@ -4,6 +4,7 @@
 //
 
 #include "Client.h"
+#include "ExecutorContent.h"
 
 Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
         Component(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
