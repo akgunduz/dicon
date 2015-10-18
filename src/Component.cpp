@@ -134,7 +134,7 @@ bool Component::onReceive(long address, Message *msg) {
             return processDistributorMsg(address, msg);
 
         case HOST_NODE:
-            return processClientMsg(address, msg);
+            return processNodeMsg(address, msg);
 
         case HOST_COLLECTOR:
             return processCollectorMsg(address, msg);

@@ -26,8 +26,10 @@ private :
 	INTERFACES getType();
 
 public :
+    static std::vector<ConnectInterface>interfaceList;
 	static uint16_t gOffset;
 	Net(Unit, int, const InterfaceCallback *, const char *);
+    static std::vector<ConnectInterface> getInterfaces();
 	std::vector<long> getAddressList();
 	~Net();
 };

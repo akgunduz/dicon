@@ -98,7 +98,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 	return status;
 }
 
-bool Node::processClientMsg(long address, Message *msg) {
+bool Node::processNodeMsg(long address, Message *msg) {
 	return false;
 }
 
@@ -109,21 +109,18 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 	switch(type) {
 
 		case MSGTYPE_READY:
-			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"READY\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_ALIVE:
-			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"ALIVE\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_BUSY:
-			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BUSY\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
@@ -145,7 +142,6 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 	switch(type) {
 
 		case MSGTYPE_MD5:
-			msg->setPriority(PRIORITY_2);
 			msg->setRule(STREAM_MD5ONLY, rule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",

@@ -9,18 +9,12 @@
 #include "Common.h"
 #include "Message.h"
 #include "Address.h"
+#include "InterfaceCallback.h"
+#include "MessageDirection.h"
 
 #define MAX_SCHEDULER_CAPACITY 100
 
 #define MAX_INTERFACE 10
-
-enum MESSAGE_DIRECTION {
-	MESSAGE_END,
-	MESSAGE_RECEIVE,
-	MESSAGE_SEND
-};
-
-typedef bool (*fSchedulerCB)(void*, long, Message *);
 
 class Capsule {
 
@@ -35,13 +29,6 @@ public:
 		this->address = address;
 		this->msg = msg;
 	}
-};
-
-class InterfaceCallback {
-public:
-	fSchedulerCB cb;
-	void *arg;
-	InterfaceCallback(fSchedulerCB _cb, void *_arg) : cb(_cb), arg(_arg) {}
 };
 
 class Scheduler {

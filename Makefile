@@ -22,14 +22,20 @@ endif
 
 FILES = \
 		$(SOURCE_PATH)/Application.cpp \
+        ${SOURCE_PATH}/ArchTypes.cpp \
 		$(SOURCE_PATH)/Node.cpp \
 		$(SOURCE_PATH)/NodeManager.cpp \
 		$(SOURCE_PATH)/Collector.cpp \
 		$(SOURCE_PATH)/Common.cpp \
+        ${SOURCE_PATH}/Component.cpp \
+        ${SOURCE_PATH}/ConnectInterface.cpp \
 		$(SOURCE_PATH)/Connector.cpp \
 		$(SOURCE_PATH)/Console.cpp \
 		$(SOURCE_PATH)/ConsoleClient.cpp \
 		$(SOURCE_PATH)/Content.cpp \
+		${SOURCE_PATH}/FileContent.cpp \
+		${SOURCE_PATH}/ParameterContent.cpp \
+		${SOURCE_PATH}/ExecutorContent.cpp \
 		$(SOURCE_PATH)/Distributor.cpp \
 		$(SOURCE_PATH)/Interface.cpp \
 		$(SOURCE_PATH)/Log.cpp \
@@ -39,8 +45,10 @@ FILES = \
 		$(SOURCE_PATH)/Pipe.cpp \
 		$(SOURCE_PATH)/Rule.cpp \
 		$(SOURCE_PATH)/Scheduler.cpp \
-		$(SOURCE_PATH)/Tools.cpp \
+		$(SOURCE_PATH)/Util.cpp \
+		$(SOURCE_PATH)/Unit.cpp \
 		$(SOURCE_PATH)/UnixSocket.cpp \
+		${SOURCE_PATH}/StopWatch.cpp \
 		$(SOURCE_PATH)/Address.cpp \
 		$(SOURCE_PATH)/NetAddress.cpp \
 		$(SOURCE_PATH)/PipeAddress.cpp \

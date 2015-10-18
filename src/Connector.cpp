@@ -51,6 +51,16 @@ bool Connector::send(long target, Message *msg) {
 
 }
 
+bool Connector::put(long target, Message *msg) {
+
+    if (!initialized) {
+        return false;
+    }
+
+    return _interface->push(MESSAGE_RECEIVE, target, msg);
+
+}
+
 long Connector::getAddress() {
 
 	if (!initialized) {
@@ -70,16 +80,6 @@ std::vector<long> Connector::getAddressList() {
 	}
 
 	return _interface->getAddressList();
-
-}
-
-int Connector::getNotifier(NOTIFIER_TYPE type) {
-
-	if (!initialized) {
-		return 0;
-	}
-
-	return _interface->getNotifier(type);
 
 }
 

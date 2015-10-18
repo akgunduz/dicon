@@ -7,6 +7,7 @@
 #include "UnixSocketAddress.h"
 
 uint16_t UnixSocket::gOffset = 1001;
+std::vector<ConnectInterface> UnixSocket::interfaceList;
 
 UnixSocket::UnixSocket(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(host, INTERFACE_UNIXSOCKET, cb, rootPath) {
@@ -229,4 +230,15 @@ std::vector<long> UnixSocket::getAddressList() {
 	closedir(unixdir);
 
 	return list;
+}
+
+std::vector<ConnectInterface> UnixSocket::getInterfaces() {
+
+    if (interfaceList.size() > 0) {
+        return interfaceList;
+    }
+
+    interfaceList.push_back(ConnectInterface("us", INTERFACE_UNIXSOCKET));
+
+    return interfaceList;
 }

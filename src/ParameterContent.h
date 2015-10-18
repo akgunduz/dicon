@@ -8,6 +8,18 @@
 
 #include "Content.h"
 
+enum PARAM_TYPES {
+    PARAM_LONG,
+    PARAM_DOUBLE,
+    PARAM_STRING
+};
+
+union Params {
+    long latom;
+    double datom;
+    char sPtr[255];
+};
+
 class ParameterContent : public Content {
 	PARAM_TYPES mType;
 	Params mParams;

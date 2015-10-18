@@ -7,6 +7,7 @@
 
 #include "Common.h"
 #include "Address.h"
+#include "ConnectInterface.h"
 
 class UnixSocketAddress  : public Address {
 

@@ -6,17 +6,19 @@
 #define BANKOR_COMPONENT_H
 
 #include "Connector.h"
+#include "MessageTypes.h"
 
 class Component {
 
 protected :
 
     InterfaceCallback *callback;
-    Connector *connectors[HOST_MAX];
 
     const char* rootPath;
 
 public:
+    Connector *connectors[HOST_MAX];
+
     Component(Unit host, long index, const char* rootPath);
     ~Component();
     const char* getRootPath();
@@ -28,7 +30,7 @@ public:
 
     virtual bool processDistributorMsg(long, Message *) = 0;
     virtual bool processCollectorMsg(long, Message *) = 0;
-    virtual bool processClientMsg(long, Message *) = 0;
+    virtual bool processNodeMsg(long, Message *) = 0;
 
 };
 

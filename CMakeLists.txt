@@ -7,12 +7,9 @@ add_definitions(-D__IDE__)
 
 set(FILES
         ${SOURCE_PATH}/Application.cpp
-        ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Application.h
-        ${SOURCE_PATH}/Node.cpp
-        ${SOURCE_PATH}/Node.h
-        ${SOURCE_PATH}/NodeManager.cpp
-        ${SOURCE_PATH}/NodeManager.h
+        ${SOURCE_PATH}/ArchTypes.cpp
+        ${SOURCE_PATH}/ArchTypes.h
         ${SOURCE_PATH}/Collector.cpp
         ${SOURCE_PATH}/Collector.h
         ${SOURCE_PATH}/Common.cpp
@@ -40,18 +37,34 @@ set(FILES
         ${SOURCE_PATH}/Distributor.h
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/Interface.h
+        ${SOURCE_PATH}/InterfaceCallback.cpp
+        ${SOURCE_PATH}/InterfaceCallback.h
         ${SOURCE_PATH}/Log.cpp
         ${SOURCE_PATH}/Log.h
         ${SOURCE_PATH}/BaseMessage.cpp
         ${SOURCE_PATH}/BaseMessage.h
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/Message.h
+        ${SOURCE_PATH}/MessageDirection.cpp
+        ${SOURCE_PATH}/MessageDirection.h
+        ${SOURCE_PATH}/MessageTypes.cpp
+        ${SOURCE_PATH}/MessageTypes.h
         ${SOURCE_PATH}/Net.cpp
         ${SOURCE_PATH}/Net.h
+        ${SOURCE_PATH}/Node.cpp
+        ${SOURCE_PATH}/Node.h
+        ${SOURCE_PATH}/NodeItem.cpp
+        ${SOURCE_PATH}/NodeItem.h
+        ${SOURCE_PATH}/NodeManager.cpp
+        ${SOURCE_PATH}/NodeManager.h
+        ${SOURCE_PATH}/NodeWatchdog.cpp
+        ${SOURCE_PATH}/NodeWatchdog.h
         ${SOURCE_PATH}/Pipe.cpp
         ${SOURCE_PATH}/Pipe.h
         ${SOURCE_PATH}/Rule.cpp
         ${SOURCE_PATH}/Rule.h
+        ${SOURCE_PATH}/RuleTypes.cpp
+        ${SOURCE_PATH}/RuleTypes.h
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/Scheduler.h
         ${SOURCE_PATH}/Util.cpp

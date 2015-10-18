@@ -18,10 +18,10 @@ class Connector {
 public:
 	Connector(Unit, int, const InterfaceCallback *, const char *);
 	bool send(long, Message*);
+	bool put(long, Message*);
 	long getAddress();
 	INTERFACES getInterfaceType();
 	Interface* getInterface();
-	int getNotifier(NOTIFIER_TYPE);
 	std::vector<long> getAddressList();
 	const char * getRootPath();
 	virtual ~Connector();

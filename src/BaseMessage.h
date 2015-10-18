@@ -14,7 +14,7 @@
 
 #define PRIORITY_COEFFICIENT 10
 
-#define DEFAULT_PRIORITY PRIORITY_3
+#define DEFAULT_PRIORITY 3
 
 #define SIGNATURE 0x55AA
 
@@ -27,20 +27,6 @@
 #define TMP_BUFFER_SIZE 1000
 
 #define MAX_VARIANT 2
-
-enum PRIORITIES {
-    PRIORITY_HEAD,
-    PRIORITY_1,
-    PRIORITY_2,
-    PRIORITY_3,
-    PRIORITY_4,
-    PRIORITY_5,
-    PRIORITY_6,
-    PRIORITY_7,
-    PRIORITY_8,
-    PRIORITY_9,
-    PRIORITY_MAX,
-};
 
 //To get rid of Alignment problem stay in 64bit mod
 struct MessageHeader {
@@ -118,10 +104,10 @@ public:
     long getDeviceID();
     long getMessageID();
 
-    PRIORITIES getPriority();
-    void setPriority(PRIORITIES);
+    int getPriority();
+    void setPriority(int);
     void normalizePriority();
-    PRIORITIES iteratePriority();
+    int iteratePriority();
 
     int getBinarySize(const char*);
     bool transferBinary(int, int, uint8_t *, int);

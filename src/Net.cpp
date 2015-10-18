@@ -7,6 +7,7 @@
 #include "NetAddress.h"
 
 uint16_t Net::gOffset = 0;
+std::vector<ConnectInterface> Net::interfaceList;
 
 Net::Net(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(host, INTERFACE_NET, cb, rootPath) {
@@ -207,4 +208,43 @@ INTERFACES Net::getType() {
 std::vector<long> Net::getAddressList() {
 
     return NetAddress::getAddressList(address);
+}
+
+std::vector<ConnectInterface> Net::getInterfaces() {
+
+    if (interfaceList.size() > 0) {
+        return interfaceList;
+    }
+
+    struct ifaddrs* ifAddrStruct = nullptr;
+    struct ifaddrs* loop = nullptr;
+
+    getifaddrs(&ifAddrStruct);
+    if (ifAddrStruct == nullptr) {
+        return interfaceList;
+    }
+
+    for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
+
+        if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
+
+            if (strncmp(loop->ifa_name, "et", 2) == 0 ||
+                strncmp(loop->ifa_name, "en", 2) == 0 ||
+                strncmp(loop->ifa_name, "br", 2) == 0 ||
+                strncmp(loop->ifa_name, "lo", 2) == 0) {
+
+                interfaceList.push_back(ConnectInterface(loop->ifa_name,
+                                                         ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                                         NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
+
+            }
+        }
+    };
+
+    interfaceList.push_back(ConnectInterface("us", INTERFACE_UNIXSOCKET));
+    interfaceList.push_back(ConnectInterface("pp", INTERFACE_PIPE));
+
+    freeifaddrs(ifAddrStruct);
+
+    return interfaceList;
 }

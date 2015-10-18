@@ -266,7 +266,7 @@ void Rule::reset() {
 
 void Rule::display() {
 	for (int j = RULE_FILES; j < RULE_MAX; j++) {
-		LOG_S("\t%s :", sRuleTypes[j].c_str());
+		LOG_S("\t%s :", RuleTypes::getName((RULE_TYPES)j));
 		for (int k = 0; k < getContentCount(static_cast<RULE_TYPES>(j)); k++) {
 			Content *cnt = getContent(static_cast<RULE_TYPES>(j), k);
 

@@ -91,20 +91,20 @@ void BaseMessage::setVariant(int id, long variant) {
     header.variant[id] = variant;
 }
 
-PRIORITIES BaseMessage::getPriority() {
-	return (PRIORITIES)header.priority;
+int BaseMessage::getPriority() {
+	return header.priority;
 }
 
-PRIORITIES BaseMessage::iteratePriority() {
+int BaseMessage::iteratePriority() {
 
-	if (header.priority > PRIORITY_1) {
+	if (header.priority > 1) {
 		header.priority--;
 	}
 
-	return (PRIORITIES)header.priority;
+	return header.priority;
 }
 
-void BaseMessage::setPriority(PRIORITIES priority) {
+void BaseMessage::setPriority(int priority) {
 	header.priority = priority;
 }
 

@@ -4,47 +4,26 @@
 
 #include "ConnectInterface.h"
 #include "NetAddress.h"
+#include "Net.h"
+#include "UnixSocket.h"
+#include "Pipe.h"
 
 std::vector<ConnectInterface> ConnectInterface::interfaceList;
-bool initialized = false;
 
 std::vector<ConnectInterface> ConnectInterface::getInterfaces() {
 
-    if (initialized) {
+    if (interfaceList.size() > 0) {
         return interfaceList;
     }
 
-    struct ifaddrs* ifAddrStruct = nullptr;
-    struct ifaddrs* loop = nullptr;
+    std::vector<ConnectInterface> netInterfaces = Net::getInterfaces();
+    interfaceList.insert(interfaceList.end(), netInterfaces.begin(), netInterfaces.end());
 
-    getifaddrs(&ifAddrStruct);
-    if (ifAddrStruct == nullptr) {
-        return interfaceList;
-    }
+    std::vector<ConnectInterface> unixSocketInterfaces = UnixSocket::getInterfaces();
+    interfaceList.insert(interfaceList.end(), unixSocketInterfaces.begin(), unixSocketInterfaces.end());
 
-    for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
-
-        if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
-
-            if (strncmp(loop->ifa_name, "et", 2) == 0 ||
-                strncmp(loop->ifa_name, "en", 2) == 0 ||
-                strncmp(loop->ifa_name, "br", 2) == 0 ||
-                strncmp(loop->ifa_name, "lo", 2) == 0) {
-
-                interfaceList.push_back(ConnectInterface(loop->ifa_name,
-                    ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                    NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
-
-            }
-        }
-    };
-
-    interfaceList.push_back(ConnectInterface("us", INTERFACE_UNIXSOCKET));
-    interfaceList.push_back(ConnectInterface("pp", INTERFACE_PIPE));
-
-    freeifaddrs(ifAddrStruct);
-
-    initialized = true;
+    std::vector<ConnectInterface> pipeInterfaces = Pipe::getInterfaces();
+    interfaceList.insert(interfaceList.end(), pipeInterfaces.begin(), pipeInterfaces.end());
 
     return interfaceList;
 }

@@ -19,22 +19,22 @@ class Collector : public Component {
 
 	virtual bool processDistributorMsg(long, Message *);
 	virtual bool processCollectorMsg(long, Message *);
-	virtual bool processClientMsg(long, Message *);
+	virtual bool processNodeMsg(long, Message *);
 
 	bool send2DistributorMsg(long, int);
 	bool send2ClientMsg(long, int);
 
 public:
+
 	Collector(int, int, const char *rootPath);
+    virtual ~Collector();
 
-	virtual ~Collector();
+    bool reset();
+    bool processRule();
+    bool processRule(const std::string &);
+    bool syncTime();
 
-	bool reset();
-	bool processRule();
-	bool processRule(const std::string &);
-	bool syncTime();
-
-	void display();
+    void display();
 };
 
 #endif	/* COLLECTOR_H */

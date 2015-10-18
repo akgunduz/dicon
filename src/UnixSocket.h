@@ -27,6 +27,8 @@ private :
 public :
 	static uint16_t gOffset;
 	UnixSocket(Unit, int, const InterfaceCallback *, const char *);
+    static std::vector<ConnectInterface>interfaceList;
+    static std::vector<ConnectInterface> getInterfaces();
 	std::vector<long> getAddressList();
 	~UnixSocket();
 };

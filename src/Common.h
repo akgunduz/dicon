@@ -37,6 +37,8 @@
 #include <sys/time.h>
 #include <dirent.h>
 #include <json-c/json.h>
+#include <signal.h>
+#include <time.h>
 
 #ifdef __WXWIDGETS__
 #include <wx/wxprec.h>
@@ -48,6 +50,7 @@
 #endif
 
 #ifdef APPLE
+#include <IOKit/IOKitKeys.h>
 #include <CommonCrypto/CommonDigest.h>
 #include "Common_apple.h"
 
@@ -107,17 +110,6 @@ enum FILETYPE {
     FILE_RULE,
 	FILE_COMMON,
 	FILE_ARCH
-};
-
-enum ARCHIDS {
-	ARCH_OSX,
-	ARCH_WIN,
-	ARCH_LIN,
-	ARCH_ARM11,
-	ARCH_A7,
-	ARCH_A8,
-	ARCH_A9,
-	ARCH_A15
 };
 
 enum UI_UPDATE {

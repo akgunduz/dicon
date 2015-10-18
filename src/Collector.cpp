@@ -89,13 +89,14 @@ bool Collector::processCollectorMsg(long address, Message *msg) {
     return false;
 }
 
-bool Collector::processClientMsg(long address, Message *msg) {
+bool Collector::processNodeMsg(long address, Message *msg) {
 
 	bool status = false;
 
 	switch(msg->getType()) {
 
 		case MSGTYPE_MD5: {
+
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
@@ -141,21 +142,21 @@ bool Collector::send2DistributorMsg(long address, int type) {
 	switch(type) {
 
 		case MSGTYPE_READY:
-			msg->setPriority(PRIORITY_1);
+
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"READY\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_CLIENT:
-			msg->setPriority(PRIORITY_2);
+
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"CLIENT\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_TIME:
-			msg->setPriority(PRIORITY_1);
+
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"TIME\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
@@ -186,7 +187,7 @@ bool Collector::send2ClientMsg(long address, int type) {
 	switch(type) {
 
 		case MSGTYPE_RULE:
-			msg->setPriority(PRIORITY_3);
+
 			msg->setRule(STREAM_RULE, ruleItr->second);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"RULE\" msg sent to client: %s",
@@ -194,7 +195,7 @@ bool Collector::send2ClientMsg(long address, int type) {
 			break;
 
 		case MSGTYPE_BINARY:
-			msg->setPriority(PRIORITY_3);
+
 			msg->setRule(STREAM_BINARY, ruleItr->second);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"BINARY\" msg sent to client: %s with \"%d\" file binary",

@@ -1,0 +1,27 @@
+//
+// Created by Haluk Akgunduz on 10/18/15.
+//
+
+#ifndef BANKOR_MESSAGETYPES_H
+#define BANKOR_MESSAGETYPES_H
+
+enum MSG_TYPE {
+    MSGTYPE_CLIENT = 100,
+    MSGTYPE_RULE,
+    MSGTYPE_BINARY,
+    MSGTYPE_MD5,
+    MSGTYPE_WAKEUP,
+    MSGTYPE_READY,
+    MSGTYPE_BUSY,
+    MSGTYPE_TIME,
+    MSGTYPE_TIMEOUT,
+    MSGTYPE_ALIVE,
+
+};
+
+class MessageTypes {
+
+};
+
+
+#endif //BANKOR_MESSAGETYPES_H

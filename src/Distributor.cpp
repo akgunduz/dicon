@@ -10,17 +10,14 @@ Distributor::Distributor(int collectorIndex,
             Component(Unit(HOST_DISTRIBUTOR, Util::getID()),
 					  generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath){
 
-	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_NODE));
+	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
 
-	clientManager = new NodeManager(connectors[nodeIndex],
-			timeoutCallback, sendWakeupMessage, backupRate);
-	clientManager->initClientChecker();
-
+    LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_NODE));
 };
 
 Distributor::~Distributor() {
 
-	delete clientManager;
+	delete nodeManager;
 }
 
 bool Distributor::processDistributorMsg(long address, Message *msg) {
@@ -48,7 +45,7 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_TIME:
 			collStartTime.start();
-			clientManager->resetDiffTimes();
+			nodeManager->resetTimes();
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"TIME\" msg from collector: %s", Address::getString(address).c_str());
 			break;
@@ -62,7 +59,7 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 }
 
-bool Distributor::processClientMsg(long address, Message *msg) {
+bool Distributor::processNodeMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -74,7 +71,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
-			clientManager->setClientIdle(address, msg->getOwner().getID(), collStartTime.stop());
+			nodeManager->setIdle(address, msg->getOwner().getID(), collStartTime.stop());
 
 			if (collectorWaitingList.size() > 0) {
 
@@ -97,7 +94,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"ALIVE\" msg from client: %s", Address::getString(address).c_str());
 
-			if (!clientManager->setClientValidate(address, msg->getOwner().getID())
+			if (!nodeManager->validate(address, msg->getOwner().getID())
 					&& collectorWaitingList.size() > 0) {
 
                 long collectorAddress = collectorWaitingList.front();
@@ -119,7 +116,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"BUSY\" msg from client: %s", Address::getString(address).c_str());
 
-			clientManager->setClientBusy(address);
+			nodeManager->setBusy(address);
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, BUSY);
 
 
@@ -130,7 +127,7 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"TIMEOUT\" msg from client: %s", Address::getString(address).c_str());
 
-			clientManager->setClientRemove(address);
+			nodeManager->remove(address);
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, REMOVE);
 
 			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_CLIENT);
@@ -146,14 +143,13 @@ bool Distributor::processClientMsg(long address, Message *msg) {
 
 }
 
-bool Distributor::send2ClientMsg(long address, uint8_t type) {
+bool Distributor::send2NodeMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_DISTRIBUTOR, type, getRootPath());
 
 	switch(type) {
 
 		case MSGTYPE_WAKEUP:
-			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"WAKEUP\" msg sent to client: %s", Address::getString(address).c_str());
 			break;
@@ -175,27 +171,25 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 	switch(type) {
 
 		case MSGTYPE_WAKEUP:
-			msg->setPriority(PRIORITY_1);
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"WAKEUP\" msg sent to collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_CLIENT: {
-				msg->setPriority(PRIORITY_2);
-				NodeItem * client = clientManager->getIdleClient(address);
+				NodeItem *node = nodeManager->getIdle(address);
 
-				if (client != nullptr) {
+				if (node != nullptr) {
 
-					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, client->address, PREBUSY);
+					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, node->address, PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG,
 							"\"CLIENT\" msg sent to collector: %s with available client: %s",
 						  Address::getString(address).c_str(),
-						  Address::getString(client->address).c_str());
+						  Address::getString(node->address).c_str());
 
-                    msg->setVariant(0, client->address);
-                    msg->setVariant(1, client->id);
+                    msg->setVariant(0, node->address);
+                    msg->setVariant(1, node->id);
 
-                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, client->address);
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, node->address);
 
 				} else {
 					collectorWaitingList.push_back(address);
@@ -221,6 +215,24 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 }
 
+bool Distributor::sendWakeupMessage(Connector *connector) {
+
+    std::vector<long> list = connector->getAddressList();
+
+    for (int i = 0; i < list.size(); i++) {
+
+        Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
+        //LOG_I("\"WAKEUP\" messages sent to : %s", Address::getString(list[i]).c_str());
+        connector->send(list[i], msg);
+
+    }
+
+    LOG_U(UI_UPDATE_DIST_LOG,
+          "\"WAKEUP\" messages sent to network");
+
+    return true;
+}
+
 bool Distributor::sendWakeupMessagesAll() {
 
 	sendWakeupMessage(connectors[HOST_NODE]);
@@ -232,39 +244,24 @@ bool Distributor::sendWakeupMessagesAll() {
 
 bool Distributor::reset() {
 
-	clientManager->clear();
+	nodeManager->clear();
 	collectorWaitingList.clear();
 	collStartTime.reset();
 	return true;
 
 }
 
-bool Distributor::timeoutCallback(Connector *connector,
-								  long address, long collectorAddress) {
+bool Distributor::onTimeOut(Component *component, NodeItem *node) {
 
-	Message *msg = new Message(HOST_NODE, MSGTYPE_TIMEOUT, connector->getRootPath());
-	msg->setVariant(0, collectorAddress);
-	connector->getInterface()->
-			push(MESSAGE_RECEIVE, address, msg);
+	Message *msg = new Message(HOST_NODE, MSGTYPE_TIMEOUT, component->getRootPath());
+	msg->setVariant(0, node->lastServedCollector);
+    component->connectors[HOST_NODE]->put(node->address, msg);
 
 	return true;
 }
 
-bool Distributor::sendWakeupMessage(Connector *connector) {
 
-	std::vector<long> list = connector->getAddressList();
+bool Distributor::onWakeup(Component *component) {
 
-	for (int i = 0; i < list.size(); i++) {
-
-		Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
-		msg->setPriority(PRIORITY_1);
-		//LOG_I("\"WAKEUP\" messages sent to : %s", Address::getString(list[i]).c_str());
-		connector->send(list[i], msg);
-
-	}
-
-	LOG_U(UI_UPDATE_DIST_LOG,
-			"\"WAKEUP\" messages sent to network");
-
-	return true;
+    return ((Distributor*)component)->sendWakeupMessage(component->connectors[HOST_NODE]);
 }

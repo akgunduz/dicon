@@ -6,6 +6,8 @@
 #include "Pipe.h"
 #include "PipeAddress.h"
 
+std::vector<ConnectInterface> Pipe::interfaceList;
+
 Pipe::Pipe(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(host, INTERFACE_PIPE, cb, rootPath) {
 
@@ -123,4 +125,15 @@ std::vector<long> Pipe::getAddressList() {
 
 	return list;
 
+}
+
+std::vector<ConnectInterface> Pipe::getInterfaces() {
+
+    if (interfaceList.size() > 0) {
+        return interfaceList;
+    }
+
+    interfaceList.push_back(ConnectInterface("pp", INTERFACE_PIPE));
+
+    return interfaceList;
 }

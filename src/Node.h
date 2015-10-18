@@ -16,21 +16,21 @@ private:
 
 	long distributorAddress;
 
+    virtual bool processDistributorMsg(long, Message *);
+    virtual bool processCollectorMsg(long, Message *);
+    virtual bool processNodeMsg(long, Message *);
+
+    bool send2DistributorMsg(long, uint8_t);
+    bool send2CollectorMsg(long, uint8_t);
+
+    bool processRule();
+    void processExecutor(std::string);
+    bool processMD5();
+
 public:
 	Node(int, int, const char *rootPath);
 
 	virtual ~Node();
-
-	bool processRule();
-	void processExecutor(std::string);
-	bool processMD5();
-
-	bool send2DistributorMsg(long, uint8_t);
-	bool send2CollectorMsg(long, uint8_t);
-
-	virtual bool processDistributorMsg(long, Message *);
-	virtual bool processCollectorMsg(long, Message *);
-	virtual bool processClientMsg(long, Message *);
 };
 
 
