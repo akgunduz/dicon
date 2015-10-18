@@ -27,7 +27,7 @@ bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
 
 	try {
 
-		clientObject = new Client(distInterface, collInterface, path);
+		clientObject = new Node(distInterface, collInterface, path);
 
 	} catch (std::runtime_error &e) {
 
@@ -102,7 +102,7 @@ void Console::clientRun(INTERFACES distInterface, INTERFACES collInterface) {
 void Console::clientUpdateAddresses(ConsoleEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	LOG_S("Client Interface Addresses --> Distributor : %s, Collector : %s",
+	LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
 		  Address::getString(data->data64_1).c_str(),
 		  Address::getString(data->data64_2).c_str());
 
@@ -111,14 +111,14 @@ void Console::clientUpdateAddresses(ConsoleEvent &event) {
 void Console::clientUpdateState(ConsoleEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	LOG_S("Client State : %s", sStates[data->data64_1]);
+	LOG_S("Node State : %s", sStates[data->data64_1]);
 
 }
 
 void Console::clientUpdateAttachedCollAddress(ConsoleEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
-	LOG_S("Client Attached Collector : %s", Address::getString(data->data64_1).c_str());
+	LOG_S("Node Attached Collector : %s", Address::getString(data->data64_1).c_str());
 
 }
 
@@ -140,7 +140,7 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 			return;
 		}
 
-		LOG_S("Client File --> Path : %s, MD5 : %s, Validity : %s, Flag : %s",
+		LOG_S("Node File --> Path : %s, MD5 : %s, Validity : %s, Flag : %s",
 				content->getPath(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
 				content->isValid() ? "V" : "I", content->isFlaggedToSent() ? "Y" : "N");
 	}
@@ -160,15 +160,15 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 
 		switch(content->getParamType()) {
 			case PARAM_LONG:
-				LOG_S("Client Parameter --> Type : %s, Value : %ld",
+				LOG_S("Node Parameter --> Type : %s, Value : %ld",
 						sParamTypes[content->getParamType()], content->getParam().latom);
 				break;
 			case PARAM_DOUBLE:
-				LOG_S("Client Parameter --> Type : %s, Value : %lf",
+				LOG_S("Node Parameter --> Type : %s, Value : %lf",
 						sParamTypes[content->getParamType()], content->getParam().datom);
 				break;
 			case PARAM_STRING:
-				LOG_S("Client Parameter --> Type : %s, Value : %s",
+				LOG_S("Node Parameter --> Type : %s, Value : %s",
 						sParamTypes[content->getParamType()], content->getParam().sPtr);
 				break;
 			default:
@@ -188,7 +188,7 @@ void Console::clientUpdateExecList(ConsoleEvent &event) {
 			return;
 		}
 
-		LOG_S("Client Executor : %s", content->getExec().c_str());
+		LOG_S("Node Executor : %s", content->getExec().c_str());
 
 	}
 }

@@ -12,7 +12,7 @@ Distributor::Distributor(int collectorIndex,
 
 	LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(HOST_COLLECTOR), getAddress(HOST_NODE));
 
-	clientManager = new ClientManager(connectors[nodeIndex],
+	clientManager = new NodeManager(connectors[nodeIndex],
 			timeoutCallback, sendWakeupMessage, backupRate);
 	clientManager->initClientChecker();
 
@@ -182,7 +182,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 		case MSGTYPE_CLIENT: {
 				msg->setPriority(PRIORITY_2);
-				ClientMap* client = clientManager->getIdleClient(address);
+				NodeItem * client = clientManager->getIdleClient(address);
 
 				if (client != nullptr) {
 

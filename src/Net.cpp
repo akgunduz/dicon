@@ -110,7 +110,7 @@ void Net::runReceiver(Unit host) {
 
 			int acceptfd = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
 			if (acceptfd < 0) {
-				LOG_E("Client Socket open with err : %d!!!", errno);
+				LOG_E("Node Socket open with err : %d!!!", errno);
 				return;
 			}
 

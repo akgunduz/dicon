@@ -52,11 +52,12 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				LOG_W("No available client right now.");
 				status = false;
 				LOG_U(UI_UPDATE_COLL_LOG,
-						"\"CLIENT\" msg from distributor: %s, no Available Client", Address::getString(address).c_str());
+						"\"CLIENT\" msg from distributor: %s, no Available Node", Address::getString(address).c_str());
 				break;
 			}
 
 			rules[clientAddress] = new Rule(Unit(HOST_COLLECTOR), Unit(HOST_NODE, clientID), getRootPath());
+
 			if (!rules[clientAddress]) {
 				LOG_E("Could not create a rule from path : %s", getRootPath());
 				return false;

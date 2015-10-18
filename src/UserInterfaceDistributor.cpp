@@ -12,7 +12,7 @@ void UserInterface::distInit() {
 	distCollList->InsertColumn(0, column);
 
 	column.SetId(1);
-	column.SetText( _("Attached Client") );
+	column.SetText( _("Attached Node") );
 	column.SetWidth(unit.GetWidth());
 	distCollList->InsertColumn(1, column);
 
@@ -132,7 +132,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 	if (data->data64_2 > 0) {
 		distCollList->SetItem(i, 1, Address::getString(data->data64_2));
 	} else {
-		distCollList->SetItem(i, 1, "No Available Client!!");
+		distCollList->SetItem(i, 1, "No Available Node!!");
 	}
 
 }

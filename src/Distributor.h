@@ -7,15 +7,15 @@
 #define	DISTRIBUTOR_H
 
 #include "Component.h"
-#include "Client.h"
+#include "Node.h"
 #include "Connector.h"
 #include "Util.h"
-#include "ClientManager.h"
+#include "NodeManager.h"
 
 class Distributor : public Component {
 private:
 
-	ClientManager *clientManager;
+	NodeManager *clientManager;
 
 	std::deque<long> collectorWaitingList;
 

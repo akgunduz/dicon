@@ -16,8 +16,6 @@ public:
     static void mkPath(const char *dir);
 	static short getID();
 	static const char* getIDDir(enum ARCHIDS);
-	static bool getAbsolutePath(Unit host, Unit node, FILETYPE fileType,
-                                const char* rootPath, const char* path, char *absPath, char *md5Path);
 };
 
 

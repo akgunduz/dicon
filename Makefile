@@ -22,8 +22,8 @@ endif
 
 FILES = \
 		$(SOURCE_PATH)/Application.cpp \
-		$(SOURCE_PATH)/Client.cpp \
-		$(SOURCE_PATH)/ClientManager.cpp \
+		$(SOURCE_PATH)/Node.cpp \
+		$(SOURCE_PATH)/NodeManager.cpp \
 		$(SOURCE_PATH)/Collector.cpp \
 		$(SOURCE_PATH)/Common.cpp \
 		$(SOURCE_PATH)/Connector.cpp \

@@ -71,9 +71,9 @@ public:
 	void onCollProcessClick(wxCommandEvent &event);
 	void onCollProcessSliderScroll( wxScrollEvent& event );
 
-	//Client
+	//Node
 
-	Client *clientObject;
+	Node *clientObject;
 
 	void clientInit();
 

@@ -6,9 +6,8 @@
 #include "Rule.h"
 #include "ParameterContent.h"
 #include "ExecutorContent.h"
-#include "Util.h"
 
-Rule::Rule(Unit host, Unit node, const char* rootPath) {
+Rule::Rule(Unit host, Unit node, const char* rootPath, FileContent *fileContent) {
 
     this->unitHost = host;
     this->unitNode = node;
@@ -16,26 +15,26 @@ Rule::Rule(Unit host, Unit node, const char* rootPath) {
 	valid = false;
 	parallel = false;
 
-    char absPath[PATH_MAX];
-    char md5Path[PATH_MAX];
+    if (fileContent == nullptr) {
+        content = new FileContent(host, node, rootPath, RULE_FILE, FILE_RULE);
+        if (!content->isValid()) {
+            LOG_E("Can not read rule file %s!!!", RULE_FILE);
+            return;
+        }
 
-    Util::getAbsolutePath(unitHost, unitNode, FILE_RULE, getRootPath(), RULE_FILE, absPath, md5Path);
-
-    content = new FileContent(absPath, RULE_FILE, md5Path, FILE_RULE);
-	if (!content->isValid()) {
-		LOG_E("Can not read rule file %s!!!", RULE_FILE);
-		return;
-	}
+    } else {
+        content = fileContent;
+    }
 
 	char *ruleBuffer = nullptr;
 
-	if (!readFile(absPath, &ruleBuffer)) {
-		LOG_E("Read problem in rule file %s!!!", absPath);
+	if (!readFile(content->getAbsPath(), &ruleBuffer)) {
+		LOG_E("Read problem in rule file %s!!!", content->getAbsPath());
 		return;
 	}
 
 	if (ruleBuffer == nullptr) {
-		LOG_E("Read problem in rule file %s!!!", absPath);
+		LOG_E("Read problem in rule file %s!!!", content->getAbsPath());
 		return;
 	}
 
@@ -150,12 +149,7 @@ bool Rule::parseFileNode(json_object *node) {
 
         FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
 
-        char absPath[PATH_MAX];
-        char md5Path[PATH_MAX];
-
-        Util::getAbsolutePath(unitHost, unitNode, fileType, getRootPath(), path, absPath, md5Path);
-
-		FileContent *content = new FileContent(absPath, path, md5Path, fileType);
+		FileContent *content = new FileContent(unitHost, unitNode, getRootPath(), path, fileType);
 
 		contentList[RULE_FILES].push_back(content);
 
@@ -264,11 +258,6 @@ int Rule::getContentCount(RULE_TYPES type) {
 	return (int) contentList[type].size();
 }
 
-bool Rule::addContent(RULE_TYPES types, Content *content) {
-	contentList[types].push_back(content);
-	return true;
-}
-
 void Rule::reset() {
 	for (int i = RULE_FILES; i < RULE_MAX; i++) {
 		contentList[i].clear();
@@ -330,22 +319,6 @@ int Rule::getFlaggedFileCount() {
 	}
 
 	return count;
-}
-
-bool Rule::isValid() {
-	return valid;
-}
-
-bool Rule::updateFileContent(FileContent *refContent) {
-
-	for (uint16_t i = 0; i < getContentCount(RULE_FILES); i++) {
-		FileContent *content = (FileContent *)getContent(RULE_FILES, i);
-		if (strcmp(refContent->getPath(), content->getPath()) == 0) {
-			content->set(refContent);
-		}
-	}
-
-	return true;
 }
 
 const char* Rule::getRootPath() {

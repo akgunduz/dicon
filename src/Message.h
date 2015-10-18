@@ -43,11 +43,16 @@ class Message : public BaseMessage {
 
 public:
 
+    char rootPath[PATH_MAX];
+
 	Rule *rule;
 	std::vector<MD5Wrapper> md5List;
 
 	Message(Unit host, const char*);
 	Message(Unit owner, int type, const char*);
+
+    const char* getRootPath();
+    Rule * getRule();
 
 	void setRule(int, Rule *);
 

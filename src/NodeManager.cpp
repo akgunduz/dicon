@@ -3,9 +3,9 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "ClientManager.h"
+#include "NodeManager.h"
 
-ClientManager::ClientManager(Connector *connector,
+NodeManager::NodeManager(Connector *connector,
 		fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) {
 
 	clientConnector = connector;
@@ -13,16 +13,16 @@ ClientManager::ClientManager(Connector *connector,
 	this->wakeupCB = wakeupCB;
 	this->backupRate = backupRate;
 
-	LOG_I("ClientManager is created!!!");
+	LOG_I("NodeManager is created!!!");
 };
 
-ClientManager::~ClientManager() {
+NodeManager::~NodeManager() {
 
 	stopClientChecker();
 	pthread_join(threadClientChecker, nullptr);
 
-	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
-		ClientMap* client = i->second;
+	for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+		NodeItem * client = i->second;
 		if (client->is_timer_active) {
 			stopClientTimer(client);
 			pthread_join(client->thread, nullptr);
@@ -30,15 +30,15 @@ ClientManager::~ClientManager() {
 	}
 }
 
-bool ClientManager::initClientTimer(ClientMap *clientMap, long collectorAddress) {
+bool NodeManager::initClientTimer(NodeItem *clientMap, long collectorAddress) {
 
 	if (clientConnector == nullptr) {
-		LOG_I("Client Connector is not initiated");
+		LOG_I("Node Connector is not initiated");
 		return false;
 	}
 
 	if (clientMap->is_timer_active) {
-		LOG_I("Client Timer is already active");
+		LOG_I("Node Timer is already active");
 		return false;
 	}
 
@@ -76,13 +76,13 @@ bool ClientManager::initClientTimer(ClientMap *clientMap, long collectorAddress)
 
 }
 
-bool ClientManager::stopClientTimer(ClientMap *clientMap) {
+bool NodeManager::stopClientTimer(NodeItem *clientMap) {
 
 	pthread_cond_signal(&clientMap->cond);
 	return true;
 }
 
-void *ClientManager::runClientTimer(void *arg) {
+void *NodeManager::runClientTimer(void *arg) {
 
 	struct timespec timer;
 	struct timeval now;
@@ -116,10 +116,10 @@ void *ClientManager::runClientTimer(void *arg) {
 	return nullptr;
 };
 
-bool ClientManager::initClientChecker() {
+bool NodeManager::initClientChecker() {
 
 	if (clientConnector == nullptr) {
-		LOG_I("Client Connector is not initiated");
+		LOG_I("Node Connector is not initiated");
 		return false;
 	}
 
@@ -150,12 +150,12 @@ bool ClientManager::initClientChecker() {
 	return true;
 }
 
-void *ClientManager::runClientChecker(void *arg) {
+void *NodeManager::runClientChecker(void *arg) {
 
 	struct timespec timer;
 	struct timeval now;
 
-	struct ClientManager *clientManager = (ClientManager *) arg;
+	struct NodeManager *clientManager = (NodeManager *) arg;
 
 	while(1) {
 
@@ -179,28 +179,28 @@ void *ClientManager::runClientChecker(void *arg) {
 	}
 	pthread_cond_destroy(&clientManager->condClientChecker);
 	pthread_mutex_destroy(&clientManager->mutexClientChecker);
-	LOG_I("Ending Client Checking!!!");
+	LOG_I("Ending Node Checking!!!");
 
 	return nullptr;
 };
 
-bool ClientManager::stopClientChecker() {
+bool NodeManager::stopClientChecker() {
 
 	pthread_cond_signal(&condClientChecker);
 	return true;
 }
 
-bool ClientManager::setClientIdle(long address, short id, double totalTime) {
+bool NodeManager::setClientIdle(long address, short id, double totalTime) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address);
+		NodeItem *clientMap = nodes.at(address);
 		clientMap->state = IDLE;
-		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
+		LOG_T("Node at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
 
 		if (clientMap->stopWatch.isInitiated()) {
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"Client at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
+					"Node at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
 				  Address::getString(address).c_str(), clientMap->stopWatch.stop(), totalTime);
 		}
 
@@ -214,29 +214,29 @@ bool ClientManager::setClientIdle(long address, short id, double totalTime) {
 
 }
 
-bool ClientManager::setClientValidate(long address, short id) {
+bool NodeManager::setClientValidate(long address, short id) {
 
-	std::map<long, ClientMap*>::iterator i = clients.find(address);
-	if (i == clients.end()) {
+	std::map<long, NodeItem *>::iterator i = nodes.find(address);
+	if (i == nodes.end()) {
 		addClient(address, id);
 		return false;
 	}
 
-	LOG_T("Client at address : %s is Alive", Address::getString(address).c_str());
+	LOG_T("Node at address : %s is Alive", Address::getString(address).c_str());
 	return true;
 
 }
 
-bool ClientManager::setClientBusy(long address) {
+bool NodeManager::setClientBusy(long address) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address);
+		NodeItem *clientMap = nodes.at(address);
 		stopClientTimer(clientMap);
 		clientMap->state = BUSY;
 		clientMap->usage++;
 		clientMap->stopWatch.start();
-		LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
+		LOG_T("Node at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
 		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
@@ -247,18 +247,18 @@ bool ClientManager::setClientBusy(long address) {
 
 }
 
-bool ClientManager::setClientRemove(long address) {
+bool NodeManager::setClientRemove(long address) {
 
 	try {
 
-		ClientMap *clientMap = clients.at(address);
-		clients.erase(address);
+		NodeItem *clientMap = nodes.at(address);
+		nodes.erase(address);
 		delete clientMap;
 
 		readyBackup = (uint32_t) fmin(totalBackup, readyBackup + 1);
 
 		LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-		LOG_T("Client at address %s removed from the list", Address::getString(address).c_str());
+		LOG_T("Node at address %s removed from the list", Address::getString(address).c_str());
 
 	} catch (const std::out_of_range e) {
 		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
@@ -269,30 +269,30 @@ bool ClientManager::setClientRemove(long address) {
 
 }
 
-bool ClientManager::addClient(long address, short id) {
+bool NodeManager::addClient(long address, short id) {
 
-	clients[address] = new ClientMap(IDLE, 0, address, id);
+	nodes[address] = new NodeItem(IDLE, 0, address, id);
 
-	totalBackup = clients.size() == 1 ? 0 : (uint32_t) ceil(clients.size() * backupRate);
+	totalBackup = nodes.size() == 1 ? 0 : (uint32_t) ceil(nodes.size() * backupRate);
 
 	readyBackup = 0;
 
 	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-	LOG_T("Client at address : %s added to the list", Address::getString(address).c_str());
+	LOG_T("Node at address : %s added to the list", Address::getString(address).c_str());
 
 	return true;
 }
 
-ClientMap* ClientManager::getIdleClient(long collectorAddress) {
+NodeItem *NodeManager::getIdleClient(long collectorAddress) {
 
 //TODO coklu collector de burada thread korumasi olmasi lazim
 
-	ClientMap *leastUsedClient = nullptr;
+	NodeItem *leastUsedClient = nullptr;
 
 	int idleCount = 0;
 
-	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
-		ClientMap *clientMap = i->second;
+	for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
+		NodeItem *clientMap = i->second;
 		if (clientMap->state != IDLE) {
 			continue;
 		}
@@ -314,7 +314,7 @@ ClientMap* ClientManager::getIdleClient(long collectorAddress) {
 
 		initClientTimer(leastUsedClient, collectorAddress);
 
-		LOG_T("Client at address : %s returned to collector",
+		LOG_T("Node at address : %s returned to collector",
 			  Address::getString(leastUsedClient->address).c_str());
 
 		return leastUsedClient;
@@ -326,17 +326,17 @@ ClientMap* ClientManager::getIdleClient(long collectorAddress) {
 	return nullptr;
 }
 
-bool ClientManager::resetDiffTimes() {
+bool NodeManager::resetDiffTimes() {
 
-	for (std::map<long, ClientMap*>::iterator i = clients.begin(); i != clients.end(); i++) {
+	for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
 		i->second->stopWatch.reset();
 	}
 	return true;
 }
 
-void ClientManager::clear() {
+void NodeManager::clear() {
 
-	clients.clear();
+	nodes.clear();
 	readyBackup = 0;
 	totalBackup = 0;
 }

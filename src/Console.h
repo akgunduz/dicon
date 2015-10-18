@@ -42,7 +42,7 @@ class Console {
 
 	Distributor *distObject;
 	Collector *collObject;
-	Client *clientObject;
+	Node *clientObject;
 
 	fConsoleUpdater uiUpdater[UI_UPDATE_MAX];
 

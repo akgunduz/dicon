@@ -96,7 +96,7 @@ enum INTERFACES {
 	INTERFACE_MAX
 };
 
-enum STATES {
+enum NodeStates {
 	IDLE,
 	BUSY,
 	PREBUSY,

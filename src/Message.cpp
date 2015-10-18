@@ -4,18 +4,27 @@
 //
 
 #include "Message.h"
-#include "Util.h"
 
 Message::Message(Unit host, const char* rootPath)
-		: BaseMessage(host, rootPath) {
+		: BaseMessage(host) {
 
+    strcpy(this->rootPath, rootPath);
 	rule = nullptr;
 }
 
 Message::Message(Unit owner, int type, const char* rootPath)
-		: BaseMessage(owner, type, rootPath) {
+		: BaseMessage(owner, type) {
 
+    strcpy(this->rootPath, rootPath);
 	rule = nullptr;
+}
+
+const char *Message::getRootPath() {
+	return rootPath;
+}
+
+Rule* Message::getRule() {
+    return rule;
 }
 
 void Message::setRule(int streamFlag, Rule *rule) {
@@ -47,7 +56,14 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
 		LOG_E("readFileBinary can not read path data");
 		return false;
 	}
-	content->setPath(path);
+
+    long fileType;
+    if (!readNumber(desc, &fileType)) {
+        LOG_E("readFileBinary can not read filetype data");
+        return false;
+    }
+
+    content->setFile(getHost(), getOwner(), getRootPath(), path, (FILETYPE)fileType);
 
 	if (header->sizes[1] != MD5_DIGEST_LENGTH) {
 		LOG_E("Md5 size must be %d long", MD5_DIGEST_LENGTH);
@@ -63,12 +79,7 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
 
 	uint8_t calcmd5[MD5_DIGEST_LENGTH];
 
-    char absPath[PATH_MAX];
-    char md5Path[PATH_MAX];
-
-    Util::getAbsolutePath(getHost(), getOwner(), FILE_RULE, getRootPath(), path, absPath, md5Path);
-
-	if (!readBinary(desc, absPath, calcmd5, md5Path, header->sizes[2])) {
+	if (!readBinary(desc, content->getAbsPath(), calcmd5, content->getMD5Path(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}
@@ -109,23 +120,23 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
                 return false;
             }
 
-            if (rule == nullptr) {
+            if (fileContent->getFileType() == FILE_RULE) {
 
-                rule = new Rule(Unit(getHost()), Unit(getOwner()), getRootPath());
+                if (rule != nullptr) {
+                    delete rule;
+                }
 
+                rule = new Rule(getHost(), getOwner(), getRootPath(), fileContent);
+
+            } else {
+
+                delete fileContent;
             }
-
-            if (rule->isValid() && strcmp(fileContent->getPath(), RULE_FILE) == 0) {
-
-                rule->updateFileContent(fileContent);
-
-            }
-
-            delete fileContent;
         }
             break;
 
         case BLOCK_FILE_MD5: {
+
             MD5Wrapper md5;
             if (!readFileMD5(in, &md5, blockHeader)) {
                 return false;
@@ -165,8 +176,12 @@ bool Message::writeFileBinary(int desc, FileContent *content) {
 	}
 
 	if (!writeString(desc, content->getPath())) {
-		return false;
-	}
+        return false;
+    }
+
+    if (!writeNumber(desc, content->getFileType())) {
+        return false;
+    }
 
 	if (!writeMD5(desc, content->getMD5())) {
 		return false;

@@ -9,10 +9,10 @@ set(FILES
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Application.h
-        ${SOURCE_PATH}/Client.cpp
-        ${SOURCE_PATH}/Client.h
-        ${SOURCE_PATH}/ClientManager.cpp
-        ${SOURCE_PATH}/ClientManager.h
+        ${SOURCE_PATH}/Node.cpp
+        ${SOURCE_PATH}/Node.h
+        ${SOURCE_PATH}/NodeManager.cpp
+        ${SOURCE_PATH}/NodeManager.h
         ${SOURCE_PATH}/Collector.cpp
         ${SOURCE_PATH}/Collector.h
         ${SOURCE_PATH}/Common.cpp

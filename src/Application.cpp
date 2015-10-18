@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 				LOG_I("Running in Console Collector Mode");
 				break;
 			case 'c':
-				LOG_I("Running in Console Client Mode");
+				LOG_I("Running in Console Node Mode");
 
 				if (argc != 4) {
 					LOG_E("Invalid Parameter, Must be \"Mode Interface Interface\"");

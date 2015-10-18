@@ -6,19 +6,18 @@
 #include "BaseMessage.h"
 #include "Util.h"
 
-BaseMessage::BaseMessage(Unit host, const char* rootPath) {
+BaseMessage::BaseMessage(Unit host) {
 
 	memset(&header, 0, sizeof(MessageHeader));
-    strcpy(this->rootPath, rootPath);
     setHost(host);
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
 }
 
-BaseMessage::BaseMessage(Unit owner, int type, const char* rootPath) {
+BaseMessage::BaseMessage(Unit owner, int type) {
 
 	memset(&header, 0, sizeof(MessageHeader));
-    strcpy(this->rootPath, rootPath);
+
 	header.time = 0;
 	header.deviceID = 0;
 	header.messageID = 0;//new Random(time).nextLong();
@@ -562,8 +561,4 @@ bool BaseMessage::writeToStream(int out) {
     writeEndStream(out);
 
 	return true;
-}
-
-const char *BaseMessage::getRootPath() {
-    return rootPath;
 }

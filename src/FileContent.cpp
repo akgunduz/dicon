@@ -13,11 +13,14 @@ FileContent::FileContent() {
 	setValid(false);
 	flaggedToSent = true;
 	strcpy(path, "");
-	strcpy(absPath, "");
+	strcpy(this->absPath, "");
+	strcpy(this->md5Path, "");
 }
 
-FileContent::FileContent(const char *absPath,
-		const char* path, const char* md5Path, FILETYPE type) : FileContent() {
+FileContent::FileContent(Unit host, Unit node, const char* rootPath,
+                         const char *path, FILETYPE fileType) : FileContent() {
+
+    setFile(host, node, rootPath, path, fileType);
 
 	FILE *file = fopen(absPath, "r");
 	if (file == nullptr) {
@@ -26,11 +29,8 @@ FileContent::FileContent(const char *absPath,
 		return;
 	}
 
-    setPath(path);
-    setAbsPath(absPath);
     setValid(true);
     setFlaggedToSent(true);
-    setFileType(type);
 
 	char buf[BUFFER_SIZE];
 
@@ -64,7 +64,6 @@ FileContent::FileContent(const char *absPath,
 
 	md5file = fopen(md5Path, "w");
 	fwrite(Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
-//	fputc('\0', md5file);
 	fclose(md5file);
 };
 
@@ -76,16 +75,12 @@ const char* FileContent::getPath() {
 	return path;
 }
 
-void FileContent::setPath(const char *path) {
-    strcpy(this->path, path);
-}
-
 const char* FileContent::getAbsPath() {
     return absPath;
 }
 
-void FileContent::setAbsPath(const char *path) {
-    strcpy(this->absPath, path);
+const char* FileContent::getMD5Path() {
+	return md5Path;
 }
 
 uint8_t* FileContent::getMD5() {
@@ -108,15 +103,39 @@ FILETYPE FileContent::getFileType() {
     return fileType;
 }
 
-void FileContent::setFileType(FILETYPE fileType) {
+void FileContent::setFile(Unit host, Unit node, const char* rootPath,
+                          const char *path, FILETYPE fileType) {
+
+    strcpy(this->path, path);
     this->fileType = fileType;
-}
 
-void FileContent::set(FileContent *content) {
+    if (host.getType() == HOST_COLLECTOR) {
 
-    setPath(content->getPath());
-    setMD5(content->getMD5());
-	setValid(content->isValid());
-	setFlaggedToSent(content->isFlaggedToSent());
-    setFileType(content->getFileType());
+        switch(fileType) {
+            case FILE_RULE:
+                sprintf(absPath, "%s%s", rootPath, path);
+                break;
+            case FILE_COMMON:
+                sprintf(absPath, "%scommon/%s", rootPath, path);
+                break;
+            case FILE_ARCH:
+                sprintf(absPath, "%sarch/%s/%s", rootPath, (char*)sArchs[node.getID()], path);
+                break;
+        }
+
+    } else {
+        sprintf(absPath, "%s%s", rootPath, path);
+    }
+
+    if (access(absPath, F_OK ) == -1) {
+        Util::mkPath(absPath);
+    }
+
+    //  char *ptr = absPath + strlen(rootPath);
+
+    sprintf(md5Path, "%smd5/%s.md5", rootPath, path);
+
+    if (access(md5Path, F_OK ) == -1) {
+        Util::mkPath(md5Path);
+    }
 }

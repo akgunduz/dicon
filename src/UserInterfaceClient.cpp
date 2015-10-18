@@ -69,7 +69,7 @@ void UserInterface::onClientInitClick( wxCommandEvent& event ) {
 			sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
 			mkdir(path, 0777);
 
-			clientObject = new Client((uint32_t)clientDistInterface->GetSelection(),
+			clientObject = new Node((uint32_t)clientDistInterface->GetSelection(),
 					(uint32_t)clientCollInterface->GetSelection(), path);
 
 		} catch (std::runtime_error &e) {

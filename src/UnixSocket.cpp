@@ -97,7 +97,7 @@ void UnixSocket::runReceiver(Unit host) {
 
 			int acceptfd = accept(unixSocket, nullptr, nullptr);
 			if (acceptfd < 0) {
-				LOG_E("Client Socket open with err : %d!!!", errno);
+				LOG_E("Node Socket open with err : %d!!!", errno);
 				return;
 			}
 

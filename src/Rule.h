@@ -29,12 +29,6 @@ enum RULE_TYPES {
 	RULE_MAX
 };
 
-enum RUN_TYPE {
-	RUN_SEQUENTIAL,
-	RUN_PARALLEL,
-	RUN_MAX
-};
-
 static std::string sRuleTypes[RULE_MAX] = {
 	SRULE_RUNTYPE,
 	SRULE_FILES,
@@ -75,20 +69,16 @@ class Rule {
 
 public:
 
-	Rule(Unit, Unit, const char*);
+	Rule(Unit host, Unit node, const char*, FileContent* content = nullptr);
 	~Rule();
-	bool isValid();
 	bool isParallel();
 	FileContent* getContent();
 	const char* getRootPath();
 	Content* getContent(RULE_TYPES type, int index);
 	int getContentCount(RULE_TYPES type);
 	int getFlaggedFileCount();
-	bool updateFileContent(FileContent*);
-	bool addContent(RULE_TYPES, Content *);
 	void reset();
 	void display();
-
 };
 
 

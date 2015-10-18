@@ -3,11 +3,11 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Client.h"
+#include "Node.h"
 #include "ExecutorContent.h"
 #include "Util.h"
 
-Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
+Node::Node(int distributorIndex, int collectorIndex, const char *rootPath) :
         Component(Unit(HOST_NODE),
 				  generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
 
@@ -20,11 +20,11 @@ Client::Client(int distributorIndex, int collectorIndex, const char *rootPath) :
 
 }
 
-Client::~Client() {
+Node::~Node() {
 
 }
 
-bool Client::processDistributorMsg(long address, Message *msg) {
+bool Node::processDistributorMsg(long address, Message *msg) {
 
     bool status = false;
 
@@ -48,7 +48,7 @@ bool Client::processDistributorMsg(long address, Message *msg) {
     return status;
 }
 
-bool Client::processCollectorMsg(long address, Message *msg) {
+bool Node::processCollectorMsg(long address, Message *msg) {
 
 	bool status = false;
 
@@ -78,11 +78,6 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_BINARY:
 
-			rule = msg->rule;
-			if (rule == nullptr) {
-				rule = new Rule(Unit(HOST_NODE), Unit(HOST_NODE), getRootPath());
-			}
-
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s with \"%d\" file binary",
 				  Address::getString(address).c_str(), 0/*msg->getReceivedBinaryCount()*/);
@@ -103,11 +98,11 @@ bool Client::processCollectorMsg(long address, Message *msg) {
 	return status;
 }
 
-bool Client::processClientMsg(long address, Message *msg) {
+bool Node::processClientMsg(long address, Message *msg) {
 	return false;
 }
 
-bool Client::send2DistributorMsg(long address, uint8_t type) {
+bool Node::send2DistributorMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(Unit(HOST_NODE), type, getRootPath());
 
@@ -143,7 +138,7 @@ bool Client::send2DistributorMsg(long address, uint8_t type) {
 
 }
 
-bool Client::send2CollectorMsg(long address, uint8_t type) {
+bool Node::send2CollectorMsg(long address, uint8_t type) {
 
 	Message *msg = new Message(HOST_NODE, type, getRootPath());
 
@@ -165,7 +160,7 @@ bool Client::send2CollectorMsg(long address, uint8_t type) {
 	return connectors[HOST_COLLECTOR]->send(address, msg);
 }
 
-bool Client::processMD5() {
+bool Node::processMD5() {
 
 	for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
 
@@ -188,7 +183,7 @@ bool Client::processMD5() {
 
 }
 
-void Client::processExecutor(std::string cmd) {
+void Node::processExecutor(std::string cmd) {
 
 	size_t pos = 0, newpos = 0;
 	char *cmdargs[100];
@@ -228,7 +223,7 @@ void Client::processExecutor(std::string cmd) {
 	exit(EXIT_FAILURE);
 }
 
-bool Client::processRule() {
+bool Node::processRule() {
 
 	int status;
 

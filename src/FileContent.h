@@ -7,29 +7,32 @@
 #define __FileContent_H_
 
 #include "Content.h"
+#include "Unit.h"
 
 class FileContent : public Content {
 	char path[PATH_MAX];
 	char absPath[PATH_MAX];
+	char md5Path[PATH_MAX];
 	uint8_t md5[MD5_DIGEST_LENGTH];
 	bool flaggedToSent;
 	FILETYPE fileType;
 
 public:
 	FileContent();
-	FileContent(const char*, const char*, const char*, FILETYPE);
+	FileContent(Unit host, Unit node, const char* rootPath,
+                const char *path, FILETYPE fileType);
 	~FileContent(){};
 	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
 	FILETYPE getFileType();
-	void setFileType(FILETYPE);
 	uint8_t* getMD5();
 	void setMD5(uint8_t*);
     const char* getPath();
+    void setFile(Unit host, Unit node, const char* rootPath,
+                 const char *path, FILETYPE fileType);
     const char* getAbsPath();
-	void setPath(const char*);
-	void setAbsPath(const char *path);
-	void set(FileContent *);
+	const char* getMD5Path();
+
 	virtual CONTENT_TYPES getType();
 };
 

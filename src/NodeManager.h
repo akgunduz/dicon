@@ -6,7 +6,7 @@
 #ifndef CLIENTMANAGER_H
 #define	CLIENTMANAGER_H
 
-#include "Client.h"
+#include "Node.h"
 #include "Connector.h"
 #include "Util.h"
 #include "StopWatch.h"
@@ -17,7 +17,7 @@
 typedef bool (*fTimeoutCB)(Connector *, long , long);
 typedef bool (*fWakeupCB)(Connector *);
 
-struct ClientMap {
+struct NodeItem {
 
 	volatile bool is_timer_active = false;
 
@@ -25,22 +25,23 @@ struct ClientMap {
 	pthread_cond_t cond;
 	pthread_t thread;
 
-	STATES state = IDLE;
+	NodeStates state = IDLE;
 	int usage;
 	long address;
+	long lastServedCollector;
 	short id;
 	StopWatch stopWatch;
-	ClientMap(STATES s, int u, long a, short i) : state(s), usage(u), address(a), id(i) {
+	NodeItem(NodeStates s, int u, long a, short i) : state(s), usage(u), address(a), id(i) {
 		stopWatch.reset();
 	}
 };
 
-class ClientManager {
+class NodeManager {
 private:
 
 	Connector *clientConnector;
 
-	std::map<long, ClientMap*> clients;
+	std::map<long, NodeItem *> nodes;
 
 	uint32_t readyBackup = 0;
 	uint32_t totalBackup = 0;
@@ -53,17 +54,17 @@ private:
 	pthread_cond_t condClientChecker;
 	pthread_t threadClientChecker;
 
-	bool initClientTimer(ClientMap *, long);
-	bool stopClientTimer(ClientMap *);
+	bool initClientTimer(NodeItem *, long);
+	bool stopClientTimer(NodeItem *);
 	static void *runClientTimer(void *);
 	static void *runClientChecker(void *);
 	bool stopClientChecker();
 
 public:
 
-	ClientManager(Connector *, fTimeoutCB, fWakeupCB, double);
+	NodeManager(Connector *, fTimeoutCB, fWakeupCB, double);
 
-	virtual ~ClientManager();
+	virtual ~NodeManager();
 
 	bool initClientChecker();
 
@@ -74,7 +75,7 @@ public:
 	bool setClientValidate(long, short);
 	bool addClient(long, short);
 
-	ClientMap* getIdleClient(long);
+	NodeItem * getIdleClient(long);
 
 	void clear();
 
@@ -82,10 +83,10 @@ public:
 
 struct ClientManagerArgument {
 	Connector *clientConnector;
-	ClientMap *clientMap;
+	NodeItem *clientMap;
 	long collectorAddress;
 	fTimeoutCB timeoutCB;
-	ClientManagerArgument(Connector *cc, fTimeoutCB cb, ClientMap *c, long a) :
+	ClientManagerArgument(Connector *cc, fTimeoutCB cb, NodeItem *c, long a) :
 			clientConnector(cc), timeoutCB(cb), clientMap(c), collectorAddress(a) {}
 };
 

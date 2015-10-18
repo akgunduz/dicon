@@ -91,16 +91,14 @@ class BaseMessage {
 
     Unit host;
 
-    char rootPath[PATH_MAX];
-
 	struct MessageHeader header;
 
     int streamFlag;
 
 public:
 
-    BaseMessage(Unit host, const char* rootPath);
-    BaseMessage(Unit owner, int type, const char* rootPath);
+    BaseMessage(Unit host);
+    BaseMessage(Unit owner, int type);
 
     void setStreamFlag(int);
 
@@ -119,8 +117,6 @@ public:
     long getTime();
     long getDeviceID();
     long getMessageID();
-
-    const char* getRootPath();
 
     PRIORITIES getPriority();
     void setPriority(PRIORITIES);

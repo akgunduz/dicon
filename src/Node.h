@@ -9,7 +9,7 @@
 
 #include "Component.h"
 
-class Client : public Component {
+class Node : public Component {
 private:
 
 	Rule* rule;
@@ -17,9 +17,9 @@ private:
 	long distributorAddress;
 
 public:
-	Client(int, int, const char *rootPath);
+	Node(int, int, const char *rootPath);
 
-	virtual ~Client();
+	virtual ~Node();
 
 	bool processRule();
 	void processExecutor(std::string);
