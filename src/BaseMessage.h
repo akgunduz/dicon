@@ -81,7 +81,8 @@ class BaseMessage {
 
     int streamFlag;
 
-    long targetAddress;
+    bool isUDP;
+    sockaddr_in targetAddress;
 
 public:
 
@@ -90,6 +91,7 @@ public:
 
     void setStreamFlag(int);
     void setTargetAddress(long);
+    void setProtocol(bool);
 
 	int getType();
 

@@ -18,8 +18,7 @@ Component::Component(Unit host, long index, const char* rootPath) {
 
         try {
 
-            connectors[HOST_DISTRIBUTOR] = new Connector(host, Device::getDevice(indexDist),
-                                                         Device::isMulticastEnabled(indexDist), callback, rootPath);
+            connectors[HOST_DISTRIBUTOR] = new Connector(host, Device::getDevice(indexDist), false, callback, rootPath);
             this->rootPath = connectors[HOST_DISTRIBUTOR]->getRootPath();
 
         } catch (const std::runtime_error e) {

@@ -14,18 +14,16 @@ public:
 
     long address;
     long helper;
-    bool multicastEnabled = false;
 
     static std::vector<Device>deviceList;
 
     Device(const char* _name, INTERFACES _type);
-    Device(const char* _name, long _ipAddress, long _helper, bool _multicastEnabled);
+    Device(const char* _name, long _ipAddress, long _helper);
 
     const char* getName();
     INTERFACES getType();
     long getAddress();
     long getHelper();
-    bool isMulticastEnabled();
 
     static std::vector<Device> getInterfaces();
     static int getCount();
@@ -34,7 +32,6 @@ public:
     static INTERFACES getType(int);
     static long getAddress(int);
     static long getHelper(int);
-    static bool isMulticastEnabled(int);
 };
 
 

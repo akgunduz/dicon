@@ -89,7 +89,7 @@ ip_mreq NetAddress::getMulticastAddress(long address) {
     memset((char *) &imreq, 0, sizeof(imreq));
 
     imreq.imr_multiaddr.s_addr = htonl(MULTICAST_ADDRESS);
-    imreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    imreq.imr_interface.s_addr = htonl((uint32_t)getIP(address));
     return imreq;
 
 }

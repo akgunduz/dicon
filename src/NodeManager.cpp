@@ -13,7 +13,7 @@ NodeManager::NodeManager(Component* component, fTimeoutCB timeoutCB, fWakeupCB w
 	this->backupRate = backupRate;
 
     if (nodeWatchdog == nullptr) {
-        nodeWatchdog = new NodeWatchdog(component, wakeupCB);
+    //    nodeWatchdog = new NodeWatchdog(component, wakeupCB);
     }
 };
 

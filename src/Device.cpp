@@ -16,13 +16,12 @@ Device::Device(const char *name, INTERFACES type) {
     this->type = type;
 }
 
-Device::Device(const char *_name, long _ipAddress, long _helper, bool _multicastEnabled) {
+Device::Device(const char *_name, long _ipAddress, long _helper) {
 
     strcpy(this->name, _name);
     this->type = INTERFACE_NET;
     this->address = _ipAddress;
     this->helper = _helper;
-    this->multicastEnabled = _multicastEnabled;
 }
 
 const char* Device::getName() {
@@ -40,11 +39,6 @@ long Device::getAddress() {
 long Device::getHelper() {
     return helper;
 }
-
-bool Device::isMulticastEnabled() {
-    return multicastEnabled;
-}
-
 
 
 std::vector<Device> Device::getInterfaces() {
@@ -109,11 +103,4 @@ long Device::getHelper(int index) {
                              deviceList.size() - 1 : index];
 
     return ci->helper;
-}
-
-bool Device::isMulticastEnabled(int index) {
-
-    Device *ci = &deviceList[index >= deviceList.size() ?
-                             deviceList.size() - 1 : index];
-    return ci->multicastEnabled;
 }

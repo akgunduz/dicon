@@ -14,6 +14,7 @@ BaseMessage::BaseMessage(Unit host) {
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
     setTargetAddress(0);
+    setProtocol(false);
 }
 
 BaseMessage::BaseMessage(Unit owner, int type) {
@@ -30,6 +31,7 @@ BaseMessage::BaseMessage(Unit owner, int type) {
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
     setTargetAddress(0);
+    setProtocol(false);
 }
 
 void BaseMessage::setStreamFlag(int flag) {
@@ -37,7 +39,11 @@ void BaseMessage::setStreamFlag(int flag) {
 }
 
 void BaseMessage::setTargetAddress(long targetAddress) {
-    this->targetAddress = targetAddress;
+    this->targetAddress = NetAddress::getInetAddress(targetAddress);
+}
+
+void BaseMessage::setProtocol(bool isUDP) {
+    this->isUDP = isUDP;
 }
 
 int BaseMessage::getType() {
@@ -145,6 +151,11 @@ bool BaseMessage::transferBinary(int in, int out, uint8_t *md5, int size) {
     bool error = false;
     int readSize;
 
+    if (isUDP) {
+        LOG_E("Can not transfer binary in UDP mode!!!");
+        return false;
+    }
+
     do {
 
         if (size > BUFFER_SIZE) {
@@ -185,7 +196,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 	do {
         long count;
 
-        if (!NetAddress::isMulticast(targetAddress)) {
+        if (!isUDP) {
             count = read(in, buf + offset, (size_t) size);
 
         } else {
@@ -416,12 +427,11 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
         long count;
 
-        if (!NetAddress::isMulticast(targetAddress)) {
+        if (!isUDP) {
             count = write(out, buf + offset, (size_t)size);
 
         } else {
-            sockaddr_in addr = NetAddress::getInetAddress(targetAddress);
-            count = sendto(out, buf + offset, (size_t)size, 0, (struct sockaddr *) &addr, sizeof(addr));
+            count = sendto(out, buf + offset, (size_t)size, 0, (struct sockaddr *) &targetAddress, sizeof(struct sockaddr));
         }
 
 		if (count == -1) {

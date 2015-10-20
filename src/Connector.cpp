@@ -8,8 +8,7 @@
 #include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(Unit host, Device *device, bool multicastEnabled,
-                     const InterfaceCallback *cb, const char *rootPath) {
+Connector::Connector(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath) {
 
 	INTERFACES  interfaceType = device->getType();
 

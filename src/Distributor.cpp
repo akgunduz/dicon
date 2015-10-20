@@ -216,13 +216,13 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 }
 
 bool Distributor::sendWakeupMessage(Connector *connector) {
-
+/*
     if (connector->getDevice()->isMulticastEnabled()) {
 
         Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
         connector->send(msg);
 
-    } else {
+    } else */{
 
         std::vector<long> list = connector->getAddressList();
 
@@ -243,9 +243,9 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
 bool Distributor::sendWakeupMessagesAll() {
 
 	sendWakeupMessage(connectors[HOST_NODE]);
-	if (connectors[HOST_COLLECTOR] != connectors[HOST_NODE]) {
+/*	if (connectors[HOST_COLLECTOR] != connectors[HOST_NODE]) {
 		sendWakeupMessage(connectors[HOST_COLLECTOR]);
-	}
+	}*/
 	return true;
 }
 

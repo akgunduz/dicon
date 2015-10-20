@@ -107,13 +107,14 @@ bool Net::init() {
             close(netSocket);
             return false;
         }
-
+/*
         if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
             LOG_E("Socket option with err : %d!!!", errno);
             close(multicastSocket);
             close(netSocket);
             return false;
         }
+        */
     }
 
 	if (!initThread()) {
@@ -186,7 +187,7 @@ void Net::runReceiver(Unit host) {
         if (multicastEnabled && FD_ISSET(multicastSocket, &readfs)) {
 
             Message *msg = new Message(host, getRootPath());
-            msg->setTargetAddress(multicastAddress);
+            msg->setProtocol(true);
             if (msg->readFromStream(multicastSocket)) {
                 push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
             }
@@ -250,24 +251,23 @@ void Net::runSender(long target, Message *msg) {
 
 void Net::runMulticastSender(Message *msg) {
 
-    int clientSocket = socket(PF_INET, SOCK_DGRAM, 0);
+    int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
         LOG_T("Socket sender open with err : %d!!!", errno);
         return;
     }
-/*
-    const char *iname = device->getName();
-    setsockopt(clientSocket, SOL_SOCKET, SO_BINDTODEVICE, iname, strlen(iname));
-*/
+
+    struct in_addr interface_addr = NetAddress::getInetAddress(address).sin_addr;
+    setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
+
     msg->setOwnerAddress(address);
+    msg->setProtocol(true);
     msg->setTargetAddress(multicastAddress);
     msg->writeToStream(clientSocket);
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);
 }
-
-
 
 void Net::setAddress(int portOffset) {
 
@@ -319,9 +319,8 @@ std::vector<Device> Net::getInterfaces() {
                 strncmp(loop->ifa_name, "lo", 2) == 0) {
 
                 interfaceList.push_back(Device(loop->ifa_name,
-                                                         ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                                         NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
-                strncmp(loop->ifa_name, "lo", 2) != 0));
+                             ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                             NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
 
             }
         }
