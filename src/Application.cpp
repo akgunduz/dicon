@@ -13,7 +13,7 @@ Console *c_ui;
 
 int main(int argc, char** argv) {
 
-	Log::setLogLevel(LEVEL_TRACE);
+	Log::setLogLevel(LEVEL_WARN);
 
 	Device::getInterfaces();
 

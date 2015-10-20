@@ -50,6 +50,21 @@ std::string NetAddress::getIPstr(long address) {
     return std::string(cIP);
 }
 
+std::string NetAddress::getIPstr2(long ip) {
+
+    struct in_addr addr;
+    addr.s_addr = htonl(ip);
+    char cIP[INET_ADDRSTRLEN];
+
+    const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
+    if (!dst) {
+        LOG_E("Ip is invalid");
+        return "";
+    }
+
+    return std::string(cIP);
+}
+
 sockaddr_in NetAddress::getInetAddress(long address) {
 
     sockaddr_in inet_addr;
@@ -128,9 +143,13 @@ std::vector<long> NetAddress::getAddressList(long address) {
 
     } else {
 
-        long range = 1 << (32 - netmask);
+        long range = (1 << (32 - netmask)) - 2;
 
-        long startIP = (1 >> netmask) & ownIP + 1;
+        int mask = ((int)0x80000000) >> (netmask - 1);
+
+        long net = mask & ownIP;
+
+        long startIP = net + 1;
 
         for (int i = 0; i < range; i++) {
 

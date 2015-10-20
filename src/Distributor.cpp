@@ -229,7 +229,11 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
         for (int i = 0; i < list.size(); i++) {
 
             Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
+
             connector->send(list[i], msg);
+
+            LOG_U(UI_UPDATE_LOG,
+                  "\"WAKEUP\" message sent to : %s", Address::getString(list[i]).c_str());
 
         }
     }
@@ -243,9 +247,9 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
 bool Distributor::sendWakeupMessagesAll() {
 
 	sendWakeupMessage(connectors[HOST_NODE]);
-/*	if (connectors[HOST_COLLECTOR] != connectors[HOST_NODE]) {
+	if (connectors[HOST_COLLECTOR] != connectors[HOST_NODE]) {
 		sendWakeupMessage(connectors[HOST_COLLECTOR]);
-	}*/
+	}
 	return true;
 }
 

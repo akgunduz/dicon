@@ -21,6 +21,7 @@ public:
     static std::string getString(long);
     static long getIP(long);
     static std::string getIPstr(long);
+    static std::string getIPstr2(long);
     static int getPort(long);
     static int getNetmask(long);
     static sockaddr_in getInetAddress(long);
