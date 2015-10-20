@@ -78,3 +78,7 @@ short Util::getID() {
     return ARCH_A11;
 #endif
 }
+
+bool Util::isMulticast() {
+    return false;
+}

@@ -219,13 +219,16 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 }
 
 bool Distributor::sendWakeupMessage(Connector *connector) {
-/*
-    if (connector->getDevice()->isMulticastEnabled()) {
+
+    if (Util::isMulticast()) {
 
         Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
         connector->send(msg);
 
-    } else */{
+        LOG_U(UI_UPDATE_LOG,
+              "\"WAKEUP\" message sent as multicast");
+
+    } else {
 
         std::vector<long> list = connector->getAddressList();
 
@@ -239,10 +242,10 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
                   "\"WAKEUP\" message sent to : %s", Address::getString(list[i]).c_str());
 
         }
-    }
 
-    LOG_U(UI_UPDATE_DIST_LOG,
-          "\"WAKEUP\" messages sent to network");
+        LOG_U(UI_UPDATE_DIST_LOG,
+              "\"WAKEUP\" messages sent to network");
+    }
 
     return true;
 }
