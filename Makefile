@@ -73,7 +73,7 @@ PI_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/bin/$(TOOLCHAIN_AR
 
 PI_OBJECTS_PATH = Objects/pi
 
-PI_CFLAGS = $(CFLAGS) -O2 -pipe -march=armv6zk -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -marm \
+PI_CFLAGS = $(CFLAGS) -O2 -pipe -DARM11 -march=armv6zk -mtune=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp -marm \
 	-I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/pi/$(GCC_VERSION)/include
 
@@ -94,7 +94,7 @@ C15_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_
 
 C15_OBJECTS_PATH = Objects/c15
 
-C15_CFLAGS = $(CFLAGS) -O3 -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
+C15_CFLAGS = $(CFLAGS) -O3 -DCORTEXA15 -march=armv7ve -mcpu=cortex-a15 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c15/$(GCC_VERSION)/include
 
@@ -114,7 +114,7 @@ C9_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_P
 
 C9_OBJECTS_PATH = Objects/c9
 
-C9_CFLAGS = $(CFLAGS) -O3 -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=hard -mfpu=neon \
+C9_CFLAGS = $(CFLAGS) -O3 -DCORTEXA9 -march=armv7-a -mcpu=cortex-a9 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c9/$(GCC_VERSION)/include
 
@@ -135,7 +135,7 @@ C8_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_P
 
 C8_OBJECTS_PATH = Objects/c8
 
-C8_CFLAGS = $(CFLAGS) -O3 -march=armv7-a -mcpu=cortex-a8 -mfloat-abi=hard -mfpu=neon \
+C8_CFLAGS = $(CFLAGS) -O3 -DCORTEXA8 -march=armv7-a -mcpu=cortex-a8 -mfloat-abi=hard -mfpu=neon \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c8/$(GCC_VERSION)/include
 
@@ -156,7 +156,7 @@ C7_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/bin/$(TOOLCHAIN_ARM_P
 
 C7_OBJECTS_PATH = Objects/c7
 
-C7_CFLAGS = $(CFLAGS) -O3 -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 \
+C7_CFLAGS = $(CFLAGS) -O3 -DCORTEXA7 -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 \
 	-mvectorize-with-neon-quad -I$(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION)/$(TOOLCHAIN_ARM_PREFIX)/include \
 	-I$(TOOLCHAIN_PATH)/libs/c7/$(GCC_VERSION)/include
 
@@ -196,7 +196,7 @@ CMD_CC = g++
 
 CMD_OBJECTS_PATH = Objects/cmd
 
-CMD_CFLAGS = $(CFLAGS) -O3 -pipe
+CMD_CFLAGS = $(CFLAGS) -O3 -DLINUX -pipe
 
 CMD_LDFLAGS = -L/usr/local/lib $(LDFLAGS)
 
@@ -214,7 +214,7 @@ UI_CC = /usr/local/bin/clang-omp++
 
 UI_OBJECTS_PATH = Objects/ui
 
-UI_CFLAGS = $(CFLAGS) -O3 -pipe -D__WXWIDGETS__ -D_FILE_OFFSET_BITS=64 -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__ \
+UI_CFLAGS = $(CFLAGS) -O3 -pipe -DAPPLE -D__WXWIDGETS__ -D_FILE_OFFSET_BITS=64 -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__ \
 	-I/usr/local/include/wx-3.0 -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 
 
 UI_LDFLAGS = -L/usr/local/lib -framework IOKit -framework Carbon \
@@ -237,7 +237,7 @@ UILNX_CC = g++
 
 UILNX_OBJECTS_PATH = Objects/uilnx
 
-UILNX_CFLAGS = $(CFLAGS) -O0 -pipe -D__WXWIDGETS__ -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 \
+UILNX_CFLAGS = $(CFLAGS) -O0 -pipe -DLINUX -D__WXWIDGETS__ -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 \
     -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__
 
 UILNX_LDFLAGS = -L/usr/lib/x86_64-linux-gnu  -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 \

@@ -65,6 +65,16 @@ short Util::getID() {
 #if defined(APPLE)
 	return ARCH_OSX;
 #elif defined(LINUX)
-    return ARCH_LINUX;
+    return ARCH_LNX;
+#elif defined(CORTEXA15)
+    return ARCH_CA15;
+#elif defined(CORTEXA9)
+    return ARCH_CA9;
+#elif defined(CORTEXA8)
+    return ARCH_CA8;
+#elif defined(CORTEXA7)
+    return ARCH_CA7;
+#elif defined(ARM11)
+    return ARCH_A11;
 #endif
 }
