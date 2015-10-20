@@ -68,6 +68,8 @@
 #else
 #include <openssl/md5.h>
 #include "Common_linux.h"
+#define ntohll(x) be64toh(x)
+#define htonll(x) htobe64(x)
 #endif
 
 #ifndef nullptr
