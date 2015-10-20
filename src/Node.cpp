@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "ExecutorContent.h"
 #include "Util.h"
+#include "ArchTypes.h"
 
 Node::Node(int distributorIndex, int collectorIndex, const char *rootPath) :
         Component(Unit(HOST_NODE),
@@ -109,21 +110,24 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 	switch(type) {
 
 		case MSGTYPE_READY:
+
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"READY\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
+					"\"READY\" msg sent to distributor: %s with ID : %s",
+                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
 
 		case MSGTYPE_ALIVE:
+
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"ALIVE\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
+					"\"ALIVE\" msg sent to distributor: %s with ID : %s",
+                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
 
 		case MSGTYPE_BUSY:
+
 			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"BUSY\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
+					"\"BUSY\" msg sent to distributor: %s with ID : %s",
+                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
 
 		default:

@@ -19,6 +19,6 @@ const char *ArchTypes::getDir(ARCH_IDS id) {
     return sArchTypes[id];
 }
 
-int ArchTypes::getMax() {
+short ArchTypes::getMax() {
     return ARCH_MAX;
 }

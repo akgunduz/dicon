@@ -4,6 +4,7 @@
 //
 
 #include "Distributor.h"
+#include "ArchTypes.h"
 
 Distributor::Distributor(int collectorIndex,
 		int nodeIndex, const char *rootPath, double backupRate) :
@@ -67,7 +68,8 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_READY:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from client: %s", Address::getString(address).c_str());
+					"\"READY\" msg from client: %s with ID : %s",
+                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
@@ -92,7 +94,8 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"ALIVE\" msg from client: %s", Address::getString(address).c_str());
+					"\"ALIVE\" msg from client: %s with ID : %s",
+                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 
 			if (!nodeManager->validate(address, msg->getOwner().getID())
 					&& collectorWaitingList.size() > 0) {

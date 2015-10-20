@@ -21,7 +21,7 @@ class ArchTypes {
 
 public:
     static const char* getDir(ARCH_IDS id);
-    static int getMax();
+    static short getMax();
 };
 
 
