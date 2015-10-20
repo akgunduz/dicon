@@ -62,5 +62,9 @@ void Util::mkPath(const char *path) {
 }
 
 short Util::getID() {
+#if defined(APPLE)
 	return ARCH_OSX;
+#elif defined(LINUX)
+    return ARCH_LINUX;
+#endif
 }
