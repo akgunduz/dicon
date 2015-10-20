@@ -127,7 +127,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 	}
 
 	distCollList->SetItem(i, 0, Address::getString(data->data64_1));
-	distCollList->SetItem(i, 2, wxString::Format(wxT("%li"), data->data64_1));
+	distCollList->SetItem(i, 2, wxString::Format(wxT("%ld"), data->data64_1));
 
 	if (data->data64_2 > 0) {
 		distCollList->SetItem(i, 1, Address::getString(data->data64_2));
@@ -159,7 +159,7 @@ void UserInterface::distAddtoClientList(wxCommandEvent &event) {
 
 	distClientList->SetItem(i, 0, Address::getString(data->data64_1));
 	distClientList->SetItem(i, 1, sStates[data->data64_2]);
-	distClientList->SetItem(i, 2, wxString::Format(wxT("%li"), data->data64_1));
+	distClientList->SetItem(i, 2, wxString::Format(wxT("%ld"), data->data64_1));
 
 }
 
@@ -167,8 +167,8 @@ void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
 
-	distBackupCount->SetLabelText(wxString::Format(wxT("%li"), data->data64_1));
-	distBackupReady->SetLabelText(wxString::Format(wxT("%li"), data->data64_2));
+	distBackupCount->SetLabelText(wxString::Format(wxT("%ld"), data->data64_1));
+	distBackupReady->SetLabelText(wxString::Format(wxT("%ld"), data->data64_2));
 
 }
 

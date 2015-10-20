@@ -165,7 +165,7 @@ void UserInterface::collUpdateParamList(wxCommandEvent &event) {
 		collParamList->SetItem(index, 0, sParamTypes[content->getParamType()]);
 		switch(content->getParamType()) {
 			case PARAM_LONG:
-				collParamList->SetItem(index, 1, wxString::Format(wxT("%li"), content->getParam().latom));
+				collParamList->SetItem(index, 1, wxString::Format(wxT("%ld"), content->getParam().latom));
 				break;
 			case PARAM_DOUBLE:
 				collParamList->SetItem(index, 1, wxString::Format(wxT("%lf"), content->getParam().datom));

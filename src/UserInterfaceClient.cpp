@@ -165,7 +165,7 @@ void UserInterface::clientUpdateParamList(wxCommandEvent &event) {
 		clientParamList->SetItem(index, 0, sParamTypes[content->getParamType()]);
 		switch(content->getParamType()) {
 			case PARAM_LONG:
-				clientParamList->SetItem(index, 1, wxString::Format(wxT("%li"), content->getParam().latom));
+				clientParamList->SetItem(index, 1, wxString::Format(wxT("%ld"), content->getParam().latom));
 				break;
 			case PARAM_DOUBLE:
 				clientParamList->SetItem(index, 1, wxString::Format(wxT("%lf"), content->getParam().datom));

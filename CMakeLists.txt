@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11 -stdlib=libc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11")
 add_definitions(-D__IDE__)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Debug/")
@@ -112,7 +112,7 @@ if (APPLE)
         -framework System \
         -lwx_osx_cocoau_xrc-3.0 -lwx_osx_cocoau_webview-3.0 -lwx_osx_cocoau_html-3.0 \
         -lwx_osx_cocoau_qa-3.0 -lwx_osx_cocoau_adv-3.0 -lwx_osx_cocoau_core-3.0 \
-        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto")
+        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto -stdlib=libc++")
 
     add_executable(bankor-osx ${FILES} ${WX_FILES})
 
