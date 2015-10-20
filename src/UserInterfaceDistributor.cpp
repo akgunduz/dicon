@@ -44,9 +44,9 @@ void UserInterface::distInit() {
 	uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
 	uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
-	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
-		distCollInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
-		distClientInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+	for (uint32_t i = 0; i < Device::getCount(); i++) {
+		distCollInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
+		distClientInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
 	}
 
 }

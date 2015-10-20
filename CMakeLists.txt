@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11 -stdlib=libc++")
 add_definitions(-D__IDE__)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Debug/")
+set(CMAKE_BINARY_DIR "Objects/")
 
 set(FILES
         ${SOURCE_PATH}/Application.cpp
@@ -18,8 +21,8 @@ set(FILES
         ${SOURCE_PATH}/Common_linux.h
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/Component.h
-        ${SOURCE_PATH}/ConnectInterface.cpp
-        ${SOURCE_PATH}/ConnectInterface.h
+        ${SOURCE_PATH}/Device.cpp
+        ${SOURCE_PATH}/Device.h
         ${SOURCE_PATH}/Connector.cpp
         ${SOURCE_PATH}/Connector.h
         ${SOURCE_PATH}/Console.cpp
@@ -109,20 +112,32 @@ if (APPLE)
         -framework System \
         -lwx_osx_cocoau_xrc-3.0 -lwx_osx_cocoau_webview-3.0 -lwx_osx_cocoau_html-3.0 \
         -lwx_osx_cocoau_qa-3.0 -lwx_osx_cocoau_adv-3.0 -lwx_osx_cocoau_core-3.0 \
-        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto -stdlib=libc++")
+        -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lcrypto")
 
-    add_executable(Bankor ${FILES} ${WX_FILES})
+    add_executable(bankor-osx ${FILES} ${WX_FILES})
 
 elseif(CYGWIN)
 
+    add_definitions(-DUNICODE -DCYGWIN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0
         -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
-    add_definitions(-DUNICODE -DCYGWIN)
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /bin/cygjson-c-2.dll /bin/cygcrypto-1.0.0.dll
         -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_webview-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0
         -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0")
 
-    add_executable(Bankor ${FILES})
+    add_executable(bankor-cyg ${FILES})
+
+else()
+
+    add_definitions(-DLINUX -D__WXWIDGETS__)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/x86_64-linux-gnu -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
+
+    #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Debug/")
+    #set(CMAKE_BINARY_DIR "Objects/")
+
+    add_executable(bankor-lnx ${FILES} ${WX_FILES})
 
 endif()

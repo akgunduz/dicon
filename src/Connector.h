@@ -16,12 +16,14 @@ class Connector {
 	bool initialized = false;
 	Interface* _interface;
 public:
-	Connector(Unit, int, const InterfaceCallback *, const char *);
+	Connector(Unit, Device *, bool, const InterfaceCallback *, const char *);
 	bool send(long, Message*);
+	bool send(Message*);
 	bool put(long, Message*);
 	long getAddress();
 	INTERFACES getInterfaceType();
 	Interface* getInterface();
+    Device* getDevice();
 	std::vector<long> getAddressList();
 	const char * getRootPath();
 	virtual ~Connector();

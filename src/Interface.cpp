@@ -5,7 +5,7 @@
 
 #include "Interface.h"
 
-Interface::Interface(Unit host, INTERFACES type, const InterfaceCallback *callBack, const char *rootPath) {
+Interface::Interface(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *callBack, const char *rootPath) {
 
 	try {
 
@@ -19,8 +19,11 @@ Interface::Interface(Unit host, INTERFACES type, const InterfaceCallback *callBa
 	InterfaceCallback *interfaceCallback = new InterfaceCallback(senderCB, this);
 
     this->host = host;
+    this->device = device;
+    this->multicastEnabled = multicastEnabled;
+
 	scheduler->setReceiveCB(callBack);
-	scheduler->setSendCB(type, interfaceCallback);
+	scheduler->setSendCB(device->getType(), interfaceCallback);
 
 	strcpy(this->rootPath, rootPath);
 }
@@ -95,7 +98,14 @@ bool Interface::senderCB(void *arg, long address, Message *msg) {
 void* Interface::runSender(void *arg) {
 
 	Argument *argument = (Argument *) arg;
-	argument->_interface->runSender(argument->address, argument->msg);
+
+    if (argument->address != argument->_interface->getMulticastAddress()) {
+        argument->_interface->runSender(argument->address, argument->msg);
+
+    } else {
+        argument->_interface->runMulticastSender(argument->msg);
+    }
+
 	delete argument;
 	return nullptr;
 
@@ -135,6 +145,23 @@ long Interface::getAddress() {
 	return address;
 }
 
+long Interface::getMulticastAddress() {
+
+    if (!initialized) {
+        return 0;
+    }
+
+    return multicastAddress;
+}
+
 const char *Interface::getRootPath() {
 	return rootPath;
+}
+
+bool Interface::isMulticastEnabled() {
+    return multicastEnabled;
+}
+
+Device *Interface::getDevice() {
+    return device;
 }

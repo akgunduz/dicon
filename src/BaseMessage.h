@@ -81,12 +81,15 @@ class BaseMessage {
 
     int streamFlag;
 
+    long targetAddress;
+
 public:
 
     BaseMessage(Unit host);
     BaseMessage(Unit owner, int type);
 
     void setStreamFlag(int);
+    void setTargetAddress(long);
 
 	int getType();
 

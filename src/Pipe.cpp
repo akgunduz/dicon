@@ -6,12 +6,12 @@
 #include "Pipe.h"
 #include "PipeAddress.h"
 
-std::vector<ConnectInterface> Pipe::interfaceList;
+std::vector<Device> Pipe::interfaceList;
 
-Pipe::Pipe(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, INTERFACE_PIPE, cb, rootPath) {
+Pipe::Pipe(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, device, multicastEnabled, cb, rootPath) {
 
-	if (!init(interfaceIndex)) {
+	if (!init()) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("Pipe : Instance create failed!!!");
 	}
@@ -20,7 +20,7 @@ Pipe::Pipe(Unit host, int interfaceIndex, const InterfaceCallback *cb, const cha
 
 }
 
-bool Pipe::init(int interfaceIndex) {
+bool Pipe::init() {
 
 	if (pipe(desc) < 0) {
 		LOG_E("Init failed with err : %d!!!", errno);
@@ -28,7 +28,7 @@ bool Pipe::init(int interfaceIndex) {
 	}
 	LOG_T("Pipe receiver %d is opened !!!", desc[1]);
 
-	setAddress(interfaceIndex);
+	setAddress(0);
 
 	if (fcntl(desc[0], F_SETFL, O_NONBLOCK) == -1) {
 		LOG_E("Problem with Pipe States with err : %d!!!", errno);
@@ -99,7 +99,7 @@ void Pipe::runSender(long target, Message *msg) {
 
 }
 
-void Pipe::setAddress(int index) {
+void Pipe::setAddress(int portIndex) {
 
 	address = (long) desc[1];
 
@@ -127,13 +127,17 @@ std::vector<long> Pipe::getAddressList() {
 
 }
 
-std::vector<ConnectInterface> Pipe::getInterfaces() {
+std::vector<Device> Pipe::getInterfaces() {
 
     if (interfaceList.size() > 0) {
         return interfaceList;
     }
 
-    interfaceList.push_back(ConnectInterface("pp", INTERFACE_PIPE));
+    interfaceList.push_back(Device("pp", INTERFACE_PIPE));
 
     return interfaceList;
+}
+
+void Pipe::runMulticastSender(Message *message) {
+
 }

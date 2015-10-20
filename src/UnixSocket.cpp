@@ -6,13 +6,12 @@
 #include "UnixSocket.h"
 #include "UnixSocketAddress.h"
 
-uint16_t UnixSocket::gOffset = 1001;
-std::vector<ConnectInterface> UnixSocket::interfaceList;
+std::vector<Device> UnixSocket::interfaceList;
 
-UnixSocket::UnixSocket(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, INTERFACE_UNIXSOCKET, cb, rootPath) {
+UnixSocket::UnixSocket(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, device, multicastEnabled, cb, rootPath) {
 
-	if (!init(interfaceIndex)) {
+	if (!init()) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
@@ -20,7 +19,7 @@ UnixSocket::UnixSocket(Unit host, int interfaceIndex, const InterfaceCallback *c
 
 }
 
-bool UnixSocket::init(int interfaceIndex) {
+bool UnixSocket::init() {
 
 	unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (unixSocket < 0) {
@@ -28,7 +27,7 @@ bool UnixSocket::init(int interfaceIndex) {
 		return false;
 	}
 
-	setAddress(interfaceIndex);
+	setAddress(0);
 
     sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
 
@@ -178,9 +177,9 @@ UnixSocket::~UnixSocket() {
 }
 
 
-void UnixSocket::setAddress(int index) {
+void UnixSocket::setAddress(int portIndex) {
 
-	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  gOffset++;
+	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  portIndex;
 }
 
 INTERFACES UnixSocket::getType() {
@@ -232,13 +231,17 @@ std::vector<long> UnixSocket::getAddressList() {
 	return list;
 }
 
-std::vector<ConnectInterface> UnixSocket::getInterfaces() {
+std::vector<Device> UnixSocket::getInterfaces() {
 
     if (interfaceList.size() > 0) {
         return interfaceList;
     }
 
-    interfaceList.push_back(ConnectInterface("us", INTERFACE_UNIXSOCKET));
+    interfaceList.push_back(Device("us", INTERFACE_UNIXSOCKET));
 
     return interfaceList;
+}
+
+void UnixSocket::runMulticastSender(Message *message) {
+
 }

@@ -17,18 +17,19 @@
 class UnixSocket : public Interface {
 private :
 	int unixSocket;
-	bool init(int);
+	bool init();
 	void runReceiver(Unit host);
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
+    void runMulticastSender(Message *);
 	void setAddress(int);
 	INTERFACES getType();
 
 public :
 	static uint16_t gOffset;
-	UnixSocket(Unit, int, const InterfaceCallback *, const char *);
-    static std::vector<ConnectInterface>interfaceList;
-    static std::vector<ConnectInterface> getInterfaces();
+	UnixSocket(Unit, Device*, bool, const InterfaceCallback *, const char *);
+    static std::vector<Device>interfaceList;
+    static std::vector<Device> getInterfaces();
 	std::vector<long> getAddressList();
 	~UnixSocket();
 };

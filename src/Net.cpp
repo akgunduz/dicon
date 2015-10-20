@@ -6,22 +6,19 @@
 #include "Net.h"
 #include "NetAddress.h"
 
-uint16_t Net::gOffset = 0;
-std::vector<ConnectInterface> Net::interfaceList;
+std::vector<Device> Net::interfaceList;
 
-Net::Net(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, INTERFACE_NET, cb, rootPath) {
+Net::Net(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, device, multicastEnabled, cb, rootPath) {
 
-	if (!init(interfaceIndex)) {
+	if (!init()) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
 
-	LOG_I("Instance is created, Socket : %d!!!", netSocket);
-
 }
 
-bool Net::init(int interfaceIndex) {
+bool Net::init() {
 
 	netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (netSocket < 0) {
@@ -29,54 +26,102 @@ bool Net::init(int interfaceIndex) {
 		return false;
 	}
 
-	int on = 1;
-	if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
-		LOG_E("Socket option with err : %d!!!", errno);
-		close(netSocket);
-		return false;
-	}
-	LOG_T("Socket set option is OK!!!");
+    int on = 1;
+    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(netSocket);
+        return false;
+    }
 
-	int tryCount = 0;
+    int tryCount = 0;
 
-	do {
+    do {
 
-        tryCount++;
-
-		setAddress(interfaceIndex);
+        setAddress(tryCount);
         struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
-		if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
-			LOG_E("Socket bind with err : %d!!!", errno);
-			if (errno != EADDRINUSE || tryCount == 10) {
-				close(netSocket);
-				return false;
-			}
-			continue;
-		}
+        if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
+            LOG_E("Socket bind with err : %d!!!", errno);
+            if (errno != EADDRINUSE || tryCount == 10) {
+                close(netSocket);
+                return false;
+            }
 
-		break;
+            tryCount++;
 
-	} while(1);
+            continue;
+        }
 
-	LOG_T("Socket binding is OK!!!");
+        break;
 
-	if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
-		LOG_E("Socket listen with err : %d!!!", errno);
-		close(netSocket);
-		return false;
-	}
-	LOG_T("Socket listen is OK!!!");
+    } while(1);
 
-	if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
-		LOG_E("Could not set socket Non-Blocking!!!");
-		close(netSocket);
-		return false;
-	}
-	LOG_T("Set socket Non-Blocking is OK!!!");
+    LOG_U(UI_UPDATE_LOG,
+          "Using address : %s", Address::getString(address).c_str());
+
+    if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
+        LOG_E("Socket listen with err : %d!!!", errno);
+        close(netSocket);
+        return false;
+    }
+
+    if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+        LOG_E("Could not set socket Non-Blocking!!!");
+        close(netSocket);
+        return false;
+    }
+
+    multicastAddress = NetAddress::parseAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
+
+    if (multicastEnabled) {
+
+        multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        if (multicastSocket < 0) {
+            LOG_E("Socket receiver open with err : %d!!!", errno);
+            close(netSocket);
+            return false;
+        }
+
+        if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+            LOG_E("Socket option with err : %d!!!", errno);
+            close(multicastSocket);
+            close(netSocket);
+            return false;
+        }
+
+        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address, DEFAULT_MULTICAST_PORT);
+        if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
+            LOG_E("Socket bind with err : %d!!!", errno);
+            close(multicastSocket);
+            close(netSocket);
+            return false;
+        }
+
+        LOG_U(UI_UPDATE_LOG,
+              "Using multicast address : %s", Address::getString(multicastAddress).c_str());
+
+        ip_mreq imreq = NetAddress::getMulticastAddress(address);
+
+        if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
+            LOG_E("Socket option with err : %d!!!", errno);
+            close(multicastSocket);
+            close(netSocket);
+            return false;
+        }
+
+        if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
+            LOG_E("Socket option with err : %d!!!", errno);
+            close(multicastSocket);
+            close(netSocket);
+            return false;
+        }
+    }
 
 	if (!initThread()) {
 		LOG_E("Problem with Server thread");
-		close(netSocket);
+        if (multicastEnabled) {
+            close(multicastSocket);
+        }
+        close(netSocket);
 		return false;
 	}
 
@@ -85,15 +130,24 @@ bool Net::init(int interfaceIndex) {
 
 void Net::runReceiver(Unit host) {
 
-	bool thread_started = true;
+    bool thread_started = true;
 
-	int maxfd = std::max(netSocket, notifierPipe[0]) + 1;
+    struct sockaddr_in cli_addr;
+    socklen_t clilen = sizeof(cli_addr);
 
-	struct sockaddr_in cli_addr;
-	socklen_t clilen = sizeof(cli_addr);
+    fd_set readfs, orjreadfs;
+    FD_ZERO(&orjreadfs);
 
-	fd_set readfs, orjreadfs;
-	FD_ZERO(&orjreadfs);
+    int maxfd = std::max(netSocket, notifierPipe[0]);
+
+    if (multicastEnabled) {
+        maxfd = std::max(maxfd, multicastSocket) + 1;
+        FD_SET(multicastSocket, &orjreadfs);
+
+    } else {
+        maxfd += 1;
+    }
+
 	FD_SET(netSocket, &orjreadfs);
 	FD_SET(notifierPipe[0], &orjreadfs);
 
@@ -128,6 +182,16 @@ void Net::runReceiver(Unit host) {
 				thread_started = false;
 			}
 		}
+
+        if (multicastEnabled && FD_ISSET(multicastSocket, &readfs)) {
+
+            Message *msg = new Message(host, getRootPath());
+            msg->setTargetAddress(multicastAddress);
+            if (msg->readFromStream(multicastSocket)) {
+                push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+            }
+
+        }
 
 		if (FD_ISSET(notifierPipe[0], &readfs)) {
 
@@ -184,17 +248,38 @@ void Net::runSender(long target, Message *msg) {
 	close(clientSocket);
 }
 
+void Net::runMulticastSender(Message *msg) {
+
+    int clientSocket = socket(PF_INET, SOCK_DGRAM, 0);
+    if (clientSocket < 0) {
+        LOG_T("Socket sender open with err : %d!!!", errno);
+        return;
+    }
+/*
+    const char *iname = device->getName();
+    setsockopt(clientSocket, SOL_SOCKET, SO_BINDTODEVICE, iname, strlen(iname));
+*/
+    msg->setOwnerAddress(address);
+    msg->setTargetAddress(multicastAddress);
+    msg->writeToStream(clientSocket);
+
+    shutdown(clientSocket, SHUT_RDWR);
+    close(clientSocket);
+}
 
 
-void Net::setAddress(int index) {
 
-    address = NetAddress::parseAddress(ConnectInterface::getAddress(index),
-			DEFAULT_PORT + gOffset++, (int)ConnectInterface::getHelper(index));
+void Net::setAddress(int portOffset) {
 
+    address = NetAddress::parseAddress(device->getAddress(),
+			DEFAULT_PORT + portOffset, (int) device->getHelper());
 }
 
 Net::~Net() {
 	end();
+    if (multicastEnabled) {
+        close(multicastSocket);
+    }
 	close(netSocket);
 }
 
@@ -210,7 +295,7 @@ std::vector<long> Net::getAddressList() {
     return NetAddress::getAddressList(address);
 }
 
-std::vector<ConnectInterface> Net::getInterfaces() {
+std::vector<Device> Net::getInterfaces() {
 
     if (interfaceList.size() > 0) {
         return interfaceList;
@@ -233,16 +318,14 @@ std::vector<ConnectInterface> Net::getInterfaces() {
                 strncmp(loop->ifa_name, "br", 2) == 0 ||
                 strncmp(loop->ifa_name, "lo", 2) == 0) {
 
-                interfaceList.push_back(ConnectInterface(loop->ifa_name,
+                interfaceList.push_back(Device(loop->ifa_name,
                                                          ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                                         NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
+                                                         NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                strncmp(loop->ifa_name, "lo", 2) != 0));
 
             }
         }
     };
-
-    interfaceList.push_back(ConnectInterface("us", INTERFACE_UNIXSOCKET));
-    interfaceList.push_back(ConnectInterface("pp", INTERFACE_PIPE));
 
     freeifaddrs(ifAddrStruct);
 

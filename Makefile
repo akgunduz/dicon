@@ -23,12 +23,10 @@ endif
 FILES = \
 		$(SOURCE_PATH)/Application.cpp \
         ${SOURCE_PATH}/ArchTypes.cpp \
-		$(SOURCE_PATH)/Node.cpp \
-		$(SOURCE_PATH)/NodeManager.cpp \
 		$(SOURCE_PATH)/Collector.cpp \
 		$(SOURCE_PATH)/Common.cpp \
         ${SOURCE_PATH}/Component.cpp \
-        ${SOURCE_PATH}/ConnectInterface.cpp \
+        ${SOURCE_PATH}/Device.cpp \
 		$(SOURCE_PATH)/Connector.cpp \
 		$(SOURCE_PATH)/Console.cpp \
 		$(SOURCE_PATH)/ConsoleClient.cpp \
@@ -38,17 +36,25 @@ FILES = \
 		${SOURCE_PATH}/ExecutorContent.cpp \
 		$(SOURCE_PATH)/Distributor.cpp \
 		$(SOURCE_PATH)/Interface.cpp \
+		${SOURCE_PATH}/InterfaceCallback.cpp \
 		$(SOURCE_PATH)/Log.cpp \
 		$(SOURCE_PATH)/BaseMessage.cpp \
 		$(SOURCE_PATH)/Message.cpp \
+        ${SOURCE_PATH}/MessageDirection.cpp \
+        ${SOURCE_PATH}/MessageTypes.cpp \
 		$(SOURCE_PATH)/Net.cpp \
+        $(SOURCE_PATH)/Node.cpp \
+        ${SOURCE_PATH}/NodeItem.cpp \
+        $(SOURCE_PATH)/NodeManager.cpp \
+        ${SOURCE_PATH}/NodeWatchdog.cpp \
 		$(SOURCE_PATH)/Pipe.cpp \
 		$(SOURCE_PATH)/Rule.cpp \
+		${SOURCE_PATH}/RuleTypes.cpp \
 		$(SOURCE_PATH)/Scheduler.cpp \
 		$(SOURCE_PATH)/Util.cpp \
 		$(SOURCE_PATH)/Unit.cpp \
-		$(SOURCE_PATH)/UnixSocket.cpp \
 		${SOURCE_PATH}/StopWatch.cpp \
+		$(SOURCE_PATH)/UnixSocket.cpp \
 		$(SOURCE_PATH)/Address.cpp \
 		$(SOURCE_PATH)/NetAddress.cpp \
 		$(SOURCE_PATH)/PipeAddress.cpp \
@@ -208,7 +214,7 @@ UI_CC = /usr/local/bin/clang-omp++
 
 UI_OBJECTS_PATH = Objects/ui
 
-UI_CFLAGS = $(CFLAGS) -O3 -pipe -DUSE_WXWIDGETS -D_FILE_OFFSET_BITS=64 -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__ \
+UI_CFLAGS = $(CFLAGS) -O3 -pipe -D__WXWIDGETS__ -D_FILE_OFFSET_BITS=64 -DwxDEBUG_LEVEL=0 -DWXUSINGDLL -D__WXMAC__ -D__WXOSX__ -D__WXOSX_COCOA__ \
 	-I/usr/local/include/wx-3.0 -I/usr/local/lib/wx/include/osx_cocoa-unicode-3.0 
 
 UI_LDFLAGS = -L/usr/local/lib -framework IOKit -framework Carbon \
@@ -231,10 +237,11 @@ UILNX_CC = g++
 
 UILNX_OBJECTS_PATH = Objects/uilnx
 
-UILNX_CFLAGS = $(CFLAGS) -O0 -pipe -DUSE_WXWIDGETS -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__
+UILNX_CFLAGS = $(CFLAGS) -O0 -pipe -D__WXWIDGETS__ -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 \
+    -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__
 
-
-UILNX_LDFLAGS = -L/usr/lib/x86_64-linux-gnu  -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 $(LDFLAGS)
+UILNX_LDFLAGS = -L/usr/lib/x86_64-linux-gnu  -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 \
+    -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 $(LDFLAGS)
 
 UILNX_FILES = $(FILES) $(WX_FILES)
 

@@ -53,9 +53,9 @@ void UserInterface::clientInit() {
 	uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &UserInterface::clientUpdateExecList;
 	uiUpdater[UI_UPDATE_CLIENT_LOG] = &UserInterface::clientUpdateLog;
 
-	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
-		clientDistInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
-		clientCollInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+	for (uint32_t i = 0; i < Device::getCount(); i++) {
+		clientDistInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
+		clientCollInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
 	}
 
 }

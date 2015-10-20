@@ -61,9 +61,47 @@ sockaddr_in NetAddress::getInetAddress(long address) {
 
 }
 
+sockaddr_in NetAddress::getInetAddress(int port) {
+
+    sockaddr_in inet_addr;
+    memset((char *) &inet_addr, 0, sizeof(inet_addr));
+    inet_addr.sin_family = AF_INET;
+    inet_addr.sin_port = htons(port);
+    inet_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    return inet_addr;
+
+}
+
+sockaddr_in NetAddress::getInetAddress(long address, int port) {
+
+    sockaddr_in inet_addr;
+    memset((char *) &inet_addr, 0, sizeof(inet_addr));
+    inet_addr.sin_family = AF_INET;
+    inet_addr.sin_port = htons(port);
+    inet_addr.sin_addr.s_addr = htonl((uint32_t)getIP(address));
+    return inet_addr;
+
+}
+
+ip_mreq NetAddress::getMulticastAddress(long address) {
+
+    ip_mreq imreq;
+    memset((char *) &imreq, 0, sizeof(imreq));
+
+    imreq.imr_multiaddr.s_addr = htonl(MULTICAST_ADDRESS);
+    imreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    return imreq;
+
+}
+
 bool NetAddress::isLoopback(long address) {
 
-    return  (((address) & IPADDRESS_MASK) == LOOPBACK_ADDRESS);
+    return  (((address) & IPADDRESS_MASK) == htonl(LOOPBACK_ADDRESS));
+}
+
+bool NetAddress::isMulticast(long address) {
+
+    return  (((address) & IPADDRESS_MASK) == htonl(MULTICAST_ADDRESS));
 }
 
 std::vector<long> NetAddress::getAddressList(long address) {

@@ -217,14 +217,21 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 bool Distributor::sendWakeupMessage(Connector *connector) {
 
-    std::vector<long> list = connector->getAddressList();
-
-    for (int i = 0; i < list.size(); i++) {
+    if (connector->getDevice()->isMulticastEnabled()) {
 
         Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
-        //LOG_I("\"WAKEUP\" messages sent to : %s", Address::getString(list[i]).c_str());
-        connector->send(list[i], msg);
+        connector->send(msg);
 
+    } else {
+
+        std::vector<long> list = connector->getAddressList();
+
+        for (int i = 0; i < list.size(); i++) {
+
+            Message *msg = new Message(HOST_DISTRIBUTOR, MSGTYPE_WAKEUP, connector->getRootPath());
+            connector->send(list[i], msg);
+
+        }
     }
 
     LOG_U(UI_UPDATE_DIST_LOG,

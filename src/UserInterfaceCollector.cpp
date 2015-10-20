@@ -53,9 +53,9 @@ void UserInterface::collInit() {
 	uiUpdater[UI_UPDATE_COLL_EXEC_LIST] = &UserInterface::collUpdateExecList;
 	uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
-	for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
-		collDistInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
-		collClientInterface->Insert(wxString(sInterfaces[ConnectInterface::getType(i)]) + " --> " + ConnectInterface::getName(i), i);
+	for (uint32_t i = 0; i < Device::getCount(); i++) {
+		collDistInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
+		collClientInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
 	}
 
 }

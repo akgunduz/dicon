@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 	Log::setLogLevel(LEVEL_TRACE);
 
-	ConnectInterface::getInterfaces();
+	Device::getInterfaces();
 
 	if (argc > 1) {
 
@@ -26,9 +26,9 @@ int main(int argc, char** argv) {
 		switch(cmd) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
-				for (uint32_t i = 0; i < ConnectInterface::getCount(); i++) {
-					ConnectInterface *ci = ConnectInterface::getInterface(i);
-					LOG_S("%s : %s", sInterfaces[ci->type], ci->name.c_str());
+				for (uint32_t i = 0; i < Device::getCount(); i++) {
+					Device *ci = Device::getDevice(i);
+					LOG_S("%s : %s", sInterfaces[ci->type], ci->getName());
 				}
 				break;
 			case 'd':

@@ -15,15 +15,16 @@
 class Pipe : public Interface {
 private :
 	int desc[2];
-	bool init(int);
+	bool init();
 	void runReceiver(Unit);
 	void runSender(long, Message *);
+    void runMulticastSender(Message *);
 	void setAddress(int);
 	INTERFACES getType();
 public :
-	Pipe(Unit, int, const InterfaceCallback *, const char *);
-    static std::vector<ConnectInterface>interfaceList;
-    static std::vector<ConnectInterface> getInterfaces();
+	Pipe(Unit, Device*, bool, const InterfaceCallback *, const char *);
+    static std::vector<Device>interfaceList;
+    static std::vector<Device> getInterfaces();
 	std::vector<long> getAddressList();
 	~Pipe();
 };

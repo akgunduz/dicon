@@ -8,24 +8,25 @@
 #include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(Unit host, int interfaceIndex, const InterfaceCallback *cb, const char *rootPath) {
+Connector::Connector(Unit host, Device *device, bool multicastEnabled,
+                     const InterfaceCallback *cb, const char *rootPath) {
 
-	INTERFACES  interfaceType = ConnectInterface::getType(interfaceIndex);
+	INTERFACES  interfaceType = device->getType();
 
 	try {
 
 		switch(interfaceType) {
 
 			case INTERFACE_NET:
-				_interface = new Net(host, interfaceIndex, cb, rootPath);
+				_interface = new Net(host, device, multicastEnabled, cb, rootPath);
 				break;
 
 			case INTERFACE_PIPE:
-				_interface = new Pipe(host, interfaceIndex, cb, rootPath);
+				_interface = new Pipe(host, device, false, cb, rootPath);
 				break;
 
 			case INTERFACE_UNIXSOCKET:
-				_interface = new UnixSocket(host, interfaceIndex, cb, rootPath);
+				_interface = new UnixSocket(host, device, false, cb, rootPath);
 				break;
 
 			default:
@@ -48,6 +49,16 @@ bool Connector::send(long target, Message *msg) {
 	}
 
 	return _interface->push(MESSAGE_SEND, target, msg);
+
+}
+
+bool Connector::send(Message *msg) {
+
+    if (!initialized) {
+        return false;
+    }
+
+    return _interface->push(MESSAGE_SEND, _interface->getMulticastAddress(), msg);
 
 }
 
@@ -90,7 +101,6 @@ Connector::~Connector() {
 
 }
 
-
 INTERFACES Connector::getInterfaceType() {
 
 	return _interface->getType();
@@ -106,4 +116,8 @@ Interface *Connector::getInterface() {
 
 	return _interface;
 
+}
+
+Device* Connector::getDevice() {
+    return _interface->getDevice();
 }

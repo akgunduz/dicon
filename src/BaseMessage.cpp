@@ -5,6 +5,7 @@
 
 #include "BaseMessage.h"
 #include "Util.h"
+#include "NetAddress.h"
 
 BaseMessage::BaseMessage(Unit host) {
 
@@ -12,6 +13,7 @@ BaseMessage::BaseMessage(Unit host) {
     setHost(host);
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
+    setTargetAddress(0);
 }
 
 BaseMessage::BaseMessage(Unit owner, int type) {
@@ -27,10 +29,15 @@ BaseMessage::BaseMessage(Unit owner, int type) {
     setOwner(owner);
 	setStreamFlag(STREAM_NONE);
 	setPriority(DEFAULT_PRIORITY);
+    setTargetAddress(0);
 }
 
 void BaseMessage::setStreamFlag(int flag) {
 	streamFlag = flag;
+}
+
+void BaseMessage::setTargetAddress(long targetAddress) {
+    this->targetAddress = targetAddress;
 }
 
 int BaseMessage::getType() {
@@ -176,8 +183,14 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 	bool busy = false;
 
 	do {
+        long count;
 
-		long count = read(in, buf + offset, (size_t)size);
+        if (!NetAddress::isMulticast(targetAddress)) {
+            count = read(in, buf + offset, (size_t) size);
+
+        } else {
+            count = recvfrom(in, buf + offset, (size_t) size, 0, nullptr, nullptr);
+        }
 
 		if (count == -1) {
 
@@ -401,7 +414,15 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
 	do {
 
-		long count = write(out, buf + offset, (size_t)size);
+        long count;
+
+        if (!NetAddress::isMulticast(targetAddress)) {
+            count = write(out, buf + offset, (size_t)size);
+
+        } else {
+            sockaddr_in addr = NetAddress::getInetAddress(targetAddress);
+            count = sendto(out, buf + offset, (size_t)size, 0, (struct sockaddr *) &addr, sizeof(addr));
+        }
 
 		if (count == -1) {
 
