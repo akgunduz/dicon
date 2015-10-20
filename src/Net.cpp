@@ -88,7 +88,7 @@ bool Net::init() {
             return false;
         }
 
-        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address, DEFAULT_MULTICAST_PORT);
+        struct sockaddr_in serverAddress = NetAddress::getInetAddress(DEFAULT_MULTICAST_PORT);
         if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
             LOG_E("Socket bind with err : %d!!!", errno);
             close(multicastSocket);

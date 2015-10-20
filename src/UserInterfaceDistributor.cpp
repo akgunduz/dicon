@@ -167,8 +167,8 @@ void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
 	EventData *data = (EventData *)event.GetClientData();
 
-	distBackupCount->SetLabelText(wxString::Format(wxT("%i"), data->data64_1));
-	distBackupReady->SetLabelText(wxString::Format(wxT("%i"), data->data64_2));
+	distBackupCount->SetLabelText(wxString::Format(wxT("%li"), data->data64_1));
+	distBackupReady->SetLabelText(wxString::Format(wxT("%li"), data->data64_2));
 
 }
 
