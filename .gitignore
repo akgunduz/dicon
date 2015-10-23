@@ -1,6 +1,8 @@
 /Bankor.xcodeproj/
 /.idea/
 Bankor.asta.lock
+data/Bankor.rc
+data/Makefile
 /Debug/
 .cproject
 .gitattributes
