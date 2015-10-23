@@ -142,11 +142,12 @@ void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ..
 
 	char logout[255];
 	sprintf(logout, "%s : %s[%d]: %s \n", sLogLevels[level], p, line, buf);
-
+#if 0
 	EventData *data = new EventData(logout);
-
 	update_ui(UI_UPDATE_LOG, data);
-
+#else
+        printf(logout);
+#endif
 }
 
 void Log::update_ui(int id, void *data) {

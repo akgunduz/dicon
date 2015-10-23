@@ -316,7 +316,8 @@ std::vector<Device> Net::getInterfaces() {
             if (strncmp(loop->ifa_name, "et", 2) == 0 ||
                 strncmp(loop->ifa_name, "en", 2) == 0 ||
                 strncmp(loop->ifa_name, "br", 2) == 0 ||
-                strncmp(loop->ifa_name, "lo", 2) == 0) {
+                strncmp(loop->ifa_name, "lo", 2) == 0 ||
+                strncmp(loop->ifa_name, "wlan", 2) == 0) {
 
                 interfaceList.push_back(Device(loop->ifa_name,
                              ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),

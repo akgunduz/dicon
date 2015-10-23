@@ -62,11 +62,7 @@ FILES = \
 
 WX_FILES = \
 		$(SOURCE_PATH)/UserInterface.cpp \
-		$(SOURCE_PATH)/UserInterfaceApp.cpp \
-		$(SOURCE_PATH)/UserInterfaceClient.cpp \
-		$(SOURCE_PATH)/UserInterfaceCollector.cpp \
-		$(SOURCE_PATH)/UserInterfaceDistributor.cpp \
-		$(SOURCE_PATH)/UserInterfaceGenerated.cpp
+		$(SOURCE_PATH)/UserInterfaceApp.cpp
 
 
 PI_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/bin/$(TOOLCHAIN_ARM_PREFIX)-g++

@@ -92,11 +92,7 @@ set(WX_FILES
         ${SOURCE_PATH}/UserInterface.h
         ${SOURCE_PATH}/UserInterfaceApp.cpp
         ${SOURCE_PATH}/UserInterfaceApp.h
-        ${SOURCE_PATH}/UserInterfaceClient.cpp
-        ${SOURCE_PATH}/UserInterfaceCollector.cpp
-        ${SOURCE_PATH}/UserInterfaceDistributor.cpp
-        ${SOURCE_PATH}/UserInterfaceGenerated.cpp
-        ${SOURCE_PATH}/UserInterfaceGenerated.h)
+)
 
 include_directories(${SOURCE_PATH})
 

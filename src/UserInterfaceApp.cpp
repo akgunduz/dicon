@@ -13,7 +13,7 @@ UserInterface *g_ui;
 
 bool UserInterfaceApp::OnInit() {
 
-	g_ui = new UserInterface(wxT("Bankor"), wxDefaultPosition, wxSize(-1, -1));
+	g_ui = new UserInterface( NULL);
 	g_ui->Show(true);
 	return true;
 }
