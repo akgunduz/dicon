@@ -170,10 +170,9 @@ void Net::runReceiver(Unit host) {
 				return;
 			}
 
-			Argument *argument = new Argument(this);
+			Argument *argument = new Argument(this, cli_addr.sin_addr.s_addr);
 			argument->host = host;
 			argument->acceptSocket = acceptfd;
-			argument->address = (cli_addr.sin_addr.s_addr);
 
 			pthread_t thread;
 			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);

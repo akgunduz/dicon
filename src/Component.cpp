@@ -114,11 +114,12 @@ const char* Component::getRootPath() {
 
 }
 
-bool Component::receiveCB(void *arg, long address, Message *msg) {
+bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
     Component *component = (Component *) arg;
+    MessageItem *messageItem = (MessageItem*) item;
 
-    return component->onReceive(address, msg);
+    return component->onReceive(messageItem->address, messageItem->msg);
 }
 
 bool Component::onReceive(long address, Message *msg) {

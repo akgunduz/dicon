@@ -6,8 +6,9 @@
 #define BANKOR_INTERFACECALLBACK_H
 
 #include "Message.h"
+#include "SchedulerItem.h"
 
-typedef bool (*fSchedulerCB)(void*, long, Message *);
+typedef bool (*fSchedulerCB)(void*, SchedulerItem*);
 
 class InterfaceCallback {
 public:

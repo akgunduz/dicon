@@ -70,24 +70,24 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
 		return false;
 	}
 
-	uint8_t md5[MD5_DIGEST_LENGTH];
-	if (!readMD5(desc, md5)) {
-		LOG_E("readFileBinary can not read MD5 data");
-		return false;
-	}
-	content->setMD5(md5);
-
-	uint8_t calcmd5[MD5_DIGEST_LENGTH];
-
-	if (!readBinary(desc, content->getAbsPath(), calcmd5, content->getMD5Path(), header->sizes[2])) {
+	uint8_t calcMD5[MD5_DIGEST_LENGTH];
+	if (!readBinary(desc, content->getAbsPath(), calcMD5, content->getMD5Path(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}
 
-	if (memcmp(md5, calcmd5, MD5_DIGEST_LENGTH) != 0) {
+    uint8_t md5[MD5_DIGEST_LENGTH];
+    if (!readMD5(desc, md5)) {
+        LOG_E("readFileBinary can not read MD5 data");
+        return false;
+    }
+
+	if (memcmp(md5, calcMD5, MD5_DIGEST_LENGTH) != 0) {
 		LOG_E("readFileBinary mismatch in md5 data");
 		return false;
 	}
+
+    content->setMD5(md5);
 	content->setValid(true);
 
 	return true;
@@ -183,18 +183,16 @@ bool Message::writeFileBinary(int desc, FileContent *content) {
         return false;
     }
 
-	if (!writeMD5(desc, content->getMD5())) {
-		return false;
-	}
-
-	uint8_t calcmd5[MD5_DIGEST_LENGTH];
-	if (!writeBinary(desc, content->getAbsPath(), calcmd5)) {
+	uint8_t calcMD5[MD5_DIGEST_LENGTH];
+	if (!writeBinary(desc, content->getAbsPath(), calcMD5)) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}
 
-	if (memcmp(content->getMD5(), calcmd5, MD5_DIGEST_LENGTH) != 0) {
-		LOG_E("writeFileBinary mismatch in md5 data");
+    content->setMD5(calcMD5);
+
+	if (!writeMD5(desc, calcMD5)) {
+        LOG_E("writeFileBinary can not write md5 data");
 		return false;
 	}
 

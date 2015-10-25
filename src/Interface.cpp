@@ -5,25 +5,25 @@
 
 #include "Interface.h"
 
-Interface::Interface(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *callBack, const char *rootPath) {
+Interface::Interface(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *receiveCB, const char *rootPath) {
 
 	try {
 
-		scheduler = new Scheduler(MAX_SCHEDULER_CAPACITY);
+		scheduler = new Scheduler();
 
 	} catch (const std::runtime_error e) {
 		LOG_E("Scheduler Init failed!!!");
 		throw std::runtime_error("Interface : Scheduler Start failed!!!");
 	}
 
-	InterfaceCallback *interfaceCallback = new InterfaceCallback(senderCB, this);
+	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
 
     this->host = host;
     this->device = device;
     this->multicastEnabled = multicastEnabled;
 
-	scheduler->setReceiveCB(callBack);
-	scheduler->setSendCB(device->getType(), interfaceCallback);
+	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
+	scheduler->setCB(MESSAGE_SEND, sendCB);
 
 	strcpy(this->rootPath, rootPath);
 }
@@ -78,11 +78,10 @@ void *Interface::runReceiver(void *arg) {
 
 }
 
-bool Interface::senderCB(void *arg, long address, Message *msg) {
+bool Interface::senderCB(void *arg, SchedulerItem *item) {
 
 	Argument *argument = new Argument((Interface*)arg);
-	argument->msg = msg;
-	argument->address = address;
+	argument->item = (MessageItem*) item;
 
 	pthread_t thread;
 
@@ -99,11 +98,11 @@ void* Interface::runSender(void *arg) {
 
 	Argument *argument = (Argument *) arg;
 
-    if (argument->address != argument->_interface->getMulticastAddress()) {
-        argument->_interface->runSender(argument->address, argument->msg);
+    if (argument->item->address != argument->_interface->getMulticastAddress()) {
+        argument->_interface->runSender(argument->item->address, argument->item->msg);
 
     } else {
-        argument->_interface->runMulticastSender(argument->msg);
+        argument->_interface->runMulticastSender(argument->item->msg);
     }
 
 	delete argument;
@@ -122,7 +121,7 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
 	if (Address::getInterface(target) == getType()) {
 
-		scheduler->push(type, target, msg);
+		scheduler->push(new MessageItem(type, target, msg));
 		return true;
 	}
 

@@ -61,10 +61,7 @@ FileContent::FileContent(Unit host, Unit node, const char* rootPath,
 	MD5_Final(md5, &ctx);
 
 	// and write back
-
-	md5file = fopen(md5Path, "w");
-	fwrite(Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
-	fclose(md5file);
+    setMD5(md5);
 };
 
 CONTENT_TYPES FileContent::getType() {
@@ -88,7 +85,12 @@ uint8_t* FileContent::getMD5() {
 }
 
 void FileContent::setMD5(uint8_t *md5) {
+
 	memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
+
+    FILE *md5file = fopen(md5Path, "w");
+	fwrite(Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
+	fclose(md5file);
 }
 
 bool FileContent::isFlaggedToSent() {

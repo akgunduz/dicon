@@ -38,10 +38,12 @@ FILES = \
 		$(SOURCE_PATH)/Interface.cpp \
 		${SOURCE_PATH}/InterfaceCallback.cpp \
 		$(SOURCE_PATH)/Log.cpp \
+		$(SOURCE_PATH)/Job.cpp \
 		$(SOURCE_PATH)/BaseMessage.cpp \
 		$(SOURCE_PATH)/Message.cpp \
         ${SOURCE_PATH}/MessageDirection.cpp \
         ${SOURCE_PATH}/MessageTypes.cpp \
+        ${SOURCE_PATH}/MessageItem.cpp \
 		$(SOURCE_PATH)/Net.cpp \
         $(SOURCE_PATH)/Node.cpp \
         ${SOURCE_PATH}/NodeItem.cpp \
@@ -51,6 +53,7 @@ FILES = \
 		$(SOURCE_PATH)/Rule.cpp \
 		${SOURCE_PATH}/RuleTypes.cpp \
 		$(SOURCE_PATH)/Scheduler.cpp \
+		$(SOURCE_PATH)/SchedulerItem.cpp \
 		$(SOURCE_PATH)/Util.cpp \
 		$(SOURCE_PATH)/Unit.cpp \
 		${SOURCE_PATH}/StopWatch.cpp \

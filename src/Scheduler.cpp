@@ -5,20 +5,20 @@
 
 #include "Scheduler.h"
 
-Scheduler::Scheduler(int capacity) {
+Scheduler::Scheduler() {
 
-	mCapacity = capacity;
+	this->capacity = MAX_SCHEDULER_CAPACITY;
 
-	int res = pthread_mutex_init(&mMutex, NULL);
+	int res = pthread_mutex_init(&mutex, NULL);
 	if (res) {
 		LOG_E("Mutex init failed");
 		throw std::runtime_error("Scheduler : Mutex init failed");
 	}
 
-	res = pthread_cond_init (&mCond, NULL);
+	res = pthread_cond_init (&cond, NULL);
 	if (res) {
 		LOG_E("Condition init fail");
-		pthread_mutex_destroy(&mMutex);
+		pthread_mutex_destroy(&mutex);
 		throw std::runtime_error("Scheduler : Condition init failed");
 	}
 
@@ -26,58 +26,55 @@ Scheduler::Scheduler(int capacity) {
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-	int pthr = pthread_create(&mThread, &attr, run, (void *)this);
+	int pthr = pthread_create(&thread, &attr, run, (void *)this);
 	pthread_attr_destroy(&attr);
 	if (pthr) {
 		LOG_E("Problem with run thread");
-		pthread_cond_destroy(&mCond);
-		pthread_mutex_destroy(&mMutex);
+		pthread_cond_destroy(&cond);
+		pthread_mutex_destroy(&mutex);
 		throw std::runtime_error("Scheduler : Problem with run thread");
 	}
 
-	mInitialized = true;
+	initialized = true;
 }
 
 Scheduler::~Scheduler() {
 
-	if (!mInitialized) {
+	if (!initialized) {
 		return;
 	}
 
 	end();
 
-	pthread_join(mThread, nullptr);
+	pthread_join(thread, nullptr);
 
-	for (std::list<struct Capsule>::iterator itr = mMessages.begin(); itr != mMessages.end(); itr++) {
-		delete itr->msg;
+	for (std::list<SchedulerItem*>::iterator itr = items.begin(); itr != items.end(); itr++) {
+		delete *itr;
 	}
 
-	mMessages.clear();
+	items.clear();
 
-	pthread_cond_destroy(&mCond);
-	pthread_mutex_destroy(&mMutex);
+	pthread_cond_destroy(&cond);
+	pthread_mutex_destroy(&mutex);
 
 }
 
-bool Scheduler::push(MESSAGE_DIRECTION type, long target, Message *msg) {
+bool Scheduler::push(SchedulerItem *item) {
 
-	if (pthread_mutex_lock(&mMutex) != 0) { //replaced with trylock
+	if (pthread_mutex_lock(&mutex) != 0) { //replaced with trylock
 		LOG_E("Can not push, system is BUSY!!!");
 		return false;
 	}
 
-	if (mMessages.size() < mCapacity) {
+	if (items.size() < capacity) {
 
-		msg->normalizePriority();
-
-		Capsule capsule(type, target, msg);
-		mMessages.push_back(capsule);
-		pthread_mutex_unlock(&mMutex);
-		pthread_cond_signal(&mCond);
+		items.push_back(item);
+		pthread_mutex_unlock(&mutex);
+		pthread_cond_signal(&cond);
 		return true;
 	}
 
-	pthread_mutex_unlock(&mMutex);
+	pthread_mutex_unlock(&mutex);
 
 	return false;
 }
@@ -88,35 +85,40 @@ void *Scheduler::run(void *arg) {
 
 	while(true) {
 
-		pthread_mutex_lock(&scheduler->mMutex);
+		pthread_mutex_lock(&scheduler->mutex);
 
-		if (scheduler->mMessages.empty()) {
-			pthread_cond_wait(&scheduler->mCond, &scheduler->mMutex);
+		if (scheduler->items.empty()) {
+			pthread_cond_wait(&scheduler->cond, &scheduler->mutex);
 		}
 
-		std::list<struct Capsule>::iterator itr, ref = scheduler->mMessages.begin();
+		std::list<SchedulerItem*>::iterator itr, ref = scheduler->items.begin();
 
-		for (itr = ref;	itr != scheduler->mMessages.end(); itr++) {
+		for (itr = ref;	itr != scheduler->items.end(); itr++) {
 
-			if (itr->msg->getPriority() < ref->msg->getPriority()) {
+            SchedulerItem *itrItem = *itr;
+            SchedulerItem *refItem = *ref;
+			if (itrItem->priority < refItem->priority) {
 				ref = itr;
 			}
 
-			itr->msg->iteratePriority();
+            if (itrItem->priority > 0) {
+                itrItem->priority--;
+            }
 		}
 
-		Capsule refCapsule = *(ref);
-		scheduler->mMessages.erase(ref);
+		SchedulerItem *item = *(ref);
+		scheduler->items.erase(ref);
 
-		pthread_mutex_unlock(&scheduler->mMutex);
+		pthread_mutex_unlock(&scheduler->mutex);
 
-        if (refCapsule.type == MESSAGE_END) {
+        if (item->type == END_ITEM) {
             break;
         }
 
-		int interfaceType = refCapsule.type + Address::getInterface(refCapsule.address);
-
-		scheduler->mCB[interfaceType]->cb(scheduler->mCB[interfaceType]->arg, refCapsule.address, refCapsule.msg);
+        const InterfaceCallback* iCB = scheduler->callbacks[item->type];
+        if (iCB != nullptr) {
+            iCB->cb(iCB->arg, item);
+        }
 	}
 
 	return nullptr;
@@ -124,18 +126,9 @@ void *Scheduler::run(void *arg) {
 
 void Scheduler::end() {
 
-	push(MESSAGE_END, 0, nullptr);
-
+    push(new SchedulerItem());
 }
 
-void Scheduler::setReceiveCB(const InterfaceCallback *callBack) {
-
-	mCB[MESSAGE_RECEIVE] = callBack;
-
-}
-
-void Scheduler::setSendCB(uint16_t interfaceID, const InterfaceCallback *callBack) {
-
-	mCB[MESSAGE_SEND + interfaceID] = callBack;
-
+void Scheduler::setCB(int id, const InterfaceCallback *cb) {
+	callbacks[id] = cb;
 }

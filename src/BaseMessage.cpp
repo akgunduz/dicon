@@ -12,7 +12,7 @@ BaseMessage::BaseMessage(Unit host) {
 	memset(&header, 0, sizeof(MessageHeader));
     setHost(host);
 	setStreamFlag(STREAM_NONE);
-	setPriority(DEFAULT_PRIORITY);
+	setPriority(MESSAGE_DEFAULT_PRIORITY);
     setTargetAddress(0);
     setProtocol(false);
 }
@@ -29,7 +29,7 @@ BaseMessage::BaseMessage(Unit owner, int type) {
     setHost(owner);
     setOwner(owner);
 	setStreamFlag(STREAM_NONE);
-	setPriority(DEFAULT_PRIORITY);
+	setPriority(MESSAGE_DEFAULT_PRIORITY);
     setTargetAddress(0);
     setProtocol(false);
 }
@@ -367,7 +367,7 @@ bool BaseMessage::readBinary(int in, const char* path, uint8_t *md5, const char*
 	bool status = transferBinary(in, out, md5, size);
 
 	close(out);
-
+/*
 	if (status) {
 
         out = open(md5Path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
@@ -385,7 +385,7 @@ bool BaseMessage::readBinary(int in, const char* path, uint8_t *md5, const char*
 
 		close(out);
 	}
-
+*/
 	return status;
 
 }

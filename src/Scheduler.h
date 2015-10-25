@@ -11,41 +11,24 @@
 #include "Address.h"
 #include "InterfaceCallback.h"
 #include "MessageDirection.h"
+#include "SchedulerItem.h"
 
 #define MAX_SCHEDULER_CAPACITY 100
 
-#define MAX_INTERFACE 10
-
-class Capsule {
-
-public:
-
-	MESSAGE_DIRECTION type;
-	long address;
-	Message *msg;
-
-	Capsule(MESSAGE_DIRECTION type, long address, Message *msg) {
-		this->type = type;
-		this->address = address;
-		this->msg = msg;
-	}
-};
-
 class Scheduler {
 private:
-	pthread_mutex_t mMutex;
-	pthread_cond_t mCond;
-	pthread_t mThread;
-	std::list<Capsule> mMessages;
-	int mCapacity;
-	bool mInitialized = false;
-	const InterfaceCallback* mCB[MAX_INTERFACE];
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	pthread_t thread;
+	std::list<SchedulerItem*> items;
+	std::map<int, const InterfaceCallback*> callbacks;
+	int capacity;
+	bool initialized = false;
 	static void* run(void *);
 public:
-	Scheduler(int);
-	void setReceiveCB(const InterfaceCallback *);
-	void setSendCB(uint16_t, const InterfaceCallback *);
-	bool push(MESSAGE_DIRECTION type, long, Message *data);
+	Scheduler();
+    void setCB(int, const InterfaceCallback *);
+	bool push(SchedulerItem *item);
 	void end();
     virtual ~Scheduler();
 private:

@@ -5,8 +5,7 @@ set(SOURCE_PATH "src")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11")
 add_definitions(-D__IDE__)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Debug/")
-set(CMAKE_BINARY_DIR "Objects/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Debug/")
 
 set(FILES
         ${SOURCE_PATH}/Application.cpp
@@ -44,10 +43,14 @@ set(FILES
         ${SOURCE_PATH}/InterfaceCallback.h
         ${SOURCE_PATH}/Log.cpp
         ${SOURCE_PATH}/Log.h
+        ${SOURCE_PATH}/Job.cpp
+        ${SOURCE_PATH}/Job.h
         ${SOURCE_PATH}/BaseMessage.cpp
         ${SOURCE_PATH}/BaseMessage.h
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/Message.h
+        ${SOURCE_PATH}/MessageItem.cpp
+        ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/MessageDirection.cpp
         ${SOURCE_PATH}/MessageDirection.h
         ${SOURCE_PATH}/MessageTypes.cpp
@@ -70,6 +73,8 @@ set(FILES
         ${SOURCE_PATH}/RuleTypes.h
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/Scheduler.h
+        ${SOURCE_PATH}/SchedulerItem.cpp
+        ${SOURCE_PATH}/SchedulerItem.h
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Util.h
         ${SOURCE_PATH}/Unit.cpp
@@ -85,7 +90,13 @@ set(FILES
         ${SOURCE_PATH}/PipeAddress.cpp
         ${SOURCE_PATH}/PipeAddress.h
         ${SOURCE_PATH}/UnixSocketAddress.cpp
-        ${SOURCE_PATH}/UnixSocketAddress.h)
+        ${SOURCE_PATH}/UnixSocketAddress.h
+        ${SOURCE_PATH}/Job.cpp
+        ${SOURCE_PATH}/Job.h
+        ${SOURCE_PATH}/MessageItem.cpp
+        ${SOURCE_PATH}/MessageItem.h
+        ${SOURCE_PATH}/SchedulerItem.cpp
+        ${SOURCE_PATH}/SchedulerItem.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/UserInterface.cpp
@@ -126,13 +137,11 @@ elseif(CYGWIN)
 
 else()
 
+    set(CMAKE_CXX_COMPILER /usr/bin/g++)
     add_definitions(-DLINUX -D__WXWIDGETS__)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
 
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib/x86_64-linux-gnu -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
-
-    #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "Debug/")
-    #set(CMAKE_BINARY_DIR "Objects/")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--start-group -L/usr/lib/x86_64-linux-gnu -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
 
     add_executable(bankor-lnx ${FILES} ${WX_FILES})
 

@@ -304,6 +304,7 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
             return;
         }
 
+        distLog->Clear();
         distBackupRate->SetEditable(false);
         distInitBtn->SetLabel("Stop");
 
@@ -352,6 +353,7 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
             return;
         }
 
+        collLog->Clear();
         collInitBtn->SetLabel("Stop");
 
     } else {
@@ -400,6 +402,7 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
             return;
         }
 
+        nodeLog->Clear();
         nodeInitBtn->SetLabel("Stop");
 
     } else {

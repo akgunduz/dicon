@@ -24,7 +24,7 @@ public:
     const char* getRootPath();
     INTERFACES getInterfaceType(HOST host);
     long getAddress(HOST host);
-    static bool receiveCB(void *, long, Message *);
+    static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);
     static long generateIndex(int indexFirst, int indexSecond, int indexThird);
 

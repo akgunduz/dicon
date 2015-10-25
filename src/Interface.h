@@ -10,6 +10,7 @@
 #include "Address.h"
 #include "Device.h"
 #include "Unit.h"
+#include "MessageItem.h"
 
 class Interface;
 
@@ -24,13 +25,17 @@ public:
 
 	Unit host;
 	int acceptSocket = 0;
-	Message *msg = nullptr;
-
-	long address = 0;
+	MessageItem *item;
 
 	Interface *_interface;
 
-	Argument(Interface *c) : _interface(c){}
+	Argument(Interface *c, long address) : _interface(c){
+		item = new MessageItem(MESSAGE_RECEIVE, address, nullptr);
+	}
+
+	Argument(Interface *c) : _interface(c){
+		item = new MessageItem(MESSAGE_RECEIVE, 0, nullptr);
+	}
 };
 
 /*
@@ -45,7 +50,7 @@ class Interface {
 private :
 	static void* runReceiver(void *);
 	static void* runSender(void *);
-	static bool senderCB(void *, long, Message *);
+	static bool senderCB(void *, SchedulerItem *);
 
 protected :
 	bool initialized = false;

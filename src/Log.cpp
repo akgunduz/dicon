@@ -146,7 +146,7 @@ void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ..
 	EventData *data = new EventData(logout);
 	update_ui(UI_UPDATE_LOG, data);
 #else
-        printf(logout);
+        printf("%s", logout);
 #endif
 }
 

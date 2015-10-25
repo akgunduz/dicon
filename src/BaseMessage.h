@@ -14,8 +14,6 @@
 
 #define PRIORITY_COEFFICIENT 10
 
-#define DEFAULT_PRIORITY 3
-
 #define SIGNATURE 0x55AA
 
 #define STREAM_NONE 0xFFFF
@@ -27,6 +25,8 @@
 #define TMP_BUFFER_SIZE 1000
 
 #define MAX_VARIANT 2
+
+#define MESSAGE_DEFAULT_PRIORITY 3
 
 //To get rid of Alignment problem stay in 64bit mod
 struct MessageHeader {

@@ -13,6 +13,7 @@
 
 class Collector : public Component {
 
+
 	std::map<long , Rule*> rules;
 
 	long distributorAddress;
