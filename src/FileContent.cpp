@@ -111,23 +111,33 @@ void FileContent::setFile(Unit host, Unit node, const char* rootPath,
     strcpy(this->path, path);
     this->fileType = fileType;
 
-    if (host.getType() == HOST_COLLECTOR) {
+	switch(host.getType()) {
 
-        switch(fileType) {
-            case FILE_RULE:
-                sprintf(absPath, "%s%s", rootPath, path);
-                break;
-            case FILE_COMMON:
-                sprintf(absPath, "%scommon/%s", rootPath, path);
-                break;
-            case FILE_ARCH:
-                sprintf(absPath, "%sarch/%s/%s", rootPath, (char*)sArchs[node.getID()], path);
-                break;
-        }
+        case HOST_DISTRIBUTOR:
+            sprintf(absPath, "%s/%s", rootPath, path);
+            break;
 
-    } else {
-        sprintf(absPath, "%s%s", rootPath, path);
-    }
+        case HOST_COLLECTOR:
+            switch(fileType) {
+                case FILE_RULE:
+                //    sprintf(absPath, "%s/Job_%s/%s", rootPath, jobID, path);
+                    break;
+                case FILE_COMMON:
+               //     sprintf(absPath, "%s/Job_%s/common/%s", rootPath, jobID, path);
+                    break;
+                case FILE_ARCH:
+                //    sprintf(absPath, "%s/Job_%s/arch/%s/%s", rootPath, jobID, (char*)sArchs[node.getID()], path);
+                    break;
+            }
+            break;
+
+        case HOST_NODE:
+       //     sprintf(absPath, "%s/Job_%s/%s", rootPath, jobID, path);
+            break;
+
+        default:
+            return;
+	}
 
     if (access(absPath, F_OK ) == -1) {
         Util::mkPath(absPath);
@@ -135,7 +145,7 @@ void FileContent::setFile(Unit host, Unit node, const char* rootPath,
 
     //  char *ptr = absPath + strlen(rootPath);
 
-    sprintf(md5Path, "%smd5/%s.md5", rootPath, path);
+//    sprintf(md5Path, "%s/md5/Job_%s/%s.md5", rootPath, jobID, path);
 
     if (access(md5Path, F_OK ) == -1) {
         Util::mkPath(md5Path);

@@ -26,6 +26,8 @@
 
 #define MAX_VARIANT 2
 
+#define MAX_JOBID_LENGTH 50
+
 #define MESSAGE_DEFAULT_PRIORITY 3
 
 //To get rid of Alignment problem stay in 64bit mod
@@ -39,6 +41,7 @@ struct MessageHeader {
     long deviceID;
     long messageID;
     long variant[MAX_VARIANT];
+//	char jobID[MAX_JOBID_LENGTH];
 
 };
 
@@ -102,6 +105,8 @@ public:
 
     long getOwnerAddress();
 	void setOwnerAddress(long);
+//    const char* getJobID();
+//	void setJobID(const char*);
     long getVariant(int id);
 	void setVariant(int id, long variant);
 

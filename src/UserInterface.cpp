@@ -660,9 +660,9 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
     Rule *rule = (Rule *)event.GetClientData();
 
-    for (int j = 0; j < rule->getContentCount(RULE_FILES); j++) {
+    for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
 
-        FileContent *content = (FileContent *) rule->getContent(RULE_FILES, j);
+        FileContent *content = (FileContent *) rule->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }
@@ -691,9 +691,9 @@ void UserInterface::collUpdateExecList(wxCommandEvent &event) {
 
     Rule *rule = (Rule *)event.GetClientData();
 
-    for (int j = 0; j < rule->getContentCount(RULE_EXECUTORS); j++) {
+    for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
 
-        ExecutorContent *content = (ExecutorContent *) rule->getContent(RULE_EXECUTORS, j);
+        ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, j);
         if (content == nullptr) {
             return;
         }
@@ -725,6 +725,7 @@ void UserInterface::nodeInit() {
     uiUpdater[UI_UPDATE_CLIENT_ATT_COLL_ADDRESS] = &UserInterface::nodeUpdateAttachedCollAddress;
     uiUpdater[UI_UPDATE_CLIENT_FILE_LIST] = &UserInterface::nodeUpdateFileList;
     uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
+    uiUpdater[UI_UPDATE_CLIENT_CLEAR] = &UserInterface::nodeUpdateClear;
     uiUpdater[UI_UPDATE_CLIENT_LOG] = &UserInterface::nodeUpdateLog;
 
     if (Device::getCount() > 0) {
@@ -746,14 +747,18 @@ void UserInterface::nodeUpdateState(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
     nodeState->SetLabel(sStates[data->data64_1]);
-
 }
 
 void UserInterface::nodeUpdateAttachedCollAddress(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
     nodeCollAddress->SetLabel(Address::getString(data->data64_1));
+}
 
+void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
+
+    nodeFileList->DeleteAllItems();
+    nodeExecList->Clear();
 }
 
 void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
@@ -767,9 +772,9 @@ void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
     Rule *rule = (Rule *)event.GetClientData();
 
-    for (int j = 0; j < rule->getContentCount(RULE_FILES); j++) {
+    for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
 
-        FileContent *content = (FileContent *) rule->getContent(RULE_FILES, j);
+        FileContent *content = (FileContent *) rule->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }
@@ -798,9 +803,9 @@ void UserInterface::nodeUpdateExecList(wxCommandEvent &event) {
 
     Rule *rule = (Rule *)event.GetClientData();
 
-    for (int j = 0; j < rule->getContentCount(RULE_EXECUTORS); j++) {
+    for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
 
-        ExecutorContent *content = (ExecutorContent *) rule->getContent(RULE_EXECUTORS, j);
+        ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, j);
         if (content == nullptr) {
             return;
         }

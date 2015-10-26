@@ -10,11 +10,11 @@
 #include "Rule.h"
 #include "Connector.h"
 #include "Message.h"
+#include "Job.h"
 
 class Collector : public Component {
 
-
-	std::map<long , Rule*> rules;
+	std::map<long , Job*> jobs;
 
 	long distributorAddress;
 

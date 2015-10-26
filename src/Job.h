@@ -5,14 +5,28 @@
 #ifndef BANKOR_JOB_H
 #define BANKOR_JOB_H
 
-
 #include "Rule.h"
+#include "RuleItem.h"
+#include "JsonFile.h"
 
-class Job {
-    char id[50];
-    Rule* rule;
+#define MAX_JOB_COUNT 100
+#define JOB_FILE "Job.json"
+
+class Job : public JsonFile {
+
+    long id;
+    char name[50];
+    std::list<RuleItem*> rules;
     long attachedNode;
-    int repeat;
+
+public:
+    Job(Unit host, Unit node, const char* path, FileContent* fileContent = nullptr);
+    ~Job();
+    static bool parseRuleNode(void*, json_object *node);
+
+    virtual const char *getFileName();
+
+    virtual FILETYPE getFileType();
 };
 
 

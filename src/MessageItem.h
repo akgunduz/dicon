@@ -20,6 +20,7 @@ public:
     MessageItem(MESSAGE_DIRECTION type, long address, Message *msg) : SchedulerItem(type) {
         this->address = address;
         this->msg = msg;
+        this->priority = msg->getPriority();
     }
 };
 

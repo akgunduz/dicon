@@ -31,6 +31,7 @@ class Message : public BaseMessage {
 public:
 
     char rootPath[PATH_MAX];
+    char jobID[MD5_DIGEST_LENGTH];
 
 	Rule *rule;
 	std::vector<MD5Wrapper> md5List;

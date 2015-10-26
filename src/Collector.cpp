@@ -20,7 +20,7 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
 
 Collector::~Collector() {
 
-	for (std::map<long , Rule*>::iterator i = rules.begin(); i != rules.end(); i++) {
+	for (std::map<long , Job*>::iterator i = jobs.begin(); i != jobs.end(); i++) {
         delete i->second;
 	}
 }
@@ -43,7 +43,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 			status = send2DistributorMsg(address, MSGTYPE_READY);
 			break;
 
-		case MSGTYPE_CLIENT: {
+		case MSGTYPE_NODE: {
 
             long clientAddress = msg->getVariant(0);
 			short clientID = (short) msg->getVariant(1);
@@ -110,8 +110,8 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 			for (int i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
-				for (uint16_t j = 0; j < ruleItr->second->getContentCount(RULE_FILES); j++) {
-					FileContent *content = (FileContent *) ruleItr->second->getContent(RULE_FILES, j);
+				for (uint16_t j = 0; j < ruleItr->second->getContentCount(CONTENT_FILE); j++) {
+					FileContent *content = (FileContent *) ruleItr->second->getContent(CONTENT_FILE, j);
 					//TODO 64 bit le coz
 					if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
 						//TODO bu clientte var, gonderme
@@ -148,7 +148,7 @@ bool Collector::send2DistributorMsg(long address, int type) {
 				  Address::getString(address).c_str());
 			break;
 
-		case MSGTYPE_CLIENT:
+		case MSGTYPE_NODE:
 
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"CLIENT\" msg sent to distributor: %s",
@@ -218,7 +218,7 @@ bool Collector::processRule(const std::string &path) {
 //		setRootPath(path);
 //	}
 
-	return send2DistributorMsg(distributorAddress, MSGTYPE_CLIENT);
+	return send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
 }
 
 bool Collector::processRule() {

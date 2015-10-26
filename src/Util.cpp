@@ -79,6 +79,36 @@ short Util::getID() {
 #endif
 }
 
+std::list<std::string> Util::getFileList(const char *path, const char* filter) {
+
+    std::string file;
+    std::list<std::string> fileList;
+
+    struct dirent *ent;
+
+    DIR *dir = opendir(path);
+    if (dir == nullptr) {
+        LOG_E("Directory : %s could not opened\n err: %d", path, errno);
+        return fileList;
+    }
+
+    while((ent = readdir(dir)) != nullptr) {
+
+        if (ent->d_type != DT_REG) {
+            continue;
+        }
+
+        if (strncmp(ent->d_name, filter, strlen(filter)) != 0) {
+            continue;
+        }
+
+        file = std::string(path) + "/" + ent->d_name;
+        fileList.push_back(file);
+    }
+
+    return fileList;
+}
+
 bool Util::isMulticast() {
     return false;
 }

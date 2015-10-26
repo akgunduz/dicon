@@ -152,6 +152,7 @@ public:
     void nodeUpdateLog(wxCommandEvent &event);
     void nodeUpdateFileList(wxCommandEvent &event);
     void nodeUpdateExecList(wxCommandEvent &event);
+    void nodeUpdateClear(wxCommandEvent &event);
 
 ////@begin UserInterface event handler declarations
 

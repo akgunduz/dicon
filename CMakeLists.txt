@@ -69,8 +69,6 @@ set(FILES
         ${SOURCE_PATH}/Pipe.h
         ${SOURCE_PATH}/Rule.cpp
         ${SOURCE_PATH}/Rule.h
-        ${SOURCE_PATH}/RuleTypes.cpp
-        ${SOURCE_PATH}/RuleTypes.h
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/Scheduler.h
         ${SOURCE_PATH}/SchedulerItem.cpp
@@ -96,7 +94,15 @@ set(FILES
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/SchedulerItem.h)
+        ${SOURCE_PATH}/SchedulerItem.h
+        src/RuleItem.cpp
+        src/RuleItem.h
+        src/JsonType.cpp
+        src/JsonType.h
+        src/JsonFile.cpp
+        src/JsonFile.h
+        src/RuleContent.cpp
+        src/RuleContent.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/UserInterface.cpp

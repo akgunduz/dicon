@@ -6,14 +6,16 @@
 #ifndef __Content_H_
 #define __Content_H_
 
-#include "Common.h"
+#include "Log.h"
 
 #define BUFFER_SIZE 512
 
 enum CONTENT_TYPES {
+    CONTENT_RUNTYPE,
 	CONTENT_FILE,
 	CONTENT_PARAM,
-	CONTENT_EXECUTOR
+	CONTENT_EXECUTOR,
+    CONTENT_MAX
 };
 
 class Content {

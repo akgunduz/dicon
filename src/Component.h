@@ -20,7 +20,7 @@ public:
     Connector *connectors[HOST_MAX];
 
     Component(Unit host, long index, const char* rootPath);
-    ~Component();
+    virtual ~Component();
     const char* getRootPath();
     INTERFACES getInterfaceType(HOST host);
     long getAddress(HOST host);

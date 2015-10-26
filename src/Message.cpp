@@ -63,12 +63,21 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
         return false;
     }
 
+    if (header->sizes[1] != MD5_DIGEST_LENGTH) {
+        LOG_E("Md5 & JobID size must be %d long", MD5_DIGEST_LENGTH);
+        return false;
+    }
+
+    char jobID[PATH_MAX];
+    if (!readString(desc, jobID, header->sizes[1])) {
+        LOG_E("readFileBinary can not read jobID data");
+        return false;
+    }
+
+    strcpy(this->jobID, jobID);
+
     content->setFile(getHost(), getOwner(), getRootPath(), path, (FILETYPE)fileType);
 
-	if (header->sizes[1] != MD5_DIGEST_LENGTH) {
-		LOG_E("Md5 size must be %d long", MD5_DIGEST_LENGTH);
-		return false;
-	}
 
 	uint8_t calcMD5[MD5_DIGEST_LENGTH];
 	if (!readBinary(desc, content->getAbsPath(), calcMD5, content->getMD5Path(), header->sizes[2])) {
@@ -225,8 +234,8 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             break;
 
         case STREAM_BINARY:
-            for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
-                FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
+            for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+                FileContent *content = (FileContent *)rule->getContent(CONTENT_FILE, i);
                 if (content->isFlaggedToSent()) {
                     if (!writeFileBinary(out, content)) {
                         return false;
@@ -236,8 +245,8 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             break;
 
         case STREAM_MD5ONLY:
-            for (uint16_t i = 0; i < rule->getContentCount(RULE_FILES); i++) {
-                FileContent *content = (FileContent *)rule->getContent(RULE_FILES, i);
+            for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+                FileContent *content = (FileContent *)rule->getContent(CONTENT_FILE, i);
                 if (content->isFlaggedToSent()) {
                     if (!writeFileMD5(out, content)) {
                         return false;

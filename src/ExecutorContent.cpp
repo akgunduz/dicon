@@ -34,7 +34,7 @@ std::string ExecutorContent::getParsed(void *pRule) {
 	bool cmdMode = false;
 
 	int cmdIndex = 0;
-	RULE_TYPES cmdType = RULE_FILES;
+	CONTENT_TYPES cmdType = CONTENT_FILE;
 
 	for (uint32_t i = 0; i < exec.size(); i++) {
 		switch(exec[i]) {
@@ -42,7 +42,7 @@ std::string ExecutorContent::getParsed(void *pRule) {
 				if (!cmdMode) {
 					cmdMode = true;
 					cmdIndex = 0;
-					cmdType = RULE_MAX;
+					cmdType = CONTENT_MAX;
 					break;
 				}
 				cmdMode = false;
@@ -50,14 +50,14 @@ std::string ExecutorContent::getParsed(void *pRule) {
 			case 'F':
 			case 'f':
 				if (cmdMode) {
-					cmdType = RULE_FILES;
+					cmdType = CONTENT_FILE;
 					break;
 				}
 				//no break
 			case 'P':
 			case 'p':
 				if (cmdMode) {
-					cmdType = RULE_PARAMETERS;
+					cmdType = CONTENT_PARAM;
 					break;
 				}
 				//no break
@@ -101,14 +101,14 @@ bool ExecutorContent::parseCommand(char *parsed, void *pRule, int cmdType, int c
 
 	Rule *refRule = (Rule *)pRule;
 
-	if (cmdType == RULE_FILES) {
-		FileContent *content = (FileContent *) refRule->getContent(RULE_FILES, cmdIndex);
+	if (cmdType == CONTENT_FILE) {
+		FileContent *content = (FileContent *) refRule->getContent(CONTENT_FILE, cmdIndex);
 		if (content != nullptr) {
             sprintf(parsed, "%s%s%s", parsed, refRule->getRootPath(), content->getPath());
 		}
 
-	} else if (cmdType == RULE_PARAMETERS) {
-		ParameterContent *content = (ParameterContent *) refRule->getContent(RULE_PARAMETERS, cmdIndex);
+	} else if (cmdType == CONTENT_PARAM) {
+		ParameterContent *content = (ParameterContent *) refRule->getContent(CONTENT_PARAM, cmdIndex);
 		if (content != nullptr) {
 			switch(content->getParamType()) {
 				case PARAM_LONG:

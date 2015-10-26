@@ -14,6 +14,7 @@ BaseMessage::BaseMessage(Unit host) {
 	setStreamFlag(STREAM_NONE);
 	setPriority(MESSAGE_DEFAULT_PRIORITY);
     setTargetAddress(0);
+//    setJobID("");
     setProtocol(false);
 }
 
@@ -31,6 +32,7 @@ BaseMessage::BaseMessage(Unit owner, int type) {
 	setStreamFlag(STREAM_NONE);
 	setPriority(MESSAGE_DEFAULT_PRIORITY);
     setTargetAddress(0);
+ //   setJobID("");
     setProtocol(false);
 }
 
@@ -73,7 +75,15 @@ long BaseMessage::getOwnerAddress() {
 void BaseMessage::setOwnerAddress(long address) {
 	header.ownerAddress = address;
 }
+/*
+const char* BaseMessage::getJobID() {
+	return header.jobID;
+}
 
+void BaseMessage::setJobID(const char* jobID) {
+	strcpy(header.jobID, jobID);
+}
+*/
 long BaseMessage::getTime() {
 	return header.time;
 }
@@ -282,6 +292,7 @@ bool BaseMessage::readHeader(int in, MessageHeader *header) {
     for (int i = 0; i < MAX_VARIANT; i++) {
         header->variant[i] = ntohll(*((long *) p)); p += 8;
     }
+  //  strcpy(header->jobID, (char*)p);
 
 	return true;
 }
@@ -502,6 +513,7 @@ bool BaseMessage::writeHeader(int out, MessageHeader *header) {
     for (int i = 0; i < MAX_VARIANT; i++) {
         *((long *) p) = htonll(header->variant[i]); p += 8;
     }
+  //  strcpy((char*)p, header->jobID);
 
 	if (!writeBlock(out, tmpBuf, sizeof(MessageHeader))) {
 		LOG_E("Can not write message header to stream");

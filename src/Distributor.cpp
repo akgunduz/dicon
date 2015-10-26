@@ -37,11 +37,11 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 					"\"READY\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
-		case MSGTYPE_CLIENT:
+		case MSGTYPE_NODE:
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"CLIENT\" msg from collector: %s", Address::getString(address).c_str());
 
-			status = send2CollectorMsg(address, MSGTYPE_CLIENT);
+			status = send2CollectorMsg(address, MSGTYPE_NODE);
 			break;
 
 		case MSGTYPE_TIME:
@@ -84,7 +84,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
                       "Processing a collector from the waiting list: %s",
 					  Address::getString(collectorAddress).c_str());
 
-				status = send2CollectorMsg(collectorAddress, MSGTYPE_CLIENT);
+				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
 
 			} else {
 				status = true;
@@ -106,7 +106,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 				LOG_U(UI_UPDATE_DIST_LOG,
 						"Processing a collector from the waiting list: %s", Address::getString(collectorAddress).c_str());
 
-				status = send2CollectorMsg(collectorAddress, MSGTYPE_CLIENT);
+				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
 			} else {
 				status = true;
 			}
@@ -133,7 +133,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 			nodeManager->remove(address);
 			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, REMOVE);
 
-			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_CLIENT);
+			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_NODE);
 
 			break;
 
@@ -178,7 +178,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 					"\"WAKEUP\" msg sent to collector: %s", Address::getString(address).c_str());
 			break;
 
-		case MSGTYPE_CLIENT: {
+		case MSGTYPE_NODE: {
 				NodeItem *node = nodeManager->getIdle(address);
 
 				if (node != nullptr) {

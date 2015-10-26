@@ -133,9 +133,9 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 
 	Rule *rule = (Rule *)event.GetClientData();
 
-	for (int j = 0; j < rule->getContentCount(RULE_FILES); j++) {
+	for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
 
-		FileContent *content = (FileContent *) rule->getContent(RULE_FILES, j);
+		FileContent *content = (FileContent *) rule->getContent(CONTENT_FILE, j);
 		if (content == nullptr) {
 			return;
 		}
@@ -151,9 +151,9 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 
 	Rule *rule = (Rule *)event.GetClientData();
 
-	for (int j = 0; j < rule->getContentCount(RULE_PARAMETERS); j++) {
+	for (int j = 0; j < rule->getContentCount(CONTENT_PARAM); j++) {
 
-		ParameterContent *content = (ParameterContent *) rule->getContent(RULE_PARAMETERS, j);
+		ParameterContent *content = (ParameterContent *) rule->getContent(CONTENT_PARAM, j);
 		if (content == nullptr) {
 			return;
 		}
@@ -181,9 +181,9 @@ void Console::clientUpdateExecList(ConsoleEvent &event) {
 
 	Rule *rule = (Rule *)event.GetClientData();
 
-	for (int j = 0; j < rule->getContentCount(RULE_EXECUTORS); j++) {
+	for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
 
-		ExecutorContent *content = (ExecutorContent *) rule->getContent(RULE_EXECUTORS, j);
+		ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, j);
 		if (content == nullptr) {
 			return;
 		}
