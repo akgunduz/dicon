@@ -4,8 +4,8 @@
 //
 
 #include "Console.h"
-#include "ParameterContent.h"
-#include "ExecutorContent.h"
+#include "ParameterItem.h"
+#include "ExecutorItem.h"
 
 bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
 
@@ -135,13 +135,13 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
 
-		FileContent *content = (FileContent *) rule->getContent(CONTENT_FILE, j);
+		FileItem *content = (FileItem *) rule->getContent(CONTENT_FILE, j);
 		if (content == nullptr) {
 			return;
 		}
 
 		LOG_S("Node File --> Path : %s, MD5 : %s, Validity : %s, Flag : %s",
-				content->getPath(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
+				content->getFileName(), Util::hex2str(content->getMD5(), MD5_DIGEST_LENGTH).c_str(),
 				content->isValid() ? "V" : "I", content->isFlaggedToSent() ? "Y" : "N");
 	}
 
@@ -153,7 +153,7 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_PARAM); j++) {
 
-		ParameterContent *content = (ParameterContent *) rule->getContent(CONTENT_PARAM, j);
+		ParameterItem *content = (ParameterItem *) rule->getContent(CONTENT_PARAM, j);
 		if (content == nullptr) {
 			return;
 		}
@@ -183,7 +183,7 @@ void Console::clientUpdateExecList(ConsoleEvent &event) {
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
 
-		ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, j);
+		ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, j);
 		if (content == nullptr) {
 			return;
 		}

@@ -30,11 +30,11 @@ public:
 	Interface *_interface;
 
 	Argument(Interface *c, long address) : _interface(c){
-		item = new MessageItem(MESSAGE_RECEIVE, address, nullptr);
+		item = new MessageItem(MESSAGE_RECEIVE, address);
 	}
 
 	Argument(Interface *c) : _interface(c){
-		item = new MessageItem(MESSAGE_RECEIVE, 0, nullptr);
+		item = new MessageItem(MESSAGE_RECEIVE);
 	}
 };
 

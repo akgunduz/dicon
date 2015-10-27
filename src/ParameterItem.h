@@ -6,7 +6,7 @@
 #ifndef __ParameterContent_H_
 #define __ParameterContent_H_
 
-#include "Content.h"
+#include "ContentItem.h"
 
 enum PARAM_TYPES {
     PARAM_LONG,
@@ -20,13 +20,13 @@ union Params {
     char sPtr[255];
 };
 
-class ParameterContent : public Content {
+class ParameterItem : public ContentItem {
 	PARAM_TYPES mType;
 	Params mParams;
 public:
-	ParameterContent(){};
-	ParameterContent(const char *param);
-	~ParameterContent(){};
+	ParameterItem(){};
+	ParameterItem(const char *param);
+	~ParameterItem(){};
 	PARAM_TYPES getParamType();
 	Params getParam();
 	void setParam(union Params *);

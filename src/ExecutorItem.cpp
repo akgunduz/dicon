@@ -3,31 +3,31 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "ExecutorContent.h"
+#include "ExecutorItem.h"
 #include "Rule.h"
-#include "ParameterContent.h"
+#include "ParameterItem.h"
 
-ExecutorContent::ExecutorContent(const char *line) {
+ExecutorItem::ExecutorItem(const char *line) {
 
 	setValid(true);
 
 	exec = line;
 }
 
-CONTENT_TYPES ExecutorContent::getType() {
+CONTENT_TYPES ExecutorItem::getType() {
 	return CONTENT_EXECUTOR;
 }
 
-std::string ExecutorContent::getExec() {
+std::string ExecutorItem::getExec() {
 	return exec;
 }
 
-void ExecutorContent::setExec(const std::string &exec) {
+void ExecutorItem::setExec(const std::string &exec) {
 	this->exec = exec;
 }
 
 
-std::string ExecutorContent::getParsed(void *pRule) {
+std::string ExecutorItem::getParsed(void *pRule) {
 
 //	Rule *refRule = (Rule *)pRule;
 	char parsed[PATH_MAX] = "";
@@ -97,18 +97,18 @@ std::string ExecutorContent::getParsed(void *pRule) {
 	return parsed;
 }
 
-bool ExecutorContent::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
+bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
 
 	Rule *refRule = (Rule *)pRule;
 
 	if (cmdType == CONTENT_FILE) {
-		FileContent *content = (FileContent *) refRule->getContent(CONTENT_FILE, cmdIndex);
+		FileItem *content = (FileItem *) refRule->getContent(CONTENT_FILE, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsed, "%s%s%s", parsed, refRule->getRootPath(), content->getPath());
+            sprintf(parsed, "%s%s%s", parsed, refRule->getRootPath(), content->getFileName());
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {
-		ParameterContent *content = (ParameterContent *) refRule->getContent(CONTENT_PARAM, cmdIndex);
+		ParameterItem *content = (ParameterItem *) refRule->getContent(CONTENT_PARAM, cmdIndex);
 		if (content != nullptr) {
 			switch(content->getParamType()) {
 				case PARAM_LONG:

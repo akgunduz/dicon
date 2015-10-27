@@ -113,7 +113,8 @@ enum FILETYPE {
     FILE_JOB,
     FILE_RULE,
 	FILE_COMMON,
-	FILE_ARCH
+	FILE_ARCH,
+    FILE_MAX
 };
 
 enum UI_UPDATE {
@@ -128,7 +129,7 @@ enum UI_UPDATE {
 	UI_UPDATE_COLL_ADDRESS,
 	UI_UPDATE_COLL_ATT_DIST_ADDRESS,
 	UI_UPDATE_COLL_ATT_CLIENT_ADDRESS,
-	UI_UPDATE_COLL_FILE_LIST,
+    UI_UPDATE_COLL_JOB_LIST,
 	UI_UPDATE_COLL_PARAM_LIST,
 	UI_UPDATE_COLL_EXEC_LIST,
 	UI_UPDATE_COLL_LOG,
@@ -151,15 +152,16 @@ public:
 	uint64_t data64_1;
 	uint64_t data64_2;
 	std::string dataStr;
+    void *dataPtr;
 
 	EventData(uint64_t data) : data64_1(data) {}
 	EventData(uint64_t data, uint64_t data2) : data64_1(data), data64_2(data2) {}
 	EventData(uint64_t data, const char *data2) : data64_1(data), dataStr(data2) {}
 	EventData(uint64_t data, uint64_t data2, const char *data3) : data64_1(data), data64_2(data2), dataStr(data3) {}
 	EventData(const char *data) : dataStr(data) {}
+	EventData(void *data) : dataPtr(data) {}
 };
 
-extern const char* sArchs[];
 extern const char* sStates[];
 extern const char* sParamTypes[];
 extern const char* sInterfaces[];

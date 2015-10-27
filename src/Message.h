@@ -46,14 +46,14 @@ public:
 
 	bool readMD5(int, uint8_t*);
 
-	bool readFileBinary(int, FileContent *, struct BlockHeader*);
+	bool readFileBinary(int, FileItem *, struct BlockHeader*);
 	bool readFileMD5(int, MD5Wrapper *, struct BlockHeader*);
 	bool readMessageBlock(int in, BlockHeader *);
 
 	bool writeMD5(int, uint8_t*);
 
-	bool writeFileBinary(int, FileContent *);
-	bool writeFileMD5(int, FileContent *);
+	bool writeFileBinary(int, FileItem *);
+	bool writeFileMD5(int, FileItem *);
 	bool writeMessageStream(int out, int streamFlag);
 
 };

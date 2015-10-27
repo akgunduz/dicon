@@ -17,10 +17,12 @@ public:
     long address;
     Message *msg;
 
-    MessageItem(MESSAGE_DIRECTION type, long address, Message *msg) : SchedulerItem(type) {
+    MessageItem(MESSAGE_DIRECTION type, long address = 0, Message *msg = nullptr) : SchedulerItem(type) {
         this->address = address;
-        this->msg = msg;
-        this->priority = msg->getPriority();
+        if (msg != nullptr) {
+            this->msg = msg;
+            this->priority = msg->getPriority();
+        }
     }
 };
 

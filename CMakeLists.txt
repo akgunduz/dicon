@@ -27,14 +27,14 @@ set(FILES
         ${SOURCE_PATH}/Console.cpp
         ${SOURCE_PATH}/Console.h
         ${SOURCE_PATH}/ConsoleClient.cpp
-        ${SOURCE_PATH}/Content.cpp
-        ${SOURCE_PATH}/Content.h
-        ${SOURCE_PATH}/FileContent.cpp
-        ${SOURCE_PATH}/FileContent.h
-        ${SOURCE_PATH}/ParameterContent.cpp
-        ${SOURCE_PATH}/ParameterContent.h
-        ${SOURCE_PATH}/ExecutorContent.cpp
-        ${SOURCE_PATH}/ExecutorContent.h
+        ${SOURCE_PATH}/ContentItem.cpp
+        ${SOURCE_PATH}/ContentItem.h
+        ${SOURCE_PATH}/FileItem.cpp
+        ${SOURCE_PATH}/FileItem.h
+        ${SOURCE_PATH}/ParameterItem.cpp
+        ${SOURCE_PATH}/ParameterItem.h
+        ${SOURCE_PATH}/ExecutorItem.cpp
+        ${SOURCE_PATH}/ExecutorItem.h
         ${SOURCE_PATH}/Distributor.cpp
         ${SOURCE_PATH}/Distributor.h
         ${SOURCE_PATH}/Interface.cpp
@@ -95,12 +95,10 @@ set(FILES
         ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.h
-        src/RuleItem.cpp
-        src/RuleItem.h
         src/JsonType.cpp
         src/JsonType.h
-        src/JsonFile.cpp
-        src/JsonFile.h
+        src/JsonItem.cpp
+        src/JsonItem.h
         src/RuleContent.cpp
         src/RuleContent.h)
 

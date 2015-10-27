@@ -14,7 +14,8 @@
 
 class Collector : public Component {
 
-	std::map<long , Job*> jobs;
+	std::vector<Job*> *jobs;
+	std::map<long , Rule*> rules;
 
 	long distributorAddress;
 

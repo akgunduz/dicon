@@ -14,14 +14,21 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
 
 	distributorAddress = 0;
 
-	LOG_I("Instance is created!!!");
+    jobs = new std::vector<Job*>();
 
+    jobs->clear();
+    std::vector<std::string> dirList = Util::getDirList(getRootPath(), "Job_");
+    for (int i = 0; i < dirList.size(); i++) {
+        jobs->push_back(new Job(getRootPath(), JOB_FILE, dirList[i].c_str()));
+    }
+
+    LOG_U(UI_UPDATE_COLL_JOB_LIST, jobs);
 }
 
 Collector::~Collector() {
 
-	for (std::map<long , Job*>::iterator i = jobs.begin(); i != jobs.end(); i++) {
-        delete i->second;
+	for (std::vector<Job*>::iterator i = jobs->begin(); i != jobs->end(); i++) {
+        delete *i;
 	}
 }
 
@@ -56,7 +63,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				break;
 			}
 
-			rules[clientAddress] = new Rule(Unit(HOST_COLLECTOR), Unit(HOST_NODE, clientID), getRootPath());
+			rules[clientAddress] = new Rule(getRootPath(), "Haluk");
 
 			if (!rules[clientAddress]) {
 				LOG_E("Could not create a rule from path : %s", getRootPath());
@@ -65,7 +72,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			LOG_T("New Rule created from path : %s", getRootPath());
 
-			LOG_U(UI_UPDATE_COLL_FILE_LIST, rules[clientAddress]);
+			LOG_U(UI_UPDATE_COLL_JOB_LIST, rules[clientAddress]);
 			LOG_U(UI_UPDATE_COLL_PARAM_LIST, rules[clientAddress]);
 			LOG_U(UI_UPDATE_COLL_EXEC_LIST, rules[clientAddress]);
 
@@ -111,7 +118,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 			for (int i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
 				for (uint16_t j = 0; j < ruleItr->second->getContentCount(CONTENT_FILE); j++) {
-					FileContent *content = (FileContent *) ruleItr->second->getContent(CONTENT_FILE, j);
+					FileItem *content = (FileItem *) ruleItr->second->getContent(CONTENT_FILE, j);
 					//TODO 64 bit le coz
 					if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
 						//TODO bu clientte var, gonderme
@@ -120,7 +127,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 				}
 			}
 
-			LOG_U(UI_UPDATE_COLL_FILE_LIST, ruleItr->second);
+			LOG_U(UI_UPDATE_COLL_JOB_LIST, ruleItr->second);
 
 			status = send2ClientMsg(address, MSGTYPE_BINARY);
 		}

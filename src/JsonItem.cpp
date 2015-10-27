@@ -2,22 +2,19 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#include "JsonFile.h"
+#include "JsonItem.h"
 
-JsonFile::JsonFile(Unit unitHost, Unit unitNode, const char *path) {
-
-    this->unitHost = unitHost;
-    this->unitNode = unitNode;
-    strcpy(this->rootPath, path);
+JsonItem::JsonItem(FileItem *fileItem)
+    : FileItem(fileItem){
 
 }
 
-JsonFile::~JsonFile() {
+JsonItem::JsonItem(const char *rootPath, const char* fileName, FILETYPE fileType)
+        : FileItem(rootPath, fileName, fileType) {
 
-    if (content != nullptr) {
-        delete content;
-        content = nullptr;
-    }
+}
+
+JsonItem::~JsonItem() {
 
     for (std::map<int , JsonType *>::iterator i = contentTypes.begin(); i != contentTypes.end(); i++) {
         delete i->second;
@@ -25,35 +22,26 @@ JsonFile::~JsonFile() {
 
     for (int i = 0; i < MAX_CONTENT_TYPE; i++) {
         for (int j = 0; j < contentList[i].size(); j++) {
-            Content *item = contentList[i][j];
+            ContentItem *item = contentList[i][j];
             delete item;
         }
     }
 }
 
-
-FileContent *JsonFile::getContent() {
-    return content;
-}
-
-const char *JsonFile::getRootPath() {
-    return rootPath;
-}
-
-Content *JsonFile::getContent(int type, int index) {
+ContentItem *JsonItem::getContent(int type, int index) {
     return contentList[type][index];
 }
 
-int JsonFile::getContentCount(int type) {
+int JsonItem::getContentCount(int type) {
     return (int) contentList[type].size();
 }
 
-int JsonFile::getFlaggedFileCount() {
+int JsonItem::getFlaggedFileCount() {
 
     int count = 0;
 
     for (uint16_t i = 0; i < getContentCount(CONTENT_FILE); i++) {
-        FileContent *content = (FileContent *)getContent(CONTENT_FILE, i);
+        FileItem *content = (FileItem *)getContent(CONTENT_FILE, i);
         if (content->isFlaggedToSent()) {
             count++;
         }
@@ -62,14 +50,14 @@ int JsonFile::getFlaggedFileCount() {
     return count;
 }
 
-void JsonFile::reset() {
+void JsonItem::reset() {
 
     for (int i = 0; i < contentList->size(); i++) {
         contentList[i].clear();
     }
 }
 
-bool JsonFile::parse(const char *path) {
+bool JsonItem::parse(const char *path) {
 
     struct json_object* node = json_object_from_file(path);
     if (node == NULL){

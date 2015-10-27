@@ -6,15 +6,15 @@
 #ifndef __ExecutorContent_H_
 #define __ExecutorContent_H_
 
-#include "Content.h"
+#include "ContentItem.h"
 
-class ExecutorContent : public Content {
+class ExecutorItem : public ContentItem {
 	std::string exec;
 	bool parseCommand(char*, void *, int, int);
 public:
-	ExecutorContent(){};
-	ExecutorContent(const char *exec);
-	~ExecutorContent(){};
+	ExecutorItem(){};
+	ExecutorItem(const char *exec);
+	~ExecutorItem(){};
 	std::string getExec();
 	std::string getParsed(void *);
 	void setExec(const std::string&);

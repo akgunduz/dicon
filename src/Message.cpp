@@ -44,7 +44,7 @@ bool Message::readMD5(int desc, uint8_t *md5) {
 	return true;
 }
 
-bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader *header) {
+bool Message::readFileBinary(int desc, FileItem *content, struct BlockHeader *header) {
 
 	if (header->blockType != BLOCK_FILE_BINARY) {
 		LOG_E("readFileBinary can not read other blocks");
@@ -76,11 +76,11 @@ bool Message::readFileBinary(int desc, FileContent *content, struct BlockHeader 
 
     strcpy(this->jobID, jobID);
 
-    content->setFile(getHost(), getOwner(), getRootPath(), path, (FILETYPE)fileType);
+    content->setFile(getRootPath(), path, (FILETYPE)fileType);
 
 
 	uint8_t calcMD5[MD5_DIGEST_LENGTH];
-	if (!readBinary(desc, content->getAbsPath(), calcMD5, content->getMD5Path(), header->sizes[2])) {
+	if (!readBinary(desc, content->getAbsPath(getHost(), getOwner()).c_str(), calcMD5, content->getMD5Path().c_str(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}
@@ -123,23 +123,23 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
         case BLOCK_FILE_BINARY: {
 
-            FileContent *fileContent = new FileContent();
+            FileItem *fileItem = new FileItem(getRootPath());
 
-            if (!readFileBinary(in, fileContent, blockHeader)) {
+            if (!readFileBinary(in, fileItem, blockHeader)) {
                 return false;
             }
 
-            if (fileContent->getFileType() == FILE_RULE) {
+            if (fileItem->getFileType() == FILE_RULE) {
 
                 if (rule != nullptr) {
                     delete rule;
                 }
 
-                rule = new Rule(getHost(), getOwner(), getRootPath(), fileContent);
+                rule = new Rule(fileItem);
 
             } else {
 
-                delete fileContent;
+                delete fileItem;
             }
         }
             break;
@@ -172,19 +172,19 @@ bool Message::writeMD5(int desc, uint8_t *md5) {
 	return true;
 }
 
-bool Message::writeFileBinary(int desc, FileContent *content) {
+bool Message::writeFileBinary(int desc, FileItem *content) {
 
 	BlockHeader blockHeader = {3, BLOCK_FILE_BINARY};
 
-    blockHeader.sizes[0] = (uint32_t)strlen(content->getPath());
+    blockHeader.sizes[0] = (uint32_t)strlen(content->getFileName());
     blockHeader.sizes[1] = MD5_DIGEST_LENGTH;
-    blockHeader.sizes[2] = getBinarySize(content->getAbsPath());
+    blockHeader.sizes[2] = getBinarySize(content->getAbsPath(getHost(), getOwner()).c_str());
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
 	}
 
-	if (!writeString(desc, content->getPath())) {
+	if (!writeString(desc, content->getFileName())) {
         return false;
     }
 
@@ -193,7 +193,7 @@ bool Message::writeFileBinary(int desc, FileContent *content) {
     }
 
 	uint8_t calcMD5[MD5_DIGEST_LENGTH];
-	if (!writeBinary(desc, content->getAbsPath(), calcMD5)) {
+	if (!writeBinary(desc, content->getAbsPath(getHost(), getOwner()).c_str(), calcMD5)) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}
@@ -209,7 +209,7 @@ bool Message::writeFileBinary(int desc, FileContent *content) {
 
 }
 
-bool Message::writeFileMD5(int desc, FileContent *content) {
+bool Message::writeFileMD5(int desc, FileItem *content) {
 
 	BlockHeader blockHeader = {1, BLOCK_FILE_MD5};
 
@@ -227,7 +227,7 @@ bool Message::writeMessageStream(int out, int streamFlag) {
     switch(streamFlag) {
 
         case STREAM_RULE:
-            if (!writeFileBinary(out, rule->getContent())) {
+            if (!writeFileBinary(out, rule)) {
                 return false;
             }
 
@@ -235,7 +235,7 @@ bool Message::writeMessageStream(int out, int streamFlag) {
 
         case STREAM_BINARY:
             for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                FileContent *content = (FileContent *)rule->getContent(CONTENT_FILE, i);
+                FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
                 if (content->isFlaggedToSent()) {
                     if (!writeFileBinary(out, content)) {
                         return false;
@@ -246,7 +246,7 @@ bool Message::writeMessageStream(int out, int streamFlag) {
 
         case STREAM_MD5ONLY:
             for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                FileContent *content = (FileContent *)rule->getContent(CONTENT_FILE, i);
+                FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
                 if (content->isFlaggedToSent()) {
                     if (!writeFileMD5(out, content)) {
                         return false;

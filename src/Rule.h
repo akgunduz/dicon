@@ -8,13 +8,18 @@
 #define __Rule_H_
 
 #include "Log.h"
-#include "FileContent.h"
+#include "FileItem.h"
 #include "Unit.h"
-#include "JsonFile.h"
+#include "JsonItem.h"
 
-class Rule : public JsonFile {
+class Rule : public JsonItem {
 
 	bool parallel;
+
+    bool active;
+    int repeat;
+
+    void init();
 
 	static bool parseRunTypeNode(void*, json_object *node);
     static bool parseFileNode(void*, json_object *node);
@@ -23,14 +28,17 @@ class Rule : public JsonFile {
 
 public:
 
-	Rule(Unit host, Unit node, const char*, FileContent* content = nullptr);
+	Rule(FileItem * content);
+	Rule(const char*, const char*);
 	~Rule();
+
 	bool isParallel();
-	void display();
 
-    virtual const char *getFileName();
+    bool getActive();
+    void setActive(bool active);
 
-    virtual FILETYPE getFileType();
+    int getRepeat();
+    void setRepeat(int repeat);
 };
 
 

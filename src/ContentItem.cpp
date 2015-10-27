@@ -3,23 +3,23 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Content.h"
+#include "ContentItem.h"
 #include "Util.h"
 #include "Rule.h"
 
-Content::Content() {
+ContentItem::ContentItem() {
 
 	mIsValid = false;
 
 }
 
-bool Content::isValid() {
+bool ContentItem::isValid() {
 
 	return mIsValid;
 
 }
 
-void Content::setValid(bool valid) {
+void ContentItem::setValid(bool valid) {
 
 	mIsValid = valid;
 

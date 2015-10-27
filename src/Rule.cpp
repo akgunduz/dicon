@@ -4,35 +4,33 @@
 //
 
 #include "Rule.h"
-#include "ParameterContent.h"
-#include "ExecutorContent.h"
+#include "ParameterItem.h"
+#include "ExecutorItem.h"
 
-Rule::Rule(Unit host, Unit node, const char* rootPath, FileContent *fileContent)
-        : JsonFile(host, node, rootPath) {
+Rule::Rule(FileItem *fileItem)
+        : JsonItem(fileItem) {
+
+    init();
+}
+
+Rule::Rule(const char* rootPath, const char* filePath)
+        : JsonItem(rootPath, filePath, FILE_RULE) {
+
+    init();
+}
+
+void Rule::init() {
 
     contentTypes[CONTENT_RUNTYPE] = new JsonType(CONTENT_RUNTYPE, "runtype", this, parseRunTypeNode);
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
     contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
 
-	parallel = false;
+    parallel = false;
+    active = true;
+    repeat = 1;
 
-    if (fileContent == nullptr) {
-        content = new FileContent(host, node, rootPath, RULE_FILE, FILE_RULE);
-        if (!content->isValid()) {
-            LOG_E("Can not read json file : %s!!!", RULE_FILE);
-            return;
-        }
-
-    } else {
-        content = fileContent;
-    }
-
-    content->setFlaggedToSent(true);
-
-    char ruleFilePath[PATH_MAX];
-    sprintf(ruleFilePath, "%s/%s", rootPath, RULE_FILE);
-    if (!parse(ruleFilePath)) {
+    if (!parse(getAbsPath().c_str())) {
         LOG_E("Rule could not parsed!!!");
     }
 }
@@ -44,7 +42,7 @@ Rule::~Rule() {
 bool Rule::parseRunTypeNode(void *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
-    if (type != json_type_int) {
+    if (type != json_type_string) {
         LOG_E("Invalid JSON Files Node");
         return false;
     }
@@ -88,9 +86,7 @@ bool Rule::parseFileNode(void *parent, json_object *node) {
 
         FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
 
-		FileContent *content = new FileContent(((Rule*)parent)->unitHost,
-                                               ((Rule*)parent)->unitNode,
-                                               ((Rule*)parent)->getRootPath(), path, fileType);
+		FileItem *content = new FileItem(((Rule*)parent)->getRootPath(), path, fileType);
 
         ((Rule*)parent)->contentList[CONTENT_FILE].push_back(content);
 
@@ -117,7 +113,7 @@ bool Rule::parseParamNode(void *parent, json_object *node) {
 
 		const char *param = json_object_get_string(child);
 
-		ParameterContent *content = new ParameterContent(param);
+		ParameterItem *content = new ParameterItem(param);
 		if (content->isValid()) {
             ((Rule*)parent)->contentList[CONTENT_PARAM].push_back(content);
 		}
@@ -147,7 +143,7 @@ bool Rule::parseExecutorNode(void *parent, json_object *node) {
 
 		const char *exec = json_object_get_string(child);
 
-		ExecutorContent *content = new ExecutorContent(exec);
+		ExecutorItem *content = new ExecutorItem(exec);
 		if (content->isValid()) {
             ((Rule*)parent)->contentList[CONTENT_EXECUTOR].push_back(content);
 		}
@@ -157,54 +153,24 @@ bool Rule::parseExecutorNode(void *parent, json_object *node) {
 	return true;
 }
 
-void Rule::display() {
-    /*
-	for (int j = RULE_FILES; j < RULE_MAX; j++) {
-		LOG_S("\t%s :", RuleTypes::getName((RULE_TYPES)j));
-		for (int k = 0; k < getContentCount(static_cast<RULE_TYPES>(j)); k++) {
-			Content *cnt = getContent(static_cast<RULE_TYPES>(j), k);
-
-			switch(cnt->getType()) {
-				case CONTENT_FILE: {
-					FileContent *fcnt = (FileContent *)cnt;
-					LOG_S("\t\tFile : %s", fcnt->getPath());
-				}
-					break;
-				case CONTENT_PARAM: {
-					ParameterContent *pcnt = (ParameterContent *)cnt;
-					PARAM_TYPES type = pcnt->getParamType();
-					switch(type) {
-						case PARAM_LONG:
-							LOG_S("\t\tParameter %ld with Type : %d", pcnt->getParam().latom, pcnt->getParamType());
-							break;
-						case PARAM_DOUBLE:
-							LOG_S("\t\tParameter %f with Type : %d", pcnt->getParam().datom, pcnt->getParamType());
-							break;
-						case PARAM_STRING:
-							LOG_S("\t\tParameter %s with Type : %d", pcnt->getParam().sPtr, pcnt->getParamType());
-							break;
-					}
-
-				}
-					break;
-				case CONTENT_EXECUTOR: {
-					ExecutorContent *ecnt = (ExecutorContent *) cnt;
-					LOG_S("\t\tExecutor %s", ecnt->getExec().c_str());
-				}
-					break;
-			}
-		}
-	}*/
-}
-
-const char *Rule::getFileName() {
-    return RULE_FILE;
-}
-
-FILETYPE Rule::getFileType() {
-    return FILE_RULE;
-}
-
 bool Rule::isParallel() {
 	return parallel;
 }
+
+bool Rule::getActive() {
+    return active;
+}
+
+void Rule::setActive(bool active) {
+    this->active = active;
+}
+
+int Rule::getRepeat() {
+    return repeat;
+}
+
+void Rule::setRepeat(int repeat) {
+    this->repeat = repeat;
+}
+
+

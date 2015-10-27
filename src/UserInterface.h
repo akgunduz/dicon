@@ -16,6 +16,7 @@
 
 #include "Distributor.h"
 #include "Collector.h"
+#include <wx/treelist.h>
 
 ////@begin includes
 #include "wx/frame.h"
@@ -33,9 +34,7 @@ class wxToggleButton;
 class wxListCtrl;
 ////@end forward declarations
 
-/*!
- * Control identifiers
- */
+#define ID_COLL_JOB_LIST 10100
 
 ////@begin control identifiers
 #define ID_USERINTERFACE 10000
@@ -57,8 +56,7 @@ class wxListCtrl;
 #define ID_COLL_NODE_ADDRESS 10018
 #define ID_COLL_INIT 10019
 #define ID_COLL_PROCESS 10020
-#define ID_COLL_FILE_LIST 10021
-#define ID_COLL_EXEC_LIST 10003
+#define ID_COLL_PROCESS_LIST 10003
 #define ID_COLL_LOG 10023
 #define ID_NODE_BINDED_ADDRESS 10015
 #define ID_NODE_COLL_ADDRESS 10022
@@ -136,8 +134,8 @@ public:
     void collUpdateAttachedNodeAddress(wxCommandEvent& event);
 
     void collUpdateLog(wxCommandEvent &event);
-    void collUpdateFileList(wxCommandEvent &event);
-    void collUpdateExecList(wxCommandEvent &event);
+    void collUpdateJobList(wxCommandEvent &event);
+    void collUpdateProcessList(wxCommandEvent &event);
 
     //Node
 
@@ -173,6 +171,8 @@ public:
 
 ////@end UserInterface event handler declarations
 
+    void OnCollJobListChecked( wxTreeListEvent& event );
+
 ////@begin UserInterface member function declarations
 
     /// Retrieves bitmap resources
@@ -184,6 +184,8 @@ public:
 
     /// Should we show tooltips?
     static bool ShowToolTips();
+
+    wxTreeListCtrl* collJobList;
 
 ////@begin UserInterface member variables
     wxTextCtrl* distBackupRate;
@@ -201,8 +203,7 @@ public:
     wxStaticText* collNodeAddress;
     wxToggleButton* collInitBtn;
     wxButton* collProcessBtn;
-    wxListCtrl* collFileList;
-    wxListBox* collExecList;
+    wxListBox* collProcessList;
     wxListBox* collLog;
     wxStaticText* nodeCollAddress;
     wxChoice* nodeConnectInterface;

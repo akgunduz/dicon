@@ -15,7 +15,8 @@ public:
 	static bool str2hex(uint8_t *buf, const char *s, uint32_t len);
     static void mkPath(const char *dir);
 	static short getID();
-    static std::list<std::string> getFileList(const char*, const char*);
+    static std::vector<std::string> getFileList(const char*, const char*);
+    static std::vector<std::string> getDirList(const char*, const char*);
     static bool isMulticast();
 };
 

@@ -3,10 +3,10 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "ParameterContent.h"
+#include "ParameterItem.h"
 #include "Rule.h"
 
-ParameterContent::ParameterContent(const char *param) {
+ParameterItem::ParameterItem(const char *param) {
 
 	setValid(true);
 
@@ -22,18 +22,18 @@ ParameterContent::ParameterContent(const char *param) {
 	}
 };
 
-CONTENT_TYPES ParameterContent::getType() {
+CONTENT_TYPES ParameterItem::getType() {
 	return CONTENT_PARAM;
 }
 
-PARAM_TYPES ParameterContent::getParamType() {
+PARAM_TYPES ParameterItem::getParamType() {
 	return mType;
 }
 
-Params ParameterContent::getParam() {
+Params ParameterItem::getParam() {
 	return mParams;
 }
 
-void ParameterContent::setParam(Params *param) {
+void ParameterItem::setParam(Params *param) {
 	memcpy(&mParams, param, sizeof(Params));
 }

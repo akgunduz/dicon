@@ -4,29 +4,47 @@
 
 #include "Job.h"
 
-Job::Job(Unit host, Unit node, const char *rootPath, FileContent* fileContent)
-        : JsonFile(host, node, rootPath) {
+Job::Job(FileItem *fileItem, const char* jobDir)
+        : JsonItem(fileItem) {
+
+    init(jobDir);
+}
+
+Job::Job(const char *rootPath, const char* filePath, const char* jobDir)
+        : JsonItem(getJobPath(rootPath, jobDir).c_str(), filePath, FILE_JOB) {
+
+    init(jobDir);
+}
+
+Job::~Job() {
+
+}
+
+void Job::init(const char* jobDir) {
 
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
+    contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
 
-    if (fileContent == nullptr) {
-        content = new FileContent(host, node, rootPath, JOB_FILE, FILE_JOB);
-        if (!content->isValid()) {
-            LOG_E("Can not read json file : %s!!!", JOB_FILE);
-            return;
-        }
-
-    } else {
-        content = fileContent;
-    }
-
-    content->setFlaggedToSent(true);
-
-    char jobFilePath[PATH_MAX];
-    sprintf(jobFilePath, "%s/%s", rootPath, JOB_FILE);
-    if (!parse(jobFilePath)) {
+    if (!parse(getAbsPath().c_str())) {
         LOG_E("Job could not parsed!!!");
     }
+
+    strcpy(this->jobDir, jobDir);
+}
+
+bool Job::parseNameNode(void *parent, json_object *node) {
+
+    enum json_type type = json_object_get_type(node);
+    if (type != json_type_string) {
+        LOG_E("Invalid JSON Name Node");
+        return false;
+    }
+
+    const char *name = json_object_get_string(node);
+
+    ((Job*)parent)->setName(name);
+
+    return true;
 }
 
 bool Job::parseRuleNode(void *parent, json_object *node) {
@@ -53,32 +71,33 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
 
         json_object *pathNode = json_object_array_get_idx(child, 0);
         json_object *activeNode = json_object_array_get_idx(child, 1);
-        json_object *repeatNode = json_object_array_get_idx(child, 1);
+        json_object *repeatNode = json_object_array_get_idx(child, 2);
 
         const char *path = json_object_get_string(pathNode);
         bool active = (bool) json_object_get_boolean(activeNode);
         int repeat = json_object_get_int(repeatNode);
 
-        RuleItem *ruleItem = new RuleItem(path, active, repeat);
-        ((Job*)parent)->rules.push_back(ruleItem);
+        Job* job = (Job*) parent;
+
+        Rule *rule = new Rule(job->getRootPath(), path);
+        rule->setActive(active);
+        rule->setRepeat(repeat);
+
+        job->contentList[CONTENT_FILE].push_back(rule);
     }
 
     return true;
 }
 
-Job::~Job() {
-
-    for (std::list<RuleItem*>::iterator itr = rules.begin(); itr != rules.end(); itr++) {
-        delete *itr;
-    }
-
-    rules.clear();
+const char *Job::getName() {
+    return name;
 }
 
-const char *Job::getFileName() {
-    return JOB_FILE;
+void Job::setName(const char *name) {
+    strncpy(this->name, name, 50);
 }
 
-FILETYPE Job::getFileType() {
-    return FILE_JOB;
+std::string Job::getJobPath(const char *rootPath, const char *jobDir) {
+
+    return std::string(rootPath) + "/" + (char*)jobDir;
 }

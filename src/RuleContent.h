@@ -5,9 +5,9 @@
 #ifndef BANKOR_RULECONTENT_H
 #define BANKOR_RULECONTENT_H
 
-#include "FileContent.h"
+#include "FileItem.h"
 
-class RuleContent : public FileContent {
+class RuleContent : public FileItem {
 
 };
 

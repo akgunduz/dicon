@@ -4,7 +4,7 @@
 //
 
 #include "Node.h"
-#include "ExecutorContent.h"
+#include "ExecutorItem.h"
 #include "Util.h"
 #include "ArchTypes.h"
 
@@ -166,10 +166,10 @@ bool Node::processMD5() {
 
 	for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
 
-		FileContent *content = (FileContent *)rule->getContent(CONTENT_FILE, i);
+		FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
 
 		char absPath[PATH_MAX];
-		sprintf(absPath, "%s%s", getRootPath(), content->getPath());
+		sprintf(absPath, "%s%s", getRootPath(), content->getFileName());
 
 		//Burada ters lojik var,
 		//	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
@@ -232,7 +232,7 @@ bool Node::processRule() {
 	if (!rule->isParallel()) {
 
 		for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-			ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, i);
+			ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
 			std::string cmd = content->getParsed(rule);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"Executing %s command", cmd.c_str());
@@ -261,7 +261,7 @@ bool Node::processRule() {
 
 	//parallel process
 	for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-		ExecutorContent *content = (ExecutorContent *)rule->getContent(CONTENT_EXECUTOR, i);
+		ExecutorItem *content = (ExecutorItem *)rule->getContent(CONTENT_EXECUTOR, i);
 		std::string cmd = content->getParsed(rule);
 		LOG_U(UI_UPDATE_CLIENT_LOG,
 				"Executing %s command", cmd.c_str());

@@ -7,25 +7,27 @@
 #define __Content_H_
 
 #include "Log.h"
+#include "SchedulerItem.h"
 
 #define BUFFER_SIZE 512
 
 enum CONTENT_TYPES {
     CONTENT_RUNTYPE,
+    CONTENT_NAME,
 	CONTENT_FILE,
 	CONTENT_PARAM,
 	CONTENT_EXECUTOR,
     CONTENT_MAX
 };
 
-class Content {
+class ContentItem : public SchedulerItem {
 	bool mIsValid;
 public:
 	bool isValid();
 	void setValid(bool);
-	Content();
+	ContentItem();
 	virtual CONTENT_TYPES getType() = 0;
-	virtual ~Content(){};
+	virtual ~ContentItem(){};
 };
 
 #endif //__Content_H_
