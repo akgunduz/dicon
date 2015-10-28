@@ -230,8 +230,9 @@ bool Collector::send2NodeMsg(long address, int type, Job* job) {
 bool Collector::processRule() {
 
     for (int i = 0; i < jobs->size(); i++) {
-        return send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
+        send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
     }
+    return true;
 }
 
 bool Collector::syncTime() {

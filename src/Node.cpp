@@ -87,7 +87,9 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 	//		LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
 
-			processRule();
+            for (int i = 0; i < job->getRuleCount(); i++) {
+                processRule(job->getRule(i));
+            }
 
 			LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
 			status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
@@ -226,7 +228,7 @@ void Node::processExecutor(std::string cmd) {
 	exit(EXIT_FAILURE);
 }
 
-bool Node::processRule() {
+bool Node::processRule(Rule* rule) {
 
 	int status;
 

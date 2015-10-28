@@ -85,7 +85,7 @@ SchedulerItem* Scheduler::pull() {
 
     if (pthread_mutex_lock(&mutex) != 0) { //replaced with trylock
         LOG_E("Can not push, system is BUSY!!!");
-        return false;
+        return nullptr;
     }
 
     if (items.empty()) {

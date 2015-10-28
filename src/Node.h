@@ -23,7 +23,7 @@ private:
     bool send2DistributorMsg(long, uint8_t);
     bool send2CollectorMsg(long, uint8_t);
 
-    bool processRule();
+    bool processRule(Rule*);
     void processExecutor(std::string);
     bool processMD5();
 

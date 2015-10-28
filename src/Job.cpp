@@ -126,3 +126,11 @@ long Job::getAttachedNode() {
 void Job::setAttachedNode(long address) {
     this->attachedNode = address;
 }
+
+Rule *Job::getRule(int index) {
+    return (Rule*)getContent(CONTENT_FILE, index);
+}
+
+int Job::getRuleCount() {
+    return getContentCount(CONTENT_FILE);
+}

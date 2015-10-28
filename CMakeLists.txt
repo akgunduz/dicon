@@ -98,9 +98,7 @@ set(FILES
         src/JsonType.cpp
         src/JsonType.h
         src/JsonItem.cpp
-        src/JsonItem.h
-        src/RuleContent.cpp
-        src/RuleContent.h)
+        src/JsonItem.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/UserInterface.cpp
