@@ -1,0 +1,12 @@
+{
+    "Job": {
+
+        "name": "Bostan Korkulugu",
+
+        "rules": [
+            ["Rule_1.json", true, 1],
+            ["Rule_2.json", false, 2],
+            ["Rule_3.json", true, 2],
+        ]
+    }
+}
