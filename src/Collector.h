@@ -19,12 +19,14 @@ class Collector : public Component {
 
 	long distributorAddress;
 
+    Scheduler *scheduler;
+
 	virtual bool processDistributorMsg(long, Message *);
 	virtual bool processCollectorMsg(long, Message *);
 	virtual bool processNodeMsg(long, Message *);
 
 	bool send2DistributorMsg(long, int);
-	bool send2ClientMsg(long, int);
+	bool send2NodeMsg(long, int, Job* job);
 
 public:
 
@@ -33,10 +35,8 @@ public:
 
     bool reset();
     bool processRule();
-    bool processRule(const std::string &);
     bool syncTime();
 
-    void display();
 };
 
 #endif	/* COLLECTOR_H */

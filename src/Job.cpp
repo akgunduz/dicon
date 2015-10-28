@@ -4,6 +4,12 @@
 
 #include "Job.h"
 
+Job::Job(FileItem *fileItem)
+        : JsonItem(fileItem) {
+
+    init(getJobDir(fileItem->getID()).c_str());
+}
+
 Job::Job(FileItem *fileItem, const char* jobDir)
         : JsonItem(fileItem) {
 
@@ -30,6 +36,7 @@ void Job::init(const char* jobDir) {
     }
 
     strcpy(this->jobDir, jobDir);
+    this->attachedNode = 0;
 }
 
 bool Job::parseNameNode(void *parent, json_object *node) {
@@ -100,4 +107,22 @@ void Job::setName(const char *name) {
 std::string Job::getJobPath(const char *rootPath, const char *jobDir) {
 
     return std::string(rootPath) + "/" + (char*)jobDir;
+}
+
+std::string Job::getJobPath(const char *rootPath, long ID) {
+
+    return std::string(rootPath) + "/Job_" + std::to_string(ID);
+}
+
+std::string Job::getJobDir(long ID) {
+
+    return std::string("Job_") + std::to_string(ID);
+}
+
+long Job::getAttachedNode() {
+    return attachedNode;
+}
+
+void Job::setAttachedNode(long address) {
+    this->attachedNode = address;
 }

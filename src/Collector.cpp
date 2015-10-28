@@ -30,6 +30,8 @@ Collector::~Collector() {
 	for (std::vector<Job*>::iterator i = jobs->begin(); i != jobs->end(); i++) {
         delete *i;
 	}
+
+    delete jobs;
 }
 
 bool Collector::processDistributorMsg(long address, Message *msg) {
@@ -52,36 +54,40 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 		case MSGTYPE_NODE: {
 
-            long clientAddress = msg->getVariant(0);
-			short clientID = (short) msg->getVariant(1);
+            long nodeAddress = msg->getVariant(0);
+			short nodeID = (short) msg->getVariant(1);
 
-			if (clientAddress == 0) {
+			if (nodeAddress == 0) {
 				LOG_W("No available client right now.");
 				status = false;
 				LOG_U(UI_UPDATE_COLL_LOG,
-						"\"CLIENT\" msg from distributor: %s, no Available Node", Address::getString(address).c_str());
+						"\"NODE\" msg from distributor: %s, no Available Node", Address::getString(address).c_str());
 				break;
 			}
 
-			rules[clientAddress] = new Rule(getRootPath(), "Haluk");
+            int i = 0;
+            for (; i < jobs->size(); i++) {
+                if ((*jobs)[i]->getAttachedNode() > 0) {
+                    continue;
+                }
+            }
 
-			if (!rules[clientAddress]) {
-				LOG_E("Could not create a rule from path : %s", getRootPath());
-				return false;
-			}
+            if (i == jobs->size()) {
+                LOG_W("No served job remains.");
+                break;
+            }
 
-			LOG_T("New Rule created from path : %s", getRootPath());
+            (*jobs)[i]->setAttachedNode(nodeAddress);
 
-			LOG_U(UI_UPDATE_COLL_JOB_LIST, rules[clientAddress]);
-			LOG_U(UI_UPDATE_COLL_PARAM_LIST, rules[clientAddress]);
-			LOG_U(UI_UPDATE_COLL_EXEC_LIST, rules[clientAddress]);
+			LOG_T("New Job created from path : %s", (*jobs)[i]->getRootPath());
 
-			LOG_U(UI_UPDATE_COLL_ATT_CLIENT_ADDRESS, clientAddress);
 			LOG_U(UI_UPDATE_COLL_LOG,
-                  "\"CLIENT\" msg from distributor: %s, available client: %s",
-				  Address::getString(address).c_str(), Address::getString(clientAddress).c_str());
+                  "\"NODE\" msg from distributor: %s, available node: %s",
+				  Address::getString(address).c_str(), Address::getString(nodeAddress).c_str());
 
-			status = send2ClientMsg(clientAddress, MSGTYPE_RULE);
+            LOG_U(UI_UPDATE_COLL_PROCESS_LIST, (*jobs)[i]);
+
+			status = send2NodeMsg(nodeAddress, MSGTYPE_RULE, (*jobs)[i]);
 			break;
 			}
 		default :
@@ -108,28 +114,38 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-			std::map<long, Rule *>::iterator ruleItr = rules.find(address);
-			if (ruleItr == rules.end()) {
-				LOG_W("Could not find a rule for address : %lld", address);
-				break;
+            int i = 0;
+            for (; i < jobs->size(); i++) {
+                if ((*jobs)[i]->getAttachedNode() != address) {
+                    continue;
+                }
+            }
 
-			}
+            if (i == jobs->size()) {
+                LOG_W("No served job remains for md5.");
+                break;
+            }
 
-			for (int i = 0; i < msg->md5List.size(); i++) {
+            Job *job = (*jobs)[i];
+
+			for (i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
-				for (uint16_t j = 0; j < ruleItr->second->getContentCount(CONTENT_FILE); j++) {
-					FileItem *content = (FileItem *) ruleItr->second->getContent(CONTENT_FILE, j);
-					//TODO 64 bit le coz
-					if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
-						//TODO bu clientte var, gonderme
-						content->setFlaggedToSent(false);
-					}
-				}
+                for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
+                    Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
+                    for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+                        FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
+                        //TODO 64 bit le coz
+                        if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
+                            //TODO bu clientte var, gonderme
+                            content->setFlaggedToSent(false);
+                        }
+                    }
+                }
 			}
 
-			LOG_U(UI_UPDATE_COLL_JOB_LIST, ruleItr->second);
+		//	LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-			status = send2ClientMsg(address, MSGTYPE_BINARY);
+			status = send2NodeMsg(address, MSGTYPE_BINARY, job);
 		}
 			break;
 
@@ -179,23 +195,15 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 }
 
-bool Collector::send2ClientMsg(long address, int type) {
+bool Collector::send2NodeMsg(long address, int type, Job* job) {
 
 	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
-
-	std::map<long, Rule*>::iterator ruleItr = rules.find(address);
-	if (ruleItr == rules.end()) {
-		LOG_W("Could not find a rule for address : %lld", address);
-		delete msg;
-		return false;
-
-	}
 
 	switch(type) {
 
 		case MSGTYPE_RULE:
 
-			msg->setRule(STREAM_RULE, ruleItr->second);
+			msg->setJob(STREAM_RULE, job);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"RULE\" msg sent to client: %s",
 				  Address::getString(address).c_str());
@@ -203,10 +211,10 @@ bool Collector::send2ClientMsg(long address, int type) {
 
 		case MSGTYPE_BINARY:
 
-			msg->setRule(STREAM_BINARY, ruleItr->second);
+			msg->setJob(STREAM_BINARY, job);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"BINARY\" msg sent to client: %s with \"%d\" file binary",
-				  Address::getString(address).c_str(), ruleItr->second->getFlaggedFileCount());
+				  Address::getString(address).c_str(), job->getFlaggedFileCount());
 			break;
 
 		default:
@@ -219,19 +227,11 @@ bool Collector::send2ClientMsg(long address, int type) {
 
 }
 
-bool Collector::processRule(const std::string &path) {
-
-//	if (path.compare(getRootPath()) != 0) {
-//		setRootPath(path);
-//	}
-
-	return send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
-}
-
 bool Collector::processRule() {
 
-	return processRule(getRootPath());
-
+    for (int i = 0; i < jobs->size(); i++) {
+        return send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
+    }
 }
 
 bool Collector::syncTime() {
@@ -240,16 +240,11 @@ bool Collector::syncTime() {
 
 }
 
-void Collector::display() {
-
-	//mRule->display();
-
-}
-
-
 bool Collector::reset() {
 
-	rules.clear();
+	for (int i = 0; i < jobs->size(); i++) {
+        (*jobs)[i]->setAttachedNode(0);
+    }
 	return true;
 
 }

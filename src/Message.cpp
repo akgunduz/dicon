@@ -3,35 +3,36 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <openssl/md5.h>
 #include "Message.h"
 
 Message::Message(Unit host, const char* rootPath)
 		: BaseMessage(host) {
 
     strcpy(this->rootPath, rootPath);
-	rule = nullptr;
+	job = nullptr;
 }
 
 Message::Message(Unit owner, int type, const char* rootPath)
 		: BaseMessage(owner, type) {
 
     strcpy(this->rootPath, rootPath);
-	rule = nullptr;
+    job = nullptr;
 }
 
 const char *Message::getRootPath() {
 	return rootPath;
 }
 
-Rule* Message::getRule() {
-    return rule;
+Job* Message::getJob() {
+    return job;
 }
 
-void Message::setRule(int streamFlag, Rule *rule) {
+void Message::setJob(int streamFlag, Job *job) {
 
     setStreamFlag(streamFlag);
 
-    this->rule = rule;
+    this->job = job;
 }
 
 bool Message::readMD5(int desc, uint8_t *md5) {
@@ -63,23 +64,21 @@ bool Message::readFileBinary(int desc, FileItem *content, struct BlockHeader *he
         return false;
     }
 
-    if (header->sizes[1] != MD5_DIGEST_LENGTH) {
-        LOG_E("Md5 & JobID size must be %d long", MD5_DIGEST_LENGTH);
+    long id;
+    if (!readNumber(desc, &id)) {
+        LOG_E("readFileBinary can not read filetype data");
         return false;
     }
-
-    char jobID[PATH_MAX];
-    if (!readString(desc, jobID, header->sizes[1])) {
-        LOG_E("readFileBinary can not read jobID data");
-        return false;
-    }
-
-    strcpy(this->jobID, jobID);
 
     content->setFile(getRootPath(), path, (FILETYPE)fileType);
+    content->setID(id);
 
+    if (header->sizes[1] != MD5_DIGEST_LENGTH) {
+        LOG_E("Md5 size must be %d long", MD5_DIGEST_LENGTH);
+        return false;
+    }
 
-	uint8_t calcMD5[MD5_DIGEST_LENGTH];
+    uint8_t calcMD5[MD5_DIGEST_LENGTH];
 	if (!readBinary(desc, content->getAbsPath(getHost(), getOwner()).c_str(), calcMD5, content->getMD5Path().c_str(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
@@ -129,13 +128,13 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
                 return false;
             }
 
-            if (fileItem->getFileType() == FILE_RULE) {
+            if (fileItem->getFileType() == FILE_JOB) {
 
-                if (rule != nullptr) {
-                    delete rule;
+                if (job != nullptr) {
+                    delete job;
                 }
 
-                rule = new Rule(fileItem);
+                job = new Job(fileItem);
 
             } else {
 
@@ -192,6 +191,10 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
         return false;
     }
 
+    if (!writeNumber(desc, content->getID())) {
+        return false;
+    }
+
 	uint8_t calcMD5[MD5_DIGEST_LENGTH];
 	if (!writeBinary(desc, content->getAbsPath(getHost(), getOwner()).c_str(), calcMD5)) {
 		LOG_E("writeFileBinary can not write Binary data");
@@ -227,29 +230,43 @@ bool Message::writeMessageStream(int out, int streamFlag) {
     switch(streamFlag) {
 
         case STREAM_RULE:
-            if (!writeFileBinary(out, rule)) {
+            if (!writeFileBinary(out, job)) {
                 return false;
+            }
+
+            for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
+                FileItem *content = (FileItem *)job->getContent(CONTENT_FILE, i);
+                if (!writeFileBinary(out, content)) {
+                    return false;
+                }
             }
 
             break;
 
         case STREAM_BINARY:
-            for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
-                if (content->isFlaggedToSent()) {
-                    if (!writeFileBinary(out, content)) {
-                        return false;
+
+            for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
+                Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
+                for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+                    FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
+                    if (content->isFlaggedToSent()) {
+                        if (!writeFileBinary(out, content)) {
+                            return false;
+                        }
                     }
                 }
             }
             break;
 
         case STREAM_MD5ONLY:
-            for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
-                if (content->isFlaggedToSent()) {
-                    if (!writeFileMD5(out, content)) {
-                        return false;
+            for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
+                Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
+                for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+                    FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
+                    if (content->isFlaggedToSent()) {
+                        if (!writeFileMD5(out, content)) {
+                            return false;
+                        }
                     }
                 }
             }

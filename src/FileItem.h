@@ -11,6 +11,7 @@
 
 class FileItem : public ContentItem {
 
+    long id;
 	char fileName[PATH_MAX];
 	char rootPath[PATH_MAX];
 //	char absPath[PATH_MAX];
@@ -26,7 +27,7 @@ public:
     FileItem(FileItem*);
 	FileItem(const char* rootPath,
              const char *fileName, FILETYPE fileType,
-             uint8_t *md5 = nullptr);
+             int id = 0, uint8_t *md5 = nullptr);
 	~FileItem(){};
 	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
@@ -35,6 +36,8 @@ public:
 	void setMD5(uint8_t*);
     const char* getFileName();
     const char* getRootPath();
+    long getID();
+    void setID(long id);
 
     void setFile(const char* rootPath,
                  const char *fileName, FILETYPE fileType);

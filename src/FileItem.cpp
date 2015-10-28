@@ -20,12 +20,12 @@ FileItem::FileItem(const char* rootPath) {
 
 FileItem::FileItem(FileItem *item)
         : FileItem(item->getRootPath(), item->getFileName(),
-                   item->getFileType(), item->getMD5()) {
+                   item->getFileType(), item->getID(), item->getMD5()) {
 
 }
 
 FileItem::FileItem(const char *rootPath, const char *fileName,
-                   FILETYPE fileType, uint8_t *md5) : FileItem(rootPath) {
+                   FILETYPE fileType, int id, uint8_t *md5) : FileItem(rootPath) {
 
     if (md5 != nullptr) {
         memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
@@ -45,6 +45,7 @@ FileItem::FileItem(const char *rootPath, const char *fileName,
         }
     }
 
+    setID(id);
     setFile(rootPath, fileName, fileType);
     setFlaggedToSent(true);
 /*
@@ -174,4 +175,12 @@ const char *FileItem::getRootPath() {
 
 void FileItem::setRootPath(const char *rootPath) {
     strcpy(this->rootPath, rootPath);
+}
+
+long FileItem::getID() {
+    return id;
+}
+
+void FileItem::setID(long id) {
+    this->id = id;
 }

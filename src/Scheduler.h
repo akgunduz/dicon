@@ -17,6 +17,7 @@
 
 class Scheduler {
 private:
+    bool seperateThread;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
 	pthread_t thread;
@@ -26,9 +27,10 @@ private:
 	bool initialized = false;
 	static void* run(void *);
 public:
-	Scheduler();
+	Scheduler(bool seperateThread = true);
     void setCB(int, const InterfaceCallback *);
 	bool push(SchedulerItem *item);
+    SchedulerItem* pull();
 	void end();
     virtual ~Scheduler();
 private:

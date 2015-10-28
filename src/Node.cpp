@@ -65,16 +65,16 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_CLIENT_CLEAR, "");
 
-			rule = msg->rule;
+			job = msg->job;
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
 				break;
 			}
 
-			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
-			LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, rule);
-			LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, rule);
+	//		LOG_U(UI_UPDATE_CLIENT_FILE_LIST, job);
+	//		LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, job);
+	//		LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, job);
 
 			status &= send2CollectorMsg(address, MSGTYPE_MD5);
 			break;
@@ -85,7 +85,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 					"\"BINARY\" msg from collector: %s",
 				  Address::getString(address).c_str());
 
-			LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
+	//		LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
 
 			processRule();
 
@@ -148,10 +148,10 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 	switch(type) {
 
 		case MSGTYPE_MD5:
-			msg->setRule(STREAM_MD5ONLY, rule);
+			msg->setJob(STREAM_MD5ONLY, job);
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-				  Address::getString(address).c_str(), rule->getFlaggedFileCount());
+				  Address::getString(address).c_str(), job->getFlaggedFileCount());
 			break;
 
 		default:
@@ -164,22 +164,23 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 
 bool Node::processMD5() {
 
-	for (uint16_t i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+    for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
+        Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
+        for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
+            FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
 
-		FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
+            char absPath[PATH_MAX];
+            sprintf(absPath, "%s%s", getRootPath(), content->getFileName());
 
-		char absPath[PATH_MAX];
-		sprintf(absPath, "%s%s", getRootPath(), content->getFileName());
-
-		//Burada ters lojik var,
-		//	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
-		//	true -> collectordan dosyayi isteme, md5 i set EDEREK
-		if (access(absPath, F_OK ) == -1) {
-                        //printf("error %d\n", errno);
-			content->setFlaggedToSent(false);
-		}
-
-	}
+            //Burada ters lojik var,
+            //	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
+            //	true -> collectordan dosyayi isteme, md5 i set EDEREK
+            if (access(absPath, F_OK ) == -1) {
+                //printf("error %d\n", errno);
+                content->setFlaggedToSent(false);
+            }
+        }
+    }
 
 	return true;
 

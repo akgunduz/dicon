@@ -12,7 +12,7 @@
 class Node : public Component {
 private:
 
-	Rule* rule;
+	Job* job;
 
 	long distributorAddress;
 

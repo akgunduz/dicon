@@ -8,8 +8,8 @@
 #define __Message_H_
 
 #include "BaseMessage.h"
-#include "Rule.h"
 #include "Unit.h"
+#include "Job.h"
 
 #define STREAM_RULE 0x01
 
@@ -31,18 +31,17 @@ class Message : public BaseMessage {
 public:
 
     char rootPath[PATH_MAX];
-    char jobID[MD5_DIGEST_LENGTH];
 
-	Rule *rule;
+	Job *job;
 	std::vector<MD5Wrapper> md5List;
 
 	Message(Unit host, const char*);
 	Message(Unit owner, int type, const char*);
 
     const char* getRootPath();
-    Rule * getRule();
+    Job* getJob();
 
-	void setRule(int, Rule *);
+	void setJob(int, Job *);
 
 	bool readMD5(int, uint8_t*);
 

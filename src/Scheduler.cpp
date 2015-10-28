@@ -5,8 +5,9 @@
 
 #include "Scheduler.h"
 
-Scheduler::Scheduler() {
+Scheduler::Scheduler(bool seperateThread) {
 
+    this->seperateThread = seperateThread;
 	this->capacity = MAX_SCHEDULER_CAPACITY;
 
 	int res = pthread_mutex_init(&mutex, NULL);
@@ -22,18 +23,20 @@ Scheduler::Scheduler() {
 		throw std::runtime_error("Scheduler : Condition init failed");
 	}
 
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    if (seperateThread) {
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-	int pthr = pthread_create(&thread, &attr, run, (void *)this);
-	pthread_attr_destroy(&attr);
-	if (pthr) {
-		LOG_E("Problem with run thread");
-		pthread_cond_destroy(&cond);
-		pthread_mutex_destroy(&mutex);
-		throw std::runtime_error("Scheduler : Problem with run thread");
-	}
+        int pthr = pthread_create(&thread, &attr, run, (void *) this);
+        pthread_attr_destroy(&attr);
+        if (pthr) {
+            LOG_E("Problem with run thread");
+            pthread_cond_destroy(&cond);
+            pthread_mutex_destroy(&mutex);
+            throw std::runtime_error("Scheduler : Problem with run thread");
+        }
+    }
 
 	initialized = true;
 }
@@ -44,15 +47,7 @@ Scheduler::~Scheduler() {
 		return;
 	}
 
-	end();
-
-	pthread_join(thread, nullptr);
-
-	for (std::list<SchedulerItem*>::iterator itr = items.begin(); itr != items.end(); itr++) {
-		delete *itr;
-	}
-
-	items.clear();
+    end();
 
 	pthread_cond_destroy(&cond);
 	pthread_mutex_destroy(&mutex);
@@ -70,13 +65,55 @@ bool Scheduler::push(SchedulerItem *item) {
 
 		items.push_back(item);
 		pthread_mutex_unlock(&mutex);
-		pthread_cond_signal(&cond);
+        if (seperateThread) {
+            pthread_cond_signal(&cond);
+        }
 		return true;
 	}
 
+    LOG_E("Too many items in scheduler, escaping them!!!");
 	pthread_mutex_unlock(&mutex);
 
 	return false;
+}
+
+SchedulerItem* Scheduler::pull() {
+
+    if (seperateThread) {
+        return nullptr;
+    }
+
+    if (pthread_mutex_lock(&mutex) != 0) { //replaced with trylock
+        LOG_E("Can not push, system is BUSY!!!");
+        return false;
+    }
+
+    if (items.empty()) {
+        pthread_mutex_unlock(&mutex);
+        return nullptr;
+    }
+
+    std::list<SchedulerItem*>::iterator itr, ref = items.begin();
+
+    for (itr = ref;	itr != items.end(); itr++) {
+
+        SchedulerItem *itrItem = *itr;
+        SchedulerItem *refItem = *ref;
+        if (itrItem->priority < refItem->priority) {
+            ref = itr;
+        }
+
+        if (itrItem->priority > 0) {
+            itrItem->priority--;
+        }
+    }
+
+    SchedulerItem *item = *(ref);
+    items.erase(ref);
+
+    pthread_mutex_unlock(&mutex);
+
+    return item;
 }
 
 void *Scheduler::run(void *arg) {
@@ -126,7 +163,12 @@ void *Scheduler::run(void *arg) {
 
 void Scheduler::end() {
 
-    push(new SchedulerItem());
+    if (seperateThread) {
+        push(new SchedulerItem());
+        pthread_join(thread, nullptr);
+    }
+
+    items.clear();
 }
 
 void Scheduler::setCB(int id, const InterfaceCallback *cb) {

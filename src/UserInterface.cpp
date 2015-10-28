@@ -620,7 +620,7 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
     uiUpdater[UI_UPDATE_COLL_ATT_CLIENT_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
     uiUpdater[UI_UPDATE_COLL_JOB_LIST] = &UserInterface::collUpdateJobList;
-    uiUpdater[UI_UPDATE_COLL_EXEC_LIST] = &UserInterface::collUpdateProcessList;
+    uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
     if (Device::getCount() > 0) {
