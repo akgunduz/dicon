@@ -14,18 +14,24 @@ FileItem::FileItem(const char* rootPath) {
     strcpy(this->rootPath, rootPath);
     strcpy(this->fileName, "");
     this->fileType = FILE_MAX;
+    this->id = 0;
 	setFlaggedToSent(true);
 }
 
 
-FileItem::FileItem(FileItem *item)
-        : FileItem(item->getRootPath(), item->getFileName(),
-                   item->getFileType(), item->getID(), item->getMD5()) {
+FileItem::FileItem(FileItem *item) {
 
+    set(item);
 }
 
 FileItem::FileItem(const char *rootPath, const char *fileName,
                    FILETYPE fileType, int id, uint8_t *md5) : FileItem(rootPath) {
+
+    set(rootPath, fileName, fileType, id, md5);
+};
+
+void FileItem::set(const char *rootPath, const char *fileName,
+                   FILETYPE fileType, int id, uint8_t *md5) {
 
     if (md5 != nullptr) {
         memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
@@ -80,7 +86,7 @@ FileItem::FileItem(const char *rootPath, const char *fileName,
 	// and write back
     setMD5(md5);
 */
-};
+}
 
 CONTENT_TYPES FileItem::getType() {
 	return CONTENT_FILE;
@@ -167,6 +173,12 @@ void FileItem::setFile(const char* rootPath,
     strcpy(this->rootPath, rootPath);
     strcpy(this->fileName, fileName);
     this->fileType = fileType;
+}
+
+void FileItem::set(FileItem *item) {
+
+    set(item->getRootPath(), item->getFileName(),
+            item->getFileType(), item->getID(), item->getMD5());
 }
 
 const char *FileItem::getRootPath() {

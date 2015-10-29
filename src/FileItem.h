@@ -29,6 +29,9 @@ public:
              const char *fileName, FILETYPE fileType,
              int id = 0, uint8_t *md5 = nullptr);
 	~FileItem(){};
+    void set(const char *rootPath, const char *fileName,
+             FILETYPE fileType, int id, uint8_t *md5);
+    void set(FileItem*);
 	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
 	FILETYPE getFileType();

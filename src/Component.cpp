@@ -173,3 +173,13 @@ long Component::getAddress(HOST host) {
 }
 
 
+void Component::setRootPath(const char *rootPath) {
+
+    for (int i = 0; i < HOST_MAX; i++) {
+        if (connectors[i] != nullptr) {
+            connectors[i]->setRootPath(rootPath);
+        }
+    }
+
+    this->rootPath = rootPath;
+}

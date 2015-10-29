@@ -9,7 +9,52 @@
 
 wxIMPLEMENT_APP_NO_MAIN(UserInterfaceApp);
 
+/*
+ * UserInterfaceApp type definition
+ */
+
+IMPLEMENT_CLASS( UserInterfaceApp, wxApp )
+
+
+/*
+ * UserInterfaceApp event table definition
+ */
+
+BEGIN_EVENT_TABLE( UserInterfaceApp, wxApp )
+
+////@begin UserInterfaceApp event table entries
+////@end UserInterfaceApp event table entries
+
+END_EVENT_TABLE()
+
 UserInterface *g_ui;
+
+UserInterfaceApp::UserInterfaceApp()
+{
+    Init();
+}
+
+
+/*
+ * Member initialisation
+ */
+
+void UserInterfaceApp::Init()
+{
+////@begin UserInterfaceApp member initialisation
+////@end UserInterfaceApp member initialisation
+}
+
+/*
+ * Cleanup for UserInterfaceApp
+ */
+
+int UserInterfaceApp::OnExit()
+{
+////@begin UserInterfaceApp cleanup
+    return wxApp::OnExit();
+////@end UserInterfaceApp cleanup
+}
 
 bool UserInterfaceApp::OnInit() {
 

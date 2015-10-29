@@ -161,7 +161,7 @@ void UserInterface::CreateControls()
 ////@begin UserInterface content construction
     UserInterface* itemFrame1 = this;
 
-    wxNotebook* itemNotebook2 = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT );
+    wxNotebook* itemNotebook2 = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_NOPAGETHEME|wxNB_FLAT|wxNO_BORDER );
 
     wxPanel* itemPanel3 = new wxPanel( itemNotebook2, ID_PANEL_DISTRIBUTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     itemPanel3->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -278,153 +278,6 @@ void UserInterface::CreateControls()
 
 }
 
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
- */
-
-void UserInterface::OnDistInitClick( wxCommandEvent& event )
-{
-    if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
-
-        try {
-            distCollList->DeleteAllItems();
-            distNodeList->DeleteAllItems();
-
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
-            mkdir(path, 0777);
-
-            double backupRate = 0;
-            distBackupRate->GetLineText(0).ToDouble(&backupRate);
-
-            distObject = new Distributor((uint32_t)distConnectInterface->GetSelection(),
-                                         (uint32_t)distConnectInterface->GetSelection(), path, backupRate);
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
-
-        distLog->Clear();
-        distBackupRate->SetEditable(false);
-        distInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete distObject;
-        distBackupRate->SetEditable(true);
-        distInitBtn->SetLabel("Init");
-        distAddress->SetLabel("");
-    }
-}
-
-
-/*
- * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_DIST_POLL
- */
-
-void UserInterface::OnDistPollClick( wxCommandEvent& event )
-{
-    distObject->reset();
-    distCollList->DeleteAllItems();
-    distNodeList->DeleteAllItems();
-
-    distObject->sendWakeupMessagesAll();
-}
-
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
- */
-
-void UserInterface::OnCollInitClick( wxCommandEvent& event )
-{
-    if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
-
-        try {
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), COLLECTOR_PATH);
-            mkdir(path, 0777);
-
-            collObject = new Collector((uint32_t)collConnectInterface->GetSelection(),
-                                       (uint32_t)collConnectInterface->GetSelection(), path);
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
-
-        collLog->Clear();
-        collInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete collObject;
-        collInitBtn->SetLabel("Init");
-        collAddress->SetLabel("");
-    }
-}
-
-
-/*
- * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
- */
-
-void UserInterface::OnCollProcessClick( wxCommandEvent& event )
-{
-    collProcessList->Clear();
-
-    collObject->syncTime();
-
-    collObject->processRule();
-
-}
-
-void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
-{
-
-    collJobList->UpdateItemParentStateRecursively(event.GetItem());
-
-    wxCheckBoxState state = collJobList->GetCheckedState(event.GetItem());
-
-    collJobList->CheckItemRecursively(event.GetItem(), state);
-
-}
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_NODE_INIT
- */
-
-void UserInterface::OnNodeInitClick( wxCommandEvent& event )
-{
-    if (wxStrcmp(nodeInitBtn->GetLabel(), "Init") == 0) {
-
-        try {
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
-            mkdir(path, 0777);
-
-            nodeObject = new Node((uint32_t)nodeConnectInterface->GetSelection(),
-                                    (uint32_t)nodeConnectInterface->GetSelection(), path);
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
-
-        nodeLog->Clear();
-        nodeInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete nodeObject;
-        nodeInitBtn->SetLabel("Init");
-        nodeAddress->SetLabel("");
-    }
-}
-
-
 /*
  * Should we show tooltips?
  */
@@ -482,7 +335,7 @@ void UserInterface::updateUI(wxCommandEvent& event) {
 
 void UserInterface::updateLog(wxCommandEvent& event) {
 
-    EventData *data = (EventData *)event.GetClientData();
+    //EventData *data = (EventData *)event.GetClientData();
    // genericLog->Append(data->dataStr);
 
 }
@@ -526,6 +379,60 @@ void UserInterface::distInit() {
         }
         distConnectInterface->Select(0);
     }
+}
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
+ */
+
+void UserInterface::OnDistInitClick( wxCommandEvent& event )
+{
+    if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
+
+        try {
+            distCollList->DeleteAllItems();
+            distNodeList->DeleteAllItems();
+
+            char path[PATH_MAX];
+            sprintf(path, "%s/%s/", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
+            mkdir(path, 0777);
+
+            double backupRate = 0;
+            distBackupRate->GetLineText(0).ToDouble(&backupRate);
+
+            distObject = new Distributor((uint32_t)distConnectInterface->GetSelection(),
+                                         (uint32_t)distConnectInterface->GetSelection(), path, backupRate);
+
+        } catch (std::runtime_error &e) {
+
+            return;
+        }
+
+        distLog->Clear();
+        distBackupRate->SetEditable(false);
+        distInitBtn->SetLabel("Stop");
+
+    } else {
+
+        delete distObject;
+        distBackupRate->SetEditable(true);
+        distInitBtn->SetLabel("Init");
+        distAddress->SetLabel("");
+    }
+}
+
+
+/*
+ * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_DIST_POLL
+ */
+
+void UserInterface::OnDistPollClick( wxCommandEvent& event )
+{
+    distObject->reset();
+    distCollList->DeleteAllItems();
+    distNodeList->DeleteAllItems();
+
+    distObject->sendWakeupMessagesAll();
 }
 
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
@@ -609,6 +516,7 @@ void UserInterface::distUpdateLog(wxCommandEvent &event) {
 
 }
 
+
 void UserInterface::collInit() {
 
     int width = collJobList->GetSize().GetWidth() / 5.5;
@@ -629,6 +537,65 @@ void UserInterface::collInit() {
         }
         collConnectInterface->Select(0);
     }
+}
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
+ */
+
+void UserInterface::OnCollInitClick( wxCommandEvent& event )
+{
+    if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
+
+        try {
+            char path[PATH_MAX];
+            sprintf(path, "%s/%s/", getcwd(nullptr, 0), COLLECTOR_PATH);
+            mkdir(path, 0777);
+
+            collObject = new Collector((uint32_t)collConnectInterface->GetSelection(),
+                                       (uint32_t)collConnectInterface->GetSelection(), path);
+
+        } catch (std::runtime_error &e) {
+
+            return;
+        }
+
+        collLog->Clear();
+        collInitBtn->SetLabel("Stop");
+
+    } else {
+
+        delete collObject;
+        collInitBtn->SetLabel("Init");
+        collAddress->SetLabel("");
+        collJobList->DeleteAllItems();
+    }
+}
+
+
+/*
+ * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
+ */
+
+void UserInterface::OnCollProcessClick( wxCommandEvent& event )
+{
+    collProcessList->Clear();
+
+    collObject->syncTime();
+
+    collObject->processRule();
+
+}
+
+void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
+{
+
+    collJobList->UpdateItemParentStateRecursively(event.GetItem());
+
+    wxCheckBoxState state = collJobList->GetCheckedState(event.GetItem());
+
+    collJobList->CheckItemRecursively(event.GetItem(), state);
+
 }
 
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
@@ -725,6 +692,38 @@ void UserInterface::nodeInit() {
         nodeConnectInterface->Select(0);
     }
 
+}
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_NODE_INIT
+ */
+
+void UserInterface::OnNodeInitClick( wxCommandEvent& event )
+{
+    if (wxStrcmp(nodeInitBtn->GetLabel(), "Init") == 0) {
+
+        try {
+            char path[PATH_MAX];
+            sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
+            mkdir(path, 0777);
+
+            nodeObject = new Node((uint32_t)nodeConnectInterface->GetSelection(),
+                                  (uint32_t)nodeConnectInterface->GetSelection(), path);
+
+        } catch (std::runtime_error &e) {
+
+            return;
+        }
+
+        nodeLog->Clear();
+        nodeInitBtn->SetLabel("Stop");
+
+    } else {
+
+        delete nodeObject;
+        nodeInitBtn->SetLabel("Init");
+        nodeAddress->SetLabel("");
+    }
 }
 
 void UserInterface::nodeUpdateAddresses(wxCommandEvent &event) {

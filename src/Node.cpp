@@ -66,6 +66,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_CLIENT_CLEAR, "");
 
 			job = msg->job;
+            setRootPath(job->getRootPath());
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");

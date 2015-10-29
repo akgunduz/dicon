@@ -10,8 +10,23 @@
 #include "Common.h"
 
 class UserInterfaceApp : public wxApp {
+
+    DECLARE_CLASS( UserInterfaceApp )
+    DECLARE_EVENT_TABLE()
+
 public:
-	virtual bool OnInit();
+
+    /// Constructor
+    UserInterfaceApp();
+
+    void Init();
+
+    virtual bool OnInit();
+
+    /// Called on exit
+    virtual int OnExit();
 };
+
+DECLARE_APP(UserInterfaceApp)
 
 #endif

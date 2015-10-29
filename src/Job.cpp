@@ -4,22 +4,31 @@
 
 #include "Job.h"
 
-Job::Job(FileItem *fileItem)
-        : JsonItem(fileItem) {
+Job::Job(const char *rootPath, const char* jobDir)
+        : JsonItem(getJobPath(rootPath, jobDir).c_str()){
 
-    init(getJobDir(fileItem->getID()).c_str());
+    init(jobDir);
+
 }
-
+/*
 Job::Job(FileItem *fileItem, const char* jobDir)
         : JsonItem(fileItem) {
 
     init(jobDir);
-}
 
+    if (!parse(getAbsPath().c_str())) {
+        LOG_E("Job could not parsed!!!");
+    }
+}
+*/
 Job::Job(const char *rootPath, const char* filePath, const char* jobDir)
         : JsonItem(getJobPath(rootPath, jobDir).c_str(), filePath, FILE_JOB) {
 
     init(jobDir);
+
+    if (!parse(getAbsPath().c_str())) {
+        LOG_E("Job could not parsed!!!");
+    }
 }
 
 Job::~Job() {
@@ -30,10 +39,7 @@ void Job::init(const char* jobDir) {
 
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
-
-    if (!parse(getAbsPath().c_str())) {
-        LOG_E("Job could not parsed!!!");
-    }
+    contentTypes[CONTENT_ID] = new JsonType(CONTENT_ID, "id", this, parseIDNode);
 
     strcpy(this->jobDir, jobDir);
     this->attachedNode = 0;
@@ -50,6 +56,21 @@ bool Job::parseNameNode(void *parent, json_object *node) {
     const char *name = json_object_get_string(node);
 
     ((Job*)parent)->setName(name);
+
+    return true;
+}
+
+bool Job::parseIDNode(void *parent, json_object *node) {
+
+    enum json_type type = json_object_get_type(node);
+    if (type != json_type_int) {
+        LOG_E("Invalid JSON Name Node");
+        return false;
+    }
+
+    long id = json_object_get_int64(node);
+
+    ((Job*)parent)->setID(id);
 
     return true;
 }
@@ -109,14 +130,15 @@ std::string Job::getJobPath(const char *rootPath, const char *jobDir) {
     return std::string(rootPath) + "/" + (char*)jobDir;
 }
 
-std::string Job::getJobPath(const char *rootPath, long ID) {
+std::string Job::getJobPath(const char *rootPath) {
 
-    return std::string(rootPath) + "/Job_" + std::to_string(ID);
+    return std::string(rootPath) + "/Job_" + std::to_string(getID());
 }
 
-std::string Job::getJobDir(long ID) {
+const char* Job::getJobDir() {
 
-    return std::string("Job_") + std::to_string(ID);
+    return jobDir;
+    //return std::string("Job_") + std::to_string(getID());
 }
 
 long Job::getAttachedNode() {

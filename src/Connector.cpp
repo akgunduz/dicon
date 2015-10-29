@@ -111,6 +111,11 @@ const char *Connector::getRootPath() {
 	return _interface->getRootPath();
 }
 
+void Connector::setRootPath(const char *rootPath) {
+
+    _interface->setRootPath(rootPath);
+}
+
 Interface *Connector::getInterface() {
 
 	return _interface;

@@ -70,6 +70,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
                 if ((*jobs)[i]->getAttachedNode() > 0) {
                     continue;
                 }
+                break;
             }
 
             if (i == jobs->size()) {
@@ -119,6 +120,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
                 if ((*jobs)[i]->getAttachedNode() != address) {
                     continue;
                 }
+                break;
             }
 
             if (i == jobs->size()) {

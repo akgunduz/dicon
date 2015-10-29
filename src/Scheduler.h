@@ -13,7 +13,7 @@
 #include "MessageDirection.h"
 #include "SchedulerItem.h"
 
-#define MAX_SCHEDULER_CAPACITY 100
+#define MAX_SCHEDULER_CAPACITY 10000
 
 class Scheduler {
 private:

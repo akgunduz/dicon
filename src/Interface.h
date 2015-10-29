@@ -78,6 +78,7 @@ public :
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
     const char* getRootPath();
+    void setRootPath(const char* rootPath);
 	virtual INTERFACES getType() = 0;
 	virtual long getAddress();
     virtual Device* getDevice();

@@ -22,6 +22,7 @@ protected:
 
 public:
 
+    JsonItem(const char *rootPath);
     JsonItem(FileItem *fileItem);
     JsonItem(const char* rootPath, const char* fileName, FILETYPE fileType);
     virtual ~JsonItem();

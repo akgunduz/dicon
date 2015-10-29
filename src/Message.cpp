@@ -24,6 +24,10 @@ const char *Message::getRootPath() {
 	return rootPath;
 }
 
+void Message::setRootPath(const char *rootPath) {
+    strcpy(this->rootPath, rootPath);
+}
+
 Job* Message::getJob() {
     return job;
 }
@@ -43,6 +47,21 @@ bool Message::readMD5(int desc, uint8_t *md5) {
 	}
 
 	return true;
+}
+
+bool Message::readJobID(int desc, char* jobDir, struct BlockHeader* header) {
+
+    if (header->blockType != BLOCK_FILE_JOB) {
+        LOG_E("readJobID can not read other blocks");
+        return false;
+    }
+
+    if (!readString(desc, jobDir, header->sizes[0])) {
+        LOG_E("readJobID can not read path data");
+        return false;
+    }
+
+    return true;
 }
 
 bool Message::readFileBinary(int desc, FileItem *content, struct BlockHeader *header) {
@@ -120,6 +139,21 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
     switch(blockHeader->blockType) {
 
+        case BLOCK_FILE_JOB:
+            char jobDir[PATH_MAX];
+            if (!readJobID(in, jobDir, blockHeader)) {
+                return false;
+            }
+
+            if (job != nullptr) {
+                delete job;
+            }
+
+            job = new Job(getRootPath(), jobDir);
+
+            setRootPath(job->getRootPath());
+            break;
+
         case BLOCK_FILE_BINARY: {
 
             FileItem *fileItem = new FileItem(getRootPath());
@@ -130,11 +164,7 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
             if (fileItem->getFileType() == FILE_JOB) {
 
-                if (job != nullptr) {
-                    delete job;
-                }
-
-                job = new Job(fileItem);
+                job->set(fileItem);
 
             } else {
 
@@ -212,17 +242,30 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
 
 }
 
-bool Message::writeFileMD5(int desc, FileItem *content) {
+bool Message::writeFileJob(int desc, Job *job) {
 
-	BlockHeader blockHeader = {1, BLOCK_FILE_MD5};
+	BlockHeader blockHeader = {1, BLOCK_FILE_JOB};
 
-    blockHeader.sizes[0] = MD5_DIGEST_LENGTH;
+    blockHeader.sizes[0] = (int) strlen(job->getJobDir());
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
 	}
 
-	return writeMD5(desc, content->getMD5());
+	return writeString(desc, job->getJobDir());
+}
+
+bool Message::writeFileMD5(int desc, FileItem *content) {
+
+    BlockHeader blockHeader = {1, BLOCK_FILE_MD5};
+
+    blockHeader.sizes[0] = MD5_DIGEST_LENGTH;
+
+    if (!writeBlockHeader(desc, &blockHeader)) {
+        return false;
+    }
+
+    return writeMD5(desc, content->getMD5());
 }
 
 bool Message::writeMessageStream(int out, int streamFlag) {
@@ -230,6 +273,11 @@ bool Message::writeMessageStream(int out, int streamFlag) {
     switch(streamFlag) {
 
         case STREAM_RULE:
+
+            if (!writeFileJob(out, job)) {
+                return false;
+            }
+
             if (!writeFileBinary(out, job)) {
                 return false;
             }
@@ -279,3 +327,5 @@ bool Message::writeMessageStream(int out, int streamFlag) {
     return true;
 
 }
+
+

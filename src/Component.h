@@ -22,6 +22,7 @@ public:
     Component(Unit host, long index, const char* rootPath);
     virtual ~Component();
     const char* getRootPath();
+    void setRootPath(const char* rootPath);
     INTERFACES getInterfaceType(HOST host);
     long getAddress(HOST host);
     static bool receiveCB(void *, SchedulerItem*);

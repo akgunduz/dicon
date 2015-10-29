@@ -157,6 +157,10 @@ const char *Interface::getRootPath() {
 	return rootPath;
 }
 
+void Interface::setRootPath(const char *rootPath) {
+    strcpy(this->rootPath, rootPath);
+}
+
 bool Interface::isMulticastEnabled() {
     return multicastEnabled;
 }

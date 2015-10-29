@@ -26,6 +26,7 @@ public:
     Device* getDevice();
 	std::vector<long> getAddressList();
 	const char * getRootPath();
+	void setRootPath(const char* rootPath);
 	virtual ~Connector();
 };
 

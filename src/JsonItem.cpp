@@ -4,8 +4,13 @@
 
 #include "JsonItem.h"
 
+JsonItem::JsonItem(const char *rootPath)
+    : FileItem(rootPath) {
+
+}
+
 JsonItem::JsonItem(FileItem *fileItem)
-    : FileItem(fileItem){
+    : FileItem(fileItem) {
 
 }
 
