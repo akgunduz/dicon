@@ -6,6 +6,7 @@
 #include "BaseMessage.h"
 #include "Util.h"
 #include "NetAddress.h"
+#include "Md5.h"
 
 BaseMessage::BaseMessage(Unit host) {
 
@@ -151,7 +152,7 @@ int BaseMessage::getBinarySize(const char* path) {
     return fileSize;
 }
 
-bool BaseMessage::transferBinary(int in, int out, uint8_t *md5, int size) {
+bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
 
     uint8_t buf[BUFFER_SIZE];
 
@@ -192,7 +193,7 @@ bool BaseMessage::transferBinary(int in, int out, uint8_t *md5, int size) {
 
     } while(size > 0);
 
-    MD5_Final(md5, &ctx);
+    MD5_Final(md5->data, &ctx);
 
     return !error;
 
@@ -365,7 +366,7 @@ bool BaseMessage::readNumber(int in, long *number) {
 	return true;
 }
 
-bool BaseMessage::readBinary(int in, const char* path, uint8_t *md5, const char* md5Path, int size) {
+bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, const char* md5Path, int size) {
 
 	Util::mkPath(path);
 
@@ -420,7 +421,7 @@ bool BaseMessage::readFromStream(int in) {
         }
 
         if (blockHeader.blockType == BLOCK_END_STREAM) {
-            return true;
+            return readFinalize();
 
         } else if (!readMessageBlock(in, &blockHeader)) {
             return false;
@@ -559,7 +560,7 @@ bool BaseMessage::writeNumber(int out, long number) {
 	return true;
 }
 
-bool BaseMessage::writeBinary(int out, const char* path, uint8_t *md5) {
+bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5) {
 
     int size = getBinarySize(path);
 
@@ -603,5 +604,5 @@ bool BaseMessage::writeToStream(int out) {
 
     writeEndStream(out);
 
-	return true;
+	return writeFinalize();
 }

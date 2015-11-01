@@ -8,6 +8,7 @@
 
 #include "Log.h"
 #include "SchedulerItem.h"
+#include "Unit.h"
 
 #define BUFFER_SIZE 512
 
@@ -22,11 +23,13 @@ enum CONTENT_TYPES {
 };
 
 class ContentItem : public SchedulerItem {
-	bool mIsValid;
+
+	bool valid;
 public:
 	bool isValid();
 	void setValid(bool);
 	ContentItem();
+
 	virtual CONTENT_TYPES getType() = 0;
 	virtual ~ContentItem(){};
 };

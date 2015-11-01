@@ -6,7 +6,13 @@
 #include "ParameterItem.h"
 #include "Rule.h"
 
-ParameterItem::ParameterItem(const char *param) {
+ParameterItem::ParameterItem()
+    : ContentItem () {
+
+};
+
+ParameterItem::ParameterItem(const char *param)
+        : ContentItem () {
 
 	setValid(true);
 

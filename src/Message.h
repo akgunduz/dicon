@@ -10,8 +10,9 @@
 #include "BaseMessage.h"
 #include "Unit.h"
 #include "Job.h"
+#include "Md5.h"
 
-#define STREAM_RULE 0x01
+#define STREAM_JOB 0x01
 
 //Send md5 + binary
 #define STREAM_BINARY 0x02
@@ -19,13 +20,8 @@
 //Send md5
 #define STREAM_MD5ONLY 0x03
 
-#define BLOCK_FILE_JOB 0x01
-#define BLOCK_FILE_BINARY 0x02
-#define BLOCK_FILE_MD5 0x03
-
-struct MD5Wrapper {
-	uint8_t md5[MD5_DIGEST_LENGTH];
-};
+#define BLOCK_FILE_BINARY 0x01
+#define BLOCK_FILE_MD5 0x02
 
 class Message : public BaseMessage {
 
@@ -36,7 +32,8 @@ public:
     char rootPath[PATH_MAX];
 
 	Job *job;
-	std::vector<MD5Wrapper> md5List;
+
+	std::vector<Md5> md5List;
 
 	Message(Unit host, const char*);
 	Message(Unit owner, int type, const char*);
@@ -46,20 +43,21 @@ public:
 
 	void setJob(int, Job *);
 
-	bool readMD5(int, uint8_t*);
+	bool readMD5(int, Md5*);
 
-	bool readJobID(int, char*, struct BlockHeader*);
 	bool readFileBinary(int, FileItem *, struct BlockHeader*);
-	bool readFileMD5(int, MD5Wrapper *, struct BlockHeader*);
+	bool readFileMD5(int, Md5*, struct BlockHeader*);
 	bool readMessageBlock(int in, BlockHeader *);
 
-	bool writeMD5(int, uint8_t*);
+	bool writeMD5(int, Md5*);
 
-	bool writeFileJob(int, Job *);
 	bool writeFileBinary(int, FileItem *);
 	bool writeFileMD5(int, FileItem *);
 	bool writeMessageStream(int out, int streamFlag);
 
+    virtual bool readFinalize();
+
+    virtual bool writeFinalize();
 };
 
 #endif //__Message_H_

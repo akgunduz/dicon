@@ -16,12 +16,15 @@ protected :
 
     const char* rootPath;
 
+    Unit host;
+
 public:
     Connector *connectors[HOST_MAX];
 
     Component(Unit host, long index, const char* rootPath);
     virtual ~Component();
     const char* getRootPath();
+    Unit* getHost();
     void setRootPath(const char* rootPath);
     INTERFACES getInterfaceType(HOST host);
     long getAddress(HOST host);

@@ -9,18 +9,17 @@
 
 ContentItem::ContentItem() {
 
-	mIsValid = false;
-
+	this->valid = false;
 }
 
 bool ContentItem::isValid() {
 
-	return mIsValid;
+	return valid;
 
 }
 
 void ContentItem::setValid(bool valid) {
 
-	mIsValid = valid;
+	this->valid = valid;
 
 }

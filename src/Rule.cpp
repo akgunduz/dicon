@@ -7,19 +7,19 @@
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
 
-Rule::Rule(FileItem *fileItem)
+Rule::Rule(FileItem *fileItem, bool parseFiles)
         : JsonItem(fileItem) {
 
-    init();
+    init(parseFiles);
 }
 
-Rule::Rule(const char* rootPath, const char* filePath)
-        : JsonItem(rootPath, filePath, FILE_RULE) {
+Rule::Rule(const char* rootPath, const char* jobDir, const char* fileName, bool parseFiles)
+        : JsonItem(rootPath, jobDir, fileName, FILE_RULE) {
 
-    init();
+    init(parseFiles);
 }
 
-void Rule::init() {
+void Rule::init(bool parseFiles) {
 
     contentTypes[CONTENT_RUNTYPE] = new JsonType(CONTENT_RUNTYPE, "runtype", this, parseRunTypeNode);
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
@@ -30,7 +30,7 @@ void Rule::init() {
     active = true;
     repeat = 1;
 
-    if (!parse(getAbsPath().c_str())) {
+    if (parseFiles && !parse()) {
         LOG_E("Rule could not parsed!!!");
     }
 }
@@ -86,7 +86,9 @@ bool Rule::parseFileNode(void *parent, json_object *node) {
 
         FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
 
-		FileItem *content = new FileItem(((Rule*)parent)->getRootPath(), path, fileType);
+        Rule* rule = (Rule*) parent;
+
+		FileItem *content = new FileItem(rule->getRootPath(), rule->getJobDir(), path, fileType);
 
         ((Rule*)parent)->contentList[CONTENT_FILE].push_back(content);
 

@@ -2,47 +2,43 @@
 // Created by akgunduz on 23.10.2015.
 //
 
+#include <set>
 #include "Job.h"
 
-Job::Job(const char *rootPath, const char* jobDir)
-        : JsonItem(getJobPath(rootPath, jobDir).c_str()){
+Job::Job(FileItem *fileItem, bool parseFiles)
+    : JsonItem (fileItem) {
 
-    init(jobDir);
+    init(parseFiles);
+}
+
+Job::Job(const char *rootPath, const char* jobDir, bool parseFiles)
+        : JsonItem(rootPath, jobDir, JOB_FILE, FILE_JOB){
+
+    init(parseFiles);
 
 }
-/*
-Job::Job(FileItem *fileItem, const char* jobDir)
-        : JsonItem(fileItem) {
 
-    init(jobDir);
+Job::Job(const char *rootPath, const char* jobDir, const char* fileName, bool parseFiles)
+        : JsonItem(rootPath, jobDir, fileName, FILE_JOB) {
 
-    if (!parse(getAbsPath().c_str())) {
-        LOG_E("Job could not parsed!!!");
-    }
-}
-*/
-Job::Job(const char *rootPath, const char* filePath, const char* jobDir)
-        : JsonItem(getJobPath(rootPath, jobDir).c_str(), filePath, FILE_JOB) {
+    init(parseFiles);
 
-    init(jobDir);
-
-    if (!parse(getAbsPath().c_str())) {
-        LOG_E("Job could not parsed!!!");
-    }
 }
 
 Job::~Job() {
 
 }
 
-void Job::init(const char* jobDir) {
+void Job::init(bool parseFiles) {
 
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
-    contentTypes[CONTENT_ID] = new JsonType(CONTENT_ID, "id", this, parseIDNode);
 
-    strcpy(this->jobDir, jobDir);
     this->attachedNode = 0;
+
+    if (parseFiles && !parse()) {
+        LOG_E("Job could not parsed!!!");
+    }
 }
 
 bool Job::parseNameNode(void *parent, json_object *node) {
@@ -56,21 +52,6 @@ bool Job::parseNameNode(void *parent, json_object *node) {
     const char *name = json_object_get_string(node);
 
     ((Job*)parent)->setName(name);
-
-    return true;
-}
-
-bool Job::parseIDNode(void *parent, json_object *node) {
-
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_int) {
-        LOG_E("Invalid JSON Name Node");
-        return false;
-    }
-
-    long id = json_object_get_int64(node);
-
-    ((Job*)parent)->setID(id);
 
     return true;
 }
@@ -107,7 +88,7 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
 
         Job* job = (Job*) parent;
 
-        Rule *rule = new Rule(job->getRootPath(), path);
+        Rule *rule = new Rule(job->getRootPath(), job->getJobDir(), path, true);
         rule->setActive(active);
         rule->setRepeat(repeat);
 
@@ -125,22 +106,6 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-std::string Job::getJobPath(const char *rootPath, const char *jobDir) {
-
-    return std::string(rootPath) + "/" + (char*)jobDir;
-}
-
-std::string Job::getJobPath(const char *rootPath) {
-
-    return std::string(rootPath) + "/Job_" + std::to_string(getID());
-}
-
-const char* Job::getJobDir() {
-
-    return jobDir;
-    //return std::string("Job_") + std::to_string(getID());
-}
-
 long Job::getAttachedNode() {
     return attachedNode;
 }
@@ -155,4 +120,22 @@ Rule *Job::getRule(int index) {
 
 int Job::getRuleCount() {
     return getContentCount(CONTENT_FILE);
+}
+
+bool Job::prepareUniqueList(std::vector<Md5> *md5List) {
+
+    for (int i = 0; i < getRuleCount(); i++) {
+        Rule *rule = (Rule *)getContent(CONTENT_FILE, i);
+        uniqueList[(char*)rule->getMD5()] = rule;
+        for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
+            FileItem *fileItem = (FileItem *)rule->getContent(CONTENT_FILE, j);
+            uniqueList[(char*)fileItem->getMD5()] = fileItem;
+        }
+    }
+
+    for (int i = 0; i < md5List->size(); i++) {
+        uniqueList.erase((char*)(*md5List)[i].data);
+    }
+
+    return true;
 }

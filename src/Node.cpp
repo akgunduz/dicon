@@ -65,8 +65,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_CLIENT_CLEAR, "");
 
-			job = msg->job;
-            setRootPath(job->getRootPath());
+			job = msg->getJob();
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
@@ -81,6 +80,8 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 			break;
 
 		case MSGTYPE_BINARY:
+
+            job = msg->getJob();
 
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s",

@@ -19,7 +19,7 @@ class Rule : public JsonItem {
     bool active;
     int repeat;
 
-    void init();
+    void init(bool parseFiles);
 
 	static bool parseRunTypeNode(void*, json_object *node);
     static bool parseFileNode(void*, json_object *node);
@@ -28,8 +28,8 @@ class Rule : public JsonItem {
 
 public:
 
-	Rule(FileItem * content);
-	Rule(const char*, const char*);
+	Rule(FileItem* fileItem, bool parseFiles);
+	Rule(const char*, const char*, const char*, bool parseFiles);
 	~Rule();
 
 	bool isParallel();

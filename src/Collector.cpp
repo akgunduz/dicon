@@ -19,7 +19,7 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
     jobs->clear();
     std::vector<std::string> dirList = Util::getDirList(getRootPath(), "Job_");
     for (int i = 0; i < dirList.size(); i++) {
-        jobs->push_back(new Job(getRootPath(), JOB_FILE, dirList[i].c_str()));
+        jobs->push_back(new Job(getRootPath(), dirList[i].c_str(), true));
     }
 
     LOG_U(UI_UPDATE_COLL_JOB_LIST, jobs);
@@ -129,13 +129,13 @@ bool Collector::processNodeMsg(long address, Message *msg) {
             }
 
             Job *job = (*jobs)[i];
-
+/*
 			for (i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
                 for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
                     Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
-                    for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                        FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
+                    for (int k = 0; k < rule->getContentCount(CONTENT_FILE); k++) {
+                        FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, k);
                         //TODO 64 bit le coz
                         if (memcmp(content->getMD5(), msg->md5List[i].md5, MD5_DIGEST_LENGTH) == 0) {
                             //TODO bu clientte var, gonderme
@@ -145,7 +145,11 @@ bool Collector::processNodeMsg(long address, Message *msg) {
                 }
 			}
 
+
+*/
 		//	LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
+
+            job->prepareUniqueList(&msg->md5List);
 
 			status = send2NodeMsg(address, MSGTYPE_BINARY, job);
 		}
@@ -205,7 +209,7 @@ bool Collector::send2NodeMsg(long address, int type, Job* job) {
 
 		case MSGTYPE_RULE:
 
-			msg->setJob(STREAM_RULE, job);
+			msg->setJob(STREAM_JOB, job);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"RULE\" msg sent to client: %s",
 				  Address::getString(address).c_str());

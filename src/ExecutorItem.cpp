@@ -7,7 +7,13 @@
 #include "Rule.h"
 #include "ParameterItem.h"
 
-ExecutorItem::ExecutorItem(const char *line) {
+ExecutorItem::ExecutorItem()
+        : ContentItem () {
+
+};
+
+ExecutorItem::ExecutorItem(const char *line)
+        : ContentItem () {
 
 	setValid(true);
 
@@ -104,7 +110,7 @@ bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdI
 	if (cmdType == CONTENT_FILE) {
 		FileItem *content = (FileItem *) refRule->getContent(CONTENT_FILE, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsed, "%s%s%s", parsed, refRule->getRootPath(), content->getFileName());
+            sprintf(parsed, "%s%s/%s/%s", parsed, refRule->getRootPath(), refRule->getJobDir(), content->getFileName());
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {

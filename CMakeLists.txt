@@ -47,6 +47,8 @@ set(FILES
         ${SOURCE_PATH}/Job.h
         ${SOURCE_PATH}/BaseMessage.cpp
         ${SOURCE_PATH}/BaseMessage.h
+        ${SOURCE_PATH}/Md5.cpp
+        ${SOURCE_PATH}/Md5.h
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/Message.h
         ${SOURCE_PATH}/MessageItem.cpp

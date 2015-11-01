@@ -5,9 +5,9 @@
 
 #include "Scheduler.h"
 
-Scheduler::Scheduler(bool seperateThread) {
+Scheduler::Scheduler(bool ownThread) {
 
-    this->seperateThread = seperateThread;
+    this->ownThread = ownThread;
 	this->capacity = MAX_SCHEDULER_CAPACITY;
 
 	int res = pthread_mutex_init(&mutex, NULL);
@@ -23,7 +23,7 @@ Scheduler::Scheduler(bool seperateThread) {
 		throw std::runtime_error("Scheduler : Condition init failed");
 	}
 
-    if (seperateThread) {
+    if (ownThread) {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -43,10 +43,6 @@ Scheduler::Scheduler(bool seperateThread) {
 
 Scheduler::~Scheduler() {
 
-	if (!initialized) {
-		return;
-	}
-
     end();
 
 	pthread_cond_destroy(&cond);
@@ -65,7 +61,7 @@ bool Scheduler::push(SchedulerItem *item) {
 
 		items.push_back(item);
 		pthread_mutex_unlock(&mutex);
-        if (seperateThread) {
+        if (ownThread) {
             pthread_cond_signal(&cond);
         }
 		return true;
@@ -79,18 +75,20 @@ bool Scheduler::push(SchedulerItem *item) {
 
 SchedulerItem* Scheduler::pull() {
 
-    if (seperateThread) {
-        return nullptr;
-    }
-
     if (pthread_mutex_lock(&mutex) != 0) { //replaced with trylock
         LOG_E("Can not push, system is BUSY!!!");
         return nullptr;
     }
 
     if (items.empty()) {
-        pthread_mutex_unlock(&mutex);
-        return nullptr;
+
+        if (ownThread) {
+            pthread_cond_wait(&cond, &mutex);
+
+        } else {
+            pthread_mutex_unlock(&mutex);
+            return nullptr;
+        }
     }
 
     std::list<SchedulerItem*>::iterator itr, ref = items.begin();
@@ -122,31 +120,7 @@ void *Scheduler::run(void *arg) {
 
 	while(true) {
 
-		pthread_mutex_lock(&scheduler->mutex);
-
-		if (scheduler->items.empty()) {
-			pthread_cond_wait(&scheduler->cond, &scheduler->mutex);
-		}
-
-		std::list<SchedulerItem*>::iterator itr, ref = scheduler->items.begin();
-
-		for (itr = ref;	itr != scheduler->items.end(); itr++) {
-
-            SchedulerItem *itrItem = *itr;
-            SchedulerItem *refItem = *ref;
-			if (itrItem->priority < refItem->priority) {
-				ref = itr;
-			}
-
-            if (itrItem->priority > 0) {
-                itrItem->priority--;
-            }
-		}
-
-		SchedulerItem *item = *(ref);
-		scheduler->items.erase(ref);
-
-		pthread_mutex_unlock(&scheduler->mutex);
+        SchedulerItem *item = scheduler->pull();
 
         if (item->type == END_ITEM) {
             break;
@@ -163,7 +137,11 @@ void *Scheduler::run(void *arg) {
 
 void Scheduler::end() {
 
-    if (seperateThread) {
+    if (!initialized) {
+        return;
+    }
+
+    if (ownThread) {
         push(new SchedulerItem());
         pthread_join(thread, nullptr);
     }

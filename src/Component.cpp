@@ -9,6 +9,8 @@ Component::Component(Unit host, long index, const char* rootPath) {
 
     memset(connectors, 0, sizeof(connectors));
 
+    this->host = host;
+
     callback = new InterfaceCallback(receiveCB, this);
 
     int indexDist = (int)(index & 0xFFFF);
@@ -182,4 +184,8 @@ void Component::setRootPath(const char *rootPath) {
     }
 
     this->rootPath = rootPath;
+}
+
+Unit *Component::getHost() {
+    return &host;
 }

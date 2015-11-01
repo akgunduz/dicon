@@ -12,7 +12,7 @@ class ExecutorItem : public ContentItem {
 	std::string exec;
 	bool parseCommand(char*, void *, int, int);
 public:
-	ExecutorItem(){};
+	ExecutorItem();
 	ExecutorItem(const char *exec);
 	~ExecutorItem(){};
 	std::string getExec();

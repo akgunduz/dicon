@@ -9,6 +9,7 @@
 
 #include "Common.h"
 #include "Unit.h"
+#include "Md5.h"
 
 #define BUFFER_SIZE 512
 
@@ -105,8 +106,6 @@ public:
 
     long getOwnerAddress();
 	void setOwnerAddress(long);
-//    const char* getJobID();
-//	void setJobID(const char*);
     long getVariant(int id);
 	void setVariant(int id, long variant);
 
@@ -120,10 +119,10 @@ public:
     int iteratePriority();
 
     int getBinarySize(const char*);
-    bool transferBinary(int, int, uint8_t *, int);
+    bool transferBinary(int, int, Md5 *, int);
 
 	bool readBlock(int, uint8_t *, int);
-	bool readBinary(int, const char*, uint8_t *, const char*, int);
+	bool readBinary(int, const char*, Md5 *, const char*, int);
 
 	bool readSignature(int);
 	bool readHeader(int, MessageHeader *);
@@ -134,6 +133,7 @@ public:
 	bool readFromStream(int);
 
     virtual bool readMessageBlock(int in, BlockHeader *) = 0;
+    virtual bool readFinalize() = 0;
 
 	bool writeBlock(int, const uint8_t *, int);
 
@@ -142,13 +142,14 @@ public:
 	bool writeBlockHeader(int, struct BlockHeader *);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
-	bool writeBinary(int, const char*, uint8_t *);
+	bool writeBinary(int, const char*, Md5 *);
 
 	bool writeEndStream(int);
 
 	bool writeToStream(int);
 
     virtual bool writeMessageStream(int out, int streamFlag) = 0;
+    virtual bool writeFinalize() = 0;
 };
 
 #endif //__Message_H_

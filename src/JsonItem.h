@@ -24,13 +24,14 @@ public:
 
     JsonItem(const char *rootPath);
     JsonItem(FileItem *fileItem);
-    JsonItem(const char* rootPath, const char* fileName, FILETYPE fileType);
+    JsonItem(const char* rootPath, const char* jobDir,
+             const char* fileName, FILETYPE fileType);
     virtual ~JsonItem();
     ContentItem * getContent(int type, int index);
     int getContentCount(int type);
     int getFlaggedFileCount();
     void reset();
-    bool parse(const char* path);
+    bool parse();
 };
 
 

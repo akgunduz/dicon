@@ -14,8 +14,8 @@ JsonItem::JsonItem(FileItem *fileItem)
 
 }
 
-JsonItem::JsonItem(const char *rootPath, const char* fileName, FILETYPE fileType)
-        : FileItem(rootPath, fileName, fileType) {
+JsonItem::JsonItem(const char *rootPath, const char* jobDir, const char* fileName, FILETYPE fileType)
+        : FileItem(rootPath, jobDir, fileName, fileType) {
 
 }
 
@@ -62,9 +62,9 @@ void JsonItem::reset() {
     }
 }
 
-bool JsonItem::parse(const char *path) {
+bool JsonItem::parse() {
 
-    struct json_object* node = json_object_from_file(path);
+    struct json_object* node = json_object_from_file(getAbsPath().c_str());
     if (node == NULL){
         LOG_E("Invalid JSON File");
         return false;

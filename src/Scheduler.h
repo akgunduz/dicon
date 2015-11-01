@@ -17,7 +17,7 @@
 
 class Scheduler {
 private:
-    bool seperateThread;
+    bool ownThread;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
 	pthread_t thread;

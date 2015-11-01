@@ -24,7 +24,7 @@ class ParameterItem : public ContentItem {
 	PARAM_TYPES mType;
 	Params mParams;
 public:
-	ParameterItem(){};
+	ParameterItem();
 	ParameterItem(const char *param);
 	~ParameterItem(){};
 	PARAM_TYPES getParamType();

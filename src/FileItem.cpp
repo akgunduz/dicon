@@ -4,56 +4,53 @@
 //
 
 #include "FileItem.h"
-#include "Rule.h"
-#include "Util.h"
 #include "ArchTypes.h"
 
-FileItem::FileItem(const char* rootPath) {
+FileItem::FileItem(const char* rootPath)
+        : ContentItem () {
 
-	memset(this->md5, 0, MD5_DIGEST_LENGTH);
-    strcpy(this->rootPath, rootPath);
-    strcpy(this->fileName, "");
-    this->fileType = FILE_MAX;
-    this->id = 0;
+    setMD5();
+    setFile(rootPath, "", "", FILE_MAX);
 	setFlaggedToSent(true);
 }
 
 
-FileItem::FileItem(FileItem *item) {
+FileItem::FileItem(FileItem *item)
+        : ContentItem () {
 
     set(item);
 }
 
-FileItem::FileItem(const char *rootPath, const char *fileName,
-                   FILETYPE fileType, int id, uint8_t *md5) : FileItem(rootPath) {
+FileItem::FileItem(const char *rootPath, const char *jobDir, const char *fileName,
+                   FILETYPE fileType, Md5 *md5)
+        : ContentItem () {
 
-    set(rootPath, fileName, fileType, id, md5);
+    set(rootPath, jobDir, fileName, fileType, md5);
 };
 
-void FileItem::set(const char *rootPath, const char *fileName,
-                   FILETYPE fileType, int id, uint8_t *md5) {
+bool FileItem::set(const char *rootPath, const char *jobDir, const char *fileName,
+                   FILETYPE fileType, Md5 *md5) {
+
+    setFile(rootPath, jobDir, fileName, fileType);
+    setFlaggedToSent(true);
 
     if (md5 != nullptr) {
-        memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
+        this->md5.set(md5);
+        return true;
 
     } else {
-        memset(this->md5, 0, MD5_DIGEST_LENGTH);
-        char buf[BUFFER_SIZE];
-
-        FILE *md5file = fopen(getMD5Path().c_str(), "r");
-        if (md5file != nullptr) {
-            fgets(buf, MD5_DIGEST_LENGTH * 2 + 1, md5file);
-            if (Util::str2hex(this->md5, buf, MD5_DIGEST_LENGTH * 2)) {
-                fclose(md5file);
-                return;
+/*
+        bool status = this->md5.get(getMD5Path().c_str());
+        if (!status) {
+            FILE *file = fopen(getAbsPath().c_str(), "r");
+            if (file == nullptr) {
+                LOG_T("FileContent %s could not opened");
+                setValid(false);
+                return false;
             }
-            fclose(md5file);
-        }
+        }*/
     }
 
-    setID(id);
-    setFile(rootPath, fileName, fileType);
-    setFlaggedToSent(true);
 /*
 	FILE *file = fopen(getAbsPath(node), "r");
 	if (file == nullptr) {
@@ -88,17 +85,44 @@ void FileItem::set(const char *rootPath, const char *fileName,
 */
 }
 
+void FileItem::set(FileItem *item) {
+
+    set(item->getRootPath(), item->getJobDir(), item->getFileName(),
+        item->getFileType(), item->getMD5());
+}
+
+const char* FileItem::getRootPath() {
+    return rootPath;
+}
+
+void FileItem::setRootPath(const char *rootPath) {
+    strcpy(this->rootPath, rootPath);
+}
+
 CONTENT_TYPES FileItem::getType() {
 	return CONTENT_FILE;
 }
 
-const char*FileItem::getFileName() {
+const char* FileItem::getJobDir() {
+    return jobDir;
+}
+
+const char* FileItem::getFileName() {
 	return fileName;
+}
+
+FILETYPE FileItem::getFileType() {
+    return fileType;
+}
+
+Md5* FileItem::getMD5() {
+    return &md5;
 }
 
 std::string FileItem::getAbsPath() {
 
-    std::string absPath = std::string(rootPath) + "/" + fileName;
+    std::string absPath = std::string(rootPath) + "/" + jobDir + "/" + fileName;
+
 
     if (!absPath.empty() && access(absPath.c_str(), F_OK ) == -1) {
         Util::mkPath(absPath.c_str());
@@ -113,13 +137,13 @@ std::string FileItem::getAbsPath(Unit host, Unit node) {
     std::string absPath = "";
 
     if (host.getType() == HOST_COLLECTOR && fileType == FILE_COMMON) {
-        absPath = std::string(rootPath) + "/common/" + fileName;
+        absPath = std::string(rootPath) + "/" + jobDir + "/common/" + fileName;
 
     } else if(host.getType() == HOST_COLLECTOR && fileType == FILE_ARCH) {
-        absPath = std::string(rootPath) + "/arch/" + (char*)ArchTypes::getDir((ARCH_IDS)node.getID()) + "/" + fileName;
+        absPath = std::string(rootPath) + "/" + jobDir + "/arch/" + (char*)ArchTypes::getDir((ARCH_IDS)node.getID()) + "/" + fileName;
 
     } else {
-        absPath = std::string(rootPath) + "/" + fileName;
+        absPath = std::string(rootPath) + "/" + jobDir + "/" + fileName;
 
     }
 
@@ -133,26 +157,13 @@ std::string FileItem::getAbsPath(Unit host, Unit node) {
 
 std::string FileItem::getMD5Path() {
 
-    std::string md5Path = std::string(rootPath) + "/md5/" + fileName + ".md5";
+    std::string md5Path = std::string(rootPath) + "/" + jobDir + "/md5/" + fileName + ".md5";
 
     if (access(md5Path.c_str(), F_OK ) == -1) {
         Util::mkPath(md5Path.c_str());
     }
 
 	return md5Path;
-}
-
-uint8_t*FileItem::getMD5() {
-	return md5;
-}
-
-void FileItem::setMD5(uint8_t *md5) {
-
-	memcpy(this->md5, md5, MD5_DIGEST_LENGTH);
-
-    FILE *md5file = fopen(getMD5Path().c_str(), "w");
-	fwrite(Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
-	fclose(md5file);
 }
 
 bool FileItem::isFlaggedToSent() {
@@ -163,36 +174,23 @@ void FileItem::setFlaggedToSent(bool flaggedToSent) {
 	this->flaggedToSent = flaggedToSent;
 }
 
-FILETYPE FileItem::getFileType() {
-    return fileType;
-}
 
-void FileItem::setFile(const char* rootPath,
+void FileItem::setFile(const char* rootPath, const char *jobDir,
                        const char *fileName, FILETYPE fileType) {
 
     strcpy(this->rootPath, rootPath);
     strcpy(this->fileName, fileName);
+    strcpy(this->jobDir, jobDir);
     this->fileType = fileType;
 }
 
-void FileItem::set(FileItem *item) {
 
-    set(item->getRootPath(), item->getFileName(),
-            item->getFileType(), item->getID(), item->getMD5());
-}
+void FileItem::setMD5(Md5 *md5) {
 
-const char *FileItem::getRootPath() {
-    return rootPath;
-}
+    if (md5 == nullptr) {
+        this->md5.reset();
+        return;
+    }
 
-void FileItem::setRootPath(const char *rootPath) {
-    strcpy(this->rootPath, rootPath);
-}
-
-long FileItem::getID() {
-    return id;
-}
-
-void FileItem::setID(long id) {
-    this->id = id;
+    this->md5.set(md5, getMD5Path().c_str());
 }
