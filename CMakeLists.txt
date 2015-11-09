@@ -97,10 +97,10 @@ set(FILES
         ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.h
-        src/JsonType.cpp
-        src/JsonType.h
-        src/JsonItem.cpp
-        src/JsonItem.h)
+        ${SOURCE_PATH}/JsonType.cpp
+        ${SOURCE_PATH}/JsonType.h
+        ${SOURCE_PATH}/JsonItem.cpp
+        ${SOURCE_PATH}/JsonItem.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/UserInterface.cpp
@@ -151,6 +151,6 @@ else()
         -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 \
         -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
 
-    add_executable(bankor-lnx ${FILES} ${WX_FILES})
+    add_executable(bankor-lnx ${FILES} ${WX_FILES} src/MapItem.cpp src/MapItem.h src/FileList.cpp src/FileList.h)
 
 endif()

@@ -4,8 +4,8 @@
 
 #include "JsonItem.h"
 
-JsonItem::JsonItem(const char *rootPath)
-    : FileItem(rootPath) {
+JsonItem::JsonItem(Unit host, const char *rootPath)
+    : FileItem(host, rootPath) {
 
 }
 
@@ -14,8 +14,8 @@ JsonItem::JsonItem(FileItem *fileItem)
 
 }
 
-JsonItem::JsonItem(const char *rootPath, const char* jobDir, const char* fileName, FILETYPE fileType)
-        : FileItem(rootPath, jobDir, fileName, fileType) {
+JsonItem::JsonItem(Unit host, const char *rootPath, const char* jobDir, const char* fileName, FILETYPE fileType)
+        : FileItem(host, rootPath, jobDir, fileName, fileType) {
 
 }
 
@@ -64,7 +64,7 @@ void JsonItem::reset() {
 
 bool JsonItem::parse() {
 
-    struct json_object* node = json_object_from_file(getAbsPath().c_str());
+    struct json_object* node = json_object_from_file(getAbsPath());
     if (node == NULL){
         LOG_E("Invalid JSON File");
         return false;

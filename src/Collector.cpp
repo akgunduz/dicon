@@ -19,7 +19,7 @@ Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) 
     jobs->clear();
     std::vector<std::string> dirList = Util::getDirList(getRootPath(), "Job_");
     for (int i = 0; i < dirList.size(); i++) {
-        jobs->push_back(new Job(getRootPath(), dirList[i].c_str(), true));
+        jobs->push_back(new Job(getHost(), getRootPath(), dirList[i].c_str()));
     }
 
     LOG_U(UI_UPDATE_COLL_JOB_LIST, jobs);
@@ -79,6 +79,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
             }
 
             (*jobs)[i]->setAttachedNode(nodeAddress);
+            (*jobs)[i]->prepareFileList(nodeID);
 
 			LOG_T("New Job created from path : %s", (*jobs)[i]->getRootPath());
 
@@ -149,7 +150,9 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 */
 		//	LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-            job->prepareUniqueList(&msg->md5List);
+            job->fileList->setFlags(&msg->md5List, false);
+
+         //   job->prepareUniqueList(&msg->md5List);
 
 			status = send2NodeMsg(address, MSGTYPE_BINARY, job);
 		}

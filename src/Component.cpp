@@ -186,6 +186,6 @@ void Component::setRootPath(const char *rootPath) {
     this->rootPath = rootPath;
 }
 
-Unit *Component::getHost() {
-    return &host;
+Unit Component::getHost() {
+    return host;
 }

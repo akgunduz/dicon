@@ -30,17 +30,21 @@ FILES = \
 		$(SOURCE_PATH)/Connector.cpp \
 		$(SOURCE_PATH)/Console.cpp \
 		$(SOURCE_PATH)/ConsoleClient.cpp \
-		$(SOURCE_PATH)/Content.cpp \
-		${SOURCE_PATH}/FileContent.cpp \
-		${SOURCE_PATH}/ParameterContent.cpp \
-		${SOURCE_PATH}/ExecutorContent.cpp \
+	$(SOURCE_PATH)/FileList.cpp \
+		$(SOURCE_PATH)/ContentItem.cpp \
+		${SOURCE_PATH}/FileItem.cpp \
+		${SOURCE_PATH}/ParameterItem.cpp \
+		${SOURCE_PATH}/ExecutorItem.cpp \
 		$(SOURCE_PATH)/Distributor.cpp \
 		$(SOURCE_PATH)/Interface.cpp \
 		${SOURCE_PATH}/InterfaceCallback.cpp \
 		$(SOURCE_PATH)/Log.cpp \
 		$(SOURCE_PATH)/Job.cpp \
 		$(SOURCE_PATH)/BaseMessage.cpp \
+	$(SOURCE_PATH)/MapItem.cpp \
+	$(SOURCE_PATH)/JsonItem.cpp \
 		$(SOURCE_PATH)/Message.cpp \
+	$(SOURCE_PATH)/Md5.cpp \
         ${SOURCE_PATH}/MessageDirection.cpp \
         ${SOURCE_PATH}/MessageTypes.cpp \
         ${SOURCE_PATH}/MessageItem.cpp \
@@ -51,7 +55,6 @@ FILES = \
         ${SOURCE_PATH}/NodeWatchdog.cpp \
 		$(SOURCE_PATH)/Pipe.cpp \
 		$(SOURCE_PATH)/Rule.cpp \
-		${SOURCE_PATH}/RuleTypes.cpp \
 		$(SOURCE_PATH)/Scheduler.cpp \
 		$(SOURCE_PATH)/SchedulerItem.cpp \
 		$(SOURCE_PATH)/Util.cpp \

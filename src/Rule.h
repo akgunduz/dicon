@@ -11,6 +11,7 @@
 #include "FileItem.h"
 #include "Unit.h"
 #include "JsonItem.h"
+#include "FileList.h"
 
 class Rule : public JsonItem {
 
@@ -19,17 +20,19 @@ class Rule : public JsonItem {
     bool active;
     int repeat;
 
-    void init(bool parseFiles);
+    FileList *fileList;
+
+    void init(FileList *fileList);
 
 	static bool parseRunTypeNode(void*, json_object *node);
-    static bool parseFileNode(void*, json_object *node);
+    static bool parseMapNode(void*, json_object *node);
     static bool parseParamNode(void*, json_object *node);
     static bool parseExecutorNode(void*, json_object *node);
 
 public:
 
-	Rule(FileItem* fileItem, bool parseFiles);
-	Rule(const char*, const char*, const char*, bool parseFiles);
+	Rule(FileItem* fileItem, FileList *);
+	Rule(Unit host, const char*, const char*, const char*, FileList*);
 	~Rule();
 
 	bool isParallel();

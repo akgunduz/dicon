@@ -4,39 +4,43 @@
 
 #include <set>
 #include "Job.h"
+#include "MapItem.h"
 
-Job::Job(FileItem *fileItem, bool parseFiles)
+Job::Job(FileItem *fileItem)
     : JsonItem (fileItem) {
 
-    init(parseFiles);
+    init();
 }
 
-Job::Job(const char *rootPath, const char* jobDir, bool parseFiles)
-        : JsonItem(rootPath, jobDir, JOB_FILE, FILE_JOB){
+Job::Job(Unit host, const char *rootPath, const char* jobDir)
+        : JsonItem(host, rootPath, jobDir, JOB_FILE, FILE_JOB){
 
-    init(parseFiles);
+    init();
 
 }
 
-Job::Job(const char *rootPath, const char* jobDir, const char* fileName, bool parseFiles)
-        : JsonItem(rootPath, jobDir, fileName, FILE_JOB) {
+Job::Job(Unit host, const char *rootPath, const char* jobDir, const char* fileName)
+        : JsonItem(host, rootPath, jobDir, fileName, FILE_JOB) {
 
-    init(parseFiles);
+    init();
 
 }
 
 Job::~Job() {
 
+    delete fileList;
 }
 
-void Job::init(bool parseFiles) {
+void Job::init() {
+
+    fileList = new FileList();
 
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
 
     this->attachedNode = 0;
 
-    if (parseFiles && !parse()) {
+    if (!parse()) {
         LOG_E("Job could not parsed!!!");
     }
 }
@@ -88,7 +92,7 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
 
         Job* job = (Job*) parent;
 
-        Rule *rule = new Rule(job->getRootPath(), job->getJobDir(), path, true);
+        Rule *rule = new Rule(job->getHost(), job->getRootPath(), job->getJobDir(), path, job->fileList);
         rule->setActive(active);
         rule->setRepeat(repeat);
 
@@ -122,20 +126,21 @@ int Job::getRuleCount() {
     return getContentCount(CONTENT_FILE);
 }
 
-bool Job::prepareUniqueList(std::vector<Md5> *md5List) {
+bool Job::prepareFileList(short nodeID) {
 
-    for (int i = 0; i < getRuleCount(); i++) {
-        Rule *rule = (Rule *)getContent(CONTENT_FILE, i);
-        uniqueList[(char*)rule->getMD5()] = rule;
-        for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
-            FileItem *fileItem = (FileItem *)rule->getContent(CONTENT_FILE, j);
-            uniqueList[(char*)fileItem->getMD5()] = fileItem;
+    Unit node(HOST_NODE, nodeID);
+
+    for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
+        Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
+        for (int i = 0; i < rule->getContentCount(CONTENT_MAP); i++) {
+            MapItem *content = (MapItem *)rule->getContent(CONTENT_MAP, i);
+            fileList->set(content->get(node));
         }
     }
-
+/*
     for (int i = 0; i < md5List->size(); i++) {
         uniqueList.erase((char*)(*md5List)[i].data);
     }
-
+*/
     return true;
 }

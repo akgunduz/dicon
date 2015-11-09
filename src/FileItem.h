@@ -18,22 +18,34 @@ class FileItem : public ContentItem {
 	char fileName[MAX_FILE_NAME_LENGTH];
 	char jobDir[MAX_JOB_DIR_LENGTH];
 	char rootPath[PATH_MAX];
+	char absPath[PATH_MAX];
+	char md5Path[PATH_MAX];
 
 	Md5 md5;
 	bool flaggedToSent;
 	FILETYPE fileType;
 
+    Unit host;
+
     void setRootPath(const char* rootPath);
 
 public:
-	FileItem(const char* rootPath);
+	FileItem(Unit host, const char* rootPath);
     FileItem(FileItem*);
-	FileItem(const char*, const char *,
+    FileItem(Unit host, const char*, const char *,
+             const char*, FILETYPE,
+             Md5 *md5 = nullptr);
+	FileItem(Unit host, Unit node, const char*, const char *,
              const char*, FILETYPE,
              Md5 *md5 = nullptr);
 	~FileItem(){};
-    bool set(const char *, const char *,
-             const char *, FILETYPE, Md5*);
+
+    bool set(Unit host, Unit node, const char *, const char *,
+             const char *, FILETYPE, Md5* = nullptr);
+
+    bool set(Unit host, const char *, const char *,
+             const char *, FILETYPE, Md5* = nullptr);
+
     void set(FileItem*);
 	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
@@ -43,12 +55,12 @@ public:
     const char* getFileName();
     const char* getRootPath();
     const char* getJobDir();
+    Unit getHost();
 
-    void setFile(const char* , const char*,
+    void setFile(Unit node, const char* , const char*,
                  const char*, FILETYPE);
-    std::string getAbsPath();
-    std::string getAbsPath(Unit, Unit);
-    std::string getMD5Path();
+    const char* getAbsPath();
+    const char* getMD5Path();
 
 	virtual CONTENT_TYPES getType();
 };

@@ -14,7 +14,7 @@ enum ARCH_IDS {
     ARCH_CA8,
     ARCH_CA9,
     ARCH_CA15,
-    ARCH_MAX
+    ARCH_MAX,
 };
 
 class ArchTypes {

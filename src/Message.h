@@ -22,9 +22,11 @@
 
 #define BLOCK_FILE_BINARY 0x01
 #define BLOCK_FILE_MD5 0x02
+#define BLOCK_JOB_INFO 0x03
 
 class Message : public BaseMessage {
 
+    char jobDir[50];
     void setRootPath(const char *);
 
 public:
@@ -32,6 +34,7 @@ public:
     char rootPath[PATH_MAX];
 
 	Job *job;
+    FileList *fileList;
 
 	std::vector<Md5> md5List;
 
@@ -40,17 +43,20 @@ public:
 
     const char* getRootPath();
     Job* getJob();
+    const char* getJobDir();
 
 	void setJob(int, Job *);
 
 	bool readMD5(int, Md5*);
 
+	bool readJobInfo(int, char *, struct BlockHeader*);
 	bool readFileBinary(int, FileItem *, struct BlockHeader*);
 	bool readFileMD5(int, Md5*, struct BlockHeader*);
 	bool readMessageBlock(int in, BlockHeader *);
 
 	bool writeMD5(int, Md5*);
 
+	bool writeJobInfo(int, const char *jobDir);
 	bool writeFileBinary(int, FileItem *);
 	bool writeFileMD5(int, FileItem *);
 	bool writeMessageStream(int out, int streamFlag);

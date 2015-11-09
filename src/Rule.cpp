@@ -6,23 +6,24 @@
 #include "Rule.h"
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
+#include "MapItem.h"
 
-Rule::Rule(FileItem *fileItem, bool parseFiles)
+Rule::Rule(FileItem *fileItem, FileList *fileList)
         : JsonItem(fileItem) {
 
-    init(parseFiles);
+    init(fileList);
 }
 
-Rule::Rule(const char* rootPath, const char* jobDir, const char* fileName, bool parseFiles)
-        : JsonItem(rootPath, jobDir, fileName, FILE_RULE) {
+Rule::Rule(Unit host, const char* rootPath, const char* jobDir, const char* fileName, FileList *fileList)
+        : JsonItem(host, rootPath, jobDir, fileName, FILE_RULE) {
 
-    init(parseFiles);
+    init(fileList);
 }
 
-void Rule::init(bool parseFiles) {
+void Rule::init(FileList *fileList) {
 
     contentTypes[CONTENT_RUNTYPE] = new JsonType(CONTENT_RUNTYPE, "runtype", this, parseRunTypeNode);
-    contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
+    contentTypes[CONTENT_MAP] = new JsonType(CONTENT_FILE, "files", this, parseMapNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
     contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
 
@@ -30,7 +31,9 @@ void Rule::init(bool parseFiles) {
     active = true;
     repeat = 1;
 
-    if (parseFiles && !parse()) {
+    this->fileList = fileList;
+
+    if (!parse()) {
         LOG_E("Rule could not parsed!!!");
     }
 }
@@ -56,7 +59,7 @@ bool Rule::parseRunTypeNode(void *parent, json_object *node) {
     return true;
 }
 
-bool Rule::parseFileNode(void *parent, json_object *node) {
+bool Rule::parseMapNode(void *parent, json_object *node) {
 
 	enum json_type type = json_object_get_type(node);
 	if (type != json_type_array) {
@@ -88,9 +91,13 @@ bool Rule::parseFileNode(void *parent, json_object *node) {
 
         Rule* rule = (Rule*) parent;
 
-		FileItem *content = new FileItem(rule->getRootPath(), rule->getJobDir(), path, fileType);
-
-        ((Rule*)parent)->contentList[CONTENT_FILE].push_back(content);
+	//	FileItem *content = new FileItem(rule->getRootPath(), rule->getJobDir(), path, fileType);
+		MapItem *content = new MapItem(rule->getHost(), rule->getRootPath(), rule->getJobDir(), path, fileType);
+      /*  for (int i = 0; i < content->getCount(); i++) {
+            rule->fileList->set(content->get(i));
+        }
+*/
+        ((Rule*)parent)->contentList[CONTENT_MAP].push_back(content);
 
 	}
 	return true;

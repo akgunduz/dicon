@@ -40,7 +40,7 @@ public:
         fgets(buf, MD5_DIGEST_LENGTH * 2 + 1, md5file);
         fclose(md5file);
 
-        return Util::str2hex(data, buf, MD5_DIGEST_LENGTH * 2);
+        return Util::str2hex(data, buf, MD5_DIGEST_LENGTH);
     }
 
     void reset() {

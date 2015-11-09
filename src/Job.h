@@ -8,6 +8,7 @@
 #include "Rule.h"
 #include "JsonItem.h"
 #include "Md5.h"
+#include "FileList.h"
 
 
 #define MAX_JOB_COUNT 100
@@ -21,13 +22,15 @@ class Job : public JsonItem {
 
 public:
 
+    FileList *fileList;
+
     std::map<std::string, FileItem*> uniqueList;
 
-    Job(FileItem *fileItem, bool parseFiles);
-    Job(const char *rootPath, const char* jobDir, bool parseFiles);
-    Job(const char *rootPath, const char* jobDir, const char* fileName, bool parseFiles);
+    Job(FileItem *fileItem);
+    Job(Unit host, const char *rootPath, const char* jobDir);
+    Job(Unit host, const char *rootPath, const char* jobDir, const char* fileName);
 
-    void init(bool parseFiles);
+    void init();
     ~Job();
 
     const char* getName();
@@ -42,7 +45,7 @@ public:
     static bool parseNameNode(void*, json_object *node);
     static bool parseRuleNode(void*, json_object *node);
 
-    bool prepareUniqueList(std::vector<Md5> *md5List);
+    bool prepareFileList(short nodeID);
 };
 
 
