@@ -14,8 +14,6 @@ ParameterItem::ParameterItem()
 ParameterItem::ParameterItem(const char *param)
         : ContentItem () {
 
-	setValid(true);
-
 	if (strncmp(param, "l:", 2) == 0) {
 		mType = PARAM_LONG;
 		mParams.latom = atol(param + 2);
@@ -42,4 +40,8 @@ Params ParameterItem::getParam() {
 
 void ParameterItem::setParam(Params *param) {
 	memcpy(&mParams, param, sizeof(Params));
+}
+
+bool ParameterItem::isValid() {
+    return true;
 }

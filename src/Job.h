@@ -15,16 +15,24 @@
 #define JOB_ITEM 0
 #define JOB_FILE "Job.json"
 
+class AttachedNode {
+
+public:
+    long address;
+    short id;
+};
+
+
 class Job : public JsonItem {
 
     char name[50];
-    long attachedNode;
+    AttachedNode attachedNode;
 
 public:
 
-    FileList *fileList;
+  //  FileList *fileList;
 
-    std::map<std::string, FileItem*> uniqueList;
+  //  std::map<std::string, FileItem*> uniqueList;
 
     Job(FileItem *fileItem);
     Job(Unit host, const char *rootPath, const char* jobDir);
@@ -36,8 +44,8 @@ public:
     const char* getName();
     void setName(const char*);
 
-    long getAttachedNode();
-    void setAttachedNode(long address);
+    AttachedNode getAttachedNode();
+    void setAttachedNode(long address, short id);
 
     Rule* getRule(int index);
     int getRuleCount();
@@ -45,7 +53,8 @@ public:
     static bool parseNameNode(void*, json_object *node);
     static bool parseRuleNode(void*, json_object *node);
 
-    bool prepareFileList(short nodeID);
+    FileList* prepareFileList(Unit host);
+    FileList* prepareRuleList();
 };
 
 

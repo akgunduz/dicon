@@ -8,19 +8,19 @@
 #include "ExecutorItem.h"
 #include "MapItem.h"
 
-Rule::Rule(FileItem *fileItem, FileList *fileList)
+Rule::Rule(FileItem *fileItem)
         : JsonItem(fileItem) {
 
-    init(fileList);
+    init();
 }
 
-Rule::Rule(Unit host, const char* rootPath, const char* jobDir, const char* fileName, FileList *fileList)
+Rule::Rule(Unit host, const char* rootPath, const char* jobDir, const char* fileName)
         : JsonItem(host, rootPath, jobDir, fileName, FILE_RULE) {
 
-    init(fileList);
+    init();
 }
 
-void Rule::init(FileList *fileList) {
+void Rule::init() {
 
     contentTypes[CONTENT_RUNTYPE] = new JsonType(CONTENT_RUNTYPE, "runtype", this, parseRunTypeNode);
     contentTypes[CONTENT_MAP] = new JsonType(CONTENT_FILE, "files", this, parseMapNode);
@@ -30,8 +30,6 @@ void Rule::init(FileList *fileList) {
     parallel = false;
     active = true;
     repeat = 1;
-
-    this->fileList = fileList;
 
     if (!parse()) {
         LOG_E("Rule could not parsed!!!");

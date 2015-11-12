@@ -155,11 +155,14 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 
 	switch(type) {
 
-		case MSGTYPE_MD5:
-			msg->setJob(STREAM_MD5ONLY, job);
-			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-				  Address::getString(address).c_str(), job->getFlaggedFileCount());
+		case MSGTYPE_MD5: {
+
+            FileList *list = job->prepareFileList(Unit(HOST_NODE, Util::getID()));
+            msg->setJob(STREAM_MD5ONLY, list);
+            LOG_U(UI_UPDATE_CLIENT_LOG,
+                  "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
+                  Address::getString(address).c_str(), job->getFlaggedFileCount());
+        }
 			break;
 
 		default:
@@ -255,8 +258,11 @@ bool Node::processRule(Rule* rule) {
 				return false;
 
 			} else if (pid > 0) {
-				//parent part
-				waitpid(pid, &status, 0);
+                //parent part
+                int res;
+                do {
+                    res = waitpid(pid, &status, 0);
+                } while ((res < 0) && (errno == EINTR));
 
 			} else {
 				//child part

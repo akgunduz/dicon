@@ -404,6 +404,8 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, const char* md5
 
 bool BaseMessage::readFromStream(int in) {
 
+    setDescriptor(in);
+
 	if (!readSignature(in)) {
 		return false;
 	}
@@ -587,6 +589,8 @@ bool BaseMessage::writeEndStream(int out) {
 
 bool BaseMessage::writeToStream(int out) {
 
+    setDescriptor(out);
+
 	if (!writeSignature(out)) {
 		return false;
 	}
@@ -605,4 +609,12 @@ bool BaseMessage::writeToStream(int out) {
     writeEndStream(out);
 
 	return writeFinalize();
+}
+
+int BaseMessage::getDescriptor() {
+    return desc;
+}
+
+void BaseMessage::setDescriptor(int desc) {
+    this->desc = desc;
 }

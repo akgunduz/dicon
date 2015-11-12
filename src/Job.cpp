@@ -28,17 +28,14 @@ Job::Job(Unit host, const char *rootPath, const char* jobDir, const char* fileNa
 
 Job::~Job() {
 
-    delete fileList;
 }
 
 void Job::init() {
 
-    fileList = new FileList();
-
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
 
-    this->attachedNode = 0;
+    this->attachedNode.address = 0;
 
     if (!parse()) {
         LOG_E("Job could not parsed!!!");
@@ -92,7 +89,7 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
 
         Job* job = (Job*) parent;
 
-        Rule *rule = new Rule(job->getHost(), job->getRootPath(), job->getJobDir(), path, job->fileList);
+        Rule *rule = new Rule(job->getHost(), job->getRootPath(), job->getJobDir(), path);
         rule->setActive(active);
         rule->setRepeat(repeat);
 
@@ -110,12 +107,13 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-long Job::getAttachedNode() {
+AttachedNode Job::getAttachedNode() {
     return attachedNode;
 }
 
-void Job::setAttachedNode(long address) {
-    this->attachedNode = address;
+void Job::setAttachedNode(long address, short id) {
+    this->attachedNode.address = address;
+    this->attachedNode.id = id;
 }
 
 Rule *Job::getRule(int index) {
@@ -126,21 +124,34 @@ int Job::getRuleCount() {
     return getContentCount(CONTENT_FILE);
 }
 
-bool Job::prepareFileList(short nodeID) {
+FileList* Job::prepareFileList(Unit host) {
 
-    Unit node(HOST_NODE, nodeID);
+    FileList *fileList = new FileList(getJobDir());
 
     for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
         Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
         for (int i = 0; i < rule->getContentCount(CONTENT_MAP); i++) {
             MapItem *content = (MapItem *)rule->getContent(CONTENT_MAP, i);
-            fileList->set(content->get(node));
+            FileItem *fileItem = content->get(host.getID());
+            if (fileItem->isValid()) {
+                fileList->set(fileItem);
+            }
         }
     }
-/*
-    for (int i = 0; i < md5List->size(); i++) {
-        uniqueList.erase((char*)(*md5List)[i].data);
+
+    return fileList;
+}
+
+FileList* Job::prepareRuleList() {
+
+    FileList *fileList = new FileList(getJobDir());
+
+    fileList->set(this);
+
+    for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
+        Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
+        fileList->set(rule);
     }
-*/
-    return true;
+
+    return fileList;
 }

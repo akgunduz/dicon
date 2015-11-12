@@ -31,6 +31,8 @@ public:
 	Params getParam();
 	void setParam(union Params *);
 	virtual CONTENT_TYPES getType();
+
+    virtual bool isValid();
 };
 
 #endif //__Content_H_

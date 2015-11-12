@@ -25,13 +25,12 @@ enum CONTENT_TYPES {
 
 class ContentItem : public SchedulerItem {
 
-	bool valid;
 public:
-	bool isValid();
-	void setValid(bool);
-	ContentItem();
+
+	ContentItem(){};
 
 	virtual CONTENT_TYPES getType() = 0;
+    virtual bool isValid() = 0;
 	virtual ~ContentItem(){};
 };
 

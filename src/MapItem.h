@@ -25,6 +25,8 @@ public:
     FILETYPE getFileType();
 
     virtual CONTENT_TYPES getType();
+
+    virtual bool isValid();
 };
 
 

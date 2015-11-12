@@ -43,22 +43,20 @@ bool FileItem::set(Unit host, Unit node, const char *rootPath, const char *jobDi
 
     setFile(node, rootPath, jobDir, fileName, fileType);
     setFlaggedToSent(true);
-    setValid(false);
+
+    FILE *file = fopen(getAbsPath(), "r");
+    if (file == nullptr) {
+        LOG_T("FileContent %s could not opened");
+        return false;
+    }
 
     if (md5 != nullptr) {
         this->md5.set(md5, getMD5Path());
-        setValid(true);
         return true;
     }
 
     bool status = this->md5.get(getMD5Path());
     if (!status) {
-        FILE *file = fopen(getAbsPath(), "r");
-        if (file == nullptr) {
-            LOG_T("FileContent %s could not opened");
-            setValid(false);
-            return false;
-        }
 
         char buf[BUFFER_SIZE];
 
@@ -74,28 +72,26 @@ bool FileItem::set(Unit host, Unit node, const char *rootPath, const char *jobDi
             }
             MD5_Update(&ctx, buf, (unsigned)BUFFER_SIZE);
         }
-        fclose(file);
+
         MD5_Final(this->md5.data, &ctx);
 
-        // and write back
-        FILE *md5file = fopen(getMD5Path(), "w");
-        fwrite(Util::hex2str(this->md5.data, MD5_DIGEST_LENGTH).c_str(), 1, MD5_DIGEST_LENGTH * 2, md5file);
-        fclose(md5file);
+        this->md5.set(nullptr, getMD5Path());
     }
 
-    setValid(true);
+    fclose(file);
+
     return true;
 }
 
 bool FileItem::set(Unit host, const char *rootPath, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5) {
 
-    set(host, Unit(HOST_MAX), rootPath, jobDir, fileName, fileType, md5);
+    return set(host, Unit(HOST_MAX), rootPath, jobDir, fileName, fileType, md5);
 }
 
-void FileItem::set(FileItem *item) {
+bool FileItem::set(FileItem *item) {
 
-    set(item->getHost(), item->getRootPath(), item->getJobDir(), item->getFileName(),
+    return set(item->getHost(), item->getRootPath(), item->getJobDir(), item->getFileName(),
         item->getFileType(), item->getMD5());
 }
 
@@ -173,6 +169,10 @@ void FileItem::setFile(Unit node, const char* rootPath, const char *jobDir,
     if (access(md5Path, F_OK ) == -1) {
         Util::mkPath(md5Path);
     }
+}
+
+bool FileItem::isValid() {
+    return !this->md5.empty();
 }
 
 void FileItem::setMD5(Md5 *md5) {

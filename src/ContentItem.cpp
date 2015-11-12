@@ -4,22 +4,3 @@
 //
 
 #include "ContentItem.h"
-#include "Util.h"
-#include "Rule.h"
-
-ContentItem::ContentItem() {
-
-	this->valid = false;
-}
-
-bool ContentItem::isValid() {
-
-	return valid;
-
-}
-
-void ContentItem::setValid(bool valid) {
-
-	this->valid = valid;
-
-}

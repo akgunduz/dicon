@@ -10,14 +10,12 @@ Message::Message(Unit host, const char* rootPath)
 		: BaseMessage(host) {
 
     strcpy(this->rootPath, rootPath);
-    job = nullptr;
 }
 
 Message::Message(Unit owner, int type, const char* rootPath)
 		: BaseMessage(owner, type) {
 
     strcpy(this->rootPath, rootPath);
-    job = nullptr;
 }
 
 const char *Message::getRootPath() {
@@ -28,15 +26,12 @@ void Message::setRootPath(const char *rootPath) {
     strcpy(this->rootPath, rootPath);
 }
 
-Job* Message::getJob() {
-    return job;
-}
 
-void Message::setJob(int streamFlag, Job *job) {
+void Message::setJob(int streamFlag, FileList *fileList) {
 
     setStreamFlag(streamFlag);
 
-    this->job = job;
+    this->fileList = fileList;
 }
 
 bool Message::readMD5(int desc, Md5* md5) {
@@ -95,7 +90,6 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
 	}
 
     content->setMD5(&md5);
-	content->setValid(true);
 
 	return true;
 }
@@ -263,23 +257,11 @@ bool Message::writeMessageStream(int out, int streamFlag) {
 
         case STREAM_JOB:
 
-            if (!writeJobInfo(out, job->getJobDir())) {
+            if (!writeJobInfo(out, fileList->getDir())) {
                 return false;
             }
 
-            if (!writeFileBinary(out, job)) {
-                return false;
-            }
-
-            contentCount = 1;
-
-            for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
-                FileItem *content = (FileItem *)job->getContent(CONTENT_FILE, i);
-                if (!writeFileBinary(out, content)) {
-                    return false;
-                }
-                contentCount++;
-            }
+            contentCount = fileList->process(this, &Message::writeFileBinary, FILE_LIST_ALL);
 
             LOG_E("%d job content sent to network", contentCount);
             break;
@@ -302,18 +284,14 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             }
             LOG_E("%d binary content sent to network", contentCount);*/
 
-            for (std::map<std::string, FileItem*>::iterator it = job->uniqueList.begin();
-                    it != job->uniqueList.end(); ++it) {
+            contentCount = fileList->process(this, &Message::writeFileBinary, FILE_LIST_TRUE);
 
-                if (!writeFileBinary(out, it->second)) {
-                    return false;
-                }
-            }
+            LOG_E("%d binary content sent to network", contentCount);
 
             break;
 
         case STREAM_MD5ONLY:
-
+/*
             contentCount = 0;
 
             for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
@@ -328,6 +306,9 @@ bool Message::writeMessageStream(int out, int streamFlag) {
                     }
                 }
             }
+*/
+            contentCount = fileList->process(this, &Message::writeFileMD5, FILE_LIST_TRUE);
+
             LOG_E("%d md5 content sent to network", contentCount);
             break;
 

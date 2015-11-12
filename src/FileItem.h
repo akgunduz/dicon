@@ -46,7 +46,7 @@ public:
     bool set(Unit host, const char *, const char *,
              const char *, FILETYPE, Md5* = nullptr);
 
-    void set(FileItem*);
+    bool set(FileItem*);
 	bool isFlaggedToSent();
 	void setFlaggedToSent(bool);
 	FILETYPE getFileType();
@@ -63,6 +63,8 @@ public:
     const char* getMD5Path();
 
 	virtual CONTENT_TYPES getType();
+
+    virtual bool isValid();
 };
 
 #endif //__Content_H_

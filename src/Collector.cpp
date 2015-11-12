@@ -65,31 +65,23 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				break;
 			}
 
-            int i = 0;
-            for (; i < jobs->size(); i++) {
-                if ((*jobs)[i]->getAttachedNode() > 0) {
-                    continue;
-                }
+            Job* job = getUnservedJob();
+            if (job == nullptr) {
                 break;
             }
 
-            if (i == jobs->size()) {
-                LOG_W("No served job remains.");
-                break;
-            }
+            job->setAttachedNode(nodeAddress, nodeID);
+            FileList *list = job->prepareRuleList();
 
-            (*jobs)[i]->setAttachedNode(nodeAddress);
-            (*jobs)[i]->prepareFileList(nodeID);
-
-			LOG_T("New Job created from path : %s", (*jobs)[i]->getRootPath());
+			LOG_T("New Job created from path : %s", job->getRootPath());
 
 			LOG_U(UI_UPDATE_COLL_LOG,
                   "\"NODE\" msg from distributor: %s, available node: %s",
 				  Address::getString(address).c_str(), Address::getString(nodeAddress).c_str());
 
-            LOG_U(UI_UPDATE_COLL_PROCESS_LIST, (*jobs)[i]);
+            LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
-			status = send2NodeMsg(nodeAddress, MSGTYPE_RULE, (*jobs)[i]);
+			status = send2NodeMsg(nodeAddress, MSGTYPE_RULE, list);
 			break;
 			}
 		default :
@@ -116,20 +108,10 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-            int i = 0;
-            for (; i < jobs->size(); i++) {
-                if ((*jobs)[i]->getAttachedNode() != address) {
-                    continue;
-                }
+            Job* job = getAttachedJob(address);
+            if (job == nullptr) {
                 break;
             }
-
-            if (i == jobs->size()) {
-                LOG_W("No served job remains for md5.");
-                break;
-            }
-
-            Job *job = (*jobs)[i];
 /*
 			for (i = 0; i < msg->md5List.size(); i++) {
 				//TODO contentler icinde ara
@@ -148,13 +130,14 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 
 */
+
 		//	LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-            job->fileList->setFlags(&msg->md5List, false);
+            FileList *list = job->prepareFileList(Unit(HOST_COLLECTOR, job->getAttachedNode().id));
 
-         //   job->prepareUniqueList(&msg->md5List);
+            list->setFlags(&msg->md5List, false);
 
-			status = send2NodeMsg(address, MSGTYPE_BINARY, job);
+			status = send2NodeMsg(address, MSGTYPE_BINARY, list);
 		}
 			break;
 
@@ -204,7 +187,7 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 }
 
-bool Collector::send2NodeMsg(long address, int type, Job* job) {
+bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
 
@@ -212,7 +195,7 @@ bool Collector::send2NodeMsg(long address, int type, Job* job) {
 
 		case MSGTYPE_RULE:
 
-			msg->setJob(STREAM_JOB, job);
+			msg->setJob(STREAM_JOB, list);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"RULE\" msg sent to client: %s",
 				  Address::getString(address).c_str());
@@ -220,10 +203,10 @@ bool Collector::send2NodeMsg(long address, int type, Job* job) {
 
 		case MSGTYPE_BINARY:
 
-			msg->setJob(STREAM_BINARY, job);
+			msg->setJob(STREAM_BINARY, list);
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"BINARY\" msg sent to client: %s with \"%d\" file binary",
-				  Address::getString(address).c_str(), job->getFlaggedFileCount());
+				  Address::getString(address).c_str(), list->getCount());
 			break;
 
 		default:
@@ -253,8 +236,44 @@ bool Collector::syncTime() {
 bool Collector::reset() {
 
 	for (int i = 0; i < jobs->size(); i++) {
-        (*jobs)[i]->setAttachedNode(0);
+        (*jobs)[i]->setAttachedNode(0, 0);
     }
 	return true;
 
+}
+
+Job* Collector::getAttachedJob(long address) {
+
+    int i = 0;
+    for (; i < jobs->size(); i++) {
+        if ((*jobs)[i]->getAttachedNode().address != address) {
+            continue;
+        }
+        break;
+    }
+
+    if (i == jobs->size()) {
+        LOG_W("No job found attached to %ld", address);
+        return nullptr;
+    }
+
+    return (*jobs)[i];
+}
+
+Job* Collector::getUnservedJob() {
+
+    int i = 0;
+    for (; i < jobs->size(); i++) {
+        if ((*jobs)[i]->getAttachedNode().address > 0) {
+            continue;
+        }
+        break;
+    }
+
+    if (i == jobs->size()) {
+        LOG_W("No unserved job remains.");
+        return nullptr;
+    }
+
+    return (*jobs)[i];
 }

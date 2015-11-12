@@ -56,3 +56,7 @@ int MapItem::getCount() {
 FILETYPE MapItem::getFileType() {
     return fileType;
 }
+
+bool MapItem::isValid() {
+    return true;
+}

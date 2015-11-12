@@ -19,6 +19,8 @@ public:
 	std::string getParsed(void *);
 	void setExec(const std::string&);
 	virtual CONTENT_TYPES getType();
+
+    virtual bool isValid();
 };
 
 

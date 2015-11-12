@@ -6,6 +6,7 @@
 #include "ExecutorItem.h"
 #include "Rule.h"
 #include "ParameterItem.h"
+#include "MapItem.h"
 
 ExecutorItem::ExecutorItem()
         : ContentItem () {
@@ -14,8 +15,6 @@ ExecutorItem::ExecutorItem()
 
 ExecutorItem::ExecutorItem(const char *line)
         : ContentItem () {
-
-	setValid(true);
 
 	exec = line;
 }
@@ -32,7 +31,6 @@ void ExecutorItem::setExec(const std::string &exec) {
 	this->exec = exec;
 }
 
-
 std::string ExecutorItem::getParsed(void *pRule) {
 
 //	Rule *refRule = (Rule *)pRule;
@@ -40,7 +38,7 @@ std::string ExecutorItem::getParsed(void *pRule) {
 	bool cmdMode = false;
 
 	int cmdIndex = 0;
-	CONTENT_TYPES cmdType = CONTENT_FILE;
+	CONTENT_TYPES cmdType = CONTENT_MAP;
 
 	for (uint32_t i = 0; i < exec.size(); i++) {
 		switch(exec[i]) {
@@ -56,7 +54,7 @@ std::string ExecutorItem::getParsed(void *pRule) {
 			case 'F':
 			case 'f':
 				if (cmdMode) {
-					cmdType = CONTENT_FILE;
+					cmdType = CONTENT_MAP;
 					break;
 				}
 				//no break
@@ -100,17 +98,18 @@ std::string ExecutorItem::getParsed(void *pRule) {
 		parseCommand(parsed, pRule, cmdType, cmdIndex);
 	}
 
-	return parsed;
+	return std::string(parsed);
 }
 
 bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
 
 	Rule *refRule = (Rule *)pRule;
 
-	if (cmdType == CONTENT_FILE) {
-		FileItem *content = (FileItem *) refRule->getContent(CONTENT_FILE, cmdIndex);
+	if (cmdType == CONTENT_MAP) {
+		MapItem *content = (MapItem *) refRule->getContent(CONTENT_MAP, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsed, "%s%s/%s/%s", parsed, refRule->getRootPath(), refRule->getJobDir(), content->getFileName());
+        //    sprintf(parsed, "%s%s/%s/%s", parsed, refRule->getRootPath(), refRule->getJobDir(), content->getFileName());
+            sprintf(parsed, "%s%s", parsed, content->get()->getAbsPath());
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {
@@ -133,4 +132,6 @@ bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdI
 	return true;
 }
 
-
+bool ExecutorItem::isValid() {
+    return true;
+}

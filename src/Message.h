@@ -33,7 +33,7 @@ public:
 
     char rootPath[PATH_MAX];
 
-	Job *job;
+	//Job *job;
     FileList *fileList;
 
 	std::vector<Md5> md5List;
@@ -42,10 +42,9 @@ public:
 	Message(Unit owner, int type, const char*);
 
     const char* getRootPath();
-    Job* getJob();
     const char* getJobDir();
 
-	void setJob(int, Job *);
+	void setJob(int, FileList *fileList);
 
 	bool readMD5(int, Md5*);
 
@@ -65,5 +64,7 @@ public:
 
     virtual bool writeFinalize();
 };
+
+//typedef bool (Message::*fWriteProcess)(int desc, FileItem *content);
 
 #endif //__Message_H_

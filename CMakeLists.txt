@@ -31,6 +31,8 @@ set(FILES
         ${SOURCE_PATH}/ContentItem.h
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/FileItem.h
+        ${SOURCE_PATH}/FileList.cpp
+        ${SOURCE_PATH}/FileList.h
         ${SOURCE_PATH}/ParameterItem.cpp
         ${SOURCE_PATH}/ParameterItem.h
         ${SOURCE_PATH}/ExecutorItem.cpp
@@ -75,6 +77,8 @@ set(FILES
         ${SOURCE_PATH}/Scheduler.h
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.h
+        ${SOURCE_PATH}/MapItem.cpp
+        ${SOURCE_PATH}/MapItem.h
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Util.h
         ${SOURCE_PATH}/Unit.cpp

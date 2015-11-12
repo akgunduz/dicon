@@ -3,6 +3,7 @@
 //
 
 #include "FileList.h"
+#include "Message.h"
 
 bool FileList::set(FileItem *item) {
 
@@ -27,12 +28,43 @@ FileItem* FileList::get(Md5 *md5) {
 void FileList::setFlags(std::vector<Md5> *md5List, bool flag) {
 
     for (int i = 0; i < md5List->size(); i++) {
-        FileItem *item = list[md5List->at(i).data];
-        if (item != nullptr) {
-            item->setFlaggedToSent(flag);
+        TypeFileList::iterator itr = list.find(md5List->at(i).data);
+
+        if (itr != list.end()) {
+            itr->second->setFlaggedToSent(flag);
 
         } else {
             LOG_E("Serious problem, fix it!!!");
         }
     }
+}
+
+int FileList::getCount() {
+    return (int) list.size();
+}
+
+int FileList::process(Message *msg, fWriteProcess function, FILELIST_FLAG flag) {
+
+    int contentCount = 0;
+
+    for (TypeFileList::iterator it = list.begin(); it != list.end(); it++) {
+
+        FileItem *item = it->second;
+
+        if (flag == FILE_LIST_ALL || (flag == FILE_LIST_TRUE && item->isFlaggedToSent())
+                                      || (flag == FILE_LIST_FALSE && !item->isFlaggedToSent())) {
+
+            (msg->*function)(msg->getDescriptor(), item);
+            contentCount++;
+        }
+    }
+    return contentCount;
+}
+
+FileList::FileList(const char *parentDir) {
+    strcpy(this->parentDir, parentDir);
+}
+
+const char *FileList::getDir() {
+    return parentDir;
 }

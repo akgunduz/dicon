@@ -9,9 +9,14 @@
 #include "Util.h"
 #include "ContentItem.h"
 
+constexpr static uint8_t emptyData[MD5_DIGEST_LENGTH] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
 class Md5 {
 
 public:
+
     uint8_t data[MD5_DIGEST_LENGTH];
 
     Md5() {
@@ -20,7 +25,9 @@ public:
 
     void set(Md5 *ref, const char *path = nullptr) {
 
-        memcpy(data, ref->data, MD5_DIGEST_LENGTH);
+        if (ref != nullptr) {
+            memcpy(data, ref->data, MD5_DIGEST_LENGTH);
+        }
 
         if (path != nullptr) {
             FILE *md5file = fopen(path, "w");
@@ -54,7 +61,10 @@ public:
     bool equal(Md5 *ref) {
         return memcmp(data, ref->data, MD5_DIGEST_LENGTH) == 0;
     }
-};
 
+    bool empty() {
+        return memcmp(data, emptyData, MD5_DIGEST_LENGTH) == 0;
+    }
+};
 
 #endif //BANKOR_MD5_H

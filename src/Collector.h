@@ -15,18 +15,18 @@
 class Collector : public Component {
 
 	std::vector<Job*> *jobs;
-	std::map<long , Rule*> rules;
 
 	long distributorAddress;
-
-    Scheduler *scheduler;
 
 	virtual bool processDistributorMsg(long, Message *);
 	virtual bool processCollectorMsg(long, Message *);
 	virtual bool processNodeMsg(long, Message *);
 
 	bool send2DistributorMsg(long, int);
-	bool send2NodeMsg(long, int, Job* job);
+	bool send2NodeMsg(long, int, FileList *);
+
+    Job* getAttachedJob(long address);
+    Job* getUnservedJob();
 
 public:
 
