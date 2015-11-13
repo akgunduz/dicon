@@ -27,11 +27,25 @@ FileItem* FileList::get(Md5 *md5) {
 
 void FileList::setFlags(std::vector<Md5> *md5List, bool flag) {
 
-    for (int i = 0; i < md5List->size(); i++) {
+    for (unsigned int i = 0; i < md5List->size(); i++) {
         TypeFileList::iterator itr = list.find(md5List->at(i).data);
 
         if (itr != list.end()) {
             itr->second->setFlaggedToSent(flag);
+
+        } else {
+            LOG_E("Serious problem, fix it!!!");
+        }
+    }
+}
+
+void FileList::remove(std::vector<Md5> *md5List) {
+
+    for (unsigned int i = 0; i < md5List->size(); i++) {
+        TypeFileList::iterator itr = list.find(md5List->at(i).data);
+
+        if (itr != list.end()) {
+            list.erase(itr);
 
         } else {
             LOG_E("Serious problem, fix it!!!");

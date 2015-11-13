@@ -39,13 +39,13 @@ FileItem *MapItem::get(int index) {
     return files[index];
 }
 
-FileItem *MapItem::get(Unit node) {
+FileItem *MapItem::get(Unit unit) {
 
-    if (fileType != FILE_ARCH) {
+    if (fileType != FILE_ARCH || unit.getType() != HOST_COLLECTOR) {
         return files[0];
     }
 
-    return files[node.getID()];
+    return files[unit.getID()];
 }
 
 int MapItem::getCount() {

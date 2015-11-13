@@ -135,7 +135,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
             FileList *list = job->prepareFileList(Unit(HOST_COLLECTOR, job->getAttachedNode().id));
 
-            list->setFlags(&msg->md5List, false);
+            list->remove(&msg->md5List);
 
 			status = send2NodeMsg(address, MSGTYPE_BINARY, list);
 		}

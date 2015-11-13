@@ -41,6 +41,7 @@ public:
     const char* getDir();
     FileItem* get(Md5*);
     void setFlags(std::vector<Md5> *, bool);
+    void remove(std::vector<Md5> *);
     int process(Message *msg, fWriteProcess process, FILELIST_FLAG flag);
 };
 
