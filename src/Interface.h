@@ -56,6 +56,7 @@ protected :
 	bool initialized = false;
     Unit host;
     Device *device;
+    int lastFreePort;
 	long address;
     bool multicastEnabled = false;
     long multicastAddress = 0;
@@ -63,14 +64,14 @@ protected :
 	Scheduler *scheduler;
 	pthread_t thread;
 	int notifierPipe[2];
-	virtual bool init() = 0;
+	//virtual bool init() = 0;
 	virtual void runReceiver(Unit host) = 0;
 	virtual void runSender(long, Message *) = 0;
 	virtual void runMulticastSender(Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(Unit host, Device*, bool multicastEnabled, const InterfaceCallback *, const char *);
+	Interface(Unit host, const InterfaceCallback *, const char *);
 	virtual void setAddress(int) = 0;
 
 public :

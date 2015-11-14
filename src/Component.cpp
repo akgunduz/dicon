@@ -21,7 +21,7 @@ Component::Component(Unit host, long index, const char* rootPath) {
 
         try {
 
-            connectors[HOST_DISTRIBUTOR] = new Connector(host, Device::getDevice(indexDist), Util::isMulticast(), callback, rootPath);
+            connectors[HOST_DISTRIBUTOR] = new Connector(host, (CONNECTTYPE)indexDist, callback, rootPath);
             this->rootPath = connectors[HOST_DISTRIBUTOR]->getRootPath();
 
         } catch (const std::runtime_error e) {
@@ -40,7 +40,7 @@ Component::Component(Unit host, long index, const char* rootPath) {
 
             try {
 
-                connectors[HOST_COLLECTOR] = new Connector(host, Device::getDevice(indexCollector), false, callback, rootPath);
+                connectors[HOST_COLLECTOR] = new Connector(host, (CONNECTTYPE)indexCollector, callback, rootPath);
                 this->rootPath = connectors[HOST_COLLECTOR]->getRootPath();
 
             } catch (const std::runtime_error e) {
@@ -68,7 +68,7 @@ Component::Component(Unit host, long index, const char* rootPath) {
 
             try {
 
-                connectors[HOST_NODE] = new Connector(host, Device::getDevice(indexNode), false, callback, rootPath);
+                connectors[HOST_NODE] = new Connector(host, (CONNECTTYPE)indexNode, callback, rootPath);
                 this->rootPath = connectors[HOST_NODE]->getRootPath();
 
             } catch (const std::runtime_error e) {

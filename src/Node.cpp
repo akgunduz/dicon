@@ -161,7 +161,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
             msg->setJob(STREAM_MD5ONLY, list);
             LOG_U(UI_UPDATE_CLIENT_LOG,
                   "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-                  Address::getString(address).c_str(), job->getFlaggedFileCount());
+                  Address::getString(address).c_str(), list->getCount());
         }
 			break;
 

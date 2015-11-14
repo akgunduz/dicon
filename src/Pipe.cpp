@@ -9,7 +9,7 @@
 std::vector<Device> Pipe::interfaceList;
 
 Pipe::Pipe(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, device, multicastEnabled, cb, rootPath) {
+		: Interface(host, cb, rootPath) {
 
 	if (!init()) {
 		LOG_E("Instance create failed!!!");

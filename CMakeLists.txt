@@ -111,6 +111,9 @@ set(WX_FILES
         ${SOURCE_PATH}/UserInterface.h
         ${SOURCE_PATH}/UserInterfaceApp.cpp
         ${SOURCE_PATH}/UserInterfaceApp.h
+        src/MapItem.cpp src/MapItem.h src/FileList.cpp src/FileList.h
+        ${SOURCE_PATH}/DeviceManager.cpp
+        ${SOURCE_PATH}/DeviceManager.h
 )
 
 include_directories(${SOURCE_PATH})
@@ -155,6 +158,6 @@ else()
         -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 \
         -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
 
-    add_executable(bankor-lnx ${FILES} ${WX_FILES} src/MapItem.cpp src/MapItem.h src/FileList.cpp src/FileList.h)
+    add_executable(bankor-lnx ${FILES} ${WX_FILES})
 
 endif()

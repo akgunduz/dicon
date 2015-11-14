@@ -49,27 +49,28 @@ class wxListCtrl;
 #define ID_DIST_COLL_LIST 10012
 #define ID_DIST_NODE_LIST 10009
 #define ID_DIST_LOG 10013
+#define ID_CHOICE 10021
+#define ID_STATICTEXT 10024
 #define ID_PANEL_COLLECTOR 10014
 #define ID_COLL_DIST_ADDRESS 10004
-#define ID_COLL_CONNECT_INTERFACE 10016
 #define ID_COLL_BINDED_ADDRESS 10017
 #define ID_COLL_NODE_ADDRESS 10018
 #define ID_COLL_INIT 10019
 #define ID_COLL_PROCESS 10020
 #define ID_COLL_PROCESS_LIST 10003
 #define ID_COLL_LOG 10023
+#define ID_STATICTEXT1 10025
 #define ID_NODE_BINDED_ADDRESS 10015
 #define ID_NODE_COLL_ADDRESS 10022
-#define ID_NODE_CONNECT_INTERFACE 10014
 #define ID_NODE_STATE 10026
 #define ID_NODE_INIT 10027
 #define ID_NODE_FILE_LIST 10029
 #define ID_NODE_EXEC_LIST 10030
 #define ID_NODE_LOG 10031
-#define SYMBOL_USERINTERFACE_STYLE wxDEFAULT_FRAME_STYLE|wxCAPTION|wxSYSTEM_MENU|wxCLOSE_BOX
+#define SYMBOL_USERINTERFACE_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
 #define SYMBOL_USERINTERFACE_TITLE _("Bankor")
 #define SYMBOL_USERINTERFACE_IDNAME ID_USERINTERFACE
-#define SYMBOL_USERINTERFACE_SIZE wxSize(600, 700)
+#define SYMBOL_USERINTERFACE_SIZE wxSize(600, 800)
 #define SYMBOL_USERINTERFACE_POSITION wxDefaultPosition
 ////@end control identifiers
 
@@ -189,25 +190,26 @@ public:
 
 ////@begin UserInterface member variables
     wxTextCtrl* distBackupRate;
-    wxChoice* distConnectInterface;
-    wxStaticText* distAddress;
+    wxChoice* distCollInterface;
+    wxStaticText* distCollDeviceAddress;
     wxStaticText* distBackupStatus;
     wxToggleButton* distInitBtn;
     wxButton* distPollBtn;
     wxListCtrl* distCollList;
     wxListCtrl* distNodeList;
     wxListBox* distLog;
+    wxChoice* nodeInterface;
+    wxStaticText* distNodeDeviceAddress;
     wxStaticText* collDistAddress;
-    wxChoice* collConnectInterface;
-    wxStaticText* collAddress;
+    wxStaticText* collNodeDeviceAddress;
     wxStaticText* collNodeAddress;
     wxToggleButton* collInitBtn;
     wxButton* collProcessBtn;
     wxListBox* collProcessList;
     wxListBox* collLog;
+    wxStaticText* collDistDeviceAddress;
     wxStaticText* nodeCollAddress;
-    wxChoice* nodeConnectInterface;
-    wxStaticText* nodeAddress;
+    wxStaticText* nodeDeviceAddress;
     wxStaticText* nodeState;
     wxToggleButton* nodeInitBtn;
     wxListCtrl* nodeFileList;

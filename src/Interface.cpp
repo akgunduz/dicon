@@ -4,8 +4,9 @@
 //
 
 #include "Interface.h"
+#include "NetAddress.h"
 
-Interface::Interface(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *receiveCB, const char *rootPath) {
+Interface::Interface(Unit host, const InterfaceCallback *receiveCB, const char *rootPath) {
 
 	try {
 
@@ -19,8 +20,9 @@ Interface::Interface(Unit host, Device *device, bool multicastEnabled, const Int
 	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
 
     this->host = host;
-    this->device = device;
-    this->multicastEnabled = multicastEnabled;
+    this->lastFreePort = DEFAULT_PORT;
+//    this->device = device;
+//    this->multicastEnabled = multicastEnabled;
 
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
 	scheduler->setCB(MESSAGE_SEND, sendCB);

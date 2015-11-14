@@ -8,24 +8,19 @@
 #include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(Unit host, Device *device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath) {
-
-	INTERFACES  interfaceType = device->getType();
+Connector::Connector(Unit host, CONNECTTYPE connectType, const InterfaceCallback *cb, const char *rootPath) {
 
 	try {
 
-		switch(interfaceType) {
+		switch(connectType) {
 
-			case INTERFACE_NET:
-				_interface = new Net(host, device, multicastEnabled, cb, rootPath);
+			case CONNECT_TCP:
+            case CONNECT_LOOP:
+				_interface = new Net(host, connectType, cb, rootPath);
 				break;
 
-			case INTERFACE_PIPE:
-				_interface = new Pipe(host, device, false, cb, rootPath);
-				break;
-
-			case INTERFACE_UNIXSOCKET:
-				_interface = new UnixSocket(host, device, false, cb, rootPath);
+			case CONNECT_UNIXSOCKET:
+				_interface = new UnixSocket(host, cb, rootPath);
 				break;
 
 			default:

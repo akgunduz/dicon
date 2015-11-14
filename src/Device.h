@@ -7,6 +7,12 @@
 
 #include "Common.h"
 
+enum CONNECTTYPE {
+    CONNECT_TCP,
+    CONNECT_LOOP,
+    CONNECT_UNIXSOCKET
+};
+
 class Device {
 public:
     char name[50];
@@ -14,6 +20,7 @@ public:
 
     long address;
     long helper;
+    int port;
 
     static std::vector<Device>deviceList;
 
@@ -24,8 +31,11 @@ public:
     INTERFACES getType();
     long getAddress();
     long getHelper();
+    void setPort(int port);
 
     static std::vector<Device> getInterfaces();
+    static bool createInterfaces();
+    static Device* getFreeDevice(CONNECTTYPE);
     static int getCount();
     static Device* getDevice(int);
     static std::string getName(int);

@@ -19,7 +19,9 @@ class Net : public Interface {
 private :
 	int netSocket;
 	int multicastSocket;
-	bool init();
+	bool initTCP();
+	bool initLoopBack();
+	bool initMulticast();
 	void runReceiver(Unit host);
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
@@ -29,7 +31,7 @@ private :
 
 public :
     static std::vector<Device>interfaceList;
-	Net(Unit, Device*, bool, const InterfaceCallback *, const char *);
+	Net(Unit, CONNECTTYPE, const InterfaceCallback *, const char *);
     static std::vector<Device> getInterfaces();
 	std::vector<long> getAddressList();
 	~Net();

@@ -5,20 +5,224 @@
 
 #include "Net.h"
 #include "NetAddress.h"
+#include "DeviceManager.h"
 
 std::vector<Device> Net::interfaceList;
 
-Net::Net(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, device, multicastEnabled, cb, rootPath) {
+Net::Net(Unit host, CONNECTTYPE connectType, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, cb, rootPath) {
 
-	if (!init()) {
-		LOG_E("Instance create failed!!!");
-		throw std::runtime_error("NetReceiver : Instance create failed!!!");
-	}
+    if (connectType == CONNECT_TCP) {
+
+        if (!initTCP()) {
+            LOG_E("initTCP failed!!!");
+            throw std::runtime_error("NetReceiver : initTCP failed!!!");
+        }
+
+        if (host.getType() == HOST_DISTRIBUTOR && !initMulticast()) {
+            LOG_E("initMulticast failed!!!");
+            throw std::runtime_error("NetReceiver : initMulticast failed!!!");
+        }
+
+    } else {
+
+        if (!initLoopBack()) {
+            LOG_E("initLoopBack failed!!!");
+            throw std::runtime_error("NetReceiver : initLoopBack failed!!!");
+        }
+    }
+
+    if (!initThread()) {
+        LOG_E("Problem with Server thread");
+        if (multicastEnabled) {
+            close(multicastSocket);
+        }
+        close(netSocket);
+    }
 
 }
 
+
+bool Net::initTCP() {
+
+    netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (netSocket < 0) {
+        LOG_E("Socket open with err : %d!!!", errno);
+        return false;
+    }
+
+    int on = 1;
+    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(netSocket);
+        return false;
+    }
+
+    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
+
+        Device *device = &(*DeviceManager::getDevices())[i];
+        if (strncmp(device->name, "lo", 2) == 0 ||
+            strncmp(device->name, "us", 2) == 0) {
+            continue;
+        }
+
+        address = NetAddress::parseAddress(device->getAddress(),
+                                                DEFAULT_PORT, (int) device->getHelper());
+
+        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
+
+        if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
+            continue;
+        }
+
+        LOG_U(UI_UPDATE_LOG,
+              "Using address : %s", Address::getString(address).c_str());
+
+        if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
+            LOG_E("Socket listen with err : %d!!!", errno);
+            close(netSocket);
+            return false;
+        }
+
+        if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+            LOG_E("Could not set socket Non-Blocking!!!");
+            close(netSocket);
+            return false;
+        }
+
+        device->setPort(DEFAULT_PORT);
+
+        this->device = device;
+
+        return true;
+    }
+
+    LOG_E("Could not set create tcp net socket!!!");
+
+    close(netSocket);
+
+    return false;
+}
+
+bool Net::initLoopBack() {
+
+    netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (netSocket < 0) {
+        LOG_E("Socket open with err : %d!!!", errno);
+        return false;
+    }
+
+    int on = 1;
+    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(netSocket);
+        return false;
+    }
+
+    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
+
+        Device *device = &(*DeviceManager::getDevices())[i];
+        if (strncmp(device->name, "lo", 2) != 0) {
+            continue;
+        }
+
+        int tryCount = 10;
+
+        for (int j = tryCount; j > 0; j--) {
+
+            address = NetAddress::parseAddress(device->getAddress(),
+                                                    lastFreePort, (int) device->getHelper());
+
+            struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
+
+            if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
+
+                lastFreePort++;
+                continue;
+            }
+
+            LOG_U(UI_UPDATE_LOG,
+                  "Using address : %s", Address::getString(address).c_str());
+
+            if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
+                LOG_E("Socket listen with err : %d!!!", errno);
+                close(netSocket);
+                return false;
+            }
+
+            if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+                LOG_E("Could not set socket Non-Blocking!!!");
+                close(netSocket);
+                return false;
+            }
+
+            device->setPort(lastFreePort);
+
+            this->device = device;
+
+            return true;
+        }
+
+        break;
+
+    }
+
+    LOG_E("Could not set create loopback net socket!!!");
+
+    close(netSocket);
+
+    return false;
+}
+
+bool Net::initMulticast() {
+
+    multicastAddress = NetAddress::parseAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
+
+    multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (multicastSocket < 0) {
+        LOG_E("Socket receiver open with err : %d!!!", errno);
+        return false;
+    }
+
+    int on = 1;
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(multicastSocket);
+        return false;
+    }
+
+    struct sockaddr_in serverAddress = NetAddress::getInetAddress(DEFAULT_MULTICAST_PORT);
+    if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
+        LOG_E("Socket bind with err : %d!!!", errno);
+        close(multicastSocket);
+        return false;
+    }
+
+    LOG_U(UI_UPDATE_LOG,
+          "Using multicast address : %s", Address::getString(multicastAddress).c_str());
+
+    ip_mreq imreq = NetAddress::getMulticastAddress(address);
+
+    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(multicastSocket);
+        return false;
+    }
+/*
+        if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
+            LOG_E("Socket option with err : %d!!!", errno);
+            close(multicastSocket);
+            return false;
+        }
+        */
+
+    multicastEnabled = true;
+
+    return true;
+}
+/*
 bool Net::init() {
+
 
 	netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (netSocket < 0) {
@@ -107,14 +311,14 @@ bool Net::init() {
             close(netSocket);
             return false;
         }
-/*
-        if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
-            LOG_E("Socket option with err : %d!!!", errno);
-            close(multicastSocket);
-            close(netSocket);
-            return false;
-        }
-        */
+
+//        if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
+//            LOG_E("Socket option with err : %d!!!", errno);
+//            close(multicastSocket);
+//            close(netSocket);
+//            return false;
+//        }
+
     }
 
 	if (!initThread()) {
@@ -128,7 +332,7 @@ bool Net::init() {
 
 	return true;
 }
-
+*/
 void Net::runReceiver(Unit host) {
 
     bool thread_started = true;

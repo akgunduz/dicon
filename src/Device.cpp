@@ -104,3 +104,54 @@ long Device::getHelper(int index) {
 
     return ci->helper;
 }
+
+bool Device::createInterfaces() {
+
+    struct ifaddrs* ifAddrStruct = nullptr;
+    struct ifaddrs* loop = nullptr;
+
+    getifaddrs(&ifAddrStruct);
+    if (ifAddrStruct == nullptr) {
+        return false;
+    }
+
+    for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
+
+        if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
+
+            if (strncmp(loop->ifa_name, "et", 2) == 0 ||
+                strncmp(loop->ifa_name, "en", 2) == 0 ||
+                strncmp(loop->ifa_name, "br", 2) == 0 ||
+                strncmp(loop->ifa_name, "lo", 2) == 0 ||
+                strncmp(loop->ifa_name, "wlan", 2) == 0) {
+
+                deviceList.push_back(Device(loop->ifa_name,
+                                               ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                               NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
+
+            }
+        }
+    };
+
+    freeifaddrs(ifAddrStruct);
+
+    deviceList.push_back(Device("us", INTERFACE_UNIXSOCKET));
+
+    return true;
+}
+
+Device* Device::getFreeDevice(CONNECTTYPE connectType) {
+
+    switch(connectType) {
+
+        case CONNECT_TCP:
+
+            break;
+    }
+
+    return nullptr;
+}
+
+void Device::setPort(int port) {
+    this->port = port;
+}

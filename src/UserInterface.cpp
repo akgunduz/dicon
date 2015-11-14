@@ -124,25 +124,26 @@ void UserInterface::Init()
 
 ////@begin UserInterface member initialisation
     distBackupRate = NULL;
-    distConnectInterface = NULL;
-    distAddress = NULL;
+    distCollInterface = NULL;
+    distCollDeviceAddress = NULL;
     distBackupStatus = NULL;
     distInitBtn = NULL;
     distPollBtn = NULL;
     distCollList = NULL;
     distNodeList = NULL;
     distLog = NULL;
+    nodeInterface = NULL;
+    distNodeDeviceAddress = NULL;
     collDistAddress = NULL;
-    collConnectInterface = NULL;
-    collAddress = NULL;
+    collNodeDeviceAddress = NULL;
     collNodeAddress = NULL;
     collInitBtn = NULL;
     collProcessBtn = NULL;
     collProcessList = NULL;
     collLog = NULL;
+    collDistDeviceAddress = NULL;
     nodeCollAddress = NULL;
-    nodeConnectInterface = NULL;
-    nodeAddress = NULL;
+    nodeDeviceAddress = NULL;
     nodeState = NULL;
     nodeInitBtn = NULL;
     nodeFileList = NULL;
@@ -161,120 +162,123 @@ void UserInterface::CreateControls()
 ////@begin UserInterface content construction
     UserInterface* itemFrame1 = this;
 
-    wxNotebook* itemNotebook2 = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_NOPAGETHEME|wxNB_FLAT|wxNO_BORDER );
+    wxNotebook* itemNotebook2 = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT );
 
     wxPanel* itemPanel3 = new wxPanel( itemNotebook2, ID_PANEL_DISTRIBUTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     itemPanel3->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    wxStaticText* itemStaticText4 = new wxStaticText( itemPanel3, wxID_STATIC, _("Connect Interface :"), wxPoint(10, 30), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText4 = new wxStaticText( itemPanel3, wxID_STATIC, _("Collector Interface :"), wxPoint(10, 30), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText5 = new wxStaticText( itemPanel3, wxID_STATIC, _("Backup Rate :"), wxPoint(10, 70), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText5 = new wxStaticText( itemPanel3, wxID_STATIC, _("Backup Rate :"), wxPoint(10, 110), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText6 = new wxStaticText( itemPanel3, wxID_STATIC, _("Collectors :"), wxPoint(10, 180), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText6 = new wxStaticText( itemPanel3, wxID_STATIC, _("Collectors :"), wxPoint(10, 280), wxDefaultSize, 0 );
 
-    distBackupRate = new wxTextCtrl( itemPanel3, ID_DIST_BACKUP_RATE, wxEmptyString, wxPoint(150, 66), wxSize(130, -1), 0 );
+    distBackupRate = new wxTextCtrl( itemPanel3, ID_DIST_BACKUP_RATE, wxEmptyString, wxPoint(150, 106), wxSize(130, -1), 0 );
 
-    wxArrayString distConnectInterfaceStrings;
-    distConnectInterface = new wxChoice( itemPanel3, ID_DIST_CONNECT_INTERFACE, wxPoint(150, 26), wxSize(130, -1), distConnectInterfaceStrings, 0 );
+    wxArrayString distCollInterfaceStrings;
+    distCollInterface = new wxChoice( itemPanel3, ID_DIST_CONNECT_INTERFACE, wxPoint(150, 26), wxSize(130, -1), distCollInterfaceStrings, 0 );
 
-    wxStaticText* itemStaticText9 = new wxStaticText( itemPanel3, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText9 = new wxStaticText( itemPanel3, wxID_STATIC, _("Binded Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText10 = new wxStaticText( itemPanel3, wxID_STATIC, _("Backup Status :"), wxPoint(310, 70), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText10 = new wxStaticText( itemPanel3, wxID_STATIC, _("Backup Status :"), wxPoint(310, 110), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel3, wxID_STATIC, _("Nodes :"), wxPoint(310, 180), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel3, wxID_STATIC, _("Nodes :"), wxPoint(310, 280), wxDefaultSize, 0 );
 
-    distAddress = new wxStaticText( itemPanel3, ID_DIST_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    distCollDeviceAddress = new wxStaticText( itemPanel3, ID_DIST_BINDED_ADDRESS, _("0"), wxPoint(150, 70), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    distBackupStatus = new wxStaticText( itemPanel3, ID_DIST_BACKUP_STATUS, _("0"), wxPoint(450, 70), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    distBackupStatus = new wxStaticText( itemPanel3, ID_DIST_BACKUP_STATUS, _("0"), wxPoint(450, 110), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    distInitBtn = new wxToggleButton( itemPanel3, ID_DIST_INIT, _("Init"), wxPoint(10, 110), wxSize(270, 50), 0 );
+    distInitBtn = new wxToggleButton( itemPanel3, ID_DIST_INIT, _("Init"), wxPoint(10, 210), wxSize(270, 50), 0 );
     distInitBtn->SetValue(false);
 
-    distPollBtn = new wxButton( itemPanel3, ID_DIST_POLL, _("Poll"), wxPoint(310, 110), wxSize(270, 50), 0 );
+    distPollBtn = new wxButton( itemPanel3, ID_DIST_POLL, _("Poll"), wxPoint(310, 210), wxSize(270, 50), 0 );
 
-    distCollList = new wxListCtrl( itemPanel3, ID_DIST_COLL_LIST, wxPoint(10, 220), wxSize(270, 200), wxLC_REPORT );
+    distCollList = new wxListCtrl( itemPanel3, ID_DIST_COLL_LIST, wxPoint(10, 320), wxSize(270, 200), wxLC_REPORT );
 
-    distNodeList = new wxListCtrl( itemPanel3, ID_DIST_NODE_LIST, wxPoint(310, 220), wxSize(270, 200), wxLC_REPORT );
+    distNodeList = new wxListCtrl( itemPanel3, ID_DIST_NODE_LIST, wxPoint(310, 320), wxSize(270, 200), wxLC_REPORT );
 
     wxArrayString distLogStrings;
-    distLog = new wxListBox( itemPanel3, ID_DIST_LOG, wxPoint(10, 440), wxSize(570, 180), distLogStrings, wxLB_SINGLE );
+    distLog = new wxListBox( itemPanel3, ID_DIST_LOG, wxPoint(10, 540), wxSize(570, 180), distLogStrings, wxLB_SINGLE );
+
+    wxStaticText* itemStaticText19 = new wxStaticText( itemPanel3, wxID_STATIC, _("Node Interface :"), wxPoint(310, 30), wxDefaultSize, 0 );
+
+    wxArrayString nodeInterfaceStrings;
+    nodeInterface = new wxChoice( itemPanel3, ID_CHOICE, wxPoint(450, 26), wxSize(130, -1), nodeInterfaceStrings, 0 );
+
+    wxStaticText* itemStaticText21 = new wxStaticText( itemPanel3, wxID_STATIC, _("Binded Address :"), wxPoint(310, 70), wxDefaultSize, 0 );
+
+    distNodeDeviceAddress = new wxStaticText( itemPanel3, ID_STATICTEXT, _("0"), wxPoint(450, 70), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
     itemNotebook2->AddPage(itemPanel3, _("Distributor"));
 
-    wxPanel* itemPanel19 = new wxPanel( itemNotebook2, ID_PANEL_COLLECTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    itemPanel19->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    collDistAddress = new wxStaticText( itemPanel19, ID_COLL_DIST_ADDRESS, _("0"), wxPoint(160, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    wxPanel* itemPanel23 = new wxPanel( itemNotebook2, ID_PANEL_COLLECTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    itemPanel23->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    collDistAddress = new wxStaticText( itemPanel23, ID_COLL_DIST_ADDRESS, _("0"), wxPoint(160, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    wxStaticText* itemStaticText21 = new wxStaticText( itemPanel19, wxID_STATIC, _("Distributor Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel23, wxID_STATIC, _("Distributor Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText22 = new wxStaticText( itemPanel19, wxID_STATIC, _("Jobs :"), wxPoint(10, 180), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel23, wxID_STATIC, _("Jobs :"), wxPoint(10, 280), wxDefaultSize, 0 );
 
-    wxArrayString collConnectInterfaceStrings;
-    collConnectInterface = new wxChoice( itemPanel19, ID_COLL_CONNECT_INTERFACE, wxPoint(150, 26), wxSize(130, -1), collConnectInterfaceStrings, 0 );
+    wxStaticText* itemStaticText27 = new wxStaticText( itemPanel23, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText24 = new wxStaticText( itemPanel19, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText28 = new wxStaticText( itemPanel23, wxID_STATIC, _("Last Node Address :"), wxPoint(310, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText25 = new wxStaticText( itemPanel19, wxID_STATIC, _("Last Node Address :"), wxPoint(310, 70), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel23, wxID_STATIC, _("Process :"), wxPoint(310, 280), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel19, wxID_STATIC, _("Process :"), wxPoint(310, 180), wxDefaultSize, 0 );
+    collNodeDeviceAddress = new wxStaticText( itemPanel23, ID_COLL_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    collAddress = new wxStaticText( itemPanel19, ID_COLL_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    collNodeAddress = new wxStaticText( itemPanel23, ID_COLL_NODE_ADDRESS, _("0"), wxPoint(460, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    collNodeAddress = new wxStaticText( itemPanel19, ID_COLL_NODE_ADDRESS, _("0"), wxPoint(460, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
-
-    collInitBtn = new wxToggleButton( itemPanel19, ID_COLL_INIT, _("Init"), wxPoint(10, 110), wxSize(270, 50), 0 );
+    collInitBtn = new wxToggleButton( itemPanel23, ID_COLL_INIT, _("Init"), wxPoint(10, 210), wxSize(270, 50), 0 );
     collInitBtn->SetValue(false);
 
-    collProcessBtn = new wxButton( itemPanel19, ID_COLL_PROCESS, _("Process"), wxPoint(310, 110), wxSize(270, 50), 0 );
+    collProcessBtn = new wxButton( itemPanel23, ID_COLL_PROCESS, _("Process"), wxPoint(310, 210), wxSize(270, 50), 0 );
 
     wxArrayString collProcessListStrings;
-    collProcessList = new wxListBox( itemPanel19, ID_COLL_PROCESS_LIST, wxPoint(310, 220), wxSize(270, 200), collProcessListStrings, wxLB_SINGLE );
+    collProcessList = new wxListBox( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 320), wxSize(270, 200), collProcessListStrings, wxLB_SINGLE );
 
     wxArrayString collLogStrings;
-    collLog = new wxListBox( itemPanel19, ID_COLL_LOG, wxPoint(10, 440), wxSize(570, 180), collLogStrings, wxLB_SINGLE );
+    collLog = new wxListBox( itemPanel23, ID_COLL_LOG, wxPoint(10, 540), wxSize(570, 180), collLogStrings, wxLB_SINGLE );
 
-    wxStaticText* itemStaticText33 = new wxStaticText( itemPanel19, wxID_STATIC, _("Connect Interface :"), wxPoint(10, 30), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText36 = new wxStaticText( itemPanel23, wxID_STATIC, _("Binded Address :"), wxPoint(10, 30), wxDefaultSize, 0 );
 
-    itemNotebook2->AddPage(itemPanel19, _("Collector"));
+    collDistDeviceAddress = new wxStaticText( itemPanel23, ID_STATICTEXT1, _("0"), wxPoint(150, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    wxPanel* itemPanel34 = new wxPanel( itemNotebook2, ID_NODE_BINDED_ADDRESS, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    itemPanel34->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    nodeCollAddress = new wxStaticText( itemPanel34, ID_NODE_COLL_ADDRESS, _("0"), wxPoint(160, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    itemNotebook2->AddPage(itemPanel23, _("Collector"));
 
-    wxStaticText* itemStaticText36 = new wxStaticText( itemPanel34, wxID_STATIC, _("Collector Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
+    wxPanel* itemPanel38 = new wxPanel( itemNotebook2, ID_NODE_BINDED_ADDRESS, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    itemPanel38->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    nodeCollAddress = new wxStaticText( itemPanel38, ID_NODE_COLL_ADDRESS, _("0"), wxPoint(160, 70), wxSize(120, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    wxStaticText* itemStaticText37 = new wxStaticText( itemPanel34, wxID_STATIC, _("Files :"), wxPoint(10, 180), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText40 = new wxStaticText( itemPanel38, wxID_STATIC, _("Collector Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
 
-    wxArrayString nodeConnectInterfaceStrings;
-    nodeConnectInterface = new wxChoice( itemPanel34, ID_NODE_CONNECT_INTERFACE, wxPoint(150, 26), wxSize(130, -1), nodeConnectInterfaceStrings, 0 );
+    wxStaticText* itemStaticText41 = new wxStaticText( itemPanel38, wxID_STATIC, _("Files :"), wxPoint(10, 280), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText39 = new wxStaticText( itemPanel34, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText42 = new wxStaticText( itemPanel38, wxID_STATIC, _("Binded Address :"), wxPoint(10, 30), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText40 = new wxStaticText( itemPanel34, wxID_STATIC, _("State :"), wxPoint(310, 70), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText43 = new wxStaticText( itemPanel38, wxID_STATIC, _("State :"), wxPoint(310, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText41 = new wxStaticText( itemPanel34, wxID_STATIC, _("Executors :"), wxPoint(310, 180), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText44 = new wxStaticText( itemPanel38, wxID_STATIC, _("Executors :"), wxPoint(310, 280), wxDefaultSize, 0 );
 
-    nodeAddress = new wxStaticText( itemPanel34, ID_NODE_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    nodeDeviceAddress = new wxStaticText( itemPanel38, ID_NODE_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    nodeState = new wxStaticText( itemPanel34, ID_NODE_STATE, _("0"), wxPoint(450, 70), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    nodeState = new wxStaticText( itemPanel38, ID_NODE_STATE, _("0"), wxPoint(450, 70), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    nodeInitBtn = new wxToggleButton( itemPanel34, ID_NODE_INIT, _("Init"), wxPoint(10, 110), wxSize(570, 50), 0 );
+    nodeInitBtn = new wxToggleButton( itemPanel38, ID_NODE_INIT, _("Init"), wxPoint(10, 210), wxSize(570, 50), 0 );
     nodeInitBtn->SetValue(false);
 
-    nodeFileList = new wxListCtrl( itemPanel34, ID_NODE_FILE_LIST, wxPoint(10, 220), wxSize(270, 200), wxLC_REPORT );
+    nodeFileList = new wxListCtrl( itemPanel38, ID_NODE_FILE_LIST, wxPoint(10, 320), wxSize(270, 200), wxLC_REPORT );
 
     wxArrayString nodeExecListStrings;
-    nodeExecList = new wxListBox( itemPanel34, ID_NODE_EXEC_LIST, wxPoint(310, 220), wxSize(270, 200), nodeExecListStrings, wxLB_SINGLE );
+    nodeExecList = new wxListBox( itemPanel38, ID_NODE_EXEC_LIST, wxPoint(310, 320), wxSize(270, 200), nodeExecListStrings, wxLB_SINGLE );
 
     wxArrayString nodeLogStrings;
-    nodeLog = new wxListBox( itemPanel34, ID_NODE_LOG, wxPoint(10, 440), wxSize(570, 180), nodeLogStrings, wxLB_SINGLE );
+    nodeLog = new wxListBox( itemPanel38, ID_NODE_LOG, wxPoint(10, 540), wxSize(570, 180), nodeLogStrings, wxLB_SINGLE );
 
-    wxStaticText* itemStaticText48 = new wxStaticText( itemPanel34, wxID_STATIC, _("Connect Interface :"), wxPoint(10, 30), wxDefaultSize, 0 );
-
-    itemNotebook2->AddPage(itemPanel34, _("Node"));
+    itemNotebook2->AddPage(itemPanel38, _("Node"));
 
 ////@end UserInterface content construction
 
-    collJobList = new wxTreeListCtrl( itemPanel19, ID_COLL_JOB_LIST, wxPoint(10, 220), wxSize(270, 200), wxTL_3STATE);
+    collJobList = new wxTreeListCtrl( itemPanel23, ID_COLL_JOB_LIST, wxPoint(10, 320), wxSize(270, 200), wxTL_3STATE);
 
 }
 
@@ -373,12 +377,20 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
+    distCollInterface->Insert("TCP", 0);
+    distCollInterface->Insert("Loopback", 1);
+    distCollInterface->Insert("UnixSocket", 2);
+
+    nodeInterface->Insert("TCP", 0);
+    nodeInterface->Insert("Loopback", 1);
+    nodeInterface->Insert("UnixSocket", 2);
+/*
     if (Device::getCount() > 0) {
         for (uint32_t i = 0; i < Device::getCount(); i++) {
             distConnectInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
         }
         distConnectInterface->Select(0);
-    }
+    }*/
 }
 
 /*
@@ -400,8 +412,8 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
             double backupRate = 0;
             distBackupRate->GetLineText(0).ToDouble(&backupRate);
 
-            distObject = new Distributor((uint32_t)distConnectInterface->GetSelection(),
-                                         (uint32_t)distConnectInterface->GetSelection(), path, backupRate);
+            distObject = new Distributor((uint32_t)distCollInterface->GetSelection(),
+                                         (uint32_t)nodeInterface->GetSelection(), path, backupRate);
 
         } catch (std::runtime_error &e) {
 
@@ -417,7 +429,8 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
         delete distObject;
         distBackupRate->SetEditable(true);
         distInitBtn->SetLabel("Init");
-        distAddress->SetLabel("");
+        distCollDeviceAddress->SetLabel("");
+        distNodeDeviceAddress->SetLabel("");
     }
 }
 
@@ -438,7 +451,8 @@ void UserInterface::OnDistPollClick( wxCommandEvent& event )
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    distAddress->SetLabel(Address::getString(data->data64_1));
+    distCollDeviceAddress->SetLabel(Address::getString(data->data64_1));
+    distNodeDeviceAddress->SetLabel(Address::getString(data->data64_2));
 
 }
 
@@ -531,12 +545,13 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
+    /*
     if (Device::getCount() > 0) {
         for (uint32_t i = 0; i < Device::getCount(); i++) {
             collConnectInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
         }
         collConnectInterface->Select(0);
-    }
+    }*/
 }
 
 /*
@@ -552,8 +567,8 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
             sprintf(path, "%s/%s/", getcwd(nullptr, 0), COLLECTOR_PATH);
             mkdir(path, 0777);
 
-            collObject = new Collector((uint32_t)collConnectInterface->GetSelection(),
-                                       (uint32_t)collConnectInterface->GetSelection(), path);
+            collObject = new Collector((uint32_t)distCollInterface->GetSelection(),
+                                       (uint32_t)nodeInterface->GetSelection(), path);
 
         } catch (std::runtime_error &e) {
 
@@ -567,7 +582,8 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
 
         delete collObject;
         collInitBtn->SetLabel("Init");
-        collAddress->SetLabel("");
+        collDistDeviceAddress->SetLabel("");
+        collNodeDeviceAddress->SetLabel("");
         collJobList->DeleteAllItems();
     }
 }
@@ -601,7 +617,8 @@ void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    collAddress->SetLabel(Address::getString(data->data64_1));
+    collDistDeviceAddress->SetLabel(Address::getString(data->data64_1));
+    collNodeDeviceAddress->SetLabel(Address::getString(data->data64_2));
 
 }
 
@@ -684,14 +701,14 @@ void UserInterface::nodeInit() {
     uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
     uiUpdater[UI_UPDATE_CLIENT_CLEAR] = &UserInterface::nodeUpdateClear;
     uiUpdater[UI_UPDATE_CLIENT_LOG] = &UserInterface::nodeUpdateLog;
-
+/*
     if (Device::getCount() > 0) {
         for (uint32_t i = 0; i < Device::getCount(); i++) {
             nodeConnectInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
         }
         nodeConnectInterface->Select(0);
     }
-
+*/
 }
 
 /*
@@ -707,8 +724,8 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
             sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
             mkdir(path, 0777);
 
-            nodeObject = new Node((uint32_t)nodeConnectInterface->GetSelection(),
-                                  (uint32_t)nodeConnectInterface->GetSelection(), path);
+            nodeObject = new Node((uint32_t)nodeInterface->GetSelection(),
+                                  (uint32_t)nodeInterface->GetSelection(), path);
 
         } catch (std::runtime_error &e) {
 
@@ -722,14 +739,14 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
 
         delete nodeObject;
         nodeInitBtn->SetLabel("Init");
-        nodeAddress->SetLabel("");
+        nodeDeviceAddress->SetLabel("");
     }
 }
 
 void UserInterface::nodeUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    nodeAddress->SetLabel(Address::getString(data->data64_1));
+    nodeDeviceAddress->SetLabel(Address::getString(data->data64_1));
 }
 
 void UserInterface::nodeUpdateState(wxCommandEvent &event) {

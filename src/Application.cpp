@@ -8,6 +8,7 @@
 #include "UserInterface.h"
 #endif
 #include "Console.h"
+#include "DeviceManager.h"
 
 Console *c_ui;
 
@@ -15,7 +16,9 @@ int main(int argc, char** argv) {
 
 	Log::setLogLevel(LEVEL_WARN);
 
-	Device::getInterfaces();
+	//Device::getInterfaces();
+
+    DeviceManager::getInstance();
 
 	if (argc > 1) {
 

@@ -2,7 +2,7 @@
 <resource version="2.3.0.1" xmlns="http://www.wxwidgets.org/wxxrc">
     <object class="wxFrame" name="ID_USERINTERFACE" subclass="UserInterface">
         <style>wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX</style>
-        <size>600,700</size>
+        <size>600,800</size>
         <title>Bankor</title>
         <centered>1</centered>
         <object class="wxNotebook" name="ID_NOTEBOOK">
@@ -14,73 +14,91 @@
                     <exstyle>wxWS_EX_VALIDATE_RECURSIVELY</exstyle>
                     <object class="wxStaticText" name="wxID_STATIC">
                         <pos>10,30</pos>
-                        <label>Connect Interface :</label>
+                        <label>Collector Interface :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>10,70</pos>
+                        <pos>10,110</pos>
                         <label>Backup Rate :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>10,180</pos>
+                        <pos>10,280</pos>
                         <label>Collectors :</label>
                     </object>
                     <object class="wxTextCtrl" name="ID_DIST_BACKUP_RATE">
                         <size>130,-1</size>
-                        <pos>150,66</pos>
+                        <pos>150,106</pos>
                     </object>
                     <object class="wxChoice" name="ID_DIST_CONNECT_INTERFACE">
                         <size>130,-1</size>
                         <pos>150,26</pos>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,30</pos>
+                        <pos>10,70</pos>
                         <label>Binded Address :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,70</pos>
+                        <pos>310,110</pos>
                         <label>Backup Status :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,180</pos>
+                        <pos>310,280</pos>
                         <label>Nodes :</label>
                     </object>
                     <object class="wxStaticText" name="ID_DIST_BINDED_ADDRESS">
                         <size>130,-1</size>
-                        <pos>450,30</pos>
+                        <pos>150,70</pos>
                         <style>wxALIGN_RIGHT|wxST_NO_AUTORESIZE</style>
                         <label>0</label>
                     </object>
                     <object class="wxStaticText" name="ID_DIST_BACKUP_STATUS">
                         <size>130,-1</size>
-                        <pos>450,70</pos>
+                        <pos>450,110</pos>
                         <style>wxALIGN_RIGHT|wxST_NO_AUTORESIZE</style>
                         <label>0</label>
                     </object>
                     <object class="wxToggleButton" name="ID_DIST_INIT">
                         <size>270,50</size>
-                        <pos>10,110</pos>
+                        <pos>10,210</pos>
                         <label>Init</label>
                         <checked>0</checked>
                     </object>
                     <object class="wxButton" name="ID_DIST_POLL">
                         <size>270,50</size>
-                        <pos>310,110</pos>
+                        <pos>310,210</pos>
                         <label>Poll</label>
                     </object>
                     <object class="wxListCtrl" name="ID_DIST_COLL_LIST">
                         <size>270,200</size>
-                        <pos>10,220</pos>
+                        <pos>10,320</pos>
                         <style>wxLC_REPORT</style>
                     </object>
                     <object class="wxListCtrl" name="ID_DIST_NODE_LIST">
                         <size>270,200</size>
-                        <pos>310,220</pos>
+                        <pos>310,320</pos>
                         <style>wxLC_REPORT</style>
                     </object>
                     <object class="wxListBox" name="ID_DIST_LOG">
                         <size>570,180</size>
-                        <pos>10,440</pos>
+                        <pos>10,540</pos>
                         <style>wxLB_SINGLE</style>
+                    </object>
+                    <object class="wxStaticText" name="wxID_STATIC">
+                        <pos>310,30</pos>
+                        <label>Node Interface :</label>
+                    </object>
+                    <object class="wxChoice" name="ID_CHOICE">
+                        <size>130,-1</size>
+                        <pos>450,26</pos>
+                    </object>
+                    <object class="wxStaticText" name="wxID_STATIC">
+                        <pos>310,70</pos>
+                        <label>Binded Address :</label>
+                    </object>
+                    <object class="wxStaticText" name="ID_STATICTEXT">
+                        <size>130,-1</size>
+                        <pos>450,70</pos>
+                        <style>wxALIGN_RIGHT|wxST_NO_AUTORESIZE</style>
+                        <label>0</label>
                     </object>
                 </object>
             </object>
@@ -100,12 +118,8 @@
                         <label>Distributor Address :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>10,180</pos>
+                        <pos>10,280</pos>
                         <label>Jobs :</label>
-                    </object>
-                    <object class="wxChoice" name="ID_COLL_CONNECT_INTERFACE">
-                        <size>130,-1</size>
-                        <pos>150,26</pos>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
                         <pos>310,30</pos>
@@ -116,7 +130,7 @@
                         <label>Last Node Address :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,180</pos>
+                        <pos>310,280</pos>
                         <label>Process :</label>
                     </object>
                     <object class="wxStaticText" name="ID_COLL_BINDED_ADDRESS">
@@ -133,28 +147,34 @@
                     </object>
                     <object class="wxToggleButton" name="ID_COLL_INIT">
                         <size>270,50</size>
-                        <pos>10,110</pos>
+                        <pos>10,210</pos>
                         <label>Init</label>
                         <checked>0</checked>
                     </object>
                     <object class="wxButton" name="ID_COLL_PROCESS">
                         <size>270,50</size>
-                        <pos>310,110</pos>
+                        <pos>310,210</pos>
                         <label>Process</label>
                     </object>
                     <object class="wxListBox" name="ID_COLL_PROCESS_LIST">
                         <size>270,200</size>
-                        <pos>310,220</pos>
+                        <pos>310,320</pos>
                         <style>wxLB_SINGLE</style>
                     </object>
                     <object class="wxListBox" name="ID_COLL_LOG">
                         <size>570,180</size>
-                        <pos>10,440</pos>
+                        <pos>10,540</pos>
                         <style>wxLB_SINGLE</style>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
                         <pos>10,30</pos>
-                        <label>Connect Interface :</label>
+                        <label>Binded Address :</label>
+                    </object>
+                    <object class="wxStaticText" name="ID_STATICTEXT1">
+                        <size>130,-1</size>
+                        <pos>150,30</pos>
+                        <style>wxALIGN_RIGHT|wxST_NO_AUTORESIZE</style>
+                        <label>0</label>
                     </object>
                 </object>
             </object>
@@ -174,15 +194,11 @@
                         <label>Collector Address :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>10,180</pos>
+                        <pos>10,280</pos>
                         <label>Files :</label>
                     </object>
-                    <object class="wxChoice" name="ID_NODE_CONNECT_INTERFACE">
-                        <size>130,-1</size>
-                        <pos>150,26</pos>
-                    </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,30</pos>
+                        <pos>10,30</pos>
                         <label>Binded Address :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
@@ -190,7 +206,7 @@
                         <label>State :</label>
                     </object>
                     <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>310,180</pos>
+                        <pos>310,280</pos>
                         <label>Executors :</label>
                     </object>
                     <object class="wxStaticText" name="ID_NODE_BINDED_ADDRESS">
@@ -207,28 +223,24 @@
                     </object>
                     <object class="wxToggleButton" name="ID_NODE_INIT">
                         <size>570,50</size>
-                        <pos>10,110</pos>
+                        <pos>10,210</pos>
                         <label>Init</label>
                         <checked>0</checked>
                     </object>
                     <object class="wxListCtrl" name="ID_NODE_FILE_LIST">
                         <size>270,200</size>
-                        <pos>10,220</pos>
+                        <pos>10,320</pos>
                         <style>wxLC_REPORT</style>
                     </object>
                     <object class="wxListBox" name="ID_NODE_EXEC_LIST">
                         <size>270,200</size>
-                        <pos>310,220</pos>
+                        <pos>310,320</pos>
                         <style>wxLB_SINGLE</style>
                     </object>
                     <object class="wxListBox" name="ID_NODE_LOG">
                         <size>570,180</size>
-                        <pos>10,440</pos>
+                        <pos>10,540</pos>
                         <style>wxLB_SINGLE</style>
-                    </object>
-                    <object class="wxStaticText" name="wxID_STATIC">
-                        <pos>10,30</pos>
-                        <label>Connect Interface :</label>
                     </object>
                 </object>
             </object>

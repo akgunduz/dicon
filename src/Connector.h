@@ -16,7 +16,7 @@ class Connector {
 	bool initialized = false;
 	Interface* _interface;
 public:
-	Connector(Unit, Device *, bool, const InterfaceCallback *, const char *);
+	Connector(Unit, CONNECTTYPE, const InterfaceCallback *, const char *);
 	bool send(long, Message*);
 	bool send(Message*);
 	bool put(long, Message*);

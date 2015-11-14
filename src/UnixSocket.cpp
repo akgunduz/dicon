@@ -5,70 +5,91 @@
 
 #include "UnixSocket.h"
 #include "UnixSocketAddress.h"
+#include "DeviceManager.h"
 
 std::vector<Device> UnixSocket::interfaceList;
 
-UnixSocket::UnixSocket(Unit host, Device* device, bool multicastEnabled, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, device, multicastEnabled, cb, rootPath) {
+UnixSocket::UnixSocket(Unit host, const InterfaceCallback *cb, const char *rootPath)
+		: Interface(host, cb, rootPath) {
 
-	if (!init()) {
+	if (!initUnixSocket()) {
 		LOG_E("Instance create failed!!!");
 		throw std::runtime_error("NetReceiver : Instance create failed!!!");
 	}
-	LOG_I("Instance is created, Socket : %d!!!", unixSocket);
+
+    if (!initThread()) {
+        LOG_E("Problem with Server thread");
+        close(unixSocket);
+    }
 
 }
 
-bool UnixSocket::init() {
+bool UnixSocket::initUnixSocket() {
 
-	unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (unixSocket < 0) {
-		LOG_E("Socket receiver open with err : %d!!!", errno);
-		return false;
-	}
+    unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (unixSocket < 0) {
+        LOG_E("Socket receiver open with err : %d!!!", errno);
+        return false;
+    }
 
-	setAddress(0);
+    int on = 1;
+    if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
+        LOG_E("Socket option with err : %d!!!", errno);
+        close(unixSocket);
+        return false;
+    }
 
-    sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
+    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
 
-	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(serverAddress.sun_path);
+        Device *device = &(*DeviceManager::getDevices())[i];
+        if (strncmp(device->name, "us", 2) != 0) {
+            continue;
+        }
 
-	int on = 1;
-	if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
-		LOG_E("Socket option with err : %d!!!", errno);
-		close(unixSocket);
-		return false;
-	}
-	LOG_T("Socket set option is OK!!!");
+        int tryCount = 10;
 
-	if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
-		LOG_E("Socket bind with err : %d!!!", errno);
-		close(unixSocket);
-		return false;
-	}
-	LOG_T("Socket binding is OK!!!");
+        for (int j = tryCount; j > 0; j--) {
 
-	if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
-		LOG_E("Socket listen with err : %d!!!", errno);
-		close(unixSocket);
-		return false;
-	}
-	LOG_T("Socket listen is OK!!!");
+            address = (((unsigned) getpid() << 10) & 0xFFFFFF) | lastFreePort;
 
-	if(fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
-		LOG_E("Could not set socket Non-Blocking!!!");
-		close(unixSocket);
-		return false;
-	}
-	LOG_T("Set socket Non-Blocking is OK!!!");
+            sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
 
-	if (!initThread()) {
-		LOG_E("Problem with Server thread");
-		close(unixSocket);
-		return false;
-	}
+            socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
-	return true;
+            if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
+
+                lastFreePort++;
+                continue;
+            }
+
+            if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
+                LOG_E("Socket listen with err : %d!!!", errno);
+                close(unixSocket);
+                return false;
+            }
+
+            if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
+                LOG_E("Could not set socket Non-Blocking!!!");
+                close(unixSocket);
+                return false;
+            }
+
+            device->setPort(lastFreePort);
+
+            this->device = device;
+
+            return true;
+        }
+
+        break;
+
+    }
+
+    LOG_E("Could not set create unix socket!!!");
+
+    close(unixSocket);
+
+    return false;
 }
 
 void UnixSocket::runReceiver(Unit host) {
