@@ -28,16 +28,18 @@ typedef bool (Message::*fWriteProcess)(int desc, FileItem *content);
 
 class FileList {
 
+    long id;
     char parentDir[50];
     TypeFileList list;
 
 public:
 
-    FileList(const char* parentDir);
+    FileList(long id, const char* parentDir);
     bool set(FileItem*);
     bool check(FileItem*);
     bool check(Md5*);
     int getCount();
+    long getID();
     const char* getDir();
     FileItem* get(Md5*);
     void setFlags(std::vector<Md5> *, bool);

@@ -23,9 +23,11 @@ private:
     bool send2DistributorMsg(long, uint8_t);
     bool send2CollectorMsg(long, uint8_t);
 
+    void parseCommand(char *cmd, char **argv);
     bool processRule(Rule*);
-    void processExecutor(std::string);
     bool processMD5();
+    bool processParallel(Rule* rule);
+    bool processSequential(Rule* rule);
 
 public:
 	Node(int, int, const char *rootPath);

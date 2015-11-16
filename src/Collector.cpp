@@ -104,11 +104,13 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_MD5: {
 
+            long jobID = msg->getVariant(0);
+
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-            Job* job = getAttachedJob(address);
+            Job* job = getJob(jobID);
             if (job == nullptr) {
                 break;
             }
@@ -191,6 +193,8 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
 
+    msg->setVariant(0, list->getID());
+
 	switch(type) {
 
 		case MSGTYPE_RULE:
@@ -240,6 +244,24 @@ bool Collector::reset() {
     }
 	return true;
 
+}
+
+Job* Collector::getJob(long id) {
+
+    int i = 0;
+    for (; i < jobs->size(); i++) {
+        if ((*jobs)[i]->getID() != id) {
+            continue;
+        }
+        break;
+    }
+
+    if (i == jobs->size()) {
+        LOG_W("No job found with id %ld", id);
+        return nullptr;
+    }
+
+    return (*jobs)[i];
 }
 
 Job* Collector::getAttachedJob(long address) {

@@ -9,15 +9,14 @@
 #include "ContentItem.h"
 
 class ExecutorItem : public ContentItem {
-	std::string exec;
+	char exec[PATH_MAX];
 	bool parseCommand(char*, void *, int, int);
 public:
 	ExecutorItem();
 	ExecutorItem(const char *exec);
 	~ExecutorItem(){};
-	std::string getExec();
-	std::string getParsed(void *);
-	void setExec(const std::string&);
+    const char* getExec();
+	bool getParsed(void *, char*);
 	virtual CONTENT_TYPES getType();
 
     virtual bool isValid();

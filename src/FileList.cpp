@@ -5,6 +5,12 @@
 #include "FileList.h"
 #include "Message.h"
 
+FileList::FileList(long id, const char *parentDir) {
+
+    this->id = id;
+    strcpy(this->parentDir, parentDir);
+}
+
 bool FileList::set(FileItem *item) {
 
     list[item->getMD5()->data] = item;
@@ -75,10 +81,11 @@ int FileList::process(Message *msg, fWriteProcess function, FILELIST_FLAG flag) 
     return contentCount;
 }
 
-FileList::FileList(const char *parentDir) {
-    strcpy(this->parentDir, parentDir);
-}
 
 const char *FileList::getDir() {
     return parentDir;
+}
+
+long FileList::getID() {
+    return id;
 }

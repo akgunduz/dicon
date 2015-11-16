@@ -25,6 +25,7 @@ public:
 
 class Job : public JsonItem {
 
+    long id;
     char name[50];
     AttachedNode attachedNode;
 
@@ -44,12 +45,16 @@ public:
     const char* getName();
     void setName(const char*);
 
+    long getID();
+    void setID(long id);
+
     AttachedNode getAttachedNode();
     void setAttachedNode(long address, short id);
 
     Rule* getRule(int index);
     int getRuleCount();
 
+    static bool parseIDNode(void*, json_object *node);
     static bool parseNameNode(void*, json_object *node);
     static bool parseRuleNode(void*, json_object *node);
 

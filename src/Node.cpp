@@ -76,22 +76,15 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 				break;
 			}
 
-	//		LOG_U(UI_UPDATE_CLIENT_FILE_LIST, job);
-	//		LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, job);
-	//		LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, job);
-
 			status &= send2CollectorMsg(address, MSGTYPE_MD5);
 			break;
 
 		case MSGTYPE_BINARY:
 
-        //    job = msg->getJob();
-
 			LOG_U(UI_UPDATE_CLIENT_LOG,
 					"\"BINARY\" msg from collector: %s",
 				  Address::getString(address).c_str());
 
-	//		LOG_U(UI_UPDATE_CLIENT_FILE_LIST, rule);
 
             for (int i = 0; i < job->getRuleCount(); i++) {
                 processRule(job->getRule(i));
@@ -158,6 +151,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 		case MSGTYPE_MD5: {
 
             FileList *list = job->prepareFileList(Unit(HOST_NODE, Util::getID()));
+            msg->setVariant(0, list->getID());
             msg->setJob(STREAM_MD5ONLY, list);
             LOG_U(UI_UPDATE_CLIENT_LOG,
                   "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
@@ -197,125 +191,128 @@ bool Node::processMD5() {
 
 }
 
-void Node::processExecutor(std::string cmd) {
+void Node::parseCommand(char *cmd, char **argv) {
 
-	size_t pos = 0, newpos = 0;
-	char *cmdargs[100];
-	int j;
-	std::string subs;
+    while (*cmd != '\0') {
 
-	char *buffer = (char *) malloc(100 * 255);
-	if (buffer == nullptr) {
-		LOG_E("Malloc failed");
-		exit(EXIT_FAILURE);
-	}
+        while (*cmd == ' ' || *cmd == '\t' || *cmd == '\n') {
+            *cmd++ = '\0';
+        }
 
-	for (j = 0; j < 100; j++) {
-		cmdargs[j] = buffer + (j * 255);
-	}
+        *argv++ = cmd;
 
-	j = 0;
-
-	do {
-
-		newpos = cmd.find(' ', pos);
-		if (newpos == std::string::npos) {
-			subs = cmd.substr(pos, cmd.length() - pos);
-			strcpy(cmdargs[j], subs.c_str());
-			cmdargs[j+1] = nullptr;
-			break;
-		}
-		subs = cmd.substr(pos, newpos - pos);
-		strcpy(cmdargs[j], subs.c_str());
-		pos = newpos + 1;
-		j++;
-
-	} while(1);
-	LOG_I("ExecV run with cmd : %s", cmdargs[0]);
-	execv(cmdargs[0], cmdargs);
-	LOG_E("ExecV failed with error : %d", errno);
-	exit(EXIT_FAILURE);
+        while (*cmd != '\0' && *cmd != ' ' && *cmd != '\t' && *cmd != '\n') {
+            cmd++;
+        }
+    }
+    *argv = nullptr;
 }
 
 bool Node::processRule(Rule* rule) {
 
-	int status;
+    return rule->isParallel() ? processParallel(rule) : processSequential(rule);
 
-	if (!rule->isParallel()) {
+}
 
-		for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-			ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
-			std::string cmd = content->getParsed(rule);
-			LOG_U(UI_UPDATE_CLIENT_LOG,
-					"Executing %s command", cmd.c_str());
-#ifdef CYGWIN
-			LOG_I("Simulating fork in Windows!!!");
-#else
-			pid_t pid = fork();
+bool Node::processParallel(Rule* rule) {
 
-			if (pid == -1) {
-				LOG_E("Rule Process failed in fork!!!");
-				return false;
+    int status;
+    char cmd[PATH_MAX] = "";
+    char *args[100];
 
-			} else if (pid > 0) {
-                //parent part
-                int res;
-                do {
-                    res = waitpid(pid, &status, 0);
-                } while ((res < 0) && (errno == EINTR));
-
-			} else {
-				//child part
-				processExecutor(cmd);
-			}
-#endif
-		}
-
-		return true;
-	}
-
-	//parallel process
-	for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-		ExecutorItem *content = (ExecutorItem *)rule->getContent(CONTENT_EXECUTOR, i);
-		std::string cmd = content->getParsed(rule);
-		LOG_U(UI_UPDATE_CLIENT_LOG,
-				"Executing %s command", cmd.c_str());
+    for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
+        ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
+        content->getParsed(rule, cmd);
+        parseCommand(cmd, args);
+        LOG_U(UI_UPDATE_CLIENT_LOG, "Executing %s command", cmd + strlen(getRootPath()));
 
 #ifdef CYGWIN
-		LOG_I("Simulating fork in Windows!!!");
+        LOG_I("Simulating fork in Windows!!!");
 #else
-		pid_t pid = fork();
 
-		if (pid == -1) {
-			LOG_E("Rule Process failed in fork!!!");
-			return false;
+        pid_t pid = fork();
 
-		} else if (pid == 0) {
-			//child part
-			processExecutor(cmd);
+        if (pid == -1) {
+            LOG_E("Rule Process failed in fork!!!");
+            return false;
 
-		}
+        } else if (pid == 0) {
+            //child part
+            execv(*args, args);
+            LOG_E("ExecV failed with error : %d", errno);
+            exit(EXIT_FAILURE);
+
+        }
 #endif
-	}
+    }
 
 #ifdef CYGWIN
     LOG_I("Simulating wait in Windows!!!");
 #else
-	while (true) {
+    while (true) {
 
-		pid_t pid = wait(&status);
-		if (pid == -1) {
-			if (errno == ECHILD) {
-				//no more child process
-				break;
-			}
-		} else {
-			if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-				LOG_E("Process with pid %d failed in fork!!!", pid);
-				return false;
-			}
-		}
-	}
+        pid_t pid = wait(&status);
+        if (pid == -1) {
+            if (errno == ECHILD) {
+                //no more child process
+                break;
+            }
+        } else {
+            if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+                LOG_E("Process with pid %d failed in fork!!!", pid);
+                return false;
+            }
+        }
+    }
 #endif
-	return true;
+
+    return true;
 }
+
+bool Node::processSequential(Rule* rule) {
+
+    int status;
+    char cmd[PATH_MAX] = "";
+    char *args[100];
+
+    for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
+        ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
+
+        content->getParsed(rule, cmd);
+
+        LOG_U(UI_UPDATE_CLIENT_LOG, "Executing %s command", cmd + strlen(getRootPath()));
+
+        parseCommand(cmd, args);
+
+
+#ifdef CYGWIN
+        LOG_I("Simulating fork in Windows!!!");
+#else
+
+        pid_t pid = fork();
+
+        if (pid == -1) {
+            LOG_E("Rule Process failed in fork!!!");
+            return false;
+
+        } else if (pid > 0) {
+            //parent part
+            int res;
+            do {
+                //res = wait(&status);
+                res = waitpid(pid, &status, 0);
+            } while ((res < 0) && (errno == EINTR));
+
+        } else {
+            //child part
+            execv(*args, args);
+            LOG_E("ExecV failed with error : %d for command %s", errno, cmd);
+            exit(EXIT_FAILURE);
+        }
+#endif
+    }
+
+    return true;
+}
+
+

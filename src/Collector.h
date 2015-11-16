@@ -25,6 +25,7 @@ class Collector : public Component {
 	bool send2DistributorMsg(long, int);
 	bool send2NodeMsg(long, int, FileList *);
 
+    Job* getJob(long id);
     Job* getAttachedJob(long address);
     Job* getUnservedJob();
 

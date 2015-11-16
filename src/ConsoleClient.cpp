@@ -188,7 +188,7 @@ void Console::clientUpdateExecList(ConsoleEvent &event) {
 			return;
 		}
 
-		LOG_S("Node Executor : %s", content->getExec().c_str());
+		LOG_S("Node Executor : %s", content->getExec());
 
 	}
 }

@@ -16,31 +16,26 @@ ExecutorItem::ExecutorItem()
 ExecutorItem::ExecutorItem(const char *line)
         : ContentItem () {
 
-	exec = line;
+	strcpy(exec, line);
 }
 
 CONTENT_TYPES ExecutorItem::getType() {
 	return CONTENT_EXECUTOR;
 }
 
-std::string ExecutorItem::getExec() {
+const char* ExecutorItem::getExec() {
 	return exec;
 }
 
-void ExecutorItem::setExec(const std::string &exec) {
-	this->exec = exec;
-}
-
-std::string ExecutorItem::getParsed(void *pRule) {
+bool ExecutorItem::getParsed(void *pRule, char *parsed) {
 
 //	Rule *refRule = (Rule *)pRule;
-	char parsed[PATH_MAX] = "";
 	bool cmdMode = false;
-
+    strcpy(parsed, "");
 	int cmdIndex = 0;
 	CONTENT_TYPES cmdType = CONTENT_MAP;
 
-	for (uint32_t i = 0; i < exec.size(); i++) {
+	for (uint32_t i = 0; i < strlen(exec); i++) {
 		switch(exec[i]) {
 			case '$':
 				if (!cmdMode) {
@@ -98,7 +93,7 @@ std::string ExecutorItem::getParsed(void *pRule) {
 		parseCommand(parsed, pRule, cmdType, cmdIndex);
 	}
 
-	return std::string(parsed);
+	return true;
 }
 
 bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
