@@ -12,8 +12,8 @@ Node::Node(int distributorIndex, int collectorIndex, const char *rootPath) :
         Component(Unit(HOST_NODE),
 				  generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
 
-	LOG_U(UI_UPDATE_CLIENT_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
-	LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
+	LOG_U(UI_UPDATE_NODE_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
+	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
 	distributorAddress = 0;
 
@@ -35,7 +35,7 @@ bool Node::processDistributorMsg(long address, Message *msg) {
 
             distributorAddress = address;
 
-            LOG_U(UI_UPDATE_CLIENT_LOG,
+            LOG_U(UI_UPDATE_NODE_LOG,
                   "\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
 
             status = send2DistributorMsg(address, MSGTYPE_ALIVE);
@@ -57,13 +57,13 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_RULE:
 
-			LOG_U(UI_UPDATE_CLIENT_STATE, BUSY);
+			LOG_U(UI_UPDATE_NODE_STATE, BUSY);
 			status = send2DistributorMsg(distributorAddress, MSGTYPE_BUSY);
 
-			LOG_U(UI_UPDATE_CLIENT_LOG,
+			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"RULE\" msg from collector: %s", Address::getString(address).c_str());
 
-			LOG_U(UI_UPDATE_CLIENT_CLEAR, "");
+			LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
             if (job != nullptr) {
                 delete job;
@@ -81,7 +81,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_BINARY:
 
-			LOG_U(UI_UPDATE_CLIENT_LOG,
+			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"BINARY\" msg from collector: %s",
 				  Address::getString(address).c_str());
 
@@ -90,7 +90,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
                 processRule(job->getRule(i));
             }
 
-			LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
+			LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 			status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
 			break;
 
@@ -114,21 +114,21 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 
 		case MSGTYPE_READY:
 
-			LOG_U(UI_UPDATE_CLIENT_LOG,
+			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"READY\" msg sent to distributor: %s with ID : %s",
                   Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
 
 		case MSGTYPE_ALIVE:
 
-			LOG_U(UI_UPDATE_CLIENT_LOG,
+			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"ALIVE\" msg sent to distributor: %s with ID : %s",
                   Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
 
 		case MSGTYPE_BUSY:
 
-			LOG_U(UI_UPDATE_CLIENT_LOG,
+			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"BUSY\" msg sent to distributor: %s with ID : %s",
                   Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 			break;
@@ -153,7 +153,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
             FileList *list = job->prepareFileList(Unit(HOST_NODE, Util::getID()));
             msg->setVariant(0, list->getID());
             msg->setJob(STREAM_MD5ONLY, list);
-            LOG_U(UI_UPDATE_CLIENT_LOG,
+            LOG_U(UI_UPDATE_NODE_LOG,
                   "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
                   Address::getString(address).c_str(), list->getCount());
         }
@@ -177,9 +177,11 @@ bool Node::processMD5() {
             char absPath[PATH_MAX];
             sprintf(absPath, "%s%s", getRootPath(), content->getFileName());
 
-            //Burada ters lojik var,
-            //	false -> collectordan dosyayi iste, md5 i set ETMEYEREK
-            //	true -> collectordan dosyayi isteme, md5 i set EDEREK
+            /*
+             * false -> request file from collector, with no md5 set
+             * true -> do not request file from collector, with md5 set
+             */
+
             if (access(absPath, F_OK ) == -1) {
                 //printf("error %d\n", errno);
                 content->setFlaggedToSent(false);
@@ -224,7 +226,7 @@ bool Node::processParallel(Rule* rule) {
         ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
         content->getParsed(rule, cmd);
         parseCommand(cmd, args);
-        LOG_U(UI_UPDATE_CLIENT_LOG, "Executing %s command", cmd + strlen(getRootPath()));
+        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(getRootPath()));
 
 #ifdef CYGWIN
         LOG_I("Simulating fork in Windows!!!");
@@ -280,7 +282,7 @@ bool Node::processSequential(Rule* rule) {
 
         content->getParsed(rule, cmd);
 
-        LOG_U(UI_UPDATE_CLIENT_LOG, "Executing %s command", cmd + strlen(getRootPath()));
+        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
 
         parseCommand(cmd, args);
 

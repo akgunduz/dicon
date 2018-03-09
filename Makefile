@@ -13,62 +13,69 @@ OBJECTS_PATH = Objects
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    TOOLCHAIN_PATH = /home/akgunduz/Toolchains
+    TOOLCHAIN_PATH = ~/Toolchains
     TOOLCHAIN_ARM_PREFIX = arm-linux-gnueabihf
 else
-	TOOLCHAIN_PATH = /Volumes/DEPO/Toolchains
+	TOOLCHAIN_PATH = ~/Toolchains
 	TOOLCHAIN_ARM_PREFIX = arm-linux-gnueabihf
 endif
 
 FILES = \
-		$(SOURCE_PATH)/Application.cpp \
+        ${SOURCE_PATH}/Application.cpp \
         ${SOURCE_PATH}/ArchTypes.cpp \
-		$(SOURCE_PATH)/Collector.cpp \
-		$(SOURCE_PATH)/Common.cpp \
+        ${SOURCE_PATH}/Collector.cpp \
+        ${SOURCE_PATH}/Common.cpp \
         ${SOURCE_PATH}/Component.cpp \
         ${SOURCE_PATH}/Device.cpp \
-		$(SOURCE_PATH)/Connector.cpp \
-		$(SOURCE_PATH)/Console.cpp \
-		$(SOURCE_PATH)/ConsoleClient.cpp \
-	$(SOURCE_PATH)/FileList.cpp \
-		$(SOURCE_PATH)/ContentItem.cpp \
-		${SOURCE_PATH}/FileItem.cpp \
-		${SOURCE_PATH}/ParameterItem.cpp \
-		${SOURCE_PATH}/ExecutorItem.cpp \
-		$(SOURCE_PATH)/Distributor.cpp \
-		$(SOURCE_PATH)/Interface.cpp \
-		${SOURCE_PATH}/InterfaceCallback.cpp \
-		$(SOURCE_PATH)/Log.cpp \
-		$(SOURCE_PATH)/Job.cpp \
-		$(SOURCE_PATH)/BaseMessage.cpp \
-	$(SOURCE_PATH)/MapItem.cpp \
-	$(SOURCE_PATH)/JsonItem.cpp \
-		$(SOURCE_PATH)/Message.cpp \
-	$(SOURCE_PATH)/Md5.cpp \
+        ${SOURCE_PATH}/Connector.cpp \
+        ${SOURCE_PATH}/Console.cpp \
+        ${SOURCE_PATH}/ConsoleNode.cpp \
+        ${SOURCE_PATH}/ContentItem.cpp \
+        ${SOURCE_PATH}/FileItem.cpp \
+        ${SOURCE_PATH}/FileList.cpp \
+        ${SOURCE_PATH}/ParameterItem.cpp \
+        ${SOURCE_PATH}/ExecutorItem.cpp \
+        ${SOURCE_PATH}/Distributor.cpp \
+        ${SOURCE_PATH}/Interface.cpp \
+        ${SOURCE_PATH}/InterfaceCallback.cpp \
+        ${SOURCE_PATH}/Log.cpp \
+        ${SOURCE_PATH}/Job.cpp \
+        ${SOURCE_PATH}/BaseMessage.cpp \
+        ${SOURCE_PATH}/Md5.cpp \
+        ${SOURCE_PATH}/Message.cpp \
+        ${SOURCE_PATH}/MessageItem.cpp \
         ${SOURCE_PATH}/MessageDirection.cpp \
         ${SOURCE_PATH}/MessageTypes.cpp \
-        ${SOURCE_PATH}/MessageItem.cpp \
-		$(SOURCE_PATH)/Net.cpp \
-        $(SOURCE_PATH)/Node.cpp \
+        ${SOURCE_PATH}/Net.cpp \
+        ${SOURCE_PATH}/Node.cpp \
         ${SOURCE_PATH}/NodeItem.cpp \
-        $(SOURCE_PATH)/NodeManager.cpp \
+        ${SOURCE_PATH}/NodeManager.cpp \
         ${SOURCE_PATH}/NodeWatchdog.cpp \
-		$(SOURCE_PATH)/Pipe.cpp \
-		$(SOURCE_PATH)/Rule.cpp \
-		$(SOURCE_PATH)/Scheduler.cpp \
-		$(SOURCE_PATH)/SchedulerItem.cpp \
-		$(SOURCE_PATH)/Util.cpp \
-		$(SOURCE_PATH)/Unit.cpp \
-		${SOURCE_PATH}/StopWatch.cpp \
-		$(SOURCE_PATH)/UnixSocket.cpp \
-		$(SOURCE_PATH)/Address.cpp \
-		$(SOURCE_PATH)/NetAddress.cpp \
-		$(SOURCE_PATH)/PipeAddress.cpp \
-		$(SOURCE_PATH)/UnixSocketAddress.cpp \
+        ${SOURCE_PATH}/Pipe.cpp \
+        ${SOURCE_PATH}/Rule.cpp \
+        ${SOURCE_PATH}/Scheduler.cpp \
+        ${SOURCE_PATH}/SchedulerItem.cpp \
+        ${SOURCE_PATH}/MapItem.cpp \
+        ${SOURCE_PATH}/Util.cpp \
+        ${SOURCE_PATH}/Unit.cpp \
+        ${SOURCE_PATH}/StopWatch.cpp \
+        ${SOURCE_PATH}/UnixSocket.cpp \
+        ${SOURCE_PATH}/Address.cpp \
+        ${SOURCE_PATH}/NetAddress.cpp \
+        ${SOURCE_PATH}/PipeAddress.cpp \
+        ${SOURCE_PATH}/UnixSocketAddress.cpp \
+        ${SOURCE_PATH}/Job.cpp \
+        ${SOURCE_PATH}/MessageItem.cpp \
+        ${SOURCE_PATH}/SchedulerItem.cpp \
+        ${SOURCE_PATH}/JsonType.cpp \
+        ${SOURCE_PATH}/JsonItem.cpp \
+        ${SOURCE_PATH}/DeviceManager.cpp
 
 WX_FILES = \
 		$(SOURCE_PATH)/UserInterface.cpp \
-		$(SOURCE_PATH)/UserInterfaceApp.cpp
+		$(SOURCE_PATH)/UserInterfaceApp.cpp \
+        ${SOURCE_PATH}/MapItem.cpp \
+        ${SOURCE_PATH}/FileList.cpp
 
 
 PI_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/bin/$(TOOLCHAIN_ARM_PREFIX)-g++

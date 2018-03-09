@@ -7,27 +7,27 @@
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
 
-bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
+bool Console::nodeInit(INTERFACES distInterface, INTERFACES collInterface) {
 
-	uiUpdater[UI_UPDATE_CLIENT_ADDRESS] = &Console::clientUpdateAddresses;
-	uiUpdater[UI_UPDATE_CLIENT_STATE] = &Console::clientUpdateState;
-	uiUpdater[UI_UPDATE_CLIENT_ATT_COLL_ADDRESS] = &Console::clientUpdateAttachedCollAddress;
-	uiUpdater[UI_UPDATE_CLIENT_FILE_LIST] = &Console::clientUpdateFileList;
-	uiUpdater[UI_UPDATE_CLIENT_PARAM_LIST] = &Console::clientUpdateParamList;
-	uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &Console::clientUpdateExecList;
-	uiUpdater[UI_UPDATE_CLIENT_LOG] = &Console::clientUpdateLog;
+	uiUpdater[UI_UPDATE_NODE_ADDRESS] = &Console::nodeUpdateAddresses;
+	uiUpdater[UI_UPDATE_NODE_STATE] = &Console::nodeUpdateState;
+	uiUpdater[UI_UPDATE_NODE_ATT_COLL_ADDRESS] = &Console::nodeUpdateAttachedCollAddress;
+	uiUpdater[UI_UPDATE_NODE_FILE_LIST] = &Console::nodeUpdateFileList;
+	uiUpdater[UI_UPDATE_NODE_PARAM_LIST] = &Console::nodeUpdateParamList;
+	uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &Console::nodeUpdateExecList;
+	uiUpdater[UI_UPDATE_NODE_LOG] = &Console::nodeUpdateLog;
 
 	char path[PATH_MAX];
-	sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
+	sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
 
-	clientRemoveDir(path);
+	nodeRemoveDir(path);
 	mkdir(path, 0777);
 
-	clientObject = nullptr;
+	nodeObject = nullptr;
 
 	try {
 
-		clientObject = new Node(distInterface, collInterface, path);
+		nodeObject = new Node(distInterface, collInterface, path);
 
 	} catch (std::runtime_error &e) {
 
@@ -38,15 +38,15 @@ bool Console::clientInit(INTERFACES distInterface, INTERFACES collInterface) {
 
 }
 
-void Console::clientDestroy() {
+void Console::nodeDestroy() {
 
-	if (clientObject) {
-		delete clientObject;
+	if (nodeObject) {
+		delete nodeObject;
 	}
 
 }
 
-void Console::clientRemoveDir(const char *dirpath) {
+void Console::nodeRemoveDir(const char *dirpath) {
 
 	struct dirent *entry;
 	char path[PATH_MAX];
@@ -60,7 +60,7 @@ void Console::clientRemoveDir(const char *dirpath) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
 			snprintf(path, (size_t) PATH_MAX, "%s/%s", dirpath, entry->d_name);
             if (entry->d_type == DT_DIR) {
-				clientRemoveDir(path);
+				nodeRemoveDir(path);
 			} else {
 				unlink(path);
 			}
@@ -73,10 +73,10 @@ void Console::clientRemoveDir(const char *dirpath) {
 	rmdir(dirpath);
 }
 
-void Console::clientRun(INTERFACES distInterface, INTERFACES collInterface) {
+void Console::nodeRun(INTERFACES distInterface, INTERFACES collInterface) {
 
-	if (!clientInit(distInterface, collInterface) ) {
-		clientDestroy();
+	if (!nodeInit(distInterface, collInterface) ) {
+		nodeDestroy();
 		return;
 	}
 
@@ -86,7 +86,7 @@ void Console::clientRun(INTERFACES distInterface, INTERFACES collInterface) {
 		in = getchar();
 		switch(in) {
 			case 'q':
-				clientDestroy();
+				nodeDestroy();
 				return;
 			case 'd':
 				Log::iterateLogLevel();
@@ -99,39 +99,39 @@ void Console::clientRun(INTERFACES distInterface, INTERFACES collInterface) {
 
 }
 
-void Console::clientUpdateAddresses(ConsoleEvent &event) {
+void Console::nodeUpdateAddresses(ConsoleEvent &event) {
 
-	EventData *data = (EventData *)event.GetClientData();
+	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
 		  Address::getString(data->data64_1).c_str(),
 		  Address::getString(data->data64_2).c_str());
 
 }
 
-void Console::clientUpdateState(ConsoleEvent &event) {
+void Console::nodeUpdateState(ConsoleEvent &event) {
 
-	EventData *data = (EventData *)event.GetClientData();
+	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("Node State : %s", sStates[data->data64_1]);
 
 }
 
-void Console::clientUpdateAttachedCollAddress(ConsoleEvent &event) {
+void Console::nodeUpdateAttachedCollAddress(ConsoleEvent &event) {
 
-	EventData *data = (EventData *)event.GetClientData();
+	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("Node Attached Collector : %s", Address::getString(data->data64_1).c_str());
 
 }
 
-void Console::clientUpdateLog(ConsoleEvent &event) {
+void Console::nodeUpdateLog(ConsoleEvent &event) {
 
-	EventData *data = (EventData *)event.GetClientData();
+	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("%s", data->dataStr.c_str());
 
 }
 
-void Console::clientUpdateFileList(ConsoleEvent &event) {
+void Console::nodeUpdateFileList(ConsoleEvent &event) {
 
-	Rule *rule = (Rule *)event.GetClientData();
+	Rule *rule = (Rule *) event.GetClientData();
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
 
@@ -147,9 +147,9 @@ void Console::clientUpdateFileList(ConsoleEvent &event) {
 
 }
 
-void Console::clientUpdateParamList(ConsoleEvent &event) {
+void Console::nodeUpdateParamList(ConsoleEvent &event) {
 
-	Rule *rule = (Rule *)event.GetClientData();
+	Rule *rule = (Rule *) event.GetClientData();
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_PARAM); j++) {
 
@@ -177,9 +177,9 @@ void Console::clientUpdateParamList(ConsoleEvent &event) {
 	}
 }
 
-void Console::clientUpdateExecList(ConsoleEvent &event) {
+void Console::nodeUpdateExecList(ConsoleEvent &event) {
 
-	Rule *rule = (Rule *)event.GetClientData();
+	Rule *rule = (Rule *) event.GetClientData();
 
 	for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
 

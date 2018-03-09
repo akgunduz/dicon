@@ -13,7 +13,7 @@ NodeManager::NodeManager(Component* component, fTimeoutCB timeoutCB, fWakeupCB w
 	this->backupRate = backupRate;
 
     if (nodeWatchdog == nullptr) {
-    //    nodeWatchdog = new NodeWatchdog(component, wakeupCB);
+     //   nodeWatchdog = new NodeWatchdog(component, wakeupCB);
     }
 };
 
@@ -69,7 +69,7 @@ NodeItem *NodeManager::getIdle(long collectorAddress) {
 
     } else {
 
-        LOG_W("No available client right now.");
+        LOG_W("No available node right now.");
     }
 
     return nullptr;
@@ -129,7 +129,7 @@ bool NodeManager::setBusy(long address) {
 		LOG_T("Node at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
+		LOG_E("Could not found a node with address : %s", Address::getString(address).c_str());
 		return false;
 	}
 
@@ -151,7 +151,7 @@ bool NodeManager::remove(long address) {
 		LOG_T("Node at address %s removed from the list", Address::getString(address).c_str());
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a client with address : %s", Address::getString(address).c_str());
+		LOG_E("Could not found a node with address : %s", Address::getString(address).c_str());
 		return false;
 	}
 

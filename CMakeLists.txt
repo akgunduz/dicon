@@ -2,118 +2,70 @@ cmake_minimum_required(VERSION 3.3)
 project(Bankor)
 set(SOURCE_PATH "src")
 
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11")
 add_definitions(-D__IDE__)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Debug/")
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Debug/")
 
 set(FILES
         ${SOURCE_PATH}/Application.cpp
-        ${SOURCE_PATH}/Application.h
         ${SOURCE_PATH}/ArchTypes.cpp
-        ${SOURCE_PATH}/ArchTypes.h
         ${SOURCE_PATH}/Collector.cpp
-        ${SOURCE_PATH}/Collector.h
         ${SOURCE_PATH}/Common.cpp
-        ${SOURCE_PATH}/Common.h
-        ${SOURCE_PATH}/Common_apple.h
-        ${SOURCE_PATH}/Common_linux.h
         ${SOURCE_PATH}/Component.cpp
-        ${SOURCE_PATH}/Component.h
         ${SOURCE_PATH}/Device.cpp
-        ${SOURCE_PATH}/Device.h
         ${SOURCE_PATH}/Connector.cpp
-        ${SOURCE_PATH}/Connector.h
         ${SOURCE_PATH}/Console.cpp
-        ${SOURCE_PATH}/Console.h
-        ${SOURCE_PATH}/ConsoleClient.cpp
+        ${SOURCE_PATH}/ConsoleNode.cpp
         ${SOURCE_PATH}/ContentItem.cpp
-        ${SOURCE_PATH}/ContentItem.h
         ${SOURCE_PATH}/FileItem.cpp
-        ${SOURCE_PATH}/FileItem.h
         ${SOURCE_PATH}/FileList.cpp
-        ${SOURCE_PATH}/FileList.h
         ${SOURCE_PATH}/ParameterItem.cpp
-        ${SOURCE_PATH}/ParameterItem.h
         ${SOURCE_PATH}/ExecutorItem.cpp
-        ${SOURCE_PATH}/ExecutorItem.h
         ${SOURCE_PATH}/Distributor.cpp
-        ${SOURCE_PATH}/Distributor.h
         ${SOURCE_PATH}/Interface.cpp
-        ${SOURCE_PATH}/Interface.h
         ${SOURCE_PATH}/InterfaceCallback.cpp
-        ${SOURCE_PATH}/InterfaceCallback.h
         ${SOURCE_PATH}/Log.cpp
-        ${SOURCE_PATH}/Log.h
         ${SOURCE_PATH}/Job.cpp
-        ${SOURCE_PATH}/Job.h
         ${SOURCE_PATH}/BaseMessage.cpp
-        ${SOURCE_PATH}/BaseMessage.h
         ${SOURCE_PATH}/Md5.cpp
-        ${SOURCE_PATH}/Md5.h
         ${SOURCE_PATH}/Message.cpp
-        ${SOURCE_PATH}/Message.h
         ${SOURCE_PATH}/MessageItem.cpp
-        ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/MessageDirection.cpp
-        ${SOURCE_PATH}/MessageDirection.h
         ${SOURCE_PATH}/MessageTypes.cpp
-        ${SOURCE_PATH}/MessageTypes.h
         ${SOURCE_PATH}/Net.cpp
-        ${SOURCE_PATH}/Net.h
         ${SOURCE_PATH}/Node.cpp
-        ${SOURCE_PATH}/Node.h
         ${SOURCE_PATH}/NodeItem.cpp
-        ${SOURCE_PATH}/NodeItem.h
         ${SOURCE_PATH}/NodeManager.cpp
-        ${SOURCE_PATH}/NodeManager.h
         ${SOURCE_PATH}/NodeWatchdog.cpp
-        ${SOURCE_PATH}/NodeWatchdog.h
         ${SOURCE_PATH}/Pipe.cpp
-        ${SOURCE_PATH}/Pipe.h
         ${SOURCE_PATH}/Rule.cpp
-        ${SOURCE_PATH}/Rule.h
         ${SOURCE_PATH}/Scheduler.cpp
-        ${SOURCE_PATH}/Scheduler.h
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/SchedulerItem.h
         ${SOURCE_PATH}/MapItem.cpp
-        ${SOURCE_PATH}/MapItem.h
         ${SOURCE_PATH}/Util.cpp
-        ${SOURCE_PATH}/Util.h
         ${SOURCE_PATH}/Unit.cpp
-        ${SOURCE_PATH}/Unit.h
         ${SOURCE_PATH}/StopWatch.cpp
-        ${SOURCE_PATH}/StopWatch.h
         ${SOURCE_PATH}/UnixSocket.cpp
-        ${SOURCE_PATH}/UnixSocket.h
         ${SOURCE_PATH}/Address.cpp
-        ${SOURCE_PATH}/Address.h
         ${SOURCE_PATH}/NetAddress.cpp
-        ${SOURCE_PATH}/NetAddress.h
         ${SOURCE_PATH}/PipeAddress.cpp
-        ${SOURCE_PATH}/PipeAddress.h
         ${SOURCE_PATH}/UnixSocketAddress.cpp
-        ${SOURCE_PATH}/UnixSocketAddress.h
         ${SOURCE_PATH}/Job.cpp
-        ${SOURCE_PATH}/Job.h
         ${SOURCE_PATH}/MessageItem.cpp
-        ${SOURCE_PATH}/MessageItem.h
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/SchedulerItem.h
         ${SOURCE_PATH}/JsonType.cpp
-        ${SOURCE_PATH}/JsonType.h
         ${SOURCE_PATH}/JsonItem.cpp
-        ${SOURCE_PATH}/JsonItem.h)
+)
 
 set(WX_FILES
         ${SOURCE_PATH}/UserInterface.cpp
-        ${SOURCE_PATH}/UserInterface.h
         ${SOURCE_PATH}/UserInterfaceApp.cpp
-        ${SOURCE_PATH}/UserInterfaceApp.h
-        src/MapItem.cpp src/MapItem.h src/FileList.cpp src/FileList.h
+        ${SOURCE_PATH}/MapItem.cpp
+        ${SOURCE_PATH}/FileList.cpp
         ${SOURCE_PATH}/DeviceManager.cpp
-        ${SOURCE_PATH}/DeviceManager.h
 )
 
 include_directories(${SOURCE_PATH})

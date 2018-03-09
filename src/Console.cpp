@@ -58,7 +58,7 @@ void Console::updateConsoleEvent(int id, void *data) {
 
 	ConsoleEvent event;
 	event.SetId(id);
-	event.SetClientData(data);
+    event.SetClientData(data);
 	if (uiUpdater[id] != nullptr) {
 		((this)->*(uiUpdater[id]))(event);
 	}
@@ -66,7 +66,7 @@ void Console::updateConsoleEvent(int id, void *data) {
 
 void Console::updateLog(ConsoleEvent &event) {
 
-	EventData *data = (EventData *)event.GetClientData();
+	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("%s", data->dataStr.c_str());
 
 }

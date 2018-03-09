@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef CLIENTMANAGER_H
-#define	CLIENTMANAGER_H
+#ifndef NODEMANAGER_H
+#define	NODEMANAGER_H
 
 #include "Node.h"
 #include "Connector.h"
@@ -14,12 +14,12 @@
 #include "NodeWatchdog.h"
 
 struct NodeManagerArgument {
-    Connector *clientConnector;
-    NodeItem *clientMap;
+    Connector *nodeConnector;
+    NodeItem *nodeMap;
     long collectorAddress;
     fTimeoutCB timeoutCB;
     NodeManagerArgument(Connector *cc, fTimeoutCB cb, NodeItem *c, long a) :
-            clientConnector(cc), timeoutCB(cb), clientMap(c), collectorAddress(a) {}
+            nodeConnector(cc), timeoutCB(cb), nodeMap(c), collectorAddress(a) {}
 };
 
 class NodeManager {

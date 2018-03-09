@@ -49,7 +49,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
 
-			status = send2DistributorMsg(address, MSGTYPE_READY);
+			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
 			break;
 
 		case MSGTYPE_NODE: {
@@ -58,7 +58,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 			short nodeID = (short) msg->getVariant(1);
 
 			if (nodeAddress == 0) {
-				LOG_W("No available client right now.");
+				LOG_W("No available node right now.");
 				status = false;
 				LOG_U(UI_UPDATE_COLL_LOG,
 						"\"NODE\" msg from distributor: %s, no Available Node", Address::getString(address).c_str());
@@ -107,7 +107,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
             long jobID = msg->getVariant(0);
 
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"MD5\" msg from client: %s with \"%d\" MD5 info",
+					"\"MD5\" msg from node: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
             Job* job = getJob(jobID);
@@ -158,17 +158,17 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 	switch(type) {
 
-		case MSGTYPE_READY:
+		case MSGTYPE_ALIVE:
 
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"READY\" msg sent to distributor: %s",
+					"\"ALIVE\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_NODE:
 
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"CLIENT\" msg sent to distributor: %s",
+					"\"NODE\" msg sent to distributor: %s",
 				  Address::getString(address).c_str());
 			break;
 
@@ -201,7 +201,7 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 			msg->setJob(STREAM_JOB, list);
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"RULE\" msg sent to client: %s",
+					"\"RULE\" msg sent to node: %s",
 				  Address::getString(address).c_str());
 			break;
 
@@ -209,7 +209,7 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 			msg->setJob(STREAM_BINARY, list);
 			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"BINARY\" msg sent to client: %s with \"%d\" file binary",
+					"\"BINARY\" msg sent to node: %s with \"%d\" file binary",
 				  Address::getString(address).c_str(), list->getCount());
 			break;
 

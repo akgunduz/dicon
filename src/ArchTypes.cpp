@@ -5,14 +5,14 @@
 #include "ArchTypes.h"
 
 const char* sArchTypes[] = {
-        "osx",
-        "win",
-        "lin",
-        "arm11",
-        "a7",
-        "a8",
-        "a9",
-        "a15",
+        "osx-x86",
+        "win-x86",
+        "lnx-x86",
+        "lnx-arm11",
+        "lnx-a7",
+        "lnx-a8",
+        "lnx-a9",
+        "lnx-a15",
 };
 
 const char *ArchTypes::getDir(ARCH_IDS id) {

@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Client_H_
-#define __Client_H_
+#ifndef NODE_H
+#define NODE_H
 
 #include "Component.h"
 
@@ -36,4 +36,4 @@ public:
 };
 
 
-#endif //__Client_H_
+#endif //NODE_H

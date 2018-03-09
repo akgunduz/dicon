@@ -33,7 +33,7 @@ public:
 	void SetData1(uint64_t);
 	void SetData2(uint64_t);
 	void SetString(std::string&);
-	void SetClientData(void*);
+	void SetClientData(void *);
 };
 
 typedef void (Console::*fConsoleUpdater)(ConsoleEvent &event);
@@ -42,7 +42,7 @@ class Console {
 
 	Distributor *distObject;
 	Collector *collObject;
-	Node *clientObject;
+	Node *nodeObject;
 
 	fConsoleUpdater uiUpdater[UI_UPDATE_MAX];
 
@@ -53,18 +53,18 @@ public:
 
 	void updateLog(ConsoleEvent &event);
 
-	bool clientInit(INTERFACES, INTERFACES);
-	void clientDestroy();
-	void clientRemoveDir(const char *);
-	void clientRun(INTERFACES, INTERFACES);
-	void clientUpdateAddresses(ConsoleEvent& event);
-	void clientUpdateState(ConsoleEvent& event);
-	void clientUpdateAttachedCollAddress(ConsoleEvent& event);
+	bool nodeInit(INTERFACES, INTERFACES);
+	void nodeDestroy();
+	void nodeRemoveDir(const char *);
+	void nodeRun(INTERFACES, INTERFACES);
+	void nodeUpdateAddresses(ConsoleEvent &event);
+	void nodeUpdateState(ConsoleEvent &event);
+	void nodeUpdateAttachedCollAddress(ConsoleEvent &event);
 
-	void clientUpdateLog(ConsoleEvent &event);
-	void clientUpdateFileList(ConsoleEvent &event);
-	void clientUpdateParamList(ConsoleEvent &event);
-	void clientUpdateExecList(ConsoleEvent &event);
+	void nodeUpdateLog(ConsoleEvent &event);
+	void nodeUpdateFileList(ConsoleEvent &event);
+	void nodeUpdateParamList(ConsoleEvent &event);
+	void nodeUpdateExecList(ConsoleEvent &event);
 };
 
 

@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 					break;
 				}
 
-				c_ui->clientRun((INTERFACES) atoi(argv[2]), (INTERFACES) atoi(argv[3]));
+                c_ui->nodeRun((INTERFACES) atoi(argv[2]), (INTERFACES) atoi(argv[3]));
 				break;
 			default:
 				break;

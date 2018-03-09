@@ -127,6 +127,10 @@ const char* FileItem::getAbsPath() {
     return absPath;
 }
 
+const char* FileItem::getRefPath() {
+    return absPath + strlen(rootPath);
+}
+
 const char* FileItem::getMD5Path() {
 	return md5Path;
 }

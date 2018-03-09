@@ -9,13 +9,13 @@
 
 //#define USE_WXWIDGETS
 
-#define ROOT_PATH "/Users/akgunduz/Projects/Private/Bankor/Tests"
+//#define ROOT_PATH "/Users/akgunduz/Projects/Private/Bankor/Tests"
 #define UNIXSOCKET_PATH "/var/tmp/"
 #define UNIXSOCKET_FILE_PREFIX "bankor_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
 #define DISTRIBUTOR_PATH "Distributor"
 #define COLLECTOR_PATH "Collector"
-#define CLIENT_PATH "Client"
+#define NODE_PATH "Node"
 
 #endif

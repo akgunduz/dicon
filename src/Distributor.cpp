@@ -31,15 +31,15 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 	switch(msg->getType()) {
 
-		case MSGTYPE_READY:
+		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from collector: %s", Address::getString(address).c_str());
+					"\"ALIVE\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_NODE:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"CLIENT\" msg from collector: %s", Address::getString(address).c_str());
+					"\"NODE\" msg from collector: %s", Address::getString(address).c_str());
 
 			status = send2CollectorMsg(address, MSGTYPE_NODE);
 			break;
@@ -68,10 +68,8 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_READY:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from client: %s with ID : %s",
+					"\"READY\" msg from node: %s with ID : %s",
                   Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
-
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
 
 			nodeManager->setIdle(address, msg->getOwner().getID(), collStartTime.stop());
 
@@ -90,11 +88,13 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 				status = true;
 			}
 
+			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
+
 			break;
 
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"ALIVE\" msg from client: %s with ID : %s",
+					"\"ALIVE\" msg from node: %s with ID : %s",
                   Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
 
 			if (!nodeManager->validate(address, msg->getOwner().getID())
@@ -111,16 +111,16 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 				status = true;
 			}
 
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
+			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
 
 			break;
 
 		case MSGTYPE_BUSY:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"BUSY\" msg from client: %s", Address::getString(address).c_str());
+					"\"BUSY\" msg from node: %s", Address::getString(address).c_str());
 
 			nodeManager->setBusy(address);
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, BUSY);
+			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
 
 
 			status = true;
@@ -128,10 +128,10 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_TIMEOUT:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"TIMEOUT\" msg from client: %s", Address::getString(address).c_str());
+					"\"TIMEOUT\" msg from node: %s", Address::getString(address).c_str());
 
 			nodeManager->remove(address);
-			LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, REMOVE);
+			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
 
 			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_NODE);
 
@@ -154,7 +154,7 @@ bool Distributor::send2NodeMsg(long address, uint8_t type) {
 
 		case MSGTYPE_WAKEUP:
 			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"WAKEUP\" msg sent to client: %s", Address::getString(address).c_str());
+					"\"WAKEUP\" msg sent to node: %s", Address::getString(address).c_str());
 			break;
 
 		default:
@@ -183,9 +183,9 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 
 				if (node != nullptr) {
 
-					LOG_U(UI_UPDATE_DIST_CLIENT_LIST, node->address, PREBUSY);
+					LOG_U(UI_UPDATE_DIST_NODE_LIST, node->address, PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG,
-							"\"CLIENT\" msg sent to collector: %s with available client: %s",
+							"\"NODE\" msg sent to collector: %s with available node: %s",
 						  Address::getString(address).c_str(),
 						  Address::getString(node->address).c_str());
 
@@ -198,7 +198,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 					collectorWaitingList.push_back(address);
 
 					LOG_U(UI_UPDATE_DIST_LOG,
-							"\"CLIENT\" msg sent to collector: %s with no available client",
+							"\"NODE\" msg sent to collector: %s with no available node",
 						  Address::getString(address).c_str());
 
                     msg->setVariant(0, 0);

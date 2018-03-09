@@ -172,7 +172,7 @@ void UserInterface::CreateControls()
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemPanel3, wxID_STATIC, _("Collectors :"), wxPoint(10, 280), wxDefaultSize, 0 );
 
-    distBackupRate = new wxTextCtrl( itemPanel3, ID_DIST_BACKUP_RATE, wxEmptyString, wxPoint(150, 106), wxSize(130, -1), 0 );
+    distBackupRate = new wxTextCtrl( itemPanel3, ID_DIST_BACKUP_RATE, _("0"), wxPoint(150, 106), wxSize(130, -1), 0 );
 
     wxArrayString distCollInterfaceStrings;
     distCollInterface = new wxChoice( itemPanel3, ID_DIST_CONNECT_INTERFACE, wxPoint(150, 26), wxSize(130, -1), distCollInterfaceStrings, 0 );
@@ -373,17 +373,20 @@ void UserInterface::distInit() {
 
     uiUpdater[UI_UPDATE_DIST_ADDRESS] = &UserInterface::distUpdateAddresses;
     uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &UserInterface::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_CLIENT_LIST] = &UserInterface::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &UserInterface::distAddtoNodeList;
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
     distCollInterface->Insert("TCP", 0);
     distCollInterface->Insert("Loopback", 1);
     distCollInterface->Insert("UnixSocket", 2);
+    distCollInterface->SetSelection(1);
 
     nodeInterface->Insert("TCP", 0);
     nodeInterface->Insert("Loopback", 1);
     nodeInterface->Insert("UnixSocket", 2);
+    nodeInterface->SetSelection(1);
+
 /*
     if (Device::getCount() > 0) {
         for (uint32_t i = 0; i < Device::getCount(); i++) {
@@ -406,7 +409,7 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
             distNodeList->DeleteAllItems();
 
             char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
+            sprintf(path, "%s/%s", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
             mkdir(path, 0777);
 
             double backupRate = 0;
@@ -540,7 +543,7 @@ void UserInterface::collInit() {
 
     uiUpdater[UI_UPDATE_COLL_ADDRESS] = &UserInterface::collUpdateAddresses;
     uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
-    uiUpdater[UI_UPDATE_COLL_ATT_CLIENT_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
+    uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
     uiUpdater[UI_UPDATE_COLL_JOB_LIST] = &UserInterface::collUpdateJobList;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
@@ -564,7 +567,7 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
 
         try {
             char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), COLLECTOR_PATH);
+            sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
             mkdir(path, 0777);
 
             collObject = new Collector((uint32_t)distCollInterface->GetSelection(),
@@ -598,6 +601,7 @@ void UserInterface::OnCollProcessClick( wxCommandEvent& event )
     collProcessList->Clear();
 
     collObject->syncTime();
+    collObject->reset();
 
     collObject->processRule();
 
@@ -694,13 +698,13 @@ void UserInterface::nodeInit() {
     column.SetWidth(width);
     nodeFileList->InsertColumn(1, column);
 
-    uiUpdater[UI_UPDATE_CLIENT_ADDRESS] = &UserInterface::nodeUpdateAddresses;
-    uiUpdater[UI_UPDATE_CLIENT_STATE] = &UserInterface::nodeUpdateState;
-    uiUpdater[UI_UPDATE_CLIENT_ATT_COLL_ADDRESS] = &UserInterface::nodeUpdateAttachedCollAddress;
-    uiUpdater[UI_UPDATE_CLIENT_FILE_LIST] = &UserInterface::nodeUpdateFileList;
-    uiUpdater[UI_UPDATE_CLIENT_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
-    uiUpdater[UI_UPDATE_CLIENT_CLEAR] = &UserInterface::nodeUpdateClear;
-    uiUpdater[UI_UPDATE_CLIENT_LOG] = &UserInterface::nodeUpdateLog;
+    uiUpdater[UI_UPDATE_NODE_ADDRESS] = &UserInterface::nodeUpdateAddresses;
+    uiUpdater[UI_UPDATE_NODE_STATE] = &UserInterface::nodeUpdateState;
+    uiUpdater[UI_UPDATE_NODE_ATT_COLL_ADDRESS] = &UserInterface::nodeUpdateAttachedCollAddress;
+    uiUpdater[UI_UPDATE_NODE_FILE_LIST] = &UserInterface::nodeUpdateFileList;
+    uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
+    uiUpdater[UI_UPDATE_NODE_CLEAR] = &UserInterface::nodeUpdateClear;
+    uiUpdater[UI_UPDATE_NODE_LOG] = &UserInterface::nodeUpdateLog;
 /*
     if (Device::getCount() > 0) {
         for (uint32_t i = 0; i < Device::getCount(); i++) {
@@ -721,7 +725,7 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
 
         try {
             char path[PATH_MAX];
-            sprintf(path, "%s/%s/", getcwd(nullptr, 0), CLIENT_PATH);
+            sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
             mkdir(path, 0777);
 
             nodeObject = new Node((uint32_t)nodeInterface->GetSelection(),

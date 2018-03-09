@@ -7,12 +7,12 @@
 #ifndef __Common_LINUX_H_
 #define __Common_LINUX_H_
 
-#define ROOT_PATH "/home/akgunduz/Projects/Private/Bankor/"
+//#define ROOT_PATH "/home/akgunduz/Projects/Private/Bankor/"
 #define UNIXSOCKET_PATH "/var/tmp/"
 #define UNIXSOCKET_FILE_PREFIX "bankor_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
 #define DISTRIBUTOR_PATH "Distributor"
 #define COLLECTOR_PATH "Collector"
-#define CLIENT_PATH "Client"
+#define NODE_PATH "Node"
 #endif

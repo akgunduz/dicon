@@ -60,6 +60,7 @@ public:
     void setFile(Unit node, const char* , const char*,
                  const char*, FILETYPE);
     const char* getAbsPath();
+    const char* getRefPath();
     const char* getMD5Path();
 
 	virtual CONTENT_TYPES getType();
