@@ -7,10 +7,12 @@
 #include "UnixSocketAddress.h"
 #include "DeviceManager.h"
 
-std::vector<Device> UnixSocket::interfaceList;
+std::vector<Device> UnixSocket::deviceList;
 
-UnixSocket::UnixSocket(Unit host, const InterfaceCallback *cb, const char *rootPath)
+UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(host, cb, rootPath) {
+
+    this->device = device;
 
 	if (!initUnixSocket()) {
 		LOG_E("Instance create failed!!!");
@@ -41,10 +43,7 @@ bool UnixSocket::initUnixSocket() {
 
     for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
 
-        Device *device = &(*DeviceManager::getDevices())[i];
-        if (strncmp(device->name, "us", 2) != 0) {
-            continue;
-        }
+        Device *device = getDevice();
 
         int tryCount = 10;
 
@@ -75,8 +74,6 @@ bool UnixSocket::initUnixSocket() {
             }
 
             device->setPort(lastFreePort);
-
-            this->device = device;
 
             return true;
         }
@@ -154,7 +151,7 @@ void *UnixSocket::runAccepter(void *arg) {
 
 	Argument *argument = (Argument *) arg;
 
-	Message *msg = new Message(argument->host, argument->_interface->getRootPath());
+	Message *msg = new Message(argument->host);
 	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
@@ -252,17 +249,21 @@ std::vector<long> UnixSocket::getAddressList() {
 	return list;
 }
 
-std::vector<Device> UnixSocket::getInterfaces() {
-
-    if (interfaceList.size() > 0) {
-        return interfaceList;
-    }
-
-    interfaceList.push_back(Device("us", INTERFACE_UNIXSOCKET));
-
-    return interfaceList;
-}
-
 void UnixSocket::runMulticastSender(Message *message) {
 
+}
+
+bool UnixSocket::createDevices() {
+
+	deviceList.push_back(Device("us", INTERFACE_UNIXSOCKET));
+
+	return true;
+}
+
+std::vector<Device>*  UnixSocket::getDevices() {
+
+    if (deviceList.size() == 0) {
+        createDevices();
+    }
+    return &deviceList;
 }

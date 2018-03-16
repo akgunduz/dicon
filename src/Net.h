@@ -11,6 +11,7 @@
 #include "Scheduler.h"
 #include "Interface.h"
 #include "Message.h"
+#include "Component.h"
 
 #define DEFAULT_IPRANGE 100
 #define MAX_SIMUL_CLIENTS 10
@@ -29,12 +30,17 @@ private :
 	void setAddress(int);
 	INTERFACES getType();
 
+	static std::vector<Device>deviceList;
+
 public :
-    static std::vector<Device>interfaceList;
-	Net(Unit, CONNECTTYPE, const InterfaceCallback *, const char *);
-    static std::vector<Device> getInterfaces();
+
+	Net(Unit, Device*, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~Net();
+
+	static bool createDevices();
+	static std::vector<Device>* getDevices();
+
 };
 
 #endif //__Server_H_

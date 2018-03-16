@@ -31,7 +31,7 @@ class Collector : public Component {
 
 public:
 
-	Collector(int, int, const char *rootPath);
+	Collector(const char *rootPath);
     virtual ~Collector();
 
     bool reset();

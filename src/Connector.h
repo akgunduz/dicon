@@ -13,21 +13,32 @@
 #include "Address.h"
 
 class Connector {
-	bool initialized = false;
+
 	Interface* _interface;
+
+	static std::vector<Device>deviceList;
+    static Device *selectedDevices[2] ;
+
 public:
-	Connector(Unit, CONNECTTYPE, const InterfaceCallback *, const char *);
+	Connector(Unit, Device*, const InterfaceCallback *, const char *);
 	bool send(long, Message*);
 	bool send(Message*);
 	bool put(long, Message*);
 	long getAddress();
 	INTERFACES getInterfaceType();
-	Interface* getInterface();
-    Device* getDevice();
 	std::vector<long> getAddressList();
-	const char * getRootPath();
-	void setRootPath(const char* rootPath);
+//	const char * getRootPath();
+//	void setRootPath(const char* rootPath);
 	virtual ~Connector();
+
+
+	static bool createDevices();
+	static std::vector<Device>* getDevices();
+	static Device* getDevice(unsigned long);
+	static unsigned long getCount();
+
+    static void setSelectedDevices(unsigned char, unsigned char);
+    static Device* getSelectedDevice(unsigned char);
 };
 
 

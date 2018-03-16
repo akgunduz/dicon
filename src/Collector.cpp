@@ -7,19 +7,19 @@
 #include "Util.h"
 #include "NetAddress.h"
 
-Collector::Collector(int distributorIndex, int nodeIndex, const char *rootPath) :
-        Component(Unit(HOST_COLLECTOR, Util::getID()), generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath){
+Collector::Collector(const char *rootPath) :
+        Component(Unit(COMP_COLLECTOR, Util::getArch()), rootPath){
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_NODE));
+	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_NODE));
 
 	distributorAddress = 0;
 
     jobs = new std::vector<Job*>();
 
     jobs->clear();
-    std::vector<std::string> dirList = Util::getDirList(getRootPath(), "Job_");
+    std::vector<std::string> dirList = Util::getDirList(Unit::getRootPath(COMP_COLLECTOR), "Job_");
     for (int i = 0; i < dirList.size(); i++) {
-        jobs->push_back(new Job(getHost(), getRootPath(), dirList[i].c_str()));
+        jobs->push_back(new Job(getInfo(), dirList[i].c_str()));
     }
 
     LOG_U(UI_UPDATE_COLL_JOB_LIST, jobs);
@@ -55,7 +55,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 		case MSGTYPE_NODE: {
 
             long nodeAddress = msg->getVariant(0);
-			short nodeID = (short) msg->getVariant(1);
+			ARCH nodeArch = (ARCH) msg->getVariant(1);
 
 			if (nodeAddress == 0) {
 				LOG_W("No available node right now.");
@@ -70,10 +70,10 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
                 break;
             }
 
-            job->setAttachedNode(nodeAddress, nodeID);
+            job->setAttachedNode(nodeAddress, nodeArch);
             FileList *list = job->prepareRuleList();
 
-			LOG_T("New Job created from path : %s", job->getRootPath());
+			LOG_T("New Job created from path : %s", "TODO JOB");
 
 			LOG_U(UI_UPDATE_COLL_LOG,
                   "\"NODE\" msg from distributor: %s, available node: %s",
@@ -135,7 +135,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 		//	LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-            FileList *list = job->prepareFileList(Unit(HOST_COLLECTOR, job->getAttachedNode().id));
+            FileList *list = job->prepareFileList(Unit(COMP_COLLECTOR, job->getAttachedNode().getArch()));
 
             list->remove(&msg->md5List);
 
@@ -154,7 +154,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 bool Collector::send2DistributorMsg(long address, int type) {
 
-	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
+	Message *msg = new Message(COMP_COLLECTOR, type);
 
 	switch(type) {
 
@@ -185,13 +185,13 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 	}
 
-	return connectors[HOST_DISTRIBUTOR]->send(address, msg);
+	return connectors[COMP_DISTRIBUTOR]->send(address, msg);
 
 }
 
 bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
-	Message *msg = new Message(HOST_COLLECTOR, type, getRootPath());
+	Message *msg = new Message(COMP_COLLECTOR, type);
 
     msg->setVariant(0, list->getID());
 
@@ -219,7 +219,7 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 	}
 
-	return connectors[HOST_NODE]->send(address, msg);
+	return connectors[COMP_NODE]->send(address, msg);
 
 }
 
@@ -240,7 +240,7 @@ bool Collector::syncTime() {
 bool Collector::reset() {
 
 	for (int i = 0; i < jobs->size(); i++) {
-        (*jobs)[i]->setAttachedNode(0, 0);
+        (*jobs)[i]->setAttachedNode(0, ARCH_MAX);
     }
 	return true;
 

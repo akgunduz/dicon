@@ -16,7 +16,7 @@ class MapItem : public ContentItem {
     int fileCount;
 
 public:
-    MapItem(Unit host, const char *rootPath, const char *jobDir, const char *fileName,
+    MapItem(Unit host, const char *jobDir, const char *fileName,
                        FILETYPE fileType);
     FileItem *get();
     FileItem *get(int index);

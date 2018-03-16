@@ -4,15 +4,13 @@
 //
 
 #include "Node.h"
-#include "ExecutorItem.h"
 #include "Util.h"
 #include "ArchTypes.h"
 
-Node::Node(int distributorIndex, int collectorIndex, const char *rootPath) :
-        Component(Unit(HOST_NODE),
-				  generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath) {
+Node::Node(const char *rootPath) :
+        Component(Unit(COMP_NODE), rootPath) {
 
-	LOG_U(UI_UPDATE_NODE_ADDRESS, getAddress(HOST_DISTRIBUTOR), getAddress(HOST_COLLECTOR));
+	LOG_U(UI_UPDATE_NODE_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
 	distributorAddress = 0;
@@ -69,7 +67,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
                 delete job;
             }
 
-            job = new Job(getHost(), getRootPath(), msg->getJobDir());
+            job = new Job(getInfo(), msg->getJobDir());
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
@@ -108,7 +106,7 @@ bool Node::processNodeMsg(long address, Message *msg) {
 
 bool Node::send2DistributorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(Unit(HOST_NODE), type, getRootPath());
+	Message *msg = new Message(Unit(COMP_NODE), type);
 
 	switch(type) {
 
@@ -116,21 +114,21 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"READY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
 			break;
 
 		case MSGTYPE_ALIVE:
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"ALIVE\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
 			break;
 
 		case MSGTYPE_BUSY:
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"BUSY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir((ARCH_IDS)msg->getOwner().getID()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
 			break;
 
 		default:
@@ -138,19 +136,19 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[HOST_DISTRIBUTOR]->send(address, msg);
+	return connectors[COMP_DISTRIBUTOR]->send(address, msg);
 
 }
 
 bool Node::send2CollectorMsg(long address, uint8_t type) {
 
-	Message *msg = new Message(HOST_NODE, type, getRootPath());
+	Message *msg = new Message(COMP_NODE, type);
 
 	switch(type) {
 
 		case MSGTYPE_MD5: {
 
-            FileList *list = job->prepareFileList(Unit(HOST_NODE, Util::getID()));
+            FileList *list = job->prepareFileList(Unit(COMP_NODE, Util::getArch()));
             msg->setVariant(0, list->getID());
             msg->setJob(STREAM_MD5ONLY, list);
             LOG_U(UI_UPDATE_NODE_LOG,
@@ -164,7 +162,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[HOST_COLLECTOR]->send(address, msg);
+	return connectors[COMP_COLLECTOR]->send(address, msg);
 }
 
 bool Node::processMD5() {
@@ -174,16 +172,11 @@ bool Node::processMD5() {
         for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
             FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
 
-            char absPath[PATH_MAX];
-            sprintf(absPath, "%s%s", getRootPath(), content->getFileName());
-
             /*
              * false -> request file from collector, with no md5 set
              * true -> do not request file from collector, with md5 set
              */
-
-            if (access(absPath, F_OK ) == -1) {
-                //printf("error %d\n", errno);
+            if (!Util::checkPath(Unit::getRootPath(COMP_NODE) ,content->getFileName(), false)) {
                 content->setFlaggedToSent(false);
             }
         }
@@ -226,7 +219,7 @@ bool Node::processParallel(Rule* rule) {
         ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
         content->getParsed(rule, cmd);
         parseCommand(cmd, args);
-        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(getRootPath()));
+        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(Unit::getRootPath(COMP_NODE)));
 
 #ifdef CYGWIN
         LOG_I("Simulating fork in Windows!!!");
@@ -284,7 +277,10 @@ bool Node::processSequential(Rule* rule) {
 
         LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
 
-        parseCommand(cmd, args);
+        char fullcmd[PATH_MAX];
+        strcpy(fullcmd, Util::absPath(getInfo(), cmd).c_str());
+
+        parseCommand(fullcmd, args);
 
 
 #ifdef CYGWIN

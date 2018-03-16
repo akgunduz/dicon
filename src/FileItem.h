@@ -17,8 +17,7 @@ class FileItem : public ContentItem {
 
 	char fileName[MAX_FILE_NAME_LENGTH];
 	char jobDir[MAX_JOB_DIR_LENGTH];
-	char rootPath[PATH_MAX];
-	char absPath[PATH_MAX];
+	char refPath[PATH_MAX];
 	char md5Path[PATH_MAX];
 
 	Md5 md5;
@@ -27,23 +26,23 @@ class FileItem : public ContentItem {
 
     Unit host;
 
-    void setRootPath(const char* rootPath);
+    //void setRootPath(const char* rootPath);
 
 public:
-	FileItem(Unit host, const char* rootPath);
+	FileItem(Unit host);
     FileItem(FileItem*);
-    FileItem(Unit host, const char*, const char *,
+    FileItem(Unit host,  const char *,
              const char*, FILETYPE,
              Md5 *md5 = nullptr);
-	FileItem(Unit host, Unit node, const char*, const char *,
+	FileItem(Unit host, Unit node, const char *,
              const char*, FILETYPE,
              Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    bool set(Unit host, Unit node, const char *, const char *,
+    bool set(Unit host, Unit node, const char *,
              const char *, FILETYPE, Md5* = nullptr);
 
-    bool set(Unit host, const char *, const char *,
+    bool set(Unit host, const char *,
              const char *, FILETYPE, Md5* = nullptr);
 
     bool set(FileItem*);
@@ -53,13 +52,12 @@ public:
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
     const char* getFileName();
-    const char* getRootPath();
+    //const char* getRootPath();
     const char* getJobDir();
     Unit getHost();
 
-    void setFile(Unit node, const char* , const char*,
+    void setFile(Unit node, const char*,
                  const char*, FILETYPE);
-    const char* getAbsPath();
     const char* getRefPath();
     const char* getMD5Path();
 

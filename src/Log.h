@@ -31,8 +31,12 @@ enum LOGLEVEL {
 //#define LOG_U(a, b) Log::display_at_ui(a, b)
 //#define LOG_UI(a, b, c) Log::display_at_ui(a, b, c)
 
+typedef void (*update_ui_callback)(void*, int, void*);
+
 class Log {
 	static LOGLEVEL mLevel;
+	static update_ui_callback cb;
+	static void *uiContext;
 public:
 
 	static void setLogLevel(LOGLEVEL level);
@@ -48,6 +52,7 @@ public:
 
 	static void display_at_ui(int, void*);
 	static void update_ui(int, void*);
+	static void set_ui_callback(void *, update_ui_callback cb);
 };
 
 #endif //__Log_H_

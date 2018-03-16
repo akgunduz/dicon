@@ -7,6 +7,9 @@
 
 Console::Console() {
 
+    Log::setLogLevel(LEVEL_WARN);
+    Log::set_ui_callback(this, updateUICallback);
+
 	uiUpdater[UI_UPDATE_LOG] = &Console::updateLog;
 }
 
@@ -54,7 +57,7 @@ void ConsoleEvent::SetClientData(void *dataPointer) {
 	this->dataPointer = dataPointer;
 }
 
-void Console::updateConsoleEvent(int id, void *data) {
+void Console::updateUIEvent(int id, void *data) {
 
 	ConsoleEvent event;
 	event.SetId(id);
@@ -69,4 +72,8 @@ void Console::updateLog(ConsoleEvent &event) {
 	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("%s", data->dataStr.c_str());
 
+}
+
+void Console::updateUICallback(void *context, int id, void *data) {
+    ((Console*) context)->updateUIEvent(id, data);
 }

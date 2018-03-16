@@ -5,28 +5,44 @@
 #include "Unit.h"
 #include "Util.h"
 
-Unit::Unit(int unit) {
-    this->unit = unit;
+char Unit::rootPath[COMP_MAX][PATH_MAX];
+
+Unit::Unit(int data) {
+    this->type = (COMPONENT) (data >> 16);
+    this->arch = (ARCH) (data & 0xFFFF);
 }
 
-Unit::Unit(HOST type, short id) {
-    this->unit = (int)type << 16 | id;
+Unit::Unit(COMPONENT component, ARCH arch) {
+
+    this->type = component;
+    this->arch = arch;
+
+    //this->unit = (int)type << 16 | arch;
 }
 
-Unit::Unit(HOST type) {
-    this->unit = (int)type << 16 | Util::getID();
+Unit::Unit(COMPONENT component) {
+
+    this->type = component;
+    this->arch = Util::getArch();
+   // this->unit = (int)type << 16 | Util::getArch();
 }
 
-HOST Unit::getType() {
-    return (HOST) (unit >> 16);
+COMPONENT Unit::getType() {
+
+    return type;
+   // return (COMPONENT) (unit >> 16);
 }
 
-short Unit::getID() {
-    return (short) (unit & 0xFFFF);
+ARCH Unit::getArch() {
+
+    return arch;
+ //   return (short) (unit & 0xFFFF);
 }
 
 Unit::Unit(const Unit &rep) {
-    this->unit = rep.unit;
+    this->type = rep.type;
+    this->arch = rep.arch;
+    //this->unit = rep.unit;
 }
 
 Unit::Unit() {
@@ -34,5 +50,15 @@ Unit::Unit() {
 }
 
 int Unit::getUnit() {
-    return this->unit;
+    return type << 16 | arch;
 }
+
+const char* Unit::getRootPath(COMPONENT component) {
+    return rootPath[component];
+}
+
+void Unit::setRootPath(COMPONENT component, const char *path) {
+    strcpy(rootPath[component], path);
+}
+
+

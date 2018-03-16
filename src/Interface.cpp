@@ -27,7 +27,7 @@ Interface::Interface(Unit host, const InterfaceCallback *receiveCB, const char *
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
 	scheduler->setCB(MESSAGE_SEND, sendCB);
 
-	strcpy(this->rootPath, rootPath);
+	//setRootPath(rootPath);
 }
 
 void Interface::end() {
@@ -155,13 +155,13 @@ long Interface::getMulticastAddress() {
     return multicastAddress;
 }
 
-const char *Interface::getRootPath() {
-	return rootPath;
-}
-
-void Interface::setRootPath(const char *rootPath) {
-    strcpy(this->rootPath, rootPath);
-}
+//const char *Interface::getRootPath() {
+//	return rootPath;
+//}
+//
+//void Interface::setRootPath(const char *rootPath) {
+//    strcpy(this->rootPath, rootPath);
+//}
 
 bool Interface::isMulticastEnabled() {
     return multicastEnabled;

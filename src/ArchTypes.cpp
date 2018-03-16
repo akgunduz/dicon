@@ -15,8 +15,8 @@ const char* sArchTypes[] = {
         "lnx-a15",
 };
 
-const char *ArchTypes::getDir(ARCH_IDS id) {
-    return sArchTypes[id];
+const char *ArchTypes::getDir(ARCH arch) {
+    return sArchTypes[arch];
 }
 
 short ArchTypes::getMax() {

@@ -25,13 +25,16 @@ private :
 	void setAddress(int);
 	INTERFACES getType();
 
+	static std::vector<Device>deviceList;
+
 public :
 	static uint16_t gOffset;
-	UnixSocket(Unit, const InterfaceCallback *, const char *);
-    static std::vector<Device>interfaceList;
-    static std::vector<Device> getInterfaces();
+	UnixSocket(Unit, Device*, const InterfaceCallback *, const char *);
 	std::vector<long> getAddressList();
 	~UnixSocket();
+
+	static bool createDevices();
+    static std::vector<Device>* getDevices();
 };
 
 #endif //__UnixSocket_H_

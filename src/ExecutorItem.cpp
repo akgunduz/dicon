@@ -103,8 +103,7 @@ bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdI
 	if (cmdType == CONTENT_MAP) {
 		MapItem *content = (MapItem *) refRule->getContent(CONTENT_MAP, cmdIndex);
 		if (content != nullptr) {
-        //    sprintf(parsed, "%s%s/%s/%s", parsed, refRule->getRootPath(), refRule->getJobDir(), content->getFileName());
-            sprintf(parsed, "%s%s", parsed, content->get()->getAbsPath());
+            sprintf(parsed, "%s%s", parsed, content->get()->getRefPath());
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {

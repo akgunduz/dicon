@@ -5,16 +5,9 @@
 
 #include "Log.h"
 
-#ifdef __WXWIDGETS__
-#include "UserInterface.h"
-extern UserInterface *g_ui;
-#endif
-
-#include "Console.h"
-
 LOGLEVEL Log::mLevel = LEVEL_ERROR;
-
-extern Console *c_ui;
+void* Log::uiContext = NULL;
+update_ui_callback Log::cb = NULL;
 
 static const char* sLogLevels[LEVEL_MAX] = {
 		"NONE  ",
@@ -142,24 +135,19 @@ void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ..
 
 	char logout[255];
 	sprintf(logout, "%s : %s[%d]: %s \n", sLogLevels[level], p, line, buf);
-#if 0
-	EventData *data = new EventData(logout);
-	update_ui(UI_UPDATE_LOG, data);
-#else
-        printf("%s", logout);
-#endif
+    printf("%s", logout);
+}
+
+void Log::set_ui_callback(void *context, update_ui_callback cb) {
+
+    Log::uiContext = context;
+	Log::cb = cb;
 }
 
 void Log::update_ui(int id, void *data) {
 
-#ifdef __WXWIDGETS__
-	if (g_ui) {
-		g_ui->updateUIEvent(id, data);
-	}
-#endif
-
-	if (c_ui) {
-		c_ui->updateConsoleEvent(id, data);
+	if (cb && uiContext) {
+		cb(uiContext, id, data);
 	}
 }
 

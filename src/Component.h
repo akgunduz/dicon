@@ -14,23 +14,22 @@ protected :
 
     InterfaceCallback *callback;
 
-    const char* rootPath;
+   // const char* rootPath;
+   // char rootPath[PATH_MAX];
 
-    Unit host;
+    Unit info;
 
 public:
-    Connector *connectors[HOST_MAX];
+    Connector *connectors[COMP_MAX];
 
-    Component(Unit host, long index, const char* rootPath);
+    Component(Unit host, const char* rootPath);
     virtual ~Component();
-    const char* getRootPath();
-    Unit getHost();
-    void setRootPath(const char* rootPath);
-    INTERFACES getInterfaceType(HOST host);
-    long getAddress(HOST host);
+ //   const char* getRootPath();
+    Unit getInfo();
+ //   void setRootPath(const char* rootPath);
+    long getAddress(COMPONENT host);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);
-    static long generateIndex(int indexFirst, int indexSecond, int indexThird);
 
     virtual bool processDistributorMsg(long, Message *) = 0;
     virtual bool processCollectorMsg(long, Message *) = 0;

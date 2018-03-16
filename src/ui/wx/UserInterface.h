@@ -16,6 +16,14 @@
 
 #include "Distributor.h"
 #include "Collector.h"
+#include "Node.h"
+
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+#include <wx/wx.h>
+#endif
+#include <wx/app.h>
+#include <wx/event.h>
 #include <wx/treelist.h>
 
 ////@begin includes
@@ -105,6 +113,8 @@ public:
     fUIUpdater uiUpdater[UI_UPDATE_MAX];
 
     //Generic
+
+    static void updateUICallback(void*, int, void*);
 
     void updateUIEvent(int, void*);
 

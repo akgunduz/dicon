@@ -4,9 +4,6 @@
 //
 
 #include "Rule.h"
-#include "ParameterItem.h"
-#include "ExecutorItem.h"
-#include "MapItem.h"
 
 Rule::Rule(FileItem *fileItem)
         : JsonItem(fileItem) {
@@ -14,8 +11,8 @@ Rule::Rule(FileItem *fileItem)
     init();
 }
 
-Rule::Rule(Unit host, const char* rootPath, const char* jobDir, const char* fileName)
-        : JsonItem(host, rootPath, jobDir, fileName, FILE_RULE) {
+Rule::Rule(Unit host,  const char* jobDir, const char* fileName)
+        : JsonItem(host, jobDir, fileName, FILE_RULE) {
 
     init();
 }
@@ -90,7 +87,7 @@ bool Rule::parseMapNode(void *parent, json_object *node) {
         Rule* rule = (Rule*) parent;
 
 	//	FileItem *content = new FileItem(rule->getRootPath(), rule->getJobDir(), path, fileType);
-		MapItem *content = new MapItem(rule->getHost(), rule->getRootPath(), rule->getJobDir(), path, fileType);
+		MapItem *content = new MapItem(rule->getHost(), rule->getJobDir(), path, fileType);
       /*  for (int i = 0; i < content->getCount(); i++) {
             rule->fileList->set(content->get(i));
         }

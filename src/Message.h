@@ -31,17 +31,19 @@ class Message : public BaseMessage {
 
 public:
 
-    char rootPath[PATH_MAX];
+    //char rootPath[PATH_MAX];
 
 	//Job *job;
     FileList *fileList;
 
 	std::vector<Md5> md5List;
 
-	Message(Unit host, const char*);
-	Message(Unit owner, int type, const char*);
+//	Message(Unit host, const char*);
+//	Message(Unit owner, int type, const char*);
+	Message(Unit host);
+	Message(Unit owner, int type);
 
-    const char* getRootPath();
+//    const char* getRootPath();
     const char* getJobDir();
 
 	void setJob(int, FileList *fileList);

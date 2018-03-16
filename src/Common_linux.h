@@ -7,7 +7,10 @@
 #ifndef __Common_LINUX_H_
 #define __Common_LINUX_H_
 
-//#define ROOT_PATH "/home/akgunduz/Projects/Private/Bankor/"
+#include <openssl/md5.h>
+#define ntohll(x) be64toh(x)
+#define htonll(x) htobe64(x)
+
 #define UNIXSOCKET_PATH "/var/tmp/"
 #define UNIXSOCKET_FILE_PREFIX "bankor_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"

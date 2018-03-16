@@ -7,19 +7,26 @@
 
 
 #include "Common.h"
+#include "ArchTypes.h"
 
 class Unit {
-    int unit;
+    COMPONENT type;
+    ARCH arch;
+
+    static char rootPath[COMP_MAX][PATH_MAX];
 
 public:
     Unit();
-    Unit(int unit);
-    Unit(HOST type);
-    Unit(HOST type, short id);
-    Unit(const Unit& rep);
-    HOST getType();
-    short getID();
+    Unit(int);
+    Unit(COMPONENT);
+    Unit(COMPONENT, ARCH);
+    Unit(const Unit&);
+    COMPONENT getType();
+    ARCH getArch();
     int getUnit();
+
+    static const char* getRootPath(COMPONENT);
+    static void setRootPath(COMPONENT, const char*);
 };
 
 

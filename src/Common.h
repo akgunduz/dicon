@@ -37,46 +37,22 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <dirent.h>
-#include <json-c/json.h>
+#include <json.h>
 #include <signal.h>
 #include <time.h>
 
-#ifdef __WXWIDGETS__
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
-#include <wx/app.h>
-#include <wx/event.h>
-#endif
+#include <sys/ioctl.h>
+#include <net/if.h>
 
 #ifdef APPLE
-#include <IOKit/IOKitKeys.h>
-#include <CommonCrypto/CommonDigest.h>
 #include "Common_apple.h"
-
-#ifdef MD5_DIGEST_LENGTH
-#undef MD5_DIGEST_LENGTH
-#endif
-
-#define MD5_Init            CC_MD5_Init
-#define MD5_Update          CC_MD5_Update
-#define MD5_Final           CC_MD5_Final
-#define MD5_DIGEST_LENGTH   CC_MD5_DIGEST_LENGTH
-#define MD5_CTX             CC_MD5_CTX
-
 #else
-#include <openssl/md5.h>
 #include "Common_linux.h"
-#define ntohll(x) be64toh(x)
-#define htonll(x) htobe64(x)
 #endif
 
 #ifndef nullptr
 #define nullptr NULL
 #endif
-
-#define RULE_FILE "Rule.json"
 
 #define MD5_PATH "md5"
 #define ARCH_PATH "arch"
@@ -88,17 +64,16 @@
 #define IPADDRESS_MASK 0xFFFFFFFF
 #define DEFAULT_PORT 61001*/
 
-enum HOST {
-	HOST_DISTRIBUTOR,
-	HOST_COLLECTOR,
-	HOST_NODE,
-	HOST_MAX
+enum COMPONENT {
+	COMP_DISTRIBUTOR,
+	COMP_COLLECTOR,
+	COMP_NODE,
+	COMP_MAX
 };
 
 enum INTERFACES {
 	INTERFACE_NET,
 	INTERFACE_UNIXSOCKET,
-	INTERFACE_PIPE,
 	INTERFACE_MAX
 };
 

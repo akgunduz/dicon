@@ -16,7 +16,7 @@ INTERFACES Address::getInterface(long address) {
         return INTERFACE_UNIXSOCKET;
     }
 
-    return INTERFACE_PIPE;
+    return INTERFACE_MAX;
 }
 
 inline std::string Address::getStdString(long address) {

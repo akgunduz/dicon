@@ -49,7 +49,9 @@ class Console {
 public:
 	Console();
 
-	void updateConsoleEvent(int, void*);
+	static void updateUICallback(void*, int, void*);
+
+	void updateUIEvent(int, void*);
 
 	void updateLog(ConsoleEvent &event);
 

@@ -15,11 +15,16 @@
 #define JOB_ITEM 0
 #define JOB_FILE "Job.json"
 
-class AttachedNode {
+struct AttachedNode {
+
+    long address;
+    ARCH arch;
 
 public:
-    long address;
-    short id;
+
+    long getAddress();
+    ARCH getArch();
+
 };
 
 
@@ -36,8 +41,8 @@ public:
   //  std::map<std::string, FileItem*> uniqueList;
 
     Job(FileItem *fileItem);
-    Job(Unit host, const char *rootPath, const char* jobDir);
-    Job(Unit host, const char *rootPath, const char* jobDir, const char* fileName);
+    Job(Unit host, const char* jobDir);
+    Job(Unit host, const char* jobDir, const char* fileName);
 
     void init();
     ~Job();
@@ -49,7 +54,7 @@ public:
     void setID(long id);
 
     AttachedNode getAttachedNode();
-    void setAttachedNode(long address, short id);
+    void setAttachedNode(long, ARCH);
 
     Rule* getRule(int index);
     int getRuleCount();

@@ -61,10 +61,10 @@ void Util::mkPath(const char *path) {
     mkdir(tmp, S_IRWXU);
 }
 
-short Util::getID() {
+ARCH Util::getArch() {
 #if defined(APPLE)
 	return ARCH_OSX;
-#elif defined(LINUX)
+#elif defined(__linux__)
     return ARCH_LNX;
 #elif defined(CORTEXA15)
     return ARCH_CA15;
@@ -139,6 +139,27 @@ std::vector<std::string> Util::getDirList(const char *path, const char* filter) 
     return fileList;
 }
 
+
+
 bool Util::isMulticast() {
     return false;
+}
+
+std::string Util::mixPath(const char *path1, const char *path2) {
+    return std::string(path1) + "/" + path2;
+}
+
+bool Util::checkPath(const char *path1, const char *path2, bool dir) {
+    std::string final = std::string(path1) + "/" + path2;
+    if (access(final.c_str(), F_OK ) == -1) {
+        if (dir) {
+            mkPath(final.c_str());
+        }
+        return false;
+    }
+    return true;
+}
+
+std::string Util::absPath(Unit host, const char *path2) {
+    return std::string(Unit::getRootPath(host.getType())) + "/" + path2;
 }

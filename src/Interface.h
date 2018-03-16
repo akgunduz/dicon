@@ -60,10 +60,11 @@ protected :
 	long address;
     bool multicastEnabled = false;
     long multicastAddress = 0;
-    char rootPath[PATH_MAX];
+    //char rootPath[PATH_MAX];
 	Scheduler *scheduler;
 	pthread_t thread;
 	int notifierPipe[2];
+
 	//virtual bool init() = 0;
 	virtual void runReceiver(Unit host) = 0;
 	virtual void runSender(long, Message *) = 0;
@@ -78,8 +79,8 @@ public :
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	int getNotifier(NOTIFIER_TYPE type);
-    const char* getRootPath();
-    void setRootPath(const char* rootPath);
+    //const char* getRootPath();
+    //void setRootPath(const char* rootPath);
 	virtual INTERFACES getType() = 0;
 	virtual long getAddress();
     virtual Device* getDevice();

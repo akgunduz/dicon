@@ -7,29 +7,21 @@
 #include "NetAddress.h"
 #include "DeviceManager.h"
 
-std::vector<Device> Net::interfaceList;
+std::vector<Device> Net::deviceList;
 
-Net::Net(Unit host, CONNECTTYPE connectType, const InterfaceCallback *cb, const char *rootPath)
+Net::Net(Unit host, Device *device, const InterfaceCallback *cb, const char *rootPath)
 		: Interface(host, cb, rootPath) {
 
-    if (connectType == CONNECT_TCP) {
+    this->device = device;
 
-        if (!initTCP()) {
-            LOG_E("initTCP failed!!!");
-            throw std::runtime_error("NetReceiver : initTCP failed!!!");
-        }
+    if (!initTCP()) {
+        LOG_E("initTCP failed!!!");
+        throw std::runtime_error("NetReceiver : initTCP failed!!!");
+    }
 
-        if (host.getType() == HOST_DISTRIBUTOR && !initMulticast()) {
-            LOG_E("initMulticast failed!!!");
-            throw std::runtime_error("NetReceiver : initMulticast failed!!!");
-        }
-
-    } else {
-
-        if (!initLoopBack()) {
-            LOG_E("initLoopBack failed!!!");
-            throw std::runtime_error("NetReceiver : initLoopBack failed!!!");
-        }
+    if (host.getType() == COMP_DISTRIBUTOR && !initMulticast()) {
+        LOG_E("initMulticast failed!!!");
+        throw std::runtime_error("NetReceiver : initMulticast failed!!!");
     }
 
     if (!initThread()) {
@@ -41,7 +33,6 @@ Net::Net(Unit host, CONNECTTYPE connectType, const InterfaceCallback *cb, const 
     }
 
 }
-
 
 bool Net::initTCP() {
 
@@ -58,20 +49,18 @@ bool Net::initTCP() {
         return false;
     }
 
-    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
+    int tryCount = 10;
 
-        Device *device = &(*DeviceManager::getDevices())[i];
-        if (strncmp(device->name, "lo", 2) == 0 ||
-            strncmp(device->name, "us", 2) == 0) {
-            continue;
-        }
+    for (int j = tryCount; j > 0; j--) {
 
         address = NetAddress::parseAddress(device->getAddress(),
-                                                DEFAULT_PORT, (int) device->getHelper());
+                                                lastFreePort, (int) device->getHelper());
 
         struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
 
-        if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
+        if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
+
+            lastFreePort++;
             continue;
         }
 
@@ -90,84 +79,13 @@ bool Net::initTCP() {
             return false;
         }
 
-        device->setPort(DEFAULT_PORT);
-
-        this->device = device;
+        device->setPort(lastFreePort);
 
         return true;
     }
 
+
     LOG_E("Could not set create tcp net socket!!!");
-
-    close(netSocket);
-
-    return false;
-}
-
-bool Net::initLoopBack() {
-
-    netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (netSocket < 0) {
-        LOG_E("Socket open with err : %d!!!", errno);
-        return false;
-    }
-
-    int on = 1;
-    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
-        LOG_E("Socket option with err : %d!!!", errno);
-        close(netSocket);
-        return false;
-    }
-
-    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
-
-        Device *device = &(*DeviceManager::getDevices())[i];
-        if (strncmp(device->name, "lo", 2) != 0) {
-            continue;
-        }
-
-        int tryCount = 10;
-
-        for (int j = tryCount; j > 0; j--) {
-
-            address = NetAddress::parseAddress(device->getAddress(),
-                                                    lastFreePort, (int) device->getHelper());
-
-            struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
-
-            if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
-
-                lastFreePort++;
-                continue;
-            }
-
-            LOG_U(UI_UPDATE_LOG,
-                  "Using address : %s", Address::getString(address).c_str());
-
-            if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
-                LOG_E("Socket listen with err : %d!!!", errno);
-                close(netSocket);
-                return false;
-            }
-
-            if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
-                LOG_E("Could not set socket Non-Blocking!!!");
-                close(netSocket);
-                return false;
-            }
-
-            device->setPort(lastFreePort);
-
-            this->device = device;
-
-            return true;
-        }
-
-        break;
-
-    }
-
-    LOG_E("Could not set create loopback net socket!!!");
 
     close(netSocket);
 
@@ -389,7 +307,7 @@ void Net::runReceiver(Unit host) {
 
         if (multicastEnabled && FD_ISSET(multicastSocket, &readfs)) {
 
-            Message *msg = new Message(host, getRootPath());
+            Message *msg = new Message(host);
             msg->setProtocol(true);
             if (msg->readFromStream(multicastSocket)) {
                 push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
@@ -416,7 +334,7 @@ void *Net::runAccepter(void *arg) {
 
 	Argument *argument = (Argument *) arg;
 
-	Message *msg = new Message(argument->host, argument->_interface->getRootPath());
+	Message *msg = new Message(argument->host);
 	if (msg->readFromStream(argument->acceptSocket)) {
 		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
 	}
@@ -498,39 +416,40 @@ std::vector<long> Net::getAddressList() {
     return NetAddress::getAddressList(address);
 }
 
-std::vector<Device> Net::getInterfaces() {
-
-    if (interfaceList.size() > 0) {
-        return interfaceList;
-    }
+bool Net::createDevices() {
 
     struct ifaddrs* ifAddrStruct = nullptr;
     struct ifaddrs* loop = nullptr;
 
     getifaddrs(&ifAddrStruct);
     if (ifAddrStruct == nullptr) {
-        return interfaceList;
+        return false;
     }
 
     for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
 
         if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
 
-            if (strncmp(loop->ifa_name, "et", 2) == 0 ||
-                strncmp(loop->ifa_name, "en", 2) == 0 ||
-                strncmp(loop->ifa_name, "br", 2) == 0 ||
-                strncmp(loop->ifa_name, "lo", 2) == 0 ||
-                strncmp(loop->ifa_name, "wlan", 2) == 0) {
-
-                interfaceList.push_back(Device(loop->ifa_name,
-                             ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                             NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
-
+            if (!((loop->ifa_flags & IFF_UP) && (loop->ifa_flags & IFF_RUNNING))) {
+                continue;
             }
+
+            deviceList.push_back(Device(loop->ifa_name,
+                                        ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                        NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                                        (loop->ifa_flags & IFF_LOOPBACK) > 0));
         }
     };
 
     freeifaddrs(ifAddrStruct);
 
-    return interfaceList;
+    return true;
+}
+
+std::vector<Device>*  Net::getDevices() {
+
+    if (deviceList.size() == 0) {
+        createDevices();
+    }
+    return &deviceList;
 }

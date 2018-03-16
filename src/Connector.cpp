@@ -5,22 +5,23 @@
 
 #include "Connector.h"
 #include "Net.h"
-#include "Pipe.h"
 #include "UnixSocket.h"
 
-Connector::Connector(Unit host, CONNECTTYPE connectType, const InterfaceCallback *cb, const char *rootPath) {
+std::vector<Device> Connector::deviceList;
+Device* Connector::selectedDevices[2];
+
+Connector::Connector(Unit component, Device* device, const InterfaceCallback *cb, const char *rootPath) {
 
 	try {
 
-		switch(connectType) {
+		switch(device->getType()) {
 
-			case CONNECT_TCP:
-            case CONNECT_LOOP:
-				_interface = new Net(host, connectType, cb, rootPath);
+			case INTERFACE_NET:
+				_interface = new Net(component, device, cb, rootPath);
 				break;
 
-			case CONNECT_UNIXSOCKET:
-				_interface = new UnixSocket(host, cb, rootPath);
+			case INTERFACE_UNIXSOCKET:
+				_interface = new UnixSocket(component, device, cb, rootPath);
 				break;
 
 			default:
@@ -32,68 +33,38 @@ Connector::Connector(Unit host, CONNECTTYPE connectType, const InterfaceCallback
 		LOG_E("Interface Init failed!!!");
 		throw std::runtime_error("Connector : Interface Init failed!!!");
 	}
-
-	initialized = true;
-}
-
-bool Connector::send(long target, Message *msg) {
-
-	if (!initialized) {
-		return false;
-	}
-
-	return _interface->push(MESSAGE_SEND, target, msg);
-
-}
-
-bool Connector::send(Message *msg) {
-
-    if (!initialized) {
-        return false;
-    }
-
-    return _interface->push(MESSAGE_SEND, _interface->getMulticastAddress(), msg);
-
-}
-
-bool Connector::put(long target, Message *msg) {
-
-    if (!initialized) {
-        return false;
-    }
-
-    return _interface->push(MESSAGE_RECEIVE, target, msg);
-
-}
-
-long Connector::getAddress() {
-
-	if (!initialized) {
-		return 0;
-	}
-
-	return _interface->getAddress();
-
-}
-
-std::vector<long> Connector::getAddressList() {
-
-	if (!initialized) {
-
-		std::vector<long> list;
-		return list;
-	}
-
-	return _interface->getAddressList();
-
 }
 
 Connector::~Connector() {
 
-	delete _interface;
-	_interface = nullptr;
-
+    delete _interface;
 }
+
+bool Connector::send(long target, Message *msg) {
+
+	return _interface->push(MESSAGE_SEND, target, msg);
+}
+
+bool Connector::send(Message *msg) {
+
+    return _interface->push(MESSAGE_SEND, _interface->getMulticastAddress(), msg);
+}
+
+bool Connector::put(long target, Message *msg) {
+
+    return _interface->push(MESSAGE_RECEIVE, target, msg);
+}
+
+long Connector::getAddress() {
+
+	return _interface->getAddress();
+}
+
+std::vector<long> Connector::getAddressList() {
+
+	return _interface->getAddressList();
+}
+
 
 INTERFACES Connector::getInterfaceType() {
 
@@ -101,22 +72,64 @@ INTERFACES Connector::getInterfaceType() {
 
 }
 
-const char *Connector::getRootPath() {
+//const char *Connector::getRootPath() {
+//
+//	return _interface->getRootPath();
+//}
+//
+//void Connector::setRootPath(const char *rootPath) {
+//
+//    _interface->setRootPath(rootPath);
+//}
+//
+//Interface *Connector::getInterface() {
+//
+//	return _interface;
+//}
+//
+//Device* Connector::getDevice() {
+//
+//    return _interface->getDevice();
+//}
 
-	return _interface->getRootPath();
+bool Connector::createDevices() {
+
+    std::vector<Device> *netDevices = Net::getDevices();
+    deviceList.insert(deviceList.end(), netDevices->begin(), netDevices->end());
+
+    std::vector<Device> *unixSocketDevices = UnixSocket::getDevices();
+    deviceList.insert(deviceList.end(), unixSocketDevices->begin(), unixSocketDevices->end());
+
+    return true;
 }
 
-void Connector::setRootPath(const char *rootPath) {
+unsigned long Connector::getCount() {
 
-    _interface->setRootPath(rootPath);
-}
-
-Interface *Connector::getInterface() {
-
-	return _interface;
+    return getDevices()->size();
 
 }
 
-Device* Connector::getDevice() {
-    return _interface->getDevice();
+std::vector<Device> *Connector::getDevices() {
+
+    if (deviceList.empty()) {
+        createDevices();
+    }
+    return &deviceList;
+}
+
+Device* Connector::getDevice(unsigned long index) {
+
+    return &deviceList[index >= deviceList.size() ?
+                                      deviceList.size() - 1 : index];
+}
+
+void Connector::setSelectedDevices(unsigned char other, unsigned char node) {
+
+    selectedDevices[0] = getDevice(other);
+    selectedDevices[1] = getDevice(node);
+}
+
+Device* Connector::getSelectedDevice(unsigned char index) {
+
+    return selectedDevices[index];
 }

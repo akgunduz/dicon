@@ -56,3 +56,4 @@ Objects/
 /Distributor/
 /Collector/
 /Node/
+/cmake-build*

@@ -39,17 +39,14 @@ bool DeviceManager::createDevices() {
 
         if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
 
-            if (strncmp(loop->ifa_name, "et", 2) == 0 ||
-                strncmp(loop->ifa_name, "en", 2) == 0 ||
-                strncmp(loop->ifa_name, "br", 2) == 0 ||
-                strncmp(loop->ifa_name, "lo", 2) == 0 ||
-                strncmp(loop->ifa_name, "wlan", 2) == 0) {
-
-                deviceList.push_back(Device(loop->ifa_name,
-                                            ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                            NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr))));
-
+            if (!((loop->ifa_flags & IFF_UP) && (loop->ifa_flags & IFF_RUNNING))) {
+                continue;
             }
+
+            deviceList.push_back(Device(loop->ifa_name,
+                                 ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                 NetAddress::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                                        (bool)loop->ifa_flags & IFF_LOOPBACK));
         }
     };
 
@@ -59,16 +56,13 @@ bool DeviceManager::createDevices() {
 
     return true;
 }
-
+/*
 Device* DeviceManager::getFreeDevice(CONNECTTYPE connectType) {
 
     switch(connectType) {
 
         case CONNECT_TCP:
             return getFreeDeviceTCP();
-
-        case CONNECT_LOOP:
-            return getFreeDeviceLoopback();
 
         case CONNECT_UNIXSOCKET:
             return getFreeDeviceUnixSocket();
@@ -77,7 +71,7 @@ Device* DeviceManager::getFreeDevice(CONNECTTYPE connectType) {
 
     return nullptr;
 }
-
+*/
 Device *DeviceManager::getFreeDeviceTCP() {
 
     int netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -96,8 +90,7 @@ Device *DeviceManager::getFreeDeviceTCP() {
     for (int i = 0; i < getInstance()->deviceList.size(); i++) {
 
         Device *device = &getInstance()->deviceList[i];
-        if (strncmp(device->name, "lo", 2) == 0 ||
-            strncmp(device->name, "us", 2) == 0) {
+        if (device->getType() != INTERFACE_NET || device->isLoopback()) {
             continue;
         }
 
@@ -234,6 +227,18 @@ Device *DeviceManager::getFreeDeviceUnixSocket() {
     return nullptr;
 }
 
+unsigned long DeviceManager::getCount() {
+
+    return getInstance()->deviceList.size();
+
+}
+
 std::vector<Device> *DeviceManager::getDevices() {
     return &getInstance()->deviceList;
+}
+
+Device* DeviceManager::getDevice(unsigned long index) {
+
+    return &getInstance()->deviceList[index >= getInstance()->deviceList.size() ?
+                                      getInstance()->deviceList.size() - 1 : index];
 }

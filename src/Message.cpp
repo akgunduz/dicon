@@ -6,25 +6,34 @@
 #include <openssl/md5.h>
 #include "Message.h"
 
-Message::Message(Unit host, const char* rootPath)
+//Message::Message(Unit host, const char* rootPath)
+//		: BaseMessage(host) {
+//
+//    setRootPath(rootPath);
+//}
+//
+//Message::Message(Unit owner, int type, const char* rootPath)
+//		: BaseMessage(owner, type) {
+//
+//    setRootPath(rootPath);
+//}
+Message::Message(Unit host)
 		: BaseMessage(host) {
 
-    strcpy(this->rootPath, rootPath);
 }
 
-Message::Message(Unit owner, int type, const char* rootPath)
+Message::Message(Unit owner, int type)
 		: BaseMessage(owner, type) {
 
-    strcpy(this->rootPath, rootPath);
 }
 
-const char *Message::getRootPath() {
-	return rootPath;
-}
-
-void Message::setRootPath(const char *rootPath) {
-    strcpy(this->rootPath, rootPath);
-}
+//const char *Message::getRootPath() {
+//	return rootPath;
+//}
+//
+//void Message::setRootPath(const char *rootPath) {
+//    strcpy(this->rootPath, rootPath);
+//}
 
 
 void Message::setJob(int streamFlag, FileList *fileList) {
@@ -69,10 +78,10 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
         return false;
     }
 
-    content->setFile(getOwner(), getRootPath(), jobDir, fileName, (FILETYPE)fileType);
+    content->setFile(getOwner(), jobDir, fileName, (FILETYPE)fileType);
 
     Md5 calcMD5;
-	if (!readBinary(desc, content->getAbsPath(), &calcMD5,
+	if (!readBinary(desc, content->getRefPath(), &calcMD5,
                     content->getMD5Path(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
@@ -126,7 +135,7 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
         case BLOCK_FILE_BINARY: {
 
-            FileItem *fileItem = new FileItem(getHost(), getRootPath());
+            FileItem *fileItem = new FileItem(getHost());
 
             if (!readFileBinary(in, fileItem, blockHeader)) {
                 return false;
@@ -188,7 +197,7 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
 
     blockHeader.sizes[0] = (uint32_t)strlen(content->getJobDir());
     blockHeader.sizes[1] = (uint32_t)strlen(content->getFileName());
-    blockHeader.sizes[2] = getBinarySize(content->getAbsPath());
+    blockHeader.sizes[2] = getBinarySize(Util::absPath(getHost(), content->getRefPath()).c_str());
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
@@ -207,7 +216,7 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
     }
 
 	Md5 calcMD5;
-	if (!writeBinary(desc, content->getAbsPath(), &calcMD5)) {
+	if (!writeBinary(desc, content->getRefPath(), &calcMD5, blockHeader.sizes[2])) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}

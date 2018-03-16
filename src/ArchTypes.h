@@ -5,7 +5,7 @@
 #ifndef BANKOR_ARCHTYPES_H
 #define BANKOR_ARCHTYPES_H
 
-enum ARCH_IDS {
+enum ARCH {
     ARCH_OSX,
     ARCH_WIN,
     ARCH_LNX,
@@ -20,7 +20,7 @@ enum ARCH_IDS {
 class ArchTypes {
 
 public:
-    static const char* getDir(ARCH_IDS id);
+    static const char* getDir(ARCH id);
     static short getMax();
 };
 

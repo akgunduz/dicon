@@ -147,7 +147,7 @@ public:
 	bool writeBlockHeader(int, struct BlockHeader *);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
-	bool writeBinary(int, const char*, Md5 *);
+	bool writeBinary(int, const char*, Md5 *, int);
 
 	bool writeEndStream(int);
 

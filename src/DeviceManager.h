@@ -28,7 +28,9 @@ public:
 
     static DeviceManager* getInstance();
     static std::vector<Device>* getDevices();
-    static Device* getFreeDevice(CONNECTTYPE);
+    static Device* getDevice(unsigned long);
+    static unsigned long getCount();
+    //static Device* getFreeDevice(CONNECTTYPE);
 };
 
 

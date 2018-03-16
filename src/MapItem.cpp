@@ -4,19 +4,19 @@
 
 #include "MapItem.h"
 
-MapItem::MapItem(Unit host, const char *rootPath, const char *jobDir,
+MapItem::MapItem(Unit host, const char *jobDir,
                  const char *fileName, FILETYPE fileType) {
 
     this->fileType = fileType;
 
-    if(host.getType() == HOST_COLLECTOR && fileType == FILE_ARCH) {
+    if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
         for (short i = 0; i < ARCH_MAX; i++) {
-            files[i] = new FileItem(host, Unit(HOST_NODE, i), rootPath, jobDir, fileName, fileType);
+            files[i] = new FileItem(host, Unit(COMP_NODE, (ARCH) i), jobDir, fileName, fileType);
         }
         this->fileCount = ARCH_MAX;
 
     } else {
-        files[0] = new FileItem(host, Unit(HOST_NODE), rootPath, jobDir, fileName, fileType);
+        files[0] = new FileItem(host, Unit(COMP_NODE), jobDir, fileName, fileType);
         this->fileCount = 1;
     }
 }
@@ -41,11 +41,11 @@ FileItem *MapItem::get(int index) {
 
 FileItem *MapItem::get(Unit unit) {
 
-    if (fileType != FILE_ARCH || unit.getType() != HOST_COLLECTOR) {
+    if (fileType != FILE_ARCH || unit.getType() != COMP_COLLECTOR) {
         return files[0];
     }
 
-    return files[unit.getID()];
+    return files[unit.getArch()];
 }
 
 int MapItem::getCount() {

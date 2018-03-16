@@ -7,7 +7,8 @@
 #include "UserInterfaceApp.h"
 #include "UserInterface.h"
 
-wxIMPLEMENT_APP_NO_MAIN(UserInterfaceApp);
+//wxIMPLEMENT_APP_NO_MAIN(UserInterfaceApp);
+wxIMPLEMENT_APP(UserInterfaceApp);
 
 /*
  * UserInterfaceApp type definition

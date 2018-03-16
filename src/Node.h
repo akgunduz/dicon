@@ -30,7 +30,7 @@ private:
     bool processSequential(Rule* rule);
 
 public:
-	Node(int, int, const char *rootPath);
+	Node(const char *rootPath);
 
 	virtual ~Node();
 };

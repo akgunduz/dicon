@@ -6,11 +6,11 @@
 #include "FileItem.h"
 #include "ArchTypes.h"
 
-FileItem::FileItem(Unit host, const char* rootPath)
+FileItem::FileItem(Unit host)
         : ContentItem () {
 
     setMD5();
-    setFile(Unit(HOST_MAX), rootPath, "", "", FILE_MAX);
+    setFile(Unit(COMP_MAX), "", "", FILE_MAX);
 	setFlaggedToSent(true);
     this->host = host;
 }
@@ -22,40 +22,40 @@ FileItem::FileItem(FileItem *item)
     set(item);
 }
 
-FileItem::FileItem(Unit host, const char *rootPath, const char *jobDir, const char *fileName,
+FileItem::FileItem(Unit host, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5)
         : ContentItem () {
 
-    set(host, rootPath, jobDir, fileName, fileType, md5);
+    set(host, jobDir, fileName, fileType, md5);
 };
 
-FileItem::FileItem(Unit host, Unit node, const char *rootPath, const char *jobDir, const char *fileName,
+FileItem::FileItem(Unit host, Unit node, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5)
         : ContentItem () {
 
-    set(host, node, rootPath, jobDir, fileName, fileType, md5);
+    set(host, node, jobDir, fileName, fileType, md5);
 };
 
-bool FileItem::set(Unit host, Unit node, const char *rootPath, const char *jobDir, const char *fileName,
+bool FileItem::set(Unit host, Unit node, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5) {
 
     this->host = host;
 
-    setFile(node, rootPath, jobDir, fileName, fileType);
+    setFile(node, jobDir, fileName, fileType);
     setFlaggedToSent(true);
 
-    FILE *file = fopen(getAbsPath(), "r");
+    FILE *file = fopen(Util::absPath(host, getRefPath()).c_str(), "r");
     if (file == nullptr) {
         LOG_T("FileContent %s could not opened");
         return false;
     }
 
     if (md5 != nullptr) {
-        this->md5.set(md5, getMD5Path());
+        this->md5.set(md5, Util::absPath(host, getMD5Path()).c_str());
         return true;
     }
 
-    bool status = this->md5.get(getMD5Path());
+    bool status = this->md5.get(Util::absPath(host, getMD5Path()).c_str());
     if (!status) {
 
         char buf[BUFFER_SIZE];
@@ -75,7 +75,7 @@ bool FileItem::set(Unit host, Unit node, const char *rootPath, const char *jobDi
 
         MD5_Final(this->md5.data, &ctx);
 
-        this->md5.set(nullptr, getMD5Path());
+        this->md5.set(nullptr, Util::absPath(host, getMD5Path()).c_str());
     }
 
     fclose(file);
@@ -83,25 +83,25 @@ bool FileItem::set(Unit host, Unit node, const char *rootPath, const char *jobDi
     return true;
 }
 
-bool FileItem::set(Unit host, const char *rootPath, const char *jobDir, const char *fileName,
+bool FileItem::set(Unit host, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5) {
 
-    return set(host, Unit(HOST_MAX), rootPath, jobDir, fileName, fileType, md5);
+    return set(host, Unit(COMP_MAX), jobDir, fileName, fileType, md5);
 }
 
 bool FileItem::set(FileItem *item) {
 
-    return set(item->getHost(), item->getRootPath(), item->getJobDir(), item->getFileName(),
+    return set(item->getHost(), item->getJobDir(), item->getFileName(),
         item->getFileType(), item->getMD5());
 }
 
-const char* FileItem::getRootPath() {
-    return rootPath;
-}
-
-void FileItem::setRootPath(const char *rootPath) {
-    strcpy(this->rootPath, rootPath);
-}
+//const char* FileItem::getRootPath() {
+//    return rootPath;
+//}
+//
+//void FileItem::setRootPath(const char *rootPath) {
+//    strcpy(this->rootPath, rootPath);
+//}
 
 CONTENT_TYPES FileItem::getType() {
 	return CONTENT_FILE;
@@ -123,12 +123,8 @@ Md5* FileItem::getMD5() {
     return &md5;
 }
 
-const char* FileItem::getAbsPath() {
-    return absPath;
-}
-
 const char* FileItem::getRefPath() {
-    return absPath + strlen(rootPath);
+    return refPath;
 }
 
 const char* FileItem::getMD5Path() {
@@ -144,35 +140,32 @@ void FileItem::setFlaggedToSent(bool flaggedToSent) {
 }
 
 
-void FileItem::setFile(Unit node, const char* rootPath, const char *jobDir,
+void FileItem::setFile(Unit node, const char *jobDir,
                        const char *fileName, FILETYPE fileType) {
 
-    strcpy(this->rootPath, rootPath);
     strcpy(this->fileName, fileName);
     strcpy(this->jobDir, jobDir);
     this->fileType = fileType;
+    if (fileType == FILE_MAX) {
+        return;
+    }
 
-    if (host.getType() == HOST_COLLECTOR && fileType == FILE_COMMON) {
-        sprintf(absPath, "%s/%s/common/%s", rootPath, jobDir, fileName);
-        sprintf(md5Path, "%s/%s/md5/common/%s.md5", rootPath, jobDir, fileName);
+    if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
+        sprintf(refPath, "%s/common/%s", jobDir, fileName);
+        sprintf(md5Path, "%s/md5/common/%s.md5", jobDir, fileName);
         //absPath = std::string(rootPath) + "/" + jobDir + "/common/" + fileName;
-    } else if(host.getType() == HOST_COLLECTOR && fileType == FILE_ARCH) {
-        sprintf(absPath, "%s/%s/arch/%s/%s", rootPath, jobDir, ArchTypes::getDir((ARCH_IDS)node.getID()), fileName);
-        sprintf(md5Path, "%s/%s/md5/arch/%s/%s.md5", rootPath, jobDir, ArchTypes::getDir((ARCH_IDS)node.getID()), fileName);
-        //absPath = std::string(rootPath) + "/" + jobDir + "/arch/" + (char*)ArchTypes::getDir((ARCH_IDS)node.getID()) + "/" + fileName;
+    } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
+        sprintf(refPath, "%s/arch/%s/%s", jobDir, ArchTypes::getDir(node.getArch()), fileName);
+        sprintf(md5Path, "%s/md5/arch/%s/%s.md5", jobDir, ArchTypes::getDir(node.getArch()), fileName);
+        //absPath = std::string(rootPath) + "/" + jobDir + "/arch/" + (char*)ArchTypes::getDir((ARCH_IDS)node.getArch()) + "/" + fileName;
     } else {
-        sprintf(absPath, "%s/%s/%s", rootPath, jobDir, fileName);
-        sprintf(md5Path, "%s/%s/md5/%s.md5", rootPath, jobDir, fileName);
+        sprintf(refPath, "%s/%s", jobDir, fileName);
+        sprintf(md5Path, "%s/md5/%s.md5",  jobDir, fileName);
         //absPath = std::string(rootPath) + "/" + jobDir + "/" + fileName;
     }
 
-    if (access(absPath, F_OK ) == -1) {
-        Util::mkPath(absPath);
-    }
-
-    if (access(md5Path, F_OK ) == -1) {
-        Util::mkPath(md5Path);
-    }
+    Util::checkPath(Unit::getRootPath(host.getType()), refPath, true);
+    Util::checkPath(Unit::getRootPath(host.getType()), md5Path, true);
 }
 
 bool FileItem::isValid() {

@@ -6,21 +6,31 @@
 #include "Job.h"
 #include "MapItem.h"
 
+long AttachedNode::getAddress() {
+
+    return address;
+}
+
+ARCH AttachedNode::getArch() {
+
+    return arch;
+}
+
 Job::Job(FileItem *fileItem)
     : JsonItem (fileItem) {
 
     init();
 }
 
-Job::Job(Unit host, const char *rootPath, const char* jobDir)
-        : JsonItem(host, rootPath, jobDir, JOB_FILE, FILE_JOB){
+Job::Job(Unit host, const char* jobDir)
+        : JsonItem(host, jobDir, JOB_FILE, FILE_JOB){
 
     init();
 
 }
 
-Job::Job(Unit host, const char *rootPath, const char* jobDir, const char* fileName)
-        : JsonItem(host, rootPath, jobDir, fileName, FILE_JOB) {
+Job::Job(Unit host, const char* jobDir, const char* fileName)
+        : JsonItem(host, jobDir, fileName, FILE_JOB) {
 
     init();
 
@@ -105,7 +115,7 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
 
         Job* job = (Job*) parent;
 
-        Rule *rule = new Rule(job->getHost(), job->getRootPath(), job->getJobDir(), path);
+        Rule *rule = new Rule(job->getHost(), job->getJobDir(), path);
         rule->setActive(active);
         rule->setRepeat(repeat);
 
@@ -136,9 +146,9 @@ AttachedNode Job::getAttachedNode() {
     return attachedNode;
 }
 
-void Job::setAttachedNode(long address, short id) {
+void Job::setAttachedNode(long address, ARCH arch) {
     this->attachedNode.address = address;
-    this->attachedNode.id = id;
+    this->attachedNode.arch = arch;
 }
 
 Rule *Job::getRule(int index) {

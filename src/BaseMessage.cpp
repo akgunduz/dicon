@@ -368,9 +368,9 @@ bool BaseMessage::readNumber(int in, long *number) {
 
 bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, const char* md5Path, int size) {
 
-	Util::mkPath(path);
+	Util::mkPath(Util::absPath(host, path).c_str());
 
-	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
+	int out = open(Util::absPath(host, path).c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
 		LOG_E("File %s could not created or opened", path);
 		return false;
@@ -562,11 +562,9 @@ bool BaseMessage::writeNumber(int out, long number) {
 	return true;
 }
 
-bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5) {
+bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 
-    int size = getBinarySize(path);
-
-	int in = open(path, O_RDONLY);
+	int in = open(Util::absPath(host, path).c_str(), O_RDONLY);
 	if (in == -1) {
 		LOG_E("File %s could not created or opened", path);
 		return false;

@@ -22,9 +22,9 @@ protected:
 
 public:
 
-    JsonItem(Unit host, const char *rootPath);
+    JsonItem(Unit host);
     JsonItem(FileItem *fileItem);
-    JsonItem(Unit host, const char* rootPath, const char* jobDir,
+    JsonItem(Unit host, const char* jobDir,
              const char* fileName, FILETYPE fileType);
     virtual ~JsonItem();
     ContentItem * getContent(int type, int index);

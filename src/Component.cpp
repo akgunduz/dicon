@@ -3,117 +3,58 @@
 //
 
 #include "Component.h"
-#include "Util.h"
 
-Component::Component(Unit host, long index, const char* rootPath) {
+Component::Component(Unit info, const char* rootPath) {
 
     memset(connectors, 0, sizeof(connectors));
 
-    this->host = host;
+    this->info = info;
+    Unit::setRootPath(info.getType(), rootPath);
 
     callback = new InterfaceCallback(receiveCB, this);
 
-    int indexDist = (int)(index & 0xFFFF);
-    int indexCollector = (int)((index >> 16) & 0xFFFF);
-    int indexNode = (int)((index >> 32) & 0xFFFF);
 
-    if (indexDist != 0xFFFF) {
+    switch(info.getType()) {
 
-        try {
-
-            connectors[HOST_DISTRIBUTOR] = new Connector(host, (CONNECTTYPE)indexDist, callback, rootPath);
-            this->rootPath = connectors[HOST_DISTRIBUTOR]->getRootPath();
-
-        } catch (const std::runtime_error e) {
-
-            LOG_E("Connector Init failed!!!");
-
-            delete callback;
-
-            throw std::runtime_error("Distributor : Connector Init failed!!!");
-        }
-    }
-
-    if (indexCollector != 0xFFFF) {
-
-        if (indexCollector != indexDist) {
-
-            try {
-
-                connectors[HOST_COLLECTOR] = new Connector(host, (CONNECTTYPE)indexCollector, callback, rootPath);
-                this->rootPath = connectors[HOST_COLLECTOR]->getRootPath();
-
-            } catch (const std::runtime_error e) {
-
-                LOG_E("Connector Init failed!!!");
-
-                if (connectors[HOST_DISTRIBUTOR] != nullptr) {
-                    delete connectors[HOST_DISTRIBUTOR];
-                }
-                delete callback;
-
-                throw std::runtime_error("Distributor : Connector Init failed!!!");
+        case COMP_DISTRIBUTOR:
+            connectors[COMP_COLLECTOR] = new Connector(info, Connector::getSelectedDevice(0), callback, rootPath);
+            if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
+                connectors[COMP_NODE] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+            } else {
+                connectors[COMP_NODE] = connectors[COMP_COLLECTOR];
             }
-
-        } else {
-
-            connectors[HOST_COLLECTOR] = connectors[HOST_DISTRIBUTOR];
-
-        }
-    }
-
-    if (indexNode != 0xFFFF) {
-
-        if (indexNode != indexDist && indexNode != indexCollector) {
-
-            try {
-
-                connectors[HOST_NODE] = new Connector(host, (CONNECTTYPE)indexNode, callback, rootPath);
-                this->rootPath = connectors[HOST_NODE]->getRootPath();
-
-            } catch (const std::runtime_error e) {
-
-                LOG_E("Connector Init failed!!!");
-
-                if (connectors[HOST_DISTRIBUTOR] != nullptr) {
-                    delete connectors[HOST_DISTRIBUTOR];
-                }
-                if (connectors[HOST_COLLECTOR] != nullptr) {
-                    delete connectors[HOST_DISTRIBUTOR];
-                }
-                delete callback;
-
-                throw std::runtime_error("Distributor : Connector Init failed!!!");
+            break;
+        case COMP_COLLECTOR:
+            connectors[COMP_DISTRIBUTOR] = new Connector(info, Connector::getSelectedDevice(0), callback, rootPath);
+            if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
+                connectors[COMP_NODE] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+            } else {
+                connectors[COMP_NODE] = connectors[COMP_DISTRIBUTOR];
             }
-
-        } else {
-
-            connectors[HOST_NODE] = indexDist != 0xFFFF ? connectors[HOST_DISTRIBUTOR] : connectors[HOST_COLLECTOR];
-
-        }
+            break;
+        case COMP_NODE:
+            connectors[COMP_DISTRIBUTOR] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+            connectors[COMP_COLLECTOR] = connectors[COMP_DISTRIBUTOR];
+            break;
+        default:
+            break;
     }
 }
 
 Component::~Component() {
 
-    if (connectors[HOST_NODE] != connectors[HOST_DISTRIBUTOR] &&
-            connectors[HOST_NODE] != connectors[HOST_COLLECTOR]) {
-        delete connectors[HOST_NODE];
+    if (connectors[COMP_NODE] != connectors[COMP_DISTRIBUTOR] &&
+            connectors[COMP_NODE] != connectors[COMP_COLLECTOR]) {
+        delete connectors[COMP_NODE];
     }
 
-    if (connectors[HOST_COLLECTOR] != connectors[HOST_DISTRIBUTOR]) {
-        delete connectors[HOST_COLLECTOR];
+    if (connectors[COMP_COLLECTOR] != connectors[COMP_DISTRIBUTOR]) {
+        delete connectors[COMP_COLLECTOR];
     }
 
-    delete connectors[HOST_DISTRIBUTOR];
+    delete connectors[COMP_DISTRIBUTOR];
 
     delete callback;
-}
-
-const char* Component::getRootPath() {
-
-    return rootPath;
-
 }
 
 bool Component::receiveCB(void *arg, SchedulerItem* item) {
@@ -135,13 +76,13 @@ bool Component::onReceive(long address, Message *msg) {
 
     switch(msg->getOwner().getType()) {
 
-        case HOST_DISTRIBUTOR:
+        case COMP_DISTRIBUTOR:
             return processDistributorMsg(address, msg);
 
-        case HOST_NODE:
+        case COMP_NODE:
             return processNodeMsg(address, msg);
 
-        case HOST_COLLECTOR:
+        case COMP_COLLECTOR:
             return processCollectorMsg(address, msg);
 
         default:
@@ -151,21 +92,7 @@ bool Component::onReceive(long address, Message *msg) {
     }
 }
 
-long Component::generateIndex(int indexDist, int indexCollector, int indexNode) {
-
-    return ((long)indexDist) | ((long)indexCollector << 16) | ((long)indexNode << 32) ;
-}
-
-INTERFACES Component::getInterfaceType(HOST host) {
-
-    if (connectors[host] != nullptr) {
-        return connectors[host]->getInterfaceType();
-    }
-
-    return INTERFACE_MAX;
-}
-
-long Component::getAddress(HOST host) {
+long Component::getAddress(COMPONENT host) {
 
     if (connectors[host] != nullptr) {
         return connectors[host]->getAddress();
@@ -174,18 +101,7 @@ long Component::getAddress(HOST host) {
     return 0;
 }
 
+Unit Component::getInfo() {
 
-void Component::setRootPath(const char *rootPath) {
-
-    for (int i = 0; i < HOST_MAX; i++) {
-        if (connectors[i] != nullptr) {
-            connectors[i]->setRootPath(rootPath);
-        }
-    }
-
-    this->rootPath = rootPath;
-}
-
-Unit Component::getHost() {
-    return host;
+    return info;
 }

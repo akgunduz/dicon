@@ -12,6 +12,9 @@
 #include "Unit.h"
 #include "JsonItem.h"
 #include "FileList.h"
+#include "ParameterItem.h"
+#include "ExecutorItem.h"
+#include "MapItem.h"
 
 class Rule : public JsonItem {
 
@@ -30,7 +33,7 @@ class Rule : public JsonItem {
 public:
 
 	Rule(FileItem* fileItem);
-	Rule(Unit host, const char*, const char*, const char*);
+	Rule(Unit host, const char*, const char*);
 	~Rule();
 
 	bool isParallel();

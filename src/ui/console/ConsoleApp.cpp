@@ -4,34 +4,22 @@
 //
 
 #include "Log.h"
-#ifdef __WXWIDGETS__
-#include "UserInterface.h"
-#endif
 #include "Console.h"
 #include "DeviceManager.h"
 
-Console *c_ui;
-
 int main(int argc, char** argv) {
-
-	Log::setLogLevel(LEVEL_WARN);
-
-	//Device::getInterfaces();
-
-    DeviceManager::getInstance();
 
 	if (argc > 1) {
 
-		c_ui = new Console();
+        Console *c_ui = new Console();
 
 		char cmd = argv[1][0];
 
 		switch(cmd) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
-				for (uint32_t i = 0; i < Device::getCount(); i++) {
-					Device *ci = Device::getDevice(i);
-					LOG_S("%s : %s", sInterfaces[ci->type], ci->getName());
+				for (uint32_t i = 0; i < Connector::getCount(); i++) {
+					LOG_S("%s : %s", sInterfaces[Connector::getDevice(i)->getType()], Connector::getDevice(i)->getName());
 				}
 				break;
 			case 'd':
@@ -40,7 +28,7 @@ int main(int argc, char** argv) {
 			case 'o':
 				LOG_I("Running in Console Collector Mode");
 				break;
-			case 'c':
+			case 'n':
 				LOG_I("Running in Console Node Mode");
 
 				if (argc != 4) {
@@ -57,10 +45,6 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-#ifdef __WXWIDGETS__
-	return wxEntry(argc, argv);
-#else
 	return 0;
-#endif
-
 }
+

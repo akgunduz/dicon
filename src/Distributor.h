@@ -30,7 +30,7 @@ private:
 
 public:
 
-	Distributor(int, int, const char *, double);
+	Distributor(const char *, double);
 	virtual ~Distributor();
 
     bool reset();
