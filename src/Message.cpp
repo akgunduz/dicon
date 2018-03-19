@@ -3,7 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <openssl/md5.h>
 #include "Message.h"
 
 Message::Message(Unit host)
@@ -63,8 +62,7 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
     std::string absPath = Util::absPath(getHost(), content->getRefPath());
 
     Md5 calcMD5;
-	if (!readBinary(desc, absPath.c_str(), &calcMD5,
-                    content->getMD5Path(), header->sizes[2])) {
+	if (!readBinary(desc, absPath.c_str(), &calcMD5, header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}

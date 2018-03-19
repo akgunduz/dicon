@@ -201,7 +201,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOG_W("Busy state, sleep and retry");
 				busy = true;
-				usleep(200000);
+				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 
@@ -342,7 +342,7 @@ bool BaseMessage::readNumber(int in, long *number) {
 	return true;
 }
 
-bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, const char* md5Path, int size) {
+bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	Util::mkPath(path);
 
@@ -418,7 +418,7 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOG_W("Busy state, sleep and retry");
 				busy = true;
-				usleep(200000);
+				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 

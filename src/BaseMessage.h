@@ -27,9 +27,9 @@
 
 #define MAX_VARIANT 2
 
-#define MAX_JOBID_LENGTH 50
-
 #define MESSAGE_DEFAULT_PRIORITY 3
+
+#define BUSY_SLEEP_TIME 200000
 
 //To get rid of Alignment problem stay in 64bit mod
 struct MessageHeader {
@@ -42,8 +42,6 @@ struct MessageHeader {
     long deviceID;
     long messageID;
     long variant[MAX_VARIANT];
-//	char jobID[MAX_JOBID_LENGTH];
-
 };
 
 class BlockHeader {
@@ -125,7 +123,7 @@ public:
     bool transferBinary(int, int, Md5 *, int);
 
 	bool readBlock(int, uint8_t *, int);
-	bool readBinary(int, const char*, Md5 *, const char*, int);
+	bool readBinary(int, const char*, Md5 *, int);
 
 	bool readSignature(int);
 	bool readHeader(int, MessageHeader *);

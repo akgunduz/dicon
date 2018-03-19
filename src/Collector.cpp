@@ -4,8 +4,6 @@
 //
 
 #include "Collector.h"
-#include "Util.h"
-#include "NetAddress.h"
 
 Collector::Collector(const char *rootPath) :
         Component(Unit(COMP_COLLECTOR, Util::getArch()), rootPath){
