@@ -60,8 +60,10 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
 
     content->setFile(getOwner(), jobDir, fileName, (FILETYPE)fileType);
 
+    std::string absPath = Util::absPath(getHost(), content->getRefPath());
+
     Md5 calcMD5;
-	if (!readBinary(desc, content->getRefPath(), &calcMD5,
+	if (!readBinary(desc, absPath.c_str(), &calcMD5,
                     content->getMD5Path(), header->sizes[2])) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
@@ -172,9 +174,11 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
 
 	BlockHeader blockHeader = {3, BLOCK_FILE_BINARY};
 
+    std::string absPath = Util::absPath(getHost(), content->getRefPath());
+
     blockHeader.sizes[0] = (uint32_t)strlen(content->getJobDir());
     blockHeader.sizes[1] = (uint32_t)strlen(content->getFileName());
-    blockHeader.sizes[2] = getBinarySize(Util::absPath(getHost(), content->getRefPath()).c_str());
+    blockHeader.sizes[2] = getBinarySize(absPath.c_str());
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
@@ -193,7 +197,7 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
     }
 
 	Md5 calcMD5;
-	if (!writeBinary(desc, content->getRefPath(), &calcMD5, blockHeader.sizes[2])) {
+	if (!writeBinary(desc, absPath.c_str(), &calcMD5, blockHeader.sizes[2])) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}
