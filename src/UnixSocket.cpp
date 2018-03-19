@@ -5,12 +5,11 @@
 
 #include "UnixSocket.h"
 #include "UnixSocketAddress.h"
-#include "DeviceManager.h"
 
 std::vector<Device> UnixSocket::deviceList;
 
-UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, cb, rootPath) {
+UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
+		: Interface(host, cb) {
 
     this->device = device;
 
@@ -41,46 +40,41 @@ bool UnixSocket::initUnixSocket() {
         return false;
     }
 
-    for (int i = 0; i < DeviceManager::getDevices()->size(); i++) {
+	int tryCount = 10;
 
-        Device *device = getDevice();
+	for (int j = tryCount; j > 0; j--) {
 
-        int tryCount = 10;
+		address = (((unsigned) getpid() << 10) & 0xFFFFFF) | lastFreePort;
 
-        for (int j = tryCount; j > 0; j--) {
+		sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
 
-            address = (((unsigned) getpid() << 10) & 0xFFFFFF) | lastFreePort;
+		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
-            sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
+		if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
 
-            socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
+			lastFreePort++;
+			continue;
+		}
 
-            if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
+		LOG_U(UI_UPDATE_LOG,
+			  "Using address : %s", Address::getString(address).c_str());
 
-                lastFreePort++;
-                continue;
-            }
+		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
+			LOG_E("Socket listen with err : %d!!!", errno);
+			close(unixSocket);
+			return false;
+		}
 
-            if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
-                LOG_E("Socket listen with err : %d!!!", errno);
-                close(unixSocket);
-                return false;
-            }
+		if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
+			LOG_E("Could not set socket Non-Blocking!!!");
+			close(unixSocket);
+			return false;
+		}
 
-            if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
-                LOG_E("Could not set socket Non-Blocking!!!");
-                close(unixSocket);
-                return false;
-            }
+		device->setPort(lastFreePort);
 
-            device->setPort(lastFreePort);
-
-            return true;
-        }
-
-        break;
-
-    }
+		return true;
+	}
 
     LOG_E("Could not set create unix socket!!!");
 

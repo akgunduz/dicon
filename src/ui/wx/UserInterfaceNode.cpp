@@ -56,6 +56,9 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
             sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
             mkdir(path, 0777);
 
+            Connector::setSelectedDevices((unsigned char)distCollInterface->GetSelection(),
+                                          (unsigned char)nodeInterface->GetSelection());
+
             nodeObject = new Node(path);
 
         } catch (std::runtime_error &e) {

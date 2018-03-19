@@ -4,12 +4,12 @@
 
 #include "Component.h"
 
-Component::Component(Unit info, const char* rootPath) {
+Component::Component(Unit host, const char* rootPath) {
 
     memset(connectors, 0, sizeof(connectors));
 
-    this->info = info;
-    Unit::setRootPath(info.getType(), rootPath);
+    this->info = host;
+    Unit::setRootPath(host.getType(), rootPath);
 
     callback = new InterfaceCallback(receiveCB, this);
 
@@ -17,23 +17,23 @@ Component::Component(Unit info, const char* rootPath) {
     switch(info.getType()) {
 
         case COMP_DISTRIBUTOR:
-            connectors[COMP_COLLECTOR] = new Connector(info, Connector::getSelectedDevice(0), callback, rootPath);
+            connectors[COMP_COLLECTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
             if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
-                connectors[COMP_NODE] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+                connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
             } else {
                 connectors[COMP_NODE] = connectors[COMP_COLLECTOR];
             }
             break;
         case COMP_COLLECTOR:
-            connectors[COMP_DISTRIBUTOR] = new Connector(info, Connector::getSelectedDevice(0), callback, rootPath);
+            connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
             if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
-                connectors[COMP_NODE] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+                connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
             } else {
                 connectors[COMP_NODE] = connectors[COMP_DISTRIBUTOR];
             }
             break;
         case COMP_NODE:
-            connectors[COMP_DISTRIBUTOR] = new Connector(info, Connector::getSelectedDevice(1), callback, rootPath);
+            connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(1), callback);
             connectors[COMP_COLLECTOR] = connectors[COMP_DISTRIBUTOR];
             break;
         default:

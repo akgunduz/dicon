@@ -29,7 +29,7 @@ private :
 
 public :
 	static uint16_t gOffset;
-	UnixSocket(Unit, Device*, const InterfaceCallback *, const char *);
+	UnixSocket(const Unit, Device*, const InterfaceCallback *);
 	std::vector<long> getAddressList();
 	~UnixSocket();
 

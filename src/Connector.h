@@ -20,7 +20,7 @@ class Connector {
     static Device *selectedDevices[2] ;
 
 public:
-	Connector(Unit, Device*, const InterfaceCallback *, const char *);
+	Connector(Unit, Device*, const InterfaceCallback *);
 	bool send(long, Message*);
 	bool send(Message*);
 	bool put(long, Message*);

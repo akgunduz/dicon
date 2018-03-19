@@ -9,7 +9,6 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include <DeviceManager.h>
 #include "UserInterface.h"
 
 void UserInterface::distInit() {
@@ -44,17 +43,6 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &UserInterface::distAddtoNodeList;
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
-/*
-    distCollInterface->Insert("TCP", 0);
-    distCollInterface->Insert("Loopback", 1);
-    distCollInterface->Insert("UnixSocket", 2);
-    distCollInterface->SetSelection(1);
-
-    nodeInterface->Insert("TCP", 0);
-    nodeInterface->Insert("Loopback", 1);
-    nodeInterface->Insert("UnixSocket", 2);
-    nodeInterface->SetSelection(1);
-*/
 
     for (uint32_t i = 0; i < Connector::getCount(); i++) {
         distCollInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);

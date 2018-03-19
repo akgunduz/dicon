@@ -34,7 +34,7 @@ private :
 
 public :
 
-	Net(Unit, Device*, const InterfaceCallback *, const char *);
+	Net(Unit, Device*, const InterfaceCallback *);
 	std::vector<long> getAddressList();
 	~Net();
 

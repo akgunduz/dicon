@@ -25,13 +25,6 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
-    /*
-    if (Device::getCount() > 0) {
-        for (uint32_t i = 0; i < Device::getCount(); i++) {
-            collConnectInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
-        }
-        collConnectInterface->Select(0);
-    }*/
 }
 
 /*
@@ -46,6 +39,9 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
             char path[PATH_MAX];
             sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
             mkdir(path, 0777);
+
+            Connector::setSelectedDevices((unsigned char)distCollInterface->GetSelection(),
+                                          (unsigned char)nodeInterface->GetSelection());
 
             collObject = new Collector(path);
 

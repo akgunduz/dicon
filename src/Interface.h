@@ -72,7 +72,7 @@ protected :
 
 	bool initThread();
 	void end();
-	Interface(Unit host, const InterfaceCallback *, const char *);
+	Interface(Unit host, const InterfaceCallback *);
 	virtual void setAddress(int) = 0;
 
 public :

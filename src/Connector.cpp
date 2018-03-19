@@ -10,18 +10,18 @@
 std::vector<Device> Connector::deviceList;
 Device* Connector::selectedDevices[2];
 
-Connector::Connector(Unit component, Device* device, const InterfaceCallback *cb, const char *rootPath) {
+Connector::Connector(const Unit component, Device* device, const InterfaceCallback *cb) {
 
 	try {
 
 		switch(device->getType()) {
 
 			case INTERFACE_NET:
-				_interface = new Net(component, device, cb, rootPath);
+				_interface = new Net(component, device, cb);
 				break;
 
 			case INTERFACE_UNIXSOCKET:
-				_interface = new UnixSocket(component, device, cb, rootPath);
+				_interface = new UnixSocket(component, device, cb);
 				break;
 
 			default:

@@ -5,12 +5,11 @@
 
 #include "Net.h"
 #include "NetAddress.h"
-#include "DeviceManager.h"
 
 std::vector<Device> Net::deviceList;
 
-Net::Net(Unit host, Device *device, const InterfaceCallback *cb, const char *rootPath)
-		: Interface(host, cb, rootPath) {
+Net::Net(Unit host, Device *device, const InterfaceCallback *cb)
+		: Interface(host, cb) {
 
     this->device = device;
 
@@ -19,7 +18,7 @@ Net::Net(Unit host, Device *device, const InterfaceCallback *cb, const char *roo
         throw std::runtime_error("NetReceiver : initTCP failed!!!");
     }
 
-    if (host.getType() == COMP_DISTRIBUTOR && !initMulticast()) {
+    if (!initMulticast()) {
         LOG_E("initMulticast failed!!!");
         throw std::runtime_error("NetReceiver : initMulticast failed!!!");
     }
@@ -138,119 +137,7 @@ bool Net::initMulticast() {
 
     return true;
 }
-/*
-bool Net::init() {
 
-
-	netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (netSocket < 0) {
-		LOG_E("Socket receiver open with err : %d!!!", errno);
-		return false;
-	}
-
-    int on = 1;
-    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
-        LOG_E("Socket option with err : %d!!!", errno);
-        close(netSocket);
-        return false;
-    }
-
-    int tryCount = 0;
-
-    do {
-
-        setAddress(tryCount);
-        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
-        if (bind(netSocket, (struct sockaddr *)&serverAddress, sizeof(sockaddr_in)) < 0) {
-            LOG_E("Socket bind with err : %d!!!", errno);
-            if (errno != EADDRINUSE || tryCount == 10) {
-                close(netSocket);
-                return false;
-            }
-
-            tryCount++;
-
-            continue;
-        }
-
-        break;
-
-    } while(1);
-
-    LOG_U(UI_UPDATE_LOG,
-          "Using address : %s", Address::getString(address).c_str());
-
-    if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
-        LOG_E("Socket listen with err : %d!!!", errno);
-        close(netSocket);
-        return false;
-    }
-
-    if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
-        LOG_E("Could not set socket Non-Blocking!!!");
-        close(netSocket);
-        return false;
-    }
-
-    multicastAddress = NetAddress::parseAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
-
-    if (multicastEnabled) {
-
-        multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        if (multicastSocket < 0) {
-            LOG_E("Socket receiver open with err : %d!!!", errno);
-            close(netSocket);
-            return false;
-        }
-
-        if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
-            LOG_E("Socket option with err : %d!!!", errno);
-            close(multicastSocket);
-            close(netSocket);
-            return false;
-        }
-
-        struct sockaddr_in serverAddress = NetAddress::getInetAddress(DEFAULT_MULTICAST_PORT);
-        if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
-            LOG_E("Socket bind with err : %d!!!", errno);
-            close(multicastSocket);
-            close(netSocket);
-            return false;
-        }
-
-        LOG_U(UI_UPDATE_LOG,
-              "Using multicast address : %s", Address::getString(multicastAddress).c_str());
-
-        ip_mreq imreq = NetAddress::getMulticastAddress(address);
-
-        if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
-            LOG_E("Socket option with err : %d!!!", errno);
-            close(multicastSocket);
-            close(netSocket);
-            return false;
-        }
-
-//        if (setsockopt(multicastSocket, IPPROTO_IP, IP_MULTICAST_LOOP, (const void *) &on, sizeof(int)) < 0) {
-//            LOG_E("Socket option with err : %d!!!", errno);
-//            close(multicastSocket);
-//            close(netSocket);
-//            return false;
-//        }
-
-    }
-
-	if (!initThread()) {
-		LOG_E("Problem with Server thread");
-        if (multicastEnabled) {
-            close(multicastSocket);
-        }
-        close(netSocket);
-		return false;
-	}
-
-	return true;
-}
-*/
 void Net::runReceiver(Unit host) {
 
     bool thread_started = true;
