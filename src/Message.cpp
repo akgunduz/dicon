@@ -6,17 +6,6 @@
 #include <openssl/md5.h>
 #include "Message.h"
 
-//Message::Message(Unit host, const char* rootPath)
-//		: BaseMessage(host) {
-//
-//    setRootPath(rootPath);
-//}
-//
-//Message::Message(Unit owner, int type, const char* rootPath)
-//		: BaseMessage(owner, type) {
-//
-//    setRootPath(rootPath);
-//}
 Message::Message(Unit host)
 		: BaseMessage(host) {
 
@@ -26,15 +15,6 @@ Message::Message(Unit owner, int type)
 		: BaseMessage(owner, type) {
 
 }
-
-//const char *Message::getRootPath() {
-//	return rootPath;
-//}
-//
-//void Message::setRootPath(const char *rootPath) {
-//    strcpy(this->rootPath, rootPath);
-//}
-
 
 void Message::setJob(int streamFlag, FileList *fileList) {
 
@@ -175,9 +155,6 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
 bool Message::readFinalize() {
 
-   /* if (job != nullptr) {
-        job->parse();
-    }*/
     return true;
 }
 
@@ -276,22 +253,6 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             break;
 
         case STREAM_BINARY:
-/*
-            contentCount = 0;
-
-            for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
-                Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
-                for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                    FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
-                    if (content->isFlaggedToSent()) {
-                        if (!writeFileBinary(out, content)) {
-                            return false;
-                        }
-                        contentCount++;
-                    }
-                }
-            }
-            LOG_E("%d binary content sent to network", contentCount);*/
 
             contentCount = fileList->process(this, &Message::writeFileBinary, FILE_LIST_TRUE);
 
@@ -300,22 +261,7 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             break;
 
         case STREAM_MD5ONLY:
-/*
-            contentCount = 0;
 
-            for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
-                Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
-                for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-                    FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
-                    if (content->isFlaggedToSent()) {
-                        if (!writeFileMD5(out, content)) {
-                            return false;
-                        }
-                        contentCount++;
-                    }
-                }
-            }
-*/
             contentCount = fileList->process(this, &Message::writeFileMD5, FILE_LIST_TRUE);
 
             LOG_E("%d md5 content sent to network", contentCount);

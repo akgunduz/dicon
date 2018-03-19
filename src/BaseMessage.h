@@ -87,8 +87,7 @@ class BaseMessage {
 
     int desc;
 
-    bool isUDP;
-    sockaddr_in targetAddress;
+    long multicastAddress;
 
 public:
 
@@ -96,8 +95,7 @@ public:
     BaseMessage(Unit owner, int type);
 
     void setStreamFlag(int);
-    void setTargetAddress(long);
-    void setProtocol(bool);
+    void setMulticastAddress(long);
 
     int getDescriptor();
     void setDescriptor(int);

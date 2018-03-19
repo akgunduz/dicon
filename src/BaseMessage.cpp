@@ -14,9 +14,7 @@ BaseMessage::BaseMessage(Unit host) {
     setHost(host);
 	setStreamFlag(STREAM_NONE);
 	setPriority(MESSAGE_DEFAULT_PRIORITY);
-    setTargetAddress(0);
-//    setJobID("");
-    setProtocol(false);
+    setMulticastAddress(0);
 }
 
 BaseMessage::BaseMessage(Unit owner, int type) {
@@ -32,21 +30,15 @@ BaseMessage::BaseMessage(Unit owner, int type) {
     setOwner(owner);
 	setStreamFlag(STREAM_NONE);
 	setPriority(MESSAGE_DEFAULT_PRIORITY);
-    setTargetAddress(0);
- //   setJobID("");
-    setProtocol(false);
+    setMulticastAddress(0);
 }
 
 void BaseMessage::setStreamFlag(int flag) {
 	streamFlag = flag;
 }
 
-void BaseMessage::setTargetAddress(long targetAddress) {
-    this->targetAddress = NetAddress::getInetAddress(targetAddress);
-}
-
-void BaseMessage::setProtocol(bool isUDP) {
-    this->isUDP = isUDP;
+void BaseMessage::setMulticastAddress(long address) {
+    this->multicastAddress = address;
 }
 
 int BaseMessage::getType() {
@@ -76,15 +68,7 @@ long BaseMessage::getOwnerAddress() {
 void BaseMessage::setOwnerAddress(long address) {
 	header.ownerAddress = address;
 }
-/*
-const char* BaseMessage::getJobID() {
-	return header.jobID;
-}
 
-void BaseMessage::setJobID(const char* jobID) {
-	strcpy(header.jobID, jobID);
-}
-*/
 long BaseMessage::getTime() {
 	return header.time;
 }
@@ -162,11 +146,6 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
     bool error = false;
     int readSize;
 
-    if (isUDP) {
-        LOG_E("Can not transfer binary in UDP mode!!!");
-        return false;
-    }
-
     do {
 
         if (size > BUFFER_SIZE) {
@@ -207,7 +186,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 	do {
         long count;
 
-        if (!isUDP) {
+        if (multicastAddress == 0) {
             count = read(in, buf + offset, (size_t) size);
 
         } else {
@@ -293,7 +272,6 @@ bool BaseMessage::readHeader(int in, MessageHeader *header) {
     for (int i = 0; i < MAX_VARIANT; i++) {
         header->variant[i] = ntohll(*((long *) p)); p += 8;
     }
-  //  strcpy(header->jobID, (char*)p);
 
 	return true;
 }
@@ -379,25 +357,7 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, const char* md5
 	bool status = transferBinary(in, out, md5, size);
 
 	close(out);
-/*
-	if (status) {
 
-        out = open(md5Path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
-        if (out == -1) {
-            LOG_E("File %s could not created or opened", md5Path);
-            return false;
-        }
-
-        const uint8_t* sMD5 = (const uint8_t*)Util::hex2str(md5, MD5_DIGEST_LENGTH).c_str();
-
-		if (!writeBlock(out, sMD5, MD5_DIGEST_LENGTH * 2)) {
-			LOG_E("Can not write md5 to file system in readBinary");
-			status = false;
-		}
-
-		close(out);
-	}
-*/
 	return status;
 
 }
@@ -441,11 +401,13 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
         long count;
 
-        if (!isUDP) {
+        if (multicastAddress == 0) {
             count = write(out, buf + offset, (size_t)size);
 
         } else {
-            count = sendto(out, buf + offset, (size_t)size, 0, (struct sockaddr *) &targetAddress, sizeof(struct sockaddr));
+            sockaddr_in address = NetAddress::getInetAddress(multicastAddress);
+            count = sendto(out, buf + offset, (size_t)size, 0,
+                           (struct sockaddr *) &address, sizeof(struct sockaddr));
         }
 
 		if (count == -1) {

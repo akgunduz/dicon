@@ -195,7 +195,7 @@ void Net::runReceiver(Unit host) {
         if (multicastEnabled && FD_ISSET(multicastSocket, &readfs)) {
 
             Message *msg = new Message(host);
-            msg->setProtocol(true);
+            msg->setMulticastAddress(0xFFFF);
             if (msg->readFromStream(multicastSocket)) {
                 push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
             }
@@ -269,8 +269,7 @@ void Net::runMulticastSender(Message *msg) {
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
     msg->setOwnerAddress(address);
-    msg->setProtocol(true);
-    msg->setTargetAddress(multicastAddress);
+    msg->setMulticastAddress(multicastAddress);
     msg->writeToStream(clientSocket);
 
     shutdown(clientSocket, SHUT_RDWR);
