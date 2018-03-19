@@ -7,7 +7,7 @@
 #ifndef __USERINTERFACEAPP_H_
 #define __USERINTERFACEAPP_H_
 
-#include "Common.h"
+#include "UserInterface.h"
 
 class UserInterfaceApp : public wxApp {
 

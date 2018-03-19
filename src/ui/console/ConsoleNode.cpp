@@ -4,8 +4,6 @@
 //
 
 #include "Console.h"
-#include "ParameterItem.h"
-#include "ExecutorItem.h"
 
 bool Console::nodeInit(INTERFACES distInterface, INTERFACES collInterface) {
 

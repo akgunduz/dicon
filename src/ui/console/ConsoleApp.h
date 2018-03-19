@@ -3,9 +3,9 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Common.h"
+#include "Console.h"
 
-#ifndef __APPLICATION_H_
-#define __APPLICATION_H_
+#ifndef __CONSOLEAPPLICATION_H_
+#define __CONSOLEAPPLICATION_H_
 
 #endif

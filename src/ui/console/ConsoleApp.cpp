@@ -4,8 +4,7 @@
 //
 
 #include "Log.h"
-#include "Console.h"
-#include "DeviceManager.h"
+#include "ConsoleApp.h"
 
 int main(int argc, char** argv) {
 
