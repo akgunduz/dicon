@@ -6,13 +6,112 @@
 #include "Message.h"
 
 Message::Message(Unit host)
-		: BaseMessage(host) {
+		: BaseMessage(sizeof(MessageHeader)) {
 
+    memset(&header, 0, sizeof(MessageHeader));
+
+    setHost(host);
+    setStreamFlag(STREAM_NONE);
+    setPriority(MESSAGE_DEFAULT_PRIORITY);
 }
 
 Message::Message(Unit owner, int type)
-		: BaseMessage(owner, type) {
+		: BaseMessage(sizeof(MessageHeader)) {
 
+    memset(&header, 0, sizeof(MessageHeader));
+
+    header.time = 0;
+    header.deviceID = 0;
+    header.messageID = 0;//new Random(time).nextLong();
+    header.type = type;
+
+    setHost(owner);
+    setOwner(owner);
+    setStreamFlag(STREAM_NONE);
+    setPriority(MESSAGE_DEFAULT_PRIORITY);
+}
+
+void Message::setStreamFlag(int flag) {
+    streamFlag = flag;
+}
+
+int Message::getType() {
+    return header.type;
+}
+
+Unit Message::getHost() {
+    return this->host;
+}
+
+void Message::setHost(Unit host) {
+    this->host = host;
+}
+
+Unit Message::getOwner() {
+    return Unit(header.owner);
+}
+
+void Message::setOwner(Unit owner) {
+    header.owner = owner.getUnit();
+}
+
+long Message::getOwnerAddress() {
+    return header.ownerAddress;
+}
+
+void Message::setOwnerAddress(long address) {
+    header.ownerAddress = address;
+}
+
+long Message::getTime() {
+    return header.time;
+}
+
+long Message::getDeviceID() {
+    return header.deviceID;
+}
+
+long Message::getMessageID() {
+    return header.messageID;
+}
+
+long Message::getVariant(int id) {
+
+    if (id < MAX_VARIANT) {
+        return header.variant[id];
+    }
+
+    return 0;
+}
+
+void Message::setVariant(int id, long variant) {
+
+    if (id >= MAX_VARIANT) {
+        return;
+    }
+
+    header.variant[id] = variant;
+}
+
+int Message::getPriority() {
+    return header.priority;
+}
+
+int Message::iteratePriority() {
+
+    if (header.priority > 1) {
+        header.priority--;
+    }
+
+    return header.priority;
+}
+
+void Message::setPriority(int priority) {
+    header.priority = priority;
+}
+
+void Message::normalizePriority() {
+    header.priority *= PRIORITY_COEFFICIENT;
 }
 
 void Message::setJob(int streamFlag, FileList *fileList) {
@@ -20,6 +119,23 @@ void Message::setJob(int streamFlag, FileList *fileList) {
     setStreamFlag(streamFlag);
 
     this->fileList = fileList;
+}
+
+bool Message::parseHeader(const uint8_t* buffer) {
+
+    header.type = ntohl(*((int *) buffer)); buffer += 4;
+    header.priority = ntohl(*((int *) buffer)); buffer += 4;
+    header.owner = ntohl(*((int *) buffer)); buffer += 4;
+    header.ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
+    header.time = ntohll(*((long *) buffer)); buffer += 8;
+    header.deviceID = ntohll(*((long *) buffer)); buffer += 8;
+    header.messageID = ntohll(*((long *) buffer)); buffer += 8;
+
+    for (int i = 0; i < MAX_VARIANT; i++) {
+        header.variant[i] = ntohll(*((long *) buffer)); buffer += 8;
+    }
+
+    return true;
 }
 
 bool Message::readMD5(int desc, Md5* md5) {
@@ -158,6 +274,23 @@ bool Message::readFinalize() {
     return true;
 }
 
+bool Message::prepareHeader(uint8_t *buffer) {
+
+    *((int *) buffer) = htonl(header.type); buffer += 4;
+    *((int *) buffer) = htonl(header.priority); buffer += 4;
+    *((int *) buffer) = htonl(header.owner); buffer += 4;
+    *((long *) buffer) = htonll(header.ownerAddress); buffer += 8;
+    *((long *) buffer) = htonll(header.time); buffer += 8;
+    *((long *) buffer) = htonll(header.deviceID); buffer += 8;
+    *((long *) buffer) = htonll(header.messageID); buffer += 8;
+
+    for (int i = 0; i < MAX_VARIANT; i++) {
+        *((long *) buffer) = htonll(header.variant[i]); buffer += 8;
+    }
+
+    return true;
+}
+
 bool Message::writeMD5(int desc, Md5* md5) {
 
 	if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
@@ -237,7 +370,7 @@ bool Message::writeJobInfo(int desc, const char *jobDir) {
     return writeString(desc, jobDir);
 }
 
-bool Message::writeMessageStream(int out, int streamFlag) {
+bool Message::writeMessageStream(int out) {
 
     int contentCount;
 
@@ -269,6 +402,7 @@ bool Message::writeMessageStream(int out, int streamFlag) {
             LOG_E("%d md5 content sent to network", contentCount);
             break;
 
+        case STREAM_NONE:
         default :
             break;
     }

@@ -12,6 +12,8 @@
 #include "Job.h"
 #include "Md5.h"
 
+#define STREAM_NONE 0xFFFF
+
 #define STREAM_JOB 0x01
 
 //Send md5 + binary
@@ -24,27 +26,66 @@
 #define BLOCK_FILE_MD5 0x02
 #define BLOCK_JOB_INFO 0x03
 
+#define MAX_VARIANT 2
+
+#define MESSAGE_DEFAULT_PRIORITY 3
+
+//To get rid of Alignment problem stay in 64bit mod
+struct MessageHeader {
+
+	int type;
+	int priority;
+	int owner;
+	long ownerAddress;
+	long time;
+	long deviceID;
+	long messageID;
+	long variant[MAX_VARIANT];
+};
+
 class Message : public BaseMessage {
 
+	struct MessageHeader header;
+
+	Unit host;
+
+	int streamFlag;
+
     char jobDir[50];
-    void setRootPath(const char *);
 
 public:
 
-    //char rootPath[PATH_MAX];
-
-	//Job *job;
     FileList *fileList;
 
 	std::vector<Md5> md5List;
 
-//	Message(Unit host, const char*);
-//	Message(Unit owner, int type, const char*);
 	Message(Unit host);
 	Message(Unit owner, int type);
 
-//    const char* getRootPath();
-    const char* getJobDir();
+	void setStreamFlag(int);
+
+	int getType();
+
+	Unit getHost();
+	void setHost(Unit);
+	Unit getOwner();
+	void setOwner(Unit);
+
+	long getOwnerAddress();
+	void setOwnerAddress(long);
+	long getVariant(int id);
+	void setVariant(int id, long variant);
+
+	long getTime();
+	long getDeviceID();
+	long getMessageID();
+
+	int getPriority();
+	void setPriority(int);
+	void normalizePriority();
+	int iteratePriority();
+
+	const char* getJobDir();
 
 	void setJob(int, FileList *fileList);
 
@@ -60,11 +101,14 @@ public:
 	bool writeJobInfo(int, const char *jobDir);
 	bool writeFileBinary(int, FileItem *);
 	bool writeFileMD5(int, FileItem *);
-	bool writeMessageStream(int out, int streamFlag);
+	bool writeMessageStream(int out);
 
     virtual bool readFinalize();
 
     virtual bool writeFinalize();
+
+	bool parseHeader(const uint8_t*);
+	bool prepareHeader(uint8_t *);
 };
 
 //typedef bool (Message::*fWriteProcess)(int desc, FileItem *content);

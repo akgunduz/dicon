@@ -6,116 +6,14 @@
 #include "BaseMessage.h"
 #include "NetAddress.h"
 
-BaseMessage::BaseMessage(Unit host) {
+BaseMessage::BaseMessage(int size) {
 
-	memset(&header, 0, sizeof(MessageHeader));
-    setHost(host);
-	setStreamFlag(STREAM_NONE);
-	setPriority(MESSAGE_DEFAULT_PRIORITY);
+    headerSize = size;
     setMulticastAddress(0);
-}
-
-BaseMessage::BaseMessage(Unit owner, int type) {
-
-	memset(&header, 0, sizeof(MessageHeader));
-
-	header.time = 0;
-	header.deviceID = 0;
-	header.messageID = 0;//new Random(time).nextLong();
-	header.type = type;
-
-    setHost(owner);
-    setOwner(owner);
-	setStreamFlag(STREAM_NONE);
-	setPriority(MESSAGE_DEFAULT_PRIORITY);
-    setMulticastAddress(0);
-}
-
-void BaseMessage::setStreamFlag(int flag) {
-	streamFlag = flag;
 }
 
 void BaseMessage::setMulticastAddress(long address) {
     multicastAddress = address;
-}
-
-int BaseMessage::getType() {
-	return header.type;
-}
-
-Unit BaseMessage::getHost() {
-    return this->host;
-}
-
-void BaseMessage::setHost(Unit host) {
-    this->host = host;
-}
-
-Unit BaseMessage::getOwner() {
-	return Unit(header.owner);
-}
-
-void BaseMessage::setOwner(Unit owner) {
-	header.owner = owner.getUnit();
-}
-
-long BaseMessage::getOwnerAddress() {
-	return header.ownerAddress;
-}
-
-void BaseMessage::setOwnerAddress(long address) {
-	header.ownerAddress = address;
-}
-
-long BaseMessage::getTime() {
-	return header.time;
-}
-
-long BaseMessage::getDeviceID() {
-    return header.deviceID;
-}
-
-long BaseMessage::getMessageID() {
-    return header.messageID;
-}
-
-long BaseMessage::getVariant(int id) {
-
-    if (id < MAX_VARIANT) {
-        return header.variant[id];
-    }
-
-    return 0;
-}
-
-void BaseMessage::setVariant(int id, long variant) {
-
-    if (id >= MAX_VARIANT) {
-        return;
-    }
-
-    header.variant[id] = variant;
-}
-
-int BaseMessage::getPriority() {
-	return header.priority;
-}
-
-int BaseMessage::iteratePriority() {
-
-	if (header.priority > 1) {
-		header.priority--;
-	}
-
-	return header.priority;
-}
-
-void BaseMessage::setPriority(int priority) {
-	header.priority = priority;
-}
-
-void BaseMessage::normalizePriority() {
-	header.priority *= PRIORITY_COEFFICIENT;
 }
 
 int BaseMessage::getBinarySize(const char* path) {
@@ -252,26 +150,14 @@ bool BaseMessage::readSignature(int in) {
 	return true;
 }
 
-bool BaseMessage::readHeader(int in, MessageHeader *header) {
+bool BaseMessage::readHeader(int in) {
 
-	if (!readBlock(in, tmpBuf, sizeof(MessageHeader))) {
+	if (!readBlock(in, tmpBuf, headerSize)) {
 		LOG_E("Can not read message header from stream");
 		return false;
 	}
 
-	uint8_t *p = tmpBuf;
-    header->type = ntohl(*((int *) p)); p += 4;
-	header->priority = ntohl(*((int *) p)); p += 4;
-	header->owner = ntohl(*((int *) p)); p += 4;
-    header->ownerAddress = ntohll(*((long *) p)); p += 8;
-    header->time = ntohll(*((long *) p)); p += 8;
-    header->deviceID = ntohll(*((long *) p)); p += 8;
-    header->messageID = ntohll(*((long *) p)); p += 8;
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        header->variant[i] = ntohll(*((long *) p)); p += 8;
-    }
-
-	return true;
+	return parseHeader(tmpBuf);
 }
 
 bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
@@ -368,7 +254,7 @@ bool BaseMessage::readFromStream(int in) {
 		return false;
 	}
 
-	if (!readHeader(in, &header)) {
+	if (!readHeader(in)) {
 		return false;
 	}
 
@@ -463,22 +349,14 @@ bool BaseMessage::writeSignature(int out) {
 	return true;
 }
 
-bool BaseMessage::writeHeader(int out, MessageHeader *header) {
+bool BaseMessage::writeHeader(int out) {
 
-	uint8_t *p = tmpBuf;
-	*((int *) p) = htonl(header->type); p += 4;
-	*((int *) p) = htonl(header->priority); p += 4;
-	*((int *) p) = htonl(header->owner); p += 4;
-	*((long *) p) = htonll(header->ownerAddress); p += 8;
-	*((long *) p) = htonll(header->time); p += 8;
-	*((long *) p) = htonll(header->deviceID); p += 8;
-	*((long *) p) = htonll(header->messageID); p += 8;
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        *((long *) p) = htonll(header->variant[i]); p += 8;
+    if (!prepareHeader(tmpBuf)) {
+        LOG_E("Can not prepare header");
+        return false;
     }
-  //  strcpy((char*)p, header->jobID);
 
-	if (!writeBlock(out, tmpBuf, sizeof(MessageHeader))) {
+	if (!writeBlock(out, tmpBuf, headerSize)) {
 		LOG_E("Can not write message header to stream");
 		return false;
 	}
@@ -553,15 +431,12 @@ bool BaseMessage::writeToStream(int out) {
 		return false;
 	}
 
-	if (!writeHeader(out, &header)) {
+	if (!writeHeader(out)) {
 		return false;
 	}
 
-    if (streamFlag != STREAM_NONE) {
-
-        if (!writeMessageStream(out, streamFlag)) {
-            return false;
-        }
+    if (!writeMessageStream(out)) {
+        return false;
     }
 
     writeEndStream(out);
