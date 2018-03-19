@@ -46,6 +46,7 @@
 
 #ifdef APPLE
 #include "Common_apple.h"
+#elif WIN32
 #else
 #include "Common_linux.h"
 #endif
@@ -54,15 +55,7 @@
 #define nullptr NULL
 #endif
 
-#define MD5_PATH "md5"
-#define ARCH_PATH "arch"
-#define COMMON_PATH "common"
-
 #define SHUTDOWN_NOTIFIER 'Q'
-/*#define LOOPBACK_RANGE 256
-#define LOOPBACK_ADDRESS 0x7F000001
-#define IPADDRESS_MASK 0xFFFFFFFF
-#define DEFAULT_PORT 61001*/
 
 enum COMPONENT {
 	COMP_DISTRIBUTOR,

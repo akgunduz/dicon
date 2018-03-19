@@ -4,9 +4,7 @@
 //
 
 #include "BaseMessage.h"
-#include "Util.h"
 #include "NetAddress.h"
-#include "Md5.h"
 
 BaseMessage::BaseMessage(Unit host) {
 
@@ -38,7 +36,7 @@ void BaseMessage::setStreamFlag(int flag) {
 }
 
 void BaseMessage::setMulticastAddress(long address) {
-    this->multicastAddress = address;
+    multicastAddress = address;
 }
 
 int BaseMessage::getType() {
