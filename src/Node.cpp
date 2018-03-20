@@ -220,6 +220,7 @@ bool Node::processParallel(Rule* rule) {
         content->getParsed(rule, cmd);
         parseCommand(cmd, args);
         LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(Unit::getRootPath(COMP_NODE)));
+        LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
 
 #ifdef CYGWIN
         LOG_I("Simulating fork in Windows!!!");
@@ -276,6 +277,7 @@ bool Node::processSequential(Rule* rule) {
         content->getParsed(rule, cmd);
 
         LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
+        LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
 
         char fullcmd[PATH_MAX];
         strcpy(fullcmd, Util::absPath(getInfo(), cmd).c_str());

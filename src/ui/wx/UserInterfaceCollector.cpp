@@ -73,7 +73,6 @@ void UserInterface::OnCollProcessClick( wxCommandEvent& event )
     collProcessList->Clear();
 
     collObject->syncTime();
-    collObject->reset();
 
     collObject->processRule();
 
@@ -121,11 +120,11 @@ void UserInterface::collUpdateLog(wxCommandEvent &event) {
 
 void UserInterface::collUpdateJobList(wxCommandEvent &event) {
 
-    std::vector<Job*> *jobs = (std::vector<Job*> *)event.GetClientData();
+    Jobs *jobs = (Jobs*)event.GetClientData();
 
-    for (int j =0; j < jobs->size(); j++) {
+    for (int j =0; j < jobs->getCount(); j++) {
 
-        Job *job = (*jobs)[j];
+        Job *job = jobs->getJob(j);
         wxTreeListItem jobItem = collJobList->AppendItem(collJobList->GetRootItem(), job->getName());
         for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
             Rule *rule = (Rule*) job->getContent(CONTENT_FILE, i);

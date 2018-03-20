@@ -2,19 +2,7 @@
 // Created by akgunduz on 23.10.2015.
 //
 
-#include <set>
 #include "Job.h"
-#include "MapItem.h"
-
-long AttachedNode::getAddress() {
-
-    return address;
-}
-
-ARCH AttachedNode::getArch() {
-
-    return arch;
-}
 
 Job::Job(FileItem *fileItem)
     : JsonItem (fileItem) {
@@ -46,7 +34,7 @@ void Job::init() {
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_ID] = new JsonType(CONTENT_ID, "id", this, parseIDNode);
 
-    this->attachedNode.address = 0;
+    attachedNode.setAddress(0);
 
     if (!parse()) {
         LOG_E("Job could not parsed!!!");
@@ -142,13 +130,13 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-AttachedNode Job::getAttachedNode() {
+NodeInfo Job::getAttachedNode() {
     return attachedNode;
 }
 
-void Job::setAttachedNode(long address, ARCH arch) {
-    this->attachedNode.address = address;
-    this->attachedNode.arch = arch;
+void Job::setAttachedNode(NodeInfo node) {
+
+    attachedNode = node;
 }
 
 Rule *Job::getRule(int index) {

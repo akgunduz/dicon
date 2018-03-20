@@ -8,9 +8,7 @@
 #define __Message_H_
 
 #include "BaseMessage.h"
-#include "Unit.h"
 #include "Job.h"
-#include "Md5.h"
 
 #define STREAM_NONE 0xFFFF
 
@@ -27,6 +25,8 @@
 #define BLOCK_JOB_INFO 0x03
 
 #define MAX_VARIANT 2
+
+#define PRIORITY_COEFFICIENT 10
 
 #define MESSAGE_DEFAULT_PRIORITY 3
 

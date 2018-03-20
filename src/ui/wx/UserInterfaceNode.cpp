@@ -33,14 +33,7 @@ void UserInterface::nodeInit() {
     uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
     uiUpdater[UI_UPDATE_NODE_CLEAR] = &UserInterface::nodeUpdateClear;
     uiUpdater[UI_UPDATE_NODE_LOG] = &UserInterface::nodeUpdateLog;
-/*
-    if (Device::getCount() > 0) {
-        for (uint32_t i = 0; i < Device::getCount(); i++) {
-            nodeConnectInterface->Insert(wxString(sInterfaces[Device::getType(i)]) + " --> " + Device::getName(i), i);
-        }
-        nodeConnectInterface->Select(0);
-    }
-*/
+
 }
 
 /*
@@ -141,17 +134,6 @@ void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
 void UserInterface::nodeUpdateExecList(wxCommandEvent &event) {
 
-    Rule *rule = (Rule *)event.GetClientData();
-
-    for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
-
-        ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, j);
-        if (content == nullptr) {
-            return;
-        }
-
-        nodeExecList->Append(content->getExec());
-
-    }
-
+    EventData *data = (EventData *)event.GetClientData();
+    nodeExecList->Append(wxString::Format("%s", data->dataStr));
 }

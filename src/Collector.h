@@ -11,10 +11,11 @@
 #include "Connector.h"
 #include "Message.h"
 #include "Job.h"
+#include "Jobs.h"
 
 class Collector : public Component {
 
-	std::vector<Job*> *jobs;
+	Jobs jobs;
 
 	long distributorAddress;
 
@@ -25,18 +26,14 @@ class Collector : public Component {
 	bool send2DistributorMsg(long, int);
 	bool send2NodeMsg(long, int, FileList *);
 
-    Job* getJob(long id);
-    Job* getAttachedJob(long address);
-    Job* getUnservedJob();
-
 public:
 
 	Collector(const char *rootPath);
     virtual ~Collector();
 
-    bool reset();
     bool processRule();
     bool syncTime();
+	Jobs* getJobs();
 
 };
 

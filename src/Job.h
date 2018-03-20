@@ -9,36 +9,20 @@
 #include "JsonItem.h"
 #include "Md5.h"
 #include "FileList.h"
+#include "NodeInfo.h"
 
 
 #define MAX_JOB_COUNT 100
 #define JOB_ITEM 0
 #define JOB_FILE "Job.json"
 
-struct AttachedNode {
-
-    long address;
-    ARCH arch;
-
-public:
-
-    long getAddress();
-    ARCH getArch();
-
-};
-
-
 class Job : public JsonItem {
 
     long id;
     char name[50];
-    AttachedNode attachedNode;
+    NodeInfo attachedNode;
 
 public:
-
-  //  FileList *fileList;
-
-  //  std::map<std::string, FileItem*> uniqueList;
 
     Job(FileItem *fileItem);
     Job(Unit host, const char* jobDir);
@@ -53,8 +37,8 @@ public:
     long getID();
     void setID(long id);
 
-    AttachedNode getAttachedNode();
-    void setAttachedNode(long, ARCH);
+    NodeInfo getAttachedNode();
+    void setAttachedNode(NodeInfo);
 
     Rule* getRule(int index);
     int getRuleCount();

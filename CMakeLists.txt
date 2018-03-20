@@ -73,7 +73,9 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/JsonItem.cpp
-)
+        ${SOURCE_PATH}/NodeInfo.cpp
+        ${SOURCE_PATH}/Jobs.cpp
+        )
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/UserInterface.cpp

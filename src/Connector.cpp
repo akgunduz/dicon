@@ -72,26 +72,6 @@ INTERFACES Connector::getInterfaceType() {
 
 }
 
-//const char *Connector::getRootPath() {
-//
-//	return _interface->getRootPath();
-//}
-//
-//void Connector::setRootPath(const char *rootPath) {
-//
-//    _interface->setRootPath(rootPath);
-//}
-//
-//Interface *Connector::getInterface() {
-//
-//	return _interface;
-//}
-//
-//Device* Connector::getDevice() {
-//
-//    return _interface->getDevice();
-//}
-
 bool Connector::createDevices() {
 
     std::vector<Device> *netDevices = Net::getDevices();

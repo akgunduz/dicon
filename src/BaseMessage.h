@@ -7,17 +7,11 @@
 #ifndef __BaseMessage_H_
 #define __BaseMessage_H_
 
-#include "Common.h"
-#include "Unit.h"
 #include "Md5.h"
 
 #define BUFFER_SIZE 512
 
-#define PRIORITY_COEFFICIENT 10
-
 #define SIGNATURE 0x55AA
-
-
 
 #define BLOCK_END_STREAM 0xFFFF
 
