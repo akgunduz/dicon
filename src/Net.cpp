@@ -9,9 +9,7 @@
 std::vector<Device> Net::deviceList;
 
 Net::Net(Unit host, Device *device, const InterfaceCallback *cb)
-		: Interface(host, cb) {
-
-    this->device = device;
+		: Interface(host, device, cb) {
 
     if (!initTCP()) {
         LOG_E("initTCP failed!!!");
@@ -24,11 +22,8 @@ Net::Net(Unit host, Device *device, const InterfaceCallback *cb)
     }
 
     if (!initThread()) {
-        LOG_E("Problem with Server thread");
-        if (multicastEnabled) {
-            close(multicastSocket);
-        }
-        close(netSocket);
+        LOG_E("initMulticast failed!!!");
+        throw std::runtime_error("NetReceiver : initThread failed!!!");
     }
 
 }
@@ -133,8 +128,6 @@ bool Net::initMulticast() {
         }
         */
 
-    multicastEnabled = true;
-
     return true;
 }
 
@@ -149,15 +142,10 @@ void Net::runReceiver(Unit host) {
     FD_ZERO(&orjreadfs);
 
     int maxfd = std::max(netSocket, notifierPipe[0]);
+    maxfd = std::max(maxfd, multicastSocket);
+    maxfd++;
 
-    if (multicastEnabled) {
-        maxfd = std::max(maxfd, multicastSocket) + 1;
-        FD_SET(multicastSocket, &orjreadfs);
-
-    } else {
-        maxfd += 1;
-    }
-
+    FD_SET(multicastSocket, &orjreadfs);
 	FD_SET(netSocket, &orjreadfs);
 	FD_SET(notifierPipe[0], &orjreadfs);
 
@@ -192,7 +180,7 @@ void Net::runReceiver(Unit host) {
 			}
 		}
 
-        if (multicastEnabled && FD_ISSET(multicastSocket, &readfs)) {
+        if (FD_ISSET(multicastSocket, &readfs)) {
 
             Message *msg = new Message(host);
             msg->setMulticastAddress(0xFFFF);
@@ -276,7 +264,7 @@ void Net::runMulticastSender(Message *msg) {
     close(clientSocket);
 }
 
-void Net::setAddress(int portOffset) {
+void Net::setAddress(long portOffset) {
 
     address = NetAddress::parseAddress(device->getAddress(),
 			DEFAULT_PORT + portOffset, (int) device->getHelper());
@@ -284,9 +272,7 @@ void Net::setAddress(int portOffset) {
 
 Net::~Net() {
 	end();
-    if (multicastEnabled) {
-        close(multicastSocket);
-    }
+    close(multicastSocket);
 	close(netSocket);
 }
 
@@ -332,7 +318,7 @@ bool Net::createDevices() {
     return true;
 }
 
-std::vector<Device>*  Net::getDevices() {
+std::vector<Device>* Net::getDevices() {
 
     if (deviceList.size() == 0) {
         createDevices();

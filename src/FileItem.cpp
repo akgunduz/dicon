@@ -95,14 +95,6 @@ bool FileItem::set(FileItem *item) {
         item->getFileType(), item->getMD5());
 }
 
-//const char* FileItem::getRootPath() {
-//    return rootPath;
-//}
-//
-//void FileItem::setRootPath(const char *rootPath) {
-//    strcpy(this->rootPath, rootPath);
-//}
-
 CONTENT_TYPES FileItem::getType() {
 	return CONTENT_FILE;
 }
@@ -153,15 +145,12 @@ void FileItem::setFile(Unit node, const char *jobDir,
     if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
         sprintf(refPath, "%s/common/%s", jobDir, fileName);
         sprintf(md5Path, "%s/md5/common/%s.md5", jobDir, fileName);
-        //absPath = std::string(rootPath) + "/" + jobDir + "/common/" + fileName;
     } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
         sprintf(refPath, "%s/arch/%s/%s", jobDir, ArchTypes::getDir(node.getArch()), fileName);
         sprintf(md5Path, "%s/md5/arch/%s/%s.md5", jobDir, ArchTypes::getDir(node.getArch()), fileName);
-        //absPath = std::string(rootPath) + "/" + jobDir + "/arch/" + (char*)ArchTypes::getDir((ARCH_IDS)node.getArch()) + "/" + fileName;
     } else {
         sprintf(refPath, "%s/%s", jobDir, fileName);
         sprintf(md5Path, "%s/md5/%s.md5",  jobDir, fileName);
-        //absPath = std::string(rootPath) + "/" + jobDir + "/" + fileName;
     }
 
     Util::checkPath(Unit::getRootPath(host.getType()), refPath, true);

@@ -8,13 +8,12 @@ Component::Component(Unit host, const char* rootPath) {
 
     memset(connectors, 0, sizeof(connectors));
 
-    this->info = host;
-    Unit::setRootPath(host.getType(), rootPath);
+    setHost(host);
+    Unit::setRootPath(getHost().getType(), rootPath);
 
     callback = new InterfaceCallback(receiveCB, this);
 
-
-    switch(info.getType()) {
+    switch(host.getType()) {
 
         case COMP_DISTRIBUTOR:
             connectors[COMP_COLLECTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
@@ -56,6 +55,13 @@ Component::~Component() {
 
     delete callback;
 }
+
+
+void Component::setHost(Unit host) {
+
+    this->host = host;
+}
+
 
 bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
@@ -101,7 +107,7 @@ long Component::getAddress(COMPONENT host) {
     return 0;
 }
 
-Unit Component::getInfo() {
+Unit Component::getHost() {
 
-    return info;
+    return host;
 }

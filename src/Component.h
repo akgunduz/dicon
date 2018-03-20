@@ -14,19 +14,16 @@ protected :
 
     InterfaceCallback *callback;
 
-   // const char* rootPath;
-   // char rootPath[PATH_MAX];
+    Unit host;
 
-    Unit info;
+    void setHost(Unit);
 
 public:
     Connector *connectors[COMP_MAX];
 
     Component(Unit host, const char* rootPath);
     virtual ~Component();
- //   const char* getRootPath();
-    Unit getInfo();
- //   void setRootPath(const char* rootPath);
+    Unit getHost();
     long getAddress(COMPONENT host);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);

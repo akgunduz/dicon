@@ -12,7 +12,7 @@ Collector::Collector(const char *rootPath) :
 
 	distributorAddress = 0;
 
-    getJobs()->addJobList(getInfo(), Unit::getRootPath(COMP_COLLECTOR), true);
+    getJobs()->addJobList(getHost(), Unit::getRootPath(COMP_COLLECTOR), true);
 
     LOG_U(UI_UPDATE_COLL_JOB_LIST, getJobs());
 }

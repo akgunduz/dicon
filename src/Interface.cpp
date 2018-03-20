@@ -6,7 +6,7 @@
 #include "Interface.h"
 #include "NetAddress.h"
 
-Interface::Interface(Unit host, const InterfaceCallback *receiveCB) {
+Interface::Interface(Unit host, Device *device, const InterfaceCallback *receiveCB) {
 
 	try {
 
@@ -20,14 +20,13 @@ Interface::Interface(Unit host, const InterfaceCallback *receiveCB) {
 	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
 
     this->host = host;
+	this->device = device;
     this->lastFreePort = DEFAULT_PORT;
-//    this->device = device;
-//    this->multicastEnabled = multicastEnabled;
+    this->address = 0;
+    this->multicastAddress = 0;
 
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
 	scheduler->setCB(MESSAGE_SEND, sendCB);
-
-	//setRootPath(rootPath);
 }
 
 void Interface::end() {
@@ -66,7 +65,6 @@ bool Interface::initThread() {
 		return false;
 	}
 
-	initialized = true;
 	return true;
 }
 
@@ -77,7 +75,6 @@ void *Interface::runReceiver(void *arg) {
 
     delete argument;
 	return nullptr;
-
 }
 
 bool Interface::senderCB(void *arg, SchedulerItem *item) {
@@ -109,14 +106,12 @@ void* Interface::runSender(void *arg) {
 
 	delete argument;
 	return nullptr;
-
 }
 
 Interface::~Interface() {
 
 	close(notifierPipe[1]);
 	close(notifierPipe[0]);
-
 }
 
 bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
@@ -129,34 +124,14 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
 	LOG_E("Interface is not suitable for target : %d", target);
 	return false;
-
-}
-
-int Interface::getNotifier(NOTIFIER_TYPE type) {
-
-	return notifierPipe[type];
 }
 
 long Interface::getAddress() {
-
-	if (!initialized) {
-		return 0;
-	}
-
 	return address;
 }
 
 long Interface::getMulticastAddress() {
-
-    if (!initialized) {
-        return 0;
-    }
-
     return multicastAddress;
-}
-
-bool Interface::isMulticastEnabled() {
-    return multicastEnabled;
 }
 
 Device *Interface::getDevice() {

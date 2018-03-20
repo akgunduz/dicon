@@ -26,8 +26,6 @@ class FileItem : public ContentItem {
 
     Unit host;
 
-    //void setRootPath(const char* rootPath);
-
 public:
 	FileItem(Unit host);
     FileItem(FileItem*);

@@ -27,10 +27,7 @@ public:
 	long getAddress();
 	INTERFACES getInterfaceType();
 	std::vector<long> getAddressList();
-//	const char * getRootPath();
-//	void setRootPath(const char* rootPath);
 	virtual ~Connector();
-
 
 	static bool createDevices();
 	static std::vector<Device>* getDevices();

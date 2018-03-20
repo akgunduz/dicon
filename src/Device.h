@@ -6,12 +6,7 @@
 #define BANKOR_CONNECTINTERFACE_H
 
 #include "Common.h"
-/*
-enum CONNECTTYPE {
-    CONNECT_TCP,
-    CONNECT_UNIXSOCKET
-};
-*/
+
 class Device {
 public:
     char name[50];
@@ -21,8 +16,6 @@ public:
     long helper;
     bool loopback;
     int port;
-
-    static std::vector<Device>deviceList;
 
     Device(const char* _name, INTERFACES _type);
     Device(const char* _name, long _ipAddress, long _helper, bool _loopback);

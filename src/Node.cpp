@@ -67,7 +67,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
                 delete job;
             }
 
-            job = new Job(getInfo(), msg->getJobDir());
+            job = new Job(getHost(), msg->getJobDir());
 
 			if (!processMD5()) {
 				LOG_E("Processing MD5 failed!!!");
@@ -280,7 +280,7 @@ bool Node::processSequential(Rule* rule) {
         LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
 
         char fullcmd[PATH_MAX];
-        strcpy(fullcmd, Util::absPath(getInfo(), cmd).c_str());
+        strcpy(fullcmd, Util::absPath(getHost(), cmd).c_str());
 
         parseCommand(fullcmd, args);
 

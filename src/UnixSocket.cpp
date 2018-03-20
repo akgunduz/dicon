@@ -9,18 +9,14 @@
 std::vector<Device> UnixSocket::deviceList;
 
 UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
-		: Interface(host, cb) {
-
-    this->device = device;
+		: Interface(host, device, cb) {
 
 	if (!initUnixSocket()) {
-		LOG_E("Instance create failed!!!");
-		throw std::runtime_error("NetReceiver : Instance create failed!!!");
+		throw std::runtime_error("initUnixSocket failed!!!");
 	}
 
     if (!initThread()) {
-        LOG_E("Problem with Server thread");
-        close(unixSocket);
+		throw std::runtime_error("initThread failed!!!");
     }
 
 }
@@ -189,7 +185,7 @@ UnixSocket::~UnixSocket() {
 }
 
 
-void UnixSocket::setAddress(int portIndex) {
+void UnixSocket::setAddress(long portIndex) {
 
 	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  portIndex;
 }

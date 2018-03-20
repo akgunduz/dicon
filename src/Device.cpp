@@ -43,6 +43,5 @@ bool Device::isLoopback() {
 }
 
 void Device::setPort(int port) {
-
     this->port = port;
 }
