@@ -9,10 +9,7 @@ const char* sArchTypes[] = {
         "win-x86",
         "lnx-x86",
         "lnx-arm11",
-        "lnx-a7",
-        "lnx-a8",
-        "lnx-a9",
-        "lnx-a15",
+        "lnx-cortex",
 };
 
 const char *ArchTypes::getDir(ARCH arch) {

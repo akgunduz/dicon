@@ -146,7 +146,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 
 		case MSGTYPE_MD5: {
 
-            FileList *list = job->prepareFileList(Unit(COMP_NODE, Util::getArch()));
+            FileList *list = job->prepareFileList();
             msg->setJob(STREAM_MD5ONLY, list);
             LOG_U(UI_UPDATE_NODE_LOG,
                   "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",

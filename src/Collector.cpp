@@ -97,16 +97,16 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 					"\"MD5\" msg from node: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-            NodeInfo node = getJobs()->getNodeByAddress(address);
+            NodeInfo node(address, msg->getOwner().getArch());
 
             Job* job = getJobs()->getJobByNode(node);
-            if (job == nullptr) {
+            if (job == NULL) {
                 break;
             }
 
 			//LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-            FileList *list = job->prepareFileList(Unit(COMP_COLLECTOR, node.getArch()));
+            FileList *list = job->prepareFileList(node.getArch());
 
             list->remove(&msg->md5List);
 

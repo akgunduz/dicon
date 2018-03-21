@@ -38,7 +38,7 @@ public:
     static bool parseNameNode(void*, json_object *node);
     static bool parseRuleNode(void*, json_object *node);
 
-    FileList* prepareFileList(Unit host);
+    FileList* prepareFileList(ARCH = ARCH_MAX);
     FileList* prepareRuleList();
 };
 

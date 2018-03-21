@@ -19,8 +19,8 @@ public:
     MapItem(Unit host, const char *jobDir, const char *fileName,
                        FILETYPE fileType);
     FileItem *get();
-    FileItem *get(int index);
-    FileItem *get(Unit node);
+    FileItem *get(int);
+    FileItem *get(ARCH);
     int getCount();
     FILETYPE getFileType();
 

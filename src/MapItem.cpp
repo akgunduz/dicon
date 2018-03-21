@@ -39,13 +39,13 @@ FileItem *MapItem::get(int index) {
     return files[index];
 }
 
-FileItem *MapItem::get(Unit unit) {
+FileItem *MapItem::get(ARCH arch) {
 
-    if (fileType != FILE_ARCH || unit.getType() != COMP_COLLECTOR) {
+    if (fileType != FILE_ARCH || arch >= ARCH_MAX) {
         return files[0];
     }
 
-    return files[unit.getArch()];
+    return files[arch];
 }
 
 int MapItem::getCount() {

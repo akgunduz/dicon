@@ -63,17 +63,11 @@ void Util::mkPath(const char *path) {
 
 ARCH Util::getArch() {
 #if defined(APPLE)
-	return ARCH_OSX;
+	return ARCH_OSX_X86;
 #elif defined(__linux__)
-    return ARCH_LNX;
-#elif defined(CORTEXA15)
-    return ARCH_CA15;
-#elif defined(CORTEXA9)
-    return ARCH_CA9;
-#elif defined(CORTEXA8)
-    return ARCH_CA8;
-#elif defined(CORTEXA7)
-    return ARCH_CA7;
+    return ARCH_LNX_X86;
+#elif defined(CORTEX)
+    return ARCH_CORTEX;
 #elif defined(ARM11)
     return ARCH_A11;
 #endif

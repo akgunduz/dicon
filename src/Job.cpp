@@ -111,7 +111,7 @@ int Job::getRuleCount() {
     return getContentCount(CONTENT_FILE);
 }
 
-FileList* Job::prepareFileList(Unit unit) {
+FileList* Job::prepareFileList(ARCH arch) {
 
     FileList *fileList = new FileList(getJobDir());
 
@@ -119,7 +119,7 @@ FileList* Job::prepareFileList(Unit unit) {
         Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
         for (int i = 0; i < rule->getContentCount(CONTENT_MAP); i++) {
             MapItem *content = (MapItem *)rule->getContent(CONTENT_MAP, i);
-            FileItem *fileItem = content->get(unit);
+            FileItem *fileItem = content->get(arch);
             if (fileItem->isValid()) {
                 fileList->set(fileItem);
             }

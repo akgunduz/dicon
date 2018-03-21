@@ -6,14 +6,11 @@
 #define BANKOR_ARCHTYPES_H
 
 enum ARCH {
-    ARCH_OSX,
-    ARCH_WIN,
-    ARCH_LNX,
-    ARCH_A11,
-    ARCH_CA7,
-    ARCH_CA8,
-    ARCH_CA9,
-    ARCH_CA15,
+    ARCH_OSX_X86,
+    ARCH_WIN_X86,
+    ARCH_LNX_X86,
+    ARCH_LNX_ARM11,
+    ARCH_LNX_CORTEX,
     ARCH_MAX,
 };
 
