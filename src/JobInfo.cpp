@@ -1,5 +1,6 @@
 //
-// Created by akgunduz on 21.03.2018.
+// Created by Haluk AKGUNDUZ on 21/03/18.
+// Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
 #include "JobInfo.h"

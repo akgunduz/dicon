@@ -14,6 +14,8 @@ int main(int argc, char** argv) {
 
 		char cmd = argv[1][0];
 
+		Connector::createDevices();
+
 		switch(cmd) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
 					break;
 				}
 
-                c_ui->nodeRun((INTERFACES) atoi(argv[2]), (INTERFACES) atoi(argv[3]));
+                c_ui->nodeRun(atoi(argv[2]), atoi(argv[3]));
 				break;
 			default:
 				break;

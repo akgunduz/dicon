@@ -55,10 +55,10 @@ public:
 
 	void updateLog(ConsoleEvent &event);
 
-	bool nodeInit(INTERFACES, INTERFACES);
+	bool nodeInit(int, int);
 	void nodeDestroy();
 	void nodeRemoveDir(const char *);
-	void nodeRun(INTERFACES, INTERFACES);
+	void nodeRun(int, int);
 	void nodeUpdateAddresses(ConsoleEvent &event);
 	void nodeUpdateState(ConsoleEvent &event);
 	void nodeUpdateAttachedCollAddress(ConsoleEvent &event);

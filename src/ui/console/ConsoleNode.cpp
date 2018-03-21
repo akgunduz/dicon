@@ -5,7 +5,7 @@
 
 #include "Console.h"
 
-bool Console::nodeInit(INTERFACES distInterface, INTERFACES collInterface) {
+bool Console::nodeInit(int distInterface, int collInterface) {
 
 	uiUpdater[UI_UPDATE_NODE_ADDRESS] = &Console::nodeUpdateAddresses;
 	uiUpdater[UI_UPDATE_NODE_STATE] = &Console::nodeUpdateState;
@@ -21,11 +21,11 @@ bool Console::nodeInit(INTERFACES distInterface, INTERFACES collInterface) {
 	nodeRemoveDir(path);
 	mkdir(path, 0777);
 
-	nodeObject = nullptr;
-
 	try {
 
-		nodeObject = new Node(distInterface, collInterface, path);
+		Connector::setSelectedDevices(distInterface, collInterface);
+
+		nodeObject = new Node(path);
 
 	} catch (std::runtime_error &e) {
 
@@ -71,7 +71,7 @@ void Console::nodeRemoveDir(const char *dirpath) {
 	rmdir(dirpath);
 }
 
-void Console::nodeRun(INTERFACES distInterface, INTERFACES collInterface) {
+void Console::nodeRun(int distInterface, int collInterface) {
 
 	if (!nodeInit(distInterface, collInterface) ) {
 		nodeDestroy();

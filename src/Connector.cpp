@@ -97,13 +97,13 @@ std::vector<Device> *Connector::getDevices() {
     return &deviceList;
 }
 
-Device* Connector::getDevice(unsigned long index) {
+Device* Connector::getDevice(int index) {
 
     return &deviceList[index >= deviceList.size() ?
                                       deviceList.size() - 1 : index];
 }
 
-void Connector::setSelectedDevices(unsigned char other, unsigned char node) {
+void Connector::setSelectedDevices(int other, int node) {
 
     selectedDevices[0] = getDevice(other);
     selectedDevices[1] = getDevice(node);

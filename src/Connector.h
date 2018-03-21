@@ -31,10 +31,10 @@ public:
 
 	static bool createDevices();
 	static std::vector<Device>* getDevices();
-	static Device* getDevice(unsigned long);
+	static Device* getDevice(int);
 	static unsigned long getCount();
 
-    static void setSelectedDevices(unsigned char, unsigned char);
+    static void setSelectedDevices(int, int);
     static Device* getSelectedDevice(unsigned char);
 };
 
