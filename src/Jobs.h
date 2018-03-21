@@ -7,12 +7,15 @@
 
 
 #include "Job.h"
+#include "JobInfo.h"
 
 #define JOB_DIR_PREFIX "Job_"
 
 class Jobs {
 
     std::vector<Job*> jobs;
+
+    JobInfo nodes;
 
     std::vector<Job*>* getJobs();
 
@@ -26,11 +29,15 @@ public:
     bool addJobList(Unit, const char*, bool = false);
 
     Job* getJob(int);
-    Job* getJobByID(long);
+    Job* getJobByNode(NodeInfo);
     Job* getJobByAddress(long);
-    Job* getUnServedJob();
+    NodeInfo getNodeByAddress(long);
+    Job* getJobUnServed();
 
-    bool resetStates();
+    bool attachNode(Job *job, NodeInfo node);
+    bool detachNode(Job *job);
+
+    bool reset();
     bool clear();
 
     bool isEmpty();

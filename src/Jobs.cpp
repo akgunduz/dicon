@@ -60,76 +60,54 @@ Job* Jobs::getJob(int index) {
     return jobs[index];
 }
 
+Job* Jobs::getJobByNode(NodeInfo node) {
 
-Job* Jobs::getJobByID(long id) {
-
-    int i = 0;
-    for (; i < getCount(); i++) {
-        if (jobs[i]->getID() != id) {
-            continue;
-        }
-        break;
-    }
-
-    if (i == getCount()) {
-        LOG_W("No job found with id %ld", id);
-        return nullptr;
-    }
-
-    return jobs[i];
+    return nodes.get(node);
 }
 
 Job* Jobs::getJobByAddress(long address) {
 
+    return nodes.get(address);
+}
+
+NodeInfo Jobs::getNodeByAddress(long address) {
+
+    return nodes.getNode(address);
+}
+
+Job* Jobs::getJobUnServed() {
+
     int i = 0;
     for (; i < getCount(); i++) {
-        if (jobs[i]->getAttachedNode().getAddress() != address) {
-            continue;
+
+        NodeInfo node = nodes.get(jobs[i]);
+        if (node.getAddress() == 0) {
+            break;
         }
-        break;
     }
 
     if (i == getCount()) {
-        LOG_W("No job found attached to %ld", address);
-        return nullptr;
+        LOG_W("No job found");
+        return NULL;
     }
 
     return jobs[i];
 }
 
-Job* Jobs::getUnServedJob() {
+bool Jobs::reset() {
 
-    int i = 0;
-    for (; i < getCount(); i++) {
-        if (jobs[i]->getAttachedNode().getAddress() > 0) {
-            continue;
-        }
-        break;
-    }
-
-    if (i == getCount()) {
-        LOG_W("No unServed job remains.");
-        return nullptr;
-    }
-
-    return jobs[i];
-}
-
-bool Jobs::resetStates() {
-
-    for (int i = 0; i < getCount(); i++) {
-        jobs[i]->getAttachedNode().reset();
-    }
-
+    nodes.clear();
     return true;
 }
 
 bool Jobs::clear() {
 
     for (std::vector<Job*>::iterator i = jobs.begin(); i != jobs.end(); i++) {
+
         delete *i;
     }
 
+    nodes.clear();
     jobs.clear();
     return true;
 }
@@ -139,7 +117,7 @@ bool Jobs::isEmpty() {
     return jobs.size() == 0;
 }
 
-std::vector<Job *> *Jobs::getJobs() {
+std::vector<Job*> *Jobs::getJobs() {
 
     return &jobs;
 }
@@ -147,4 +125,19 @@ std::vector<Job *> *Jobs::getJobs() {
 unsigned int Jobs::getCount() {
 
     return jobs.size();
+}
+
+bool Jobs::attachNode(Job *job, NodeInfo node) {
+
+    nodes.add(job, node);
+
+    return true;
+
+}
+
+bool Jobs::detachNode(Job *job) {
+
+    nodes.remove(job);
+
+    return true;
 }

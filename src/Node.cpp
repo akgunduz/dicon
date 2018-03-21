@@ -4,8 +4,6 @@
 //
 
 #include "Node.h"
-#include "Util.h"
-#include "ArchTypes.h"
 
 Node::Node(const char *rootPath) :
         Component(Unit(COMP_NODE), rootPath) {
@@ -31,7 +29,7 @@ bool Node::processDistributorMsg(long address, Message *msg) {
 
         case MSGTYPE_WAKEUP:
 
-            distributorAddress = address;
+            setDistributorAddress(address);
 
             LOG_U(UI_UPDATE_NODE_LOG,
                   "\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
@@ -149,7 +147,6 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 		case MSGTYPE_MD5: {
 
             FileList *list = job->prepareFileList(Unit(COMP_NODE, Util::getArch()));
-            msg->setVariant(0, list->getID());
             msg->setJob(STREAM_MD5ONLY, list);
             LOG_U(UI_UPDATE_NODE_LOG,
                   "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
@@ -164,6 +161,13 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 
 	return connectors[COMP_COLLECTOR]->send(address, msg);
 }
+
+bool Node::setDistributorAddress(long address) {
+
+    distributorAddress = address;
+    return true;
+}
+
 
 bool Node::processMD5() {
 

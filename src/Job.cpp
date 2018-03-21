@@ -32,28 +32,10 @@ void Job::init() {
 
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
-    contentTypes[CONTENT_ID] = new JsonType(CONTENT_ID, "id", this, parseIDNode);
-
-    attachedNode.setAddress(0);
 
     if (!parse()) {
         LOG_E("Job could not parsed!!!");
     }
-}
-
-bool Job::parseIDNode(void *parent, json_object *node) {
-
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_int) {
-        LOG_E("Invalid JSON Name Node");
-        return false;
-    }
-
-    long id = json_object_get_int64(node);
-
-    ((Job*)parent)->setID(id);
-
-    return true;
 }
 
 bool Job::parseNameNode(void *parent, json_object *node) {
@@ -113,30 +95,12 @@ bool Job::parseRuleNode(void *parent, json_object *node) {
     return true;
 }
 
-long Job::getID() {
-    return id;
-}
-
-void Job::setID(long id) {
-
-    this->id = id;
-}
-
 const char *Job::getName() {
     return name;
 }
 
 void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
-}
-
-NodeInfo Job::getAttachedNode() {
-    return attachedNode;
-}
-
-void Job::setAttachedNode(NodeInfo node) {
-
-    attachedNode = node;
 }
 
 Rule *Job::getRule(int index) {
@@ -149,7 +113,7 @@ int Job::getRuleCount() {
 
 FileList* Job::prepareFileList(Unit unit) {
 
-    FileList *fileList = new FileList(getID(), getJobDir());
+    FileList *fileList = new FileList(getJobDir());
 
     for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
         Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
@@ -167,7 +131,7 @@ FileList* Job::prepareFileList(Unit unit) {
 
 FileList* Job::prepareRuleList() {
 
-    FileList *fileList = new FileList(getID(), getJobDir());
+    FileList *fileList = new FileList(getJobDir());
 
     fileList->set(this);
 

@@ -10,7 +10,7 @@ Collector::Collector(const char *rootPath) :
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_NODE));
 
-	distributorAddress = 0;
+    setDistributorAddress(0);
 
     getJobs()->addJobList(getHost(), Unit::getRootPath(COMP_COLLECTOR), true);
 
@@ -29,7 +29,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 		case MSGTYPE_WAKEUP:
 
-			distributorAddress = address;
+			setDistributorAddress(address);
 
 			LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
@@ -51,12 +51,15 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				break;
 			}
 
-            Job* job = getJobs()->getUnServedJob();
+            Job* job = getJobs()->getJobUnServed();
+
             if (job == nullptr) {
+                LOG_W("No available unServed job right now.");
                 break;
             }
 
-            job->setAttachedNode(node);
+            jobs.attachNode(job, node);
+
             FileList *list = job->prepareRuleList();
 
 			LOG_T("New Job created from path : %s", "TODO JOB");
@@ -90,20 +93,20 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_MD5: {
 
-            long jobID = msg->getVariant(0);
-
 			LOG_U(UI_UPDATE_COLL_LOG,
 					"\"MD5\" msg from node: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-            Job* job = getJobs()->getJobByID(jobID);
+            NodeInfo node = getJobs()->getNodeByAddress(address);
+
+            Job* job = getJobs()->getJobByNode(node);
             if (job == nullptr) {
                 break;
             }
 
 			//LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
 
-            FileList *list = job->prepareFileList(Unit(COMP_COLLECTOR, job->getAttachedNode().getArch()));
+            FileList *list = job->prepareFileList(Unit(COMP_COLLECTOR, node.getArch()));
 
             list->remove(&msg->md5List);
 
@@ -161,8 +164,6 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 	Message *msg = new Message(COMP_COLLECTOR, type);
 
-    msg->setVariant(0, list->getID());
-
 	switch(type) {
 
 		case MSGTYPE_RULE:
@@ -208,4 +209,10 @@ bool Collector::syncTime() {
 Jobs *Collector::getJobs() {
 
     return &jobs;
+}
+
+bool Collector::setDistributorAddress(long address) {
+
+    distributorAddress = address;
+    return true;
 }

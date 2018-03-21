@@ -24,8 +24,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -std=c++11")
-
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Debug/")
 
 set(FRAMEWORK_FILES
@@ -75,6 +73,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JsonItem.cpp
         ${SOURCE_PATH}/NodeInfo.cpp
         ${SOURCE_PATH}/Jobs.cpp
+        ${SOURCE_PATH}/JobInfo.cpp
         )
 
 set(WX_FILES
@@ -110,22 +109,9 @@ message("------${wxWidgets_DEFINITIONS}")
 message("------${wxWidgets_INCLUDE_DIRS}")
 message("------${wxWidgets_LIBRARIES}")
 
-#add_definitions(-D__WXGTK__)
 
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
-#include_directories(${OPENSSL_INCLUDE_DIR})
-
-
-#include_directories(${wxWidgets_INCLUDE_DIRS})
-
-#add_definitions(-DLINUX -D__WXWIDGETS__)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-3.0 \
-#    -I/usr/include/wx-3.0 -D_FILE_OFFSET_BITS=64 -DWXUSINGDLL -D__WXGTK__")
-#
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--start-group -L/usr/lib/x86_64-linux-gnu \
-#    -lwx_gtk2u_xrc-3.0 -lwx_gtk2u_html-3.0 -lwx_gtk2u_qa-3.0 -lwx_gtk2u_adv-3.0 -lwx_gtk2u_core-3.0 \
-#    -lwx_baseu_xml-3.0 -lwx_baseu_net-3.0 -lwx_baseu-3.0 -ljson-c -lssl -lcrypto -lz -pthread ")
 
 add_library(bankor-framework-${TARGET_SUFFIX} ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework-${TARGET_SUFFIX} PUBLIC ${OPENSSL_INCLUDE_DIR})

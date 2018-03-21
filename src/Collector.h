@@ -18,6 +18,7 @@ class Collector : public Component {
 	Jobs jobs;
 
 	long distributorAddress;
+	bool setDistributorAddress(long);
 
 	virtual bool processDistributorMsg(long, Message *);
 	virtual bool processCollectorMsg(long, Message *);

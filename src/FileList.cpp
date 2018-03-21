@@ -5,9 +5,8 @@
 #include "FileList.h"
 #include "Message.h"
 
-FileList::FileList(long id, const char *parentDir) {
+FileList::FileList(const char *parentDir) {
 
-    this->id = id;
     strcpy(this->parentDir, parentDir);
 }
 
@@ -84,8 +83,4 @@ int FileList::process(Message *msg, fWriteProcess function, FILELIST_FLAG flag) 
 
 const char *FileList::getDir() {
     return parentDir;
-}
-
-long FileList::getID() {
-    return id;
 }

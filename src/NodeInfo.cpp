@@ -24,7 +24,7 @@ NodeInfo::NodeInfo(long address, ARCH arch) {
     this->arch = arch;
 }
 
-long NodeInfo::getAddress() {
+const long NodeInfo::getAddress() const {
 
     return address;
 }
@@ -36,7 +36,7 @@ bool NodeInfo::setAddress(long address) {
     return true;
 }
 
-ARCH NodeInfo::getArch() {
+const ARCH NodeInfo::getArch() {
 
     return arch;
 }

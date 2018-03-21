@@ -15,6 +15,7 @@ private:
 	Job* job = nullptr;
 
 	long distributorAddress;
+	bool setDistributorAddress(long);
 
     virtual bool processDistributorMsg(long, Message *);
     virtual bool processCollectorMsg(long, Message *);

@@ -18,9 +18,9 @@ public:
     NodeInfo();
     NodeInfo(const NodeInfo &rep);
     NodeInfo(long, ARCH);
-    long getAddress();
+    const long getAddress() const;
     bool setAddress(long);
-    ARCH getArch();
+    const ARCH getArch();
     bool setArch(ARCH);
     bool setNode(long, ARCH);
     bool isValid();
