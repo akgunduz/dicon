@@ -95,21 +95,6 @@ pkg_check_modules(JSON-C REQUIRED QUIET json-c)
 find_package(OpenSSL)
 find_package(wxWidgets)
 
-message("------${JSON-C_FOUND}")
-message("------${JSON-C_INCLUDE_DIRS}")
-message("------${JSON-C_LIBRARIES}")
-
-message("------${OPENSSL_FOUND}")
-message("------${OPENSSL_INCLUDE_DIR}")
-message("------${OPENSSL_CRYPTO_LIBRARY}")
-
-message("------${wxWidgets_FOUND}")
-message("------${wxWidgets_CXX_FLAGS}")
-message("------${wxWidgets_DEFINITIONS}")
-message("------${wxWidgets_INCLUDE_DIRS}")
-message("------${wxWidgets_LIBRARIES}")
-
-
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
 
