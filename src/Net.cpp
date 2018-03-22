@@ -47,10 +47,9 @@ bool Net::initTCP() {
 
     for (int j = tryCount; j > 0; j--) {
 
-        address = NetAddress::parseAddress(device->getAddress(),
-                                                lastFreePort, (int) device->getHelper());
+        setAddress(lastFreePort);
 
-        struct sockaddr_in serverAddress = NetAddress::getInetAddress(address);
+        struct sockaddr_in serverAddress = NetAddress::getInetAddress(getAddress());
 
         if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
@@ -264,10 +263,10 @@ void Net::runMulticastSender(Message *msg) {
     close(clientSocket);
 }
 
-void Net::setAddress(long portOffset) {
+void Net::setAddress(unsigned short port) {
 
     address = NetAddress::parseAddress(device->getAddress(),
-			DEFAULT_PORT + portOffset, (int) device->getHelper());
+			port, (int) device->getHelper());
 }
 
 Net::~Net() {

@@ -145,3 +145,25 @@ bool Util::checkPath(const char *path1, const char *path2, bool dir) {
 std::string Util::absPath(Unit host, const char *path2) {
     return std::string(Unit::getRootPath(host.getType())) + "/" + path2;
 }
+
+void Util::cleanup() {
+
+    DIR *unixdir = opendir(UNIXSOCKET_PATH);
+    if (!unixdir) {
+        printf("Can not open unix socket path!!!");
+        return;
+    }
+
+    dirent *entry;
+    char path[255];
+
+    while ((entry = readdir(unixdir)) != NULL) {
+
+        if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) == 0) {
+            sprintf(path, "%s%s", UNIXSOCKET_PATH, entry->d_name);
+            unlink(path);
+        }
+    }
+
+    closedir(unixdir);
+}

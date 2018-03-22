@@ -13,7 +13,6 @@ class UnixSocketAddress  : public Address {
 
 public:
     static sockaddr_un getUnixAddress(long);
-
 };
 
 

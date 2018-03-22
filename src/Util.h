@@ -20,6 +20,7 @@ public:
 	static std::string absPath(Unit, const char *);
 	static bool checkPath(const char*, const char*, bool);
     static bool isMulticast();
+	static void cleanup();
 };
 
 

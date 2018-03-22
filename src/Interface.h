@@ -50,7 +50,7 @@ protected :
 
 	long address;
     long multicastAddress;
-	int lastFreePort;
+	unsigned short lastFreePort;
 
 	Scheduler *scheduler;
 	pthread_t thread;
@@ -63,7 +63,7 @@ protected :
 	bool initThread();
 	void end();
 	Interface(Unit host, Device *, const InterfaceCallback *);
-	virtual void setAddress(long) = 0;
+	virtual void setAddress(unsigned short) = 0;
 
 public :
 

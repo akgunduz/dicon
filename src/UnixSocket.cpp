@@ -29,20 +29,24 @@ bool UnixSocket::initUnixSocket() {
         return false;
     }
 
-    int on = 1;
-    if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
-        LOG_E("Socket option with err : %d!!!", errno);
-        close(unixSocket);
-        return false;
-    }
+//    int on = 1;
+//    if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
+//        LOG_E("Socket option with err : %d!!!", errno);
+//        close(unixSocket);
+//        return false;
+//    }
 
 	int tryCount = 10;
 
 	for (int j = tryCount; j > 0; j--) {
 
-		address = (((unsigned) getpid() << 10) & 0xFFFFFF) | lastFreePort;
+        srand(time(NULL));
 
-		sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(address);
+        setAddress((unsigned short)rand());
+
+	//	address = (((unsigned long) getpid() << 10) & 0xFFFFFF) | (unsigned short)rand();
+
+		sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(getAddress());
 
 		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
@@ -185,9 +189,9 @@ UnixSocket::~UnixSocket() {
 }
 
 
-void UnixSocket::setAddress(long portIndex) {
+void UnixSocket::setAddress(unsigned short seed) {
 
-	address = (((unsigned)getpid() << 10) & 0xFFFFFF) |  portIndex;
+	address = (((unsigned int)getpid() << 10) & 0xFFFFFF) | seed;
 }
 
 INTERFACES UnixSocket::getType() {

@@ -22,7 +22,7 @@ private :
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
     void runMulticastSender(Message *);
-	void setAddress(long);
+	void setAddress(unsigned short);
 	INTERFACES getType();
 
 	static std::vector<Device>deviceList;

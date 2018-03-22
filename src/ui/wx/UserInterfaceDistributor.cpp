@@ -44,6 +44,8 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
+    Util::cleanup();
+
     for (uint32_t i = 0; i < Connector::getCount(); i++) {
         distCollInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
         nodeInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
