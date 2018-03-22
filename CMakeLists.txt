@@ -72,19 +72,28 @@ set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
 )
 
+set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
+set(JSON-C_LIBRARIES json-c)
+
+set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
+set(OPENSSL_CRYPTO_LIBRARY crypto)
+
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
 
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-if (DEFINED USE_UI)
-add_executable(bankor-wx ${WX_FILES})
-target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS})
-target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
-target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
-target_link_libraries(bankor-wx bankor-framework
-        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
+if (NOT DEFINED CONSOLE)
+
+    find_package(wxWidgets)
+
+    add_executable(bankor-wx ${WX_FILES})
+    target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS})
+    target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
+    target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
+    target_link_libraries(bankor-wx bankor-framework
+            ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 endif()
 
 add_executable(bankor-console ${CONSOLE_FILES})
