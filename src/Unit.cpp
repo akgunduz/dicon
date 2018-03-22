@@ -22,7 +22,7 @@ Unit::Unit(COMPONENT component, ARCH arch) {
 Unit::Unit(COMPONENT component) {
 
     this->type = component;
-    this->arch = Util::getArch();
+    this->arch = ArchTypes::getNative();
 }
 
 COMPONENT Unit::getType() {

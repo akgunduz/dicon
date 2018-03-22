@@ -6,11 +6,10 @@
 #define BANKOR_ARCHTYPES_H
 
 enum ARCH {
-    ARCH_OSX_X86,
-    ARCH_WIN_X86,
-    ARCH_LNX_X86,
-    ARCH_LNX_ARM11,
-    ARCH_LNX_CORTEX,
+    ARCH_MACOS_X86_64,
+    ARCH_WINDOWS_X86_64,
+    ARCH_LINUX_X86_64,
+    ARCH_LINUX_ARM_32,
     ARCH_MAX,
 };
 
@@ -19,6 +18,7 @@ class ArchTypes {
 public:
     static const char* getDir(ARCH id);
     static short getMax();
+    static ARCH getNative();
 };
 
 

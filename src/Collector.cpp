@@ -6,7 +6,7 @@
 #include "Collector.h"
 
 Collector::Collector(const char *rootPath) :
-        Component(Unit(COMP_COLLECTOR, Util::getArch()), rootPath){
+        Component(Unit(COMP_COLLECTOR), rootPath){
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_NODE));
 

@@ -61,18 +61,6 @@ void Util::mkPath(const char *path) {
     mkdir(tmp, S_IRWXU);
 }
 
-ARCH Util::getArch() {
-#if defined(APPLE)
-	return ARCH_OSX_X86;
-#elif defined(__linux__)
-    return ARCH_LNX_X86;
-#elif defined(CORTEX)
-    return ARCH_CORTEX;
-#elif defined(ARM11)
-    return ARCH_A11;
-#endif
-}
-
 std::vector<std::string> Util::getFileList(const char *path, const char* filter) {
 
     std::string file;

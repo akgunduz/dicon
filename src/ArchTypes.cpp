@@ -5,11 +5,10 @@
 #include "ArchTypes.h"
 
 const char* sArchTypes[] = {
-        "osx-x86",
-        "win-x86",
-        "lnx-x86",
-        "lnx-arm11",
-        "lnx-cortex",
+        "osx-x86-64",
+        "win-x86-64",
+        "lnx-x86-64",
+        "lnx-arm-32",
 };
 
 const char *ArchTypes::getDir(ARCH arch) {
@@ -18,4 +17,19 @@ const char *ArchTypes::getDir(ARCH arch) {
 
 short ArchTypes::getMax() {
     return ARCH_MAX;
+}
+
+ARCH ArchTypes::getNative() {
+
+#if defined(__arm__) && defined(__ARM_32BIT_STATE) && defined(__linux__)
+    return ARCH_LINUX_ARM_32;
+#elif defined(__APPLE__)
+    return ARCH_MACOS_X86_64;
+#elif defined(_WIN64)
+    return ARCH_WINDOWS_X86_64;
+#elif defined(__x86_64__) && defined(__linux__)
+    return ARCH_LINUX_X86_64;
+#else
+    #error "Platform is not Supported!!!";
+#endif
 }

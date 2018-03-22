@@ -4,8 +4,6 @@
 
 #include "Address.h"
 #include "NetAddress.h"
-#include "UnixSocketAddress.h"
-#include "PipeAddress.h"
 
 INTERFACES Address::getInterface(long address) {
 

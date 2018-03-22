@@ -7,7 +7,7 @@
 #include "ArchTypes.h"
 
 Distributor::Distributor(const char *rootPath, double backupRate) :
-            Component(Unit(COMP_DISTRIBUTOR, Util::getArch()), rootPath){
+            Component(Unit(COMP_DISTRIBUTOR), rootPath){
 
 	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
 
