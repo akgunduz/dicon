@@ -1,30 +1,12 @@
-cmake_minimum_required(VERSION 3.11)
-
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if (DEFINED ARM)
-        set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-linux-arm.cmake")
-    elseif(APPLE)
-        set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-apple-x86.cmake")
-    elseif(UNIX)
-        #set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-linux-x86.cmake")
-    elseif(WIN32)
-        set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain-windows-x86.cmake")
-    else()
-        message(FATAL_ERROR "Your platform does not supported!!!")
-    endif()
-endif()
-
-set(TARGET_SUFFIX lnx)
+cmake_minimum_required(VERSION 3.9)
 
 project(Bankor)
-
-set(SOURCE_PATH "src")
 
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Debug/")
+set(SOURCE_PATH "src")
 
 set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ArchTypes.cpp
@@ -90,28 +72,23 @@ set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
 )
 
-find_package(PkgConfig)
-pkg_check_modules(JSON-C REQUIRED QUIET json-c)
-find_package(OpenSSL)
-find_package(wxWidgets)
-
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
 
-add_library(bankor-framework-${TARGET_SUFFIX} ${FRAMEWORK_FILES})
-target_include_directories(bankor-framework-${TARGET_SUFFIX} PUBLIC ${OPENSSL_INCLUDE_DIR})
+add_library(bankor-framework ${FRAMEWORK_FILES})
+target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-add_executable(bankor-wx-${TARGET_SUFFIX} ${WX_FILES})
-target_compile_definitions(bankor-wx-${TARGET_SUFFIX} PUBLIC ${wxWidgets_DEFINITIONS})
-target_include_directories(bankor-wx-${TARGET_SUFFIX} PUBLIC ${wxWidgets_INCLUDE_DIRS})
-target_compile_options(bankor-wx-${TARGET_SUFFIX} PUBLIC ${wxWidgets_CXX_FLAGS})
-
-target_link_libraries(bankor-wx-${TARGET_SUFFIX} bankor-framework-${TARGET_SUFFIX}
+if (DEFINED USE_UI)
+add_executable(bankor-wx ${WX_FILES})
+target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS})
+target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
+target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
+target_link_libraries(bankor-wx bankor-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
+endif()
 
-add_executable(bankor-console-${TARGET_SUFFIX} ${CONSOLE_FILES})
-
-target_link_libraries(bankor-console-${TARGET_SUFFIX} bankor-framework-${TARGET_SUFFIX}
+add_executable(bankor-console ${CONSOLE_FILES})
+target_link_libraries(bankor-console bankor-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
 
