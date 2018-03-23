@@ -46,7 +46,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/Address.cpp
         ${SOURCE_PATH}/NetAddress.cpp
-        ${SOURCE_PATH}/PipeAddress.cpp
         ${SOURCE_PATH}/UnixSocketAddress.cpp
         ${SOURCE_PATH}/Job.cpp
         ${SOURCE_PATH}/MessageItem.cpp
