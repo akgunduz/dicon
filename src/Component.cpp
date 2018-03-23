@@ -73,14 +73,15 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    if (connectors[msg->getOwner().getType()] == nullptr ||
-            connectors[msg->getOwner().getType()]->getInterfaceType() != Address::getInterface(address)) {
-        LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
+    if (connectors[msg->getHeader()->getOwner().getType()] == nullptr ||
+            connectors[msg->getHeader()->getOwner().getType()]->getInterfaceType() != Address::getInterface(address)) {
+        LOG_W("%s: Wrong message received : %d from %s, disgarding", getHost().getTypeName(),
+              msg->getHeader()->getType(), Address::getString(address).c_str());
         delete msg;
         return false;
     }
 
-    switch(msg->getOwner().getType()) {
+    switch(msg->getHeader()->getOwner().getType()) {
 
         case COMP_DISTRIBUTOR:
             return processDistributorMsg(address, msg);
@@ -92,7 +93,8 @@ bool Component::onReceive(long address, Message *msg) {
             return processCollectorMsg(address, msg);
 
         default:
-            LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
+            LOG_W("Wrong message received : %d from %s, disgarding",
+                  msg->getHeader()->getType(), Address::getString(address).c_str());
             delete msg;
             return false;
     }

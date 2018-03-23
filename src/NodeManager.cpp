@@ -5,7 +5,9 @@
 
 #include "NodeManager.h"
 
-NodeManager::NodeManager(Component* component, fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) {
+NodeManager::NodeManager(Component* component,
+						 fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) :
+		backupRate(0), readyBackup(0), totalBackup(0) {
 
     this->component = component;
 	this->timeoutCB = timeoutCB;

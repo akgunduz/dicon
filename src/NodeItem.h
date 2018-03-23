@@ -15,7 +15,7 @@ class NodeItem {
 
 public:
 
-    NodeStates state = IDLE;
+    NodeStates state;
     int usage;
     long address;
     long lastServedCollector;

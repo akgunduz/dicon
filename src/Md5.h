@@ -9,7 +9,7 @@
 #include "Util.h"
 #include "ContentItem.h"
 
-constexpr static uint8_t emptyData[MD5_DIGEST_LENGTH] = {
+const static uint8_t emptyData[MD5_DIGEST_LENGTH] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 

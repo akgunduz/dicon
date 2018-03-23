@@ -7,6 +7,12 @@
 
 char Unit::rootPath[COMP_MAX][PATH_MAX];
 
+const char* unitTypeNames[COMP_MAX] = {
+        "Distributor",
+        "Collector",
+        "Node",
+};
+
 Unit::Unit(int data) {
 
     this->type = (COMPONENT) (data >> 16);
@@ -28,6 +34,11 @@ Unit::Unit(COMPONENT component) {
 COMPONENT Unit::getType() {
 
     return type;
+}
+
+const char *Unit::getTypeName() {
+
+    return unitTypeNames[type];
 }
 
 ARCH Unit::getArch() {
@@ -55,5 +66,6 @@ const char* Unit::getRootPath(COMPONENT component) {
 void Unit::setRootPath(COMPONENT component, const char *path) {
     strcpy(rootPath[component], path);
 }
+
 
 

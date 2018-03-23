@@ -24,16 +24,16 @@ class Argument {
 public:
 
 	Unit host;
-	int acceptSocket = 0;
+	int acceptSocket;
 	MessageItem *item;
 
 	Interface *_interface;
 
-	Argument(Interface *c, long address) : _interface(c){
+	Argument(Interface *c, long address) : _interface(c), acceptSocket(0){
 		item = new MessageItem(MESSAGE_RECEIVE, address);
 	}
 
-	Argument(Interface *c) : _interface(c){
+	Argument(Interface *c) : _interface(c), acceptSocket(0){
 		item = new MessageItem(MESSAGE_RECEIVE);
 	}
 };

@@ -25,7 +25,7 @@ bool Node::processDistributorMsg(long address, Message *msg) {
 
     bool status = false;
 
-    switch(msg->getType()) {
+    switch(msg->getHeader()->getType()) {
 
         case MSGTYPE_WAKEUP:
 
@@ -49,7 +49,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getType()) {
+	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_RULE:
 
@@ -112,21 +112,21 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"READY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 			break;
 
 		case MSGTYPE_ALIVE:
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"ALIVE\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 			break;
 
 		case MSGTYPE_BUSY:
 
 			LOG_U(UI_UPDATE_NODE_LOG,
 					"\"BUSY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 			break;
 
 		default:

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(Bankor)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 98)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
@@ -55,6 +55,8 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/NodeInfo.cpp
         ${SOURCE_PATH}/Jobs.cpp
         ${SOURCE_PATH}/JobInfo.cpp
+        ${SOURCE_PATH}/MessageHeader.cpp
+        ${SOURCE_PATH}/Block.cpp
         )
 
 set(WX_FILES
@@ -76,6 +78,8 @@ set(JSON-C_LIBRARIES json-c)
 
 set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
+
+#add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})

@@ -21,7 +21,7 @@ public:
         this->address = address;
         if (msg != nullptr) {
             this->msg = msg;
-            this->priority = msg->getPriority();
+            this->priority = msg->getHeader()->getPriority();
         }
     }
 };

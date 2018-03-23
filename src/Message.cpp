@@ -6,37 +6,26 @@
 #include "Message.h"
 
 Message::Message(Unit host)
-		: BaseMessage(sizeof(MessageHeader)) {
-
-    memset(&header, 0, sizeof(MessageHeader));
+		: BaseMessage(sizeof(MessageHeader)), header() {
 
     setHost(host);
     setStreamFlag(STREAM_NONE);
-    setPriority(MESSAGE_DEFAULT_PRIORITY);
+    getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 }
 
 Message::Message(Unit owner, int type)
-		: BaseMessage(sizeof(MessageHeader)) {
+		: BaseMessage(sizeof(MessageHeader)), header() {
 
-    memset(&header, 0, sizeof(MessageHeader));
-
-    header.time = 0;
-    header.deviceID = 0;
-    header.messageID = 0;//new Random(time).nextLong();
-    header.type = type;
+    getHeader()->setType(type);
+    getHeader()->setOwner(owner);
 
     setHost(owner);
-    setOwner(owner);
     setStreamFlag(STREAM_NONE);
-    setPriority(MESSAGE_DEFAULT_PRIORITY);
+    getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 }
 
 void Message::setStreamFlag(int flag) {
     streamFlag = flag;
-}
-
-int Message::getType() {
-    return header.type;
 }
 
 Unit Message::getHost() {
@@ -47,95 +36,11 @@ void Message::setHost(Unit host) {
     this->host = host;
 }
 
-Unit Message::getOwner() {
-    return Unit(header.owner);
-}
-
-void Message::setOwner(Unit owner) {
-    header.owner = owner.getUnit();
-}
-
-long Message::getOwnerAddress() {
-    return header.ownerAddress;
-}
-
-void Message::setOwnerAddress(long address) {
-    header.ownerAddress = address;
-}
-
-long Message::getTime() {
-    return header.time;
-}
-
-long Message::getDeviceID() {
-    return header.deviceID;
-}
-
-long Message::getMessageID() {
-    return header.messageID;
-}
-
-long Message::getVariant(int id) {
-
-    if (id < MAX_VARIANT) {
-        return header.variant[id];
-    }
-
-    return 0;
-}
-
-void Message::setVariant(int id, long variant) {
-
-    if (id >= MAX_VARIANT) {
-        return;
-    }
-
-    header.variant[id] = variant;
-}
-
-int Message::getPriority() {
-    return header.priority;
-}
-
-int Message::iteratePriority() {
-
-    if (header.priority > 1) {
-        header.priority--;
-    }
-
-    return header.priority;
-}
-
-void Message::setPriority(int priority) {
-    header.priority = priority;
-}
-
-void Message::normalizePriority() {
-    header.priority *= PRIORITY_COEFFICIENT;
-}
-
 void Message::setJob(int streamFlag, FileList *fileList) {
 
     setStreamFlag(streamFlag);
 
     this->fileList = fileList;
-}
-
-bool Message::parseHeader(const uint8_t* buffer) {
-
-    header.type = ntohl(*((int *) buffer)); buffer += 4;
-    header.priority = ntohl(*((int *) buffer)); buffer += 4;
-    header.owner = ntohl(*((int *) buffer)); buffer += 4;
-    header.ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
-    header.time = ntohll(*((long *) buffer)); buffer += 8;
-    header.deviceID = ntohll(*((long *) buffer)); buffer += 8;
-    header.messageID = ntohll(*((long *) buffer)); buffer += 8;
-
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        header.variant[i] = ntohll(*((long *) buffer)); buffer += 8;
-    }
-
-    return true;
 }
 
 bool Message::readMD5(int desc, Md5* md5) {
@@ -148,21 +53,21 @@ bool Message::readMD5(int desc, Md5* md5) {
 	return true;
 }
 
-bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
+bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
 
-	if (header->blockType != BLOCK_FILE_BINARY) {
+	if (header->getType() != BLOCK_FILE_BINARY) {
 		LOG_E("readFileBinary can not read other blocks");
 		return false;
 	}
 
     char jobDir[MAX_JOB_DIR_LENGTH];
-    if (!readString(desc, jobDir, header->sizes[0])) {
+    if (!readString(desc, jobDir, header->getSize(0))) {
         LOG_E("readFileBinary can not read path data");
         return false;
     }
 
 	char fileName[MAX_FILE_NAME_LENGTH];
-	if (!readString(desc, fileName, header->sizes[1])) {
+	if (!readString(desc, fileName, header->getSize(1))) {
 		LOG_E("readFileBinary can not read path data");
 		return false;
 	}
@@ -173,12 +78,12 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
         return false;
     }
 
-    content->setFile(getOwner(), jobDir, fileName, (FILETYPE)fileType);
+    content->setFile(getHeader()->getOwner(), jobDir, fileName, (FILETYPE)fileType);
 
     std::string absPath = Util::absPath(getHost(), content->getRefPath());
 
     Md5 calcMD5;
-	if (!readBinary(desc, absPath.c_str(), &calcMD5, header->sizes[2])) {
+	if (!readBinary(desc, absPath.c_str(), &calcMD5, header->getSize(2))) {
 		LOG_E("readFileBinary can not read Binary data");
 		return false;
 	}
@@ -199,9 +104,9 @@ bool Message::readFileBinary(int desc, FileItem *content, BlockHeader *header) {
 	return true;
 }
 
-bool Message::readFileMD5(int desc, Md5 *content, BlockHeader* header) {
+bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 
-	if (header->sizes[0] != MD5_DIGEST_LENGTH) {
+	if (header->getSize(0) != MD5_DIGEST_LENGTH) {
 		LOG_E("Md5 size must be %d long", MD5_DIGEST_LENGTH);
 		return false;
 	}
@@ -214,9 +119,9 @@ bool Message::readFileMD5(int desc, Md5 *content, BlockHeader* header) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, char *jobDir, BlockHeader *header) {
+bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
 
-    if (!readString(desc, jobDir, header->sizes[0])) {
+    if (!readString(desc, jobDir, header->getSize(0))) {
         LOG_E("readFileBinary can not read path data");
         return false;
     }
@@ -225,15 +130,15 @@ bool Message::readJobInfo(int desc, char *jobDir, BlockHeader *header) {
 }
 
 
-bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
+bool Message::readMessageBlock(int in, Block *header) {
 
-    switch(blockHeader->blockType) {
+    switch(header->getType()) {
 
         case BLOCK_FILE_BINARY: {
 
             FileItem *fileItem = new FileItem(getHost());
 
-            if (!readFileBinary(in, fileItem, blockHeader)) {
+            if (!readFileBinary(in, fileItem, header)) {
                 return false;
             }
 
@@ -246,7 +151,7 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
         case BLOCK_FILE_MD5: {
 
             Md5 md5;
-            if (!readFileMD5(in, &md5, blockHeader)) {
+            if (!readFileMD5(in, &md5, header)) {
                 return false;
             }
 
@@ -256,7 +161,7 @@ bool Message::readMessageBlock(int in, BlockHeader *blockHeader) {
 
         case BLOCK_JOB_INFO:
 
-            if (!readJobInfo(in, jobDir, blockHeader)) {
+            if (!readJobInfo(in, jobDir, header)) {
                 return false;
             }
 
@@ -274,23 +179,6 @@ bool Message::readFinalize() {
     return true;
 }
 
-bool Message::prepareHeader(uint8_t *buffer) {
-
-    *((int *) buffer) = htonl(header.type); buffer += 4;
-    *((int *) buffer) = htonl(header.priority); buffer += 4;
-    *((int *) buffer) = htonl(header.owner); buffer += 4;
-    *((long *) buffer) = htonll(header.ownerAddress); buffer += 8;
-    *((long *) buffer) = htonll(header.time); buffer += 8;
-    *((long *) buffer) = htonll(header.deviceID); buffer += 8;
-    *((long *) buffer) = htonll(header.messageID); buffer += 8;
-
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        *((long *) buffer) = htonll(header.variant[i]); buffer += 8;
-    }
-
-    return true;
-}
-
 bool Message::writeMD5(int desc, Md5* md5) {
 
 	if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
@@ -303,13 +191,13 @@ bool Message::writeMD5(int desc, Md5* md5) {
 
 bool Message::writeFileBinary(int desc, FileItem *content) {
 
-	BlockHeader blockHeader = {3, BLOCK_FILE_BINARY};
+	Block blockHeader(3, BLOCK_FILE_BINARY);
 
     std::string absPath = Util::absPath(getHost(), content->getRefPath());
 
-    blockHeader.sizes[0] = (uint32_t)strlen(content->getJobDir());
-    blockHeader.sizes[1] = (uint32_t)strlen(content->getFileName());
-    blockHeader.sizes[2] = getBinarySize(absPath.c_str());
+    blockHeader.setSize(0, (uint32_t)strlen(content->getJobDir()));
+    blockHeader.setSize(1, (uint32_t)strlen(content->getFileName()));
+    blockHeader.setSize(2, getBinarySize(absPath.c_str()));
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
@@ -328,7 +216,7 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
     }
 
 	Md5 calcMD5;
-	if (!writeBinary(desc, absPath.c_str(), &calcMD5, blockHeader.sizes[2])) {
+	if (!writeBinary(desc, absPath.c_str(), &calcMD5, blockHeader.getSize(2))) {
 		LOG_E("writeFileBinary can not write Binary data");
 		return false;
 	}
@@ -346,9 +234,9 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
 
 bool Message::writeFileMD5(int desc, FileItem *content) {
 
-    BlockHeader blockHeader = {1, BLOCK_FILE_MD5};
+    Block blockHeader(1, BLOCK_FILE_MD5);
 
-    blockHeader.sizes[0] = MD5_DIGEST_LENGTH;
+    blockHeader.setSize(0, MD5_DIGEST_LENGTH);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         return false;
@@ -359,9 +247,9 @@ bool Message::writeFileMD5(int desc, FileItem *content) {
 
 bool Message::writeJobInfo(int desc, const char *jobDir) {
 
-    BlockHeader blockHeader = {1, BLOCK_JOB_INFO};
+    Block blockHeader(1, BLOCK_JOB_INFO);
 
-    blockHeader.sizes[0] = (int) strlen(jobDir);
+    blockHeader.setSize(0, (int) strlen(jobDir));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         return false;
@@ -417,4 +305,16 @@ bool Message::writeFinalize() {
 
 const char *Message::getJobDir() {
     return jobDir;
+}
+
+MessageHeader *Message::getHeader() {
+    return &header;
+}
+
+bool Message::setHeader(const uint8_t *buffer) {
+    return getHeader()->set(buffer);
+}
+
+bool Message::extractHeader(uint8_t *buffer) {
+    return getHeader()->extract(buffer);
 }

@@ -8,47 +8,15 @@
 #define __BaseMessage_H_
 
 #include "Md5.h"
+#include "Block.h"
 
 #define BUFFER_SIZE 512
 
 #define SIGNATURE 0x55AA
 
-#define BLOCK_END_STREAM 0xFFFF
-
-#define BLOCK_HEADER_SIZE 8
-
 #define TMP_BUFFER_SIZE 1000
 
 #define BUSY_SLEEP_TIME 200000
-
-class BlockHeader {
-
-public :
-    int blockType;
-    int blockCount;
-    int *sizes;
-
-    BlockHeader() {
-
-    }
-
-    BlockHeader(int blockCount, int blockType = BLOCK_END_STREAM) {
-
-        this->blockCount = blockCount;
-        this->blockType = blockType;
-        if (blockCount > 0) {
-            sizes = new int[blockCount];
-        }
-    }
-
-    ~BlockHeader() {
-
-        if (blockCount > 0) {
-            delete[] sizes;
-        }
-    }
-
-};
 
 class BaseMessage {
 
@@ -77,20 +45,20 @@ public:
 
 	bool readSignature(int);
 	bool readHeader(int);
-	bool readBlockHeader(int, BlockHeader *);
+	bool readBlockHeader(int, Block*);
 	bool readString(int, char*, int);
 	bool readNumber(int, long*);
 
 	bool readFromStream(int);
 
-    virtual bool readMessageBlock(int in, BlockHeader *) = 0;
+    virtual bool readMessageBlock(int in, Block*) = 0;
     virtual bool readFinalize() = 0;
 
 	bool writeBlock(int, const uint8_t *, int);
 
 	bool writeSignature(int);
 	bool writeHeader(int);
-	bool writeBlockHeader(int, struct BlockHeader *);
+	bool writeBlockHeader(int, struct Block*);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
 	bool writeBinary(int, const char*, Md5 *, int);
@@ -102,8 +70,8 @@ public:
     virtual bool writeMessageStream(int out) = 0;
     virtual bool writeFinalize() = 0;
 
-    virtual bool parseHeader(const uint8_t*) = 0;
-    virtual bool prepareHeader(uint8_t *) = 0;
+    virtual bool setHeader(const uint8_t*) = 0;
+    virtual bool extractHeader(uint8_t *) = 0;
 };
 
 #endif //__Message_H_

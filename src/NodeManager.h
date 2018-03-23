@@ -31,9 +31,9 @@ private:
     fTimeoutCB timeoutCB;
     fWakeupCB wakeupCB;
 
-    double backupRate = 0;
-	int readyBackup = 0;
-	int totalBackup = 0;
+    double backupRate;
+	int readyBackup;
+	int totalBackup;
 
     NodeWatchdog *nodeWatchdog = nullptr;
 

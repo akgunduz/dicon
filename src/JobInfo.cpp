@@ -15,7 +15,7 @@ bool JobInfo::add(Job *job, NodeInfo node) {
 
 bool JobInfo::remove(Job *job) {
 
-    auto search = nodes_job.find(job);
+    std::map<const Job*, NodeInfo>::iterator search = nodes_job.find(job);
     if (search == nodes_job.end()) {
         return false;
     }
@@ -26,7 +26,7 @@ bool JobInfo::remove(Job *job) {
 
 bool JobInfo::remove(NodeInfo node) {
 
-    auto search = nodes_address.find(node);
+    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return false;
     }
@@ -37,7 +37,7 @@ bool JobInfo::remove(NodeInfo node) {
 
 Job *JobInfo::get(NodeInfo node) {
 
-    auto search = nodes_address.find(node);
+    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return NULL;
     }
@@ -48,7 +48,7 @@ Job *JobInfo::get(NodeInfo node) {
 Job *JobInfo::get(long address) {
 
     NodeInfo node = NodeInfo(address, ARCH_MAX);
-    auto search = nodes_address.find(node);
+    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return NULL;
     }
@@ -59,7 +59,7 @@ Job *JobInfo::get(long address) {
 
 NodeInfo JobInfo::get(Job *job) {
 
-    auto search = nodes_job.find(job);
+    std::map<const Job*, NodeInfo>::iterator search = nodes_job.find(job);
     if (search == nodes_job.end()) {
         return NodeInfo();
     }

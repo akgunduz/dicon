@@ -10,11 +10,11 @@
 
 class Component {
 
+    Unit host;
+
 protected :
 
     InterfaceCallback *callback;
-
-    Unit host;
 
     void setHost(Unit);
 

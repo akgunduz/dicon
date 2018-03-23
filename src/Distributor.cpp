@@ -27,7 +27,7 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getType()) {
+	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
@@ -62,14 +62,14 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getType()) {
+	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_READY:
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"READY\" msg from node: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 
-			nodeManager->setIdle(address, msg->getOwner().getArch(), collStartTime.stop());
+			nodeManager->setIdle(address, msg->getHeader()->getOwner().getArch(), collStartTime.stop());
 
 			if (collectorWaitingList.size() > 0) {
 
@@ -93,9 +93,9 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"\"ALIVE\" msg from node: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getOwner().getArch()));
+                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 
-			if (!nodeManager->validate(address, msg->getOwner().getArch())
+			if (!nodeManager->validate(address, msg->getHeader()->getOwner().getArch())
 					&& collectorWaitingList.size() > 0) {
 
                 long collectorAddress = collectorWaitingList.front();
@@ -131,7 +131,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 			nodeManager->remove(address);
 			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
 
-			status = send2CollectorMsg(msg->getVariant(0), MSGTYPE_NODE);
+			status = send2CollectorMsg(msg->getHeader()->getVariant(0), MSGTYPE_NODE);
 
 			break;
 
@@ -187,8 +187,8 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 						  Address::getString(address).c_str(),
 						  Address::getString(node->address).c_str());
 
-                    msg->setVariant(0, node->address);
-                    msg->setVariant(1, node->id);
+                    msg->getHeader()->setVariant(0, node->address);
+                    msg->getHeader()->setVariant(1, node->id);
 
                     LOG_U(UI_UPDATE_DIST_COLL_LIST, address, node->address);
 
@@ -199,7 +199,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 							"\"NODE\" msg sent to collector: %s with no available node",
 						  Address::getString(address).c_str());
 
-                    msg->setVariant(0, 0);
+                    msg->getHeader()->setVariant(0, 0);
 
                     LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
 				}
@@ -223,7 +223,7 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
         Message *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
         connector->send(msg);
 
-        LOG_U(UI_UPDATE_LOG,
+        LOG_U(UI_UPDATE_DIST_LOG,
               "\"WAKEUP\" message sent as multicast");
 
     } else {
@@ -269,7 +269,7 @@ bool Distributor::reset() {
 bool Distributor::onTimeOut(Component *component, NodeItem *node) {
 
 	Message *msg = new Message(COMP_NODE, MSGTYPE_TIMEOUT);
-	msg->setVariant(0, node->lastServedCollector);
+	msg->getHeader()->setVariant(0, node->lastServedCollector);
     component->connectors[COMP_NODE]->put(node->address, msg);
 
 	return true;

@@ -9,12 +9,15 @@
 
 class StopWatch {
 
-    bool initiated = false;
+    bool initiated;
     double tStart;
     double tStop;
 
 public:
 
+    StopWatch(){
+        initiated = false;
+    };
     void start();
     double stop();
     void reset();

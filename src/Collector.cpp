@@ -25,7 +25,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getType()) {
+	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_WAKEUP:
 
@@ -41,7 +41,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 		case MSGTYPE_NODE: {
 
-            NodeInfo node(msg->getVariant(0), (ARCH) msg->getVariant(1));
+            NodeInfo node(msg->getHeader()->getVariant(0), (ARCH) msg->getHeader()->getVariant(1));
 
 			if (node.getAddress() == 0) {
 				LOG_W("No available node right now.");
@@ -89,7 +89,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getType()) {
+	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_MD5: {
 
@@ -97,7 +97,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 					"\"MD5\" msg from node: %s with \"%d\" MD5 info",
 				  Address::getString(address).c_str(), msg->md5List.size());
 
-            NodeInfo node(address, msg->getOwner().getArch());
+            NodeInfo node(address, msg->getHeader()->getOwner().getArch());
 
             Job* job = getJobs()->getJobByNode(node);
             if (job == NULL) {

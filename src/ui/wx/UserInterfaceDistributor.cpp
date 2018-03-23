@@ -43,7 +43,6 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &UserInterface::distAddtoNodeList;
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
-
 }
 
 /*

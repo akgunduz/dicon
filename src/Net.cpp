@@ -184,7 +184,7 @@ void Net::runReceiver(Unit host) {
             Message *msg = new Message(host);
             msg->setMulticastAddress(0xFFFF);
             if (msg->readFromStream(multicastSocket)) {
-                push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+                push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
             }
 
         }
@@ -210,7 +210,7 @@ void *Net::runAccepter(void *arg) {
 
 	Message *msg = new Message(argument->host);
 	if (msg->readFromStream(argument->acceptSocket)) {
-		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+		argument->_interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
 	}
 
 	delete argument;
@@ -237,7 +237,7 @@ void Net::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->setOwnerAddress(address);
+	msg->getHeader()->setOwnerAddress(address);
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
@@ -255,7 +255,7 @@ void Net::runMulticastSender(Message *msg) {
     struct in_addr interface_addr = NetAddress::getInetAddress(address).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    msg->setOwnerAddress(address);
+    msg->getHeader()->setOwnerAddress(address);
     msg->setMulticastAddress(multicastAddress);
     msg->writeToStream(clientSocket);
 

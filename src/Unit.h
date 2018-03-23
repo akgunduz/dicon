@@ -22,6 +22,7 @@ public:
     Unit(COMPONENT, ARCH);
     Unit(const Unit&);
     COMPONENT getType();
+    const char* getTypeName();
     ARCH getArch();
     int getUnit();
 

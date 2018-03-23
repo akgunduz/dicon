@@ -157,10 +157,10 @@ bool BaseMessage::readHeader(int in) {
 		return false;
 	}
 
-	return parseHeader(tmpBuf);
+	return setHeader(tmpBuf);
 }
 
-bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
+bool BaseMessage::readBlockHeader(int in, Block *header) {
 
 	if (!readBlock(in, tmpBuf, BLOCK_HEADER_SIZE)) {
 		LOG_E("Can not read block header from stream");
@@ -168,21 +168,19 @@ bool BaseMessage::readBlockHeader(int in, BlockHeader *header) {
 	}
 
 	uint8_t *p = tmpBuf;
-	header->blockType = ntohl(*((int *) p)); p += 4;
-	header->blockCount = ntohl(*((int *) p)); p += 4;
+    header->setType(ntohl(*((int *) p))); p += 4;
+    header->setCount(ntohl(*((int *) p)));p += 4;
 
-    if (header->blockCount > 0) {
+    if (header->getCount() > 0) {
 
-        header->sizes = new int[header->blockCount];
-
-        if (!readBlock(in, tmpBuf, header->blockCount * 4)) {
+        if (!readBlock(in, tmpBuf, header->getCount() * 4)) {
             LOG_E("Can not read block header from stream");
             return false;
         }
 
         p = tmpBuf;
-        for (int i = 0; i < header->blockCount; i++) {
-            header->sizes[i] = ntohl(*((int *) p)); p += 4;
+        for (int i = 0; i < header->getCount(); i++) {
+            header->setSize(i, ntohl(*((int *) p))); p += 4;
         }
     }
 
@@ -258,18 +256,18 @@ bool BaseMessage::readFromStream(int in) {
 		return false;
 	}
 
-	struct BlockHeader blockHeader;
+	Block header;
 
     do {
 
-        if (!readBlockHeader(in, &blockHeader)) {
+        if (!readBlockHeader(in, &header)) {
             return false;
         }
 
-        if (blockHeader.blockType == BLOCK_END_STREAM) {
+        if (header.isEnd()) {
             return readFinalize();
 
-        } else if (!readMessageBlock(in, &blockHeader)) {
+        } else if (!readMessageBlock(in, &header)) {
             return false;
         }
 
@@ -351,7 +349,7 @@ bool BaseMessage::writeSignature(int out) {
 
 bool BaseMessage::writeHeader(int out) {
 
-    if (!prepareHeader(tmpBuf)) {
+    if (!extractHeader(tmpBuf)) {
         LOG_E("Can not prepare header");
         return false;
     }
@@ -364,16 +362,16 @@ bool BaseMessage::writeHeader(int out) {
 	return true;
 }
 
-bool BaseMessage::writeBlockHeader(int out, BlockHeader *header) {
+bool BaseMessage::writeBlockHeader(int out, Block *header) {
 
     uint8_t *p = tmpBuf;
-    *((int *) p) = htonl(header->blockType); p += 4;
-    *((int *) p) = htonl(header->blockCount); p += 4;
-    for (int i = 0; i < header->blockCount; i++) {
-        *((int *) p) = htonl(header->sizes[i]); p += 4;
+    *((int *) p) = htonl(header->getType()); p += 4;
+    *((int *) p) = htonl(header->getCount()); p += 4;
+    for (int i = 0; i < header->getCount(); i++) {
+        *((int *) p) = htonl(header->getSize(i)); p += 4;
     }
 
-    if (!writeBlock(out, tmpBuf, BLOCK_HEADER_SIZE + header->blockCount * 4)) {
+    if (!writeBlock(out, tmpBuf, BLOCK_HEADER_SIZE + header->getCount() * 4)) {
         LOG_E("Can not write block header to stream");
         return false;
     }
@@ -418,9 +416,9 @@ bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 
 bool BaseMessage::writeEndStream(int out) {
 
-	BlockHeader blockHeader = {0};
+	Block block(0);
 
-	return writeBlockHeader(out, &blockHeader);
+	return writeBlockHeader(out, &block);
 }
 
 bool BaseMessage::writeToStream(int out) {

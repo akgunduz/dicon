@@ -7,6 +7,7 @@
 
 Scheduler::Scheduler(bool ownThread) {
 
+    this->initialized = false;
     this->ownThread = ownThread;
 	this->capacity = MAX_SCHEDULER_CAPACITY;
 

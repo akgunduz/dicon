@@ -124,7 +124,12 @@ std::vector<std::string> Util::getDirList(const char *path, const char* filter) 
 
 
 bool Util::isMulticast() {
+
+#ifdef MULTICAST_ENABLED
+    return true;
+#else
     return false;
+#endif
 }
 
 std::string Util::mixPath(const char *path1, const char *path2) {

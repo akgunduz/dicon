@@ -9,6 +9,7 @@
 
 #include "BaseMessage.h"
 #include "Job.h"
+#include "MessageHeader.h"
 
 #define STREAM_NONE 0xFFFF
 
@@ -24,28 +25,9 @@
 #define BLOCK_FILE_MD5 0x02
 #define BLOCK_JOB_INFO 0x03
 
-#define MAX_VARIANT 2
-
-#define PRIORITY_COEFFICIENT 10
-
-#define MESSAGE_DEFAULT_PRIORITY 3
-
-//To get rid of Alignment problem stay in 64bit mod
-struct MessageHeader {
-
-	int type;
-	int priority;
-	int owner;
-	long ownerAddress;
-	long time;
-	long deviceID;
-	long messageID;
-	long variant[MAX_VARIANT];
-};
-
 class Message : public BaseMessage {
 
-	struct MessageHeader header;
+	MessageHeader header;
 
 	Unit host;
 
@@ -64,26 +46,10 @@ public:
 
 	void setStreamFlag(int);
 
-	int getType();
+	MessageHeader *getHeader();
 
 	Unit getHost();
 	void setHost(Unit);
-	Unit getOwner();
-	void setOwner(Unit);
-
-	long getOwnerAddress();
-	void setOwnerAddress(long);
-	long getVariant(int id);
-	void setVariant(int id, long variant);
-
-	long getTime();
-	long getDeviceID();
-	long getMessageID();
-
-	int getPriority();
-	void setPriority(int);
-	void normalizePriority();
-	int iteratePriority();
 
 	const char* getJobDir();
 
@@ -91,10 +57,10 @@ public:
 
 	bool readMD5(int, Md5*);
 
-	bool readJobInfo(int, char *, struct BlockHeader*);
-	bool readFileBinary(int, FileItem *, struct BlockHeader*);
-	bool readFileMD5(int, Md5*, struct BlockHeader*);
-	bool readMessageBlock(int in, BlockHeader *);
+	bool readJobInfo(int, char *, struct Block*);
+	bool readFileBinary(int, FileItem *, struct Block*);
+	bool readFileMD5(int, Md5*, struct Block*);
+	bool readMessageBlock(int in, Block*);
 
 	bool writeMD5(int, Md5*);
 
@@ -107,10 +73,8 @@ public:
 
     virtual bool writeFinalize();
 
-	bool parseHeader(const uint8_t*);
-	bool prepareHeader(uint8_t *);
+	bool setHeader(const uint8_t*);
+	bool extractHeader(uint8_t *);
 };
-
-//typedef bool (Message::*fWriteProcess)(int desc, FileItem *content);
 
 #endif //__Message_H_

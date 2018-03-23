@@ -147,7 +147,7 @@ void *UnixSocket::runAccepter(void *arg) {
 
 	Message *msg = new Message(argument->host);
 	if (msg->readFromStream(argument->acceptSocket)) {
-		argument->_interface->push(MESSAGE_RECEIVE, msg->getOwnerAddress(), msg);
+		argument->_interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
 	}
 
 	delete argument;
@@ -176,7 +176,7 @@ void UnixSocket::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->setOwnerAddress(address);
+	msg->getHeader()->setOwnerAddress(address);
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);

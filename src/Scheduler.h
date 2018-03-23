@@ -24,7 +24,7 @@ private:
 	std::list<SchedulerItem*> items;
 	std::map<int, const InterfaceCallback*> callbacks;
 	int capacity;
-	bool initialized = false;
+	bool initialized;
 	static void* run(void *);
 public:
 	Scheduler(bool seperateThread = true);
