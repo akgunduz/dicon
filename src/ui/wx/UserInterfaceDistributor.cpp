@@ -44,16 +44,6 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
     uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 
-    Util::cleanup();
-
-    for (uint32_t i = 0; i < Connector::getCount(); i++) {
-        distCollInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
-        nodeInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
-        if (Connector::getDevice(i)->isLoopback()) {
-            distCollInterface->SetSelection(i);
-            nodeInterface->SetSelection(i);
-        }
-    }
 }
 
 /*
@@ -75,8 +65,6 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
             double backupRate = 0;
             distBackupRate->GetLineText(0).ToDouble(&backupRate);
 
-            Connector::setSelectedDevices((unsigned char)distCollInterface->GetSelection(),
-                                          (unsigned char)nodeInterface->GetSelection());
             distObject = new Distributor(path, backupRate);
 
         } catch (std::runtime_error &e) {

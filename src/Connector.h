@@ -18,6 +18,7 @@ class Connector {
 
 	static std::vector<Device>deviceList;
     static Device *selectedDevices[2] ;
+	static bool devicesInitialized;
 
 public:
 	Connector(Unit, Device*, const InterfaceCallback *);

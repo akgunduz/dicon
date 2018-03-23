@@ -40,9 +40,6 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
             sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
             mkdir(path, 0777);
 
-            Connector::setSelectedDevices((unsigned char)distCollInterface->GetSelection(),
-                                          (unsigned char)nodeInterface->GetSelection());
-
             collObject = new Collector(path);
 
         } catch (std::runtime_error &e) {

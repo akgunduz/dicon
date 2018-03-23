@@ -9,6 +9,7 @@
 
 std::vector<Device> Connector::deviceList;
 Device* Connector::selectedDevices[2];
+bool Connector::devicesInitialized = false;
 
 Connector::Connector(const Unit component, Device* device, const InterfaceCallback *cb) {
 
@@ -105,8 +106,11 @@ Device* Connector::getDevice(int index) {
 
 void Connector::setSelectedDevices(int other, int node) {
 
-    selectedDevices[0] = getDevice(other);
-    selectedDevices[1] = getDevice(node);
+	if (!devicesInitialized) {
+		selectedDevices[0] = getDevice(other);
+		selectedDevices[1] = getDevice(node);
+		devicesInitialized = true;
+	}
 }
 
 Device* Connector::getSelectedDevice(unsigned char index) {
