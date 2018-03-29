@@ -55,8 +55,7 @@ bool UnixSocket::initUnixSocket() {
 			continue;
 		}
 
-		LOG_U(UI_UPDATE_LOG,
-			  "Using address : %s", Address::getString(address).c_str());
+		LOG_I("Using address : %s", Address::getString(address).c_str());
 
 		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
 			LOG_E("Socket listen with err : %d!!!", errno);

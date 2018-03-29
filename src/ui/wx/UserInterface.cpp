@@ -128,7 +128,7 @@ UserInterface::~UserInterface()
 
 void UserInterface::Init()
 {
-    Log::setLogLevel(LEVEL_WARN);
+    Log::setLogLevel(LEVEL_INFO);
     Log::set_ui_callback(this, updateUICallback);
 
     collJobList = NULL;

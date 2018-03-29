@@ -57,8 +57,7 @@ bool Net::initTCP() {
             continue;
         }
 
-        LOG_U(UI_UPDATE_LOG,
-              "Using address : %s", Address::getString(address).c_str());
+        LOG_I("Using address : %s", Address::getString(address).c_str());
 
         if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
             LOG_E("Socket listen with err : %d!!!", errno);
@@ -109,8 +108,7 @@ bool Net::initMulticast() {
         return false;
     }
 
-    LOG_U(UI_UPDATE_LOG,
-          "Using multicast address : %s", Address::getString(multicastAddress).c_str());
+    LOG_I("Using multicast address : %s", Address::getString(multicastAddress).c_str());
 
     ip_mreq imreq = NetAddress::getMulticastAddress(address);
 

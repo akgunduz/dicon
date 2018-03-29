@@ -11,7 +11,7 @@ std::vector<Device> Connector::deviceList;
 Device* Connector::selectedDevices[2];
 bool Connector::devicesInitialized = false;
 
-Interface *Connector::createInterface(const Unit component, Device *device, const InterfaceCallback *cb) {
+Interface* Connector::createInterface(const Unit component, Device *device, const InterfaceCallback *cb) {
 
     Interface *interface = NULL;
 
