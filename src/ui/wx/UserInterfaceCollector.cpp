@@ -48,11 +48,13 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
         }
 
         collLog->Clear();
+        collProcessBtn->Enable(true);
         collInitBtn->SetLabel("Stop");
 
     } else {
 
         delete collObject;
+        collProcessBtn->Enable(false);
         collInitBtn->SetLabel("Init");
         collDistDeviceAddress->SetLabel("");
         collNodeDeviceAddress->SetLabel("");

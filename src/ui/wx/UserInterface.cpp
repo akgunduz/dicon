@@ -383,9 +383,7 @@ void UserInterface::OnInterfaceInitClick( wxCommandEvent& event )
     distCollInterface->Enable(false);
     nodeInterface->Enable(false);
     distInitBtn->Enable(true);
-    distPollBtn->Enable(true);
     collInitBtn->Enable(true);
-    collProcessBtn->Enable(true);
     nodeInitBtn->Enable(true);
 }
 

@@ -73,12 +73,14 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
 
         distLog->Clear();
         distBackupRate->SetEditable(false);
+        distPollBtn->Enable(true);
         distInitBtn->SetLabel("Stop");
 
     } else {
 
         delete distObject;
         distBackupRate->SetEditable(true);
+        distPollBtn->Enable(false);
         distInitBtn->SetLabel("Init");
         distCollDeviceAddress->SetLabel("");
         distNodeDeviceAddress->SetLabel("");
