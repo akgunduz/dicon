@@ -93,7 +93,7 @@ bool Node::processNodeMsg(long address, Message *msg) {
 
 bool Node::send2DistributorMsg(long address, MSG_TYPE type) {
 
-	Message *msg = new Message(Unit(COMP_NODE), type);
+	Message *msg = new Message(COMP_NODE, type);
 
 	switch(type) {
 

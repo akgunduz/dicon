@@ -67,5 +67,15 @@ void Unit::setRootPath(COMPONENT component, const char *path) {
     strcpy(rootPath[component], path);
 }
 
+COMPONENT Unit::getNextType() {
+
+    return (COMPONENT)(((int)type + 1) % COMP_MAX);
+}
+
+COMPONENT Unit::getPrevType() {
+
+    return (COMPONENT)(((int)type + COMP_MAX - 1) % COMP_MAX);
+}
+
 
 
