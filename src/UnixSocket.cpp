@@ -18,7 +18,6 @@ UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
     if (!initThread()) {
 		throw std::runtime_error("initThread failed!!!");
     }
-
 }
 
 bool UnixSocket::initUnixSocket() {

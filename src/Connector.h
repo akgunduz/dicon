@@ -32,7 +32,7 @@ public:
     static void setSelectedDevices(int, int);
     static Device* getSelectedDevice(unsigned char);
 
-    static Interface* createInterface(const Unit component, Device* device, const InterfaceCallback *cb);
+    static Interface* createInterface(Unit component, Device* device, const InterfaceCallback *cb);
 };
 
 

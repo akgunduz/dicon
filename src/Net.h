@@ -29,7 +29,6 @@ private :
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
 	void setAddress(unsigned short);
-	INTERFACES getType();
 
 	static std::vector<Device>deviceList;
 
@@ -38,6 +37,7 @@ public :
 	Net(Unit, Device*, const InterfaceCallback *);
 	~Net();
 
+    INTERFACES getType();
 	bool isSupportMulticast();
 	std::vector<long> getAddressList();
 

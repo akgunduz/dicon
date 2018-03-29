@@ -85,10 +85,9 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    if (interfaces[msg->getHeader()->getOwner().getType()] == nullptr ||
-            interfaces[msg->getHeader()->getOwner().getType()]->getType() != Address::getInterface(address)) {
-        LOG_W("%s: Wrong message received : %s from %s, disgarding", getHost().getTypeName(),
-              MessageTypes::getName(msg->getHeader()->getType()), Address::getString(address).c_str());
+    if (msg->getHeader()->getOwner().getType() == getHost().getType()) {
+        LOG_W("%s: Loopback message %s received, ignoring ", getHost().getTypeName(),
+              MessageTypes::getName(msg->getHeader()->getType()));
         delete msg;
         return false;
     }

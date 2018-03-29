@@ -67,6 +67,7 @@ protected :
 	virtual void setAddress(unsigned short) = 0;
 
 public :
+    virtual ~Interface();
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	Device* getDevice();
@@ -76,7 +77,6 @@ public :
     virtual INTERFACES getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual std::vector<long> getAddressList() = 0;
-	virtual ~Interface();
 };
 
 

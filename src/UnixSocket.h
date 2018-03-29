@@ -24,7 +24,6 @@ private :
 	void runSender(long, Message *);
     void runMulticastSender(Message *);
 	void setAddress(unsigned short);
-	INTERFACES getType();
 
 	static std::vector<Device>deviceList;
 
@@ -33,6 +32,7 @@ public :
 	UnixSocket(Unit, Device*, const InterfaceCallback *);
 	~UnixSocket();
 
+    INTERFACES getType();
 	bool isSupportMulticast();
 	std::vector<long> getAddressList();
 
