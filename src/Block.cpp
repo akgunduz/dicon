@@ -44,6 +44,10 @@ int Block::getCount() {
 
 void Block::setCount(int count) {
 
+    if (count > 0) {
+        delete[] sizes;
+    }
+
     this->count = count;
     sizes = new int[count];
 }

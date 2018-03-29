@@ -13,7 +13,7 @@ Message::Message(Unit host)
     getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 }
 
-Message::Message(Unit owner, int type)
+Message::Message(Unit owner, MSG_TYPE type)
 		: BaseMessage(sizeof(MessageHeader)), header() {
 
     getHeader()->setType(type);

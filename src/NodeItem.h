@@ -15,7 +15,7 @@ class NodeItem {
 
 public:
 
-    NodeStates state;
+    NODE_STATES state;
     int usage;
     long address;
     long lastServedCollector;
@@ -23,7 +23,7 @@ public:
     StopWatch stopWatch;
     NodeWatchdog *watchdog;
 
-    NodeItem(NodeStates s, int u, long a, short i);
+    NodeItem(NODE_STATES s, int u, long a, short i);
     ~NodeItem();
 
 };

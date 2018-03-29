@@ -21,8 +21,8 @@ private:
     virtual bool processCollectorMsg(long, Message *);
     virtual bool processNodeMsg(long, Message *);
 
-    bool send2DistributorMsg(long, uint8_t);
-    bool send2CollectorMsg(long, uint8_t);
+    bool send2DistributorMsg(long, MSG_TYPE);
+    bool send2CollectorMsg(long, MSG_TYPE);
 
     void parseCommand(char *cmd, char **argv);
     bool processRule(Rule*);

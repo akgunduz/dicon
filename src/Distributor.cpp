@@ -4,7 +4,6 @@
 //
 
 #include "Distributor.h"
-#include "ArchTypes.h"
 
 Distributor::Distributor(const char *rootPath, double backupRate) :
             Component(Unit(COMP_DISTRIBUTOR), rootPath){
@@ -31,22 +30,15 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_ALIVE:
 			LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"ALIVE\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_NODE:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"NODE\" msg from collector: %s", Address::getString(address).c_str());
-
 			status = send2CollectorMsg(address, MSGTYPE_NODE);
 			break;
 
 		case MSGTYPE_TIME:
 			collStartTime.start();
 			nodeManager->resetTimes();
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"TIME\" msg from collector: %s", Address::getString(address).c_str());
 			break;
 
 		default:
@@ -65,9 +57,6 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 	switch(msg->getHeader()->getType()) {
 
 		case MSGTYPE_READY:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"READY\" msg from node: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 
 			nodeManager->setIdle(address, msg->getHeader()->getOwner().getArch(), collStartTime.stop());
 
@@ -91,9 +80,6 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 			break;
 
 		case MSGTYPE_ALIVE:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"ALIVE\" msg from node: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 
 			if (!nodeManager->validate(address, msg->getHeader()->getOwner().getArch())
 					&& collectorWaitingList.size() > 0) {
@@ -114,8 +100,6 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 			break;
 
 		case MSGTYPE_BUSY:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"BUSY\" msg from node: %s", Address::getString(address).c_str());
 
 			nodeManager->setBusy(address);
 			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
@@ -125,8 +109,6 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 			break;
 
 		case MSGTYPE_TIMEOUT:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"TIMEOUT\" msg from node: %s", Address::getString(address).c_str());
 
 			nodeManager->remove(address);
 			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
@@ -144,15 +126,13 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 }
 
-bool Distributor::send2NodeMsg(long address, uint8_t type) {
+bool Distributor::send2NodeMsg(long address, MSG_TYPE type) {
 
 	Message *msg = new Message(COMP_DISTRIBUTOR, type);
 
 	switch(type) {
 
 		case MSGTYPE_WAKEUP:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"WAKEUP\" msg sent to node: %s", Address::getString(address).c_str());
 			break;
 
 		default:
@@ -161,19 +141,17 @@ bool Distributor::send2NodeMsg(long address, uint8_t type) {
 
 	}
 
-	return connectors[COMP_NODE]->send(address, msg);
+	return send(COMP_NODE, address, msg);
 
 }
 
-bool Distributor::send2CollectorMsg(long address, uint8_t type) {
+bool Distributor::send2CollectorMsg(long address, MSG_TYPE type) {
 
 	Message *msg = new Message(COMP_DISTRIBUTOR, type);
 
 	switch(type) {
 
 		case MSGTYPE_WAKEUP:
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"\"WAKEUP\" msg sent to collector: %s", Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_NODE: {
@@ -182,9 +160,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 				if (node != nullptr) {
 
 					LOG_U(UI_UPDATE_DIST_NODE_LIST, node->address, PREBUSY);
-					LOG_U(UI_UPDATE_DIST_LOG,
-							"\"NODE\" msg sent to collector: %s with available node: %s",
-						  Address::getString(address).c_str(),
+					LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
 						  Address::getString(node->address).c_str());
 
                     msg->getHeader()->setVariant(0, node->address);
@@ -195,9 +171,7 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 				} else {
 					collectorWaitingList.push_back(address);
 
-					LOG_U(UI_UPDATE_DIST_LOG,
-							"\"NODE\" msg sent to collector: %s with no available node",
-						  Address::getString(address).c_str());
+					LOG_U(UI_UPDATE_DIST_LOG, "No available node");
 
                     msg->getHeader()->setVariant(0, 0);
 
@@ -212,37 +186,26 @@ bool Distributor::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[COMP_COLLECTOR]->send(address, msg);
-
+	return send(COMP_COLLECTOR, address, msg);
 }
 
-bool Distributor::sendWakeupMessage(Connector *connector) {
+bool Distributor::sendWakeupMessage(COMPONENT component) {
 
     if (Util::isMulticast()) {
 
         Message *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
-        connector->send(msg);
-
-        LOG_U(UI_UPDATE_DIST_LOG,
-              "\"WAKEUP\" message sent as multicast");
+        send(component, msg);
 
     } else {
 
-        std::vector<long> list = connector->getAddressList();
+        std::vector<long> list = getAddressList(component);
 
         for (int i = 0; i < list.size(); i++) {
 
             Message *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
 
-            connector->send(list[i], msg);
-
-            LOG_U(UI_UPDATE_LOG,
-                  "\"WAKEUP\" message sent to : %s", Address::getString(list[i]).c_str());
-
+            send(component, list[i], msg);
         }
-
-        LOG_U(UI_UPDATE_DIST_LOG,
-              "\"WAKEUP\" messages sent to network");
     }
 
     return true;
@@ -250,10 +213,12 @@ bool Distributor::sendWakeupMessage(Connector *connector) {
 
 bool Distributor::sendWakeupMessagesAll() {
 
-	sendWakeupMessage(connectors[COMP_NODE]);
-	if (connectors[COMP_COLLECTOR] != connectors[COMP_NODE]) {
-		sendWakeupMessage(connectors[COMP_COLLECTOR]);
-	}
+	sendWakeupMessage(COMP_NODE);
+
+    if (isConnectorDifferent()) {
+        sendWakeupMessage(COMP_COLLECTOR);
+    }
+
 	return true;
 }
 
@@ -270,7 +235,7 @@ bool Distributor::onTimeOut(Component *component, NodeItem *node) {
 
 	Message *msg = new Message(COMP_NODE, MSGTYPE_TIMEOUT);
 	msg->getHeader()->setVariant(0, node->lastServedCollector);
-    component->connectors[COMP_NODE]->put(node->address, msg);
+    component->put(COMP_NODE, node->address, msg);
 
 	return true;
 }
@@ -278,5 +243,5 @@ bool Distributor::onTimeOut(Component *component, NodeItem *node) {
 
 bool Distributor::onWakeup(Component *component) {
 
-    return ((Distributor*)component)->sendWakeupMessage(component->connectors[COMP_NODE]);
+    return ((Distributor*)component)->sendWakeupMessage(COMP_NODE);
 }

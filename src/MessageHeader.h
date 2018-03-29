@@ -1,11 +1,14 @@
 //
-// Created by akgunduz on 23.03.2018.
+// Created by Haluk AKGUNDUZ on 23/03/18.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
+
 
 #ifndef BANKOR_MESSAGEHEADER_H
 #define BANKOR_MESSAGEHEADER_H
 
 #include "Unit.h"
+#include "MessageTypes.h"
 
 #define MAX_VARIANT 2
 
@@ -26,8 +29,8 @@ class MessageHeader {
 
 public:
     MessageHeader();
-    void setType(int);
-    int getType();
+    void setType(MSG_TYPE);
+    MSG_TYPE getType();
     Unit getOwner();
     void setOwner(Unit);
 

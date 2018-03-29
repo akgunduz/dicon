@@ -4,7 +4,7 @@
 
 #include "NodeItem.h"
 
-NodeItem::NodeItem(NodeStates s, int u, long a, short i) :
+NodeItem::NodeItem(NODE_STATES s, int u, long a, short i) :
         state(s), usage(u), address(a), id(i) {
 
     watchdog = nullptr;

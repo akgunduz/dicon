@@ -1,19 +1,22 @@
 //
-// Created by akgunduz on 23.03.2018.
+// Created by Haluk AKGUNDUZ on 23/03/18.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
+
 #include "MessageHeader.h"
+#include "MessageTypes.h"
 
 MessageHeader::MessageHeader() {
 
 }
 
-void MessageHeader::setType(int type) {
-    this->type = type;
+void MessageHeader::setType(MSG_TYPE type) {
+    this->type = (int)type;
 }
 
-int MessageHeader::getType() {
-    return type;
+MSG_TYPE MessageHeader::getType() {
+    return (MSG_TYPE)type;
 }
 
 Unit MessageHeader::getOwner() {

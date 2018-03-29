@@ -57,6 +57,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JobInfo.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
+        ${SOURCE_PATH}/ComponentTypes.cpp
         )
 
 set(WX_FILES
@@ -79,7 +80,7 @@ set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
 
-#add_definitions(-DMULTICAST_ENABLED)
+add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})

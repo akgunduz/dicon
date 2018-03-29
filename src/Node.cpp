@@ -31,9 +31,6 @@ bool Node::processDistributorMsg(long address, Message *msg) {
 
             setDistributorAddress(address);
 
-            LOG_U(UI_UPDATE_NODE_LOG,
-                  "\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
-
             status = send2DistributorMsg(address, MSGTYPE_ALIVE);
             break;
 
@@ -56,9 +53,6 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 			LOG_U(UI_UPDATE_NODE_STATE, BUSY);
 			status = send2DistributorMsg(distributorAddress, MSGTYPE_BUSY);
 
-			LOG_U(UI_UPDATE_NODE_LOG,
-					"\"RULE\" msg from collector: %s", Address::getString(address).c_str());
-
 			LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
             if (job != nullptr) {
@@ -76,11 +70,6 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 			break;
 
 		case MSGTYPE_BINARY:
-
-			LOG_U(UI_UPDATE_NODE_LOG,
-					"\"BINARY\" msg from collector: %s",
-				  Address::getString(address).c_str());
-
 
             for (int i = 0; i < job->getRuleCount(); i++) {
                 processRule(job->getRule(i));
@@ -102,31 +91,15 @@ bool Node::processNodeMsg(long address, Message *msg) {
 	return false;
 }
 
-bool Node::send2DistributorMsg(long address, uint8_t type) {
+bool Node::send2DistributorMsg(long address, MSG_TYPE type) {
 
 	Message *msg = new Message(Unit(COMP_NODE), type);
 
 	switch(type) {
 
 		case MSGTYPE_READY:
-
-			LOG_U(UI_UPDATE_NODE_LOG,
-					"\"READY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
-			break;
-
 		case MSGTYPE_ALIVE:
-
-			LOG_U(UI_UPDATE_NODE_LOG,
-					"\"ALIVE\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
-			break;
-
 		case MSGTYPE_BUSY:
-
-			LOG_U(UI_UPDATE_NODE_LOG,
-					"\"BUSY\" msg sent to distributor: %s with ID : %s",
-                  Address::getString(address).c_str(), ArchTypes::getDir(msg->getHeader()->getOwner().getArch()));
 			break;
 
 		default:
@@ -134,11 +107,11 @@ bool Node::send2DistributorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[COMP_DISTRIBUTOR]->send(address, msg);
+	return send(COMP_DISTRIBUTOR, address, msg);
 
 }
 
-bool Node::send2CollectorMsg(long address, uint8_t type) {
+bool Node::send2CollectorMsg(long address, MSG_TYPE type) {
 
 	Message *msg = new Message(COMP_NODE, type);
 
@@ -148,9 +121,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 
             FileList *list = job->prepareFileList();
             msg->setJob(STREAM_MD5ONLY, list);
-            LOG_U(UI_UPDATE_NODE_LOG,
-                  "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-                  Address::getString(address).c_str(), list->getCount());
+            LOG_U(UI_UPDATE_NODE_LOG, "MD5 info size %d", list->getCount());
         }
 			break;
 
@@ -159,7 +130,7 @@ bool Node::send2CollectorMsg(long address, uint8_t type) {
 			return false;
 	}
 
-	return connectors[COMP_COLLECTOR]->send(address, msg);
+	return send(COMP_COLLECTOR, address, msg);
 }
 
 bool Node::setDistributorAddress(long address) {

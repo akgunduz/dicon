@@ -17,24 +17,28 @@ Component::Component(Unit host, const char* rootPath) {
 
         case COMP_DISTRIBUTOR:
             connectors[COMP_COLLECTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
-            if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
+            if (isConnectorDifferent()) {
                 connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
             } else {
                 connectors[COMP_NODE] = connectors[COMP_COLLECTOR];
+
             }
             break;
+
         case COMP_COLLECTOR:
             connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
-            if (Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1)) {
+            if (isConnectorDifferent()) {
                 connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
             } else {
                 connectors[COMP_NODE] = connectors[COMP_DISTRIBUTOR];
             }
             break;
+
         case COMP_NODE:
             connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(1), callback);
             connectors[COMP_COLLECTOR] = connectors[COMP_DISTRIBUTOR];
             break;
+
         default:
             break;
     }
@@ -56,6 +60,11 @@ Component::~Component() {
     delete callback;
 }
 
+bool Component::isConnectorDifferent() {
+
+    return Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1);
+}
+
 
 void Component::setHost(Unit host) {
 
@@ -75,11 +84,17 @@ bool Component::onReceive(long address, Message *msg) {
 
     if (connectors[msg->getHeader()->getOwner().getType()] == nullptr ||
             connectors[msg->getHeader()->getOwner().getType()]->getInterfaceType() != Address::getInterface(address)) {
-        LOG_W("%s: Wrong message received : %d from %s, disgarding", getHost().getTypeName(),
-              msg->getHeader()->getType(), Address::getString(address).c_str());
+        LOG_W("%s: Wrong message received : %s from %s, disgarding", getHost().getTypeName(),
+              MessageTypes::getName(msg->getHeader()->getType()), Address::getString(address).c_str());
         delete msg;
         return false;
     }
+
+    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+          "Receive : \"%s\" from %s: at %s",
+          MessageTypes::getName(msg->getHeader()->getType()),
+          ComponentTypes::getName(msg->getHeader()->getOwner().getType()),
+          Address::getString(address).c_str());
 
     switch(msg->getHeader()->getOwner().getType()) {
 
@@ -102,7 +117,7 @@ bool Component::onReceive(long address, Message *msg) {
 
 long Component::getAddress(COMPONENT host) {
 
-    if (connectors[host] != nullptr) {
+    if (connectors[host] != NULL) {
         return connectors[host]->getAddress();
     }
 
@@ -112,4 +127,35 @@ long Component::getAddress(COMPONENT host) {
 Unit Component::getHost() {
 
     return host;
+}
+
+bool Component::send(COMPONENT target, long address, Message *msg) {
+
+    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+            "Send : \"%s\" to %s: at %s",
+            MessageTypes::getName(msg->getHeader()->getType()),
+            ComponentTypes::getName(target),
+            Address::getString(address).c_str());
+
+    return connectors[target]->send(address, msg);
+}
+
+bool Component::send(COMPONENT target, Message *msg) {
+
+    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+          "Send : \"%s\" as MultiCast",
+          MessageTypes::getName(msg->getHeader()->getType()));
+
+    return connectors[target]->send(msg);
+}
+
+bool Component::put(COMPONENT target, long address, Message *msg) {
+
+    return connectors[target]->put(address, msg);
+}
+
+
+std::vector<long> Component::getAddressList(COMPONENT target) {
+
+    return connectors[target]->getAddressList();
 }

@@ -6,7 +6,7 @@
 #define BANKOR_UNIT_H
 
 
-#include "Common.h"
+#include "ComponentTypes.h"
 #include "ArchTypes.h"
 
 class Unit {

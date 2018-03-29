@@ -25,8 +25,8 @@ private:
     virtual bool processCollectorMsg(long, Message *);
     virtual bool processNodeMsg(long, Message *);
 
-    bool send2NodeMsg(long, uint8_t);
-    bool send2CollectorMsg(long, uint8_t);
+    bool send2NodeMsg(long, MSG_TYPE);
+    bool send2CollectorMsg(long, MSG_TYPE);
 
 public:
 
@@ -36,7 +36,7 @@ public:
     bool reset();
     static bool onTimeOut(Component*, NodeItem*);
     static bool onWakeup(Component*);
-    bool sendWakeupMessage(Connector*);
+    bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll();
 
 };

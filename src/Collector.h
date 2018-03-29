@@ -24,8 +24,8 @@ class Collector : public Component {
 	virtual bool processCollectorMsg(long, Message *);
 	virtual bool processNodeMsg(long, Message *);
 
-	bool send2DistributorMsg(long, int);
-	bool send2NodeMsg(long, int, FileList *);
+	bool send2DistributorMsg(long, MSG_TYPE);
+	bool send2NodeMsg(long, MSG_TYPE, FileList *);
 
 public:
 

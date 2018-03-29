@@ -12,6 +12,8 @@ class Component {
 
     Unit host;
 
+    Connector *connectors[COMP_MAX];
+
 protected :
 
     InterfaceCallback *callback;
@@ -19,7 +21,6 @@ protected :
     void setHost(Unit);
 
 public:
-    Connector *connectors[COMP_MAX];
 
     Component(Unit host, const char* rootPath);
     virtual ~Component();
@@ -27,6 +28,12 @@ public:
     long getAddress(COMPONENT host);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);
+    bool isConnectorDifferent();
+
+    bool send(COMPONENT, long, Message*);
+    bool send(COMPONENT, Message*);
+    bool put(COMPONENT, long, Message*);
+    std::vector<long> getAddressList(COMPONENT);
 
     virtual bool processDistributorMsg(long, Message *) = 0;
     virtual bool processCollectorMsg(long, Message *) = 0;

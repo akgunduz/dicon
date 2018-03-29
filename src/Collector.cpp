@@ -33,9 +33,6 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
-
 			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
 			break;
 
@@ -44,10 +41,9 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
             NodeInfo node(msg->getHeader()->getVariant(0), (ARCH) msg->getHeader()->getVariant(1));
 
 			if (node.getAddress() == 0) {
-				LOG_W("No available node right now.");
+
 				status = false;
-				LOG_U(UI_UPDATE_COLL_LOG,
-						"\"NODE\" msg from distributor: %s, no Available Node", Address::getString(address).c_str());
+				LOG_U(UI_UPDATE_COLL_LOG, "No Available Node");
 				break;
 			}
 
@@ -64,9 +60,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			LOG_T("New Job created from path : %s", "TODO JOB");
 
-			LOG_U(UI_UPDATE_COLL_LOG,
-                  "\"NODE\" msg from distributor: %s, available node: %s",
-				  Address::getString(address).c_str(), Address::getString(node.getAddress()).c_str());
+            LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s", Address::getString(node.getAddress()).c_str());
 
             LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
@@ -93,9 +87,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_MD5: {
 
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"MD5\" msg from node: %s with \"%d\" MD5 info",
-				  Address::getString(address).c_str(), msg->md5List.size());
+			LOG_U(UI_UPDATE_COLL_LOG, "MD5 info size %d", msg->md5List.size());
 
             NodeInfo node(address, msg->getHeader()->getOwner().getArch());
 
@@ -123,31 +115,15 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 	return status;
 }
 
-bool Collector::send2DistributorMsg(long address, int type) {
+bool Collector::send2DistributorMsg(long address, MSG_TYPE type) {
 
 	Message *msg = new Message(COMP_COLLECTOR, type);
 
 	switch(type) {
 
 		case MSGTYPE_ALIVE:
-
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"ALIVE\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
-			break;
-
 		case MSGTYPE_NODE:
-
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"NODE\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
-			break;
-
 		case MSGTYPE_TIME:
-
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"TIME\" msg sent to distributor: %s",
-				  Address::getString(address).c_str());
 			break;
 
 		default:
@@ -156,30 +132,23 @@ bool Collector::send2DistributorMsg(long address, int type) {
 
 	}
 
-	return connectors[COMP_DISTRIBUTOR]->send(address, msg);
+	return send(COMP_DISTRIBUTOR, address, msg);
 
 }
 
-bool Collector::send2NodeMsg(long address, int type, FileList *list) {
+bool Collector::send2NodeMsg(long address, MSG_TYPE type, FileList *list) {
 
 	Message *msg = new Message(COMP_COLLECTOR, type);
 
 	switch(type) {
 
 		case MSGTYPE_RULE:
-
 			msg->setJob(STREAM_JOB, list);
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"RULE\" msg sent to node: %s",
-				  Address::getString(address).c_str());
 			break;
 
 		case MSGTYPE_BINARY:
-
 			msg->setJob(STREAM_BINARY, list);
-			LOG_U(UI_UPDATE_COLL_LOG,
-					"\"BINARY\" msg sent to node: %s with \"%d\" file binary",
-				  Address::getString(address).c_str(), list->getCount());
+            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", list->getCount());
 			break;
 
 		default:
@@ -188,7 +157,7 @@ bool Collector::send2NodeMsg(long address, int type, FileList *list) {
 
 	}
 
-	return connectors[COMP_NODE]->send(address, msg);
+	return send(COMP_NODE, address, msg);
 
 }
 

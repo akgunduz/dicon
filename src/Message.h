@@ -42,7 +42,7 @@ public:
 	std::vector<Md5> md5List;
 
 	Message(Unit host);
-	Message(Unit owner, int type);
+	Message(Unit owner, MSG_TYPE type);
 
 	void setStreamFlag(int);
 
