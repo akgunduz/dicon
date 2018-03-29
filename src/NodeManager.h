@@ -35,7 +35,7 @@ private:
 	int readyBackup;
 	int totalBackup;
 
-    NodeWatchdog *nodeWatchdog = nullptr;
+    NodeWatchdog *nodeWatchdog;
 
 public:
 

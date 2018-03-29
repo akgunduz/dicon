@@ -7,7 +7,7 @@
 
 NodeManager::NodeManager(Component* component,
 						 fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) :
-		backupRate(0), readyBackup(0), totalBackup(0) {
+		backupRate(0), readyBackup(0), totalBackup(0), nodeWatchdog(NULL) {
 
     this->component = component;
 	this->timeoutCB = timeoutCB;

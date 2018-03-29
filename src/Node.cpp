@@ -5,7 +5,7 @@
 
 #include "Node.h"
 
-Node::Node(const char *rootPath) :
+Node::Node(const char *rootPath) : job(NULL),
         Component(Unit(COMP_NODE), rootPath) {
 
 	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));

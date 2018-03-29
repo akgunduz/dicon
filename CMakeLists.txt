@@ -74,10 +74,15 @@ set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
 )
 
-set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
-set(JSON-C_LIBRARIES json-c)
+if (APPLE)
+    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/include/json-c)
+    set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/openssl/1.0.2n/include/)
+else()
+    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
+    set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
+endif()
 
-set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
+set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
 
 add_definitions(-DMULTICAST_ENABLED)

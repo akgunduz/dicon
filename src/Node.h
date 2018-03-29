@@ -12,7 +12,7 @@
 class Node : public Component {
 private:
 
-	Job* job = nullptr;
+	Job* job;
 
 	long distributorAddress;
 	bool setDistributorAddress(long);

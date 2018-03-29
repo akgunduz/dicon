@@ -44,7 +44,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#ifdef APPLE
+#ifdef __APPLE__
 #include "Common_apple.h"
 #elif WIN32
 #else
