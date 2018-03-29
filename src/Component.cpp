@@ -6,7 +6,7 @@
 
 Component::Component(Unit host, const char* rootPath) {
 
-    memset(connectors, 0, sizeof(connectors));
+    memset(interfaces, 0, sizeof(Interface));
 
     setHost(host);
     Unit::setRootPath(getHost().getType(), rootPath);
@@ -16,27 +16,27 @@ Component::Component(Unit host, const char* rootPath) {
     switch(host.getType()) {
 
         case COMP_DISTRIBUTOR:
-            connectors[COMP_COLLECTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
-            if (isConnectorDifferent()) {
-                connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_COLLECTOR] = Connector::createInterface(host, Connector::getSelectedDevice(0), callback);
+            if (isInterfaceDifferent()) {
+                interfaces[COMP_NODE] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
             } else {
-                connectors[COMP_NODE] = connectors[COMP_COLLECTOR];
+                interfaces[COMP_NODE] = interfaces[COMP_COLLECTOR];
 
             }
             break;
 
         case COMP_COLLECTOR:
-            connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(0), callback);
-            if (isConnectorDifferent()) {
-                connectors[COMP_NODE] = new Connector(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, Connector::getSelectedDevice(0), callback);
+            if (isInterfaceDifferent()) {
+                interfaces[COMP_NODE] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
             } else {
-                connectors[COMP_NODE] = connectors[COMP_DISTRIBUTOR];
+                interfaces[COMP_NODE] = interfaces[COMP_DISTRIBUTOR];
             }
             break;
 
         case COMP_NODE:
-            connectors[COMP_DISTRIBUTOR] = new Connector(host, Connector::getSelectedDevice(1), callback);
-            connectors[COMP_COLLECTOR] = connectors[COMP_DISTRIBUTOR];
+            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
             break;
 
         default:
@@ -46,31 +46,34 @@ Component::Component(Unit host, const char* rootPath) {
 
 Component::~Component() {
 
-    if (connectors[COMP_NODE] != connectors[COMP_DISTRIBUTOR] &&
-            connectors[COMP_NODE] != connectors[COMP_COLLECTOR]) {
-        delete connectors[COMP_NODE];
+    if (interfaces[COMP_NODE] != interfaces[COMP_DISTRIBUTOR] &&
+            interfaces[COMP_NODE] != interfaces[COMP_COLLECTOR]) {
+        delete interfaces[COMP_NODE];
     }
 
-    if (connectors[COMP_COLLECTOR] != connectors[COMP_DISTRIBUTOR]) {
-        delete connectors[COMP_COLLECTOR];
+    if (interfaces[COMP_COLLECTOR] != interfaces[COMP_DISTRIBUTOR]) {
+        delete interfaces[COMP_COLLECTOR];
     }
 
-    delete connectors[COMP_DISTRIBUTOR];
+    delete interfaces[COMP_DISTRIBUTOR];
 
     delete callback;
 }
 
-bool Component::isConnectorDifferent() {
+bool Component::isInterfaceDifferent() {
 
     return Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1);
 }
 
+Unit Component::getHost() {
+
+    return host;
+}
 
 void Component::setHost(Unit host) {
 
     this->host = host;
 }
-
 
 bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
@@ -82,8 +85,8 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    if (connectors[msg->getHeader()->getOwner().getType()] == nullptr ||
-            connectors[msg->getHeader()->getOwner().getType()]->getInterfaceType() != Address::getInterface(address)) {
+    if (interfaces[msg->getHeader()->getOwner().getType()] == nullptr ||
+            interfaces[msg->getHeader()->getOwner().getType()]->getType() != Address::getInterface(address)) {
         LOG_W("%s: Wrong message received : %s from %s, disgarding", getHost().getTypeName(),
               MessageTypes::getName(msg->getHeader()->getType()), Address::getString(address).c_str());
         delete msg;
@@ -115,19 +118,35 @@ bool Component::onReceive(long address, Message *msg) {
     }
 }
 
-long Component::getAddress(COMPONENT host) {
+long Component::getInterfaceAddress(COMPONENT target) {
 
-    if (connectors[host] != NULL) {
-        return connectors[host]->getAddress();
+    if (interfaces[target] != NULL) {
+        return interfaces[target]->getAddress();
     }
 
     return 0;
 }
 
-Unit Component::getHost() {
 
-    return host;
+INTERFACES Component::getInterfaceType(COMPONENT target) {
+
+    if (interfaces[target] != NULL) {
+        return interfaces[target]->getType();
+    }
+
+    return INTERFACE_MAX;
 }
+
+
+bool Component::isSupportMulticast(COMPONENT target) {
+
+    if (interfaces[target] != NULL) {
+        return interfaces[target]->isSupportMulticast();
+    }
+
+    return false;
+}
+
 
 bool Component::send(COMPONENT target, long address, Message *msg) {
 
@@ -137,7 +156,7 @@ bool Component::send(COMPONENT target, long address, Message *msg) {
             ComponentTypes::getName(target),
             Address::getString(address).c_str());
 
-    return connectors[target]->send(address, msg);
+    return interfaces[target]->push(MESSAGE_SEND, address, msg);
 }
 
 bool Component::send(COMPONENT target, Message *msg) {
@@ -146,16 +165,17 @@ bool Component::send(COMPONENT target, Message *msg) {
           "Send : \"%s\" as MultiCast",
           MessageTypes::getName(msg->getHeader()->getType()));
 
-    return connectors[target]->send(msg);
+    return interfaces[target]->push(MESSAGE_SEND, interfaces[target]->getMulticastAddress(), msg);
 }
 
 bool Component::put(COMPONENT target, long address, Message *msg) {
 
-    return connectors[target]->put(address, msg);
+    return interfaces[target]->push(MESSAGE_RECEIVE, address, msg);
 }
 
 
 std::vector<long> Component::getAddressList(COMPONENT target) {
 
-    return connectors[target]->getAddressList();
+    return interfaces[target]->getAddressList();
 }
+

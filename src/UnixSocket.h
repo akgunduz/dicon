@@ -17,6 +17,7 @@
 class UnixSocket : public Interface {
 private :
 	int unixSocket;
+
 	bool initUnixSocket();
 	void runReceiver(Unit host);
 	static void *runAccepter(void *);
@@ -28,10 +29,12 @@ private :
 	static std::vector<Device>deviceList;
 
 public :
-	static uint16_t gOffset;
-	UnixSocket(const Unit, Device*, const InterfaceCallback *);
-	std::vector<long> getAddressList();
+
+	UnixSocket(Unit, Device*, const InterfaceCallback *);
 	~UnixSocket();
+
+	bool isSupportMulticast();
+	std::vector<long> getAddressList();
 
 	static bool createDevices();
     static std::vector<Device>* getDevices();

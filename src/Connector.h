@@ -14,21 +14,15 @@
 
 class Connector {
 
-	Interface* _interface;
+private:
 
 	static std::vector<Device>deviceList;
     static Device *selectedDevices[2] ;
 	static bool devicesInitialized;
 
+    Connector(){};
+
 public:
-	Connector(Unit, Device*, const InterfaceCallback *);
-	bool send(long, Message*);
-	bool send(Message*);
-	bool put(long, Message*);
-	long getAddress();
-	INTERFACES getInterfaceType();
-	std::vector<long> getAddressList();
-	virtual ~Connector();
 
 	static bool createDevices();
 	static std::vector<Device>* getDevices();
@@ -37,6 +31,8 @@ public:
 
     static void setSelectedDevices(int, int);
     static Device* getSelectedDevice(unsigned char);
+
+    static Interface* createInterface(const Unit component, Device* device, const InterfaceCallback *cb);
 };
 
 

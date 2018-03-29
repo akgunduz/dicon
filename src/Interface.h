@@ -39,6 +39,7 @@ public:
 };
 
 class Interface {
+
 private :
 	static void* runReceiver(void *);
 	static void* runSender(void *);
@@ -69,12 +70,12 @@ public :
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	Device* getDevice();
+    long getAddress();
+    long getMulticastAddress();
 
-	virtual INTERFACES getType() = 0;
-	long getAddress();
-	long getMulticastAddress();
-
-	virtual std::vector<long> getAddressList() = 0;
+    virtual INTERFACES getType() = 0;
+    virtual bool isSupportMulticast() = 0;
+    virtual std::vector<long> getAddressList() = 0;
 	virtual ~Interface();
 };
 

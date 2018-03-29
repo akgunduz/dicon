@@ -8,7 +8,7 @@
 Collector::Collector(const char *rootPath) :
         Component(Unit(COMP_COLLECTOR), rootPath){
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_NODE));
+	LOG_U(UI_UPDATE_COLL_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE));
 
     setDistributorAddress(0);
 

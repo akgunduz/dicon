@@ -11,66 +11,25 @@ std::vector<Device> Connector::deviceList;
 Device* Connector::selectedDevices[2];
 bool Connector::devicesInitialized = false;
 
-Connector::Connector(const Unit component, Device* device, const InterfaceCallback *cb) {
+Interface *Connector::createInterface(const Unit component, Device *device, const InterfaceCallback *cb) {
 
-	try {
+    Interface *interface = NULL;
 
-		switch(device->getType()) {
+    switch(device->getType()) {
 
-			case INTERFACE_NET:
-				_interface = new Net(component, device, cb);
-				break;
+        case INTERFACE_NET:
+            interface = new Net(component, device, cb);
+            break;
 
-			case INTERFACE_UNIXSOCKET:
-				_interface = new UnixSocket(component, device, cb);
-				break;
+        case INTERFACE_UNIXSOCKET:
+            interface = new UnixSocket(component, device, cb);
+            break;
 
-			default:
-				break;
-		}
+        default:
+            break;
+    }
 
-	} catch (const std::runtime_error e) {
-
-		LOG_E("Interface Init failed!!!");
-		throw std::runtime_error("Connector : Interface Init failed!!!");
-	}
-}
-
-Connector::~Connector() {
-
-    delete _interface;
-}
-
-bool Connector::send(long target, Message *msg) {
-
-	return _interface->push(MESSAGE_SEND, target, msg);
-}
-
-bool Connector::send(Message *msg) {
-
-    return _interface->push(MESSAGE_SEND, _interface->getMulticastAddress(), msg);
-}
-
-bool Connector::put(long target, Message *msg) {
-
-    return _interface->push(MESSAGE_RECEIVE, target, msg);
-}
-
-long Connector::getAddress() {
-
-	return _interface->getAddress();
-}
-
-std::vector<long> Connector::getAddressList() {
-
-	return _interface->getAddressList();
-}
-
-
-INTERFACES Connector::getInterfaceType() {
-
-	return _interface->getType();
-
+    return interface;
 }
 
 bool Connector::createDevices() {

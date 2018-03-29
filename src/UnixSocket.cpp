@@ -261,3 +261,8 @@ std::vector<Device>*  UnixSocket::getDevices() {
     }
     return &deviceList;
 }
+
+bool UnixSocket::isSupportMulticast() {
+
+    return false;
+}

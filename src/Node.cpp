@@ -8,7 +8,7 @@
 Node::Node(const char *rootPath) :
         Component(Unit(COMP_NODE), rootPath) {
 
-	LOG_U(UI_UPDATE_NODE_ADDRESS, getAddress(COMP_DISTRIBUTOR), getAddress(COMP_COLLECTOR));
+	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
 	distributorAddress = 0;

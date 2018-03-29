@@ -12,7 +12,7 @@ class Component {
 
     Unit host;
 
-    Connector *connectors[COMP_MAX];
+    Interface *interfaces[COMP_MAX];
 
 protected :
 
@@ -25,10 +25,12 @@ public:
     Component(Unit host, const char* rootPath);
     virtual ~Component();
     Unit getHost();
-    long getAddress(COMPONENT host);
+    long getInterfaceAddress(COMPONENT);
+    INTERFACES getInterfaceType(COMPONENT);
+    bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);
-    bool isConnectorDifferent();
+    bool isInterfaceDifferent();
 
     bool send(COMPONENT, long, Message*);
     bool send(COMPONENT, Message*);

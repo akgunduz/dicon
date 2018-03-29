@@ -10,7 +10,7 @@ Distributor::Distributor(const char *rootPath, double backupRate) :
 
 	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
 
-    LOG_U(UI_UPDATE_DIST_ADDRESS, getAddress(COMP_COLLECTOR), getAddress(COMP_NODE));
+    LOG_U(UI_UPDATE_DIST_ADDRESS, getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE));
 };
 
 Distributor::~Distributor() {
@@ -191,7 +191,7 @@ bool Distributor::send2CollectorMsg(long address, MSG_TYPE type) {
 
 bool Distributor::sendWakeupMessage(COMPONENT component) {
 
-    if (Util::isMulticast()) {
+    if (isSupportMulticast(component)) {
 
         Message *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
         send(component, msg);
@@ -215,7 +215,7 @@ bool Distributor::sendWakeupMessagesAll() {
 
 	sendWakeupMessage(COMP_NODE);
 
-    if (isConnectorDifferent()) {
+    if (isInterfaceDifferent()) {
         sendWakeupMessage(COMP_COLLECTOR);
     }
 

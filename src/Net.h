@@ -17,11 +17,12 @@
 #define MAX_SIMUL_CLIENTS 10
 
 class Net : public Interface {
+
 private :
 	int netSocket;
 	int multicastSocket;
+
 	bool initTCP();
-	bool initLoopBack();
 	bool initMulticast();
 	void runReceiver(Unit host);
 	static void *runAccepter(void *);
@@ -36,6 +37,8 @@ public :
 
 	Net(Unit, Device*, const InterfaceCallback *);
 	~Net();
+
+	bool isSupportMulticast();
 	std::vector<long> getAddressList();
 
 	static bool createDevices();

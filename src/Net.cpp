@@ -324,3 +324,8 @@ std::vector<Device>* Net::getDevices() {
     }
     return &deviceList;
 }
+
+bool Net::isSupportMulticast() {
+
+    return Util::isMulticast();
+}
