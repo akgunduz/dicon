@@ -222,7 +222,7 @@ sockaddr_un UnixSocket::getUnixAddress(long address) {
     bzero((char *) &unix_addr, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
     sprintf(unix_addr.sun_path, "%s%s%ld%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
-            address, UNIXSOCKET_FILE_SUFFIX);
+            address & UNIXSOCKETADDRESS_MASK, UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }
 
