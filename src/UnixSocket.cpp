@@ -4,9 +4,8 @@
 //
 
 #include "UnixSocket.h"
-#include "UnixSocketAddress.h"
 
-std::vector<Device> UnixSocket::deviceList;
+std::vector<Device*> UnixSocket::deviceList;
 
 UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
 		: Interface(host, device, cb) {
@@ -28,24 +27,14 @@ bool UnixSocket::initUnixSocket() {
         return false;
     }
 
-//    int on = 1;
-//    if (setsockopt(unixSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
-//        LOG_E("Socket option with err : %d!!!", errno);
-//        close(unixSocket);
-//        return false;
-//    }
-
 	int tryCount = 10;
+    lastFreePort = 0;
 
 	for (int j = tryCount; j > 0; j--) {
 
-        srand(time(NULL));
+        address = Address::createAddress(device->getType(), device->getAddress(), lastFreePort, device->getHelper());
 
-        setAddress((unsigned short)rand());
-
-	//	address = (((unsigned long) getpid() << 10) & 0xFFFFFF) | (unsigned short)rand();
-
-		sockaddr_un serverAddress = UnixSocketAddress::getUnixAddress(getAddress());
+		sockaddr_un serverAddress = getUnixAddress(getAddress());
 
 		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
@@ -55,7 +44,7 @@ bool UnixSocket::initUnixSocket() {
 			continue;
 		}
 
-		LOG_I("Using address : %s", Address::getString(address).c_str());
+		LOG_I("Using address : %s", getAddressString(getAddress()).c_str());
 
 		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
 			LOG_E("Socket listen with err : %d!!!", errno);
@@ -68,8 +57,6 @@ bool UnixSocket::initUnixSocket() {
 			close(unixSocket);
 			return false;
 		}
-
-		device->setPort(lastFreePort);
 
 		return true;
 	}
@@ -162,7 +149,7 @@ void UnixSocket::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is opened !!!", clientSocket);
 
-    sockaddr_un clientAddress = UnixSocketAddress::getUnixAddress(target);
+    sockaddr_un clientAddress = getUnixAddress(target);
 
 	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
 
@@ -174,11 +161,15 @@ void UnixSocket::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->getHeader()->setOwnerAddress(address);
+	msg->getHeader()->setOwnerAddress(getAddress());
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
 	close(clientSocket);
+}
+
+void UnixSocket::runMulticastSender(Message *message) {
+
 }
 
 UnixSocket::~UnixSocket() {
@@ -187,72 +178,25 @@ UnixSocket::~UnixSocket() {
 }
 
 
-void UnixSocket::setAddress(unsigned short seed) {
-
-	address = (((unsigned int)getpid() << 10) & 0xFFFFFF) | seed;
-}
-
 INTERFACES UnixSocket::getType() {
 
 	return INTERFACE_UNIXSOCKET;
 
 }
 
-std::vector<long> UnixSocket::getAddressList() {
-
-	std::vector<long> list;
-
-	DIR *unixdir = opendir(UNIXSOCKET_PATH);
-	if (!unixdir) {
-		printf("Can not open unix socket path!!!");
-		return list;
-	}
-
-	std::string path1 = "";
-
-	path1 = UNIXSOCKET_FILE_PREFIX;
-	path1.append(Address::getString(address));
-	path1.append(UNIXSOCKET_FILE_SUFFIX);
-
-	dirent *entry;
-
-	while ((entry = readdir(unixdir)) != NULL) {
-
-		if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) != 0) {
-			continue;
-		}
-
-		if (path1.compare(entry->d_name) == 0) {
-			continue;
-		}
-
-		std::string path = entry->d_name;
-
-		uint32_t start = (uint32_t)path.find('_') + 1;
-		std::string saddress = path.substr(start, path.find('.') - start);
-		long address = (unsigned)atol(saddress.c_str());
-
-		list.push_back(address);
-
-	}
-
-	closedir(unixdir);
-
-	return list;
-}
-
-void UnixSocket::runMulticastSender(Message *message) {
-
-}
-
 bool UnixSocket::createDevices() {
 
-	deviceList.push_back(Device("us", INTERFACE_UNIXSOCKET));
+    srand(time(NULL));
+    Device *device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), rand());
+
+    device->setAddressList(getAddressList(device));
+
+    deviceList.push_back(device);
 
 	return true;
 }
 
-std::vector<Device>*  UnixSocket::getDevices() {
+std::vector<Device*>*  UnixSocket::getDevices() {
 
     if (deviceList.size() == 0) {
         createDevices();
@@ -263,4 +207,64 @@ std::vector<Device>*  UnixSocket::getDevices() {
 bool UnixSocket::isSupportMulticast() {
 
     return false;
+}
+
+std::string UnixSocket::getAddressString(long address) {
+
+    char sAddress[50];
+    sprintf(sAddress, "%ld", address & UNIXSOCKETADDRESS_MASK);
+    return std::string(sAddress);
+}
+
+sockaddr_un UnixSocket::getUnixAddress(long address) {
+
+    sockaddr_un unix_addr;
+    bzero((char *) &unix_addr, sizeof(unix_addr));
+    unix_addr.sun_family = AF_UNIX;
+    sprintf(unix_addr.sun_path, "%s%s%ld%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
+            address, UNIXSOCKET_FILE_SUFFIX);
+    return unix_addr;
+}
+
+std::vector<long> UnixSocket::getAddressList(Device* device) {
+
+    std::vector<long> list;
+
+    DIR *unixdir = opendir(UNIXSOCKET_PATH);
+    if (!unixdir) {
+        printf("Can not open unix socket path!!!");
+        return list;
+    }
+
+    std::string path1 = "";
+
+    path1 = UNIXSOCKET_FILE_PREFIX;
+    path1.append(Address::getString(device->getAddress()));
+    path1.append(UNIXSOCKET_FILE_SUFFIX);
+
+    dirent *entry;
+
+    while ((entry = readdir(unixdir)) != NULL) {
+
+        if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) != 0) {
+            continue;
+        }
+
+        if (path1.compare(entry->d_name) == 0) {
+            continue;
+        }
+
+        std::string path = entry->d_name;
+
+        uint32_t start = (uint32_t)path.find('_') + 1;
+        std::string saddress = path.substr(start, path.find('.') - start);
+        long address = (unsigned)atol(saddress.c_str());
+
+        list.push_back(address);
+
+    }
+
+    closedir(unixdir);
+
+    return list;
 }

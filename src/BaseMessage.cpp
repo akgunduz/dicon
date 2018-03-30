@@ -4,15 +4,16 @@
 //
 
 #include "BaseMessage.h"
-#include "NetAddress.h"
+#include "Address.h"
 
 BaseMessage::BaseMessage(int size) {
 
     headerSize = size;
-    setMulticastAddress(0);
+    bzero(&multicastAddress, sizeof(sockaddr_in));
 }
 
-void BaseMessage::setMulticastAddress(long address) {
+void BaseMessage::setMulticastAddress(sockaddr_in address) {
+
     multicastAddress = address;
 }
 
@@ -82,7 +83,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 	do {
         long count;
 
-        if (multicastAddress == 0) {
+        if (multicastAddress.sin_addr.s_addr == 0) {
             count = read(in, buf + offset, (size_t) size);
 
         } else {
@@ -283,13 +284,12 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
         long count;
 
-        if (multicastAddress == 0) {
+        if (multicastAddress.sin_addr.s_addr == 0) {
             count = write(out, buf + offset, (size_t)size);
 
         } else {
-            sockaddr_in address = NetAddress::getInetAddress(multicastAddress);
             count = sendto(out, buf + offset, (size_t)size, 0,
-                           (struct sockaddr *) &address, sizeof(struct sockaddr));
+                           (struct sockaddr *) &multicastAddress, sizeof(struct sockaddr));
         }
 
 		if (count == -1) {

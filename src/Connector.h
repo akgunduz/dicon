@@ -16,7 +16,7 @@ class Connector {
 
 private:
 
-	static std::vector<Device>deviceList;
+	static std::vector<Device*>deviceList;
     static Device *selectedDevices[2] ;
 	static bool devicesInitialized;
 
@@ -25,7 +25,7 @@ private:
 public:
 
 	static bool createDevices();
-	static std::vector<Device>* getDevices();
+	static std::vector<Device*>* getDevices();
 	static Device* getDevice(int);
 	static unsigned long getCount();
 

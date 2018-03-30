@@ -26,13 +26,13 @@ class BaseMessage {
 
     int desc;
 
-    long multicastAddress;
+	sockaddr_in multicastAddress;
 
 public:
 
     BaseMessage(int);
 
-    void setMulticastAddress(long);
+    void setMulticastAddress(sockaddr_in);
 
     int getDescriptor();
     void setDescriptor(int);

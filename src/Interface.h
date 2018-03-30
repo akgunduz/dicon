@@ -64,7 +64,8 @@ protected :
 	bool initThread();
 	void end();
 	Interface(Unit host, Device *, const InterfaceCallback *);
-	virtual void setAddress(unsigned short) = 0;
+    //long createAddress(long address, int port, int helper);
+	//virtual void setAddress(unsigned short) = 0;
 
 public :
     virtual ~Interface();
@@ -76,7 +77,6 @@ public :
 
     virtual INTERFACES getType() = 0;
     virtual bool isSupportMulticast() = 0;
-    virtual std::vector<long> getAddressList() = 0;
 };
 
 

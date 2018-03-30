@@ -4,7 +4,6 @@
 //
 
 #include "Interface.h"
-#include "NetAddress.h"
 
 Interface::Interface(Unit host, Device *device, const InterfaceCallback *receiveCB) {
 
@@ -21,7 +20,7 @@ Interface::Interface(Unit host, Device *device, const InterfaceCallback *receive
 
     this->host = host;
 	this->device = device;
-    this->lastFreePort = DEFAULT_PORT;
+    this->lastFreePort = 0;
     this->address = 0;
     this->multicastAddress = 0;
 

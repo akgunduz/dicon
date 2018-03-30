@@ -8,17 +8,19 @@
 #include "Common.h"
 
 class Device {
-public:
+
     char name[50];
     INTERFACES type;
 
     long address;
     long helper;
     bool loopback;
-    int port;
 
-    Device(const char* _name, INTERFACES _type);
-    Device(const char* _name, long _ipAddress, long _helper, bool _loopback);
+    std::vector<long> addressList;
+
+public:
+
+    Device(const char*, INTERFACES, long, long, bool = false);
 
     const char* getName();
     INTERFACES getType();
@@ -26,6 +28,9 @@ public:
     long getHelper();
     bool isLoopback();
     void setPort(int port);
+    void setAddressList(std::vector<long>);
+    std::vector<long> getAddressList();
+
 };
 
 

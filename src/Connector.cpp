@@ -7,7 +7,7 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-std::vector<Device> Connector::deviceList;
+std::vector<Device*> Connector::deviceList;
 Device* Connector::selectedDevices[2];
 bool Connector::devicesInitialized = false;
 
@@ -34,10 +34,10 @@ Interface* Connector::createInterface(const Unit component, Device *device, cons
 
 bool Connector::createDevices() {
 
-    std::vector<Device> *netDevices = Net::getDevices();
+    std::vector<Device*> *netDevices = Net::getDevices();
     deviceList.insert(deviceList.end(), netDevices->begin(), netDevices->end());
 
-    std::vector<Device> *unixSocketDevices = UnixSocket::getDevices();
+    std::vector<Device*> *unixSocketDevices = UnixSocket::getDevices();
     deviceList.insert(deviceList.end(), unixSocketDevices->begin(), unixSocketDevices->end());
 
     return true;
@@ -49,7 +49,7 @@ unsigned long Connector::getCount() {
 
 }
 
-std::vector<Device> *Connector::getDevices() {
+std::vector<Device*> *Connector::getDevices() {
 
     if (deviceList.empty()) {
         createDevices();
@@ -59,7 +59,7 @@ std::vector<Device> *Connector::getDevices() {
 
 Device* Connector::getDevice(int index) {
 
-    return &deviceList[index >= deviceList.size() ?
+    return deviceList[index >= deviceList.size() ?
                                       deviceList.size() - 1 : index];
 }
 

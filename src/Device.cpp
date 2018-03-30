@@ -4,22 +4,13 @@
 
 #include "Device.h"
 
-Device::Device(const char *name, INTERFACES type) {
-
-    strcpy(this->name, name);
-    this->type = type;
-    this->address = 0;
-    this->helper = 0;
-    this->loopback = false;
-}
-
-Device::Device(const char *_name, long _ipAddress, long _helper, bool _loopback) {
+Device::Device(const char *_name, INTERFACES type, long address, long helper, bool loopback) {
 
     strcpy(this->name, _name);
-    this->type = INTERFACE_NET;
-    this->address = _ipAddress;
-    this->helper = _helper;
-    this->loopback = _loopback;
+    this->type = type;
+    this->address = address;
+    this->helper = helper;
+    this->loopback = loopback;
 }
 
 const char* Device::getName() {
@@ -42,6 +33,12 @@ bool Device::isLoopback() {
     return loopback;
 }
 
-void Device::setPort(int port) {
-    this->port = port;
+void Device::setAddressList(std::vector<long> list) {
+    addressList = list;
 }
+
+std::vector<long> Device::getAddressList() {
+    return addressList;
+}
+
+

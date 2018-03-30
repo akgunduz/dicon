@@ -13,6 +13,7 @@
 #include "Message.h"
 
 #define MAX_SIMUL_CLIENTS 10
+#define UNIXSOCKETADDRESS_MASK 0xFFFFFFFF
 
 class UnixSocket : public Interface {
 private :
@@ -23,9 +24,11 @@ private :
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
     void runMulticastSender(Message *);
-	void setAddress(unsigned short);
 
-	static std::vector<Device>deviceList;
+    static sockaddr_un getUnixAddress(long);
+
+    static std::vector<long> getAddressList(Device*);
+	static std::vector<Device*>deviceList;
 
 public :
 
@@ -34,10 +37,11 @@ public :
 
     INTERFACES getType();
 	bool isSupportMulticast();
-	std::vector<long> getAddressList();
+
 
 	static bool createDevices();
-    static std::vector<Device>* getDevices();
+    static std::vector<Device*>* getDevices();
+    static std::string getAddressString(long);
 };
 
 #endif //__UnixSocket_H_

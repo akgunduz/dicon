@@ -85,13 +85,6 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    if (msg->getHeader()->getOwner().getType() == getHost().getType()) {
-        LOG_W("%s: Loopback message %s received, ignoring ", getHost().getTypeName(),
-              MessageTypes::getName(msg->getHeader()->getType()));
-        delete msg;
-        return false;
-    }
-
     LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
           "Receive : \"%s\" from %s: at %s",
           MessageTypes::getName(msg->getHeader()->getType()),
@@ -175,6 +168,6 @@ bool Component::put(COMPONENT target, long address, Message *msg) {
 
 std::vector<long> Component::getAddressList(COMPONENT target) {
 
-    return interfaces[target]->getAddressList();
+    return interfaces[target]->getDevice()->getAddressList();
 }
 
