@@ -45,10 +45,14 @@ private :
 	static void* runSender(void *);
 	static bool senderCB(void *, SchedulerItem *);
 
-	Device device;
+	Device *device;
 	Unit host;
 
+    long address;
+    long multicastAddress;
+
     void setHost(Unit);
+    void setDevice(Device*);
 
 protected :
 
@@ -73,7 +77,10 @@ public :
     long getAddress();
     long getMulticastAddress();
 
-    virtual INTERFACES getType() = 0;
+    void setAddress(long);
+    void setMulticastAddress(long);
+
+    virtual INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
 };
 

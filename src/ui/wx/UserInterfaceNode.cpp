@@ -70,7 +70,7 @@ void UserInterface::OnNodeInitClick( wxCommandEvent& event )
 void UserInterface::nodeUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    nodeDeviceAddress->SetLabel(Address::getString(data->data64_1));
+    nodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
 }
 
 void UserInterface::nodeUpdateState(wxCommandEvent &event) {
@@ -82,7 +82,7 @@ void UserInterface::nodeUpdateState(wxCommandEvent &event) {
 void UserInterface::nodeUpdateAttachedCollAddress(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    nodeCollAddress->SetLabel(Address::getString(data->data64_1));
+    nodeCollAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
 }
 
 void UserInterface::nodeUpdateClear(wxCommandEvent &event) {

@@ -99,8 +99,8 @@ void UserInterface::OnDistPollClick( wxCommandEvent& event )
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    distCollDeviceAddress->SetLabel(Address::getString(data->data64_1));
-    distNodeDeviceAddress->SetLabel(Address::getString(data->data64_2));
+    distCollDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_2));
 
 }
 
@@ -113,7 +113,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
     for (; i < distCollList->GetItemCount(); i++) {
 
         std::string item = distCollList->GetItemText(i, 0).ToStdString();
-        std::string address = Address::getString(data->data64_1);
+        std::string address = InterfaceTypes::getAddressString(data->data64_1);
 
         if (address.compare(item) == 0) {
             break;
@@ -125,11 +125,11 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
         i = distCollList->InsertItem(distCollList->GetItemCount(), 0);
     }
 
-    distCollList->SetItem(i, 0, Address::getString(data->data64_1));
+    distCollList->SetItem(i, 0, InterfaceTypes::getAddressString(data->data64_1));
     distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->data64_1));
 
     if (data->data64_2 > 0) {
-        distCollList->SetItem(i, 1, Address::getString(data->data64_2));
+        distCollList->SetItem(i, 1, InterfaceTypes::getAddressString(data->data64_2));
     } else {
         distCollList->SetItem(i, 1, "No Available Node!!");
     }
@@ -145,7 +145,7 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
     for (; i < distNodeList->GetItemCount(); i++) {
 
         std::string item = distNodeList->GetItemText(i, 0).ToStdString();
-        std::string address = Address::getString(data->data64_1);
+        std::string address = InterfaceTypes::getAddressString(data->data64_1);
 
         if (address.compare(item) == 0) {
             break;
@@ -157,7 +157,7 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
         i = distNodeList->InsertItem(distNodeList->GetItemCount(), 0);
     }
 
-    distNodeList->SetItem(i, 0, Address::getString(data->data64_1));
+    distNodeList->SetItem(i, 0, InterfaceTypes::getAddressString(data->data64_1));
     distNodeList->SetItem(i, 1, sStates[data->data64_2]);
 
 }

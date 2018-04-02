@@ -67,7 +67,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 				LOG_U(UI_UPDATE_DIST_LOG,
                       "Processing a collector from the waiting list: %s",
-					  Address::getString(collectorAddress).c_str());
+					  InterfaceTypes::getAddressString(collectorAddress).c_str());
 
 				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
 
@@ -88,7 +88,8 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 				collectorWaitingList.pop_front();
 
 				LOG_U(UI_UPDATE_DIST_LOG,
-						"Processing a collector from the waiting list: %s", Address::getString(collectorAddress).c_str());
+						"Processing a collector from the waiting list: %s",
+					  InterfaceTypes::getAddressString(collectorAddress).c_str());
 
 				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
 			} else {
@@ -161,7 +162,7 @@ bool Distributor::send2CollectorMsg(long address, MSG_TYPE type) {
 
 					LOG_U(UI_UPDATE_DIST_NODE_LIST, node->address, PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
-						  Address::getString(node->address).c_str());
+                          InterfaceTypes::getAddressString(node->address).c_str());
 
                     msg->getHeader()->setVariant(0, node->address);
                     msg->getHeader()->setVariant(1, node->id);

@@ -5,45 +5,28 @@
 #ifndef BANKOR_CONNECTINTERFACE_H
 #define BANKOR_CONNECTINTERFACE_H
 
-#include "Common.h"
-
-class Device;
-
-typedef std::vector<long> (*fGetAddressList)(Device*);
+#include "InterfaceTypes.h"
 
 class Device {
 
     char name[50];
-    INTERFACES type;
+    INTERFACE type;
 
     long base;
     int helper;
     bool loopback;
 
-    long address;
-    long multicastAddress;
-
-    fGetAddressList getAddressListFunc;
-
 public:
 
-    Device(const char*, INTERFACES, long, int, bool = false);
-    Device();
+    Device(const char*, INTERFACE, long, int, bool = false);
 
     const char* getName();
-    INTERFACES getType();
+    INTERFACE getType();
     long getBase();
-    long getAddress();
-    long getMulticastAddress();
     int getHelper();
     bool isLoopback();
 
-    void setAddressList(fGetAddressList);
     std::vector<long> getAddressList();
-
-    void set(Device*);
-    void setAddress(long);
-    void setMulticastAddress(long);
 };
 
 

@@ -60,7 +60,8 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			LOG_T("New Job created from path : %s", "TODO JOB");
 
-            LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s", Address::getString(node.getAddress()).c_str());
+            LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
+				  InterfaceTypes::getAddressString(node.getAddress()).c_str());
 
             LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 

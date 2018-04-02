@@ -26,7 +26,7 @@ public:
     virtual ~Component();
     Unit getHost();
     long getInterfaceAddress(COMPONENT);
-    INTERFACES getInterfaceType(COMPONENT);
+    INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);

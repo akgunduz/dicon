@@ -91,22 +91,22 @@ void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    collDistDeviceAddress->SetLabel(Address::getString(data->data64_1));
-    collNodeDeviceAddress->SetLabel(Address::getString(data->data64_2));
+    collDistDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    collNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_2));
 
 }
 
 void UserInterface::collUpdateAttachedDistAddress(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    collDistAddress->SetLabel(Address::getString(data->data64_1));
+    collDistAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
 
 }
 
 void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    collNodeAddress->SetLabel(Address::getString(data->data64_1));
+    collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
 
 }
 

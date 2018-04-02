@@ -6,7 +6,7 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-long Address::createAddress(INTERFACES interface, long base, int port, int helper) {
+long Address::createAddress(INTERFACE interface, long base, int port, int helper) {
 
     return ((long)(interface & INTERFACE_MASK) << 56) |
             ((long)(helper & HELPER_MASK) << 48) |
@@ -14,9 +14,9 @@ long Address::createAddress(INTERFACES interface, long base, int port, int helpe
             (base & ADDRESS_MASK);
 }
 
-INTERFACES Address::getInterface(long address) {
+INTERFACE Address::getInterface(long address) {
 
-    return (INTERFACES)((address >> 56) & INTERFACE_MASK);
+    return (INTERFACE)((address >> 56) & INTERFACE_MASK);
 }
 
 long Address::getBase(long address) {
@@ -33,21 +33,4 @@ int Address::getHelper(long address) {
 
     return (int)((address >> 48) & HELPER_MASK);
 
-}
-
-std::string Address::getString(long address) {
-
-    INTERFACES _interface = getInterface(address);
-
-    switch (_interface) {
-
-        case INTERFACE_NET:
-            return Net::getAddressString(address);
-
-        case INTERFACE_UNIXSOCKET:
-            return UnixSocket::getAddressString(address);
-
-        default:
-            return "Invalid Address";
-    }
 }

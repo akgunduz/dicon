@@ -70,9 +70,9 @@ bool Net::initTCP() {
             return false;
         }
 
-        getDevice()->setAddress(address);
+        setAddress(address);
 
-        LOG_I("Using address : %s", Address::getString(address).c_str());
+        LOG_I("Using address : %s", InterfaceTypes::getAddressString(address).c_str());
 
         return true;
     }
@@ -115,7 +115,7 @@ bool Net::initMulticast() {
         return false;
     }
 
-    ip_mreq imreq = getInetMulticastAddress(getDevice()->getAddress());
+    ip_mreq imreq = getInetMulticastAddress(getAddress());
 
     if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
         LOG_E("Socket option with err : %d!!!", errno);
@@ -123,7 +123,7 @@ bool Net::initMulticast() {
         return false;
     }
 
-    getDevice()->setMulticastAddress(multicastAddress);
+    setMulticastAddress(multicastAddress);
 
     LOG_I("Using multicast address : %s", getAddressString(multicastAddress).c_str());
 
@@ -239,7 +239,7 @@ void Net::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->getHeader()->setOwnerAddress(getDevice()->getAddress());
+	msg->getHeader()->setOwnerAddress(getAddress());
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
@@ -254,11 +254,11 @@ void Net::runMulticastSender(Message *msg) {
         return;
     }
 
-    struct in_addr interface_addr = getInetAddressByAddress(getDevice()->getAddress()).sin_addr;
+    struct in_addr interface_addr = getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    msg->getHeader()->setOwnerAddress(getDevice()->getAddress());
-    msg->setMulticastAddress(getInetAddressByAddress(getDevice()->getMulticastAddress()));
+    msg->getHeader()->setOwnerAddress(getAddress());
+    msg->setMulticastAddress(getInetAddressByAddress(getMulticastAddress()));
     msg->writeToStream(clientSocket);
 
     shutdown(clientSocket, SHUT_RDWR);
@@ -272,7 +272,7 @@ Net::~Net() {
 }
 
 
-INTERFACES Net::getType() {
+INTERFACE Net::getType() {
 
 	return INTERFACE_NET;
 
@@ -300,8 +300,6 @@ bool Net::createDevices() {
                                                ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
                                                address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                                (loop->ifa_flags & IFF_LOOPBACK) > 0));
-
-            device->setAddressList(getAddressList);
 
             deviceList.push_back(device);
         }

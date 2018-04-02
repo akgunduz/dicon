@@ -7,19 +7,15 @@
 
 Interface::Interface(Unit host, Device *device, const InterfaceCallback *receiveCB) {
 
-	try {
+    scheduler = new Scheduler();
 
-		scheduler = new Scheduler();
-
-	} catch (const std::runtime_error e) {
-		LOG_E("Scheduler Init failed!!!");
-		throw std::runtime_error("Interface : Scheduler Start failed!!!");
-	}
+    this->address = 0;
+    this->multicastAddress = 0;
 
 	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
 
     setHost(host);
-    getDevice()->set(device);
+    setDevice(device);
 
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
 	scheduler->setCB(MESSAGE_SEND, sendCB);
@@ -123,15 +119,19 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 }
 
 long Interface::getAddress() {
-	return getDevice()->getAddress();
+	return address;
 }
 
 long Interface::getMulticastAddress() {
-    return getDevice()->getMulticastAddress();
+    return multicastAddress;
 }
 
-Device *Interface::getDevice() {
-    return &device;
+void Interface::setAddress(long address) {
+    this->address = address;
+}
+
+void Interface::setMulticastAddress(long multicastAddress) {
+    this->multicastAddress = multicastAddress;
 }
 
 Unit Interface::getHost() {
@@ -140,4 +140,12 @@ Unit Interface::getHost() {
 
 void Interface::setHost(Unit host) {
     this->host = host;
+}
+
+Device *Interface::getDevice() {
+    return device;
+}
+
+void Interface::setDevice(Device *device) {
+    this->device = device;
 }

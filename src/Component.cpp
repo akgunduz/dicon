@@ -87,7 +87,7 @@ bool Component::onReceive(long address, Message *msg) {
           "Receive : \"%s\" from %s: at %s",
           MessageTypes::getName(msg->getHeader()->getType()),
           ComponentTypes::getName(msg->getHeader()->getOwner().getType()),
-          Address::getString(address).c_str());
+          InterfaceTypes::getAddressString(address).c_str());
 
     switch(msg->getHeader()->getOwner().getType()) {
 
@@ -102,7 +102,8 @@ bool Component::onReceive(long address, Message *msg) {
 
         default:
             LOG_W("Wrong message received : %d from %s, disgarding",
-                  msg->getHeader()->getType(), Address::getString(address).c_str());
+                  msg->getHeader()->getType(),
+                  InterfaceTypes::getAddressString(address).c_str());
             delete msg;
             return false;
     }
@@ -118,7 +119,7 @@ long Component::getInterfaceAddress(COMPONENT target) {
 }
 
 
-INTERFACES Component::getInterfaceType(COMPONENT target) {
+INTERFACE Component::getInterfaceType(COMPONENT target) {
 
     if (interfaces[target] != NULL) {
         return interfaces[target]->getType();
@@ -137,14 +138,13 @@ bool Component::isSupportMulticast(COMPONENT target) {
     return false;
 }
 
-
 bool Component::send(COMPONENT target, long address, Message *msg) {
 
     LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
             "Send : \"%s\" to %s: at %s",
             MessageTypes::getName(msg->getHeader()->getType()),
             ComponentTypes::getName(target),
-            Address::getString(address).c_str());
+            InterfaceTypes::getAddressString(address).c_str());
 
     return interfaces[target]->push(MESSAGE_SEND, address, msg);
 }
@@ -162,7 +162,6 @@ bool Component::put(COMPONENT target, long address, Message *msg) {
 
     return interfaces[target]->push(MESSAGE_RECEIVE, address, msg);
 }
-
 
 std::vector<long> Component::getAddressList(COMPONENT target) {
 

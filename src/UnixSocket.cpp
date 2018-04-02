@@ -56,7 +56,7 @@ bool UnixSocket::initUnixSocket() {
 			return false;
 		}
 
-		getDevice()->setAddress(address);
+		setAddress(address);
 
         LOG_I("Using address : %s", getAddressString(address).c_str());
 
@@ -180,7 +180,7 @@ UnixSocket::~UnixSocket() {
 }
 
 
-INTERFACES UnixSocket::getType() {
+INTERFACE UnixSocket::getType() {
 
 	return INTERFACE_UNIXSOCKET;
 
@@ -190,8 +190,6 @@ bool UnixSocket::createDevices() {
 
     srand(time(NULL));
     Device *device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), rand());
-
-    device->setAddressList(getAddressList);
 
     deviceList.push_back(device);
 
@@ -238,11 +236,11 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
         return list;
     }
 
-    std::string ownAddressPath = "";
-
-    ownAddressPath = UNIXSOCKET_FILE_PREFIX;
-	ownAddressPath.append(Address::getString(device->getAddress()));
-	ownAddressPath.append(UNIXSOCKET_FILE_SUFFIX);
+//    std::string ownAddressPath = "";
+//
+//    ownAddressPath = UNIXSOCKET_FILE_PREFIX;
+//	ownAddressPath.append(Address::getString(device->getAddress()));
+//	ownAddressPath.append(UNIXSOCKET_FILE_SUFFIX);
 
     dirent *entry;
 
@@ -252,9 +250,9 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
             continue;
         }
 
-        if (ownAddressPath.compare(entry->d_name) == 0) {
-            continue;
-        }
+//        if (ownAddressPath.compare(entry->d_name) == 0) {
+//            continue;
+//        }
 
         std::string path = entry->d_name;
 

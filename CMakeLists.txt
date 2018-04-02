@@ -56,6 +56,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
         ${SOURCE_PATH}/ComponentTypes.cpp
+        ${SOURCE_PATH}/InterfaceTypes.cpp
         )
 
 set(WX_FILES

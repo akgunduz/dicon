@@ -84,12 +84,13 @@ bool NodeManager::setIdle(long address, short id, double totalTime) {
 		NodeItem *node = nodes.at(address);
 
         node->state = IDLE;
-		LOG_T("Node at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
+		LOG_T("Node at address : %s switch to state : %s",
+			  InterfaceTypes::getAddressString(address).c_str(), sStates[IDLE]);
 
 		if (node->stopWatch.isInitiated()) {
 			LOG_U(UI_UPDATE_DIST_LOG,
 					"Node at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
-				  Address::getString(address).c_str(), node->stopWatch.stop(), totalTime);
+                  InterfaceTypes::getAddressString(address).c_str(), node->stopWatch.stop(), totalTime);
 		}
 
 	} catch (const std::out_of_range e) {
@@ -110,7 +111,8 @@ bool NodeManager::validate(long address, short id) {
 		return false;
 	}
 
-	LOG_T("Node at address : %s is Alive", Address::getString(address).c_str());
+	LOG_T("Node at address : %s is Alive",
+          InterfaceTypes::getAddressString(address).c_str());
 	return true;
 
 }
@@ -128,10 +130,12 @@ bool NodeManager::setBusy(long address) {
         node->state = BUSY;
         node->usage++;
         node->stopWatch.start();
-		LOG_T("Node at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
+		LOG_T("Node at address : %s switch to state : %s",
+              InterfaceTypes::getAddressString(address).c_str(), sStates[BUSY]);
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a node with address : %s", Address::getString(address).c_str());
+		LOG_E("Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(address).c_str());
 		return false;
 	}
 
@@ -150,10 +154,12 @@ bool NodeManager::remove(long address) {
 		readyBackup = (int) fmin(totalBackup, readyBackup + 1);
 
 		LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-		LOG_T("Node at address %s removed from the list", Address::getString(address).c_str());
+		LOG_T("Node at address %s removed from the list",
+              InterfaceTypes::getAddressString(address).c_str());
 
 	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a node with address : %s", Address::getString(address).c_str());
+		LOG_E("Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(address).c_str());
 		return false;
 	}
 
@@ -170,7 +176,8 @@ bool NodeManager::add(long address, short id) {
 	readyBackup = 0;
 
 	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-	LOG_T("Node at address : %s added to the list", Address::getString(address).c_str());
+	LOG_T("Node at address : %s added to the list",
+          InterfaceTypes::getAddressString(address).c_str());
 
 	return true;
 }

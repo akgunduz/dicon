@@ -12,6 +12,7 @@
 #include "Interface.h"
 #include "Message.h"
 #include "Component.h"
+#include "InterfaceTypes.h"
 
 #define MAX_SIMUL_CLIENTS 10
 #define LOOPBACK_RANGE 256
@@ -39,20 +40,20 @@ private :
 	static sockaddr_in getInetAddressByPort(int);
     static ip_mreq getInetMulticastAddress(long);
 
-    static std::vector<long> getAddressList(Device*);
-	static std::vector<Device*>deviceList;
+    static std::vector<Device*>deviceList;
 
 public :
 
 	Net(Unit, Device*, const InterfaceCallback *);
 	~Net();
 
-    INTERFACES getType();
+    INTERFACE getType();
 	bool isSupportMulticast();
 
 	static bool createDevices();
 	static std::vector<Device*>* getDevices();
     static std::string getAddressString(long);
+	static std::vector<long> getAddressList(Device*);
 
 };
 

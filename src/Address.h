@@ -5,7 +5,7 @@
 #ifndef BANKOR_ADDRESS_H
 #define BANKOR_ADDRESS_H
 
-#include "Common.h"
+#include "InterfaceTypes.h"
 
 #define INTERFACE_MASK 0x01
 #define ADDRESS_MASK 0xFFFFFFFF
@@ -16,17 +16,15 @@ class Address {
 
 private:
     Address(){};
-
-
+    
 public:
 
-    static INTERFACES getInterface(long address);
+    static INTERFACE getInterface(long address);
     static long getBase(long);
     static int getPort(long);
     static int getHelper(long);
 
-    static std::string getString(long address);
-    static long createAddress(INTERFACES, long base, int port, int helper);
+    static long createAddress(INTERFACE, long base, int port, int helper);
 };
 
 #endif //BANKOR_ADDRESS_H
