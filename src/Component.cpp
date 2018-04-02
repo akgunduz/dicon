@@ -6,8 +6,6 @@
 
 Component::Component(Unit host, const char* rootPath) {
 
-    memset(interfaces, 0, sizeof(Interface));
-
     setHost(host);
     Unit::setRootPath(getHost().getType(), rootPath);
 
