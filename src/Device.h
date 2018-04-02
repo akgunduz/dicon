@@ -7,30 +7,43 @@
 
 #include "Common.h"
 
+class Device;
+
+typedef std::vector<long> (*fGetAddressList)(Device*);
+
 class Device {
 
     char name[50];
     INTERFACES type;
 
-    long address;
-    long helper;
+    long base;
+    int helper;
     bool loopback;
 
-    std::vector<long> addressList;
+    long address;
+    long multicastAddress;
+
+    fGetAddressList getAddressListFunc;
 
 public:
 
-    Device(const char*, INTERFACES, long, long, bool = false);
+    Device(const char*, INTERFACES, long, int, bool = false);
+    Device();
 
     const char* getName();
     INTERFACES getType();
+    long getBase();
     long getAddress();
-    long getHelper();
+    long getMulticastAddress();
+    int getHelper();
     bool isLoopback();
-    void setPort(int port);
-    void setAddressList(std::vector<long>);
+
+    void setAddressList(fGetAddressList);
     std::vector<long> getAddressList();
 
+    void set(Device*);
+    void setAddress(long);
+    void setMulticastAddress(long);
 };
 
 

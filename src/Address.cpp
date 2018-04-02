@@ -21,7 +21,7 @@ INTERFACES Address::getInterface(long address) {
 
 long Address::getBase(long address) {
 
-    return address & IPADDRESS_MASK;
+    return address & ADDRESS_MASK;
 }
 
 int Address::getPort(long address) {
@@ -31,7 +31,7 @@ int Address::getPort(long address) {
 
 int Address::getHelper(long address) {
 
-    return (int)((address >> 48) & NETMASK_MASK);
+    return (int)((address >> 48) & HELPER_MASK);
 
 }
 

@@ -4,13 +4,21 @@
 
 #include "Device.h"
 
-Device::Device(const char *_name, INTERFACES type, long address, long helper, bool loopback) {
+Device::Device() {
+
+    strcpy(this->name, "null");
+    this->type = INTERFACE_MAX;
+}
+
+Device::Device(const char *_name, INTERFACES type, long base, int helper, bool loopback) {
 
     strcpy(this->name, _name);
     this->type = type;
-    this->address = address;
+    this->base = base;
     this->helper = helper;
     this->loopback = loopback;
+    this->address = 0;
+    this->multicastAddress = 0;
 }
 
 const char* Device::getName() {
@@ -21,11 +29,11 @@ INTERFACES Device::getType() {
     return type;
 }
 
-long Device::getAddress() {
-    return address;
+long Device::getBase() {
+    return base;
 }
 
-long Device::getHelper() {
+int Device::getHelper() {
     return helper;
 }
 
@@ -33,12 +41,40 @@ bool Device::isLoopback() {
     return loopback;
 }
 
-void Device::setAddressList(std::vector<long> list) {
-    addressList = list;
+void Device::setAddressList(fGetAddressList getAddressList) {
+    this->getAddressListFunc = getAddressList;
 }
 
 std::vector<long> Device::getAddressList() {
-    return addressList;
+    return getAddressListFunc(this);
+}
+
+long Device::getAddress() {
+    return address;
+}
+
+void Device::setAddress(long address) {
+    this->address = address;
+}
+
+void Device::setMulticastAddress(long multicastAddress) {
+    this->multicastAddress = multicastAddress;
+}
+
+long Device::getMulticastAddress() {
+    return multicastAddress;
+}
+
+void Device::set(Device *device) {
+
+    strcpy(this->name, device->getName());
+    this->type = device->getType();
+    this->base = device->getBase();
+    this->helper = device->getHelper();
+    this->loopback = device->isLoopback();
+    this->address = device->getAddress();
+    this->multicastAddress = device->getMulticastAddress();
+    this->getAddressListFunc = device->getAddressListFunc;
 }
 
 

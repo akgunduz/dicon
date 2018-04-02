@@ -45,13 +45,12 @@ private :
 	static void* runSender(void *);
 	static bool senderCB(void *, SchedulerItem *);
 
-protected :
-    Unit host;
-    Device *device;
+	Device device;
+	Unit host;
 
-	long address;
-    long multicastAddress;
-	unsigned short lastFreePort;
+    void setHost(Unit);
+
+protected :
 
 	Scheduler *scheduler;
 	pthread_t thread;
@@ -64,13 +63,12 @@ protected :
 	bool initThread();
 	void end();
 	Interface(Unit host, Device *, const InterfaceCallback *);
-    //long createAddress(long address, int port, int helper);
-	//virtual void setAddress(unsigned short) = 0;
 
 public :
     virtual ~Interface();
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
+	Unit getHost();
 	Device* getDevice();
     long getAddress();
     long getMulticastAddress();

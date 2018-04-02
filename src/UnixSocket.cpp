@@ -28,13 +28,13 @@ bool UnixSocket::initUnixSocket() {
     }
 
 	int tryCount = 10;
-    lastFreePort = 0;
+    int lastFreePort = 0;
 
 	for (int j = tryCount; j > 0; j--) {
 
-        address = Address::createAddress(device->getType(), device->getAddress(), lastFreePort, device->getHelper());
+        long address = Address::createAddress(getDevice()->getType(), getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
 
-		sockaddr_un serverAddress = getUnixAddress(getAddress());
+		sockaddr_un serverAddress = getUnixAddress(address);
 
 		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
@@ -43,8 +43,6 @@ bool UnixSocket::initUnixSocket() {
 			lastFreePort++;
 			continue;
 		}
-
-		LOG_I("Using address : %s", getAddressString(getAddress()).c_str());
 
 		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
 			LOG_E("Socket listen with err : %d!!!", errno);
@@ -57,6 +55,10 @@ bool UnixSocket::initUnixSocket() {
 			close(unixSocket);
 			return false;
 		}
+
+		getDevice()->setAddress(address);
+
+        LOG_I("Using address : %s", getAddressString(address).c_str());
 
 		return true;
 	}
@@ -189,7 +191,7 @@ bool UnixSocket::createDevices() {
     srand(time(NULL));
     Device *device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), rand());
 
-    device->setAddressList(getAddressList(device));
+    device->setAddressList(getAddressList);
 
     deviceList.push_back(device);
 
@@ -212,7 +214,7 @@ bool UnixSocket::isSupportMulticast() {
 std::string UnixSocket::getAddressString(long address) {
 
     char sAddress[50];
-    sprintf(sAddress, "%ld", address & UNIXSOCKETADDRESS_MASK);
+    sprintf(sAddress, "%ld", address);
     return std::string(sAddress);
 }
 
@@ -222,7 +224,7 @@ sockaddr_un UnixSocket::getUnixAddress(long address) {
     bzero((char *) &unix_addr, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
     sprintf(unix_addr.sun_path, "%s%s%ld%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
-            address & UNIXSOCKETADDRESS_MASK, UNIXSOCKET_FILE_SUFFIX);
+            address, UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }
 
@@ -236,11 +238,11 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
         return list;
     }
 
-    std::string path1 = "";
+    std::string ownAddressPath = "";
 
-    path1 = UNIXSOCKET_FILE_PREFIX;
-    path1.append(Address::getString(device->getAddress()));
-    path1.append(UNIXSOCKET_FILE_SUFFIX);
+    ownAddressPath = UNIXSOCKET_FILE_PREFIX;
+	ownAddressPath.append(Address::getString(device->getAddress()));
+	ownAddressPath.append(UNIXSOCKET_FILE_SUFFIX);
 
     dirent *entry;
 
@@ -250,7 +252,7 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
             continue;
         }
 
-        if (path1.compare(entry->d_name) == 0) {
+        if (ownAddressPath.compare(entry->d_name) == 0) {
             continue;
         }
 
@@ -258,7 +260,7 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
 
         uint32_t start = (uint32_t)path.find('_') + 1;
         std::string saddress = path.substr(start, path.find('.') - start);
-        long address = (unsigned)atol(saddress.c_str());
+        long address = atol(saddress.c_str());
 
         list.push_back(address);
 

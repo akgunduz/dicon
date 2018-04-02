@@ -18,11 +18,8 @@ Interface::Interface(Unit host, Device *device, const InterfaceCallback *receive
 
 	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
 
-    this->host = host;
-	this->device = device;
-    this->lastFreePort = 0;
-    this->address = 0;
-    this->multicastAddress = 0;
+    setHost(host);
+    getDevice()->set(device);
 
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
 	scheduler->setCB(MESSAGE_SEND, sendCB);
@@ -52,7 +49,7 @@ bool Interface::initThread() {
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
 	Argument *argument = new Argument(this);
-	argument->host = host;
+	argument->host = getHost();
     argument->_interface = this;
 
 	int pthr = pthread_create(&thread, &attr, runReceiver, (void *)argument);
@@ -126,13 +123,21 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 }
 
 long Interface::getAddress() {
-	return address;
+	return getDevice()->getAddress();
 }
 
 long Interface::getMulticastAddress() {
-    return multicastAddress;
+    return getDevice()->getMulticastAddress();
 }
 
 Device *Interface::getDevice() {
-    return device;
+    return &device;
+}
+
+Unit Interface::getHost() {
+    return host;
+}
+
+void Interface::setHost(Unit host) {
+    this->host = host;
 }

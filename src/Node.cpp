@@ -12,9 +12,6 @@ Node::Node(const char *rootPath) : job(NULL),
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
 	distributorAddress = 0;
-
-	LOG_I("Instance is created!!!");
-
 }
 
 Node::~Node() {

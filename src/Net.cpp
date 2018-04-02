@@ -43,21 +43,20 @@ bool Net::initTCP() {
     }
 
     int tryCount = 10;
-    lastFreePort = DEFAULT_PORT;
+    int lastFreePort = DEFAULT_PORT;
 
     for (int j = tryCount; j > 0; j--) {
 
-        address = Address::createAddress(device->getType(), device->getAddress(), lastFreePort, (int) device->getHelper());
+        long address = Address::createAddress(getDevice()->getType(),
+                                              getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
 
-        struct sockaddr_in serverAddress = getInetAddressByAddress(getAddress());
+        struct sockaddr_in serverAddress = getInetAddressByAddress(address);
 
         if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
             lastFreePort++;
             continue;
         }
-
-        LOG_I("Using address : %s", Address::getString(address).c_str());
 
         if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
             LOG_E("Socket listen with err : %d!!!", errno);
@@ -70,6 +69,10 @@ bool Net::initTCP() {
             close(netSocket);
             return false;
         }
+
+        getDevice()->setAddress(address);
+
+        LOG_I("Using address : %s", Address::getString(address).c_str());
 
         return true;
     }
@@ -84,7 +87,7 @@ bool Net::initTCP() {
 
 bool Net::initMulticast() {
 
-    multicastAddress = Address::createAddress(device->getType(), MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
+    long multicastAddress = Address::createAddress(getDevice()->getType(), MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
 
     multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (multicastSocket < 0) {
@@ -112,15 +115,17 @@ bool Net::initMulticast() {
         return false;
     }
 
-    LOG_I("Using multicast address : %s", getAddressString(multicastAddress).c_str());
-
-    ip_mreq imreq = getInetMulticastAddress(address);
+    ip_mreq imreq = getInetMulticastAddress(getDevice()->getAddress());
 
     if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
         LOG_E("Socket option with err : %d!!!", errno);
         close(multicastSocket);
         return false;
     }
+
+    getDevice()->setMulticastAddress(multicastAddress);
+
+    LOG_I("Using multicast address : %s", getAddressString(multicastAddress).c_str());
 
     return true;
 }
@@ -234,7 +239,7 @@ void Net::runSender(long target, Message *msg) {
 
 	LOG_T("Socket sender %d is connected !!!", clientSocket);
 
-	msg->getHeader()->setOwnerAddress(address);
+	msg->getHeader()->setOwnerAddress(getDevice()->getAddress());
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
@@ -249,22 +254,16 @@ void Net::runMulticastSender(Message *msg) {
         return;
     }
 
-    struct in_addr interface_addr = getInetAddressByAddress(address).sin_addr;
+    struct in_addr interface_addr = getInetAddressByAddress(getDevice()->getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    msg->getHeader()->setOwnerAddress(address);
-    msg->setMulticastAddress(getInetAddressByAddress(multicastAddress));
+    msg->getHeader()->setOwnerAddress(getDevice()->getAddress());
+    msg->setMulticastAddress(getInetAddressByAddress(getDevice()->getMulticastAddress()));
     msg->writeToStream(clientSocket);
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);
 }
-
-//void Net::setAddress(unsigned short port) {
-//
-//    address = Address::setNetAddress(device->getAddress(),
-//			port, (int) device->getHelper());
-//}
 
 Net::~Net() {
 	end();
@@ -302,7 +301,7 @@ bool Net::createDevices() {
                                                address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                                (loop->ifa_flags & IFF_LOOPBACK) > 0));
 
-            device->setAddressList(getAddressList(device));
+            device->setAddressList(getAddressList);
 
             deviceList.push_back(device);
         }
@@ -399,9 +398,9 @@ std::vector<long> Net::getAddressList(Device* device) {
         for (int i = 0; i < LOOPBACK_RANGE; i++) {
 
             long destAddress = Address::createAddress(device->getType(),
-                                                      device->getAddress(), DEFAULT_PORT + i, device->getHelper());
+                                                      device->getBase(), DEFAULT_PORT + i, device->getHelper());
 
-            if (destAddress != device->getAddress()) {
+            if (destAddress != device->getBase()) {
 
                 list.push_back(destAddress);
 
@@ -415,13 +414,13 @@ std::vector<long> Net::getAddressList(Device* device) {
 
         int mask = ((int)0x80000000) >> (device->getHelper() - 1);
 
-        long net = mask & device->getAddress();
+        long net = mask & device->getBase();
 
         long startIP = net + 1;
 
         for (int i = 0; i < range; i++) {
 
-            if (startIP != device->getAddress()) {
+            if (startIP != device->getBase()) {
 
                 long destAddress = Address::createAddress(device->getType(),
                                                           startIP, DEFAULT_PORT, device->getHelper());
