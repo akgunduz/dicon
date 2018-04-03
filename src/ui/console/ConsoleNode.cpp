@@ -23,7 +23,7 @@ bool Console::nodeInit(int distInterface, int collInterface) {
 
 	try {
 
-		Connector::setSelectedDevices(distInterface, collInterface);
+		DeviceList::getInstance()->setActive(distInterface, collInterface);
 
 		nodeObject = new Node(path);
 
@@ -101,8 +101,8 @@ void Console::nodeUpdateAddresses(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
 	LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
-		  Address::getString(data->data64_1).c_str(),
-		  Address::getString(data->data64_2).c_str());
+		  InterfaceTypes::getAddressString(data->data64_1).c_str(),
+          InterfaceTypes::getAddressString(data->data64_2).c_str());
 
 }
 
@@ -116,7 +116,7 @@ void Console::nodeUpdateState(ConsoleEvent &event) {
 void Console::nodeUpdateAttachedCollAddress(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("Node Attached Collector : %s", Address::getString(data->data64_1).c_str());
+	LOG_S("Node Attached Collector : %s", InterfaceTypes::getAddressString(data->data64_1).c_str());
 
 }
 

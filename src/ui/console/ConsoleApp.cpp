@@ -14,13 +14,13 @@ int main(int argc, char** argv) {
 
 		char cmd = argv[1][0];
 
-		Connector::createDevices();
+		DeviceList *deviceList = DeviceList::getInstance();
 
 		switch(cmd) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
-				for (uint32_t i = 0; i < Connector::getCount(); i++) {
-					LOG_S("%s : %s", sInterfaces[Connector::getDevice(i)->getType()], Connector::getDevice(i)->getName());
+				for (uint32_t i = 0; i < deviceList->getCount(); i++) {
+					LOG_S("%s : %s", sInterfaces[deviceList->get(i)->getType()], deviceList->get(i)->getName());
 				}
 				break;
 			case 'd':

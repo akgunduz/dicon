@@ -13,7 +13,7 @@ FileList::FileList(const char *parentDir) {
 bool FileList::set(FileItem *item) {
 
     list[item->getMD5()->data] = item;
-    return false;
+    return true;
 }
 
 bool FileList::check(FileItem *item) {

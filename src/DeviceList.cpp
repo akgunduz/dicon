@@ -29,10 +29,10 @@ DeviceList::DeviceList() {
                 continue;
             }
 
-            device = new Device(Device(loop->ifa_name, INTERFACE_NET,
+            device = new Device(loop->ifa_name, INTERFACE_NET,
                                                ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
                                                Address::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
-                                               (loop->ifa_flags & IFF_LOOPBACK) > 0));
+                                               (loop->ifa_flags & IFF_LOOPBACK) > 0);
 
             add(device);
         }
@@ -70,13 +70,10 @@ Device *DeviceList::getActive(int index) {
     return devices[active[index]];
 }
 
-bool DeviceList::setActive(int activeIndex, int index) {
+bool DeviceList::setActive(int index0, int index1) {
 
-    if (activeIndex >= MAX_ACTIVE) {
-        return false;
-    }
-
-    active[activeIndex] = index;
+    active[0] = index0;
+    active[1] = index1;
 }
 
 bool DeviceList::isActiveDifferent() {

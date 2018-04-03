@@ -273,7 +273,6 @@ Net::~Net() {
 INTERFACE Net::getType() {
 
 	return INTERFACE_NET;
-
 }
 
 bool Net::isSupportMulticast() {
