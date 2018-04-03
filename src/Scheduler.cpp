@@ -124,6 +124,7 @@ void *Scheduler::run(void *arg) {
         SchedulerItem *item = scheduler->pull();
 
         if (item->type == END_ITEM) {
+            delete item;
             break;
         }
 
@@ -131,6 +132,8 @@ void *Scheduler::run(void *arg) {
         if (iCB != nullptr) {
             iCB->cb(iCB->arg, item);
         }
+
+        delete item;
 	}
 
 	return nullptr;

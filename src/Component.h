@@ -6,6 +6,7 @@
 #define BANKOR_COMPONENT_H
 
 #include "Connector.h"
+#include "DeviceList.h"
 #include "MessageTypes.h"
 
 class Component {
@@ -30,7 +31,6 @@ public:
     bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(long, Message *);
-    bool isInterfaceDifferent();
 
     bool send(COMPONENT, long, Message*);
     bool send(COMPONENT, Message*);

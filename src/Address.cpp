@@ -32,5 +32,16 @@ int Address::getPort(long address) {
 int Address::getHelper(long address) {
 
     return (int)((address >> 48) & HELPER_MASK);
+}
 
+int Address::address2prefix(long address) {
+
+    int i = 0;
+    uint32_t ip = (uint32_t) Address::getBase(address);
+    while(ip > 0) {
+        ip = ip >> 1;
+        i++;
+    }
+
+    return i;
 }

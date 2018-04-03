@@ -3,6 +3,7 @@
 //
 
 #include "Component.h"
+#include "DeviceList.h"
 
 Component::Component(Unit host, const char* rootPath) {
 
@@ -11,12 +12,14 @@ Component::Component(Unit host, const char* rootPath) {
 
     callback = new InterfaceCallback(receiveCB, this);
 
+    DeviceList *deviceList = DeviceList::getInstance();
+
     switch(host.getType()) {
 
         case COMP_DISTRIBUTOR:
-            interfaces[COMP_COLLECTOR] = Connector::createInterface(host, Connector::getSelectedDevice(0), callback);
-            if (isInterfaceDifferent()) {
-                interfaces[COMP_NODE] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_COLLECTOR] = Connector::createInterface(host, deviceList->getActive(0), callback);
+            if (deviceList->isActiveDifferent()) {
+                interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
             } else {
                 interfaces[COMP_NODE] = interfaces[COMP_COLLECTOR];
 
@@ -24,16 +27,16 @@ Component::Component(Unit host, const char* rootPath) {
             break;
 
         case COMP_COLLECTOR:
-            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, Connector::getSelectedDevice(0), callback);
-            if (isInterfaceDifferent()) {
-                interfaces[COMP_NODE] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, deviceList->getActive(0), callback);
+            if (deviceList->isActiveDifferent()) {
+                interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
             } else {
                 interfaces[COMP_NODE] = interfaces[COMP_DISTRIBUTOR];
             }
             break;
 
         case COMP_NODE:
-            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, Connector::getSelectedDevice(1), callback);
+            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, deviceList->getActive(1), callback);
             interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
             break;
 
@@ -56,11 +59,6 @@ Component::~Component() {
     delete interfaces[COMP_DISTRIBUTOR];
 
     delete callback;
-}
-
-bool Component::isInterfaceDifferent() {
-
-    return Connector::getSelectedDevice(0) != Connector::getSelectedDevice(1);
 }
 
 Unit Component::getHost() {

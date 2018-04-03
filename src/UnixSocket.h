@@ -27,8 +27,6 @@ private :
 
     static sockaddr_un getUnixAddress(long);
 
-    static std::vector<Device*>deviceList;
-
 public :
 
 	UnixSocket(Unit, Device*, const InterfaceCallback *);
@@ -37,9 +35,6 @@ public :
     INTERFACE getType();
 	bool isSupportMulticast();
 
-
-	static bool createDevices();
-    static std::vector<Device*>* getDevices();
     static std::string getAddressString(long);
 	static std::vector<long> getAddressList(Device*);
 };

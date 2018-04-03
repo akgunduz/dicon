@@ -98,10 +98,12 @@ bool UserInterface::Create( wxWindow* parent, wxWindowID id, const wxString& cap
 
     Util::cleanup();
 
-    for (uint32_t i = 0; i < Connector::getCount(); i++) {
-        distCollInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
-        nodeInterface->Insert(wxString(sInterfaces[Connector::getDevice(i)->getType()]) + " --> " + Connector::getDevice(i)->getName(), i);
-        if (Connector::getDevice(i)->isLoopback()) {
+    DeviceList *deviceList = DeviceList::getInstance();
+
+    for (uint32_t i = 0; i < deviceList->getCount(); i++) {
+        distCollInterface->Insert(wxString(sInterfaces[deviceList->get(i)->getType()]) + " --> " + deviceList->get(i)->getName(), i);
+        nodeInterface->Insert(wxString(sInterfaces[deviceList->get(i)->getType()]) + " --> " + deviceList->get(i)->getName(), i);
+        if (deviceList->get(i)->isLoopback()) {
             distCollInterface->SetSelection(i);
             nodeInterface->SetSelection(i);
         }
@@ -376,8 +378,9 @@ void UserInterface::updateLog(wxCommandEvent& event) {
 
 void UserInterface::OnInterfaceInitClick( wxCommandEvent& event )
 {
-    Connector::setSelectedDevices((unsigned char)distCollInterface->GetSelection(),
-                                  (unsigned char)nodeInterface->GetSelection());
+
+    DeviceList::getInstance()->setActive(distCollInterface->GetSelection(),
+                                         nodeInterface->GetSelection());
 
     interfaceInit->Enable(false);
     distCollInterface->Enable(false);

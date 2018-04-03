@@ -1,5 +1,6 @@
 //
-// Created by akgunduz on 02.04.2018.
+// Created by Haluk AKGUNDUZ on 02/04/18.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef BANKOR_INTERFACETYPES_H

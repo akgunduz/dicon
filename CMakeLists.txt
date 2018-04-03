@@ -57,6 +57,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Block.cpp
         ${SOURCE_PATH}/ComponentTypes.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
+        ${SOURCE_PATH}/DeviceList.cpp
         )
 
 set(WX_FILES

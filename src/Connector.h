@@ -16,21 +16,9 @@ class Connector {
 
 private:
 
-	static std::vector<Device*>deviceList;
-    static Device *selectedDevices[2] ;
-	static bool devicesInitialized;
-
     Connector(){};
 
 public:
-
-	static bool createDevices();
-	static std::vector<Device*>* getDevices();
-	static Device* getDevice(int);
-	static unsigned long getCount();
-
-    static void setSelectedDevices(int, int);
-    static Device* getSelectedDevice(unsigned char);
 
     static Interface* createInterface(Unit component, Device* device, const InterfaceCallback *cb);
 };

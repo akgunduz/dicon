@@ -34,13 +34,10 @@ private :
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
 
-    static int address2prefix(long);
     static std::string getIPString(long);
 	static sockaddr_in getInetAddressByAddress(long);
 	static sockaddr_in getInetAddressByPort(int);
     static ip_mreq getInetMulticastAddress(long);
-
-    static std::vector<Device*>deviceList;
 
 public :
 
@@ -50,8 +47,6 @@ public :
     INTERFACE getType();
 	bool isSupportMulticast();
 
-	static bool createDevices();
-	static std::vector<Device*>* getDevices();
     static std::string getAddressString(long);
 	static std::vector<long> getAddressList(Device*);
 

@@ -4,6 +4,7 @@
 //
 
 #include "Distributor.h"
+#include "DeviceList.h"
 
 Distributor::Distributor(const char *rootPath, double backupRate) :
             Component(Unit(COMP_DISTRIBUTOR), rootPath){
@@ -216,7 +217,7 @@ bool Distributor::sendWakeupMessagesAll() {
 
 	sendWakeupMessage(COMP_NODE);
 
-    if (isInterfaceDifferent()) {
+    if (DeviceList::getInstance()->isActiveDifferent()) {
         sendWakeupMessage(COMP_COLLECTOR);
     }
 

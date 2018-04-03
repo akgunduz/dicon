@@ -5,8 +5,6 @@
 
 #include "UnixSocket.h"
 
-std::vector<Device*> UnixSocket::deviceList;
-
 UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
 		: Interface(host, device, cb) {
 
@@ -186,24 +184,6 @@ INTERFACE UnixSocket::getType() {
 
 }
 
-bool UnixSocket::createDevices() {
-
-    srand(time(NULL));
-    Device *device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), rand());
-
-    deviceList.push_back(device);
-
-	return true;
-}
-
-std::vector<Device*>*  UnixSocket::getDevices() {
-
-    if (deviceList.size() == 0) {
-        createDevices();
-    }
-    return &deviceList;
-}
-
 bool UnixSocket::isSupportMulticast() {
 
     return false;
@@ -236,12 +216,6 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
         return list;
     }
 
-//    std::string ownAddressPath = "";
-//
-//    ownAddressPath = UNIXSOCKET_FILE_PREFIX;
-//	ownAddressPath.append(Address::getString(device->getAddress()));
-//	ownAddressPath.append(UNIXSOCKET_FILE_SUFFIX);
-
     dirent *entry;
 
     while ((entry = readdir(unixdir)) != NULL) {
@@ -249,10 +223,6 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
         if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) != 0) {
             continue;
         }
-
-//        if (ownAddressPath.compare(entry->d_name) == 0) {
-//            continue;
-//        }
 
         std::string path = entry->d_name;
 

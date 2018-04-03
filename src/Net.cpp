@@ -5,8 +5,6 @@
 
 #include "Net.h"
 
-std::vector<Device*> Net::deviceList;
-
 Net::Net(Unit host, Device *device, const InterfaceCallback *cb)
 		: Interface(host, device, cb) {
 
@@ -278,46 +276,6 @@ INTERFACE Net::getType() {
 
 }
 
-bool Net::createDevices() {
-
-    struct ifaddrs* ifAddrStruct = nullptr;
-    struct ifaddrs* loop = nullptr;
-
-    getifaddrs(&ifAddrStruct);
-    if (ifAddrStruct == nullptr) {
-        return false;
-    }
-
-    for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
-
-        if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
-
-            if (!((loop->ifa_flags & IFF_UP) && (loop->ifa_flags & IFF_RUNNING))) {
-                continue;
-            }
-
-            Device *device = new Device(Device(loop->ifa_name, INTERFACE_NET,
-                                               ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                               address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
-                                               (loop->ifa_flags & IFF_LOOPBACK) > 0));
-
-            deviceList.push_back(device);
-        }
-    };
-
-    freeifaddrs(ifAddrStruct);
-
-    return true;
-}
-
-std::vector<Device*>* Net::getDevices() {
-
-    if (deviceList.size() == 0) {
-        createDevices();
-    }
-    return &deviceList;
-}
-
 bool Net::isSupportMulticast() {
 
     return Util::isMulticast();
@@ -328,18 +286,6 @@ std::string Net::getAddressString(long address) {
     char sAddress[50];
     sprintf(sAddress, "%s:%d", getIPString(address).c_str(), Address::getPort(address));
     return std::string(sAddress);
-}
-
-int Net::address2prefix(long address) {
-
-    int i = 0;
-    uint32_t ip = (uint32_t) Address::getBase(address);
-    while(ip > 0) {
-        ip = ip >> 1;
-        i++;
-    }
-
-    return i;
 }
 
 std::string Net::getIPString(long address) {

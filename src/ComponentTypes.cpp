@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
 #include "ComponentTypes.h"
 
 const char* sComponentTypes[COMP_MAX] = {
