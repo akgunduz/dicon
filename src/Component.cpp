@@ -3,7 +3,6 @@
 //
 
 #include "Component.h"
-#include "DeviceList.h"
 
 Component::Component(Unit host, const char* rootPath) {
 
@@ -14,49 +13,21 @@ Component::Component(Unit host, const char* rootPath) {
 
     DeviceList *deviceList = DeviceList::getInstance();
 
-    switch(host.getType()) {
+    interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
+    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host.getType() != COMP_NODE ?
+                                   Connector::createInterface(host, deviceList->getActive(0), callback) :
+                                   interfaces[COMP_NODE];
+    interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
-        case COMP_DISTRIBUTOR:
-            interfaces[COMP_COLLECTOR] = Connector::createInterface(host, deviceList->getActive(0), callback);
-            if (deviceList->isActiveDifferent()) {
-                interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
-            } else {
-                interfaces[COMP_NODE] = interfaces[COMP_COLLECTOR];
-
-            }
-            break;
-
-        case COMP_COLLECTOR:
-            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, deviceList->getActive(0), callback);
-            if (deviceList->isActiveDifferent()) {
-                interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
-            } else {
-                interfaces[COMP_NODE] = interfaces[COMP_DISTRIBUTOR];
-            }
-            break;
-
-        case COMP_NODE:
-            interfaces[COMP_DISTRIBUTOR] = Connector::createInterface(host, deviceList->getActive(1), callback);
-            interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
-            break;
-
-        default:
-            break;
-    }
 }
 
 Component::~Component() {
 
-    if (interfaces[COMP_NODE] != interfaces[COMP_DISTRIBUTOR] &&
-            interfaces[COMP_NODE] != interfaces[COMP_COLLECTOR]) {
-        delete interfaces[COMP_NODE];
+    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
+        delete interfaces[COMP_DISTRIBUTOR];
     }
 
-    if (interfaces[COMP_COLLECTOR] != interfaces[COMP_DISTRIBUTOR]) {
-        delete interfaces[COMP_COLLECTOR];
-    }
-
-    delete interfaces[COMP_DISTRIBUTOR];
+    delete interfaces[COMP_NODE];
 
     delete callback;
 }
