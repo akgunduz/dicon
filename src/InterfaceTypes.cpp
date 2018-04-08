@@ -7,6 +7,11 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
+const char* sInterfaceNames[INTERFACE_MAX] = {
+        "TCP",
+        "UnixSocket",
+};
+
 fGetAddressList InterfaceTypes::getAddressList(INTERFACE type) {
 
     switch (type) {
@@ -40,4 +45,9 @@ std::string InterfaceTypes::getAddressString(long address) {
         default:
             return "Invalid Address";
     }
+}
+
+const char* InterfaceTypes::getName(INTERFACE type) {
+
+    return sInterfaceNames[type];
 }

@@ -118,6 +118,5 @@ public:
 
 extern const char* sStates[];
 extern const char* sParamTypes[];
-extern const char* sInterfaces[];
 
 #endif

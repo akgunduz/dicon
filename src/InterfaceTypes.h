@@ -22,6 +22,7 @@ class InterfaceTypes {
 public:
     static fGetAddressList getAddressList(INTERFACE);
     static std::string getAddressString(long);
+    static const char* getName(INTERFACE);
 };
 
 
