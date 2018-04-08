@@ -16,8 +16,3 @@ const char* sParamTypes[] = {
 		"DOUBLE",
 		"STRING",
 };
-
-const char* sInterfaces[] = {
-		"TCP",
-		"UnixSocket",
-};

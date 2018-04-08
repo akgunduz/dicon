@@ -101,8 +101,10 @@ bool UserInterface::Create( wxWindow* parent, wxWindowID id, const wxString& cap
     DeviceList *deviceList = DeviceList::getInstance();
 
     for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-        distCollInterface->Insert(wxString(sInterfaces[deviceList->get(i)->getType()]) + " --> " + deviceList->get(i)->getName(), i);
-        nodeInterface->Insert(wxString(sInterfaces[deviceList->get(i)->getType()]) + " --> " + deviceList->get(i)->getName(), i);
+        distCollInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
+                                          " --> " + deviceList->get(i)->getName(), i);
+        nodeInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
+                                      " --> " + deviceList->get(i)->getName(), i);
         if (deviceList->get(i)->isLoopback()) {
             distCollInterface->SetSelection(i);
             nodeInterface->SetSelection(i);
