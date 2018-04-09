@@ -51,6 +51,8 @@ Bankor.pro
 Bankor.pro.user*
 Bankor.1
 *.zip
+*.bak
+*.xrc
 Tests/
 Objects/
 /Distributor/

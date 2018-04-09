@@ -76,6 +76,7 @@ typedef void (UserInterface::*fUIUpdater)(wxCommandEvent &event);
 #define ID_COLL_NODE_ADDRESS 10018
 #define ID_COLL_INIT 10019
 #define ID_COLL_PROCESS 10020
+#define ID_COLL_FILE_LIST 10032
 #define ID_COLL_PROCESS_LIST 10003
 #define ID_COLL_LOG 10023
 #define ID_STATICTEXT1 10025
@@ -156,7 +157,7 @@ public:
     void collUpdateAttachedNodeAddress(wxCommandEvent& event);
 
     void collUpdateLog(wxCommandEvent &event);
-    void collUpdateJobList(wxCommandEvent &event);
+    void collUpdateFileList(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
 
     //Node
@@ -196,7 +197,15 @@ public:
 
 ////@end UserInterface event handler declarations
 
-    void OnCollJobListChecked( wxTreeListEvent& event );
+    void OnDistInitClickWrapper( wxCommandEvent& event );
+    void OnDistPollClickWrapper( wxCommandEvent& event );
+
+    void OnCollInitClickWrapper( wxCommandEvent& event );
+    void OnCollProcessClickWrapper( wxCommandEvent& event );
+
+    void OnNodeInitClickWrapper( wxCommandEvent& event );
+
+   // void OnCollJobListChecked( wxTreeListEvent& event );
 
 ////@begin UserInterface member function declarations
 
@@ -228,6 +237,7 @@ public:
     wxStaticText* collNodeAddress;
     wxToggleButton* collInitBtn;
     wxButton* collProcessBtn;
+    wxListBox* collFileList;
     wxListBox* collProcessList;
     wxListBox* collLog;
     wxStaticText* collDistDeviceAddress;
@@ -239,8 +249,6 @@ public:
     wxListBox* nodeExecList;
     wxListBox* nodeLog;
 ////@end UserInterface member variables
-
-    wxTreeListCtrl* collJobList;
 };
 
 #endif

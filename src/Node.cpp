@@ -4,6 +4,7 @@
 //
 
 #include "Node.h"
+#include "ExecutorItem.h"
 
 Node::Node(const char *rootPath) : job(NULL),
         Component(Unit(COMP_NODE), rootPath) {
@@ -68,9 +69,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
 		case MSGTYPE_BINARY:
 
-            for (int i = 0; i < job->getRuleCount(); i++) {
-                processRule(job->getRule(i));
-            }
+            processRule(job);
 
 			LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 			status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
@@ -139,20 +138,19 @@ bool Node::setDistributorAddress(long address) {
 
 bool Node::processMD5() {
 
-    for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
-        Rule *rule = (Rule *)job->getContent(CONTENT_FILE, j);
-        for (int i = 0; i < rule->getContentCount(CONTENT_FILE); i++) {
-            FileItem *content = (FileItem *)rule->getContent(CONTENT_FILE, i);
 
-            /*
-             * false -> request file from collector, with no md5 set
-             * true -> do not request file from collector, with md5 set
-             */
-            if (!Util::checkPath(Unit::getRootPath(COMP_NODE) ,content->getFileName(), false)) {
-                content->setFlaggedToSent(false);
-            }
+    for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
+        FileItem *content = (FileItem *)job->getContent(CONTENT_FILE, i);
+
+        /*
+         * false -> request file from collector, with no md5 set
+         * true -> do not request file from collector, with md5 set
+         */
+        if (!Util::checkPath(Unit::getRootPath(COMP_NODE) ,content->getFileName(), false)) {
+            content->setFlaggedToSent(false);
         }
     }
+
 
 	return true;
 
@@ -175,21 +173,21 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processRule(Rule* rule) {
+bool Node::processRule(Job* job) {
 
-    return rule->isParallel() ? processParallel(rule) : processSequential(rule);
+    return job->isParallel() ? processParallel(job) : processSequential(job);
 
 }
 
-bool Node::processParallel(Rule* rule) {
+bool Node::processParallel(Job* job) {
 
     int status;
     char cmd[PATH_MAX] = "";
     char *args[100];
 
-    for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-        ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
-        content->getParsed(rule, cmd);
+    for (int i = 0; i < job->getContentCount(CONTENT_EXECUTOR); i++) {
+        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, i);
+        content->getParsed(job, cmd);
         parseCommand(cmd, args);
         LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(Unit::getRootPath(COMP_NODE)));
         LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
@@ -237,16 +235,16 @@ bool Node::processParallel(Rule* rule) {
     return true;
 }
 
-bool Node::processSequential(Rule* rule) {
+bool Node::processSequential(Job* job) {
 
     int status;
     char cmd[PATH_MAX] = "";
     char *args[100];
 
-    for (int i = 0; i < rule->getContentCount(CONTENT_EXECUTOR); i++) {
-        ExecutorItem *content = (ExecutorItem *) rule->getContent(CONTENT_EXECUTOR, i);
+    for (int i = 0; i < job->getContentCount(CONTENT_EXECUTOR); i++) {
+        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, i);
 
-        content->getParsed(rule, cmd);
+        content->getParsed(job, cmd);
 
         LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
         LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);

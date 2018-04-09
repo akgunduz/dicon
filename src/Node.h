@@ -25,10 +25,10 @@ private:
     bool send2CollectorMsg(long, MSG_TYPE);
 
     void parseCommand(char *cmd, char **argv);
-    bool processRule(Rule*);
+    bool processRule(Job*);
     bool processMD5();
-    bool processParallel(Rule* rule);
-    bool processSequential(Rule* rule);
+    bool processParallel(Job*);
+    bool processSequential(Job*);
 
 public:
 	Node(const char *rootPath);

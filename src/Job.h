@@ -5,7 +5,6 @@
 #ifndef BANKOR_JOB_H
 #define BANKOR_JOB_H
 
-#include "Rule.h"
 #include "JsonItem.h"
 #include "Md5.h"
 #include "FileList.h"
@@ -19,6 +18,9 @@
 class Job : public JsonItem {
 
     char name[50];
+	bool parallel;
+    bool active;
+    int repeat;
 
 public:
 
@@ -32,11 +34,23 @@ public:
     const char* getName();
     void setName(const char*);
 
-    Rule* getRule(int index);
-    int getRuleCount();
+//    Rule* getRule(int index);
+//    int getRuleCount();
+
+    bool isParallel();
+
+    bool getActive();
+    void setActive(bool active);
+
+    int getRepeat();
+    void setRepeat(int repeat);
 
     static bool parseNameNode(void*, json_object *node);
-    static bool parseRuleNode(void*, json_object *node);
+  //  static bool parseRuleNode(void*, json_object *node);
+    static bool parseConcurrencyNode(void*, json_object *node);
+    static bool parseMapNode(void*, json_object *node);
+    static bool parseParamNode(void*, json_object *node);
+    static bool parseExecutorNode(void*, json_object *node);
 
     FileList* prepareFileList(ARCH = ARCH_MAX);
     FileList* prepareRuleList();

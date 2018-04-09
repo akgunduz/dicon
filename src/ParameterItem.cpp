@@ -4,7 +4,6 @@
 //
 
 #include "ParameterItem.h"
-#include "Rule.h"
 
 ParameterItem::ParameterItem()
     : ContentItem () {

@@ -49,7 +49,7 @@ void UserInterface::distInit() {
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
  */
 
-void UserInterface::OnDistInitClick( wxCommandEvent& event )
+void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
 
@@ -87,7 +87,7 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
     }
 }
 
-void UserInterface::OnDistPollClick( wxCommandEvent& event )
+void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
 {
     distObject->reset();
     distCollList->DeleteAllItems();

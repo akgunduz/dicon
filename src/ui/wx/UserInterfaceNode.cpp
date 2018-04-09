@@ -40,7 +40,7 @@ void UserInterface::nodeInit() {
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_NODE_INIT
  */
 
-void UserInterface::OnNodeInitClick( wxCommandEvent& event )
+void UserInterface::OnNodeInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(nodeInitBtn->GetLabel(), "Init") == 0) {
 
@@ -100,11 +100,11 @@ void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
 
 void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
-    Rule *rule = (Rule *)event.GetClientData();
+    Job *job = (Job *)event.GetClientData();
 
-    for (int j = 0; j < rule->getContentCount(CONTENT_FILE); j++) {
+    for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
 
-        FileItem *content = (FileItem *) rule->getContent(CONTENT_FILE, j);
+        FileItem *content = (FileItem *) job->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }

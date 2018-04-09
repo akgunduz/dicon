@@ -14,7 +14,8 @@ Collector::Collector(const char *rootPath) :
 
     getJobs()->addJobList(getHost(), Unit::getRootPath(COMP_COLLECTOR), true);
 
-    LOG_U(UI_UPDATE_COLL_JOB_LIST, getJobs());
+    LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->getJob(0));
+	LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->getJob(0));
 }
 
 Collector::~Collector() {
@@ -63,7 +64,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
             LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
 				  InterfaceTypes::getAddressString(node.getAddress()).c_str());
 
-            LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
+         //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
 			status = send2NodeMsg(node.getAddress(), MSGTYPE_RULE, list);
 			break;
@@ -97,7 +98,7 @@ bool Collector::processNodeMsg(long address, Message *msg) {
                 break;
             }
 
-			//LOG_U(UI_UPDATE_COLL_JOB_LIST, job);
+			//LOG_U(UI_UPDATE_COLL_FILE_LIST, job);
 
             FileList *list = job->prepareFileList(node.getArch());
 
@@ -162,7 +163,7 @@ bool Collector::send2NodeMsg(long address, MSG_TYPE type, FileList *list) {
 
 }
 
-bool Collector::processRule() {
+bool Collector::processJob() {
 
     for (int i = 0; i < getJobs()->getCount(); i++) {
         send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
