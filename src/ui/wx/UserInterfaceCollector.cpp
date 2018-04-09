@@ -73,12 +73,9 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    collProcessList->Clear();
-
     collObject->syncTime();
 
     collObject->processJob();
-
 }
 
 //void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
