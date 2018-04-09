@@ -8,28 +8,14 @@
 
 #include "ContentItem.h"
 
-enum PARAM_TYPES {
-    PARAM_LONG,
-    PARAM_DOUBLE,
-    PARAM_STRING
-};
-
-union Params {
-    long latom;
-    double datom;
-    char sPtr[255];
-};
-
 class ParameterItem : public ContentItem {
-	PARAM_TYPES mType;
-	Params mParams;
+	char sPtr[255];
 public:
 	ParameterItem();
 	ParameterItem(const char *param);
 	~ParameterItem(){};
-	PARAM_TYPES getParamType();
-	Params getParam();
-	void setParam(union Params *);
+	const char* getParam();
+	void setParam(const char*);
 	virtual CONTENT_TYPES getType();
 
     virtual bool isValid();

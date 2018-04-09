@@ -33,7 +33,6 @@ Job::~Job() {
 
 void Job::init() {
 
-    //contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "rules", this, parseRuleNode);
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_CONCURRENCY] = new JsonType(CONTENT_CONCURRENCY, "concurrency", this, parseConcurrencyNode);
     contentTypes[CONTENT_MAP] = new JsonType(CONTENT_MAP, "files", this, parseMapNode);
@@ -59,48 +58,6 @@ bool Job::parseNameNode(void *parent, json_object *node) {
 
     return true;
 }
-
-//bool Job::parseRuleNode(void *parent, json_object *node) {
-//
-//    enum json_type type = json_object_get_type(node);
-//    if (type != json_type_array) {
-//        LOG_E("Invalid JSON Rules Node");
-//        return false;
-//    }
-//
-//    for (unsigned int i = 0; i < json_object_array_length(node); i++) {
-//        json_object *child = json_object_array_get_idx(node, i);
-//
-//        type = json_object_get_type(child);
-//        if (type != json_type_array) {
-//            LOG_E("Invalid JSON Rules Node");
-//            return false;
-//        }
-//
-//        if (json_object_array_length(child) != 3) {
-//            LOG_E("Invalid JSON Rules Node");
-//            return false;
-//        }
-//
-//        json_object *pathNode = json_object_array_get_idx(child, 0);
-//        json_object *activeNode = json_object_array_get_idx(child, 1);
-//        json_object *repeatNode = json_object_array_get_idx(child, 2);
-//
-//        const char *path = json_object_get_string(pathNode);
-//        bool active = (bool) json_object_get_boolean(activeNode);
-//        int repeat = json_object_get_int(repeatNode);
-//
-//        Job* job = (Job*) parent;
-//
-//        Rule *rule = new Rule(job->getHost(), job->getJobDir(), path);
-//        rule->setActive(active);
-//        rule->setRepeat(repeat);
-//
-//        job->contentList[CONTENT_FILE].push_back(rule);
-//    }
-//
-//    return true;
-//}
 
 bool Job::parseConcurrencyNode(void *parent, json_object *node) {
 
@@ -226,15 +183,6 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-//Rule *Job::getRule(int index) {
-//    return (Rule*)getContent(CONTENT_FILE, index);
-//}
-//
-//int Job::getRuleCount() {
-//    return getContentCount(CONTENT_FILE);
-//}
-
-
 bool Job::isParallel() {
     return parallel;
 }
@@ -261,17 +209,6 @@ FileList* Job::prepareFileList(ARCH arch) {
     FileList *fileList = new FileList(getJobDir());
     fileList->set(this);
 
-//    for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
-//        Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
-//        for (int i = 0; i < rule->getContentCount(CONTENT_MAP); i++) {
-//            MapItem *content = (MapItem *)rule->getContent(CONTENT_MAP, i);
-//            FileItem *fileItem = content->get(arch);
-//            if (fileItem->isValid()) {
-//                fileList->set(fileItem);
-//            }
-//        }
-//    }
-
     for (int i = 0; i < getContentCount(CONTENT_MAP); i++) {
         MapItem *content = (MapItem *)getContent(CONTENT_MAP, i);
         FileItem *fileItem = content->get(arch);
@@ -289,11 +226,6 @@ FileList* Job::prepareRuleList() {
     FileList *fileList = new FileList(getJobDir());
 
     fileList->set(this);
-
-//    for (int j = 0; j < getContentCount(CONTENT_FILE); j++) {
-//        Rule *rule = (Rule *)getContent(CONTENT_FILE, j);
-//        fileList->set(rule);
-//    }
 
     return fileList;
 }

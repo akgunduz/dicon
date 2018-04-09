@@ -109,17 +109,7 @@ bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdI
 	} else if (cmdType == CONTENT_PARAM) {
 		ParameterItem *content = (ParameterItem *) refRule->getContent(CONTENT_PARAM, cmdIndex);
 		if (content != nullptr) {
-			switch(content->getParamType()) {
-				case PARAM_LONG:
-                    sprintf(parsed, "%s%ld", parsed, content->getParam().latom);
-                    break;
-				case PARAM_DOUBLE:
-                    sprintf(parsed, "%s%lf", parsed, content->getParam().datom);
-					break;
-				case PARAM_STRING:
-                    strcat(parsed, content->getParam().sPtr);
-					break;
-			}
+			strcat(parsed, content->getParam());
 		}
 	}
 

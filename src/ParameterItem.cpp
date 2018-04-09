@@ -13,34 +13,21 @@ ParameterItem::ParameterItem()
 ParameterItem::ParameterItem(const char *param)
         : ContentItem () {
 
-	if (strncmp(param, "l:", 2) == 0) {
-		mType = PARAM_LONG;
-		mParams.latom = atol(param + 2);
-	} else if (strncmp(param, "d:", 2) == 0) {
-		mType = PARAM_DOUBLE;
-		mParams.datom = atof(param + 2);
-	} else {
-		mType = PARAM_STRING;
-		strcpy(mParams.sPtr, param + 2);
-	}
+	strcpy(sPtr, param);
 };
 
 CONTENT_TYPES ParameterItem::getType() {
 	return CONTENT_PARAM;
 }
 
-PARAM_TYPES ParameterItem::getParamType() {
-	return mType;
-}
-
-Params ParameterItem::getParam() {
-	return mParams;
-}
-
-void ParameterItem::setParam(Params *param) {
-	memcpy(&mParams, param, sizeof(Params));
+void ParameterItem::setParam(const char *param) {
+	strcpy(sPtr, param);
 }
 
 bool ParameterItem::isValid() {
     return true;
+}
+
+const char *ParameterItem::getParam() {
+	return sPtr;
 }
