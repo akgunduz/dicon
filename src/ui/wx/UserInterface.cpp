@@ -54,7 +54,7 @@ BEGIN_EVENT_TABLE( UserInterface, wxFrame )
     EVT_TOGGLEBUTTON( ID_NODE_INIT, UserInterface::OnNodeInitClick )
 ////@end UserInterface event table entries
 
-    EVT_TREELIST_ITEM_CHECKED( ID_COLL_JOB_LIST, UserInterface::OnCollJobListChecked )
+    //EVT_TREELIST_ITEM_CHECKED( ID_COLL_JOB_LIST, UserInterface::OnCollJobListChecked )
 
 END_EVENT_TABLE()
 
@@ -135,8 +135,6 @@ void UserInterface::Init()
     Log::setLogLevel(LEVEL_INFO);
     Log::set_ui_callback(this, updateUICallback);
 
-    collJobList = NULL;
-
 ////@begin UserInterface member initialisation
     distCollInterface = NULL;
     nodeInterface = NULL;
@@ -155,6 +153,7 @@ void UserInterface::Init()
     collNodeAddress = NULL;
     collInitBtn = NULL;
     collProcessBtn = NULL;
+    collFileList = NULL;
     collProcessList = NULL;
     collLog = NULL;
     collDistDeviceAddress = NULL;
@@ -259,6 +258,9 @@ void UserInterface::CreateControls()
     collProcessBtn = new wxButton( itemPanel23, ID_COLL_PROCESS, _("Process"), wxPoint(310, 130), wxSize(270, 50), 0 );
     collProcessBtn->Enable(false);
 
+    wxArrayString collFileListStrings;
+    collFileList = new wxListBox( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 240), wxSize(270, 200), collFileListStrings, wxLB_SINGLE );
+
     wxArrayString collProcessListStrings;
     collProcessList = new wxListBox( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 240), wxSize(270, 200), collProcessListStrings, wxLB_SINGLE );
 
@@ -305,7 +307,7 @@ void UserInterface::CreateControls()
 
 ////@end UserInterface content construction
 
-    collJobList = new wxTreeListCtrl( itemPanel23, ID_COLL_JOB_LIST, wxPoint(10, 240), wxSize(270, 200), wxTL_3STATE);
+//    collJobList = new wxTreeListCtrl( itemPanel23, ID_COLL_JOB_LIST, wxPoint(10, 240), wxSize(270, 200), wxTL_3STATE);
 }
 
 /*
@@ -390,5 +392,55 @@ void UserInterface::OnInterfaceInitClick( wxCommandEvent& event )
     distInitBtn->Enable(true);
     collInitBtn->Enable(true);
     nodeInitBtn->Enable(true);
+}
+
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
+ */
+
+void UserInterface::OnDistInitClick( wxCommandEvent& event )
+{
+    OnDistInitClickWrapper(event);
+}
+
+
+/*
+ * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_DIST_POLL
+ */
+
+void UserInterface::OnDistPollClick( wxCommandEvent& event )
+{
+    OnDistPollClickWrapper(event);
+}
+
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
+ */
+
+void UserInterface::OnCollInitClick( wxCommandEvent& event )
+{
+    OnCollInitClickWrapper(event);
+}
+
+
+/*
+ * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
+ */
+
+void UserInterface::OnCollProcessClick( wxCommandEvent& event )
+{
+    OnCollProcessClickWrapper(event);
+}
+
+
+/*
+ * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_NODE_INIT
+ */
+
+void UserInterface::OnNodeInitClick( wxCommandEvent& event )
+{
+    OnNodeInitClickWrapper(event);
 }
 

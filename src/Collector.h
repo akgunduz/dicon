@@ -7,7 +7,6 @@
 #define	COLLECTOR_H
 
 #include "Component.h"
-#include "Rule.h"
 #include "Connector.h"
 #include "Message.h"
 #include "Job.h"
@@ -32,7 +31,7 @@ public:
 	Collector(const char *rootPath);
     virtual ~Collector();
 
-    bool processRule();
+    bool processJob();
     bool syncTime();
 	Jobs* getJobs();
 

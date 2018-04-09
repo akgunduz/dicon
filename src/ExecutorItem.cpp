@@ -4,9 +4,9 @@
 //
 
 #include "ExecutorItem.h"
-#include "Rule.h"
 #include "ParameterItem.h"
 #include "MapItem.h"
+#include "Job.h"
 
 ExecutorItem::ExecutorItem()
         : ContentItem () {
@@ -98,7 +98,7 @@ bool ExecutorItem::getParsed(void *pRule, char *parsed) {
 
 bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
 
-	Rule *refRule = (Rule *)pRule;
+	Job *refRule = (Job *)pRule;
 
 	if (cmdType == CONTENT_MAP) {
 		MapItem *content = (MapItem *) refRule->getContent(CONTENT_MAP, cmdIndex);

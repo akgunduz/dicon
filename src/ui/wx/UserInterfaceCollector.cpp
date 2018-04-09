@@ -9,19 +9,21 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
+#include <ExecutorItem.h>
+#include <MapItem.h>
 #include "UserInterface.h"
 
 void UserInterface::collInit() {
 
-    int width = collJobList->GetSize().GetWidth() / 5.5;
-
-    collJobList->AppendColumn("ID", width * 4, wxALIGN_LEFT, 0);
-    collJobList->AppendColumn("Repeat", width, wxALIGN_RIGHT, 0);
+//    int width = collJobList->GetSize().GetWidth() / 5.5;
+//
+//    collJobList->AppendColumn("ID", width * 4, wxALIGN_LEFT, 0);
+//    collJobList->AppendColumn("Repeat", width, wxALIGN_RIGHT, 0);
 
     uiUpdater[UI_UPDATE_COLL_ADDRESS] = &UserInterface::collUpdateAddresses;
     uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
     uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
-    uiUpdater[UI_UPDATE_COLL_JOB_LIST] = &UserInterface::collUpdateJobList;
+    uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
@@ -31,7 +33,7 @@ void UserInterface::collInit() {
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
  */
 
-void UserInterface::OnCollInitClick( wxCommandEvent& event )
+void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
 
@@ -58,7 +60,9 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
         collInitBtn->SetLabel("Init");
         collDistDeviceAddress->SetLabel("");
         collNodeDeviceAddress->SetLabel("");
-        collJobList->DeleteAllItems();
+        collFileList->Clear();
+        collProcessList->Clear();
+      //  collJobList->DeleteAllItems();
     }
 }
 
@@ -67,26 +71,26 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
  * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
  */
 
-void UserInterface::OnCollProcessClick( wxCommandEvent& event )
+void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
     collProcessList->Clear();
 
     collObject->syncTime();
 
-    collObject->processRule();
+    collObject->processJob();
 
 }
 
-void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
-{
-
-    collJobList->UpdateItemParentStateRecursively(event.GetItem());
-
-    wxCheckBoxState state = collJobList->GetCheckedState(event.GetItem());
-
-    collJobList->CheckItemRecursively(event.GetItem(), state);
-
-}
+//void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
+//{
+//
+//    collJobList->UpdateItemParentStateRecursively(event.GetItem());
+//
+//    wxCheckBoxState state = collJobList->GetCheckedState(event.GetItem());
+//
+//    collJobList->CheckItemRecursively(event.GetItem(), state);
+//
+//}
 
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
@@ -117,37 +121,35 @@ void UserInterface::collUpdateLog(wxCommandEvent &event) {
 
 }
 
-void UserInterface::collUpdateJobList(wxCommandEvent &event) {
+void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
-    Jobs *jobs = (Jobs*)event.GetClientData();
+    Job *job = (Job*)event.GetClientData();
 
-    for (int j =0; j < jobs->getCount(); j++) {
+    for (int j = 0; j < job->getContentCount(CONTENT_MAP); j++) {
 
-        Job *job = jobs->getJob(j);
-        wxTreeListItem jobItem = collJobList->AppendItem(collJobList->GetRootItem(), job->getName());
-        for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
-            Rule *rule = (Rule*) job->getContent(CONTENT_FILE, i);
-            wxTreeListItem ruleItem = collJobList->AppendItem(jobItem, rule->getFileName());
-            collJobList->CheckItem(ruleItem, rule->getActive() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
-            collJobList->SetItemText(ruleItem, 1, wxString::Format(wxT("%d"), rule->getRepeat()));
-            collJobList->UpdateItemParentStateRecursively(ruleItem);
-        }
-    }
-}
-
-void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
-/*
-    Rule *rule = (Rule *)event.GetClientData();
-
-    for (int j = 0; j < rule->getContentCount(CONTENT_EXECUTOR); j++) {
-
-        ExecutorContent *content = (ExecutorContent *) rule->getContent(CONTENT_EXECUTOR, j);
+        MapItem *content = (MapItem *) job->getContent(CONTENT_MAP, j);
         if (content == nullptr) {
             return;
         }
 
-        collExecList->Append(content->getExec());
+        collFileList->Append(content->get()->getFileName());
 
     }
-*/
+}
+
+void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
+
+    Job *job = (Job *)event.GetClientData();
+
+    for (int j = 0; j < job->getContentCount(CONTENT_EXECUTOR); j++) {
+
+        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, j);
+        if (content == nullptr) {
+            return;
+        }
+
+        collProcessList->Append(content->getExec());
+
+    }
+
 }
