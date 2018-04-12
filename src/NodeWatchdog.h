@@ -6,15 +6,15 @@
 #define BANKOR_NODEWATCHDOG_H
 
 #include "Connector.h"
-#include "NodeItem.h"
+#include "NodeObject.h"
 #include "Component.h"
 
 #define NODE_TIMEOUT 10
 #define WAKEUP_TIMEOUT 30
 
-class NodeItem;
+class NodeObject;
 
-typedef bool (*fTimeoutCB)(Component*, NodeItem*);
+typedef bool (*fTimeoutCB)(Component*, NodeObject*);
 typedef bool (*fWakeupCB)(Component*);
 
 enum TimerType {
@@ -25,7 +25,7 @@ enum TimerType {
 class NodeWatchdog {
 
     TimerType timerType;
-    NodeItem *nodeItem;
+    NodeObject *nodeItem;
     int timeout;
 
     pthread_mutex_t mutex;
@@ -42,7 +42,7 @@ class NodeWatchdog {
 public:
 
     NodeWatchdog(Component *component, fWakeupCB);
-    NodeWatchdog(Component *component, NodeItem*, fTimeoutCB);
+    NodeWatchdog(Component *component, NodeObject*, fTimeoutCB);
     ~NodeWatchdog();
 
     void end();

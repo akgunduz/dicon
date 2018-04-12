@@ -23,8 +23,8 @@ class Collector : public Component {
 	virtual bool processCollectorMsg(long, Message *);
 	virtual bool processNodeMsg(long, Message *);
 
-	bool send2DistributorMsg(long, MSG_TYPE);
-	bool send2NodeMsg(long, MSG_TYPE, FileList *);
+	bool send2DistributorMsg(long, MSG_TYPE, ...);
+	bool send2NodeMsg(long, MSG_TYPE, ...);
 
 public:
 
@@ -32,7 +32,6 @@ public:
     virtual ~Collector();
 
     bool processJob();
-    bool syncTime();
 	Jobs* getJobs();
 
 };

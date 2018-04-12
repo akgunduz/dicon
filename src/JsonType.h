@@ -7,7 +7,9 @@
 
 #include "Common.h"
 
-typedef bool (*fParser)(void*, json_object *);
+class JsonItem;
+
+typedef bool (*fParser)(JsonItem*, json_object *);
 
 class JsonType {
 
@@ -15,9 +17,9 @@ public:
     int id;
     char name[50];
     fParser parser;
-    void* parent;
+    JsonItem* parent;
 
-    JsonType(int id, const char* name, void *parent, fParser parser) {
+    JsonType(int id, const char* name, JsonItem *parent, fParser parser) {
         this->id = id;
         strcpy(this->name, name);
         this->parser = parser;

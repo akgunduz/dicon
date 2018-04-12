@@ -60,45 +60,45 @@ Job* Jobs::getJob(int index) {
     return jobs[index];
 }
 
-Job* Jobs::getJobByNode(NodeInfo node) {
+//Job* Jobs::getJobByNode(NodeInfo node) {
+//
+//    return nodes.get(node);
+//}
+//
+//Job* Jobs::getJobByAddress(long address) {
+//
+//    return nodes.get(address);
+//}
+//
+//NodeInfo Jobs::getNodeByAddress(long address) {
+//
+//    return nodes.getNode(address);
+//}
 
-    return nodes.get(node);
-}
-
-Job* Jobs::getJobByAddress(long address) {
-
-    return nodes.get(address);
-}
-
-NodeInfo Jobs::getNodeByAddress(long address) {
-
-    return nodes.getNode(address);
-}
-
-Job* Jobs::getJobUnServed() {
-
-    int i = 0;
-    for (; i < getCount(); i++) {
-
-        NodeInfo node = nodes.get(jobs[i]);
-        if (node.getAddress() == 0) {
-            break;
-        }
-    }
-
-    if (i == getCount()) {
-        LOG_W("No job found");
-        return NULL;
-    }
-
-    return jobs[i];
-}
-
-bool Jobs::reset() {
-
-    nodes.clear();
-    return true;
-}
+//Job* Jobs::getJobUnServed() {
+//
+//    int i = 0;
+//    for (; i < getCount(); i++) {
+//
+//        NodeInfo node = nodes.get(jobs[i]);
+//        if (node.getAddress() == 0) {
+//            break;
+//        }
+//    }
+//
+//    if (i == getCount()) {
+//        LOG_W("No job found");
+//        return NULL;
+//    }
+//
+//    return jobs[i];
+//}
+//
+//bool Jobs::reset() {
+//
+//    nodes.clear();
+//    return true;
+//}
 
 bool Jobs::clear() {
 
@@ -107,7 +107,7 @@ bool Jobs::clear() {
         delete *i;
     }
 
-    nodes.clear();
+ //   nodes.clear();
     jobs.clear();
     return true;
 }
@@ -122,22 +122,22 @@ std::vector<Job*> *Jobs::getJobs() {
     return &jobs;
 }
 
-unsigned int Jobs::getCount() {
+unsigned long Jobs::getCount() {
 
     return jobs.size();
 }
 
-bool Jobs::attachNode(Job *job, NodeInfo node) {
-
-    nodes.add(job, node);
-
-    return true;
-
-}
-
-bool Jobs::detachNode(Job *job) {
-
-    nodes.remove(job);
-
-    return true;
-}
+//bool Jobs::attachNode(Job *job, NodeInfo node) {
+//
+//    nodes.add(job, node);
+//
+//    return true;
+//
+//}
+//
+//bool Jobs::detachNode(Job *job) {
+//
+//    nodes.remove(job);
+//
+//    return true;
+//}

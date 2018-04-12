@@ -65,6 +65,18 @@ public:
     bool empty() {
         return memcmp(data, emptyData, MD5_DIGEST_LENGTH) == 0;
     }
+
+    bool compare(Md5 *ref) {
+        return memcmp(data, ref->data, MD5_DIGEST_LENGTH) < 0;
+    }
 };
+
+struct cmp_md5 {
+    bool operator()(Md5 *a, Md5 *b) const {
+        return a->compare(b);
+    }
+};
+
+typedef std::vector<Md5> TypeMD5List;
 
 #endif //BANKOR_MD5_H

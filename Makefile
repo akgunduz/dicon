@@ -48,7 +48,7 @@ FILES = \
         ${SOURCE_PATH}/MessageTypes.cpp \
         ${SOURCE_PATH}/Net.cpp \
         ${SOURCE_PATH}/Node.cpp \
-        ${SOURCE_PATH}/NodeItem.cpp \
+        ${SOURCE_PATH}/NodeObject.cpp \
         ${SOURCE_PATH}/NodeManager.cpp \
         ${SOURCE_PATH}/NodeWatchdog.cpp \
         ${SOURCE_PATH}/Pipe.cpp \
@@ -73,9 +73,7 @@ FILES = \
 
 WX_FILES = \
 		$(SOURCE_PATH)/UserInterface.cpp \
-		$(SOURCE_PATH)/UserInterfaceApp.cpp \
-        ${SOURCE_PATH}/MapItem.cpp \
-        ${SOURCE_PATH}/FileList.cpp
+		$(SOURCE_PATH)/UserInterfaceApp.cpp
 
 
 PI_CC = $(TOOLCHAIN_PATH)/$(TOOLCHAIN_TYPE)/$(GCC_VERSION).pi/bin/$(TOOLCHAIN_ARM_PREFIX)-g++

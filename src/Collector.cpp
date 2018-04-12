@@ -34,7 +34,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 			LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
-			status = send2DistributorMsg(address, MSGTYPE_ALIVE);
+			status = send2DistributorMsg(address, MSGTYPE_ALIVE, NULL);
 			break;
 
 		case MSGTYPE_NODE: {
@@ -48,16 +48,17 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 				break;
 			}
 
-            Job* job = getJobs()->getJobUnServed();
+			//TODO
+            ExecutorItem* item = getJobs()->getJob(0)->getUnServed();
 
-            if (job == nullptr) {
+            if (item == NULL) {
                 LOG_W("No available unServed job right now.");
                 break;
             }
 
-            jobs.attachNode(job, node);
+            getJobs()->getJob(0)->attachNode(item, node);
 
-            FileList *list = job->prepareRuleList();
+          //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
 
 			LOG_T("New Job created from path : %s", "TODO JOB");
 
@@ -66,7 +67,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
          //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
-			status = send2NodeMsg(node.getAddress(), MSGTYPE_RULE, list);
+			status = send2NodeMsg(node.getAddress(), MSGTYPE_JOB, item);
 			break;
 			}
 		default :
@@ -89,22 +90,24 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_MD5: {
 
-			LOG_U(UI_UPDATE_COLL_LOG, "MD5 info size %d", msg->md5List.size());
+			LOG_U(UI_UPDATE_COLL_LOG, "MD5 info size %d", msg->getData()->getMD5Count());
 
             NodeInfo node(address, msg->getHeader()->getOwner().getArch());
 
-            Job* job = getJobs()->getJobByNode(node);
-            if (job == NULL) {
-                break;
-            }
+
+            //TODO
+//            Job* job = getJobs()->getJobByNode(node);
+//            if (job == NULL) {
+//                break;
+//            }
 
 			//LOG_U(UI_UPDATE_COLL_FILE_LIST, job);
 
-            FileList *list = job->prepareFileList(node.getArch());
-
-            list->remove(&msg->md5List);
-
-			status = send2NodeMsg(address, MSGTYPE_BINARY, list);
+//            FileList *list = job->prepareFileList(node.getArch());
+//
+//            list->remove(&msg->md5List);
+//
+//			status = send2NodeMsg(address, MSGTYPE_BINARY, list);
 		}
 			break;
 
@@ -117,64 +120,95 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 	return status;
 }
 
-bool Collector::send2DistributorMsg(long address, MSG_TYPE type) {
+bool Collector::send2DistributorMsg(long address, MSG_TYPE type, ...) {
+
+    va_list ap;
+    va_start(ap, type);
 
 	Message *msg = new Message(COMP_COLLECTOR, type);
 
 	switch(type) {
 
 		case MSGTYPE_ALIVE:
-		case MSGTYPE_NODE:
-		case MSGTYPE_TIME:
 			break;
 
-		default:
+        case MSGTYPE_NODE: {
+			TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
+			msg->getData()->setStreamFlag(STREAM_MD5ONLY);
+			msg->getData()->addMD5List(md5List);
+			LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file md5 is prepared", md5List->size());
+		}
+            break;
+
+        default:
 			delete msg;
+			va_end(ap);
 			return false;
 
 	}
+
+	va_end(ap);
 
 	return send(COMP_DISTRIBUTOR, address, msg);
 
 }
 
-bool Collector::send2NodeMsg(long address, MSG_TYPE type, FileList *list) {
+bool Collector::send2NodeMsg(long address, MSG_TYPE type, ...) {
+
+    va_list ap;
+    va_start(ap, type);
 
 	Message *msg = new Message(COMP_COLLECTOR, type);
 
 	switch(type) {
 
-		case MSGTYPE_RULE:
-			msg->setJob(STREAM_JOB, list);
+		case MSGTYPE_JOB: {
+            char *executor = va_arg(ap, char*);
+            TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
+            msg->getData()->setStreamFlag(STREAM_JOB);
+            msg->getData()->setExecutor(executor);
+            msg->getData()->addMD5List(md5List);
+            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file md5 is prepared for execution : %s", md5List->size(), executor);
+        }
 			break;
 
-		case MSGTYPE_BINARY:
-			msg->setJob(STREAM_BINARY, list);
-            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", list->getCount());
+		case MSGTYPE_BINARY: {
+            TypeFileList *fileList = va_arg(ap, TypeFileList*);
+            msg->getData()->setStreamFlag(STREAM_BINARY);
+            msg->getData()->addFileList(fileList);
+            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", fileList->size());
+        }
 			break;
 
 		default:
 			delete msg;
+            va_end(ap);
 			return false;
 
 	}
 
-	return send(COMP_NODE, address, msg);
+    va_end(ap);
 
+	return send(COMP_NODE, address, msg);
 }
 
 bool Collector::processJob() {
 
-    for (int i = 0; i < getJobs()->getCount(); i++) {
-        send2DistributorMsg(distributorAddress, MSGTYPE_NODE);
-    }
+    //TODO Whole executors will be replaced with only independent executors
+    //TODO Also will add other jobs, after the prev. job is done.
+
+
+  //  for (int i = 0; i < getJobs()->getJob(0)->getCount(); i++) {
+	TypeMD5List md5List;
+	ExecutorItem *executorItem = (ExecutorItem *)jobs.getJob(0)->getContent(CONTENT_EXECUTOR, 0);
+	for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
+		md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
+	}
+
+	send2DistributorMsg(distributorAddress, MSGTYPE_NODE, &md5List);
+  //  }
+
     return true;
-}
-
-bool Collector::syncTime() {
-
-	return send2DistributorMsg(distributorAddress, MSGTYPE_TIME);
-
 }
 
 Jobs *Collector::getJobs() {

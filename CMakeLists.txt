@@ -17,7 +17,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Connector.cpp
         ${SOURCE_PATH}/ContentItem.cpp
         ${SOURCE_PATH}/FileItem.cpp
-        ${SOURCE_PATH}/FileList.cpp
+        #${SOURCE_PATH}/FileList.cpp
         ${SOURCE_PATH}/ParameterItem.cpp
         ${SOURCE_PATH}/ExecutorItem.cpp
         ${SOURCE_PATH}/Distributor.cpp
@@ -33,7 +33,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageTypes.cpp
         ${SOURCE_PATH}/Net.cpp
         ${SOURCE_PATH}/Node.cpp
-        ${SOURCE_PATH}/NodeItem.cpp
+        ${SOURCE_PATH}/NodeObject.cpp
         ${SOURCE_PATH}/NodeManager.cpp
         ${SOURCE_PATH}/NodeWatchdog.cpp
         ${SOURCE_PATH}/Scheduler.cpp
@@ -57,6 +57,8 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentTypes.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
         ${SOURCE_PATH}/DeviceList.cpp
+        ${SOURCE_PATH}/MessageData.cpp
+        #${SOURCE_PATH}/NodeTracker.cpp
         )
 
 set(WX_FILES
@@ -84,6 +86,9 @@ endif()
 set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
 
+add_definitions(-DMULTICAST_ENABLED)
+add_definitions(-DDISABLE_RECOVERY)
+add_definitions(-DDISABLE_BACKUP)
 add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})

@@ -9,7 +9,6 @@
 #include "Job.h"
 #include "JobInfo.h"
 
-#define JOB_DIR_PREFIX "Job_"
 
 class Jobs {
 
@@ -29,19 +28,19 @@ public:
     bool addJobList(Unit, const char*, bool = false);
 
     Job* getJob(int);
-    Job* getJobByNode(NodeInfo);
-    Job* getJobByAddress(long);
-    NodeInfo getNodeByAddress(long);
-    Job* getJobUnServed();
+//    Job* getJobByNode(NodeInfo);
+//    Job* getJobByAddress(long);
+//    NodeInfo getNodeByAddress(long);
+//    Job* getJobUnServed();
+//
+//    bool attachNode(Job *job, NodeInfo node);
+//    bool detachNode(Job *job);
 
-    bool attachNode(Job *job, NodeInfo node);
-    bool detachNode(Job *job);
-
-    bool reset();
+//    bool reset();
     bool clear();
 
     bool isEmpty();
-    unsigned int getCount();
+    unsigned long getCount();
 
 };
 

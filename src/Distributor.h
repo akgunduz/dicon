@@ -19,8 +19,6 @@ private:
 
 	std::deque<long> collectorWaitingList;
 
-	StopWatch collStartTime;
-
     virtual bool processDistributorMsg(long, Message *);
     virtual bool processCollectorMsg(long, Message *);
     virtual bool processNodeMsg(long, Message *);
@@ -34,7 +32,7 @@ public:
 	virtual ~Distributor();
 
     bool reset();
-    static bool onTimeOut(Component*, NodeItem*);
+    static bool onTimeOut(Component*, NodeObject*);
     static bool onWakeup(Component*);
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll();

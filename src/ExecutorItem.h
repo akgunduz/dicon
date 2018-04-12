@@ -7,16 +7,28 @@
 #define __ExecutorContent_H_
 
 #include "ContentItem.h"
+#include "FileList.h"
+#include "MapItem.h"
 
 class ExecutorItem : public ContentItem {
+
 	char exec[PATH_MAX];
-	bool parseCommand(char*, void *, int, int);
+	char parsedExec[PATH_MAX];
+
+	TypeFileList fileList;
+
+	bool parseCommand(void*, int, int);
+
 public:
 	ExecutorItem();
 	ExecutorItem(const char *exec);
 	~ExecutorItem(){};
     const char* getExec();
-	bool getParsed(void *, char*);
+    bool parse(void *);
+    const char* getParsedExec();
+    FileItem* getDependentFile(int);
+    unsigned long getDependentFileCount();
+
 	virtual CONTENT_TYPES getType();
 
     virtual bool isValid();

@@ -8,28 +8,26 @@
 #define BANKOR_JOBINFO_H
 
 
-#include "Job.h"
+//#include "Job.h"
 
-struct cmp_node {
-    bool operator()(const NodeInfo &a, const NodeInfo &b) const {
-        return a.getAddress() < b.getAddress();
-    }
-};
+
+#include "NodeInfo.h"
+#include "ExecutorItem.h"
 
 class JobInfo {
 
-    std::map<const NodeInfo, Job*, cmp_node> nodes_address;
-    std::map<const Job*, NodeInfo> nodes_job;
+    std::map<const NodeInfo, ExecutorItem*, cmp_node> nodes_address;
+    std::map<const ExecutorItem*, NodeInfo> nodes_job;
 
 public:
 
-    bool add(Job*, NodeInfo);
-    bool remove(Job*);
+    bool add(ExecutorItem*, NodeInfo);
+    bool remove(ExecutorItem*);
     bool remove(NodeInfo);
-    Job* get(NodeInfo);
-    Job* get(long);
+    ExecutorItem* get(NodeInfo);
+    ExecutorItem* get(long);
     NodeInfo getNode(long);
-    NodeInfo get(Job*);
+    NodeInfo get(ExecutorItem*);
     void clear();
 };
 

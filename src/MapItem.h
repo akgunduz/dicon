@@ -29,5 +29,6 @@ public:
     virtual bool isValid();
 };
 
+typedef std::vector<MapItem*> TypeMapList;
 
 #endif //BANKOR_MAPITEM_H

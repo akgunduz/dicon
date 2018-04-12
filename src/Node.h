@@ -12,7 +12,10 @@
 class Node : public Component {
 private:
 
-	Job* job;
+	//Job* job;
+
+	char executor[PATH_MAX];
+	TypeMD5List md5List;
 
 	long distributorAddress;
 	bool setDistributorAddress(long);
@@ -21,14 +24,17 @@ private:
     virtual bool processCollectorMsg(long, Message *);
     virtual bool processNodeMsg(long, Message *);
 
-    bool send2DistributorMsg(long, MSG_TYPE);
-    bool send2CollectorMsg(long, MSG_TYPE);
+    bool send2DistributorMsg(long, MSG_TYPE, ...);
+    bool send2CollectorMsg(long, MSG_TYPE, ...);
 
     void parseCommand(char *cmd, char **argv);
-    bool processRule(Job*);
+    bool processRule();
     bool processMD5();
     bool processParallel(Job*);
     bool processSequential(Job*);
+
+    void setExecutor(char*);
+    TypeMD5List checkFileExistence(TypeMD5List *);
 
 public:
 	Node(const char *rootPath);

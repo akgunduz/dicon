@@ -9,8 +9,8 @@ JsonItem::JsonItem(Unit host)
 
 }
 
-JsonItem::JsonItem(FileItem *fileItem)
-    : FileItem(fileItem) {
+JsonItem::JsonItem(const char* jobDir, FileItem *fileItem)
+    : FileItem(jobDir, fileItem) {
 
 }
 
@@ -64,8 +64,8 @@ void JsonItem::reset() {
 
 bool JsonItem::parse() {
 
-    std::string test = Util::absPath(getHost(), getRefPath()).c_str();
-    struct json_object* node = json_object_from_file(Util::absPath(getHost(), getRefPath()).c_str());
+    std::string test = Util::absPath(getHost(), getRefPath().c_str()).c_str();
+    struct json_object* node = json_object_from_file(Util::absPath(getHost(), getRefPath().c_str()).c_str());
     if (node == NULL){
         LOG_E("Invalid JSON File");
         return false;

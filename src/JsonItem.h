@@ -23,7 +23,7 @@ protected:
 public:
 
     JsonItem(Unit host);
-    JsonItem(FileItem *fileItem);
+    JsonItem(const char*, FileItem *fileItem);
     JsonItem(Unit host, const char* jobDir,
              const char* fileName, FILETYPE fileType);
     virtual ~JsonItem();

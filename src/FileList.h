@@ -14,7 +14,7 @@ struct cmp_str {
     }
 };
 
-typedef std::map<const uint8_t*, FileItem*, cmp_str> TypeFileList;
+typedef std::map<const uint8_t*, FileItem*, cmp_str> TypeFileListList;
 
 enum FILELIST_FLAG {
     FILE_LIST_ALL,

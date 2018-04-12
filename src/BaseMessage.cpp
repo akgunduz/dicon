@@ -227,6 +227,17 @@ bool BaseMessage::readNumber(int in, long *number) {
 	return true;
 }
 
+
+bool BaseMessage::readMD5(int desc, Md5* md5) {
+
+	if (!readBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
+		LOG_E("Can not read MD5 from stream");
+		return false;
+	}
+
+	return true;
+}
+
 bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	Util::mkPath(path);
@@ -397,6 +408,17 @@ bool BaseMessage::writeNumber(int out, long number) {
 	}
 	return true;
 }
+
+bool BaseMessage::writeMD5(int desc, Md5* md5) {
+
+    if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
+        LOG_E("Can not write md5 to stream");
+        return false;
+    }
+
+    return true;
+}
+
 
 bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 

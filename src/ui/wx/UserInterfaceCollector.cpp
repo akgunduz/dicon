@@ -73,8 +73,6 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    collObject->syncTime();
-
     collObject->processJob();
 }
 

@@ -37,11 +37,6 @@ bool Distributor::processCollectorMsg(long address, Message *msg) {
 			status = send2CollectorMsg(address, MSGTYPE_NODE);
 			break;
 
-		case MSGTYPE_TIME:
-			collStartTime.start();
-			nodeManager->resetTimes();
-			break;
-
 		default:
 			break;
 	}
@@ -59,7 +54,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_READY:
 
-			nodeManager->setIdle(address, msg->getHeader()->getOwner().getArch(), collStartTime.stop());
+			nodeManager->setIdle(NodeInfo(address, msg->getHeader()->getOwner().getArch()));
 
 			if (collectorWaitingList.size() > 0) {
 
@@ -82,7 +77,7 @@ bool Distributor::processNodeMsg(long address, Message *msg) {
 
 		case MSGTYPE_ALIVE:
 
-			if (!nodeManager->validate(address, msg->getHeader()->getOwner().getArch())
+			if (!nodeManager->validate(NodeInfo(address, msg->getHeader()->getOwner().getArch()))
 					&& collectorWaitingList.size() > 0) {
 
                 long collectorAddress = collectorWaitingList.front();
@@ -157,20 +152,22 @@ bool Distributor::send2CollectorMsg(long address, MSG_TYPE type) {
 			break;
 
 		case MSGTYPE_NODE: {
-				NodeItem *node = nodeManager->getIdle(address);
+
+				NodeObject *node = nodeManager->getIdle();
 
 				if (node != nullptr) {
 
-					LOG_U(UI_UPDATE_DIST_NODE_LIST, node->address, PREBUSY);
+					LOG_U(UI_UPDATE_DIST_NODE_LIST, node->getNode()->getAddress(), PREBUSY);
 					LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
-                          InterfaceTypes::getAddressString(node->address).c_str());
+                          InterfaceTypes::getAddressString(node->getNode()->getAddress()).c_str());
 
-                    msg->getHeader()->setVariant(0, node->address);
-                    msg->getHeader()->setVariant(1, node->id);
+                    msg->getHeader()->setVariant(0, node->getNode()->getAddress());
+                    msg->getHeader()->setVariant(1, node->getNode()->getArch());
 
-                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, node->address);
+                    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, node->getNode()->getAddress());
 
 				} else {
+
 					collectorWaitingList.push_back(address);
 
 					LOG_U(UI_UPDATE_DIST_LOG, "No available node");
@@ -228,16 +225,14 @@ bool Distributor::reset() {
 
 	nodeManager->clear();
 	collectorWaitingList.clear();
-	collStartTime.reset();
 	return true;
 
 }
 
-bool Distributor::onTimeOut(Component *component, NodeItem *node) {
+bool Distributor::onTimeOut(Component *component, NodeObject *node) {
 
 	Message *msg = new Message(COMP_NODE, MSGTYPE_TIMEOUT);
-	msg->getHeader()->setVariant(0, node->lastServedCollector);
-    component->put(COMP_NODE, node->address, msg);
+    component->put(COMP_NODE, node->getNode()->getAddress(), msg);
 
 	return true;
 }

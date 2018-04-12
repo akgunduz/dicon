@@ -41,13 +41,14 @@ public:
     bool transferBinary(int, int, Md5 *, int);
 
 	bool readBlock(int, uint8_t *, int);
-	bool readBinary(int, const char*, Md5 *, int);
 
 	bool readSignature(int);
 	bool readHeader(int);
 	bool readBlockHeader(int, Block*);
 	bool readString(int, char*, int);
 	bool readNumber(int, long*);
+	bool readMD5(int, Md5*);
+    bool readBinary(int, const char*, Md5 *, int);
 
 	bool readFromStream(int);
 
@@ -61,11 +62,12 @@ public:
 	bool writeBlockHeader(int, struct Block*);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
+    bool writeMD5(int, Md5*);
 	bool writeBinary(int, const char*, Md5 *, int);
 
-	bool writeEndStream(int);
-
 	bool writeToStream(int);
+
+    bool writeEndStream(int);
 
     virtual bool writeMessageStream(int out) = 0;
     virtual bool writeFinalize() = 0;
