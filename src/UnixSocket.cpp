@@ -5,7 +5,7 @@
 
 #include "UnixSocket.h"
 
-UnixSocket::UnixSocket(Unit host, Device *device, const InterfaceCallback *cb)
+UnixSocket::UnixSocket(COMPONENT host, Device *device, const InterfaceCallback *cb)
 		: Interface(host, device, cb) {
 
 	if (!initUnixSocket()) {
@@ -68,7 +68,7 @@ bool UnixSocket::initUnixSocket() {
     return false;
 }
 
-void UnixSocket::runReceiver(Unit host) {
+void UnixSocket::runReceiver(COMPONENT host) {
 
 	bool thread_started = true;
 

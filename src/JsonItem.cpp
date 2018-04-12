@@ -4,7 +4,7 @@
 
 #include "JsonItem.h"
 
-JsonItem::JsonItem(Unit host)
+JsonItem::JsonItem(COMPONENT host)
     : FileItem(host) {
 
 }
@@ -14,7 +14,7 @@ JsonItem::JsonItem(const char* jobDir, FileItem *fileItem)
 
 }
 
-JsonItem::JsonItem(Unit host, const char* jobDir, const char* fileName, FILETYPE fileType)
+JsonItem::JsonItem(COMPONENT host, const char* jobDir, const char* fileName, FILETYPE fileType)
         : FileItem(host, jobDir, fileName, fileType) {
 
 }

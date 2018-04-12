@@ -21,7 +21,7 @@ int BaseMessage::getBinarySize(const char* path) {
 
     FILE *fd = fopen(path, "rb");
     if (!fd) {
-        LOG_E("File %s could not found", path);
+        LOG_E("%s : File %s could not found", ComponentTypes::getName(getHost()), path);
         return 0;
     }
 
@@ -54,13 +54,13 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
         }
 
         if (!readBlock(in, buf, (unsigned)readSize)) {
-            LOG_E("Can not read data in transferBinary");
+            LOG_E("%s : Can not read data in transferBinary", ComponentTypes::getName(getHost()));
             error = true;
             break;
         }
 
         if (!writeBlock(out, buf, (unsigned)readSize)) {
-            LOG_E("Can not write data in transferBinary");
+            LOG_E("%s : Can not write data in transferBinary", ComponentTypes::getName(getHost()));
             error = true;
             break;
         }
@@ -93,23 +93,23 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 		if (count == -1) {
 
 			if (errno == EINTR) {
-				LOG_W("Interrupt Block, retry");
+				LOG_W("%s : Interrupt Block, retry", ComponentTypes::getName(getHost()));
 				continue;
 			}
 
 			if (errno == EAGAIN && !busy) {
-				LOG_W("Busy state, sleep and retry");
+				LOG_W("%s : Busy state, sleep and retry", ComponentTypes::getName(getHost()));
 				busy = true;
 				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 
-			LOG_E("Can not read data block");
+			LOG_E("%s : Can not read data block", ComponentTypes::getName(getHost()));
 			return false;
 		}
 
 		if (count == 0) {
-			LOG_E("Empty read operation");
+			LOG_E("%s : Empty read operation", ComponentTypes::getName(getHost()));
 			return false;
 		}
 
@@ -137,14 +137,14 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 bool BaseMessage::readSignature(int in) {
 
 	if (!readBlock(in, tmpBuf, 2)) {
-		LOG_E("Can not read correct signature from stream");
+		LOG_E("%s : Can not read correct signature from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
 	short signature = ntohs(*((short *) tmpBuf));
 
     if (signature != SIGNATURE) {
-        LOG_E("Can not read correct signature from stream");
+        LOG_E("%s : Can not read correct signature from stream", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -154,7 +154,7 @@ bool BaseMessage::readSignature(int in) {
 bool BaseMessage::readHeader(int in) {
 
 	if (!readBlock(in, tmpBuf, headerSize)) {
-		LOG_E("Can not read message header from stream");
+		LOG_E("%s : Can not read message header from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -164,7 +164,7 @@ bool BaseMessage::readHeader(int in) {
 bool BaseMessage::readBlockHeader(int in, Block *header) {
 
 	if (!readBlock(in, tmpBuf, BLOCK_HEADER_SIZE)) {
-		LOG_E("Can not read block header from stream");
+		LOG_E("%s : Can not read block header from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -175,7 +175,7 @@ bool BaseMessage::readBlockHeader(int in, Block *header) {
     if (header->getCount() > 0) {
 
         if (!readBlock(in, tmpBuf, header->getCount() * 4)) {
-            LOG_E("Can not read block header from stream");
+            LOG_E("%s : Can not read block header from stream", ComponentTypes::getName(getHost()));
             return false;
         }
 
@@ -195,7 +195,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 	while(size > TMP_BUFFER_SIZE - 1) {
 
 		if (!readBlock(in, tmpBuf, TMP_BUFFER_SIZE - 1)) {
-			LOG_E("Can not read object data from stream");
+			LOG_E("%s : Can not read object data from stream", ComponentTypes::getName(getHost()));
 			return false;
 		}
 
@@ -206,7 +206,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 	}
 
 	if (!readBlock(in, tmpBuf, size)) {
-		LOG_E("Can not read object data from stream");
+		LOG_E("%s : Can not read object data from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -219,7 +219,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 bool BaseMessage::readNumber(int in, long *number) {
 	//size must be 8;
 	if (!readBlock(in, tmpBuf, 8)) {
-		LOG_E("Can not read number from stream");
+		LOG_E("%s : Can not read number from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -231,7 +231,7 @@ bool BaseMessage::readNumber(int in, long *number) {
 bool BaseMessage::readMD5(int desc, Md5* md5) {
 
 	if (!readBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-		LOG_E("Can not read MD5 from stream");
+		LOG_E("%s : Can not read MD5 from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -244,7 +244,7 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
-		LOG_E("File %s could not created or opened", path);
+		LOG_E("%s : File %s could not created or opened", ComponentTypes::getName(getHost()), path);
 		return false;
 	}
 
@@ -306,23 +306,23 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 		if (count == -1) {
 
 			if (errno == EINTR) {
-				LOG_W("Interrupt Block, retry");
+				LOG_W("%s : Interrupt Block, retry", ComponentTypes::getName(getHost()));
 				continue;
 			}
 
 			if (errno == EAGAIN && !busy) {
-				LOG_W("Busy state, sleep and retry");
+				LOG_W("%s : Busy state, sleep and retry", ComponentTypes::getName(getHost()));
 				busy = true;
 				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 
-			LOG_E("Can not write data block");
+			LOG_E("%s : Can not write data block", ComponentTypes::getName(getHost()));
 			return false;
 		}
 
 		if (count == 0) {
-			LOG_E("Empty write operation");
+			LOG_E("%s : Empty write operation", ComponentTypes::getName(getHost()));
 			return false;
 		}
 
@@ -351,7 +351,7 @@ bool BaseMessage::writeSignature(int out) {
 	*((short *) tmpBuf) = htons(SIGNATURE);
 
     if (!writeBlock(out, tmpBuf, 2)) {
-        LOG_E("Can not write signature to stream");
+        LOG_E("%s : Can not write signature to stream", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -361,12 +361,12 @@ bool BaseMessage::writeSignature(int out) {
 bool BaseMessage::writeHeader(int out) {
 
     if (!extractHeader(tmpBuf)) {
-        LOG_E("Can not prepare header");
+        LOG_E("%s : Can not prepare header", ComponentTypes::getName(getHost()));
         return false;
     }
 
 	if (!writeBlock(out, tmpBuf, headerSize)) {
-		LOG_E("Can not write message header to stream");
+		LOG_E("%s : Can not write message header to stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -383,7 +383,7 @@ bool BaseMessage::writeBlockHeader(int out, Block *header) {
     }
 
     if (!writeBlock(out, tmpBuf, BLOCK_HEADER_SIZE + header->getCount() * 4)) {
-        LOG_E("Can not write block header to stream");
+        LOG_E("%s : Can not write block header to stream", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -393,7 +393,7 @@ bool BaseMessage::writeBlockHeader(int out, Block *header) {
 bool BaseMessage::writeString(int out, const char* str) {
 
 	if (!writeBlock(out, (uint8_t*)str, (int)strlen(str))) {
-		LOG_E("Can not write string to stream");
+		LOG_E("%s : Can not write string to stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
@@ -403,7 +403,7 @@ bool BaseMessage::writeString(int out, const char* str) {
 bool BaseMessage::writeNumber(int out, long number) {
 
 	if (!writeBlock(out, (uint8_t *)&number, 8)) {
-		LOG_E("Can not write char array to stream");
+		LOG_E("%s : Can not write char array to stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
 	return true;
@@ -412,7 +412,7 @@ bool BaseMessage::writeNumber(int out, long number) {
 bool BaseMessage::writeMD5(int desc, Md5* md5) {
 
     if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-        LOG_E("Can not write md5 to stream");
+        LOG_E("%s : Can not write md5 to stream", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -424,7 +424,7 @@ bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 
 	int in = open(path, O_RDONLY);
 	if (in == -1) {
-		LOG_E("File %s could not created or opened", path);
+		LOG_E("%s : File %s could not created or opened", ComponentTypes::getName(getHost()), path);
 		return false;
 	}
 
@@ -470,4 +470,12 @@ int BaseMessage::getDescriptor() {
 
 void BaseMessage::setDescriptor(int desc) {
     this->desc = desc;
+}
+
+COMPONENT BaseMessage::getHost() {
+    return this->host;
+}
+
+void BaseMessage::setHost(COMPONENT host) {
+     this->host = host;
 }

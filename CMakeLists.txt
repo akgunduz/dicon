@@ -40,7 +40,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         #${SOURCE_PATH}/MapItem.cpp
         ${SOURCE_PATH}/Util.cpp
-        ${SOURCE_PATH}/Unit.cpp
+        #${SOURCE_PATH}/Unit.cpp
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/Address.cpp

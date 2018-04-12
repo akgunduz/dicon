@@ -7,8 +7,8 @@
 #ifndef BANKOR_MESSAGEHEADER_H
 #define BANKOR_MESSAGEHEADER_H
 
-#include "Unit.h"
 #include "MessageTypes.h"
+#include "ComponentTypes.h"
 
 #define MAX_VARIANT 2
 
@@ -31,8 +31,8 @@ public:
     MessageHeader();
     void setType(MSG_TYPE);
     MSG_TYPE getType();
-    Unit getOwner();
-    void setOwner(Unit);
+    COMPONENT getOwner();
+    void setOwner(COMPONENT);
 
     long getOwnerAddress();
     void setOwnerAddress(long);

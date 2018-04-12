@@ -7,7 +7,7 @@
 #include "ExecutorItem.h"
 
 Node::Node(const char *rootPath) :
-        Component(Unit(COMP_NODE), rootPath) {
+        Component(COMP_NODE, rootPath) {
 
 	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);

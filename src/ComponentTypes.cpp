@@ -11,6 +11,8 @@ const char* sComponentTypes[COMP_MAX] = {
         "Node",
 };
 
+char ComponentTypes::rootPath[COMP_MAX][PATH_MAX];
+
 const char* ComponentTypes::getName(COMPONENT type) {
 
     return sComponentTypes[type];
@@ -34,4 +36,22 @@ UI_UPDATE ComponentTypes::getAssignedUILog(COMPONENT type) {
     }
 
     return UI_UPDATE_LOG;
+}
+
+COMPONENT ComponentTypes::getNextType(COMPONENT type) {
+
+    return (COMPONENT)(((int)type + 1) % COMP_MAX);
+}
+
+COMPONENT ComponentTypes::getPrevType(COMPONENT type) {
+
+    return (COMPONENT)(((int)type + COMP_MAX - 1) % COMP_MAX);
+}
+
+const char* ComponentTypes::getRootPath(COMPONENT component) {
+    return rootPath[component];
+}
+
+void ComponentTypes::setRootPath(COMPONENT component, const char *path) {
+    strcpy(rootPath[component], path);
 }

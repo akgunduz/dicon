@@ -147,8 +147,8 @@ bool Util::checkPath(const char *path1, const char *path2, bool dir) {
     return true;
 }
 
-std::string Util::absPath(Unit host, const char *path2) {
-    return std::string(Unit::getRootPath(host.getType())) + "/" + path2;
+std::string Util::absPath(COMPONENT host, const char *path2) {
+    return std::string(ComponentTypes::getRootPath(host)) + "/" + path2;
 }
 
 void Util::cleanup() {

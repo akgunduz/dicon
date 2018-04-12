@@ -18,9 +18,17 @@ enum COMPONENT {
 
 class ComponentTypes {
 
+    static char rootPath[COMP_MAX][PATH_MAX];
+
 public:
     static const char* getName(COMPONENT);
     static UI_UPDATE getAssignedUILog(COMPONENT);
+
+    static COMPONENT getNextType(COMPONENT);
+    static COMPONENT getPrevType(COMPONENT);
+
+    static const char* getRootPath(COMPONENT);
+    static void setRootPath(COMPONENT, const char*);
 
 };
 

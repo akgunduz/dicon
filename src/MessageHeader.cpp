@@ -19,12 +19,12 @@ MSG_TYPE MessageHeader::getType() {
     return (MSG_TYPE)type;
 }
 
-Unit MessageHeader::getOwner() {
-    return Unit(owner);
+COMPONENT MessageHeader::getOwner() {
+    return (COMPONENT)owner;
 }
 
-void MessageHeader::setOwner(Unit owner) {
-    this->owner = owner.getUnit();
+void MessageHeader::setOwner(COMPONENT owner) {
+    this->owner = owner;
 }
 
 long MessageHeader::getOwnerAddress() {

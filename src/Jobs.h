@@ -23,9 +23,9 @@ public:
     Jobs();
     ~Jobs();
     bool addJob(Job*);
-    bool addJob(Unit, const char*);
+    bool addJob(COMPONENT , const char*);
     bool addJobList(Jobs*, bool = false);
-    bool addJobList(Unit, const char*, bool = false);
+    bool addJobList(COMPONENT, const char*, bool = false);
 
     Job* getJob(int);
 //    Job* getJobByNode(NodeInfo);

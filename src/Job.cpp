@@ -12,15 +12,15 @@
 //    init("");
 //}
 
-Job::Job(Unit host, const char* jobDir)
-        : JsonItem(host, jobDir, JOB_FILE, FILE_JOB){
+Job::Job(COMPONENT host, const char* jobDir)
+        : JsonItem(host, this->jobDir, JOB_FILE, FILE_JOB){
 
     init(jobDir);
 
 }
 
-Job::Job(Unit host, const char* jobDir, const char* fileName)
-        : JsonItem(host, jobDir, fileName, FILE_JOB) {
+Job::Job(COMPONENT host, const char* jobDir, const char* fileName)
+        : JsonItem(host, this->jobDir, fileName, FILE_JOB) {
 
     init(jobDir);
 

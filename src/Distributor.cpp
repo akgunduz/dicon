@@ -7,7 +7,7 @@
 #include "DeviceList.h"
 
 Distributor::Distributor(const char *rootPath, double backupRate) :
-            Component(Unit(COMP_DISTRIBUTOR), rootPath){
+            Component(COMP_DISTRIBUTOR, rootPath){
 
 	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
 

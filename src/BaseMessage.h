@@ -26,6 +26,8 @@ class BaseMessage {
 
     int desc;
 
+    COMPONENT host;
+
 	sockaddr_in multicastAddress;
 
 public:
@@ -74,6 +76,9 @@ public:
 
     virtual bool setHeader(const uint8_t*) = 0;
     virtual bool extractHeader(uint8_t *) = 0;
+
+    COMPONENT getHost();
+    void setHost(COMPONENT);
 };
 
 #endif //__Message_H_

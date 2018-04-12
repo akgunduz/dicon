@@ -9,7 +9,6 @@
 #include "Message.h"
 #include "Address.h"
 #include "Device.h"
-#include "Unit.h"
 #include "MessageItem.h"
 
 class Interface;
@@ -23,7 +22,7 @@ class Argument {
 
 public:
 
-	Unit host;
+	COMPONENT host;
 	int acceptSocket;
 	MessageItem *item;
 
@@ -46,12 +45,12 @@ private :
 	static bool senderCB(void *, SchedulerItem *);
 
 	Device *device;
-	Unit host;
+	COMPONENT host;
 
     long address;
     long multicastAddress;
 
-    void setHost(Unit);
+    void setHost(COMPONENT);
     void setDevice(Device*);
 
 protected :
@@ -60,19 +59,19 @@ protected :
 	pthread_t thread;
 	int notifierPipe[2];
 
-	virtual void runReceiver(Unit host) = 0;
+	virtual void runReceiver(COMPONENT host) = 0;
 	virtual void runSender(long, Message *) = 0;
 	virtual void runMulticastSender(Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(Unit host, Device *, const InterfaceCallback *);
+	Interface(COMPONENT host, Device *, const InterfaceCallback *);
 
 public :
     virtual ~Interface();
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
-	Unit getHost();
+	COMPONENT getHost();
 	Device* getDevice();
     long getAddress();
     long getMulticastAddress();

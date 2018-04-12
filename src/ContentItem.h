@@ -8,7 +8,6 @@
 
 #include "Log.h"
 #include "SchedulerItem.h"
-#include "Unit.h"
 
 #define BUFFER_SIZE 512
 
