@@ -9,8 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include <ExecutorItem.h>
-#include <MapItem.h>
+#include "ExecutorItem.h"
 #include "UserInterface.h"
 
 void UserInterface::collInit() {
@@ -120,14 +119,14 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
     Job *job = (Job*)event.GetClientData();
 
-    for (int j = 0; j < job->getContentCount(CONTENT_MAP); j++) {
+    for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
 
-        MapItem *content = (MapItem *) job->getContent(CONTENT_MAP, j);
+        FileItem *content = (FileItem *) job->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }
 
-        collFileList->Append(content->get()->getFileName());
+        collFileList->Append(content->getFileName());
 
     }
 }

@@ -87,43 +87,43 @@ NodeObject *NodeManager::getIdle() {
     return NULL;
 }
 
-bool NodeManager::setIdle(NodeInfo nodeInfo) {
+bool NodeManager::setIdle(long address) {
 
-    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    TypeNodeList::iterator search = nodes.find(address);
 
     if (search == nodes.end()) {
-        add(nodeInfo);
+        add(address);
         return false;
     }
 
     search->second->setState(IDLE);
 
     LOG_I("Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str(), sStates[IDLE]);
+          InterfaceTypes::getAddressString(address).c_str(), sStates[IDLE]);
 
 	return true;
 }
 
-bool NodeManager::validate(NodeInfo nodeInfo) {
+bool NodeManager::validate(long address) {
 
-    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    TypeNodeList::iterator search = nodes.find(address);
 	if (search == nodes.end()) {
-		add(nodeInfo);
+		add(address);
 		return false;
 	}
 
 	LOG_I("Node at address : %s is Alive",
-          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+          InterfaceTypes::getAddressString(address).c_str());
 	return true;
 
 }
 
-bool NodeManager::setBusy(NodeInfo nodeInfo) {
+bool NodeManager::setBusy(long address) {
 
-    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    TypeNodeList::iterator search = nodes.find(address);
     if (search == nodes.end()) {
         LOG_W("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+              InterfaceTypes::getAddressString(address).c_str());
         return false;
     }
 
@@ -141,23 +141,23 @@ bool NodeManager::setBusy(NodeInfo nodeInfo) {
     node->iterateUsage(true);
 
     LOG_T("Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str(), sStates[BUSY]);
+          InterfaceTypes::getAddressString(address).c_str(), sStates[BUSY]);
 
 	return true;
 
 }
 
-bool NodeManager::remove(NodeInfo nodeInfo) {
+bool NodeManager::remove(long address) {
 
-    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    TypeNodeList::iterator search = nodes.find(address);
     if (search == nodes.end()) {
         LOG_W("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+              InterfaceTypes::getAddressString(address).c_str());
         return false;
     }
 
     NodeObject *node = search->second;
-    nodes.erase(nodeInfo);
+    nodes.erase(address);
     delete node;
 
 #ifndef DISABLE_BACKUP
@@ -172,9 +172,9 @@ bool NodeManager::remove(NodeInfo nodeInfo) {
 
 }
 
-bool NodeManager::add(NodeInfo node) {
+bool NodeManager::add(long address) {
 
-	nodes[node] = new NodeObject(node);
+	nodes[address] = new NodeObject(address);
 
 #ifndef DISABLE_BACKUP
 	totalBackup = nodes.size() == 1 ? 0 : (uint32_t) ceil(nodes.size() * backupRate);
@@ -185,7 +185,7 @@ bool NodeManager::add(NodeInfo node) {
 #endif
 
 	LOG_I("Node at address : %s added to the list",
-          InterfaceTypes::getAddressString(node.getAddress()).c_str());
+          InterfaceTypes::getAddressString(address).c_str());
 
 	return true;
 }

@@ -126,21 +126,8 @@ std::string FileItem::getPath(bool type) {
     char format[PATH_MAX];
     char path[PATH_MAX];
 
-    if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
-
-        !type ? strcpy(format, "%s/common/%s") : strcpy(format, "%s/md5/common/%s.md5");
-        sprintf(path, format, *jobDir, fileName);
-
-    } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
-
-        !type ? strcpy(format, "%s/arch/%s/%s") : strcpy(format, "%s/md5/arch/%s/%s.md5");
-        sprintf(path, format, *jobDir, ArchTypes::getDir(node.getArch()), fileName);
-
-    } else {
-
-        !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
-        sprintf(path, format, *jobDir, fileName);
-    }
+    !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
+    sprintf(path, format, jobDir, fileName);
 
     Util::checkPath(Unit::getRootPath(host.getType()), path, true);
 

@@ -11,23 +11,24 @@
 //#include "Job.h"
 
 
-#include "NodeInfo.h"
 #include "ExecutorItem.h"
+
+typedef std::map<const long, ExecutorItem*> TypeAddressExecList;
+typedef std::map<const ExecutorItem*, long> TypeExecAddressList;
 
 class JobInfo {
 
-    std::map<const NodeInfo, ExecutorItem*, cmp_node> nodes_address;
-    std::map<const ExecutorItem*, NodeInfo> nodes_job;
+    TypeAddressExecList nodes_address;
+    TypeExecAddressList nodes_job;
 
 public:
 
-    bool add(ExecutorItem*, NodeInfo);
+    bool add(ExecutorItem*, long);
     bool remove(ExecutorItem*);
-    bool remove(NodeInfo);
-    ExecutorItem* get(NodeInfo);
+    bool remove(long);
     ExecutorItem* get(long);
-    NodeInfo getNode(long);
-    NodeInfo get(ExecutorItem*);
+    long getNode(long);
+    long get(ExecutorItem*);
     void clear();
 };
 

@@ -3,7 +3,6 @@
 //
 
 #include "Job.h"
-#include "MapItem.h"
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
 
@@ -37,7 +36,7 @@ void Job::init(const char* jobDir) {
 
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_CONCURRENCY] = new JsonType(CONTENT_CONCURRENCY, "concurrency", this, parseConcurrencyNode);
-    contentTypes[CONTENT_MAP] = new JsonType(CONTENT_MAP, "files", this, parseMapNode);
+    contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
     contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
 
@@ -83,7 +82,7 @@ bool Job::parseConcurrencyNode(JsonItem *parent, json_object *node) {
     return true;
 }
 
-bool Job::parseMapNode(JsonItem *parent, json_object *node) {
+bool Job::parseFileNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
@@ -108,13 +107,15 @@ bool Job::parseMapNode(JsonItem *parent, json_object *node) {
         const char* path = json_object_get_string(json_object_array_get_idx(child, 0));
         const char* sFileType = json_object_get_string(json_object_array_get_idx(child, 1));
 
-        FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
+        //TODO Dependent file type will be added
+        //FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
 
+        FILETYPE fileType = FILE_COMMON;
         Job* job = (Job*) parent;
 
-        MapItem *content = new MapItem(job->getHost(), job->getJobDir(), path, fileType);
+        FileItem *content = new FileItem(job->getHost(), job->getJobDir(), path, fileType);
 
-        job->contentList[CONTENT_MAP].push_back(content);
+        job->contentList[CONTENT_FILE].push_back(content);
 
     }
     return true;
@@ -186,10 +187,6 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-const char* Job::getJobDir() {
-    return jobDir;
-}
-
 bool Job::isParallel() {
     return parallel;
 }
@@ -246,17 +243,12 @@ int Job::getCount() {
     return getContentCount(CONTENT_EXECUTOR);
 }
 
-ExecutorItem* Job::getByNode(NodeInfo node) {
+ExecutorItem* Job::get(long node) {
 
     return nodes.get(node);
 }
 
-ExecutorItem* Job::getByAddress(long address) {
-
-    return nodes.get(address);
-}
-
-NodeInfo Job::getNodeByAddress(long address) {
+long Job::getNodeByAddress(long address) {
 
     return nodes.getNode(address);
 }
@@ -266,8 +258,8 @@ ExecutorItem* Job::getUnServed() {
     int i = 0;
     for (; i < getCount(); i++) {
 
-        NodeInfo node = nodes.get(get(i));
-        if (node.getAddress() == 0) {
+        long nodeAddress = nodes.get(get(i));
+        if (nodeAddress == 0) {
             break;
         }
     }
@@ -280,9 +272,9 @@ ExecutorItem* Job::getUnServed() {
 }
 
 
-bool Job::attachNode(ExecutorItem *item, NodeInfo node) {
+bool Job::attachNode(ExecutorItem *item, long address) {
 
-    return nodes.add(item, node);
+    return nodes.add(item, address);
 }
 
 bool Job::detachNode(ExecutorItem *item) {

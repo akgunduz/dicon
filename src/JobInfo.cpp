@@ -5,17 +5,17 @@
 
 #include "JobInfo.h"
 
-bool JobInfo::add(ExecutorItem *item, NodeInfo node) {
+bool JobInfo::add(ExecutorItem *item, long address) {
 
-    nodes_address[node] = item;
-    nodes_job[item] = node;
+    nodes_address[address] = item;
+    nodes_job[item] = address;
 
     return true;
 }
 
 bool JobInfo::remove(ExecutorItem *item) {
 
-    std::map<const ExecutorItem*, NodeInfo>::iterator search = nodes_job.find(item);
+    TypeExecAddressList::iterator search = nodes_job.find(item);
     if (search == nodes_job.end()) {
         return false;
     }
@@ -24,9 +24,9 @@ bool JobInfo::remove(ExecutorItem *item) {
     return true;
 }
 
-bool JobInfo::remove(NodeInfo node) {
+bool JobInfo::remove(long address) {
 
-    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
+    TypeAddressExecList::iterator search = nodes_address.find(address);
     if (search == nodes_address.end()) {
         return false;
     }
@@ -35,20 +35,9 @@ bool JobInfo::remove(NodeInfo node) {
     return true;
 }
 
-ExecutorItem *JobInfo::get(NodeInfo node) {
-
-    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
-    if (search == nodes_address.end()) {
-        return NULL;
-    }
-
-    return search->second;
-}
-
 ExecutorItem *JobInfo::get(long address) {
 
-    NodeInfo node = NodeInfo(address, ARCH_MAX);
-    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
+    TypeAddressExecList::iterator search = nodes_address.find(address);
     if (search == nodes_address.end()) {
         return NULL;
     }
@@ -56,12 +45,11 @@ ExecutorItem *JobInfo::get(long address) {
     return search->second;
 }
 
+long JobInfo::get(ExecutorItem *item) {
 
-NodeInfo JobInfo::get(ExecutorItem *item) {
-
-    std::map<const ExecutorItem*, NodeInfo>::iterator search = nodes_job.find(item);
+    TypeExecAddressList::iterator search = nodes_job.find(item);
     if (search == nodes_job.end()) {
-        return NodeInfo();
+        return 0;
     }
 
     return search->second;
@@ -73,11 +61,11 @@ void JobInfo::clear() {
     nodes_address.clear();
 }
 
-NodeInfo JobInfo::getNode(long address) {
+long JobInfo::getNode(long address) {
 
     ExecutorItem* job = get(address);
     if (job == NULL) {
-        return NodeInfo();
+        return 0;
     }
 
     return get(job);

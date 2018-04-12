@@ -5,7 +5,6 @@
 
 #include "ExecutorItem.h"
 #include "ParameterItem.h"
-#include "MapItem.h"
 #include "Job.h"
 
 ExecutorItem::ExecutorItem()
@@ -38,7 +37,7 @@ bool ExecutorItem::parse(void *job) {
 
 	bool cmdMode = false;
 	int cmdIndex = 0;
-	CONTENT_TYPES cmdType = CONTENT_MAP;
+	CONTENT_TYPES cmdType = CONTENT_FILE;
 
 	for (uint32_t i = 0; i < strlen(exec); i++) {
 		switch(exec[i]) {
@@ -54,7 +53,7 @@ bool ExecutorItem::parse(void *job) {
 			case 'F':
 			case 'f':
 				if (cmdMode) {
-					cmdType = CONTENT_MAP;
+					cmdType = CONTENT_FILE;
 					break;
 				}
 				//no break
@@ -103,11 +102,11 @@ bool ExecutorItem::parse(void *job) {
 
 bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 
-	if (cmdType == CONTENT_MAP) {
-		MapItem *content = (MapItem *) ((Job*)job)->getContent(CONTENT_MAP, cmdIndex);
+	if (cmdType == CONTENT_FILE) {
+		FileItem *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsedExec, "%s%s", parsedExec, content->get()->getRefPath().c_str());
-            fileList.push_back(content->get());
+            sprintf(parsedExec, "%s%s", parsedExec, content->getRefPath().c_str());
+            fileList.push_back(content);
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {

@@ -17,7 +17,7 @@ private:
 
     NODE_STATES state;
     int usage;
-    NodeInfo nodeInfo;
+    long address;
     std::vector<Md5> md5List;
 
 #ifndef DISABLE_RECOVERY
@@ -26,15 +26,15 @@ private:
 
 public:
 
-    NodeObject(NODE_STATES, int, NodeInfo);
-    NodeObject(NodeInfo);
+    NodeObject(NODE_STATES, int, long);
+    NodeObject(long);
     ~NodeObject();
 
     NODE_STATES getState();
     void setState(NODE_STATES);
     int getUsage();
     void iterateUsage(bool);
-    NodeInfo* getNode();
+    long getAddress();
     std::vector<Md5>* getMD5List();
 
 };

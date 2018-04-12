@@ -66,9 +66,7 @@ enum NODE_STATES {
 
 enum FILETYPE {
     FILE_JOB,
-    FILE_RULE,
 	FILE_COMMON,
-	FILE_ARCH,
     FILE_MAX
 };
 
