@@ -6,11 +6,11 @@
 #include "FileItem.h"
 #include "ArchTypes.h"
 
-FileItem::FileItem(Unit host)
+FileItem::FileItem(COMPONENT host)
         : ContentItem () {
 
     setMD5();
-    setFile(Unit(COMP_MAX), NULL, "", FILE_MAX);
+    setFile(NULL, "", FILE_MAX);
 	setFlaggedToSent(true);
     this->host = host;
 }
@@ -22,26 +22,19 @@ FileItem::FileItem(const char *jobDir, FileItem *item)
     set(jobDir, item);
 }
 
-FileItem::FileItem(Unit host, const char *jobDir, const char *fileName,
+FileItem::FileItem(COMPONENT host, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5)
         : ContentItem () {
 
     set(host, jobDir, fileName, fileType, md5);
 };
 
-FileItem::FileItem(Unit host, Unit node, const char *jobDir, const char *fileName,
-                   FILETYPE fileType, Md5 *md5)
-        : ContentItem () {
-
-    set(host, node, jobDir, fileName, fileType, md5);
-};
-
-bool FileItem::set(Unit host, Unit node, const char *jobDir, const char *fileName,
+bool FileItem::set(COMPONENT host, const char *jobDir, const char *fileName,
                    FILETYPE fileType, Md5 *md5) {
 
     this->host = host;
 
-    setFile(node, jobDir, fileName, fileType);
+    setFile(jobDir, fileName, fileType);
     setFlaggedToSent(true);
 
     FILE *file = fopen(Util::absPath(host, getRefPath().c_str()).c_str(), "r");
@@ -81,12 +74,6 @@ bool FileItem::set(Unit host, Unit node, const char *jobDir, const char *fileNam
     fclose(file);
 
     return true;
-}
-
-bool FileItem::set(Unit host, const char *jobDir, const char *fileName,
-                   FILETYPE fileType, Md5 *md5) {
-
-    return set(host, Unit(COMP_MAX), jobDir, fileName, fileType, md5);
 }
 
 bool FileItem::set(const char *jobDir, FileItem *item) {
@@ -129,7 +116,7 @@ std::string FileItem::getPath(bool type) {
     !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
     sprintf(path, format, jobDir, fileName);
 
-    Util::checkPath(Unit::getRootPath(host.getType()), path, true);
+    Util::checkPath(ComponentTypes::getRootPath(host), path, true);
 
     return std::string(path);
 }
@@ -143,10 +130,9 @@ void FileItem::setFlaggedToSent(bool flaggedToSent) {
 }
 
 
-void FileItem::setFile(Unit node, const char* jobDir, const char *fileName, FILETYPE fileType) {
+void FileItem::setFile(const char* jobDir, const char *fileName, FILETYPE fileType) {
 
     this->jobDir = jobDir;
-    this->node = node;
     this->fileType = fileType;
     strcpy(this->fileName, fileName);
 
@@ -183,7 +169,7 @@ void FileItem::setMD5(Md5 *md5) {
     this->md5.set(md5);
 }
 
-Unit FileItem::getHost() {
+COMPONENT FileItem::getHost() {
     return host;
 }
 

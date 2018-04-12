@@ -8,7 +8,7 @@
 
 const char* sMsgTypes[MSGTYPE_MAX] = {
         "NODE",
-        "RULE",
+        "JOB",
         "BINARY",
         "MD5",
         "WAKEUP",

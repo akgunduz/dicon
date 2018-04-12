@@ -132,3 +132,8 @@ unsigned long ExecutorItem::getDependentFileCount() {
 
     return fileList.size();
 }
+
+TypeFileList *ExecutorItem::getDependentFileList() {
+
+	return &fileList;
+}

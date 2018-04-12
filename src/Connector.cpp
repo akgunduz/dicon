@@ -7,7 +7,7 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-Interface* Connector::createInterface(const Unit component, Device *device, const InterfaceCallback *cb) {
+Interface* Connector::createInterface(const COMPONENT component, Device *device, const InterfaceCallback *cb) {
 
     Interface *interface = NULL;
 

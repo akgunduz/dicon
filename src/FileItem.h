@@ -7,7 +7,6 @@
 #define __FileContent_H_
 
 #include "ContentItem.h"
-#include "Unit.h"
 #include "Md5.h"
 
 #define MAX_FILE_NAME_LENGTH 100
@@ -22,23 +21,19 @@ class FileItem : public ContentItem {
 	bool flaggedToSent;
 	FILETYPE fileType;
 
-    Unit host;
-    Unit node;
+    COMPONENT host;
+    //Unit node;
 
 	std::string getPath(bool);
 
 public:
-	FileItem(Unit host);
+	FileItem(COMPONENT host);
     FileItem(const char *, FileItem*);
-    FileItem(Unit host, const char *, const char*, FILETYPE,
-             Md5 *md5 = nullptr);
-	FileItem(Unit host, Unit node, const char *, const char*, FILETYPE,
+    FileItem(COMPONENT host, const char *, const char*, FILETYPE,
              Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    bool set(Unit host, Unit node, const char *, const char *, FILETYPE, Md5* = nullptr);
-
-    bool set(Unit host, const char *, const char *, FILETYPE, Md5* = nullptr);
+    bool set(COMPONENT host, const char *, const char *, FILETYPE, Md5* = nullptr);
 
     bool set(const char*, FileItem*);
 	bool isFlaggedToSent();
@@ -49,9 +44,9 @@ public:
     const char* getFileName();
     const char* getJobDir();
 
-    Unit getHost();
+    COMPONENT getHost();
 
-    void setFile(Unit, const char*, const char*, FILETYPE);
+    void setFile(const char*, const char*, FILETYPE);
 	std::string getRefPath();
 	std::string getMD5Path();
 

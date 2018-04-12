@@ -25,13 +25,13 @@ class Job : public JsonItem {
     int repeat;
 
     JobInfo nodes;
-    char jobDir[MAX_JOB_DIR_LENGTH];
+    char jobDir[PATH_MAX];
 
 public:
 
    // Job(FileItem *fileItem);
-    Job(Unit host, const char* jobDir);
-    Job(Unit host, const char* jobDir, const char* fileName);
+    Job(COMPONENT host, const char* jobDir);
+    Job(COMPONENT host, const char* jobDir, const char* fileName);
 
     void init(const char*);
     ~Job();

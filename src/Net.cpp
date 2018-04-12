@@ -5,7 +5,7 @@
 
 #include "Net.h"
 
-Net::Net(Unit host, Device *device, const InterfaceCallback *cb)
+Net::Net(COMPONENT host, Device *device, const InterfaceCallback *cb)
 		: Interface(host, device, cb) {
 
     if (!initTCP()) {
@@ -128,7 +128,7 @@ bool Net::initMulticast() {
     return true;
 }
 
-void Net::runReceiver(Unit host) {
+void Net::runReceiver(COMPONENT host) {
 
     bool thread_started = true;
 

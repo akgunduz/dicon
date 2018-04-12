@@ -29,7 +29,7 @@ private :
 
 	bool initTCP();
 	bool initMulticast();
-	void runReceiver(Unit host);
+	void runReceiver(COMPONENT);
 	static void *runAccepter(void *);
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
@@ -41,7 +41,7 @@ private :
 
 public :
 
-	Net(Unit, Device*, const InterfaceCallback *);
+	Net(COMPONENT, Device*, const InterfaceCallback *);
 	~Net();
 
     INTERFACE getType();

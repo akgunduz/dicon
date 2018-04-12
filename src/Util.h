@@ -7,7 +7,7 @@
 #define __Util_H_
 
 #include "Log.h"
-#include "Unit.h"
+#include "ComponentTypes.h"
 
 class Util {
 public:
@@ -17,7 +17,7 @@ public:
     static std::vector<std::string> getFileList(const char*, const char*);
     static std::vector<std::string> getDirList(const char*, const char*);
 	static std::string mixPath(const char*, const char*);
-	static std::string absPath(Unit, const char *);
+	static std::string absPath(COMPONENT, const char *);
 	static bool checkPath(const char*, const char*, bool);
     static bool isMulticast();
 	static void cleanup();

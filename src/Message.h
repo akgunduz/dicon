@@ -31,7 +31,7 @@ class Message : public BaseMessage {
 private:
 	MessageHeader header;
 
-	Unit host;
+	//Unit host;
 
     MessageData data;
 
@@ -63,15 +63,12 @@ public:
 //
 //	std::vector<Md5> md5List;
 
-	Message(Unit host);
-	Message(Unit owner, MSG_TYPE type);
+	Message(COMPONENT host);
+	Message(COMPONENT owner, MSG_TYPE type);
 
 	//void setStreamFlag(int);
 
 	MessageHeader *getHeader();
-
-	Unit getHost();
-	void setHost(Unit);
 
 	MessageData* getData();
 

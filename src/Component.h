@@ -11,7 +11,7 @@
 
 class Component {
 
-    Unit host;
+    COMPONENT host;
 
     Interface *interfaces[COMP_MAX];
 
@@ -19,13 +19,13 @@ protected :
 
     InterfaceCallback *callback;
 
-    void setHost(Unit);
+    void setHost(COMPONENT);
 
 public:
 
-    Component(Unit host, const char* rootPath);
+    Component(COMPONENT host, const char* rootPath);
     virtual ~Component();
-    Unit getHost();
+    COMPONENT getHost();
     long getInterfaceAddress(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);

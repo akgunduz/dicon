@@ -26,6 +26,7 @@ public:
     bool parse(void *);
     const char* getParsedExec();
     FileItem* getDependentFile(int);
+	TypeFileList* getDependentFileList();
     unsigned long getDependentFileCount();
 
 	virtual CONTENT_TYPES getType();

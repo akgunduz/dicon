@@ -4,17 +4,17 @@
 
 #include "Component.h"
 
-Component::Component(Unit host, const char* rootPath) {
+Component::Component(COMPONENT host, const char* rootPath) {
 
     setHost(host);
-    Unit::setRootPath(getHost().getType(), rootPath);
+    ComponentTypes::setRootPath(getHost(), rootPath);
 
     callback = new InterfaceCallback(receiveCB, this);
 
     DeviceList *deviceList = DeviceList::getInstance();
 
     interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
-    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host.getType() != COMP_NODE ?
+    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host != COMP_NODE ?
                                    Connector::createInterface(host, deviceList->getActive(0), callback) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
@@ -32,12 +32,12 @@ Component::~Component() {
     delete callback;
 }
 
-Unit Component::getHost() {
+COMPONENT Component::getHost() {
 
     return host;
 }
 
-void Component::setHost(Unit host) {
+void Component::setHost(COMPONENT host) {
 
     this->host = host;
 }
@@ -52,13 +52,13 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
           "Receive : \"%s\" from %s: at %s",
           MessageTypes::getName(msg->getHeader()->getType()),
-          ComponentTypes::getName(msg->getHeader()->getOwner().getType()),
+          ComponentTypes::getName(msg->getHeader()->getOwner()),
           InterfaceTypes::getAddressString(address).c_str());
 
-    switch(msg->getHeader()->getOwner().getType()) {
+    switch(msg->getHeader()->getOwner()) {
 
         case COMP_DISTRIBUTOR:
             return processDistributorMsg(address, msg);
@@ -109,7 +109,7 @@ bool Component::isSupportMulticast(COMPONENT target) {
 
 bool Component::send(COMPONENT target, long address, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
             "Send : \"%s\" to %s: at %s",
             MessageTypes::getName(msg->getHeader()->getType()),
             ComponentTypes::getName(target),
@@ -120,7 +120,7 @@ bool Component::send(COMPONENT target, long address, Message *msg) {
 
 bool Component::send(COMPONENT target, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost().getType()),
+    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
           "Send : \"%s\" as MultiCast",
           MessageTypes::getName(msg->getHeader()->getType()));
 

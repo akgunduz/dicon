@@ -5,7 +5,7 @@
 
 #include "Interface.h"
 
-Interface::Interface(Unit host, Device *device, const InterfaceCallback *receiveCB) {
+Interface::Interface(COMPONENT host, Device *device, const InterfaceCallback *receiveCB) {
 
     scheduler = new Scheduler();
 
@@ -134,11 +134,11 @@ void Interface::setMulticastAddress(long multicastAddress) {
     this->multicastAddress = multicastAddress;
 }
 
-Unit Interface::getHost() {
+COMPONENT Interface::getHost() {
     return host;
 }
 
-void Interface::setHost(Unit host) {
+void Interface::setHost(COMPONENT host) {
     this->host = host;
 }
 

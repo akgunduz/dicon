@@ -19,7 +19,7 @@ bool Jobs::addJob(Job *job) {
     return true;
 }
 
-bool Jobs::addJob(Unit host, const char *path) {
+bool Jobs::addJob(COMPONENT host, const char *path) {
 
     jobs.push_back(new Job(host, path));
     return true;
@@ -37,7 +37,7 @@ bool Jobs::addJobList(Jobs *jobs, bool init) {
     return true;
 }
 
-bool Jobs::addJobList(Unit host, const char *path, bool init) {
+bool Jobs::addJobList(COMPONENT host, const char *path, bool init) {
 
     if (init) {
         clear();
@@ -107,7 +107,7 @@ bool Jobs::clear() {
         delete *i;
     }
 
- //   nodes.clear();
+ //   nodes.clear();Unit
     jobs.clear();
     return true;
 }
