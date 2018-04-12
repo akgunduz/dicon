@@ -38,7 +38,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/NodeWatchdog.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/MapItem.cpp
+        #${SOURCE_PATH}/MapItem.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Unit.cpp
         ${SOURCE_PATH}/StopWatch.cpp
@@ -49,7 +49,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/JsonItem.cpp
-        ${SOURCE_PATH}/NodeInfo.cpp
+        #${SOURCE_PATH}/NodeInfo.cpp
         ${SOURCE_PATH}/Jobs.cpp
         ${SOURCE_PATH}/JobInfo.cpp
         ${SOURCE_PATH}/MessageHeader.cpp

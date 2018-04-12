@@ -8,7 +8,6 @@
 #include "JsonItem.h"
 #include "Md5.h"
 #include "FileList.h"
-#include "NodeInfo.h"
 #include "ExecutorItem.h"
 #include "JobInfo.h"
 
@@ -54,7 +53,7 @@ public:
     static bool parseNameNode(JsonItem*, json_object *node);
   //  static bool parseRuleNode(void*, json_object *node);
     static bool parseConcurrencyNode(JsonItem*, json_object *node);
-    static bool parseMapNode(JsonItem*, json_object *node);
+    static bool parseFileNode(JsonItem*, json_object *node);
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
 
@@ -63,13 +62,11 @@ public:
 
     ExecutorItem* get(int);
     int getCount();
-    const char* getJobDir();
-    ExecutorItem* getByNode(NodeInfo);
-    ExecutorItem* getByAddress(long);
-    NodeInfo getNodeByAddress(long);
+    ExecutorItem* get(long);
+    long getNodeByAddress(long);
     ExecutorItem* getUnServed();
 
-    bool attachNode(ExecutorItem*, NodeInfo node);
+    bool attachNode(ExecutorItem*, long);
     bool detachNode(ExecutorItem*);
 
     bool resetNodes();

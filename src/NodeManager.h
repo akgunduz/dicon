@@ -22,7 +22,7 @@ struct NodeManagerArgument {
             nodeConnector(cc), timeoutCB(cb), nodeMap(c), collectorAddress(a) {}
 };
 
-typedef std::map<NodeInfo, NodeObject *, cmp_node> TypeNodeList;
+typedef std::map<long, NodeObject *> TypeNodeList;
 
 class NodeManager {
 private:
@@ -49,11 +49,11 @@ public:
 
 	virtual ~NodeManager();
 
-	bool setIdle(NodeInfo);
-	bool setBusy(NodeInfo);
-	bool remove(NodeInfo);
-	bool validate(NodeInfo);
-	bool add(NodeInfo);
+	bool setIdle(long);
+	bool setBusy(long);
+	bool remove(long);
+	bool validate(long);
+	bool add(long);
 
 	NodeObject* getIdle();
 

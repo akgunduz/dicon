@@ -39,9 +39,9 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
 		case MSGTYPE_NODE: {
 
-            NodeInfo node(msg->getHeader()->getVariant(0), (ARCH) msg->getHeader()->getVariant(1));
+            long nodeAddress = msg->getHeader()->getVariant(0);
 
-			if (node.getAddress() == 0) {
+			if (nodeAddress == 0) {
 
 				status = false;
 				LOG_U(UI_UPDATE_COLL_LOG, "No Available Node");
@@ -56,18 +56,18 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
                 break;
             }
 
-            getJobs()->getJob(0)->attachNode(item, node);
+            getJobs()->getJob(0)->attachNode(item, nodeAddress);
 
           //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
 
 			LOG_T("New Job created from path : %s", "TODO JOB");
 
             LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
-				  InterfaceTypes::getAddressString(node.getAddress()).c_str());
+				  InterfaceTypes::getAddressString(nodeAddress).c_str());
 
          //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
-			status = send2NodeMsg(node.getAddress(), MSGTYPE_JOB, item);
+			status = send2NodeMsg(nodeAddress, MSGTYPE_JOB, item);
 			break;
 			}
 		default :
@@ -91,9 +91,6 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 		case MSGTYPE_MD5: {
 
 			LOG_U(UI_UPDATE_COLL_LOG, "MD5 info size %d", msg->getData()->getMD5Count());
-
-            NodeInfo node(address, msg->getHeader()->getOwner().getArch());
-
 
             //TODO
 //            Job* job = getJobs()->getJobByNode(node);

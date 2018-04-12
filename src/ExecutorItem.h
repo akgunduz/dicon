@@ -8,7 +8,6 @@
 
 #include "ContentItem.h"
 #include "FileList.h"
-#include "MapItem.h"
 
 class ExecutorItem : public ContentItem {
 
