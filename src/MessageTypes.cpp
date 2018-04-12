@@ -14,7 +14,6 @@ const char* sMsgTypes[MSGTYPE_MAX] = {
         "WAKEUP",
         "READY",
         "BUSY",
-        "TIME",
         "TIMEOUT",
         "ALIVE",
 };

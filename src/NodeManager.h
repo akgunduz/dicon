@@ -10,32 +10,38 @@
 #include "Connector.h"
 #include "Util.h"
 #include "StopWatch.h"
-#include "NodeItem.h"
+#include "NodeObject.h"
 #include "NodeWatchdog.h"
 
 struct NodeManagerArgument {
     Connector *nodeConnector;
-    NodeItem *nodeMap;
+    NodeObject *nodeMap;
     long collectorAddress;
     fTimeoutCB timeoutCB;
-    NodeManagerArgument(Connector *cc, fTimeoutCB cb, NodeItem *c, long a) :
+    NodeManagerArgument(Connector *cc, fTimeoutCB cb, NodeObject *c, long a) :
             nodeConnector(cc), timeoutCB(cb), nodeMap(c), collectorAddress(a) {}
 };
+
+typedef std::map<NodeInfo, NodeObject *, cmp_node> TypeNodeList;
 
 class NodeManager {
 private:
 
-	std::map<long, NodeItem *> nodes;
+    TypeNodeList nodes;
 
     Component *component;
     fTimeoutCB timeoutCB;
-    fWakeupCB wakeupCB;
 
+#ifndef DISABLE_BACKUP
     double backupRate;
 	int readyBackup;
 	int totalBackup;
+#endif
 
+#ifndef DISABLE_RECOVERY
+    fWakeupCB wakeupCB;
     NodeWatchdog *nodeWatchdog;
+#endif
 
 public:
 
@@ -43,14 +49,13 @@ public:
 
 	virtual ~NodeManager();
 
-	bool resetTimes();
-	bool setIdle(long, short, double);
-	bool setBusy(long);
-	bool remove(long);
-	bool validate(long, short);
-	bool add(long, short);
+	bool setIdle(NodeInfo);
+	bool setBusy(NodeInfo);
+	bool remove(NodeInfo);
+	bool validate(NodeInfo);
+	bool add(NodeInfo);
 
-	NodeItem* getIdle(long);
+	NodeObject* getIdle();
 
 	void clear();
 

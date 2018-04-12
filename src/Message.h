@@ -10,6 +10,7 @@
 #include "BaseMessage.h"
 #include "Job.h"
 #include "MessageHeader.h"
+#include "MessageData.h"
 
 #define STREAM_NONE 0xFFFF
 
@@ -27,54 +28,58 @@
 
 class Message : public BaseMessage {
 
+private:
 	MessageHeader header;
 
 	Unit host;
 
-	int streamFlag;
+    MessageData data;
 
-    char jobDir[50];
+//	int streamFlag;
+//
+//    char jobDir[50];
+
+    bool readJobInfo(int, char*, char*, struct Block*);
+    bool readFileBinary(int, FileItem *, struct Block*);
+    bool readFileMD5(int, Md5*, struct Block*);
+    bool readMessageBlock(int in, Block*);
+
+    bool writeJobInfo(int, char*, char*);
+    bool writeFileBinary(int, FileItem *);
+    bool writeFileMD5(int, Md5*);
+    bool writeMessageStream(int out);
+
+    virtual bool readFinalize();
+
+    virtual bool writeFinalize();
+
+    bool setHeader(const uint8_t*);
+    bool extractHeader(uint8_t *);
+
 
 public:
 
-    FileList *fileList;
-
-	std::vector<Md5> md5List;
+//	ExecutorItem *execution;
+//
+//	std::vector<Md5> md5List;
 
 	Message(Unit host);
 	Message(Unit owner, MSG_TYPE type);
 
-	void setStreamFlag(int);
+	//void setStreamFlag(int);
 
 	MessageHeader *getHeader();
 
 	Unit getHost();
 	void setHost(Unit);
 
-	const char* getJobDir();
+	MessageData* getData();
 
-	void setJob(int, FileList *fileList);
+	//const char* getJobDir();
 
-	bool readMD5(int, Md5*);
+	//void setJob(int, ExecutorItem*);
 
-	bool readJobInfo(int, char *, struct Block*);
-	bool readFileBinary(int, FileItem *, struct Block*);
-	bool readFileMD5(int, Md5*, struct Block*);
-	bool readMessageBlock(int in, Block*);
 
-	bool writeMD5(int, Md5*);
-
-	bool writeJobInfo(int, const char *jobDir);
-	bool writeFileBinary(int, FileItem *);
-	bool writeFileMD5(int, FileItem *);
-	bool writeMessageStream(int out);
-
-    virtual bool readFinalize();
-
-    virtual bool writeFinalize();
-
-	bool setHeader(const uint8_t*);
-	bool extractHeader(uint8_t *);
 };
 
 #endif //__Message_H_

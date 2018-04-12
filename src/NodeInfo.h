@@ -18,6 +18,7 @@ public:
     NodeInfo();
     NodeInfo(const NodeInfo &rep);
     NodeInfo(long, ARCH);
+    NodeInfo(long);
     const long getAddress() const;
     bool setAddress(long);
     const ARCH getArch();
@@ -27,6 +28,13 @@ public:
     void reset();
 
 };
+
+struct cmp_node {
+    bool operator()(const NodeInfo &a, const NodeInfo &b) const {
+        return a.getAddress() < b.getAddress();
+    }
+};
+
 
 
 #endif //BANKOR_NODEINFO_H

@@ -13,7 +13,7 @@ NodeWatchdog::NodeWatchdog(Component *component, fWakeupCB wakeupCB) {
     init();
 }
 
-NodeWatchdog::NodeWatchdog(Component *component, NodeItem *nodeItem, fTimeoutCB timeoutCB) {
+NodeWatchdog::NodeWatchdog(Component *component, NodeObject *nodeItem, fTimeoutCB timeoutCB) {
 
     this->component = component;
     this->timeoutCB = timeoutCB;

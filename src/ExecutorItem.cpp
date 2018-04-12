@@ -11,12 +11,15 @@
 ExecutorItem::ExecutorItem()
         : ContentItem () {
 
+    strcpy(exec, "");
+    strcpy(parsedExec, "");
 };
 
 ExecutorItem::ExecutorItem(const char *line)
         : ContentItem () {
 
 	strcpy(exec, line);
+    strcpy(parsedExec, "");
 }
 
 CONTENT_TYPES ExecutorItem::getType() {
@@ -27,11 +30,13 @@ const char* ExecutorItem::getExec() {
 	return exec;
 }
 
-bool ExecutorItem::getParsed(void *pRule, char *parsed) {
+const char *ExecutorItem::getParsedExec() {
+    return parsedExec;
+}
 
-//	Rule *refRule = (Rule *)pRule;
+bool ExecutorItem::parse(void *job) {
+
 	bool cmdMode = false;
-    strcpy(parsed, "");
 	int cmdIndex = 0;
 	CONTENT_TYPES cmdType = CONTENT_MAP;
 
@@ -78,11 +83,11 @@ bool ExecutorItem::getParsed(void *pRule, char *parsed) {
 			case ' ':
 				if (cmdMode) {
 					cmdMode = false;
-					parseCommand(parsed, pRule, cmdType, cmdIndex);
+					parseCommand(job, cmdType, cmdIndex);
 				}
 				//no break
 			default:
-                sprintf(parsed, "%s%c", parsed, exec[i]);
+                sprintf(parsedExec, "%s%c", parsedExec, exec[i]);
 				break;
 
 		}
@@ -90,26 +95,25 @@ bool ExecutorItem::getParsed(void *pRule, char *parsed) {
 	}
 
 	if (cmdMode) {
-		parseCommand(parsed, pRule, cmdType, cmdIndex);
+		parseCommand(job, cmdType, cmdIndex);
 	}
 
 	return true;
 }
 
-bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdIndex) {
-
-	Job *refRule = (Job *)pRule;
+bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 
 	if (cmdType == CONTENT_MAP) {
-		MapItem *content = (MapItem *) refRule->getContent(CONTENT_MAP, cmdIndex);
+		MapItem *content = (MapItem *) ((Job*)job)->getContent(CONTENT_MAP, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsed, "%s%s", parsed, content->get()->getRefPath());
+            sprintf(parsedExec, "%s%s", parsedExec, content->get()->getRefPath().c_str());
+            fileList.push_back(content->get());
 		}
 
 	} else if (cmdType == CONTENT_PARAM) {
-		ParameterItem *content = (ParameterItem *) refRule->getContent(CONTENT_PARAM, cmdIndex);
+		ParameterItem *content = (ParameterItem *) ((Job*)job)->getContent(CONTENT_PARAM, cmdIndex);
 		if (content != nullptr) {
-			strcat(parsed, content->getParam());
+			strcat(parsedExec, content->getParam());
 		}
 	}
 
@@ -118,4 +122,14 @@ bool ExecutorItem::parseCommand(char *parsed, void *pRule, int cmdType, int cmdI
 
 bool ExecutorItem::isValid() {
     return true;
+}
+
+FileItem *ExecutorItem::getDependentFile(int index) {
+
+    return fileList[index];
+}
+
+unsigned long ExecutorItem::getDependentFileCount() {
+
+    return fileList.size();
 }

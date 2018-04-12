@@ -5,17 +5,17 @@
 
 #include "JobInfo.h"
 
-bool JobInfo::add(Job *job, NodeInfo node) {
+bool JobInfo::add(ExecutorItem *item, NodeInfo node) {
 
-    nodes_address[node] = job;
-    nodes_job[job] = node;
+    nodes_address[node] = item;
+    nodes_job[item] = node;
 
     return true;
 }
 
-bool JobInfo::remove(Job *job) {
+bool JobInfo::remove(ExecutorItem *item) {
 
-    std::map<const Job*, NodeInfo>::iterator search = nodes_job.find(job);
+    std::map<const ExecutorItem*, NodeInfo>::iterator search = nodes_job.find(item);
     if (search == nodes_job.end()) {
         return false;
     }
@@ -26,7 +26,7 @@ bool JobInfo::remove(Job *job) {
 
 bool JobInfo::remove(NodeInfo node) {
 
-    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
+    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return false;
     }
@@ -35,9 +35,9 @@ bool JobInfo::remove(NodeInfo node) {
     return true;
 }
 
-Job *JobInfo::get(NodeInfo node) {
+ExecutorItem *JobInfo::get(NodeInfo node) {
 
-    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
+    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return NULL;
     }
@@ -45,10 +45,10 @@ Job *JobInfo::get(NodeInfo node) {
     return search->second;
 }
 
-Job *JobInfo::get(long address) {
+ExecutorItem *JobInfo::get(long address) {
 
     NodeInfo node = NodeInfo(address, ARCH_MAX);
-    std::map<const NodeInfo, Job*, cmp_node>::iterator search = nodes_address.find(node);
+    std::map<const NodeInfo, ExecutorItem*, cmp_node>::iterator search = nodes_address.find(node);
     if (search == nodes_address.end()) {
         return NULL;
     }
@@ -57,9 +57,9 @@ Job *JobInfo::get(long address) {
 }
 
 
-NodeInfo JobInfo::get(Job *job) {
+NodeInfo JobInfo::get(ExecutorItem *item) {
 
-    std::map<const Job*, NodeInfo>::iterator search = nodes_job.find(job);
+    std::map<const ExecutorItem*, NodeInfo>::iterator search = nodes_job.find(item);
     if (search == nodes_job.end()) {
         return NodeInfo();
     }
@@ -75,7 +75,7 @@ void JobInfo::clear() {
 
 NodeInfo JobInfo::getNode(long address) {
 
-    Job* job = get(address);
+    ExecutorItem* job = get(address);
     if (job == NULL) {
         return NodeInfo();
     }

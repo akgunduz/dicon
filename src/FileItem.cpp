@@ -10,16 +10,16 @@ FileItem::FileItem(Unit host)
         : ContentItem () {
 
     setMD5();
-    setFile(Unit(COMP_MAX), "", "", FILE_MAX);
+    setFile(Unit(COMP_MAX), NULL, "", FILE_MAX);
 	setFlaggedToSent(true);
     this->host = host;
 }
 
 
-FileItem::FileItem(FileItem *item)
+FileItem::FileItem(const char *jobDir, FileItem *item)
         : ContentItem () {
 
-    set(item);
+    set(jobDir, item);
 }
 
 FileItem::FileItem(Unit host, const char *jobDir, const char *fileName,
@@ -44,18 +44,18 @@ bool FileItem::set(Unit host, Unit node, const char *jobDir, const char *fileNam
     setFile(node, jobDir, fileName, fileType);
     setFlaggedToSent(true);
 
-    FILE *file = fopen(Util::absPath(host, getRefPath()).c_str(), "r");
+    FILE *file = fopen(Util::absPath(host, getRefPath().c_str()).c_str(), "r");
     if (file == nullptr) {
         LOG_T("FileContent %s could not opened");
         return false;
     }
 
     if (md5 != nullptr) {
-        this->md5.set(md5, Util::absPath(host, getMD5Path()).c_str());
+        this->md5.set(md5, Util::absPath(host, getMD5Path().c_str()).c_str());
         return true;
     }
 
-    bool status = this->md5.get(Util::absPath(host, getMD5Path()).c_str());
+    bool status = this->md5.get(Util::absPath(host, getMD5Path().c_str()).c_str());
     if (!status) {
 
         char buf[BUFFER_SIZE];
@@ -75,7 +75,7 @@ bool FileItem::set(Unit host, Unit node, const char *jobDir, const char *fileNam
 
         MD5_Final(this->md5.data, &ctx);
 
-        this->md5.set(nullptr, Util::absPath(host, getMD5Path()).c_str());
+        this->md5.set(nullptr, Util::absPath(host, getMD5Path().c_str()).c_str());
     }
 
     fclose(file);
@@ -89,18 +89,14 @@ bool FileItem::set(Unit host, const char *jobDir, const char *fileName,
     return set(host, Unit(COMP_MAX), jobDir, fileName, fileType, md5);
 }
 
-bool FileItem::set(FileItem *item) {
+bool FileItem::set(const char *jobDir, FileItem *item) {
 
-    return set(item->getHost(), item->getJobDir(), item->getFileName(),
+    return set(item->getHost(), jobDir, item->getFileName(),
         item->getFileType(), item->getMD5());
 }
 
 CONTENT_TYPES FileItem::getType() {
 	return CONTENT_FILE;
-}
-
-const char* FileItem::getJobDir() {
-    return jobDir;
 }
 
 const char* FileItem::getFileName() {
@@ -115,12 +111,40 @@ Md5* FileItem::getMD5() {
     return &md5;
 }
 
-const char* FileItem::getRefPath() {
-    return refPath;
+std::string FileItem::getRefPath() {
+
+    return getPath(false);
 }
 
-const char* FileItem::getMD5Path() {
-	return md5Path;
+std::string FileItem::getMD5Path() {
+
+    return getPath(true);
+}
+
+std::string FileItem::getPath(bool type) {
+
+    char format[PATH_MAX];
+    char path[PATH_MAX];
+
+    if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
+
+        !type ? strcpy(format, "%s/common/%s") : strcpy(format, "%s/md5/common/%s.md5");
+        sprintf(path, format, *jobDir, fileName);
+
+    } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
+
+        !type ? strcpy(format, "%s/arch/%s/%s") : strcpy(format, "%s/md5/arch/%s/%s.md5");
+        sprintf(path, format, *jobDir, ArchTypes::getDir(node.getArch()), fileName);
+
+    } else {
+
+        !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
+        sprintf(path, format, *jobDir, fileName);
+    }
+
+    Util::checkPath(Unit::getRootPath(host.getType()), path, true);
+
+    return std::string(path);
 }
 
 bool FileItem::isFlaggedToSent() {
@@ -132,29 +156,30 @@ void FileItem::setFlaggedToSent(bool flaggedToSent) {
 }
 
 
-void FileItem::setFile(Unit node, const char *jobDir,
-                       const char *fileName, FILETYPE fileType) {
+void FileItem::setFile(Unit node, const char* jobDir, const char *fileName, FILETYPE fileType) {
 
-    strcpy(this->fileName, fileName);
-    strcpy(this->jobDir, jobDir);
+    this->jobDir = jobDir;
+    this->node = node;
     this->fileType = fileType;
-    if (fileType == FILE_MAX) {
-        return;
-    }
+    strcpy(this->fileName, fileName);
 
-    if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
-        sprintf(refPath, "%s/common/%s", jobDir, fileName);
-        sprintf(md5Path, "%s/md5/common/%s.md5", jobDir, fileName);
-    } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
-        sprintf(refPath, "%s/arch/%s/%s", jobDir, ArchTypes::getDir(node.getArch()), fileName);
-        sprintf(md5Path, "%s/md5/arch/%s/%s.md5", jobDir, ArchTypes::getDir(node.getArch()), fileName);
-    } else {
-        sprintf(refPath, "%s/%s", jobDir, fileName);
-        sprintf(md5Path, "%s/md5/%s.md5",  jobDir, fileName);
-    }
-
-    Util::checkPath(Unit::getRootPath(host.getType()), refPath, true);
-    Util::checkPath(Unit::getRootPath(host.getType()), md5Path, true);
+//    if (fileType == FILE_MAX) {
+//        return;
+//    }
+//
+//    if (host.getType() == COMP_COLLECTOR && fileType == FILE_COMMON) {
+//        sprintf(refPath, "%s/common/%s", jobDir, fileName);
+//        sprintf(md5Path, "%s/md5/common/%s.md5", jobDir, fileName);
+//    } else if(host.getType() == COMP_COLLECTOR && fileType == FILE_ARCH) {
+//        sprintf(refPath, "%s/arch/%s/%s", jobDir, ArchTypes::getDir(node.getArch()), fileName);
+//        sprintf(md5Path, "%s/md5/arch/%s/%s.md5", jobDir, ArchTypes::getDir(node.getArch()), fileName);
+//    } else {
+//        sprintf(refPath, "%s/%s", jobDir, fileName);
+//        sprintf(md5Path, "%s/md5/%s.md5",  jobDir, fileName);
+//    }
+//
+//    Util::checkPath(Unit::getRootPath(host.getType()), refPath, true);
+//    Util::checkPath(Unit::getRootPath(host.getType()), md5Path, true);
 }
 
 bool FileItem::isValid() {
@@ -173,4 +198,8 @@ void FileItem::setMD5(Md5 *md5) {
 
 Unit FileItem::getHost() {
     return host;
+}
+
+const char *FileItem::getJobDir() {
+    return jobDir;
 }

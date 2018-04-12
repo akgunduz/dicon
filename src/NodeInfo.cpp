@@ -17,11 +17,16 @@ NodeInfo::NodeInfo(const NodeInfo &rep) {
     this->arch = rep.arch;
 }
 
-
 NodeInfo::NodeInfo(long address, ARCH arch) {
 
     this->address = address;
     this->arch = arch;
+}
+
+NodeInfo::NodeInfo(long address) {
+
+    this->address = address;
+    this->arch = ArchTypes::getNative();
 }
 
 const long NodeInfo::getAddress() const {

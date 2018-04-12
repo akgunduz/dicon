@@ -6,67 +6,77 @@
 #include "NodeManager.h"
 
 NodeManager::NodeManager(Component* component,
-						 fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate) :
-		backupRate(0), readyBackup(0), totalBackup(0), nodeWatchdog(NULL) {
+						 fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate)
+{
 
     this->component = component;
 	this->timeoutCB = timeoutCB;
-	this->wakeupCB = wakeupCB;
-	this->backupRate = backupRate;
 
-    if (nodeWatchdog == nullptr) {
-     //   nodeWatchdog = new NodeWatchdog(component, wakeupCB);
-    }
+#ifndef DISABLE_BACKUP
+	this->backupRate = backupRate;
+    this->readyBackup = 0;
+    this->totalBackup = 0;
+#endif
+
+#ifndef DISABLE_RECOVERY
+    this->wakeupCB = wakeupCB;
+	nodeWatchdog = new NodeWatchdog(component, wakeupCB);
+#endif
 };
 
 NodeManager::~NodeManager() {
 
+#ifndef DISABLE_RECOVERY
     if (nodeWatchdog != nullptr) {
         delete nodeWatchdog;
     }
-
-	for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-		NodeItem* node = i->second;
+#endif
+	for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
+		NodeObject* node = i->second;
 		delete node;
 	}
 }
 
-NodeItem *NodeManager::getIdle(long collectorAddress) {
+NodeObject *NodeManager::getIdle() {
 
 //TODO coklu collector de burada thread korumasi olmasi lazim
 
-    NodeItem *leastUsedNode = nullptr;
+    NodeObject *leastUsedNode = NULL;
 
     int idleCount = 0;
 
-    for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-        NodeItem *node = i->second;
-        if (node->state != IDLE) {
+    for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
+        NodeObject *node = i->second;
+        if (node->getState() != IDLE) {
             continue;
         }
 
         idleCount++;
 
-        if (leastUsedNode == nullptr) {
+        if (leastUsedNode == NULL) {
             leastUsedNode = node;
             continue;
         }
 
-        if (node->usage < leastUsedNode->usage) {
+        if (node->getUsage() < leastUsedNode->getUsage()) {
             leastUsedNode = node;
         }
     }
 
-    if (leastUsedNode != nullptr && idleCount - totalBackup + readyBackup > 0) {
-        leastUsedNode->state = PREBUSY;
-        leastUsedNode->lastServedCollector = collectorAddress;
+    if (leastUsedNode != NULL
+#ifndef DISABLE_BACKUP
+        && idleCount - totalBackup + readyBackup > 0
+#endif
+            ) {
+        leastUsedNode->setState(PREBUSY);
 
+#ifndef DISABLE_RECOVERY
         if (leastUsedNode->watchdog != nullptr) {
             delete leastUsedNode->watchdog;
             leastUsedNode->watchdog = nullptr;
         }
         leastUsedNode->watchdog = new NodeWatchdog(component, leastUsedNode, timeoutCB);
-
+#endif
         return leastUsedNode;
 
     } else {
@@ -74,132 +84,123 @@ NodeItem *NodeManager::getIdle(long collectorAddress) {
         LOG_W("No available node right now.");
     }
 
-    return nullptr;
+    return NULL;
 }
 
-bool NodeManager::setIdle(long address, short id, double totalTime) {
+bool NodeManager::setIdle(NodeInfo nodeInfo) {
 
-	try {
+    TypeNodeList::iterator search = nodes.find(nodeInfo);
 
-		NodeItem *node = nodes.at(address);
+    if (search == nodes.end()) {
+        add(nodeInfo);
+        return false;
+    }
 
-        node->state = IDLE;
-		LOG_T("Node at address : %s switch to state : %s",
-			  InterfaceTypes::getAddressString(address).c_str(), sStates[IDLE]);
+    search->second->setState(IDLE);
 
-		if (node->stopWatch.isInitiated()) {
-			LOG_U(UI_UPDATE_DIST_LOG,
-					"Node at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
-                  InterfaceTypes::getAddressString(address).c_str(), node->stopWatch.stop(), totalTime);
-		}
+    LOG_I("Node at address : %s switch to state : %s",
+          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str(), sStates[IDLE]);
 
-	} catch (const std::out_of_range e) {
+	return true;
+}
 
-		add(address, id);
+bool NodeManager::validate(NodeInfo nodeInfo) {
+
+    TypeNodeList::iterator search = nodes.find(nodeInfo);
+	if (search == nodes.end()) {
+		add(nodeInfo);
 		return false;
 	}
+
+	LOG_I("Node at address : %s is Alive",
+          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+	return true;
+
+}
+
+bool NodeManager::setBusy(NodeInfo nodeInfo) {
+
+    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    if (search == nodes.end()) {
+        LOG_W("Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+        return false;
+    }
+
+
+    NodeObject *node = search->second;
+
+#ifndef DISABLE_RECOVERY
+    if (node->watchdog != nullptr) {
+        delete node->watchdog;
+        node->watchdog = nullptr;
+    }
+#endif
+
+    node->setState(BUSY);
+    node->iterateUsage(true);
+
+    LOG_T("Node at address : %s switch to state : %s",
+          InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str(), sStates[BUSY]);
 
 	return true;
 
 }
 
-bool NodeManager::validate(long address, short id) {
+bool NodeManager::remove(NodeInfo nodeInfo) {
 
-	std::map<long, NodeItem *>::iterator i = nodes.find(address);
-	if (i == nodes.end()) {
-		add(address, id);
-		return false;
-	}
+    TypeNodeList::iterator search = nodes.find(nodeInfo);
+    if (search == nodes.end()) {
+        LOG_W("Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(nodeInfo.getAddress()).c_str());
+        return false;
+    }
 
-	LOG_T("Node at address : %s is Alive",
+    NodeObject *node = search->second;
+    nodes.erase(nodeInfo);
+    delete node;
+
+#ifndef DISABLE_BACKUP
+    readyBackup = (int) fmin(totalBackup, readyBackup + 1);
+
+    LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
+    LOG_T("Node at address %s removed from the list",
           InterfaceTypes::getAddressString(address).c_str());
-	return true;
-
-}
-
-bool NodeManager::setBusy(long address) {
-
-	try {
-
-		NodeItem *node = nodes.at(address);
-        if (node->watchdog != nullptr) {
-            delete node->watchdog;
-            node->watchdog = nullptr;
-        }
-
-        node->state = BUSY;
-        node->usage++;
-        node->stopWatch.start();
-		LOG_T("Node at address : %s switch to state : %s",
-              InterfaceTypes::getAddressString(address).c_str(), sStates[BUSY]);
-
-	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(address).c_str());
-		return false;
-	}
+#endif
 
 	return true;
 
 }
 
-bool NodeManager::remove(long address) {
+bool NodeManager::add(NodeInfo node) {
 
-	try {
+	nodes[node] = new NodeObject(node);
 
-		NodeItem *node = nodes.at(address);
-		nodes.erase(address);
-		delete node;
-
-		readyBackup = (int) fmin(totalBackup, readyBackup + 1);
-
-		LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-		LOG_T("Node at address %s removed from the list",
-              InterfaceTypes::getAddressString(address).c_str());
-
-	} catch (const std::out_of_range e) {
-		LOG_E("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(address).c_str());
-		return false;
-	}
-
-	return true;
-
-}
-
-bool NodeManager::add(long address, short id) {
-
-	nodes[address] = new NodeItem(IDLE, 0, address, id);
-
+#ifndef DISABLE_BACKUP
 	totalBackup = nodes.size() == 1 ? 0 : (uint32_t) ceil(nodes.size() * backupRate);
 
 	readyBackup = 0;
 
 	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-	LOG_T("Node at address : %s added to the list",
-          InterfaceTypes::getAddressString(address).c_str());
+#endif
 
-	return true;
-}
+	LOG_I("Node at address : %s added to the list",
+          InterfaceTypes::getAddressString(node.getAddress()).c_str());
 
-
-
-bool NodeManager::resetTimes() {
-
-	for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-		i->second->stopWatch.reset();
-	}
 	return true;
 }
 
 void NodeManager::clear() {
 
-    for (std::map<long, NodeItem *>::iterator i = nodes.begin(); i != nodes.end(); i++) {
-        NodeItem* node = i->second;
+    for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
+        NodeObject* node = i->second;
         delete node;
     }
 
     nodes.clear();
+
+#ifndef DISABLE_BACKUP
 	readyBackup = 0;
 	totalBackup = 0;
+#endif
 }
