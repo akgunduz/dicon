@@ -27,6 +27,7 @@ void Log::setLogLevel(LOGLEVEL level) {
 }
 
 void Log::iterateLogLevel() {
+
 	if (mLevel == LEVEL_TRACE) {
 		Log::setLogLevel(LEVEL_ERROR);
 	} else {

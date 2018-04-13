@@ -192,7 +192,7 @@ bool Node::processRule() {
     LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
 
     char fullcmd[PATH_MAX];
-    strcpy(fullcmd, Util::absPath(getHost(), cmd).c_str());
+    strcpy(fullcmd, Util::getAbsPath(getHost(), cmd).c_str());
 
     parseCommand(fullcmd, args);
 

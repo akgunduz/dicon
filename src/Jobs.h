@@ -10,24 +10,33 @@
 #include "JobInfo.h"
 
 
+struct char_cmp {
+    bool operator () (const char *a,const char *b) const
+    {
+        return strcmp(a,b) < 0;
+    }
+};
+
+typedef std::map<const char *, Job*, char_cmp> TypeJobList;
+
+
 class Jobs {
 
-    std::vector<Job*> jobs;
+    TypeJobList jobs;
 
-    JobInfo nodes;
-
-    std::vector<Job*>* getJobs();
+   // std::vector<Job*>* getJobs();
 
 public:
 
     Jobs();
     ~Jobs();
-    bool addJob(Job*);
-    bool addJob(COMPONENT , const char*);
-    bool addJobList(Jobs*, bool = false);
-    bool addJobList(COMPONENT, const char*, bool = false);
+    bool add(Job*);
+    bool add(COMPONENT , const char*);
+    //bool addList(Jobs*, bool = false);
+    bool addList(COMPONENT, const char*, bool = false);
 
-    Job* getJob(int);
+    Job* get(const char*);
+    Job* get(int);
 //    Job* getJobByNode(NodeInfo);
 //    Job* getJobByAddress(long);
 //    NodeInfo getNodeByAddress(long);

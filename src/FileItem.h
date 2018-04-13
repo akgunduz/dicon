@@ -14,31 +14,25 @@
 
 class FileItem : public ContentItem {
 
+    COMPONENT host;
 	char fileName[MAX_FILE_NAME_LENGTH];
-	const char* jobDir;
+	char jobDir[MAX_JOB_DIR_LENGTH];
+
+	bool info_only;
 
 	Md5 md5;
-	bool flaggedToSent;
-	FILETYPE fileType;
 
-    COMPONENT host;
-    //Unit node;
-
-	std::string getPath(bool);
 
 public:
 	FileItem(COMPONENT host);
-    FileItem(const char *, FileItem*);
-    FileItem(COMPONENT host, const char *, const char*, FILETYPE,
-             Md5 *md5 = nullptr);
+    FileItem(FileItem*);
+    FileItem(COMPONENT host, const char *, const char*,
+             Md5 *md5 = nullptr, bool = false);
 	~FileItem(){};
 
-    bool set(COMPONENT host, const char *, const char *, FILETYPE, Md5* = nullptr);
+    bool set(COMPONENT host, const char *, const char *, Md5* = nullptr, bool = false);
+   // bool set(const char*, FileItem*);
 
-    bool set(const char*, FileItem*);
-	bool isFlaggedToSent();
-	void setFlaggedToSent(bool);
-	FILETYPE getFileType();
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
     const char* getFileName();
@@ -46,9 +40,8 @@ public:
 
     COMPONENT getHost();
 
-    void setFile(const char*, const char*, FILETYPE);
-	std::string getRefPath();
-	std::string getMD5Path();
+   // void setFile(const char*, const char*, Md5* = nullptr);
+
 
 
 	virtual CONTENT_TYPES getType();

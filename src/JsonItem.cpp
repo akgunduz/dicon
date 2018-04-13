@@ -9,13 +9,13 @@ JsonItem::JsonItem(COMPONENT host)
 
 }
 
-JsonItem::JsonItem(const char* jobDir, FileItem *fileItem)
-    : FileItem(jobDir, fileItem) {
+JsonItem::JsonItem(FileItem *fileItem)
+    : FileItem(fileItem) {
 
 }
 
-JsonItem::JsonItem(COMPONENT host, const char* jobDir, const char* fileName, FILETYPE fileType)
-        : FileItem(host, jobDir, fileName, fileType) {
+JsonItem::JsonItem(COMPONENT host, const char* jobDir, const char* fileName)
+        : FileItem(host, jobDir, fileName) {
 
 }
 
@@ -41,20 +41,6 @@ int JsonItem::getContentCount(int type) {
     return (int) contentList[type].size();
 }
 
-int JsonItem::getFlaggedFileCount() {
-
-    int count = 0;
-
-    for (uint16_t i = 0; i < getContentCount(CONTENT_FILE); i++) {
-        FileItem *content = (FileItem *)getContent(CONTENT_FILE, i);
-        if (content->isFlaggedToSent()) {
-            count++;
-        }
-    }
-
-    return count;
-}
-
 void JsonItem::reset() {
 
     for (int i = 0; i < contentList->size(); i++) {
@@ -64,8 +50,7 @@ void JsonItem::reset() {
 
 bool JsonItem::parse() {
 
-    std::string test = Util::absPath(getHost(), getRefPath().c_str()).c_str();
-    struct json_object* node = json_object_from_file(Util::absPath(getHost(), getRefPath().c_str()).c_str());
+    struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost(), getJobDir(), getFileName()).c_str());
     if (node == NULL){
         LOG_E("Invalid JSON File");
         return false;

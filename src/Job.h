@@ -17,6 +17,9 @@
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
 
+typedef std::map<const long, ExecutorItem*> TypeAddressExecList;
+typedef std::map<const ExecutorItem*, long> TypeExecAddressList;
+
 class Job : public JsonItem {
 
     char name[50];

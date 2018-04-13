@@ -13,14 +13,14 @@
 //}
 
 Job::Job(COMPONENT host, const char* jobDir)
-        : JsonItem(host, this->jobDir, JOB_FILE, FILE_JOB){
+        : JsonItem(host, this->jobDir, JOB_FILE){
 
     init(jobDir);
 
 }
 
 Job::Job(COMPONENT host, const char* jobDir, const char* fileName)
-        : JsonItem(host, this->jobDir, fileName, FILE_JOB) {
+        : JsonItem(host, this->jobDir, fileName) {
 
     init(jobDir);
 
@@ -107,13 +107,9 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
         const char* path = json_object_get_string(json_object_array_get_idx(child, 0));
         const char* sFileType = json_object_get_string(json_object_array_get_idx(child, 1));
 
-        //TODO Dependent file type will be added
-        //FILETYPE fileType = strcmp(sFileType, "c") == 0 ? FILE_COMMON : FILE_ARCH;
-
-        FILETYPE fileType = FILE_COMMON;
         Job* job = (Job*) parent;
 
-        FileItem *content = new FileItem(job->getHost(), job->getJobDir(), path, fileType);
+        FileItem *content = new FileItem(job->getHost(), job->getJobDir(), path);
 
         job->contentList[CONTENT_FILE].push_back(content);
 

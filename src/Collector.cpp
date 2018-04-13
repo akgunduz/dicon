@@ -12,10 +12,10 @@ Collector::Collector(const char *rootPath) :
 
     setDistributorAddress(0);
 
-    getJobs()->addJobList(getHost(), ComponentTypes::getRootPath(COMP_COLLECTOR), true);
+    getJobs()->addList(getHost(), ComponentTypes::getRootPath(COMP_COLLECTOR), true);
 
-    LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->getJob(0));
-	LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->getJob(0));
+    LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
+	LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
 }
 
 Collector::~Collector() {
@@ -49,14 +49,14 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 			}
 
 			//TODO
-            ExecutorItem* item = getJobs()->getJob(0)->getUnServed();
+            ExecutorItem* item = getJobs()->get(0)->getUnServed();
 
             if (item == NULL) {
                 LOG_W("No available unServed job right now.");
                 break;
             }
 
-            getJobs()->getJob(0)->attachNode(item, nodeAddress);
+            getJobs()->get(0)->attachNode(item, nodeAddress);
 
           //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
 
@@ -72,7 +72,7 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
                 md5List.push_back(*item->getDependentFile(i)->getMD5());
             }
 
-            status = send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->getJob(0)->getJobDir(),
+            status = send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->get(0)->getJobDir(),
                                   item->getParsedExec(), &md5List);
 			break;
 			}
@@ -205,7 +205,7 @@ bool Collector::processJob() {
 
   //  for (int i = 0; i < getJobs()->getJob(0)->getCount(); i++) {
 	TypeMD5List md5List;
-	ExecutorItem *executorItem = (ExecutorItem *)jobs.getJob(0)->getContent(CONTENT_EXECUTOR, 0);
+	ExecutorItem *executorItem = (ExecutorItem *)jobs.get(0)->getContent(CONTENT_EXECUTOR, 0);
 	for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
 		md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
 	}
