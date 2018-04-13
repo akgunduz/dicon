@@ -28,7 +28,6 @@ class Job : public JsonItem {
     int repeat;
 
     JobInfo nodes;
-    char jobDir[PATH_MAX];
 
 public:
 
@@ -36,7 +35,7 @@ public:
     Job(COMPONENT host, const char* jobDir);
     Job(COMPONENT host, const char* jobDir, const char* fileName);
 
-    void init(const char*);
+    void init();
     ~Job();
 
     const char* getName();

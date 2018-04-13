@@ -13,16 +13,16 @@
 //}
 
 Job::Job(COMPONENT host, const char* jobDir)
-        : JsonItem(host, this->jobDir, JOB_FILE){
+        : JsonItem(host, jobDir, JOB_FILE){
 
-    init(jobDir);
+    init();
 
 }
 
 Job::Job(COMPONENT host, const char* jobDir, const char* fileName)
-        : JsonItem(host, this->jobDir, fileName) {
+        : JsonItem(host, jobDir, fileName) {
 
-    init(jobDir);
+    init();
 
 }
 
@@ -30,9 +30,7 @@ Job::~Job() {
 
 }
 
-void Job::init(const char* jobDir) {
-
-    strcpy(this->jobDir, jobDir);
+void Job::init() {
 
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_CONCURRENCY] = new JsonType(CONTENT_CONCURRENCY, "concurrency", this, parseConcurrencyNode);
