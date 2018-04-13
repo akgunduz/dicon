@@ -23,13 +23,12 @@ protected:
 public:
 
     JsonItem(COMPONENT host);
-    JsonItem(const char*, FileItem *fileItem);
+    JsonItem(FileItem *fileItem);
     JsonItem(COMPONENT host, const char* jobDir,
-             const char* fileName, FILETYPE fileType);
+             const char* fileName);
     virtual ~JsonItem();
     ContentItem * getContent(int type, int index);
     int getContentCount(int type);
-    int getFlaggedFileCount();
     void reset();
     bool parse();
 };

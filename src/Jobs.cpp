@@ -13,31 +13,30 @@ Jobs::~Jobs() {
     clear();
 }
 
-bool Jobs::addJob(Job *job) {
+bool Jobs::add(Job *job) {
 
-    jobs.push_back(job);
+    jobs[job->getJobDir()] = job;
     return true;
 }
 
-bool Jobs::addJob(COMPONENT host, const char *path) {
+bool Jobs::add(COMPONENT host, const char *path) {
 
-    jobs.push_back(new Job(host, path));
+    jobs[path] = new Job(host, path);
     return true;
 }
 
+//bool Jobs::addList(Jobs *jobs, bool init) {
+//
+//    if (init) {
+//        clear();
+//    }
+//
+//    this->jobs.insert(this->jobs.end(),
+//                      jobs->getJobs()->begin(), jobs->getJobs()->end());
+//    return true;
+//}
 
-bool Jobs::addJobList(Jobs *jobs, bool init) {
-
-    if (init) {
-        clear();
-    }
-
-    this->jobs.insert(this->jobs.end(),
-                      jobs->getJobs()->begin(), jobs->getJobs()->end());
-    return true;
-}
-
-bool Jobs::addJobList(COMPONENT host, const char *path, bool init) {
+bool Jobs::addList(COMPONENT host, const char *path, bool init) {
 
     if (init) {
         clear();
@@ -45,20 +44,32 @@ bool Jobs::addJobList(COMPONENT host, const char *path, bool init) {
 
     std::vector<std::string> dirList = Util::getDirList(path, JOB_DIR_PREFIX);
     for (int i = 0; i < dirList.size(); i++) {
-        addJob(host, dirList[i].c_str());
+        add(host, dirList[i].c_str());
     }
     return true;
 }
 
-Job* Jobs::getJob(int index) {
+Job* Jobs::get(const char* path) {
 
-    if (index >= getCount()) {
-        LOG_W("There is only %d jobs available", getCount());
+    TypeJobList::iterator search = jobs.find(path);
+    if (search == jobs.end()) {
         return NULL;
     }
 
-    return jobs[index];
+    return jobs[path];
 }
+
+Job* Jobs::get(int index) {
+
+    for (TypeJobList::iterator i = jobs.begin(); i != jobs.end(); i++) {
+        if (index-- == 0) {
+            return i->second;
+        }
+    }
+
+    return NULL;
+}
+
 
 //Job* Jobs::getJobByNode(NodeInfo node) {
 //
@@ -102,25 +113,24 @@ Job* Jobs::getJob(int index) {
 
 bool Jobs::clear() {
 
-    for (std::vector<Job*>::iterator i = jobs.begin(); i != jobs.end(); i++) {
+    for (TypeJobList::iterator i = jobs.begin(); i != jobs.end(); i++) {
 
-        delete *i;
+        delete i->second;
     }
 
- //   nodes.clear();Unit
     jobs.clear();
     return true;
 }
 
 bool Jobs::isEmpty() {
 
-    return jobs.size() == 0;
+    return jobs.empty();
 }
-
-std::vector<Job*> *Jobs::getJobs() {
-
-    return &jobs;
-}
+//
+//std::vector<Job*> *Jobs::getJobs() {
+//
+//    return &jobs;
+//}
 
 unsigned long Jobs::getCount() {
 

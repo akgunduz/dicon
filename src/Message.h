@@ -25,6 +25,7 @@
 #define BLOCK_FILE_BINARY 0x01
 #define BLOCK_FILE_MD5 0x02
 #define BLOCK_JOB_INFO 0x03
+#define BLOCK_FILE_INFO 0x04
 
 class Message : public BaseMessage {
 
@@ -41,12 +42,15 @@ private:
 
     bool readJobInfo(int, char*, char*, struct Block*);
     bool readFileBinary(int, FileItem *, struct Block*);
+    bool readFileInfo(int, FileItem *, struct Block*);
     bool readFileMD5(int, Md5*, struct Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeJobInfo(int, char*, char*);
+    bool writeFileInfo(int, FileItem *);
     bool writeFileBinary(int, FileItem *);
     bool writeFileMD5(int, Md5*);
+
     bool writeMessageStream(int out);
 
     virtual bool readFinalize();
