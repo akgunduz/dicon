@@ -46,7 +46,7 @@ bool FileItem::set(COMPONENT host, const char *jobDir, const char *fileName, Md5
         return true;
     }
 
-    if (strcmp(jobDir, "") != 0 || strcmp(fileName, "") != 0) {
+    if (strcmp(jobDir, "") == 0 || strcmp(fileName, "") == 0) {
         LOG_T("FileContent %s could not opened");
         return false;
     }

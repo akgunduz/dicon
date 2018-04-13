@@ -67,13 +67,13 @@ bool Collector::processDistributorMsg(long address, Message *msg) {
 
          //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
-            TypeMD5List md5List;
-            for (int i = 0; i < item->getDependentFileCount(); i++) {
-                md5List.push_back(*item->getDependentFile(i)->getMD5());
-            }
+//            TypeMD5List md5List;
+//            for (int i = 0; i < item->getDependentFileCount(); i++) {
+//                md5List.push_back(*item->getDependentFile(i)->getMD5());
+//            }
 
             status = send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->get(0)->getJobDir(),
-                                  item->getParsedExec(), &md5List);
+                                  item->getParsedExec(), item->getDependentFileList());
 			break;
 			}
 		default :
@@ -168,12 +168,12 @@ bool Collector::send2NodeMsg(long address, MSG_TYPE type, ...) {
 		case MSGTYPE_JOB: {
             char *jobDir = va_arg(ap, char*);
             char *executor = va_arg(ap, char*);
-            TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
+            TypeFileList *fileList = va_arg(ap, TypeFileList*);
             msg->getData()->setStreamFlag(STREAM_JOB);
             msg->getData()->setJobDir(jobDir);
             msg->getData()->setExecutor(executor);
-            msg->getData()->addMD5List(md5List);
-            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file md5 is prepared for execution : %s", md5List->size(), executor);
+            msg->getData()->addFileList(fileList);
+            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
         }
 			break;
 

@@ -42,7 +42,7 @@ bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
     }
 
     char fileName[MAX_FILE_NAME_LENGTH];
-    if (!readString(desc, fileName, header->getSize(0))) {
+    if (!readString(desc, fileName, header->getSize(1))) {
         LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
         return false;
     }
