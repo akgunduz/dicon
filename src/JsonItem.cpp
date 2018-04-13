@@ -34,10 +34,12 @@ JsonItem::~JsonItem() {
 }
 
 ContentItem *JsonItem::getContent(int type, int index) {
+
     return contentList[type][index];
 }
 
 int JsonItem::getContentCount(int type) {
+
     return (int) contentList[type].size();
 }
 
