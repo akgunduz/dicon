@@ -33,7 +33,6 @@ Job::~Job() {
 void Job::init() {
 
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
-    contentTypes[CONTENT_CONCURRENCY] = new JsonType(CONTENT_CONCURRENCY, "concurrency", this, parseConcurrencyNode);
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
     contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
@@ -59,23 +58,6 @@ bool Job::parseNameNode(JsonItem *parent, json_object *node) {
     const char *name = json_object_get_string(node);
 
     ((Job*)parent)->setName(name);
-
-    return true;
-}
-
-bool Job::parseConcurrencyNode(JsonItem *parent, json_object *node) {
-
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_string) {
-        LOG_E("Invalid JSON Files Node");
-        return false;
-    }
-
-    const char *runType = json_object_get_string(node);
-
-    if (strcmp(runType, "P") == 0 || strcmp(runType, "p") == 0) {
-        ((Job*)parent)->parallel = true;
-    }
 
     return true;
 }
@@ -174,60 +156,16 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
 }
 
 const char *Job::getName() {
+
     return name;
 }
 
 void Job::setName(const char *name) {
+
     strncpy(this->name, name, 50);
 }
 
-bool Job::isParallel() {
-    return parallel;
-}
-
-bool Job::getActive() {
-    return active;
-}
-
-void Job::setActive(bool active) {
-    this->active = active;
-}
-
-int Job::getRepeat() {
-    return repeat;
-}
-
-void Job::setRepeat(int repeat) {
-    this->repeat = repeat;
-}
-
-
-//FileList* Job::prepareFileList(ARCH arch) {
-//
-//    FileList *fileList = new FileList(getJobDir());
-//    fileList->set(this);
-//
-//    for (int i = 0; i < getContentCount(CONTENT_MAP); i++) {
-//        MapItem *content = (MapItem *)getContent(CONTENT_MAP, i);
-//        FileItem *fileItem = content->get(arch);
-//        if (fileItem->isValid()) {
-//            fileList->set(fileItem);
-//        }
-//    }
-//
-//    return fileList;
-//}
-//
-//FileList* Job::prepareRuleList() {
-//
-//    FileList *fileList = new FileList(getJobDir());
-//
-//    fileList->set(this);
-//
-//    return fileList;
-//}
-
-ExecutorItem* Job::get(int index) {
+ExecutorItem* Job::getByIndex(int index) {
 
     return (ExecutorItem*)getContent(CONTENT_EXECUTOR, index);
 }
@@ -237,14 +175,9 @@ int Job::getCount() {
     return getContentCount(CONTENT_EXECUTOR);
 }
 
-ExecutorItem* Job::get(long node) {
+ExecutorItem* Job::getByAddress(long address) {
 
-    return nodes.get(node);
-}
-
-long Job::getNodeByAddress(long address) {
-
-    return nodes.getNode(address);
+    return nodes.get(address);
 }
 
 ExecutorItem* Job::getUnServed() {
@@ -252,7 +185,7 @@ ExecutorItem* Job::getUnServed() {
     int i = 0;
     for (; i < getCount(); i++) {
 
-        long nodeAddress = nodes.get(get(i));
+        long nodeAddress = nodes.get(getByIndex(i));
         if (nodeAddress == 0) {
             break;
         }
@@ -262,7 +195,7 @@ ExecutorItem* Job::getUnServed() {
         return NULL;
     }
 
-    return get(i);
+    return getByIndex(i);
 }
 
 
@@ -276,9 +209,8 @@ bool Job::detachNode(ExecutorItem *item) {
     return nodes.remove(item);
 }
 
-bool Job::resetNodes() {
+void Job::resetNodes() {
 
     nodes.clear();
-    return true;
 }
 

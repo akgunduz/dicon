@@ -12,7 +12,7 @@ Node::Node(const char *rootPath) :
 	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
-	distributorAddress = 0;
+	setDistributorAddress(0);
 }
 
 Node::~Node() {
@@ -49,7 +49,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 		case MSGTYPE_JOB: {
 
             LOG_U(UI_UPDATE_NODE_STATE, BUSY);
-            status = send2DistributorMsg(distributorAddress, MSGTYPE_BUSY);
+            status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_BUSY);
 
             LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
@@ -68,7 +68,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
                 LOG_U(UI_UPDATE_NODE_STATE, IDLE);
                 //TODO will update with md5s including outputs
-                status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
+                status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
             }
 
 
@@ -81,7 +81,7 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
             LOG_U(UI_UPDATE_NODE_STATE, IDLE);
             //TODO will update with md5s including outputs
-            status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
+            status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
         }
 			break;
 
@@ -174,8 +174,15 @@ TypeFileList Node::checkFileExistence(TypeFileList list) {
         if (!Util::checkPath(ComponentTypes::getRootPath(COMP_NODE),
                              list[i]->getJobDir(), list[i]->getFileName(), false)) {
 
-            //buraya ek md5 karsilastirmasi eklenecek
             reqList.push_back(list[i]);
+
+        } else {
+
+            Md5 md5(Util::getAbsMD5Path(COMP_NODE, list[i]->getJobDir(), list[i]->getFileName()).c_str());
+            if (!md5.equal(list[i]->getMD5())) {
+
+                reqList.push_back(list[i]);
+            }
         }
     }
 
@@ -203,7 +210,6 @@ void Node::parseCommand(char *cmd, char **argv) {
 bool Node::processCommand(const char *cmd) {
 
     int status;
-   // char cmd[PATH_MAX] = "";
     char *args[100];
 
     LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
@@ -243,110 +249,4 @@ bool Node::processCommand(const char *cmd) {
 
     return true;
 
-}
-
-bool Node::processParallel(Job* job) {
-
-//    int status;
-//    char cmd[PATH_MAX] = "";
-//    char *args[100];
-//
-//    for (int i = 0; i < job->getContentCount(CONTENT_EXECUTOR); i++) {
-//        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, i);
-//        content->parse(job, cmd);
-//        parseCommand(cmd, args);
-//        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd + strlen(Unit::getRootPath(COMP_NODE)));
-//        LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
-//
-//#ifdef CYGWIN
-//        LOG_I("Simulating fork in Windows!!!");
-//#else
-//
-//        pid_t pid = fork();
-//
-//        if (pid == -1) {
-//            LOG_E("Rule Process failed in fork!!!");
-//            return false;
-//
-//        } else if (pid == 0) {
-//            //child part
-//            execv(*args, args);
-//            LOG_E("ExecV failed with error : %d", errno);
-//            exit(EXIT_FAILURE);
-//
-//        }
-//#endif
-//    }
-//
-//#ifdef CYGWIN
-//    LOG_I("Simulating wait in Windows!!!");
-//#else
-//    while (true) {
-//
-//        pid_t pid = wait(&status);
-//        if (pid == -1) {
-//            if (errno == ECHILD) {
-//                //no more child process
-//                break;
-//            }
-//        } else {
-//            if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-//                LOG_E("Process with pid %d failed in fork!!!", pid);
-//                return false;
-//            }
-//        }
-//    }
-//#endif
-
-    return true;
-}
-
-bool Node::processSequential(Job* job) {
-
-//    int status;
-//    char cmd[PATH_MAX] = "";
-//    char *args[100];
-//
-//    for (int i = 0; i < job->getContentCount(CONTENT_EXECUTOR); i++) {
-//        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, i);
-//
-//        content->parse(job, cmd);
-//
-//        LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
-//        LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
-//
-//        char fullcmd[PATH_MAX];
-//        strcpy(fullcmd, Util::absPath(getHost(), cmd).c_str());
-//
-//        parseCommand(fullcmd, args);
-//
-//
-//#ifdef CYGWIN
-//        LOG_I("Simulating fork in Windows!!!");
-//#else
-//
-//        pid_t pid = fork();
-//
-//        if (pid == -1) {
-//            LOG_E("Rule Process failed in fork!!!");
-//            return false;
-//
-//        } else if (pid > 0) {
-//            //parent part
-//            int res;
-//            do {
-//                //res = wait(&status);
-//                res = waitpid(pid, &status, 0);
-//            } while ((res < 0) && (errno == EINTR));
-//
-//        } else {
-//            //child part
-//            execv(*args, args);
-//            LOG_E("ExecV failed with error : %d for command %s", errno, cmd);
-//            exit(EXIT_FAILURE);
-//        }
-//#endif
-//    }
-
-    return true;
 }

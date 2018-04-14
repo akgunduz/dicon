@@ -8,7 +8,6 @@
 #define __Message_H_
 
 #include "BaseMessage.h"
-#include "Job.h"
 #include "MessageHeader.h"
 #include "MessageData.h"
 
@@ -28,14 +27,7 @@ class Message : public BaseMessage {
 
 private:
 	MessageHeader header;
-
-	//Unit host;
-
     MessageData data;
-
-//	int streamFlag;
-//
-//    char jobDir[50];
 
     bool readJobInfo(int, char*, char*, struct Block*);
     bool readFileBinary(int, FileItem *, struct Block*);
@@ -57,27 +49,13 @@ private:
     bool setHeader(const uint8_t*);
     bool extractHeader(uint8_t *);
 
-
 public:
-
-//	ExecutorItem *execution;
-//
-//	std::vector<Md5> md5List;
 
 	Message(COMPONENT host);
 	Message(COMPONENT owner, MSG_TYPE type);
 
-	//void setStreamFlag(int);
-
 	MessageHeader *getHeader();
-
 	MessageData* getData();
-
-	//const char* getJobDir();
-
-	//void setJob(int, ExecutorItem*);
-
-
 };
 
 #endif //__Message_H_
