@@ -108,7 +108,7 @@ void Console::nodeUpdateAddresses(ConsoleEvent &event) {
 void Console::nodeUpdateState(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("Node State : %s", sStates[data->data64_1]);
+	LOG_S("Node State : %s", NodeState::getName((NODE_STATES)data->data64_1));
 
 }
 

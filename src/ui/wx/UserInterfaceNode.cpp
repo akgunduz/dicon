@@ -76,7 +76,7 @@ void UserInterface::nodeUpdateAddresses(wxCommandEvent &event) {
 void UserInterface::nodeUpdateState(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    nodeState->SetLabel(sStates[data->data64_1]);
+    nodeState->SetLabel(NodeState::getName((NODE_STATES)data->data64_1));
 }
 
 void UserInterface::nodeUpdateAttachedCollAddress(wxCommandEvent &event) {

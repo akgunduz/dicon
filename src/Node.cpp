@@ -5,6 +5,7 @@
 
 #include "Node.h"
 #include "ExecutorItem.h"
+#include "NodeState.h"
 
 Node::Node(const char *rootPath) :
         Component(COMP_NODE, rootPath) {

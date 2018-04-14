@@ -5,14 +5,3 @@
 
 #include "Common.h"
 
-const char* sStates[] = {
-		"IDLE",
-		"BUSY",
-		"PREBUSY"
-};
-
-const char* sParamTypes[] = {
-		"LONG",
-		"DOUBLE",
-		"STRING",
-};

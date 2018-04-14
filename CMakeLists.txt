@@ -59,6 +59,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/MessageData.cpp
         #${SOURCE_PATH}/NodeTracker.cpp
+        ${SOURCE_PATH}/NodeState.cpp
         )
 
 set(WX_FILES
