@@ -126,7 +126,6 @@ void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
         nodeFileList->SetItem(i, 0, content->getFileName());
         nodeFileList->SetItem(i, 1, content->isValid() ? "V" : "I");
     }
-
 }
 
 void UserInterface::nodeUpdateExecList(wxCommandEvent &event) {
