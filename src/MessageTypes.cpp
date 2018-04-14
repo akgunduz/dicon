@@ -11,6 +11,7 @@ const char* sMsgTypes[MSGTYPE_MAX] = {
         "JOB",
         "BINARY",
         "MD5",
+        "INFO",
         "WAKEUP",
         "READY",
         "BUSY",

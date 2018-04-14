@@ -33,6 +33,21 @@ enum LOGLEVEL {
 
 typedef void (*update_ui_callback)(void*, int, void*);
 
+struct EventData {
+
+	uint64_t data64_1;
+	uint64_t data64_2;
+	std::string dataStr;
+	void *dataPtr;
+
+	EventData(uint64_t data) : data64_1(data) {}
+	EventData(uint64_t data, uint64_t data2) : data64_1(data), data64_2(data2) {}
+	EventData(uint64_t data, const char *data2) : data64_1(data), dataStr(data2) {}
+	EventData(uint64_t data, uint64_t data2, const char *data3) : data64_1(data), data64_2(data2), dataStr(data3) {}
+	EventData(const char *data) : dataStr(data) {}
+	EventData(void *data) : dataPtr(data) {}
+};
+
 class Log {
 	static LOGLEVEL mLevel;
 	static update_ui_callback cb;
@@ -49,8 +64,8 @@ public:
 	static void display_at_ui(int, uint64_t, const char* , ...);
 	static void display_at_ui(int, uint64_t, uint64_t, const char* , ...);
 	static void display_at_ui(int, const char* , ...);
-
 	static void display_at_ui(int, void*);
+
 	static void update_ui(int, void*);
 	static void set_ui_callback(void *, update_ui_callback cb);
 };
