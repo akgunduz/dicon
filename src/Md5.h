@@ -20,7 +20,15 @@ public:
     uint8_t data[MD5_DIGEST_LENGTH];
 
     Md5() {
+
         memset(data, 0, MD5_DIGEST_LENGTH);
+    }
+
+    Md5(const char *path) {
+
+        if (!get(path)) {
+            memset(data, 0, MD5_DIGEST_LENGTH);
+        }
     }
 
     void set(Md5 *ref, const char *path = nullptr) {

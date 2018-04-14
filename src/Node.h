@@ -12,8 +12,6 @@
 class Node : public Component {
 private:
 
-	//Job* job;
-
 	char executor[PATH_MAX];
 	long distributorAddress;
 
@@ -31,8 +29,6 @@ private:
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);
-    bool processParallel(Job*);
-    bool processSequential(Job*);
 
 	TypeFileList checkFileExistence(TypeFileList);
 

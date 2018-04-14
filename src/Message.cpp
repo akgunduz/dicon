@@ -362,10 +362,6 @@ bool Message::writeFinalize() {
     return true;
 }
 
-//const char *Message::getJobDir() {
-//    return jobDir;
-//}
-
 MessageHeader *Message::getHeader() {
     return &header;
 }
