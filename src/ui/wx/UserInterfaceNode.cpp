@@ -94,8 +94,9 @@ void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
 void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    nodeLog->Append(wxString::Format("%s", data->dataStr));
 
+    nodeLog->Append(wxString::Format("%s", data->dataStr));
+    LOG_S("%s : %s", ComponentTypes::getName(COMP_NODE), data->dataStr.c_str());
 }
 
 void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {

@@ -111,8 +111,9 @@ void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 void UserInterface::collUpdateLog(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
-    collLog->Append(wxString::Format("%s", data->dataStr));
 
+    collLog->Append(wxString::Format("%s", data->dataStr));
+    LOG_S("%s : %s", ComponentTypes::getName(COMP_COLLECTOR), data->dataStr.c_str());
 }
 
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
