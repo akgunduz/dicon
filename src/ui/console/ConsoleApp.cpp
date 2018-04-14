@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 			case 'l':
 				LOG_S("Listing Interfaces .....");
 				for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-					LOG_S("%s : %s", sInterfaces[deviceList->get(i)->getType()], deviceList->get(i)->getName());
+					LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(i)->getType()), deviceList->get(i)->getName());
 				}
 				break;
 			case 'd':

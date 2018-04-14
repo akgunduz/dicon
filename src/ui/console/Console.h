@@ -65,7 +65,6 @@ public:
 
 	void nodeUpdateLog(ConsoleEvent &event);
 	void nodeUpdateFileList(ConsoleEvent &event);
-	void nodeUpdateParamList(ConsoleEvent &event);
 	void nodeUpdateExecList(ConsoleEvent &event);
 };
 
