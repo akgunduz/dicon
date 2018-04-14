@@ -98,7 +98,7 @@ bool NodeManager::setIdle(long address) {
 
     search->second->setState(IDLE);
 
-    LOG_I("Node at address : %s switch to state : %s",
+    LOG_I("%s : Node at address : %s switch to state : %s", ComponentTypes::getName(component->getHost()),
           InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(IDLE));
 
 	return true;
@@ -112,7 +112,7 @@ bool NodeManager::validate(long address) {
 		return false;
 	}
 
-	LOG_I("Node at address : %s is Alive",
+	LOG_I("%s : Node at address : %s is Alive", ComponentTypes::getName(component->getHost()),
           InterfaceTypes::getAddressString(address).c_str());
 	return true;
 
@@ -140,7 +140,7 @@ bool NodeManager::setBusy(long address) {
     node->setState(BUSY);
     node->iterateUsage(true);
 
-    LOG_T("Node at address : %s switch to state : %s",
+    LOG_T("%s : Node at address : %s switch to state : %s", ComponentTypes::getName(component->getHost()),
           InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
 
 	return true;
@@ -184,7 +184,7 @@ bool NodeManager::add(long address) {
 	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
 #endif
 
-	LOG_I("Node at address : %s added to the list",
+	LOG_I("%s : Node at address : %s added to the list", ComponentTypes::getName(component->getHost()),
           InterfaceTypes::getAddressString(address).c_str());
 
 	return true;

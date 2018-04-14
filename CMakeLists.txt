@@ -90,6 +90,7 @@ set(OPENSSL_CRYPTO_LIBRARY crypto)
 add_definitions(-DMULTICAST_ENABLED)
 add_definitions(-DDISABLE_RECOVERY)
 add_definitions(-DDISABLE_BACKUP)
+add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})
