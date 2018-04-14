@@ -55,17 +55,29 @@ bool Node::processCollectorMsg(long address, Message *msg) {
 
             setExecutor(msg->getData()->getExecutor());
 
-            TypeMD5List *list = msg->getData()->getMD5List();
+            TypeFileList *list = msg->getData()->getFileList();
 
-            TypeMD5List existList = checkFileExistence(list);
+            TypeFileList requiredList = checkFileExistence(*list);
+            if (requiredList.size()) {
 
-            status &= send2CollectorMsg(address, MSGTYPE_MD5, &existList);
+                status &= send2CollectorMsg(address, MSGTYPE_INFO, &requiredList);
+
+            } else {
+
+                processCommand(getExecutor());
+
+                LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+                //TODO will update with md5s including outputs
+                status = send2DistributorMsg(distributorAddress, MSGTYPE_READY);
+            }
+
+
         }
 			break;
 
 		case MSGTYPE_BINARY: {
 
-            processRule();
+            processCommand(getExecutor());
 
             LOG_U(UI_UPDATE_NODE_STATE, IDLE);
             //TODO will update with md5s including outputs
@@ -114,11 +126,11 @@ bool Node::send2CollectorMsg(long address, MSG_TYPE type, ...) {
 
 	switch(type) {
 
-		case MSGTYPE_MD5: {
-            TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
-            msg->getData()->setStreamFlag(STREAM_MD5ONLY);
-            msg->getData()->addMD5List(md5List);
-            LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file md5 is prepared", md5List->size());
+		case MSGTYPE_INFO: {
+            TypeFileList *fileList = va_arg(ap, TypeFileList*);
+            msg->getData()->setStreamFlag(STREAM_INFO);
+            msg->getData()->addFileList(fileList);
+            LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file info is prepared", fileList->size());
         }
 			break;
 
@@ -133,37 +145,43 @@ bool Node::send2CollectorMsg(long address, MSG_TYPE type, ...) {
 	return send(COMP_COLLECTOR, address, msg);
 }
 
-bool Node::setDistributorAddress(long address) {
+const char* Node::getExecutor() {
 
-    distributorAddress = address;
-    return true;
+    return executor;
 }
 
-TypeMD5List Node::checkFileExistence(TypeMD5List *) {
+void Node::setExecutor(char *executor) {
 
-
-    return TypeMD5List();
+    strcpy(this->executor, executor);
 }
 
-bool Node::processMD5() {
+long Node::getDistributorAddress() {
 
-//
-//    for (int i = 0; i < job->getContentCount(CONTENT_FILE); i++) {
-//        FileItem *content = (FileItem *)job->getContent(CONTENT_FILE, i);
-//
-//        /*
-//         * false -> request file from collector, with no md5 set
-//         * true -> do not request file from collector, with md5 set
-//         */
-//        if (!Util::checkPath(Unit::getRootPath(COMP_NODE) ,content->getFileName(), false)) {
-//            content->setFlaggedToSent(false);
-//        }
-//    }
-
-
-	return true;
-
+    return distributorAddress;
 }
+
+void Node::setDistributorAddress(long distributorAddress) {
+
+    this->distributorAddress = distributorAddress;
+}
+
+TypeFileList Node::checkFileExistence(TypeFileList list) {
+
+    TypeFileList reqList;
+
+    for (int i = 0; i < list.size(); i++) {
+
+        if (!Util::checkPath(ComponentTypes::getRootPath(COMP_NODE),
+                             list[i]->getJobDir(), list[i]->getFileName(), false)) {
+
+            //buraya ek md5 karsilastirmasi eklenecek
+            reqList.push_back(list[i]);
+        }
+    }
+
+    return reqList;
+}
+
 
 void Node::parseCommand(char *cmd, char **argv) {
 
@@ -182,10 +200,10 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processRule() {
+bool Node::processCommand(const char *cmd) {
 
     int status;
-    char cmd[PATH_MAX] = "";
+   // char cmd[PATH_MAX] = "";
     char *args[100];
 
     LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
@@ -204,7 +222,7 @@ bool Node::processRule() {
     pid_t pid = fork();
 
     if (pid == -1) {
-        LOG_E("Rule Process failed in fork!!!");
+        LOG_E("Job Process failed in fork!!!");
         return false;
 
     } else if (pid > 0) {
@@ -332,10 +350,3 @@ bool Node::processSequential(Job* job) {
 
     return true;
 }
-
-void Node::setExecutor(char *executor) {
-
-    strcpy(this->executor, executor);
-}
-
-

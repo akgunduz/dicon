@@ -133,11 +133,25 @@ bool Util::isMulticast() {
 }
 
 std::string Util::mixPath(const char *path1, const char *path2) {
+
     return std::string(path1) + "/" + path2;
 }
 
-bool Util::checkPath(const char *path1, const char *path2, bool dir) {
-    std::string final = std::string(path1) + "/" + path2;
+bool Util::checkPath(const char *root, const char *path, bool dir) {
+
+    std::string final = std::string(root) + "/" + path;
+    if (access(final.c_str(), F_OK ) == -1) {
+        if (dir) {
+            mkPath(final.c_str());
+        }
+        return false;
+    }
+    return true;
+}
+
+bool Util::checkPath(const char *root, const char* jobDir, const char* fileName, bool dir) {
+
+    std::string final = std::string(root) + "/" + jobDir + "/" + fileName;
     if (access(final.c_str(), F_OK ) == -1) {
         if (dir) {
             mkPath(final.c_str());

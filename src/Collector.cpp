@@ -94,23 +94,12 @@ bool Collector::processNodeMsg(long address, Message *msg) {
 
 	switch(msg->getHeader()->getType()) {
 
-		case MSGTYPE_MD5: {
+		case MSGTYPE_INFO: {
 
-			LOG_U(UI_UPDATE_COLL_LOG, "MD5 info size %d", msg->getData()->getMD5Count());
+			LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
 
-            //TODO
-//            Job* job = getJobs()->getJobByNode(node);
-//            if (job == NULL) {
-//                break;
-//            }
+            status = send2NodeMsg(address, MSGTYPE_BINARY, msg->getData()->getFileList());
 
-			//LOG_U(UI_UPDATE_COLL_FILE_LIST, job);
-
-//            FileList *list = job->prepareFileList(node.getArch());
-//
-//            list->remove(&msg->md5List);
-//
-//			status = send2NodeMsg(address, MSGTYPE_BINARY, list);
 		}
 			break;
 
@@ -137,7 +126,7 @@ bool Collector::send2DistributorMsg(long address, MSG_TYPE type, ...) {
 
         case MSGTYPE_NODE: {
 			TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
-			msg->getData()->setStreamFlag(STREAM_MD5ONLY);
+			msg->getData()->setStreamFlag(STREAM_MD5);
 			msg->getData()->addMD5List(md5List);
 			LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file md5 is prepared", md5List->size());
 		}
