@@ -99,7 +99,7 @@ bool NodeManager::setIdle(long address) {
     search->second->setState(IDLE);
 
     LOG_I("Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(address).c_str(), sStates[IDLE]);
+          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(IDLE));
 
 	return true;
 }
@@ -141,7 +141,7 @@ bool NodeManager::setBusy(long address) {
     node->iterateUsage(true);
 
     LOG_T("Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(address).c_str(), sStates[BUSY]);
+          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
 
 	return true;
 

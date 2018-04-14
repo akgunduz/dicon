@@ -57,19 +57,6 @@
 
 #define SHUTDOWN_NOTIFIER 'Q'
 
-enum NODE_STATES {
-	IDLE,
-	BUSY,
-	PREBUSY,
-	REMOVE
-};
-
-enum FILETYPE {
-    FILE_JOB,
-	FILE_COMMON,
-    FILE_MAX
-};
-
 enum UI_UPDATE {
 	UI_UPDATE_LOG,
 
@@ -113,8 +100,5 @@ public:
 	EventData(const char *data) : dataStr(data) {}
 	EventData(void *data) : dataPtr(data) {}
 };
-
-extern const char* sStates[];
-extern const char* sParamTypes[];
 
 #endif

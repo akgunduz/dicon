@@ -5,9 +5,9 @@
 #ifndef BANKOR_NODEOBJECT_H
 #define BANKOR_NODEOBJECT_H
 
-#include "Common.h"
 #include "StopWatch.h"
 #include "NodeWatchdog.h"
+#include "NodeState.h"
 
 class NodeWatchdog;
 

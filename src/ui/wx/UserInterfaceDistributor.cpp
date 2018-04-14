@@ -158,7 +158,7 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
     }
 
     distNodeList->SetItem(i, 0, InterfaceTypes::getAddressString(data->data64_1));
-    distNodeList->SetItem(i, 1, sStates[data->data64_2]);
+    distNodeList->SetItem(i, 1, NodeState::getName((NODE_STATES)data->data64_2));
 
 }
 
