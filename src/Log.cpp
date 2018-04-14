@@ -135,7 +135,13 @@ void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ..
 	}
 
 	char logout[255];
+
+#ifdef DISABLE_LOGFILEINFO
+	sprintf(logout, "%s \n", buf);
+#else
 	sprintf(logout, "%s : %s[%d]: %s \n", sLogLevels[level], p, line, buf);
+#endif
+
     printf("%s", logout);
 }
 

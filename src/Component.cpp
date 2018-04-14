@@ -53,7 +53,7 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 bool Component::onReceive(long address, Message *msg) {
 
     LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-          "Receive : \"%s\" from %s: at %s",
+          "Receive --> \"%s\" from %s: at %s",
           MessageTypes::getName(msg->getHeader()->getType()),
           ComponentTypes::getName(msg->getHeader()->getOwner()),
           InterfaceTypes::getAddressString(address).c_str());
@@ -110,7 +110,7 @@ bool Component::isSupportMulticast(COMPONENT target) {
 bool Component::send(COMPONENT target, long address, Message *msg) {
 
     LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-            "Send : \"%s\" to %s: at %s",
+            "Send --> \"%s\" to %s: at %s",
             MessageTypes::getName(msg->getHeader()->getType()),
             ComponentTypes::getName(target),
             InterfaceTypes::getAddressString(address).c_str());
@@ -121,7 +121,7 @@ bool Component::send(COMPONENT target, long address, Message *msg) {
 bool Component::send(COMPONENT target, Message *msg) {
 
     LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-          "Send : \"%s\" as MultiCast",
+          "Send --> \"%s\" as MultiCast",
           MessageTypes::getName(msg->getHeader()->getType()));
 
     return interfaces[target]->push(MESSAGE_SEND, interfaces[target]->getMulticastAddress(), msg);

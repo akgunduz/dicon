@@ -56,7 +56,8 @@ bool UnixSocket::initUnixSocket() {
 
 		setAddress(address);
 
-        LOG_I("Using address : %s", getAddressString(address).c_str());
+		LOG_I("%s : Using address : %s", ComponentTypes::getName(getHost()),
+			  InterfaceTypes::getAddressString(address).c_str());
 
 		return true;
 	}
