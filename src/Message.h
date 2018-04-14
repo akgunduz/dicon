@@ -15,16 +15,13 @@
 #define STREAM_NONE 0xFFFF
 
 #define STREAM_JOB 0x01
-
-//Send md5 + binary
 #define STREAM_BINARY 0x02
+#define STREAM_MD5 0x03
+#define STREAM_INFO 0x04
 
-//Send md5
-#define STREAM_MD5ONLY 0x03
-
-#define BLOCK_FILE_BINARY 0x01
-#define BLOCK_FILE_MD5 0x02
-#define BLOCK_JOB_INFO 0x03
+#define BLOCK_JOB_INFO 0x01
+#define BLOCK_FILE_BINARY 0x02
+#define BLOCK_FILE_MD5 0x03
 #define BLOCK_FILE_INFO 0x04
 
 class Message : public BaseMessage {

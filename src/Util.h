@@ -27,6 +27,7 @@ public:
 	static std::string getRefPath(COMPONENT, const char*, const char*);
 	static std::string getMD5Path(COMPONENT, const char*, const char*);
 	static bool checkPath(const char*, const char*, bool);
+	static bool checkPath(const char*, const char*, const char*, bool);
     static bool isMulticast();
 	static void cleanup();
 };

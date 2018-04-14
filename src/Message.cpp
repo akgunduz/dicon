@@ -54,6 +54,8 @@ bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
     }
 
     content->set(getHost(), jobDir, fileName, &md5, true);
+
+    return true;
 }
 
 
@@ -316,6 +318,16 @@ bool Message::writeMessageStream(int out) {
             LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);
             break;
 
+        case STREAM_INFO:
+
+            for (i = 0; i < getData()->getFileCount(); i++) {
+
+                writeFileInfo(out, getData()->getFile(i));
+            }
+
+            LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);
+            break;
+
         case STREAM_BINARY:
 
             for (i = 0; i < getData()->getFileCount(); i++) {
@@ -327,7 +339,7 @@ bool Message::writeMessageStream(int out) {
 
             break;
 
-        case STREAM_MD5ONLY:
+        case STREAM_MD5:
 
             for (i = 0; i < getData()->getMD5Count(); i++) {
 
