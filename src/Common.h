@@ -85,4 +85,11 @@ enum UI_UPDATE {
 	UI_UPDATE_MAX
 };
 
+struct char_cmp {
+	bool operator () (const char *a,const char *b) const
+	{
+		return strcmp(a,b) < 0;
+	}
+};
+
 #endif

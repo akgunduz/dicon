@@ -37,6 +37,8 @@ public:
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll();
 
+
+
 };
 
 #endif	/* DISTRIBUTOR_H */
