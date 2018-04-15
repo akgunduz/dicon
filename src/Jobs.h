@@ -10,13 +10,6 @@
 #include "JobInfo.h"
 
 
-struct char_cmp {
-    bool operator () (const char *a,const char *b) const
-    {
-        return strcmp(a,b) < 0;
-    }
-};
-
 typedef std::map<const char *, Job*, char_cmp> TypeJobList;
 
 

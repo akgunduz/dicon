@@ -60,6 +60,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageData.cpp
         #${SOURCE_PATH}/NodeTracker.cpp
         ${SOURCE_PATH}/NodeState.cpp
+        ${SOURCE_PATH}/History.cpp
         )
 
 set(WX_FILES
