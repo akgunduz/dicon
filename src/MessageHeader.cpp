@@ -119,3 +119,8 @@ bool MessageHeader::extract(uint8_t *buffer) {
 
     return true;
 }
+
+int MessageHeader::getSize() {
+
+    return sizeof(MessageHeader);
+}

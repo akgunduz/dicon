@@ -48,6 +48,7 @@ private:
 
     bool setHeader(const uint8_t*);
     bool extractHeader(uint8_t *);
+    int getHeaderSize();
 
 public:
 

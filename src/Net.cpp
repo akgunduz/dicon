@@ -184,7 +184,7 @@ void Net::runReceiver(COMPONENT host) {
             Message *msg = new Message(host);
             sockaddr_in address;
             address.sin_addr.s_addr = 1;
-            msg->setMulticastAddress(address);
+            msg->setDatagramAddress(address);
             if (msg->readFromStream(multicastSocket)) {
                 push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
             }
@@ -258,7 +258,7 @@ void Net::runMulticastSender(Message *msg) {
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
     msg->getHeader()->setOwnerAddress(getAddress());
-    msg->setMulticastAddress(getInetAddressByAddress(getMulticastAddress()));
+    msg->setDatagramAddress(getInetAddressByAddress(getMulticastAddress()));
     msg->writeToStream(clientSocket);
 
     shutdown(clientSocket, SHUT_RDWR);

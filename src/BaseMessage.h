@@ -22,22 +22,15 @@ class BaseMessage {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE];
 
-    int headerSize;
-
-    int desc;
-
     COMPONENT host;
 
-	sockaddr_in multicastAddress;
+	sockaddr_in datagramAddress;
 
 public:
 
-    BaseMessage(int);
+    BaseMessage();
 
-    void setMulticastAddress(sockaddr_in);
-
-    int getDescriptor();
-    void setDescriptor(int);
+    void setDatagramAddress(sockaddr_in);
 
     int getBinarySize(const char*);
     bool transferBinary(int, int, Md5 *, int);
@@ -76,6 +69,7 @@ public:
 
     virtual bool setHeader(const uint8_t*) = 0;
     virtual bool extractHeader(uint8_t *) = 0;
+    virtual int getHeaderSize() = 0;
 
     COMPONENT getHost();
     void setHost(COMPONENT);

@@ -6,7 +6,7 @@
 #include "Message.h"
 
 Message::Message(COMPONENT host)
-		: BaseMessage(sizeof(MessageHeader)), header() {
+		: header() {
 
     setHost(host);
 
@@ -17,7 +17,7 @@ Message::Message(COMPONENT host)
 }
 
 Message::Message(COMPONENT owner, MSG_TYPE type)
-		: BaseMessage(sizeof(MessageHeader)), header() {
+		: header() {
 
     setHost(owner);
 
@@ -372,6 +372,10 @@ bool Message::setHeader(const uint8_t *buffer) {
 
 bool Message::extractHeader(uint8_t *buffer) {
     return getHeader()->extract(buffer);
+}
+
+int Message::getHeaderSize() {
+    return getHeader()->getSize();
 }
 
 MessageData *Message::getData() {

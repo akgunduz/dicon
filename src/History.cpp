@@ -1,6 +1,8 @@
 //
-// Created by Haluk AKGUNDUZ on 15.04.2018.
+// Created by Haluk AKGUNDUZ on 15/04/2018.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
+
 
 #include "History.h"
 
