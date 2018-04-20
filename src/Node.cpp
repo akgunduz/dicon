@@ -213,11 +213,12 @@ bool Node::processCommand(const char *cmd) {
     int status;
     char *args[100];
 
-    LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", cmd);
-    LOG_U(UI_UPDATE_NODE_EXEC_LIST, cmd);
-
     char fullcmd[PATH_MAX];
-    strcpy(fullcmd, Util::getAbsPath(getHost(), cmd).c_str());
+
+    strcpy(fullcmd, Util::parsePath(getHost(), cmd).c_str());
+
+    LOG_U(UI_UPDATE_NODE_LOG, "Executing %s command", fullcmd);
+    LOG_U(UI_UPDATE_NODE_EXEC_LIST, fullcmd);
 
     parseCommand(fullcmd, args);
 

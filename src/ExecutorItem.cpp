@@ -105,7 +105,7 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 	if (cmdType == CONTENT_FILE) {
 		FileItem *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
 		if (content != nullptr) {
-            sprintf(parsedExec, "%s%s", parsedExec,
+            sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
                     Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
             fileList.push_back(content);
 		}
