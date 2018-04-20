@@ -161,6 +161,28 @@ bool Util::checkPath(const char *root, const char* jobDir, const char* fileName,
     return true;
 }
 
+std::string Util::parsePath(COMPONENT host, const char *str) {
+
+    unsigned long len = strlen(ROOT_SIGN);
+    unsigned long pos = 0;
+
+    std::string newstr = str;
+
+    do {
+
+        pos = newstr.find(ROOT_SIGN, pos);
+
+        if (pos == std::string::npos) {
+            break;
+        }
+
+        newstr.replace(pos, len, ComponentTypes::getRootPath(host));
+
+    } while(true);
+
+    return newstr;
+}
+
 std::string Util::getAbsPath(COMPONENT host, const char *path2) {
 
     return std::string(ComponentTypes::getRootPath(host)) + "/" + path2;
