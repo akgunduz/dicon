@@ -6,15 +6,14 @@
 #include "BaseMessage.h"
 #include "Address.h"
 
-BaseMessage::BaseMessage(int size) {
+BaseMessage::BaseMessage() {
 
-    headerSize = size;
-    bzero(&multicastAddress, sizeof(sockaddr_in));
+    bzero(&datagramAddress, sizeof(sockaddr_in));
 }
 
-void BaseMessage::setMulticastAddress(sockaddr_in address) {
+void BaseMessage::setDatagramAddress(sockaddr_in address) {
 
-    multicastAddress = address;
+    datagramAddress = address;
 }
 
 int BaseMessage::getBinarySize(const char* path) {
@@ -83,7 +82,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 	do {
         long count;
 
-        if (multicastAddress.sin_addr.s_addr == 0) {
+        if (datagramAddress.sin_addr.s_addr == 0) {
             count = read(in, buf + offset, (size_t) size);
 
         } else {
@@ -153,7 +152,7 @@ bool BaseMessage::readSignature(int in) {
 
 bool BaseMessage::readHeader(int in) {
 
-	if (!readBlock(in, tmpBuf, headerSize)) {
+	if (!readBlock(in, tmpBuf, getHeaderSize())) {
 		LOG_E("%s : Can not read message header from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
@@ -258,8 +257,6 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 bool BaseMessage::readFromStream(int in) {
 
-    setDescriptor(in);
-
 	if (!readSignature(in)) {
 		return false;
 	}
@@ -295,12 +292,12 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 
         long count;
 
-        if (multicastAddress.sin_addr.s_addr == 0) {
+        if (datagramAddress.sin_addr.s_addr == 0) {
             count = write(out, buf + offset, (size_t)size);
 
         } else {
             count = sendto(out, buf + offset, (size_t)size, 0,
-                           (struct sockaddr *) &multicastAddress, sizeof(struct sockaddr));
+                           (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
         }
 
 		if (count == -1) {
@@ -365,7 +362,7 @@ bool BaseMessage::writeHeader(int out) {
         return false;
     }
 
-	if (!writeBlock(out, tmpBuf, headerSize)) {
+	if (!writeBlock(out, tmpBuf, getHeaderSize())) {
 		LOG_E("%s : Can not write message header to stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
@@ -445,8 +442,6 @@ bool BaseMessage::writeEndStream(int out) {
 
 bool BaseMessage::writeToStream(int out) {
 
-    setDescriptor(out);
-
 	if (!writeSignature(out)) {
 		return false;
 	}
@@ -464,14 +459,6 @@ bool BaseMessage::writeToStream(int out) {
 	return writeFinalize();
 }
 
-int BaseMessage::getDescriptor() {
-    return desc;
-}
-
-void BaseMessage::setDescriptor(int desc) {
-    this->desc = desc;
-}
-
 COMPONENT BaseMessage::getHost() {
     return this->host;
 }
@@ -479,3 +466,4 @@ COMPONENT BaseMessage::getHost() {
 void BaseMessage::setHost(COMPONENT host) {
      this->host = host;
 }
+

@@ -38,6 +38,7 @@ public:
     void setOwnerAddress(long);
     long getVariant(int id);
     void setVariant(int id, long variant);
+    int getSize();
 
     long getTime();
     long getDeviceID();
