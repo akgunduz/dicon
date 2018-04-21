@@ -21,7 +21,7 @@ private :
 
 	bool initUnixSocket();
 	void runReceiver(COMPONENT);
-	static void *runAccepter(void *);
+	static void runAccepter(Interface *, int);
 	void runSender(long, Message *);
     void runMulticastSender(Message *);
 

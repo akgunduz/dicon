@@ -72,6 +72,7 @@ bool UnixSocket::initUnixSocket() {
 void UnixSocket::runReceiver(COMPONENT host) {
 
 	bool thread_started = true;
+	std::thread threadAccept;
 
 	int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
 
@@ -93,23 +94,14 @@ void UnixSocket::runReceiver(COMPONENT host) {
 
 		if (FD_ISSET(unixSocket, &readfs)) {
 
-			int acceptfd = accept(unixSocket, nullptr, nullptr);
-			if (acceptfd < 0) {
+			int acceptSocket = accept(unixSocket, nullptr, nullptr);
+			if (acceptSocket < 0) {
 				LOG_E("Node Socket open with err : %d!!!", errno);
 				return;
 			}
 
-			Argument *argument = new Argument(this);
-			argument->host = host;
-			argument->acceptSocket = acceptfd;
-
-			pthread_t thread;
-			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
-			if (pthr) {
-				LOG_E("Problem with runAccepter thread");
-				close(acceptfd);
-				thread_started = false;
-			}
+			threadAccept = std::thread(runAccepter, this, acceptSocket);
+			threadAccept.detach();
 		}
 
 		if (FD_ISSET(notifierPipe[0], &readfs)) {
@@ -127,17 +119,13 @@ void UnixSocket::runReceiver(COMPONENT host) {
 	}
 }
 
-void *UnixSocket::runAccepter(void *arg) {
+void UnixSocket::runAccepter(Interface *interface, int acceptSocket) {
 
-	Argument *argument = (Argument *) arg;
+	Message *msg = new Message(interface->getHost());
 
-	Message *msg = new Message(argument->host);
-	if (msg->readFromStream(argument->acceptSocket)) {
-		argument->_interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
+	if (msg->readFromStream(acceptSocket)) {
+		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
 	}
-
-	delete argument;
-	return nullptr;
 }
 
 void UnixSocket::runSender(long target, Message *msg) {

@@ -25,49 +25,19 @@ NodeWatchdog::NodeWatchdog(Component *component, NodeObject *nodeItem, fTimeoutC
 
 void NodeWatchdog::init() {
 
-    int res = pthread_mutex_init(&mutex, NULL);
-    if (res) {
-        LOG_E("NodeWatchdog --> Mutex init failed");
-        return;
-    }
-
-    res = pthread_cond_init(&condition, NULL);
-    if (res) {
-        LOG_E("NodeWatchdog --> Condition init fail");
-        pthread_mutex_destroy(&mutex);
-        return;
-    }
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    res = pthread_create(&thread, &attr, onTimerThread, (void *)this);
-    pthread_attr_destroy(&attr);
-    if (res) {
-        LOG_E("NodeWatchdog --> Thread init fail");
-        pthread_cond_destroy(&condition);
-        pthread_mutex_destroy(&mutex);
-    }
+    thread = std::thread(onTimerThread, this);
 }
 
-void *NodeWatchdog::onTimerThread(void *ptr) {
+void NodeWatchdog::onTimerThread(NodeWatchdog *nodeWatchdog) {
 
-    NodeWatchdog* nodeWatchdog = (NodeWatchdog*) ptr;
+    while(true) {
 
-    struct timespec timer;
-    struct timeval now;
+        auto now = std::chrono::system_clock::now();
 
-    while(1) {
+        std::unique_lock<std::mutex> lock(nodeWatchdog->mutex);
 
-        gettimeofday(&now, NULL);
-
-        timer.tv_sec = now.tv_sec + nodeWatchdog->timeout;
-        timer.tv_nsec = 0;
-
-        pthread_mutex_lock(&nodeWatchdog->mutex);
-        int res = pthread_cond_timedwait(&nodeWatchdog->condition,
-                                         &nodeWatchdog->mutex, &timer);
-        if (res == ETIMEDOUT) {
+        if (nodeWatchdog->cond.wait_until(lock, now + std::chrono::seconds(nodeWatchdog->timeout)) !=
+            std::cv_status::timeout) {
 
             if (nodeWatchdog->timerType == TIMER_WAKEUP) {
                 nodeWatchdog->wakeupCB(nodeWatchdog->component);
@@ -81,21 +51,17 @@ void *NodeWatchdog::onTimerThread(void *ptr) {
             break;
         }
 
-        pthread_mutex_unlock(&nodeWatchdog->mutex);
+        lock.unlock();
 
     }
-    pthread_cond_destroy(&nodeWatchdog->condition);
-    pthread_mutex_destroy(&nodeWatchdog->mutex);
-
-    return nullptr;
 }
 
 void NodeWatchdog::end() {
 
-    pthread_mutex_lock(&mutex);
-    pthread_cond_signal(&condition);
-    pthread_mutex_unlock(&mutex);
-    pthread_join(thread, nullptr);
+    std::unique_lock<std::mutex> lock(mutex);
+    cond.notify_one();
+    lock.unlock();
+    thread.join();
 }
 
 NodeWatchdog::~NodeWatchdog() {

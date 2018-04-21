@@ -13,6 +13,7 @@
 #define BUFFER_SIZE 512
 
 #define SIGNATURE 0x55AA
+#define SIGNATURE_SIZE 2
 
 #define TMP_BUFFER_SIZE 1000
 

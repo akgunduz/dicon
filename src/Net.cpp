@@ -133,6 +133,7 @@ bool Net::initMulticast() {
 void Net::runReceiver(COMPONENT host) {
 
     bool thread_started = true;
+    std::thread threadAccept;
 
     struct sockaddr_in cli_addr;
     socklen_t clilen = sizeof(cli_addr);
@@ -160,23 +161,15 @@ void Net::runReceiver(COMPONENT host) {
 
 		if (FD_ISSET(netSocket, &readfs)) {
 
-			int acceptfd = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
-			if (acceptfd < 0) {
+			int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
+			if (acceptSocket < 0) {
 				LOG_E("Node Socket open with err : %d!!!", errno);
 				return;
 			}
 
-			Argument *argument = new Argument(this, cli_addr.sin_addr.s_addr);
-			argument->host = host;
-			argument->acceptSocket = acceptfd;
+            threadAccept = std::thread(runAccepter, this, acceptSocket);
+            threadAccept.detach();
 
-			pthread_t thread;
-			int pthr = pthread_create(&thread, NULL, runAccepter, (void *)argument);
-			if (pthr) {
-				LOG_E("Problem with runAccepter thread");
-				close(acceptfd);
-				thread_started = false;
-			}
 		}
 
         if (FD_ISSET(multicastSocket, &readfs)) {
@@ -206,17 +199,13 @@ void Net::runReceiver(COMPONENT host) {
 	}
 }
 
-void *Net::runAccepter(void *arg) {
+void Net::runAccepter(Interface *interface, int acceptSocket) {
 
-	Argument *argument = (Argument *) arg;
+	Message *msg = new Message(interface->getHost());
 
-	Message *msg = new Message(argument->host);
-	if (msg->readFromStream(argument->acceptSocket)) {
-		argument->_interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
+	if (msg->readFromStream(acceptSocket)) {
+		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
 	}
-
-	delete argument;
-	return nullptr;
 }
 
 void Net::runSender(long target, Message *msg) {
@@ -227,7 +216,8 @@ void Net::runSender(long target, Message *msg) {
 		return;
 	}
 
-	LOG_T("Socket sender %d is opened !!!", clientSocket);
+	LOG_T("Sender is opened for target : %s and message : %s !!!",
+          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getName(msg->getHeader()->getType()));
 
     sockaddr_in clientAddress = getInetAddressByAddress(target);
 
@@ -237,7 +227,8 @@ void Net::runSender(long target, Message *msg) {
 		return;
 	}
 
-	LOG_T("Socket sender %d is connected !!!", clientSocket);
+    LOG_T("Sender is connected for target : %s and message : %s !!!",
+          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getName(msg->getHeader()->getType()));
 
 	msg->getHeader()->setOwnerAddress(getAddress());
 	msg->writeToStream(clientSocket);
@@ -302,6 +293,36 @@ std::string Net::getIPString(long address) {
 
     return std::string(cIP);
 }
+
+long Net::parseIPAddress(std::string address) {
+
+    struct in_addr addr;
+
+    int res = inet_pton(AF_INET, address.c_str(), &addr);
+    if (res <= 0) {
+        return 0;
+    }
+
+    return ntohl(addr.s_addr);
+}
+
+long Net::parseAddress(std::string address) {
+
+
+    long pos = address.find(':');
+
+    std::string sIP = address.substr(0, pos);
+
+    std::string sPort = address.substr(pos + 1, std::string::npos);
+
+    long ip = parseIPAddress(sIP);
+    int port = atoi(sPort.c_str());
+
+    long final = Address::createAddress(INTERFACE_NET, ip, port, 24);
+
+    return Address::createAddress(INTERFACE_NET, ip, port, 24);
+}
+
 
 sockaddr_in Net::getInetAddressByAddress(long address) {
 

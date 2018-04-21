@@ -135,7 +135,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 
 bool BaseMessage::readSignature(int in) {
 
-	if (!readBlock(in, tmpBuf, 2)) {
+	if (!readBlock(in, tmpBuf, SIGNATURE_SIZE)) {
 		LOG_E("%s : Can not read correct signature from stream", ComponentTypes::getName(getHost()));
 		return false;
 	}
