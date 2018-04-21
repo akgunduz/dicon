@@ -11,38 +11,16 @@
 #include "Device.h"
 #include "MessageItem.h"
 
-class Interface;
-
 enum NOTIFIER_TYPE {
 	NOTIFIER_READ,
 	NOTIFIER_WRITE
 };
 
-class Argument {
-
-public:
-
-	COMPONENT host;
-	int acceptSocket;
-	MessageItem *item;
-
-	Interface *_interface;
-
-	Argument(Interface *c, long address) : _interface(c), acceptSocket(0){
-		item = new MessageItem(MESSAGE_RECEIVE, address);
-	}
-
-	Argument(Interface *c) : _interface(c), acceptSocket(0){
-		item = new MessageItem(MESSAGE_RECEIVE);
-	}
-};
-
 class Interface {
 
 private :
-	static void* runReceiver(void *);
-	static void* runSender(void *);
-	static bool senderCB(void *, SchedulerItem *);
+	static void runReceiverCB(Interface *);
+	static bool runSenderCB(void *, SchedulerItem *);
 
 	Device *device;
 	COMPONENT host;
@@ -56,7 +34,7 @@ private :
 protected :
 
 	Scheduler *scheduler;
-	pthread_t thread;
+	std::thread threadRcv;
 	int notifierPipe[2];
 
 	virtual void runReceiver(COMPONENT host) = 0;

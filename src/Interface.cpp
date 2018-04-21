@@ -12,13 +12,11 @@ Interface::Interface(COMPONENT host, Device *device, const InterfaceCallback *re
     this->address = 0;
     this->multicastAddress = 0;
 
-	InterfaceCallback *sendCB = new InterfaceCallback(senderCB, this);
-
     setHost(host);
     setDevice(device);
 
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
-	scheduler->setCB(MESSAGE_SEND, sendCB);
+	scheduler->setCB(MESSAGE_SEND, new InterfaceCallback(runSenderCB, this));
 }
 
 void Interface::end() {
@@ -27,7 +25,7 @@ void Interface::end() {
 
 	write(notifierPipe[1], buf, 1);
 
-	pthread_join(thread, nullptr);
+	threadRcv.join();
 
 }
 
@@ -40,64 +38,32 @@ bool Interface::initThread() {
 
 	LOG_T("Init Notifier PIPE OK!!!");
 
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-	Argument *argument = new Argument(this);
-	argument->host = getHost();
-    argument->_interface = this;
-
-	int pthr = pthread_create(&thread, &attr, runReceiver, (void *)argument);
-	pthread_attr_destroy(&attr);
-	if (pthr) {
-		LOG_E("Problem with run thread");
-		close(notifierPipe[1]);
-		close(notifierPipe[0]);
-		return false;
-	}
+	threadRcv = std::thread(runReceiverCB, this);
 
 	return true;
 }
 
-void *Interface::runReceiver(void *arg) {
+void Interface::runReceiverCB(Interface *interface) {
 
-    Argument *argument = (Argument *) arg;
-	argument->_interface->runReceiver(argument->host);
+    interface->runReceiver(interface->getHost());
 
-    delete argument;
-	return nullptr;
 }
 
-bool Interface::senderCB(void *arg, SchedulerItem *item) {
+bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
 
-	Argument *argument = new Argument((Interface*)arg);
-	argument->item = (MessageItem*) item;
+	Interface *interface = (Interface *) arg;
+	MessageItem *msgItem = (MessageItem*) item;
 
-	pthread_t thread;
+	if (msgItem->address != interface->getMulticastAddress()) {
 
-	int pthr = pthread_create(&thread, NULL, runSender, (void *)argument);
-	if (pthr) {
-		LOG_E("Problem with runSender thread");
-		return false;
+		interface->runSender(msgItem->address, msgItem->msg);
+
+	} else {
+
+		interface->runMulticastSender(msgItem->msg);
 	}
 
 	return true;
-}
-
-void* Interface::runSender(void *arg) {
-
-	Argument *argument = (Argument *) arg;
-
-    if (argument->item->address != argument->_interface->getMulticastAddress()) {
-        argument->_interface->runSender(argument->item->address, argument->item->msg);
-
-    } else {
-        argument->_interface->runMulticastSender(argument->item->msg);
-    }
-
-	delete argument;
-	return nullptr;
 }
 
 Interface::~Interface() {

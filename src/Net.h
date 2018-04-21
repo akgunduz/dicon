@@ -30,11 +30,13 @@ private :
 	bool initTCP();
 	bool initMulticast();
 	void runReceiver(COMPONENT);
-	static void *runAccepter(void *);
+	static void runAccepter(Interface *, int);
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
 
     static std::string getIPString(long);
+    static long parseIPAddress(std::string);
+
 	static sockaddr_in getInetAddressByAddress(long);
 	static sockaddr_in getInetAddressByPort(int);
     static ip_mreq getInetMulticastAddress(long);
@@ -49,6 +51,8 @@ public :
 
     static std::string getAddressString(long);
 	static std::vector<long> getAddressList(Device*);
+
+	static long parseAddress(std::string);
 
 };
 

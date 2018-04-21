@@ -18,9 +18,9 @@
 class Scheduler {
 private:
     bool ownThread;
-	pthread_mutex_t mutex;
-	pthread_cond_t cond;
-	pthread_t thread;
+    std::mutex mutex;
+    std::condition_variable cond;
+    std::thread thread;
 	std::list<SchedulerItem*> items;
 	std::map<int, const InterfaceCallback*> callbacks;
 	int capacity;

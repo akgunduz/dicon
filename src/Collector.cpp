@@ -128,7 +128,7 @@ bool Collector::send2DistributorMsg(long address, MSG_TYPE type, ...) {
 			TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
 			msg->getData()->setStreamFlag(STREAM_MD5);
 			msg->getData()->addMD5List(md5List);
-			LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file md5 is prepared", md5List->size());
+			LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" necessary file md5s are prepared", md5List->size());
 		}
             break;
 
@@ -192,15 +192,16 @@ bool Collector::processJob() {
     //TODO Also will add other jobs, after the prev. job is done.
 
 
-  //  for (int i = 0; i < getJobs()->getJob(0)->getCount(); i++) {
-	TypeMD5List md5List;
-	ExecutorItem *executorItem = (ExecutorItem *)jobs.get(0)->getContent(CONTENT_EXECUTOR, 0);
-	for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
-		md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
-	}
+    for (int k = 0; k < jobs.get(0)->getContentCount(CONTENT_EXECUTOR); k++) {
 
-	send2DistributorMsg(distributorAddress, MSGTYPE_NODE, &md5List);
-  //  }
+        TypeMD5List md5List;
+        ExecutorItem *executorItem = (ExecutorItem *)jobs.get(0)->getContent(CONTENT_EXECUTOR, k);
+        for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
+            md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
+        }
+
+        send2DistributorMsg(distributorAddress, MSGTYPE_NODE, &md5List);
+    }
 
     return true;
 }

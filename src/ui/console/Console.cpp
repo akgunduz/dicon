@@ -7,7 +7,7 @@
 
 Console::Console() {
 
-    Log::setLogLevel(LEVEL_WARN);
+    Log::setLogLevel(LEVEL_INFO);
     Log::set_ui_callback(this, updateUICallback);
 
 	uiUpdater[UI_UPDATE_LOG] = &Console::updateLog;

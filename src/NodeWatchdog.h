@@ -28,16 +28,16 @@ class NodeWatchdog {
     NodeObject *nodeItem;
     int timeout;
 
-    pthread_mutex_t mutex;
-    pthread_cond_t condition;
-    pthread_t thread;
+    std::mutex mutex;
+    std::condition_variable cond;
+    std::thread thread;
 
     Component *component;
     fTimeoutCB timeoutCB;
     fWakeupCB wakeupCB;
 
     void init();
-    static void *onTimerThread(void *);
+    static void onTimerThread(NodeWatchdog *);
 
 public:
 
