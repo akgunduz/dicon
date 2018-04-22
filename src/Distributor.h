@@ -26,8 +26,9 @@ private:
     bool processNodeBusyMsg(long, Message *);
     bool processNodeTimeoutMsg(long, Message *);
 
-    bool send2NodeMsg(long, MSG_TYPE);
-    bool send2CollectorMsg(long, MSG_TYPE);
+    bool send2NodeWakeupMsg(long);
+    bool send2CollectorWakeupMsg(long);
+    bool send2CollectorNodeMsg(long);
 
 public:
 

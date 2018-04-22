@@ -52,10 +52,10 @@ public:
     unsigned long getFileCount();
 
     char* getExecutor();
-    void setExecutor(char*);
+    void setExecutor(const char*);
 
     char* getJobDir();
-    void setJobDir(char*);
+    void setJobDir(const char*);
 };
 
 

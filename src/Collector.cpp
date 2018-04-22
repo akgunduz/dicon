@@ -32,7 +32,7 @@ bool Collector::processDistributorWakeupMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
-    return send2DistributorMsg(address, MSGTYPE_ALIVE, NULL);
+    return send2DistributorAliveMsg(address);
 }
 
 bool Collector::processDistributorNodeMsg(long address, Message *msg) {
@@ -71,7 +71,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 //                md5List.push_back(*item->getDependentFile(i)->getMD5());
 //            }
 
-    return send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->get(0)->getJobDir(),
+    return send2NodeJobMsg(nodeAddress, getJobs()->get(0)->getJobDir(),
                           item->getParsedExec(), item->getDependentFileList());
 }
 
@@ -79,81 +79,52 @@ bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
 
-    return send2NodeMsg(address, MSGTYPE_BINARY, msg->getData()->getFileList());
+    return send2NodeBinaryMsg(address, msg->getData()->getFileList());
 }
 
-bool Collector::send2DistributorMsg(long address, MSG_TYPE type, ...) {
+bool Collector::send2DistributorAliveMsg(long address) {
 
-    va_list ap;
-    va_start(ap, type);
+    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_ALIVE);
 
-	Message *msg = new Message(COMP_COLLECTOR, type);
-
-	switch(type) {
-
-		case MSGTYPE_ALIVE:
-			break;
-
-        case MSGTYPE_NODE: {
-			TypeMD5List *md5List = va_arg(ap, TypeMD5List*);
-			msg->getData()->setStreamFlag(STREAM_MD5);
-			msg->getData()->addMD5List(md5List);
-			LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" necessary file md5s are prepared", md5List->size());
-		}
-            break;
-
-        default:
-			delete msg;
-			va_end(ap);
-			return false;
-
-	}
-
-	va_end(ap);
-
-	return send(COMP_DISTRIBUTOR, address, msg);
-
+    return send(COMP_DISTRIBUTOR, address, msg);
 }
 
-bool Collector::send2NodeMsg(long address, MSG_TYPE type, ...) {
+bool Collector::send2DistributorNodeMsg(long address, TypeMD5List *md5List) {
 
-    va_list ap;
-    va_start(ap, type);
+    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_NODE);
 
-	Message *msg = new Message(COMP_COLLECTOR, type);
+    msg->getData()->setStreamFlag(STREAM_MD5);
+    msg->getData()->addMD5List(md5List);
 
-	switch(type) {
+    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" necessary file md5s are prepared", md5List->size());
 
-		case MSGTYPE_JOB: {
-            char *jobDir = va_arg(ap, char*);
-            char *executor = va_arg(ap, char*);
-            TypeFileList *fileList = va_arg(ap, TypeFileList*);
-            msg->getData()->setStreamFlag(STREAM_JOB);
-            msg->getData()->setJobDir(jobDir);
-            msg->getData()->setExecutor(executor);
-            msg->getData()->addFileList(fileList);
-            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
-        }
-			break;
+    return send(COMP_DISTRIBUTOR, address, msg);
+}
 
-		case MSGTYPE_BINARY: {
-            TypeFileList *fileList = va_arg(ap, TypeFileList*);
-            msg->getData()->setStreamFlag(STREAM_BINARY);
-            msg->getData()->addFileList(fileList);
-            LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", fileList->size());
-        }
-			break;
+bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* executor, TypeFileList *fileList) {
 
-		default:
-			delete msg;
-            va_end(ap);
-			return false;
+    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_JOB);
 
-	}
+    msg->getData()->setStreamFlag(STREAM_JOB);
+    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setExecutor(executor);
+    msg->getData()->addFileList(fileList);
 
-    va_end(ap);
+    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
 
-	return send(COMP_NODE, address, msg);
+    return send(COMP_NODE, address, msg);
+}
+
+bool Collector::send2NodeBinaryMsg(long address, TypeFileList *fileList) {
+
+    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_BINARY);
+
+    msg->getData()->setStreamFlag(STREAM_BINARY);
+    msg->getData()->addFileList(fileList);
+
+    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", fileList->size());
+
+    return send(COMP_NODE, address, msg);
 }
 
 bool Collector::processJob() {
@@ -170,7 +141,7 @@ bool Collector::processJob() {
             md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
         }
 
-        send2DistributorMsg(distributorAddress, MSGTYPE_NODE, &md5List);
+        send2DistributorNodeMsg(distributorAddress, &md5List);
     }
 
     return true;
