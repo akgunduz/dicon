@@ -19,9 +19,12 @@ private:
 
 	std::deque<long> collectorWaitingList;
 
-    virtual bool processDistributorMsg(long, Message *);
-    virtual bool processCollectorMsg(long, Message *);
-    virtual bool processNodeMsg(long, Message *);
+    bool processCollectorAliveMsg(long, Message *);
+    bool processCollectorNodeMsg(long, Message *);
+    bool processNodeReadyMsg(long, Message *);
+    bool processNodeAliveMsg(long, Message *);
+    bool processNodeBusyMsg(long, Message *);
+    bool processNodeTimeoutMsg(long, Message *);
 
     bool send2NodeMsg(long, MSG_TYPE);
     bool send2CollectorMsg(long, MSG_TYPE);

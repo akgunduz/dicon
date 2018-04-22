@@ -10,6 +10,10 @@
 Node::Node(const char *rootPath) :
         Component(COMP_NODE, rootPath) {
 
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
+    processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
+    processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
+
 	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
@@ -20,82 +24,50 @@ Node::~Node() {
 
 }
 
-bool Node::processDistributorMsg(long address, Message *msg) {
+bool Node::processDistributorWakeupMsg(long address, Message *msg) {
 
-    bool status = false;
+    setDistributorAddress(address);
 
-    switch(msg->getHeader()->getType()) {
+    return send2DistributorMsg(address, MSGTYPE_ALIVE);
+}
 
-        case MSGTYPE_WAKEUP:
+bool Node::processCollectorJobMsg(long address, Message *msg) {
 
-            setDistributorAddress(address);
+    LOG_U(UI_UPDATE_NODE_STATE, BUSY);
+    LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
-            status = send2DistributorMsg(address, MSGTYPE_ALIVE);
-            break;
+    if (!send2DistributorMsg(getDistributorAddress(), MSGTYPE_BUSY)) {
 
-        default :
-            break;
+        LOG_E("Could not send BUSY message to Distributor!!!");
+        return false;
     }
 
-    delete msg;
-    return status;
+    setExecutor(msg->getData()->getExecutor());
+
+    TypeFileList *list = msg->getData()->getFileList();
+
+    TypeFileList requiredList = checkFileExistence(*list);
+    if (!requiredList.empty()) {
+
+        return send2CollectorMsg(address, MSGTYPE_INFO, &requiredList);
+
+    } else {
+
+        processCommand(getExecutor());
+
+        LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+        //TODO will update with md5s including outputs
+        return send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
+    }
 }
 
-bool Node::processCollectorMsg(long address, Message *msg) {
+bool Node::processCollectorBinaryMsg(long address, Message *msg) {
 
-	bool status = false;
+    processCommand(getExecutor());
 
-	switch(msg->getHeader()->getType()) {
-
-		case MSGTYPE_JOB: {
-
-            LOG_U(UI_UPDATE_NODE_STATE, BUSY);
-            status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_BUSY);
-
-            LOG_U(UI_UPDATE_NODE_CLEAR, "");
-
-            setExecutor(msg->getData()->getExecutor());
-
-            TypeFileList *list = msg->getData()->getFileList();
-
-            TypeFileList requiredList = checkFileExistence(*list);
-            if (requiredList.size()) {
-
-                status &= send2CollectorMsg(address, MSGTYPE_INFO, &requiredList);
-
-            } else {
-
-                processCommand(getExecutor());
-
-                LOG_U(UI_UPDATE_NODE_STATE, IDLE);
-                //TODO will update with md5s including outputs
-                status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
-            }
-
-
-        }
-			break;
-
-		case MSGTYPE_BINARY: {
-
-            processCommand(getExecutor());
-
-            LOG_U(UI_UPDATE_NODE_STATE, IDLE);
-            //TODO will update with md5s including outputs
-            status = send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
-        }
-			break;
-
-		default :
-			break;
-	}
-
-	delete msg;
-	return status;
-}
-
-bool Node::processNodeMsg(long address, Message *msg) {
-	return false;
+    LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+    //TODO will update with md5s including outputs
+    return send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
 }
 
 bool Node::send2DistributorMsg(long address, MSG_TYPE type, ...) {

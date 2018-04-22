@@ -9,6 +9,12 @@
 #include "DeviceList.h"
 #include "MessageTypes.h"
 
+class Component;
+
+typedef bool (Component::*TypeProcessComponentMsg)(long, Message *);
+
+typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
+
 class Component {
 
     COMPONENT host;
@@ -16,6 +22,8 @@ class Component {
     Interface *interfaces[COMP_MAX];
 
 protected :
+
+    TypeProcessMsgMap processMsg[COMP_MAX];
 
     InterfaceCallback *callback;
 
@@ -36,10 +44,7 @@ public:
     bool send(COMPONENT, Message*);
     bool put(COMPONENT, long, Message*);
     std::vector<long> getAddressList(COMPONENT);
-
-    virtual bool processDistributorMsg(long, Message *) = 0;
-    virtual bool processCollectorMsg(long, Message *) = 0;
-    virtual bool processNodeMsg(long, Message *) = 0;
+    bool defaultProcessMsg(long, Message *);
 
 };
 

@@ -8,6 +8,10 @@
 Collector::Collector(const char *rootPath) :
         Component(COMP_COLLECTOR, rootPath){
 
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg);
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg);
+    processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
+
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE));
 
     setDistributorAddress(0);
@@ -22,94 +26,60 @@ Collector::~Collector() {
 
 }
 
-bool Collector::processDistributorMsg(long address, Message *msg) {
+bool Collector::processDistributorWakeupMsg(long address, Message *msg) {
 
-	bool status = false;
+    setDistributorAddress(address);
 
-	switch(msg->getHeader()->getType()) {
+    LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
 
-		case MSGTYPE_WAKEUP:
+    return send2DistributorMsg(address, MSGTYPE_ALIVE, NULL);
+}
 
-			setDistributorAddress(address);
+bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
-			LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
+    long nodeAddress = msg->getHeader()->getVariant(0);
 
-			status = send2DistributorMsg(address, MSGTYPE_ALIVE, NULL);
-			break;
+    if (nodeAddress == 0) {
 
-		case MSGTYPE_NODE: {
+        LOG_U(UI_UPDATE_COLL_LOG, "No Available Node");
+        delete msg;
+        return false;
+    }
 
-            long nodeAddress = msg->getHeader()->getVariant(0);
+    //TODO
+    ExecutorItem* item = getJobs()->get(0)->getUnServed();
 
-			if (nodeAddress == 0) {
+    if (item == NULL) {
+        LOG_W("No available unServed job right now.");
+        delete msg;
+        return false;
+    }
 
-				status = false;
-				LOG_U(UI_UPDATE_COLL_LOG, "No Available Node");
-				break;
-			}
+    getJobs()->get(0)->attachNode(item, nodeAddress);
 
-			//TODO
-            ExecutorItem* item = getJobs()->get(0)->getUnServed();
+    //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
 
-            if (item == NULL) {
-                LOG_W("No available unServed job right now.");
-                break;
-            }
+    LOG_T("New Job created from path : %s", "TODO JOB");
 
-            getJobs()->get(0)->attachNode(item, nodeAddress);
+    LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
+          InterfaceTypes::getAddressString(nodeAddress).c_str());
 
-          //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
-
-			LOG_T("New Job created from path : %s", "TODO JOB");
-
-            LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
-				  InterfaceTypes::getAddressString(nodeAddress).c_str());
-
-         //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
+    //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
 //            TypeMD5List md5List;
 //            for (int i = 0; i < item->getDependentFileCount(); i++) {
 //                md5List.push_back(*item->getDependentFile(i)->getMD5());
 //            }
 
-            status = send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->get(0)->getJobDir(),
-                                  item->getParsedExec(), item->getDependentFileList());
-			break;
-			}
-		default :
-			break;
-	}
-
-	delete msg;
-	return status;
+    return send2NodeMsg(nodeAddress, MSGTYPE_JOB, getJobs()->get(0)->getJobDir(),
+                          item->getParsedExec(), item->getDependentFileList());
 }
 
-bool Collector::processCollectorMsg(long address, Message *msg) {
-    return false;
-}
+bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
-bool Collector::processNodeMsg(long address, Message *msg) {
+    LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
 
-	bool status = false;
-
-	switch(msg->getHeader()->getType()) {
-
-		case MSGTYPE_INFO: {
-
-			LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
-
-            status = send2NodeMsg(address, MSGTYPE_BINARY, msg->getData()->getFileList());
-
-		}
-			break;
-
-		default:
-			break;
-
-	}
-
-	delete msg;
-	return status;
+    return send2NodeMsg(address, MSGTYPE_BINARY, msg->getData()->getFileList());
 }
 
 bool Collector::send2DistributorMsg(long address, MSG_TYPE type, ...) {

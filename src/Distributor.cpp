@@ -9,6 +9,13 @@
 Distributor::Distributor(const char *rootPath, double backupRate) :
             Component(COMP_DISTRIBUTOR, rootPath){
 
+	processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
+	processMsg[COMP_COLLECTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg);
+	processMsg[COMP_NODE][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg);
+	processMsg[COMP_NODE][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeAliveMsg);
+	processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
+	processMsg[COMP_NODE][MSGTYPE_TIMEOUT] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeTimeoutMsg);
+
 	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
 
     LOG_U(UI_UPDATE_DIST_ADDRESS, getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE));
@@ -19,108 +26,83 @@ Distributor::~Distributor() {
 	delete nodeManager;
 }
 
-bool Distributor::processDistributorMsg(long address, Message *msg) {
-	return false;
+bool Distributor::processCollectorAliveMsg(long address, Message *msg) {
+
+    LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
+    return true;
 }
 
-bool Distributor::processCollectorMsg(long address, Message *msg) {
+bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
+
+	return send2CollectorMsg(address, MSGTYPE_NODE);
+}
+
+bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getHeader()->getType()) {
+	nodeManager->setIdle(address);
 
-		case MSGTYPE_ALIVE:
-			LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
-			break;
+	if (collectorWaitingList.size() > 0) {
 
-		case MSGTYPE_NODE:
-			status = send2CollectorMsg(address, MSGTYPE_NODE);
-			break;
+		long collectorAddress = collectorWaitingList.front();
+		collectorWaitingList.pop_front();
 
-		default:
-			break;
+		LOG_U(UI_UPDATE_DIST_LOG,
+			  "Processing a collector from the waiting list: %s",
+			  InterfaceTypes::getAddressString(collectorAddress).c_str());
+
+		status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
+
+	} else {
+
+		status = true;
 	}
 
-	delete msg;
-	return status;
+	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
 
+	return status;
 }
 
-bool Distributor::processNodeMsg(long address, Message *msg) {
+bool Distributor::processNodeAliveMsg(long address, Message *msg) {
 
 	bool status = false;
 
-	switch(msg->getHeader()->getType()) {
+	if (!nodeManager->validate(address)
+		&& collectorWaitingList.size() > 0) {
 
-		case MSGTYPE_READY:
+		long collectorAddress = collectorWaitingList.front();
+		collectorWaitingList.pop_front();
 
-			nodeManager->setIdle(address);
+		LOG_U(UI_UPDATE_DIST_LOG,
+			  "Processing a collector from the waiting list: %s",
+			  InterfaceTypes::getAddressString(collectorAddress).c_str());
 
-			if (collectorWaitingList.size() > 0) {
+		status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
+	} else {
 
-				long collectorAddress = collectorWaitingList.front();
-				collectorWaitingList.pop_front();
-
-				LOG_U(UI_UPDATE_DIST_LOG,
-                      "Processing a collector from the waiting list: %s",
-					  InterfaceTypes::getAddressString(collectorAddress).c_str());
-
-				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
-
-			} else {
-				status = true;
-			}
-
-			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
-
-			break;
-
-		case MSGTYPE_ALIVE:
-
-			if (!nodeManager->validate(address)
-					&& collectorWaitingList.size() > 0) {
-
-                long collectorAddress = collectorWaitingList.front();
-				collectorWaitingList.pop_front();
-
-				LOG_U(UI_UPDATE_DIST_LOG,
-						"Processing a collector from the waiting list: %s",
-					  InterfaceTypes::getAddressString(collectorAddress).c_str());
-
-				status = send2CollectorMsg(collectorAddress, MSGTYPE_NODE);
-			} else {
-				status = true;
-			}
-
-			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
-
-			break;
-
-		case MSGTYPE_BUSY:
-
-			nodeManager->setBusy(address);
-			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
-
-
-			status = true;
-			break;
-
-		case MSGTYPE_TIMEOUT:
-
-			nodeManager->remove(address);
-			LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
-
-			status = send2CollectorMsg(msg->getHeader()->getVariant(0), MSGTYPE_NODE);
-
-			break;
-
-		default :
-			break;
+		status = true;
 	}
 
-	delete msg;
-	return status;
+	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
 
+	return status;
+}
+
+bool Distributor::processNodeBusyMsg(long address, Message *msg) {
+
+	nodeManager->setBusy(address);
+	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
+
+	return true;
+}
+
+bool Distributor::processNodeTimeoutMsg(long address, Message *msg) {
+
+	nodeManager->remove(address);
+	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
+
+	return send2CollectorMsg(msg->getHeader()->getVariant(0), MSGTYPE_NODE);
 }
 
 bool Distributor::send2NodeMsg(long address, MSG_TYPE type) {
