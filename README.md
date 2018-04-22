@@ -146,21 +146,21 @@ The communication interface is structured based on sockets and it includes messa
 
 ![alt text](docs/messageflow.png)
 
-### Rules
+### Jobs
 
-The subtasks of the applications that are going to execute in nodes are defined in rule files. Rule files includes all of the dependencies and process details of the subtasks in order to execute properly. JSON file format is choosed to define the whole structure of rule rule file. 
-There are four types of contents that can be defined in rule files;
+The subtasks of the applications that are going to execute in nodes are defined in job files.  Each job has its own directory starting with **"Job_"** prefix. In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplied as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface. (Currently fixed to directory starts with Job_ prefix, near to application service).
+
+Job files includes all of the dependencies and process details of the subtasks in order to execute properly. 
+ 
+There are four types of contents that can be defined in job files;
 	
-- **File Content** It includes the necessary file information that are going to be used by subtasks in the nodes. There can be two types of file content, first type is architecture specific which are generally executable files and second type is common. It defines with **files** tag in the json file.  The related parameters are; 
+- **Name Content** It contains the name of the job;
 
-	- **"a"** : architecture specific file
+- **File Content** It includes the necessary file information that are going to be used by subtasks in the nodes. First field defines the name of the file and second field reserved for future use, currently only common type is supported. It defines with files tag in the json file. The related parameters are;
+
 	- **"c"** : common file
 
-- **Parameter Content** It includes the parameter sets that are going to pass to executable files; Currently three types of parameters are supported; String, Double and Long. It defines with "parameters" tag in the json file. The related prefixes for parameters are; 
-
-	- **"l"** for long type
-	- **"d"** for double type
-	- **"s"** for string type
+- **Parameter Content** It includes the parameter sets that are going to pass to executable files; It defines with "parameters" tag in the json file. 
 
 - **Executable Content** It contains the command sequence of the executable list that is going to be run in nodes. Basically it is defined as macro which has references to file and parameter contents.  It defines with "executors" tag in the json file. The structure of the macro is;
 
@@ -175,73 +175,37 @@ There are four types of contents that can be defined in rule files;
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
 		
-- **Run Type Content** It defines the command list execution behaviour, commands can be sequentially run one by one or in parallel. It defines with "runtype" tag in the json file. The related parameters are; 
-
-	- **"P"** : Triggers parallel execution
-	- **"S"** : Triggers sequencial execution
 	
-Sample  Rule.json file is as follows;
+Sample  Job.json file is as follows;
 
-    "Rule": {
-        "runtype": S
-        "files": [
-            ["benchtool", "a"],
-            ["matrix.cl", "c"],
-            ["matrix/MatrixInput_1", "c"],
-            ["matrix/MatrixInput_2", "c"],
-        ],
- 
-        "parameters": [
-            "l:1000000"
-        ],
- 
-        "executors": [
-            "$F0 -a $F1 -m $F2 -r $P0",
-            "$F0 -a $F1 -m $F3 -r $P0",
-        ]
-    }
+        "Job": {
+
+	        "name": "Test",
+
+	        "files": [
+	            ["benchpar", "c"],
+	            ["matrix/MatrixInput_1", "c"],
+	            ["matrix/MatrixInput_2", "c"],
+	            ["matrix/MatrixInput_3", "c"],
+	            ["matrix/MatrixInput_512_512", "c"],
+	        ],
+
+	        "parameters": [
+	            "10"
+	        ],
+
+	        "executors": [
+	            "$F0 -a m -m 2 -r $P0 $F4",
+	            "$F0 -a m -m 4 -r $P0 $F1",
+	        ]
+    	}
 
 In this sample the subtask runs following commands sequentially;
 
 ```sh
-$ benchtool  -a matrix.cl -m matrix/MatrixInput_1 -r 1000000
-$ benchtool  -a matrix.cl -m matrix/MatrixInput_2 -r 1000000
+$ benchpar  -a m -m 2 -r 10 matrix/MatrixInput_512_512
+$ benchpar  -a m -m 2 -r 10 matrix/MatrixInput_1
 ```
-
-On Collector side; the architecture specific files should be under **"arch/<arch_ID>"** and common files should be under
-**"common"** directories.
-
-### Jobs
-
-Job is simply a bundle of rules that ease the execution of seperate rule files. Each job has its own directory starting with **"Job_"** prefix. In Job directories all the task specific files and rule files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplied as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface. (Currently fixed to directory starts with Job_ prefix, near to architecture service).
-
-There are three types of contents that can be defined in job files;
-
-- **Name Content** It contains the name of the job and defined with **name** tag in the json file.
-
-- **Rules Content** It includes rule set that are going to execute in nodes. Each rule has;
-	- **"file"** parameter for rule file location
-	- **"status"** parameter for rule active state, which can be true or false
-	- **"repeat"** parameter for rule repeat count
-
-- **ID Content** It contains the ID of the job and defined with **id** tag in the json file. Used for providing uniqueness.
-
-Sample  Job.json file is as follows;
-
-    "Job": {
-
-        "name": "Sample Job",
-
-        "rules": [
-            ["Rule_1.json", true, 1],
-            ["Rule_2.json", false, 2],
-            ["Rule_3.json", true, 2],
-        ]
-
-        "id": 1001
-    }
-
-In this sample the job runs Rule_1 one time and Rule_3 twice.
 
 ### User Interface
 
@@ -270,6 +234,7 @@ Since the UI is designed only for test & demo purposes, the main progress can be
 - Project is in still early development stage therefore lots of corner cases and scenarios should be tested. 
 - Demo application is developed just for testing the architecture purpose and can only be used as a reference; it is not suitable to be used in a final product.
 - After the nodes finish the assigned process, there is no feedback or collection of results mechanism; ie subtasks are all on their own like uploading the results somewhere else etc. Distributor & Collector only gets job is done feedback from the nodes, thats all.
+- UI will be replaced with webserver based framework.
 
 ### Contributing
 
