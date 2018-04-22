@@ -19,9 +19,9 @@ class Collector : public Component {
 	long distributorAddress;
 	bool setDistributorAddress(long);
 
-	virtual bool processDistributorMsg(long, Message *);
-	virtual bool processCollectorMsg(long, Message *);
-	virtual bool processNodeMsg(long, Message *);
+	bool processDistributorWakeupMsg(long, Message *);
+	bool processDistributorNodeMsg(long, Message *);
+	bool processNodeInfoMsg(long, Message *);
 
 	bool send2DistributorMsg(long, MSG_TYPE, ...);
 	bool send2NodeMsg(long, MSG_TYPE, ...);

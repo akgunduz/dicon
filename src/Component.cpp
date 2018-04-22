@@ -58,25 +58,32 @@ bool Component::onReceive(long address, Message *msg) {
           ComponentTypes::getName(msg->getHeader()->getOwner()),
           InterfaceTypes::getAddressString(address).c_str());
 
-    switch(msg->getHeader()->getOwner()) {
+    if (msg->getHeader()->getOwner() >= COMP_MAX) {
 
-        case COMP_DISTRIBUTOR:
-            return processDistributorMsg(address, msg);
+        LOG_E("Wrong message received : %d from %s, disgarding",
+              msg->getHeader()->getType(),
+              InterfaceTypes::getAddressString(address).c_str());
 
-        case COMP_NODE:
-            return processNodeMsg(address, msg);
-
-        case COMP_COLLECTOR:
-            return processCollectorMsg(address, msg);
-
-        default:
-            LOG_W("Wrong message received : %d from %s, disgarding",
-                  msg->getHeader()->getType(),
-                  InterfaceTypes::getAddressString(address).c_str());
-            delete msg;
-            return false;
+        delete msg;
+        return false;
     }
+
+    auto processCB = processMsg[msg->getHeader()->getOwner()].find(msg->getHeader()->getType());
+    if (processCB == processMsg[msg->getHeader()->getOwner()].end()) {
+
+        return defaultProcessMsg(address, msg);
+    }
+
+    return (this->*processMsg[msg->getHeader()->getOwner()][msg->getHeader()->getType()])(address, msg);
 }
+
+
+bool Component::defaultProcessMsg(long address, Message *msg) {
+
+    delete msg;
+    return true;
+}
+
 
 long Component::getInterfaceAddress(COMPONENT target) {
 
