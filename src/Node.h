@@ -24,8 +24,10 @@ private:
     bool processCollectorJobMsg(long, Message *);
     bool processCollectorBinaryMsg(long, Message *);
 
-    bool send2DistributorMsg(long, MSG_TYPE, ...);
-    bool send2CollectorMsg(long, MSG_TYPE, ...);
+    bool send2DistributorReadyMsg(long);
+    bool send2DistributorAliveMsg(long);
+    bool send2DistributorBusyMsg(long);
+    bool send2CollectorInfoMsg(long, TypeFileList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);

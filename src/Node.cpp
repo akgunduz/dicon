@@ -28,7 +28,7 @@ bool Node::processDistributorWakeupMsg(long address, Message *msg) {
 
     setDistributorAddress(address);
 
-    return send2DistributorMsg(address, MSGTYPE_ALIVE);
+    return send2DistributorAliveMsg(address);
 }
 
 bool Node::processCollectorJobMsg(long address, Message *msg) {
@@ -36,7 +36,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
     LOG_U(UI_UPDATE_NODE_STATE, BUSY);
     LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
-    if (!send2DistributorMsg(getDistributorAddress(), MSGTYPE_BUSY)) {
+    if (!send2DistributorBusyMsg(getDistributorAddress())) {
 
         LOG_E("Could not send BUSY message to Distributor!!!");
         return false;
@@ -49,7 +49,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
     TypeFileList requiredList = checkFileExistence(*list);
     if (!requiredList.empty()) {
 
-        return send2CollectorMsg(address, MSGTYPE_INFO, &requiredList);
+        return send2CollectorInfoMsg(address, &requiredList);
 
     } else {
 
@@ -57,7 +57,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
 
         LOG_U(UI_UPDATE_NODE_STATE, IDLE);
         //TODO will update with md5s including outputs
-        return send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
+        return send2DistributorReadyMsg(getDistributorAddress());
     }
 }
 
@@ -67,53 +67,41 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, IDLE);
     //TODO will update with md5s including outputs
-    return send2DistributorMsg(getDistributorAddress(), MSGTYPE_READY);
+    return send2DistributorReadyMsg(getDistributorAddress());
 }
 
-bool Node::send2DistributorMsg(long address, MSG_TYPE type, ...) {
+bool Node::send2DistributorReadyMsg(long address) {
 
-	Message *msg = new Message(COMP_NODE, type);
-
-	switch(type) {
-
-		case MSGTYPE_READY:
-		case MSGTYPE_ALIVE:
-		case MSGTYPE_BUSY:
-			break;
-
-		default:
-			delete msg;
-			return false;
-	}
+	auto *msg = new Message(COMP_NODE, MSGTYPE_READY);
 
 	return send(COMP_DISTRIBUTOR, address, msg);
 
 }
 
-bool Node::send2CollectorMsg(long address, MSG_TYPE type, ...) {
+bool Node::send2DistributorAliveMsg(long address) {
 
-    va_list ap;
-    va_start(ap, type);
+    auto *msg = new Message(COMP_NODE, MSGTYPE_ALIVE);
 
-	Message *msg = new Message(COMP_NODE, type);
+    return send(COMP_DISTRIBUTOR, address, msg);
 
-	switch(type) {
+}
 
-		case MSGTYPE_INFO: {
-            TypeFileList *fileList = va_arg(ap, TypeFileList*);
-            msg->getData()->setStreamFlag(STREAM_INFO);
-            msg->getData()->addFileList(fileList);
-            LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file info is prepared", fileList->size());
-        }
-			break;
+bool Node::send2DistributorBusyMsg(long address) {
 
-		default:
-			delete msg;
-            va_end(ap);
-			return false;
-	}
+    auto *msg = new Message(COMP_NODE, MSGTYPE_BUSY);
 
-    va_end(ap);
+    return send(COMP_DISTRIBUTOR, address, msg);
+
+}
+
+bool Node::send2CollectorInfoMsg(long address, TypeFileList *fileList) {
+
+	auto *msg = new Message(COMP_NODE, MSGTYPE_INFO);
+
+    msg->getData()->setStreamFlag(STREAM_INFO);
+    msg->getData()->addFileList(fileList);
+
+    LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file info is prepared", fileList->size());
 
 	return send(COMP_COLLECTOR, address, msg);
 }

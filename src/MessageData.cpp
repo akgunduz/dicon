@@ -81,7 +81,7 @@ char* MessageData::getExecutor() {
     return executor;
 }
 
-void MessageData::setExecutor(char *executor) {
+void MessageData::setExecutor(const char *executor) {
 
     strcpy(this->executor, executor);
 }
@@ -91,7 +91,7 @@ char *MessageData::getJobDir() {
     return jobDir;
 }
 
-void MessageData::setJobDir(char *jobDir) {
+void MessageData::setJobDir(const char *jobDir) {
 
     strcpy(this->jobDir, jobDir);
 }
