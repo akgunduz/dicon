@@ -9,16 +9,15 @@
 #include "ContentItem.h"
 #include "Md5.h"
 
-#define MAX_FILE_NAME_LENGTH 100
-#define MAX_JOB_DIR_LENGTH 100
-
 class FileItem : public ContentItem {
 
     COMPONENT host;
-	char fileName[MAX_FILE_NAME_LENGTH];
-	char jobDir[MAX_JOB_DIR_LENGTH];
+	char fileName[PATH_MAX];
+	char jobDir[PATH_MAX];
 
+	int id;
 	bool info_only;
+	bool is_dependent;
 
 	Md5 md5;
 
@@ -26,12 +25,12 @@ class FileItem : public ContentItem {
 public:
 	FileItem(COMPONENT host);
     FileItem(FileItem*);
-    FileItem(COMPONENT host, const char *, const char*,
-             Md5 *md5 = nullptr, bool = false);
+    FileItem(COMPONENT host, const char*, const char*,
+             int id, bool = false, Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    bool set(COMPONENT host, const char *, const char *, Md5* = nullptr, bool = false);
-   // bool set(const char*, FileItem*);
+    bool set(COMPONENT host, const char*, const char*,
+             int id, bool = false, Md5* = NULL);
 
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
@@ -39,10 +38,9 @@ public:
     const char* getJobDir();
 
     COMPONENT getHost();
+    int getID();
 
-   // void setFile(const char*, const char*, Md5* = nullptr);
-
-
+    bool isDependent();
 
 	virtual CONTENT_TYPES getType();
 

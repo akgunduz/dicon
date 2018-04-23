@@ -24,11 +24,12 @@ class Job : public JsonItem {
 
     char name[50];
     JobInfo nodes;
+    std::vector<ExecutorItem *> orderedList;
+    int servedIndicator;
 
 public:
 
     Job(COMPONENT host, const char* jobDir);
-    Job(COMPONENT host, const char* jobDir, const char* fileName);
 
     void init();
     ~Job();
@@ -43,12 +44,18 @@ public:
 
     int getCount();
     ExecutorItem* getByIndex(int);
-    ExecutorItem* getByAddress(long);
+  //  ExecutorItem* getByAddress(long);
     ExecutorItem* getUnServed();
+    ExecutorItem* getByOutput(int);
 
-    bool attachNode(ExecutorItem*, long);
-    bool detachNode(ExecutorItem*);
-    void resetNodes();
+    ExecutorItem* getOrdered(int);
+    int getOrderedCount();
+
+//    bool attachNode(ExecutorItem*, long);
+//    bool detachNode(ExecutorItem*);
+//    void resetNodes();
+
+    bool createDependencyMap();
 };
 
 

@@ -8,15 +8,14 @@
 #include "Job.h"
 
 ExecutorItem::ExecutorItem()
-        : ContentItem () {
+        : ExecutorItem("") {
 
-    strcpy(exec, "");
-    strcpy(parsedExec, "");
 };
 
 ExecutorItem::ExecutorItem(const char *line)
         : ContentItem () {
 
+    outputFile = NULL;
 	strcpy(exec, line);
     strcpy(parsedExec, "");
 }
@@ -37,7 +36,7 @@ bool ExecutorItem::parse(void *job) {
 
 	bool cmdMode = false;
 	int cmdIndex = 0;
-	CONTENT_TYPES cmdType = CONTENT_FILE;
+	EXEC_OPTIONS cmdType = EXEC_MAX;
 
 	for (uint32_t i = 0; i < strlen(exec); i++) {
 		switch(exec[i]) {
@@ -45,7 +44,7 @@ bool ExecutorItem::parse(void *job) {
 				if (!cmdMode) {
 					cmdMode = true;
 					cmdIndex = 0;
-					cmdType = CONTENT_MAX;
+					cmdType = EXEC_MAX;
 					break;
 				}
 				cmdMode = false;
@@ -53,14 +52,21 @@ bool ExecutorItem::parse(void *job) {
 			case 'F':
 			case 'f':
 				if (cmdMode) {
-					cmdType = CONTENT_FILE;
+					cmdType = EXEC_FILE;
 					break;
 				}
 				//no break
+            case 'O':
+            case 'o':
+                if (cmdMode) {
+                    cmdType = EXEC_OUTPUT;
+                    break;
+                }
+                //no break
 			case 'P':
 			case 'p':
 				if (cmdMode) {
-					cmdType = CONTENT_PARAM;
+					cmdType = EXEC_PARAM;
 					break;
 				}
 				//no break
@@ -102,20 +108,36 @@ bool ExecutorItem::parse(void *job) {
 
 bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 
-	if (cmdType == CONTENT_FILE) {
-		FileItem *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
-		if (content != nullptr) {
-            sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
-                    Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
-            fileList.push_back(content);
-		}
+    switch (cmdType) {
 
-	} else if (cmdType == CONTENT_PARAM) {
-		ParameterItem *content = (ParameterItem *) ((Job*)job)->getContent(CONTENT_PARAM, cmdIndex);
-		if (content != nullptr) {
-			strcat(parsedExec, content->getParam());
-		}
-	}
+        case EXEC_FILE: {
+            auto *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
+            if (content != nullptr) {
+                sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
+                        Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
+                fileList.push_back(content);
+            }
+        } break;
+
+        case EXEC_OUTPUT: {
+            auto *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
+            if (content != nullptr) {
+                sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
+                        Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
+                outputFile = content;
+            }
+        } break;
+
+        case EXEC_PARAM: {
+            auto *content = (ParameterItem *) ((Job*)job)->getContent(CONTENT_PARAM, cmdIndex);
+            if (content != nullptr) {
+                strcat(parsedExec, content->getParam());
+            }
+        } break;
+
+        default:
+            break;
+    }
 
 	return true;
 }
@@ -137,4 +159,9 @@ unsigned long ExecutorItem::getDependentFileCount() {
 TypeFileList *ExecutorItem::getDependentFileList() {
 
 	return &fileList;
+}
+
+FileItem *ExecutorItem::getOutputFile() {
+
+    return outputFile;
 }

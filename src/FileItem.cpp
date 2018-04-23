@@ -9,24 +9,26 @@
 FileItem::FileItem(COMPONENT host)
         : ContentItem () {
 
-    set(host, "", "", NULL, true);
+    set(host, "", "", 0, true, NULL);
 }
 
 FileItem::FileItem(FileItem *item)
         : ContentItem () {
 
-    set(item->getHost(), item->getJobDir(), item->getFileName(), item->getMD5(), !item->isValid());
+    set(item->getHost(), item->getJobDir(), item->getFileName(), item->getID(), !item->isValid(), item->getMD5());
 }
 
-FileItem::FileItem(COMPONENT host, const char *jobDir, const char *fileName, Md5 *md5, bool info_status)
+FileItem::FileItem(COMPONENT host, const char *jobDir, const char *fileName, int id, bool info_status, Md5 *md5)
         : ContentItem () {
 
-    set(host, jobDir, fileName, md5, info_status);
+    set(host, jobDir, fileName, id, info_status, md5);
 };
 
-bool FileItem::set(COMPONENT host, const char *jobDir, const char *fileName, Md5 *md5, bool info_status) {
+bool FileItem::set(COMPONENT host, const char *jobDir, const char *fileName, int id, bool info_status, Md5 *md5) {
 
     this->host = host;
+
+    this->id = id;
 
     strcpy(this->jobDir, jobDir);
 
@@ -128,4 +130,14 @@ void FileItem::setMD5(Md5 *md5) {
     }
 
     this->md5.set(md5);
+}
+
+bool FileItem::isDependent() {
+
+    return is_dependent;
+}
+
+int FileItem::getID() {
+
+    return id;
 }

@@ -35,13 +35,13 @@ bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
         return false;
     }
 
-    char jobDir[MAX_JOB_DIR_LENGTH];
+    char jobDir[PATH_MAX];
     if (!readString(desc, jobDir, header->getSize(0))) {
         LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
         return false;
     }
 
-    char fileName[MAX_FILE_NAME_LENGTH];
+    char fileName[PATH_MAX];
     if (!readString(desc, fileName, header->getSize(1))) {
         LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
         return false;
@@ -53,7 +53,7 @@ bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
         return false;
     }
 
-    content->set(getHost(), jobDir, fileName, &md5, true);
+    content->set(getHost(), jobDir, fileName, true, &md5);
 
     return true;
 }
@@ -66,13 +66,13 @@ bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
 		return false;
 	}
 
-    char jobDir[MAX_JOB_DIR_LENGTH];
+    char jobDir[PATH_MAX];
     if (!readString(desc, jobDir, header->getSize(0))) {
         LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
         return false;
     }
 
-	char fileName[MAX_FILE_NAME_LENGTH];
+	char fileName[PATH_MAX];
 	if (!readString(desc, fileName, header->getSize(1))) {
 		LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
 		return false;
@@ -96,7 +96,7 @@ bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
 		return false;
 	}
 
-    content->set(getHost(), jobDir, fileName, &md5, false);
+    content->set(getHost(), jobDir, fileName, false, &md5);
 
 	return true;
 }

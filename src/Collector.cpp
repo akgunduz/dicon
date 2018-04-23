@@ -55,7 +55,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
         return false;
     }
 
-    getJobs()->get(0)->attachNode(item, nodeAddress);
+    //getJobs()->get(0)->attachNode(item, nodeAddress);
 
     //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
 
@@ -133,10 +133,10 @@ bool Collector::processJob() {
     //TODO Also will add other jobs, after the prev. job is done.
 
 
-    for (int k = 0; k < jobs.get(0)->getContentCount(CONTENT_EXECUTOR); k++) {
+    for (int k = 0; k < 1/*jobs.get(0)->getOrderedCount()*/; k++) {
 
         TypeMD5List md5List;
-        ExecutorItem *executorItem = (ExecutorItem *)jobs.get(0)->getContent(CONTENT_EXECUTOR, k);
+        auto *executorItem = jobs.get(0)->getOrdered(k);
         for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
             md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
         }

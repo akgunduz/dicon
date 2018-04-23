@@ -9,12 +9,20 @@
 #include "ContentItem.h"
 #include "FileList.h"
 
+enum EXEC_OPTIONS {
+	EXEC_FILE,
+	EXEC_PARAM,
+	EXEC_OUTPUT,
+	EXEC_MAX
+};
+
 class ExecutorItem : public ContentItem {
 
 	char exec[PATH_MAX];
 	char parsedExec[PATH_MAX];
 
 	TypeFileList fileList;
+	FileItem* outputFile;
 
 	bool parseCommand(void*, int, int);
 
@@ -25,9 +33,10 @@ public:
     const char* getExec();
     bool parse(void *);
     const char* getParsedExec();
-    FileItem* getDependentFile(int);
+	FileItem* getDependentFile(int);
 	TypeFileList* getDependentFileList();
-    unsigned long getDependentFileCount();
+	unsigned long getDependentFileCount();
+	FileItem* getOutputFile();
 
 	virtual CONTENT_TYPES getType();
 

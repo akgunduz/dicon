@@ -118,11 +118,11 @@ void UserInterface::collUpdateLog(wxCommandEvent &event) {
 
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
-    Job *job = (Job*)event.GetClientData();
+    auto *job = (Job*)event.GetClientData();
 
     for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
 
-        FileItem *content = (FileItem *) job->getContent(CONTENT_FILE, j);
+        auto *content = (FileItem *) job->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }
@@ -134,12 +134,12 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
 void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
 
-    Job *job = (Job *)event.GetClientData();
+    auto *job = (Job *)event.GetClientData();
 
-    for (int j = 0; j < job->getContentCount(CONTENT_EXECUTOR); j++) {
+    for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        ExecutorItem *content = (ExecutorItem *) job->getContent(CONTENT_EXECUTOR, j);
-        if (content == nullptr) {
+        auto *content = job->getOrdered(j);
+        if (content == NULL) {
             return;
         }
 

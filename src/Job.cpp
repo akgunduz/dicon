@@ -6,21 +6,8 @@
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
 
-//Job::Job(FileItem *fileItem)
-//    : JsonItem (fileItem) {
-//
-//    init("");
-//}
-
 Job::Job(COMPONENT host, const char* jobDir)
         : JsonItem(host, jobDir, JOB_FILE){
-
-    init();
-
-}
-
-Job::Job(COMPONENT host, const char* jobDir, const char* fileName)
-        : JsonItem(host, jobDir, fileName) {
 
     init();
 
@@ -39,12 +26,20 @@ void Job::init() {
 
     if (!parse()) {
         LOG_E("Job could not parsed!!!");
+        return;
     }
 
     for (int i = 0; i < getContentCount(CONTENT_EXECUTOR); i++) {
-        ExecutorItem *item = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
+        auto *item = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
         item->parse(this);
     }
+
+    if (!createDependencyMap()){
+        LOG_E("Dependency Loop Detected in the Job!!!");
+        return;
+    }
+
+    servedIndicator = 0;
 }
 
 bool Job::parseNameNode(JsonItem *parent, json_object *node) {
@@ -87,9 +82,11 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
         const char* path = json_object_get_string(json_object_array_get_idx(child, 0));
         const char* sFileType = json_object_get_string(json_object_array_get_idx(child, 1));
 
-        Job* job = (Job*) parent;
+        auto *job = (Job*) parent;
 
-        FileItem *content = new FileItem(job->getHost(), job->getJobDir(), path);
+        bool is_dependent = strcmp(sFileType, "d") == 0;
+
+        auto *content = new FileItem(job->getHost(), job->getJobDir(), path, i, is_dependent);
 
         job->contentList[CONTENT_FILE].push_back(content);
 
@@ -116,7 +113,7 @@ bool Job::parseParamNode(JsonItem *parent, json_object *node) {
 
         const char *param = json_object_get_string(child);
 
-        ParameterItem *content = new ParameterItem(param);
+        auto *content = new ParameterItem(param);
         if (content->isValid()) {
             ((Job*)parent)->contentList[CONTENT_PARAM].push_back(content);
         }
@@ -145,7 +142,7 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
 
         const char *exec = json_object_get_string(child);
 
-        ExecutorItem *content = new ExecutorItem(exec);
+        auto *content = new ExecutorItem(exec);
         if (content->isValid()) {
             ((Job*)parent)->contentList[CONTENT_EXECUTOR].push_back(content);
         }
@@ -174,43 +171,142 @@ int Job::getCount() {
 
     return getContentCount(CONTENT_EXECUTOR);
 }
+//
+//ExecutorItem* Job::getByAddress(long address) {
+//
+//    return nodes.get(address);
+//}
 
-ExecutorItem* Job::getByAddress(long address) {
+ExecutorItem *Job::getByOutput(int index) {
 
-    return nodes.get(address);
+    for (int i = 0; i < getCount(); i++) {
+
+        auto *content = getByIndex(i);
+        if (content->getOutputFile() == NULL) {
+            continue;
+        }
+
+        if (content->getOutputFile()->getID() == index) {
+            return content;
+        }
+    }
+
+    return NULL;
 }
 
 ExecutorItem* Job::getUnServed() {
 
-    int i = 0;
-    for (; i < getCount(); i++) {
-
-        long nodeAddress = nodes.get(getByIndex(i));
-        if (nodeAddress == 0) {
-            break;
-        }
-    }
-
-    if (i == getCount()) {
+    if (orderedList.size() <= servedIndicator) {
         return NULL;
     }
 
-    return getByIndex(i);
+    return orderedList[servedIndicator++];
+
+//    int i = 0;
+//    for (; i < getCount(); i++) {
+//
+//        long nodeAddress = nodes.get(getByIndex(i));
+//        if (nodeAddress == 0) {
+//            break;
+//        }
+//    }
+//
+//    if (i == getCount()) {
+//        return NULL;
+//    }
+//
+//    return getByIndex(i);
 }
 
 
-bool Job::attachNode(ExecutorItem *item, long address) {
+int Job::getOrderedCount() {
 
-    return nodes.add(item, address);
+    return orderedList.size();
 }
 
-bool Job::detachNode(ExecutorItem *item) {
+ExecutorItem *Job::getOrdered(int index) {
 
-    return nodes.remove(item);
+    return orderedList[index];
 }
 
-void Job::resetNodes() {
+//bool Job::attachNode(ExecutorItem *item, long address) {
+//
+//    return nodes.add(item, address);
+//}
+//
+//bool Job::detachNode(ExecutorItem *item) {
+//
+//    return nodes.remove(item);
+//}
+//
+//void Job::resetNodes() {
+//
+//    nodes.clear();
+//}
 
-    nodes.clear();
+bool Job::createDependencyMap() {
+
+    int depth[getContentCount(CONTENT_FILE)];
+    std::vector<int> adj[getContentCount(CONTENT_FILE)];
+    std::list<int> initial, final;
+
+    bzero(depth, (size_t)getContentCount(CONTENT_FILE) * sizeof(int));
+
+    for (int i = 0; i < getContentCount(CONTENT_EXECUTOR); i++) {
+
+        auto *executor = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
+
+        for (int j = 0; j < executor->getDependentFileCount(); j++) {
+
+            auto *file = executor->getDependentFile(j);
+
+            int x = executor->getOutputFile()->getID();
+
+            adj[file->getID()].push_back(x);
+
+            depth[x]++;
+        }
+    }
+
+    for (int i = 0; i < getContentCount(CONTENT_FILE); i++) {
+
+        if (depth[i] == 0) {
+            initial.push_back(i);
+        }
+    }
+
+    while(!initial.empty()) {
+
+        int current = initial.front();
+        initial.pop_front();
+
+        final.push_back(current);
+
+        for (int i = 0; i < adj[current].size(); i++) {
+
+            depth[adj[current][i]] -= 1;
+            if (depth[adj[current][i]] == 0) {
+                initial.push_back(adj[current][i]);
+            }
+        }
+    }
+
+    for (int i = 0; i < getContentCount(CONTENT_FILE); i++) {
+
+        if (depth[i] > 0) {
+            return false;
+        }
+    }
+
+    for (int i : final) {
+
+        auto *content = getByOutput(i);
+        if (content) {
+            orderedList.push_back(getByOutput(i));
+        }
+    }
+
+    return true;
 }
+
 

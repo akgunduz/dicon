@@ -15,7 +15,7 @@ JsonItem::JsonItem(FileItem *fileItem)
 }
 
 JsonItem::JsonItem(COMPONENT host, const char* jobDir, const char* fileName)
-        : FileItem(host, jobDir, fileName) {
+        : FileItem(host, jobDir, fileName, -1) {
 
 }
 
