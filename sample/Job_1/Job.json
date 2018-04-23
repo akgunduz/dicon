@@ -1,0 +1,44 @@
+{
+    "Job": {
+
+        "name": "Matrix Multiplicator",
+
+        "files": [
+            ["matrixmul", "c"],
+            ["input/Matrix_100_1", "c"],
+            ["input/Matrix_100_2", "c"],
+            ["input/Matrix_100_3", "c"],
+            ["input/Matrix_100_4", "c"],
+            ["input/Matrix_100_5", "c"],
+            ["input/Matrix_100_6", "c"],
+            ["input/Matrix_100_7", "c"],
+            ["output/Matrix_100_8", "d"],
+            ["output/Matrix_100_9", "d"],
+            ["output/Matrix_100_10", "d"],
+            ["output/Matrix_100_11", "d"],
+            ["output/Matrix_100_12", "d"],
+            ["output/Matrix_100_13", "d"],
+            ["output/Matrix_100_14", "d"],
+            ["output/Matrix_100_15", "d"],
+            ["output/Matrix_100_16", "d"],
+            ["output/Matrix_100_17", "d"],
+        ],
+
+        "parameters": [
+            "1"
+        ],
+
+        "executors": [
+            "$F0 -r $P0 $F1 $F12 $F14 $O15",
+            "$F0 -r $P0 $F2 $F3 $O8",
+			"$F0 -r $P0 $F4 $F8 $O9",
+			"$F0 -r $P0 $F9 $F11 $O12",
+			"$F0 -r $P0 $F3 $F5 $F6 $O10",
+			"$F0 -r $P0 $F2 $F10 $F6 $O11",
+			"$F0 -r $P0 $F4 $F7 $O13",
+			"$F0 -r $P0 $F5 $F13 $O14",
+			"$F0 -r $P0 $F14 $F7 $O16",
+			"$F0 -r $P0 $F16 $F13 $O17",
+        ]
+    }
+}
