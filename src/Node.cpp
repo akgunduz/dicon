@@ -44,9 +44,9 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
 
     setExecutor(msg->getData()->getExecutor());
 
-    TypeFileList *list = msg->getData()->getFileList();
+    TypeFileInfoList list = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_ALL);
 
-    TypeFileList requiredList = checkFileExistence(*list);
+    TypeFileInfoList requiredList = checkFileExistence(&list);
     if (!requiredList.empty()) {
 
         return send2CollectorInfoMsg(address, &requiredList);
@@ -56,8 +56,13 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
         processCommand(getExecutor());
 
         LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+
+        TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
+
         //TODO will update with md5s including outputs
-        return send2DistributorReadyMsg(getDistributorAddress());
+        //TODO will update with actual binary to collector including outputs
+        return send2CollectorBinaryMsg(address, &outputList);
+       // return send2DistributorReadyMsg(getDistributorAddress());
     }
 }
 
@@ -66,8 +71,13 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
     processCommand(getExecutor());
 
     LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+
+    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
+
     //TODO will update with md5s including outputs
-    return send2DistributorReadyMsg(getDistributorAddress());
+    //TODO will update with actual binary to collector including outputs
+    return send2CollectorBinaryMsg(address, &outputList);
+    //return send2DistributorReadyMsg(getDistributorAddress());
 }
 
 bool Node::send2DistributorReadyMsg(long address) {
@@ -83,7 +93,6 @@ bool Node::send2DistributorAliveMsg(long address) {
     auto *msg = new Message(COMP_NODE, MSGTYPE_ALIVE);
 
     return send(COMP_DISTRIBUTOR, address, msg);
-
 }
 
 bool Node::send2DistributorBusyMsg(long address) {
@@ -91,10 +100,9 @@ bool Node::send2DistributorBusyMsg(long address) {
     auto *msg = new Message(COMP_NODE, MSGTYPE_BUSY);
 
     return send(COMP_DISTRIBUTOR, address, msg);
-
 }
 
-bool Node::send2CollectorInfoMsg(long address, TypeFileList *fileList) {
+bool Node::send2CollectorInfoMsg(long address, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(COMP_NODE, MSGTYPE_INFO);
 
@@ -104,6 +112,18 @@ bool Node::send2CollectorInfoMsg(long address, TypeFileList *fileList) {
     LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file info is prepared", fileList->size());
 
 	return send(COMP_COLLECTOR, address, msg);
+}
+
+bool Node::send2CollectorBinaryMsg(long address, TypeFileInfoList *fileList) {
+
+    auto *msg = new Message(COMP_NODE, MSGTYPE_BINARY);
+
+    msg->getData()->setStreamFlag(STREAM_BINARY);
+    msg->getData()->addFileList(fileList);
+
+    LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file binary is prepared", fileList->size());
+
+    return send(COMP_COLLECTOR, address, msg);
 }
 
 const char* Node::getExecutor() {
@@ -126,23 +146,24 @@ void Node::setDistributorAddress(long distributorAddress) {
     this->distributorAddress = distributorAddress;
 }
 
-TypeFileList Node::checkFileExistence(TypeFileList list) {
+TypeFileInfoList Node::checkFileExistence(TypeFileInfoList *list) {
 
-    TypeFileList reqList;
+    TypeFileInfoList reqList;
 
-    for (int i = 0; i < list.size(); i++) {
+    for (int i = 0; i < list->size(); i++) {
 
         if (!Util::checkPath(ComponentTypes::getRootPath(COMP_NODE),
-                             list[i]->getJobDir(), list[i]->getFileName(), false)) {
+                             list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
 
-            reqList.push_back(list[i]);
+            reqList.push_back(list->at(i));
 
         } else {
 
-            Md5 md5(Util::getAbsMD5Path(COMP_NODE, list[i]->getJobDir(), list[i]->getFileName()).c_str());
-            if (!md5.equal(list[i]->getMD5())) {
+            Md5 md5(Util::getAbsMD5Path(COMP_NODE,
+                                        list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
+            if (!md5.equal(list->at(i).get()->getMD5())) {
 
-                reqList.push_back(list[i]);
+                reqList.push_back(list->at(i));
             }
         }
     }
@@ -197,7 +218,6 @@ bool Node::processCommand(const char *cmd) {
         //parent part
         int res;
         do {
-            //res = wait(&status);
             res = waitpid(pid, &status, 0);
         } while ((res < 0) && (errno == EINTR));
 
@@ -211,4 +231,11 @@ bool Node::processCommand(const char *cmd) {
 
     return true;
 
+}
+
+bool Node::processFinal() {
+
+    LOG_I("Processing final steps!!!");
+
+    return true;
 }

@@ -11,22 +11,10 @@
 
 class MessageData {
 
-    void *variant[3];
-//
-//
-//
-    ExecutorItem *executorItem;
-//
-//    int executionID;
-//
-//    int jobID;
-
     int streamFlag;
 
-//    char jobDir[50];
-
     TypeMD5List md5List;
-    TypeFileList fileList;
+    TypeFileInfoList fileList;
     char executor[PATH_MAX];
     char jobDir[PATH_MAX];
 
@@ -34,9 +22,6 @@ public:
 
     int getStreamFlag();
     void setStreamFlag(int);
-   // char* getJobDir();
-
- //   void setJob(int);
 
     Md5* getMD5(int);
     TypeMD5List* getMD5List();
@@ -44,11 +29,11 @@ public:
     void addMD5List(TypeMD5List*);
     unsigned long getMD5Count();
 
-
     FileItem* getFile(int);
-    TypeFileList* getFileList();
-    void addFile(FileItem*);
-    void addFileList(TypeFileList*);
+    uint8_t getState(int);
+    TypeFileInfoList* getFileList();
+    void addFile(FileInfo);
+    void addFileList(TypeFileInfoList*);
     unsigned long getFileCount();
 
     char* getExecutor();

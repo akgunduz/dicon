@@ -31,12 +31,12 @@ private:
 
     bool readJobInfo(int, char*, char*, struct Block*);
     bool readFileBinary(int, FileItem *, struct Block*);
-    bool readFileInfo(int, FileItem *, struct Block*);
+    bool readFileInfo(int, FileItem *, uint8_t *, struct Block*);
     bool readFileMD5(int, Md5*, struct Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeJobInfo(int, char*, char*);
-    bool writeFileInfo(int, FileItem *);
+    bool writeFileInfo(int, FileItem *, uint8_t);
     bool writeFileBinary(int, FileItem *);
     bool writeFileMD5(int, Md5*);
 

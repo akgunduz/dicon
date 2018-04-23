@@ -89,7 +89,7 @@ Job* Jobs::get(int index) {
 //Job* Jobs::getJobUnServed() {
 //
 //    int i = 0;
-//    for (; i < getCount(); i++) {
+//    for (; i < getExecutorCount(); i++) {
 //
 //        NodeInfo node = nodes.get(jobs[i]);
 //        if (node.getAddress() == 0) {
@@ -97,7 +97,7 @@ Job* Jobs::get(int index) {
 //        }
 //    }
 //
-//    if (i == getCount()) {
+//    if (i == getExecutorCount()) {
 //        LOG_W("No job found");
 //        return NULL;
 //    }

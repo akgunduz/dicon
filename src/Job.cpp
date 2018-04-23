@@ -39,6 +39,8 @@ void Job::init() {
         return;
     }
 
+    createIndepentExecutions();
+
     servedIndicator = 0;
 }
 
@@ -86,7 +88,7 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
 
         bool is_dependent = strcmp(sFileType, "d") == 0;
 
-        auto *content = new FileItem(job->getHost(), job->getJobDir(), path, i, is_dependent);
+        auto *content = new FileItem(job->getHost(), job->getJobDir(), path, i);
 
         job->contentList[CONTENT_FILE].push_back(content);
 
@@ -162,31 +164,28 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-ExecutorItem* Job::getByIndex(int index) {
+ExecutorItem* Job::getExecutor(int index) {
 
     return (ExecutorItem*)getContent(CONTENT_EXECUTOR, index);
 }
 
-int Job::getCount() {
+int Job::getExecutorCount() {
 
     return getContentCount(CONTENT_EXECUTOR);
 }
-//
-//ExecutorItem* Job::getByAddress(long address) {
-//
-//    return nodes.get(address);
-//}
 
 ExecutorItem *Job::getByOutput(int index) {
 
-    for (int i = 0; i < getCount(); i++) {
+    for (int i = 0; i < getExecutorCount(); i++) {
 
-        auto *content = getByIndex(i);
-        if (content->getOutputFile() == NULL) {
+        //
+        auto *content = getExecutor(i);
+        TypeFileInfoList list = content->getFileList(FILEINFO_OUTPUT);
+        if (list.empty()) {
             continue;
         }
 
-        if (content->getOutputFile()->getID() == index) {
+        if (list[0].get()->getID() == index) {
             return content;
         }
     }
@@ -196,30 +195,30 @@ ExecutorItem *Job::getByOutput(int index) {
 
 ExecutorItem* Job::getUnServed() {
 
-    if (orderedList.size() <= servedIndicator) {
+    if (independentList.size() <= servedIndicator) {
         return NULL;
     }
 
-    return orderedList[servedIndicator++];
+    return independentList[servedIndicator++];
 
 //    int i = 0;
-//    for (; i < getCount(); i++) {
+//    for (; i < getExecutorCount(); i++) {
 //
-//        long nodeAddress = nodes.get(getByIndex(i));
+//        long nodeAddress = nodes.get(getExecutor(i));
 //        if (nodeAddress == 0) {
 //            break;
 //        }
 //    }
 //
-//    if (i == getCount()) {
+//    if (i == getExecutorCount()) {
 //        return NULL;
 //    }
 //
-//    return getByIndex(i);
+//    return getExecutor(i);
 }
 
 
-int Job::getOrderedCount() {
+size_t Job::getOrderedCount() {
 
     return orderedList.size();
 }
@@ -256,15 +255,17 @@ bool Job::createDependencyMap() {
 
         auto *executor = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
 
-        for (int j = 0; j < executor->getDependentFileCount(); j++) {
+        TypeFileInfoList depList = executor->getFileList(FILEINFO_NONOUTPUT);
+        TypeFileInfoList outList = executor->getFileList(FILEINFO_OUTPUT);
 
-            auto *file = executor->getDependentFile(j);
+        for (int j = 0; j < depList.size(); j++) {
 
-            int x = executor->getOutputFile()->getID();
+            //TODO will be updated with multi output files
+            int id = outList[0].get()->getID();
 
-            adj[file->getID()].push_back(x);
+            adj[depList[j].get()->getID()].push_back(id);
 
-            depth[x]++;
+            depth[id]++;
         }
     }
 
@@ -302,11 +303,64 @@ bool Job::createDependencyMap() {
 
         auto *content = getByOutput(i);
         if (content) {
-            orderedList.push_back(getByOutput(i));
+            orderedList.push_back(content);
         }
     }
 
     return true;
+}
+
+bool Job::createIndepentExecutions() {
+
+    independentList.clear();
+
+    for (int i = 0; i < getOrderedCount(); i++) {
+
+        auto *executor = getOrdered(i);
+
+        TypeFileInfoList depList = executor->getFileList(FILEINFO_NONEXIST);
+
+        if (depList.empty()) {
+            independentList.push_back(executor);
+        }
+    }
+
+    return true;
+}
+
+bool Job::updateIndependentExecutions(int id) {
+
+//    for (int i = 0; i < getOrderedCount(); i++) {
+//
+//        auto *execution = getOrdered(i);
+//        bool independent = true;
+//
+//        for (int j = 0; j < execution->getFileCount(); j++) {
+//
+//            auto *file = execution->getFile(j);
+//
+//            if (file->get()->getID() == id) {
+//                file->setState(FILEINFO_EXIST);
+//
+//            } else if (file->getState() == FILEINFO_NONEXIST) {
+//                independent = false;
+//                break;
+//            }
+//        }
+//
+//        if (independent) {
+//
+//            auto search = std::find(independentList.begin(), independentList.end(), execution);
+//            if (search == independentList.end()) {
+//                independentList.push_back(execution);
+//            }
+//        }
+//    }
+}
+
+size_t Job::getUnServedCount() {
+
+    return independentList.size();
 }
 
 

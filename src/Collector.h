@@ -22,11 +22,12 @@ class Collector : public Component {
 	bool processDistributorWakeupMsg(long, Message *);
 	bool processDistributorNodeMsg(long, Message *);
 	bool processNodeInfoMsg(long, Message *);
+	bool processNodeBinaryMsg(long, Message *);
 
 	bool send2DistributorAliveMsg(long);
 	bool send2DistributorNodeMsg(long, TypeMD5List*);
-	bool send2NodeJobMsg(long, const char*, const char*, TypeFileList*);
-	bool send2NodeBinaryMsg(long, TypeFileList*);
+	bool send2NodeJobMsg(long, const char*, const char*, TypeFileInfoList*);
+	bool send2NodeBinaryMsg(long, TypeFileInfoList*);
 
 public:
 

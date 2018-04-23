@@ -15,17 +15,6 @@ void MessageData::setStreamFlag(int streamFlag) {
     this->streamFlag = streamFlag;
 }
 
-//char *MessageData::getJobDir() {
-//
-//    return jobDir;
-//}
-
-//void MessageData::setJob(int streamFlag) {
-//
-//    this->streamFlag = streamFlag;
-//}
-
-
 Md5* MessageData::getMD5(int index) {
 
     return &md5List[index];
@@ -51,22 +40,27 @@ unsigned long MessageData::getMD5Count() {
     return md5List.size();
 }
 
-FileItem *MessageData::getFile(int index) {
+FileItem* MessageData::getFile(int index) {
 
-    return fileList[index];
+    return fileList[index].get();
 }
 
-TypeFileList *MessageData::getFileList() {
+uint8_t MessageData::getState(int index) {
+
+    return fileList[index].getState();
+}
+
+TypeFileInfoList *MessageData::getFileList() {
 
     return &fileList;
 }
 
-void MessageData::addFile(FileItem* file) {
+void MessageData::addFile(FileInfo file) {
 
     fileList.push_back(file);
 }
 
-void MessageData::addFileList(TypeFileList *list) {
+void MessageData::addFileList(TypeFileInfoList *list) {
 
     fileList.insert(fileList.end(), list->begin(), list->end());
 }

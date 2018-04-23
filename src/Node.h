@@ -27,12 +27,14 @@ private:
     bool send2DistributorReadyMsg(long);
     bool send2DistributorAliveMsg(long);
     bool send2DistributorBusyMsg(long);
-    bool send2CollectorInfoMsg(long, TypeFileList*);
+    bool send2CollectorInfoMsg(long, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(long, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);
+    bool processFinal();
 
-	TypeFileList checkFileExistence(TypeFileList);
+	TypeFileInfoList checkFileExistence(TypeFileInfoList*);
 
 public:
 	Node(const char *rootPath);

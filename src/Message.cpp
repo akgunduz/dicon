@@ -28,10 +28,22 @@ Message::Message(COMPONENT owner, MSG_TYPE type)
     getData()->setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
+bool Message::readFileInfo(int desc, FileItem *content, uint8_t *state, Block *header) {
 
     if (header->getType() != BLOCK_FILE_INFO) {
         LOG_E("%s : readFileInfo can not read other blocks", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    long id;
+    if (!readNumber(desc, &id)) {
+        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    long lState;
+    if (!readNumber(desc, &lState)) {
+        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -53,7 +65,8 @@ bool Message::readFileInfo(int desc, FileItem *content, Block *header) {
         return false;
     }
 
-    content->set(getHost(), jobDir, fileName, true, &md5);
+    content->set(getHost(), jobDir, fileName, (int)id, &md5);
+    *state = (uint8_t) lState;
 
     return true;
 }
@@ -65,6 +78,12 @@ bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
 		LOG_E("%s : readFileBinary can not read other blocks", ComponentTypes::getName(getHost()));
 		return false;
 	}
+
+	long id;
+    if (!readNumber(desc, &id)) {
+        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
+        return false;
+    }
 
     char jobDir[PATH_MAX];
     if (!readString(desc, jobDir, header->getSize(0))) {
@@ -96,7 +115,11 @@ bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
 		return false;
 	}
 
-    content->set(getHost(), jobDir, fileName, false, &md5);
+    content->set(getHost(), jobDir, fileName, (int)id, &md5);
+    if (!content->validate()) {
+        LOG_E("%s : readFileBinary can not validate received binary data", ComponentTypes::getName(getHost()));
+        return false;
+    }
 
 	return true;
 }
@@ -181,18 +204,18 @@ bool Message::readMessageBlock(int in, Block *header) {
 
         case BLOCK_FILE_INFO: {
 
-            FileItem *fileItem = new FileItem(getHost());
+            auto *fileItem = new FileItem(getHost());
+            uint8_t state;
 
-            if (!readFileInfo(in, fileItem, header)) {
+            if (!readFileInfo(in, fileItem, &state, header)) {
                 return false;
             }
 
             LOG_I("%s : New file info %s received", ComponentTypes::getName(getHost()), fileItem->getFileName());
 
-            getData()->addFile(fileItem);
+            getData()->addFile(FileInfo(fileItem, state));
 
         }
-
             break;
 
         default:
@@ -225,7 +248,7 @@ bool Message::writeJobInfo(int desc, char *jobDir, char *executor) {
     return writeString(desc, executor);
 }
 
-bool Message::writeFileInfo(int desc, FileItem *content) {
+bool Message::writeFileInfo(int desc, FileItem *content, uint8_t state) {
 
     Block blockHeader(2, BLOCK_FILE_INFO);
 
@@ -233,6 +256,14 @@ bool Message::writeFileInfo(int desc, FileItem *content) {
     blockHeader.setSize(1, (int) strlen(content->getFileName()));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
+        return false;
+    }
+
+    if (!writeNumber(desc, content->getID())) {
+        return false;
+    }
+
+    if (!writeNumber(desc, state)) {
         return false;
     }
 
@@ -261,6 +292,10 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
 	}
+
+    if (!writeNumber(desc, content->getID())) {
+        return false;
+    }
 
     if (!writeString(desc, content->getJobDir())) {
         return false;
@@ -312,7 +347,7 @@ bool Message::writeMessageStream(int out) {
 
             for (i = 0; i < getData()->getFileCount(); i++) {
 
-                writeFileInfo(out, getData()->getFile(i));
+                writeFileInfo(out, getData()->getFile(i), getData()->getState(i));
             }
 
             LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);
@@ -322,7 +357,7 @@ bool Message::writeMessageStream(int out) {
 
             for (i = 0; i < getData()->getFileCount(); i++) {
 
-                writeFileInfo(out, getData()->getFile(i));
+                writeFileInfo(out, getData()->getFile(i), getData()->getState(i));
             }
 
             LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);

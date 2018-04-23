@@ -38,7 +38,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/NodeWatchdog.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
-        #${SOURCE_PATH}/MapItem.cpp
         ${SOURCE_PATH}/Util.cpp
         #${SOURCE_PATH}/Unit.cpp
         ${SOURCE_PATH}/StopWatch.cpp
@@ -60,8 +59,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageData.cpp
         #${SOURCE_PATH}/NodeTracker.cpp
         ${SOURCE_PATH}/NodeState.cpp
-        ${SOURCE_PATH}/History.cpp
-        )
+        ${SOURCE_PATH}/History.cpp src/FileInfo.cpp src/FileInfo.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/UserInterface.cpp
@@ -91,7 +89,7 @@ set(OPENSSL_CRYPTO_LIBRARY crypto)
 add_definitions(-DMULTICAST_ENABLED)
 add_definitions(-DDISABLE_RECOVERY)
 add_definitions(-DDISABLE_BACKUP)
-add_definitions(-DDISABLE_LOGFILEINFO)
+#add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})

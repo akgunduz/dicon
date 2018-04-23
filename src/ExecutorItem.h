@@ -7,7 +7,8 @@
 #define __ExecutorContent_H_
 
 #include "ContentItem.h"
-#include "FileList.h"
+#include "FileItem.h"
+#include "FileInfo.h"
 
 enum EXEC_OPTIONS {
 	EXEC_FILE,
@@ -21,8 +22,7 @@ class ExecutorItem : public ContentItem {
 	char exec[PATH_MAX];
 	char parsedExec[PATH_MAX];
 
-	TypeFileList fileList;
-	FileItem* outputFile;
+	TypeFileInfoList fileList;
 
 	bool parseCommand(void*, int, int);
 
@@ -33,10 +33,11 @@ public:
     const char* getExec();
     bool parse(void *);
     const char* getParsedExec();
-	FileItem* getDependentFile(int);
-	TypeFileList* getDependentFileList();
-	unsigned long getDependentFileCount();
-	FileItem* getOutputFile();
+
+//	FileInfo* getFile(int);
+//	unsigned long getFileCount();
+	TypeFileInfoList getFileList(uint8_t);
+
 
 	virtual CONTENT_TYPES getType();
 

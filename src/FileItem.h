@@ -16,8 +16,7 @@ class FileItem : public ContentItem {
 	char jobDir[PATH_MAX];
 
 	int id;
-	bool info_only;
-	bool is_dependent;
+	bool is_validated;
 
 	Md5 md5;
 
@@ -26,11 +25,11 @@ public:
 	FileItem(COMPONENT host);
     FileItem(FileItem*);
     FileItem(COMPONENT host, const char*, const char*,
-             int id, bool = false, Md5 *md5 = nullptr);
+             int id, Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    bool set(COMPONENT host, const char*, const char*,
-             int id, bool = false, Md5* = NULL);
+    void set(COMPONENT host, const char*, const char*,
+             int id, Md5* = NULL);
 
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
@@ -40,7 +39,7 @@ public:
     COMPONENT getHost();
     int getID();
 
-    bool isDependent();
+    bool validate();
 
 	virtual CONTENT_TYPES getType();
 

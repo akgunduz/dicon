@@ -11,6 +11,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg);
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
+    processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
 	LOG_U(UI_UPDATE_COLL_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE));
 
@@ -55,24 +56,15 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
         return false;
     }
 
-    //getJobs()->get(0)->attachNode(item, nodeAddress);
-
-    //  FileList *list = getJobs()->getJob(0)->prepareRuleList();
-
     LOG_T("New Job created from path : %s", "TODO JOB");
 
     LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
-    //   LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
-
-//            TypeMD5List md5List;
-//            for (int i = 0; i < item->getDependentFileCount(); i++) {
-//                md5List.push_back(*item->getDependentFile(i)->getMD5());
-//            }
+    TypeFileInfoList list = item->getFileList(FILEINFO_ALL);
 
     return send2NodeJobMsg(nodeAddress, getJobs()->get(0)->getJobDir(),
-                          item->getParsedExec(), item->getDependentFileList());
+                          item->getParsedExec(), &list);
 }
 
 bool Collector::processNodeInfoMsg(long address, Message *msg) {
@@ -80,6 +72,13 @@ bool Collector::processNodeInfoMsg(long address, Message *msg) {
     LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
 
     return send2NodeBinaryMsg(address, msg->getData()->getFileList());
+}
+
+bool Collector::processNodeBinaryMsg(long address, Message *msg) {
+
+    LOG_U(UI_UPDATE_COLL_LOG, "%d File output binary received", msg->getData()->getFileCount());
+
+    return true;
 }
 
 bool Collector::send2DistributorAliveMsg(long address) {
@@ -101,7 +100,7 @@ bool Collector::send2DistributorNodeMsg(long address, TypeMD5List *md5List) {
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
-bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* executor, TypeFileList *fileList) {
+bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_JOB);
 
@@ -115,7 +114,7 @@ bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* ex
     return send(COMP_NODE, address, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(long address, TypeFileList *fileList) {
+bool Collector::send2NodeBinaryMsg(long address, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_BINARY);
 
@@ -133,13 +132,13 @@ bool Collector::processJob() {
     //TODO Also will add other jobs, after the prev. job is done.
 
 
-    for (int k = 0; k < 1/*jobs.get(0)->getOrderedCount()*/; k++) {
-
+    //for (int k = 0; k < 1/*jobs.get(0)->getUnServedCount()*/; k++) {
+    for (int k = 0; k < jobs.get(0)->getUnServedCount(); k++) {
         TypeMD5List md5List;
-        auto *executorItem = jobs.get(0)->getOrdered(k);
-        for (int i = 0; i < executorItem->getDependentFileCount(); i++) {
-            md5List.push_back(*executorItem->getDependentFile(i)->getMD5());
-        }
+//        auto *executorItem = jobs.get(0)->getOrdered(k);
+//        for (int i = 0; i < executorItem->getFileCount(); i++) {
+//            md5List.push_back(*executorItem->getFile(i)->getMD5());
+//        }
 
         send2DistributorNodeMsg(distributorAddress, &md5List);
     }

@@ -25,6 +25,7 @@ class Job : public JsonItem {
     char name[50];
     JobInfo nodes;
     std::vector<ExecutorItem *> orderedList;
+    std::vector<ExecutorItem *> independentList;
     int servedIndicator;
 
 public:
@@ -42,20 +43,22 @@ public:
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
 
-    int getCount();
-    ExecutorItem* getByIndex(int);
-  //  ExecutorItem* getByAddress(long);
+    int getExecutorCount();
+    ExecutorItem* getExecutor(int);
     ExecutorItem* getUnServed();
     ExecutorItem* getByOutput(int);
 
     ExecutorItem* getOrdered(int);
-    int getOrderedCount();
+    size_t getOrderedCount();
+    size_t getUnServedCount();
 
 //    bool attachNode(ExecutorItem*, long);
 //    bool detachNode(ExecutorItem*);
 //    void resetNodes();
 
     bool createDependencyMap();
+    bool createIndepentExecutions();
+    bool updateIndependentExecutions(int);
 };
 
 
