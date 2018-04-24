@@ -69,8 +69,6 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
 
     processCommand(msg->getData()->getExecutor());
 
-
-
     TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
     FileInfo::setFileListState(&outputList, FILEINFO_EXIST);
     //TODO will update with md5s including outputs

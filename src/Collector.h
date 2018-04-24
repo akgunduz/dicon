@@ -17,6 +17,7 @@ class Collector : public Component {
 	Jobs jobs;
 
 	long distributorAddress;
+	long getDistributorAddress();
 	bool setDistributorAddress(long);
 
 	bool processDistributorWakeupMsg(long, Message *);

@@ -87,7 +87,7 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     bool status = send2NodeReadyMsg(address);
 
-    return status && send2DistributorNodeMsg(address, &md5List);
+    return status && send2DistributorNodeMsg(getDistributorAddress(), &md5List);
 }
 
 bool Collector::send2DistributorAliveMsg(long address) {
@@ -167,6 +167,11 @@ bool Collector::processJob() {
 Jobs *Collector::getJobs() {
 
     return &jobs;
+}
+
+long Collector::getDistributorAddress() {
+
+    return distributorAddress;
 }
 
 bool Collector::setDistributorAddress(long address) {
