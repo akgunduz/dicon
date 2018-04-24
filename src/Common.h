@@ -28,6 +28,8 @@
 #include <map>
 #include <complex>
 #include <stdexcept>
+#include <condition_variable>
+#include <mutex>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>

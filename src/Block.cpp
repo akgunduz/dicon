@@ -6,25 +6,23 @@
 
 Block::Block() {
 
-    type = 0;
-    count = 0;
-    sizes = NULL;
+    set(0, 0);
 }
 
 Block::Block(int count, int type) {
 
-    this->count = count;
-    this->type = type;
-    if (count > 0) {
-        sizes = new int[count];
-    }
+    set(std::min(count, BLOCK_EXT_SIZE_MAX), type);
+}
+
+Block::Block(Block& copy) {
+
+    type = copy.type;
+    count = copy.count;
+    memcpy(sizes, copy.sizes, sizeof(int) * BLOCK_EXT_SIZE_MAX);
 }
 
 Block::~Block() {
 
-    if (count > 0) {
-        delete[] sizes;
-    }
 }
 
 int Block::getType() {
@@ -44,25 +42,27 @@ int Block::getCount() {
 
 void Block::setCount(int count) {
 
-    if (count > 0) {
-        delete[] sizes;
-    }
-
-    this->count = count;
-    sizes = new int[count];
+    this->count = std::min(count, BLOCK_EXT_SIZE_MAX);
 }
 
 int Block::getSize(int index) {
 
-    return sizes[index];
+    return sizes[std::min(index, BLOCK_EXT_SIZE_MAX)];
 }
 
 void Block::setSize(int index, int size) {
 
-    sizes[index] = size;
+    sizes[std::min(index, BLOCK_EXT_SIZE_MAX)] = size;
 }
 
 bool Block::isEnd() {
 
     return type == BLOCK_END_STREAM;
+}
+
+void Block::set(int count, int type) {
+
+    this->count = count;
+    this->type = type;
+    memset(this->sizes, 0, sizeof(int) * BLOCK_EXT_SIZE_MAX);
 }

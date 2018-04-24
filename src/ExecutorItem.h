@@ -36,7 +36,7 @@ public:
 
 //	FileInfo* getFile(int);
 //	unsigned long getFileCount();
-	TypeFileInfoList getFileList(uint8_t);
+	TypeFileInfoList* getFileList();
 
 
 	virtual CONTENT_TYPES getType();

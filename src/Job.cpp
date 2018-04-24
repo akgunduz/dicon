@@ -179,14 +179,14 @@ ExecutorItem *Job::getByOutput(int index) {
     for (int i = 0; i < getExecutorCount(); i++) {
 
         //
-        auto *content = getExecutor(i);
-        TypeFileInfoList list = content->getFileList(FILEINFO_OUTPUT);
+        auto *executor = getExecutor(i);
+        TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_OUTPUT);
         if (list.empty()) {
             continue;
         }
 
         if (list[0].get()->getID() == index) {
-            return content;
+            return executor;
         }
     }
 
@@ -255,8 +255,8 @@ bool Job::createDependencyMap() {
 
         auto *executor = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
 
-        TypeFileInfoList depList = executor->getFileList(FILEINFO_NONOUTPUT);
-        TypeFileInfoList outList = executor->getFileList(FILEINFO_OUTPUT);
+        TypeFileInfoList depList = FileInfo::getFileList(executor->getFileList(), FILEINFO_NONOUTPUT);
+        TypeFileInfoList outList = FileInfo::getFileList(executor->getFileList(), FILEINFO_OUTPUT);
 
         for (int j = 0; j < depList.size(); j++) {
 
@@ -318,7 +318,7 @@ bool Job::createIndepentExecutions() {
 
         auto *executor = getOrdered(i);
 
-        TypeFileInfoList depList = executor->getFileList(FILEINFO_NONEXIST);
+        TypeFileInfoList depList = FileInfo::getFileList(executor->getFileList(), FILEINFO_NONEXIST);
 
         if (depList.empty()) {
             independentList.push_back(executor);
@@ -328,7 +328,38 @@ bool Job::createIndepentExecutions() {
     return true;
 }
 
-bool Job::updateIndependentExecutions(int id) {
+bool Job::updateIndependentExecutions(TypeFileInfoList *existList) {
+
+    for (int i = 0; i < getOrderedCount(); i++) {
+
+        auto *executor = getOrdered(i);
+
+        TypeFileInfoList depList = FileInfo::getFileList(executor->getFileList(), FILEINFO_NONEXIST);
+
+        if (depList.empty()) {
+            continue;
+        }
+
+        size_t depListSize = depList.size();
+
+        for (int k = 0; k < depList.size(); k++) {
+
+            for (int j = 0; j < existList->size(); j++) {
+
+                if (existList->at(j).get()->getID() == depList[k].get()->getID()) {
+
+                    FileInfo::setFileItemState(executor->getFileList(), depList[k].get()->getID(), FILEINFO_EXIST);
+
+                    depListSize--;
+                    break;
+                }
+            }
+        }
+
+        if (depListSize == 0) {
+            independentList.push_back(executor);
+        }
+    }
 
 //    for (int i = 0; i < getOrderedCount(); i++) {
 //

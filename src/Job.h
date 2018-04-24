@@ -58,7 +58,7 @@ public:
 
     bool createDependencyMap();
     bool createIndepentExecutions();
-    bool updateIndependentExecutions(int);
+    bool updateIndependentExecutions(TypeFileInfoList*);
 };
 
 

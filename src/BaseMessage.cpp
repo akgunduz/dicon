@@ -68,7 +68,10 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
 
     } while(size > 0);
 
-    MD5_Final(md5->data, &ctx);
+    if (md5 != NULL) {
+
+        MD5_Final(md5->data, &ctx);
+    }
 
     return !error;
 

@@ -13,6 +13,7 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
+    processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
 
 	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
 	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
@@ -42,42 +43,47 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
         return false;
     }
 
-    setExecutor(msg->getData()->getExecutor());
-
     TypeFileInfoList list = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_ALL);
 
     TypeFileInfoList requiredList = checkFileExistence(&list);
     if (!requiredList.empty()) {
 
-        return send2CollectorInfoMsg(address, &requiredList);
+        return send2CollectorInfoMsg(address, msg->getData()->getJobDir(),
+                                     msg->getData()->getExecutor(), &requiredList);
 
     } else {
 
-        processCommand(getExecutor());
-
-        LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+        processCommand(msg->getData()->getExecutor());
 
         TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
+        FileInfo::setFileListState(&outputList, FILEINFO_EXIST);
 
         //TODO will update with md5s including outputs
         //TODO will update with actual binary to collector including outputs
-        return send2CollectorBinaryMsg(address, &outputList);
-       // return send2DistributorReadyMsg(getDistributorAddress());
+        return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(),
+                                       msg->getData()->getExecutor(), &outputList);
     }
 }
 
 bool Node::processCollectorBinaryMsg(long address, Message *msg) {
 
-    processCommand(getExecutor());
+    processCommand(msg->getData()->getExecutor());
+
+
+
+    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
+    FileInfo::setFileListState(&outputList, FILEINFO_EXIST);
+    //TODO will update with md5s including outputs
+    //TODO will update with actual binary to collector including outputs
+    return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(),
+                                   msg->getData()->getExecutor(), &outputList);
+}
+
+bool Node::processCollectorReadyMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
-    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
-
-    //TODO will update with md5s including outputs
-    //TODO will update with actual binary to collector including outputs
-    return send2CollectorBinaryMsg(address, &outputList);
-    //return send2DistributorReadyMsg(getDistributorAddress());
+    return send2DistributorReadyMsg(getDistributorAddress());
 }
 
 bool Node::send2DistributorReadyMsg(long address) {
@@ -85,7 +91,6 @@ bool Node::send2DistributorReadyMsg(long address) {
 	auto *msg = new Message(COMP_NODE, MSGTYPE_READY);
 
 	return send(COMP_DISTRIBUTOR, address, msg);
-
 }
 
 bool Node::send2DistributorAliveMsg(long address) {
@@ -102,11 +107,13 @@ bool Node::send2DistributorBusyMsg(long address) {
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
-bool Node::send2CollectorInfoMsg(long address, TypeFileInfoList *fileList) {
+bool Node::send2CollectorInfoMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(COMP_NODE, MSGTYPE_INFO);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
+    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
     LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file info is prepared", fileList->size());
@@ -114,26 +121,18 @@ bool Node::send2CollectorInfoMsg(long address, TypeFileInfoList *fileList) {
 	return send(COMP_COLLECTOR, address, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(long address, TypeFileInfoList *fileList) {
+bool Node::send2CollectorBinaryMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(COMP_NODE, MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
+    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
     LOG_U(UI_UPDATE_NODE_LOG, "\"%d\" file binary is prepared", fileList->size());
 
     return send(COMP_COLLECTOR, address, msg);
-}
-
-const char* Node::getExecutor() {
-
-    return executor;
-}
-
-void Node::setExecutor(char *executor) {
-
-    strcpy(this->executor, executor);
 }
 
 long Node::getDistributorAddress() {

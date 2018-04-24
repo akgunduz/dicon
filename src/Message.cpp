@@ -28,98 +28,44 @@ Message::Message(COMPONENT owner, MSG_TYPE type)
     getData()->setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readFileInfo(int desc, FileItem *content, uint8_t *state, Block *header) {
+bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *header) {
 
-    if (header->getType() != BLOCK_FILE_INFO) {
-        LOG_E("%s : readFileInfo can not read other blocks", ComponentTypes::getName(getHost()));
+    if (header->getType() != BLOCK_FILE_BINARY && header->getType() != BLOCK_FILE_INFO) {
+        LOG_E("%s : readFile can not read other blocks", ComponentTypes::getName(getHost()));
         return false;
     }
-
-    long id;
-    if (!readNumber(desc, &id)) {
-        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-    long lState;
-    if (!readNumber(desc, &lState)) {
-        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-    char jobDir[PATH_MAX];
-    if (!readString(desc, jobDir, header->getSize(0))) {
-        LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-    char fileName[PATH_MAX];
-    if (!readString(desc, fileName, header->getSize(1))) {
-        LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-    Md5 md5;
-    if (!readMD5(desc, &md5)) {
-        LOG_E("%s : readFileBinary can not read MD5 data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-    content->set(getHost(), jobDir, fileName, (int)id, &md5);
-    *state = (uint8_t) lState;
-
-    return true;
-}
-
-
-bool Message::readFileBinary(int desc, FileItem *content, Block *header) {
-
-	if (header->getType() != BLOCK_FILE_BINARY) {
-		LOG_E("%s : readFileBinary can not read other blocks", ComponentTypes::getName(getHost()));
-		return false;
-	}
 
 	long id;
     if (!readNumber(desc, &id)) {
-        LOG_E("%s : readNumber can not read id data", ComponentTypes::getName(getHost()));
+        LOG_E("%s : readFile can not read id data", ComponentTypes::getName(getHost()));
         return false;
     }
 
-    char jobDir[PATH_MAX];
-    if (!readString(desc, jobDir, header->getSize(0))) {
-        LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
+    if (!readNumber(desc, state)) {
+        LOG_E("%s : readFile can not read id data", ComponentTypes::getName(getHost()));
         return false;
     }
 
 	char fileName[PATH_MAX];
-	if (!readString(desc, fileName, header->getSize(1))) {
-		LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
+	if (!readString(desc, fileName, header->getSize(0))) {
+		LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
 		return false;
 	}
+
+    content->set(getHost(), jobDir, fileName, (int)id);
+
+    if (header->getType() != BLOCK_FILE_BINARY || (*state & FILEINFO_OUTPUT)) {
+        return true;
+    }
 
     Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost(), jobDir,
-                                              fileName).c_str(), &calcMD5, header->getSize(2))) {
-		LOG_E("%s : readFileBinary can not read Binary data", ComponentTypes::getName(getHost()));
+	if (!readBinary(desc, Util::getAbsRefPath(getHost(), content->getJobDir(),
+                                              fileName).c_str(), &calcMD5, header->getSize(1))) {
+		LOG_E("%s : readFile can not read Binary data", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
-    Md5 md5;
-    if (!readMD5(desc, &md5)) {
-        LOG_E("%s : readFileBinary can not read MD5 data", ComponentTypes::getName(getHost()));
-        return false;
-    }
-
-	if (!md5.equal(&calcMD5)) {
-		LOG_E("%s : readFileBinary mismatch in md5 data", ComponentTypes::getName(getHost()));
-		return false;
-	}
-
-    content->set(getHost(), jobDir, fileName, (int)id, &md5);
-    if (!content->validate()) {
-        LOG_E("%s : readFileBinary can not validate received binary data", ComponentTypes::getName(getHost()));
-        return false;
-    }
+    content->setMD5(&calcMD5);
 
 	return true;
 }
@@ -147,12 +93,12 @@ bool Message::readJobInfo(int desc, char *jobDir, char *execution, Block *header
     }
 
     if (!readString(desc, jobDir, header->getSize(0))) {
-        LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
+        LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
         return false;
     }
 
     if (!readString(desc, execution, header->getSize(1))) {
-        LOG_E("%s : readFileBinary can not read path data", ComponentTypes::getName(getHost()));
+        LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -163,18 +109,21 @@ bool Message::readMessageBlock(int in, Block *header) {
 
     switch(header->getType()) {
 
+        case BLOCK_FILE_INFO:
         case BLOCK_FILE_BINARY: {
 
-            FileItem *fileItem = new FileItem(getHost());
+            auto *fileItem = new FileItem(getHost());
+            long state;
 
-            if (!readFileBinary(in, fileItem, header)) {
+            if (!readFile(in, fileItem, getData()->getJobDir(), &state, header)) {
                 return false;
             }
 
-            LOG_I("%s : New binary with path %s/%s received", ComponentTypes::getName(getHost()),
+            LOG_I("%s : New %s with path %s/%s received", ComponentTypes::getName(getHost()),
+                  header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
                   fileItem->getJobDir(), fileItem->getFileName());
 
-            delete fileItem;
+            getData()->addFile(FileInfo(fileItem, state));
         }
             break;
 
@@ -200,22 +149,6 @@ bool Message::readMessageBlock(int in, Block *header) {
 
             LOG_I("%s : New job info %s received", ComponentTypes::getName(getHost()), getData()->getExecutor());
 
-            break;
-
-        case BLOCK_FILE_INFO: {
-
-            auto *fileItem = new FileItem(getHost());
-            uint8_t state;
-
-            if (!readFileInfo(in, fileItem, &state, header)) {
-                return false;
-            }
-
-            LOG_I("%s : New file info %s received", ComponentTypes::getName(getHost()), fileItem->getFileName());
-
-            getData()->addFile(FileInfo(fileItem, state));
-
-        }
             break;
 
         default:
@@ -248,46 +181,21 @@ bool Message::writeJobInfo(int desc, char *jobDir, char *executor) {
     return writeString(desc, executor);
 }
 
-bool Message::writeFileInfo(int desc, FileItem *content, uint8_t state) {
+bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) {
 
-    Block blockHeader(2, BLOCK_FILE_INFO);
+    Block blockHeader;
+    std::string absPath = "";
+    bool isBinaryTransfer = !(state & FILEINFO_OUTPUT) && isBinary;
 
-    blockHeader.setSize(0, (int) strlen(content->getJobDir()));
-    blockHeader.setSize(1, (int) strlen(content->getFileName()));
-
-    if (!writeBlockHeader(desc, &blockHeader)) {
-        return false;
+    if (!isBinaryTransfer) {
+        blockHeader.set(1, BLOCK_FILE_INFO);
+        blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
+    } else {
+        blockHeader.set(2, BLOCK_FILE_BINARY);
+        blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
+        absPath = Util::getAbsRefPath(content->getHost(), content->getJobDir(), content->getFileName());
+        blockHeader.setSize(1, getBinarySize(absPath.c_str()));
     }
-
-    if (!writeNumber(desc, content->getID())) {
-        return false;
-    }
-
-    if (!writeNumber(desc, state)) {
-        return false;
-    }
-
-    if (!writeString(desc, content->getJobDir())) {
-        return false;
-    }
-
-    if (!writeString(desc, content->getFileName())) {
-        return false;
-    }
-
-    return writeMD5(desc, content->getMD5());
-}
-
-
-bool Message::writeFileBinary(int desc, FileItem *content) {
-
-	Block blockHeader(3, BLOCK_FILE_BINARY);
-
-    std::string absPath = Util::getAbsRefPath(content->getHost(), content->getJobDir(), content->getFileName());
-
-    blockHeader.setSize(0, (uint32_t)strlen(content->getJobDir()));
-    blockHeader.setSize(1, (uint32_t)strlen(content->getFileName()));
-    blockHeader.setSize(2, getBinarySize(absPath.c_str()));
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
 		return false;
@@ -297,7 +205,7 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
         return false;
     }
 
-    if (!writeString(desc, content->getJobDir())) {
+    if (!writeNumber(desc, state)) {
         return false;
     }
 
@@ -305,18 +213,13 @@ bool Message::writeFileBinary(int desc, FileItem *content) {
         return false;
     }
 
-	Md5 calcMD5;
-	if (!writeBinary(desc, absPath.c_str(), &calcMD5, blockHeader.getSize(2))) {
-		LOG_E("%s : writeFileBinary can not write Binary data", ComponentTypes::getName(getHost()));
-		return false;
-	}
+    if (isBinaryTransfer) {
 
-    content->setMD5(&calcMD5);
-
-	if (!writeMD5(desc, &calcMD5)) {
-        LOG_E("%s : writeFileBinary can not write md5 data", ComponentTypes::getName(getHost()));
-		return false;
-	}
+        if (!writeBinary(desc, absPath.c_str(), NULL, blockHeader.getSize(1))) {
+            LOG_E("%s : writeFile can not write Binary data", ComponentTypes::getName(getHost()));
+            return false;
+        }
+    }
 
 	return true;
 
@@ -339,7 +242,8 @@ bool Message::writeMessageStream(int out) {
 
     switch(getData()->getStreamFlag()) {
 
-        case STREAM_JOB:
+        case STREAM_INFO:
+        case STREAM_BINARY:
 
             if (!writeJobInfo(out, getData()->getJobDir(), getData()->getExecutor())) {
                 return false;
@@ -347,38 +251,23 @@ bool Message::writeMessageStream(int out) {
 
             for (i = 0; i < getData()->getFileCount(); i++) {
 
-                writeFileInfo(out, getData()->getFile(i), getData()->getState(i));
+                if (!writeFile(out, getData()->getFile(i), getData()->getState(i),
+                               getData()->getStreamFlag() == STREAM_BINARY)) {
+                    return false;
+                }
             }
 
-            LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);
-            break;
-
-        case STREAM_INFO:
-
-            for (i = 0; i < getData()->getFileCount(); i++) {
-
-                writeFileInfo(out, getData()->getFile(i), getData()->getState(i));
-            }
-
-            LOG_I("%s : %d file info's sent to network", ComponentTypes::getName(getHost()), i);
-            break;
-
-        case STREAM_BINARY:
-
-            for (i = 0; i < getData()->getFileCount(); i++) {
-
-                writeFileBinary(out, getData()->getFile(i));
-            }
-
-            LOG_I("%s : %d file binary content sent to network", ComponentTypes::getName(getHost()), i);
-
+            LOG_I("%s : %d %s's sent to network", ComponentTypes::getName(getHost()), i,
+                  getData()->getStreamFlag() == STREAM_INFO ? "File Info" : "File Binary");
             break;
 
         case STREAM_MD5:
 
             for (i = 0; i < getData()->getMD5Count(); i++) {
 
-                writeFileMD5(out, getData()->getMD5(i));
+                if (!writeFileMD5(out, getData()->getMD5(i))) {
+                    return false;
+                }
             }
 
             LOG_I("%s : %d file md5 content sent to network", ComponentTypes::getName(getHost()), i);

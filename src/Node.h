@@ -12,23 +12,21 @@
 class Node : public Component {
 private:
 
-	char executor[PATH_MAX];
 	long distributorAddress;
 
-	const char* getExecutor();
-	void setExecutor(char*);
 	long getDistributorAddress();
 	void setDistributorAddress(long);
 
     bool processDistributorWakeupMsg(long, Message *);
     bool processCollectorJobMsg(long, Message *);
     bool processCollectorBinaryMsg(long, Message *);
+    bool processCollectorReadyMsg(long, Message *);
 
     bool send2DistributorReadyMsg(long);
     bool send2DistributorAliveMsg(long);
     bool send2DistributorBusyMsg(long);
-    bool send2CollectorInfoMsg(long, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(long, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(long, const char*, const char*, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(long, const char*, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);

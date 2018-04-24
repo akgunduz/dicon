@@ -20,33 +20,20 @@ typedef std::vector<FileInfo> TypeFileInfoList;
 class FileInfo {
 
     FileItem *item;
-    uint8_t state;
+    long state;
 
 public:
 
-    FileInfo(FileItem *, uint8_t);
+    FileInfo(FileItem *, long);
     FileItem* get();
 
-    uint8_t getState();
-    void setState(uint8_t);
+    long getState();
+    void setState(long);
 
-    static TypeFileInfoList getFileList(TypeFileInfoList*, uint8_t);
+    static TypeFileInfoList getFileList(TypeFileInfoList*, long);
+    static void setFileListState(TypeFileInfoList*, long);
+    static void setFileItemState(TypeFileInfoList*, long, long);
 };
-
-
-
-class FileInfoList {
-
-    TypeFileInfoList depFileList;
-    TypeFileInfoList outFileList;
-
-public:
-
-    bool add(FileInfo);
-    bool switchType(FileInfo);
-};
-
-
 
 
 #endif //BANKOR_FILEINFO_H

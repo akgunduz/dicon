@@ -11,16 +11,21 @@
 
 #define BLOCK_HEADER_SIZE 8
 
+#define BLOCK_EXT_SIZE_MAX 20
+
 class Block {
 
     int type;
     int count;
-    int *sizes;
+    int sizes[BLOCK_EXT_SIZE_MAX];
 
 public:
     Block();
+    Block(Block&);
     Block(int, int = BLOCK_END_STREAM);
     ~Block();
+
+    void set(int, int);
 
     int getType();
     void setType(int);

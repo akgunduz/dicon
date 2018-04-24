@@ -13,10 +13,9 @@
 
 #define STREAM_NONE 0xFFFF
 
-#define STREAM_JOB 0x01
+#define STREAM_INFO 0x01
 #define STREAM_BINARY 0x02
 #define STREAM_MD5 0x03
-#define STREAM_INFO 0x04
 
 #define BLOCK_JOB_INFO 0x01
 #define BLOCK_FILE_BINARY 0x02
@@ -30,14 +29,12 @@ private:
     MessageData data;
 
     bool readJobInfo(int, char*, char*, struct Block*);
-    bool readFileBinary(int, FileItem *, struct Block*);
-    bool readFileInfo(int, FileItem *, uint8_t *, struct Block*);
+    bool readFile(int, FileItem *, const char*, long *, struct Block *);
     bool readFileMD5(int, Md5*, struct Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeJobInfo(int, char*, char*);
-    bool writeFileInfo(int, FileItem *, uint8_t);
-    bool writeFileBinary(int, FileItem *);
+    bool writeFile(int, FileItem *, long, bool);
     bool writeFileMD5(int, Md5*);
 
     bool writeMessageStream(int out);

@@ -9,23 +9,45 @@ FileItem *FileInfo::get() {
     return item;
 }
 
-void FileInfo::setState(uint8_t state) {
+void FileInfo::setState(long state) {
 
     this->state = state;
 }
 
-uint8_t FileInfo::getState() {
+long FileInfo::getState() {
 
     return state;
 }
 
-FileInfo::FileInfo(FileItem *item, uint8_t state) {
+FileInfo::FileInfo(FileItem *item, long state) {
 
     this->item = item;
     this->state = state;
 }
 
-TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, uint8_t state) {
+void FileInfo::setFileListState(TypeFileInfoList *fileList, long state) {
+
+    for (int i = 0; i < fileList->size(); i++) {
+
+        fileList->at(i).setState(state);
+    }
+
+}
+
+void FileInfo::setFileItemState(TypeFileInfoList *fileList, long id, long state) {
+
+    for (int i = 0; i < fileList->size(); i++) {
+
+        if (fileList->at(i).get()->getID() == id) {
+
+            fileList->at(i).setState(state);
+            break;
+        }
+    }
+
+}
+
+TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, long state) {
 
     TypeFileInfoList list;
 

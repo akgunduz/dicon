@@ -155,8 +155,8 @@ bool ExecutorItem::isValid() {
 //    return fileList.size();
 //}
 
-TypeFileInfoList ExecutorItem::getFileList(uint8_t state) {
+TypeFileInfoList* ExecutorItem::getFileList() {
 
-    return FileInfo::getFileList(&fileList, state);
+    return &fileList;
 }
 
