@@ -294,7 +294,7 @@ bool Job::createDependencyMap() {
     return true;
 }
 
-bool Job::createIndepentExecutions() {
+void Job::createIndepentExecutions() {
 
     independentList.clear();
 
@@ -308,11 +308,9 @@ bool Job::createIndepentExecutions() {
             independentList.push_back(executor);
         }
     }
-
-    return true;
 }
 
-bool Job::updateIndependentExecutions(TypeFileInfoList *existList) {
+void Job::updateIndependentExecutions(TypeFileInfoList *existList) {
 
     for (int i = 0; i < getOrderedCount(); i++) {
 

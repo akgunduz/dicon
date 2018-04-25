@@ -70,7 +70,7 @@ Device *DeviceList::getActive(int index) {
     return devices[active[index]];
 }
 
-bool DeviceList::setActive(int index0, int index1) {
+void DeviceList::setActive(int index0, int index1) {
 
     active[0] = index0;
     active[1] = index1;

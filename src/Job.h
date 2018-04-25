@@ -56,8 +56,8 @@ public:
 
     ExecutorItem* getByOutput(int);
     bool createDependencyMap();
-    bool createIndepentExecutions();
-    bool updateIndependentExecutions(TypeFileInfoList*);
+    void createIndepentExecutions();
+    void updateIndependentExecutions(TypeFileInfoList*);
 };
 
 

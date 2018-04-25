@@ -28,7 +28,7 @@ public:
     Device* get(int);
     Device* getActive(int);
     long getCount();
-    bool setActive(int, int);
+    void setActive(int, int);
     bool isActiveDifferent();
 };
 

@@ -15,8 +15,6 @@ NodeManager::~NodeManager() {
 
 long NodeManager::getIdle() {
 
-//TODO coklu collector de burada thread korumasi olmasi lazim
-
     NodeObject leastUsedNode(IDLE, 0x7FFFFFFF);
     long leastUsedAddress = 0;
 
@@ -104,7 +102,5 @@ bool NodeManager::setState(long address, NODE_STATES state) {
 
     mutex.unlock();
 
-    LOG_T("Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
     return true;
 }

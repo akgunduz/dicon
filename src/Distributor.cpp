@@ -145,6 +145,10 @@ bool Distributor::processNodeBusyMsg(long address, Message *msg) {
 
 	nodeManager->setState(address, BUSY);
 
+    LOG_U(UI_UPDATE_DIST_LOG,
+          "Node at address : %s switch to state : %s",
+          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
+
 	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
 
 	return true;
