@@ -5,6 +5,11 @@
 
 #include "CollectorManager.h"
 
+size_t CollectorManager::getCount() {
+
+    return waitingList.size();
+}
+
 TypeWaitingCollector CollectorManager::get() {
 
     mutex.lock();
@@ -43,3 +48,4 @@ void CollectorManager::clear() {
 
     mutex.unlock();
 }
+

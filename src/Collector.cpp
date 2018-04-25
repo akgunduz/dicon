@@ -63,21 +63,20 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     }
 
     if (!Util::checkPath(ComponentTypes::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
-        LOG_W("No Job : \"%s\" found!!!", msg->getData()->getJobDir());
+        LOG_U(UI_UPDATE_COLL_LOG, "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
         delete msg;
         return false;
     }
 
-    //TODO
     ExecutorItem* executor = getJobs()->get(msg->getData()->getJobDir())->getUnServed();
 
     if (executor == NULL) {
-        LOG_W("No available unServed job right now. So WHY this Node message Come?????");
+        LOG_U(UI_UPDATE_COLL_LOG, "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
     }
 
-    LOG_T("New Job created from path : %s", "TODO JOB");
+    LOG_U(UI_UPDATE_COLL_LOG, "Job execution at path : %s has started", msg->getData()->getJobDir());
 
     LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
@@ -108,7 +107,12 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     bool status = send2NodeReadyMsg(address);
 
-    return status && send2DistributorNodeMsg(getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
+    if (getJobs()->get(msg->getData()->getJobDir())->getUnServedCount() > 0) {
+
+        status &= send2DistributorNodeMsg(getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
+    }
+
+    return status;
 }
 
 bool Collector::send2DistributorAliveMsg(long address) {

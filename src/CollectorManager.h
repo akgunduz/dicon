@@ -19,6 +19,7 @@ public:
 
     bool add(long, const char*);
     TypeWaitingCollector get();
+    size_t getCount();
     void clear();
 };
 

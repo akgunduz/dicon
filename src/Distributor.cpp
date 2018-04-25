@@ -68,7 +68,8 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 
         collectorManager->add(address, msg->getData()->getJobDir());
 
-        LOG_U(UI_UPDATE_DIST_LOG, "No available node");
+        LOG_U(UI_UPDATE_DIST_LOG, "No available node, adding Collector at %s with Job : %s to Wait List with new Count %d",
+              InterfaceTypes::getAddressString(address).c_str(), msg->getData()->getJobDir(), collectorManager->getCount());
         LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
     }
 
@@ -93,8 +94,9 @@ bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 	if (collector.first > 0) {
 
 		LOG_U(UI_UPDATE_DIST_LOG,
-			  "Processing a collector from the waiting list: %s",
-			  InterfaceTypes::getAddressString(collector.first).c_str());
+			  "Processing a collector %s with Job : %s from the waiting list with new Count %d",
+			  InterfaceTypes::getAddressString(collector.first).c_str(),
+              collector.second, collectorManager->getCount());
 
 		status = send2CollectorNodeMsg(collector.first, collector.second, address);
 
@@ -125,8 +127,9 @@ bool Distributor::processNodeAliveMsg(long address, Message *msg) {
     if (collector.first) {
 
         LOG_U(UI_UPDATE_DIST_LOG,
-              "Processing a collector from the waiting list: %s",
-              InterfaceTypes::getAddressString(collector.first).c_str());
+              "Processing a collector %s with Job : %s from the waiting list with new Count %d",
+              InterfaceTypes::getAddressString(collector.first).c_str(),
+              collector.second, collectorManager->getCount());
 
         status = send2CollectorNodeMsg(collector.first, collector.second, address);
 
