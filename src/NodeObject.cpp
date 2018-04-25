@@ -4,20 +4,16 @@
 
 #include "NodeObject.h"
 
-NodeObject::NodeObject(NODE_STATES state, int usage, long address) :
-        state(state), usage(usage), address(address) {
+NodeObject::NodeObject(NODE_STATES state, int usage) :
+        state(state), usage(usage) {
 
 }
 
-NodeObject::NodeObject(long address) :
-        state(IDLE), usage(0), address(address) {
+NodeObject::NodeObject() :
+        state(IDLE), usage(0) {
 }
 
 NodeObject::~NodeObject() {
-
-#ifndef DISABLE_RECOVERY
-    delete watchdog;
-#endif
 
 }
 
@@ -31,14 +27,9 @@ int NodeObject::getUsage() {
     return usage;
 }
 
-void NodeObject::iterateUsage(bool direction) {
+int NodeObject::iterateUsage(bool direction) {
 
-    direction ? usage++ : usage--;
-}
-
-long NodeObject::getAddress() {
-
-    return address;
+    return direction ? ++usage : --usage;
 }
 
 std::vector<Md5> *NodeObject::getMD5List() {

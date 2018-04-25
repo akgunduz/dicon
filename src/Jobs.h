@@ -10,14 +10,12 @@
 #include "JobInfo.h"
 
 
-typedef std::map<const char *, Job*, char_cmp> TypeJobList;
+typedef std::map<std::string, Job*, char_cmp> TypeJobList;
 
 
 class Jobs {
 
     TypeJobList jobs;
-
-   // std::vector<Job*>* getJobs();
 
 public:
 
@@ -25,20 +23,11 @@ public:
     ~Jobs();
     bool add(Job*);
     bool add(COMPONENT , const char*);
-    //bool addList(Jobs*, bool = false);
-    bool addList(COMPONENT, const char*, bool = false);
+    bool addPath(COMPONENT, const char *, bool = false);
 
     Job* get(const char*);
     Job* get(int);
-//    Job* getJobByNode(NodeInfo);
-//    Job* getJobByAddress(long);
-//    NodeInfo getNodeByAddress(long);
-//    Job* getJobUnServed();
-//
-//    bool attachNode(Job *job, NodeInfo node);
-//    bool detachNode(Job *job);
 
-//    bool reset();
     bool clear();
 
     bool isEmpty();

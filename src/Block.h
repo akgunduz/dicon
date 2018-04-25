@@ -11,7 +11,7 @@
 
 #define BLOCK_HEADER_SIZE 8
 
-#define BLOCK_EXT_SIZE_MAX 20
+#define BLOCK_EXT_SIZE_MAX 3
 
 class Block {
 

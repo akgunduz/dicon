@@ -40,8 +40,6 @@ void Job::init() {
     }
 
     createIndepentExecutions();
-
-    servedIndicator = 0;
 }
 
 bool Job::parseNameNode(JsonItem *parent, json_object *node) {
@@ -164,21 +162,57 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
+int Job::getExecutorCount() {
+
+    return getContentCount(CONTENT_EXECUTOR);
+}
+
 ExecutorItem* Job::getExecutor(int index) {
 
     return (ExecutorItem*)getContent(CONTENT_EXECUTOR, index);
 }
 
-int Job::getExecutorCount() {
+int Job::getFileCount() {
 
-    return getContentCount(CONTENT_EXECUTOR);
+    return getContentCount(CONTENT_FILE);
+}
+
+FileItem* Job::getFile(int index) {
+
+    return (FileItem*)getContent(CONTENT_FILE, index);
+}
+
+size_t Job::getOrderedCount() {
+
+    return orderedList.size();
+}
+
+ExecutorItem *Job::getOrdered(int index) {
+
+    return orderedList[index];
+}
+
+size_t Job::getUnServedCount() {
+
+    return independentList.size();
+}
+
+ExecutorItem* Job::getUnServed() {
+
+    if (independentList.empty()) {
+        return NULL;
+    }
+
+    ExecutorItem* executor = independentList.front();
+    independentList.pop_front();
+
+    return executor;
 }
 
 ExecutorItem *Job::getByOutput(int index) {
 
     for (int i = 0; i < getExecutorCount(); i++) {
 
-        //
         auto *executor = getExecutor(i);
         TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_OUTPUT);
         if (list.empty()) {
@@ -192,56 +226,6 @@ ExecutorItem *Job::getByOutput(int index) {
 
     return NULL;
 }
-
-ExecutorItem* Job::getUnServed() {
-
-    if (independentList.size() <= servedIndicator) {
-        return NULL;
-    }
-
-    return independentList[servedIndicator++];
-
-//    int i = 0;
-//    for (; i < getExecutorCount(); i++) {
-//
-//        long nodeAddress = nodes.get(getExecutor(i));
-//        if (nodeAddress == 0) {
-//            break;
-//        }
-//    }
-//
-//    if (i == getExecutorCount()) {
-//        return NULL;
-//    }
-//
-//    return getExecutor(i);
-}
-
-
-size_t Job::getOrderedCount() {
-
-    return orderedList.size();
-}
-
-ExecutorItem *Job::getOrdered(int index) {
-
-    return orderedList[index];
-}
-
-//bool Job::attachNode(ExecutorItem *item, long address) {
-//
-//    return nodes.add(item, address);
-//}
-//
-//bool Job::detachNode(ExecutorItem *item) {
-//
-//    return nodes.remove(item);
-//}
-//
-//void Job::resetNodes() {
-//
-//    nodes.clear();
-//}
 
 bool Job::createDependencyMap() {
 
@@ -360,38 +344,4 @@ bool Job::updateIndependentExecutions(TypeFileInfoList *existList) {
             independentList.push_back(executor);
         }
     }
-
-//    for (int i = 0; i < getOrderedCount(); i++) {
-//
-//        auto *execution = getOrdered(i);
-//        bool independent = true;
-//
-//        for (int j = 0; j < execution->getFileCount(); j++) {
-//
-//            auto *file = execution->getFile(j);
-//
-//            if (file->get()->getID() == id) {
-//                file->setState(FILEINFO_EXIST);
-//
-//            } else if (file->getState() == FILEINFO_NONEXIST) {
-//                independent = false;
-//                break;
-//            }
-//        }
-//
-//        if (independent) {
-//
-//            auto search = std::find(independentList.begin(), independentList.end(), execution);
-//            if (search == independentList.end()) {
-//                independentList.push_back(execution);
-//            }
-//        }
-//    }
 }
-
-size_t Job::getUnServedCount() {
-
-    return independentList.size();
-}
-
-

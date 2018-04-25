@@ -16,11 +16,13 @@
 #define STREAM_INFO 0x01
 #define STREAM_BINARY 0x02
 #define STREAM_MD5 0x03
+#define STREAM_JOB 0x04
 
 #define BLOCK_JOB_INFO 0x01
-#define BLOCK_FILE_BINARY 0x02
-#define BLOCK_FILE_MD5 0x03
-#define BLOCK_FILE_INFO 0x04
+#define BLOCK_EXECUTION_INFO 0x02
+#define BLOCK_FILE_BINARY 0x03
+#define BLOCK_FILE_MD5 0x04
+#define BLOCK_FILE_INFO 0x05
 
 class Message : public BaseMessage {
 
@@ -28,12 +30,14 @@ private:
 	MessageHeader header;
     MessageData data;
 
-    bool readJobInfo(int, char*, char*, struct Block*);
+    bool readJobInfo(int, char*, struct Block*);
+    bool readExecutionInfo(int, char*, struct Block*);
     bool readFile(int, FileItem *, const char*, long *, struct Block *);
     bool readFileMD5(int, Md5*, struct Block*);
     bool readMessageBlock(int in, Block*);
 
-    bool writeJobInfo(int, char*, char*);
+    bool writeJobInfo(int, char*);
+    bool writeExecutionInfo(int, char*);
     bool writeFile(int, FileItem *, long, bool);
     bool writeFileMD5(int, Md5*);
 

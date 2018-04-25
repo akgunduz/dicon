@@ -15,8 +15,10 @@
 class Collector : public Component {
 
 	Jobs jobs;
-
 	long distributorAddress;
+
+    Collector(const char *rootPath);
+
 	long getDistributorAddress();
 	bool setDistributorAddress(long);
 
@@ -26,17 +28,19 @@ class Collector : public Component {
 	bool processNodeBinaryMsg(long, Message *);
 
 	bool send2DistributorAliveMsg(long);
-	bool send2DistributorNodeMsg(long, TypeMD5List*);
+	bool send2DistributorNodeMsg(long, const char*, TypeMD5List*);
 	bool send2NodeJobMsg(long, const char*, const char*, TypeFileInfoList*);
 	bool send2NodeBinaryMsg(long, const char*, const char*, TypeFileInfoList*);
 	bool send2NodeReadyMsg(long);
 
 public:
 
-	Collector(const char *rootPath);
-    virtual ~Collector();
 
-    bool processJob();
+    ~Collector();
+    static Collector* newInstance(int);
+
+    bool processJob(int);
+    bool processJobs();
 	Jobs* getJobs();
 
 };

@@ -11,33 +11,36 @@
 #include "Connector.h"
 #include "Util.h"
 #include "NodeManager.h"
+#include "CollectorManager.h"
 
 class Distributor : public Component {
 private:
 
+    static Distributor *instance;
+
 	NodeManager *nodeManager;
 
-	std::deque<long> collectorWaitingList;
+	CollectorManager *collectorManager;
 
+    Distributor(const char *);
     bool processCollectorAliveMsg(long, Message *);
     bool processCollectorNodeMsg(long, Message *);
     bool processNodeReadyMsg(long, Message *);
     bool processNodeAliveMsg(long, Message *);
     bool processNodeBusyMsg(long, Message *);
-    bool processNodeTimeoutMsg(long, Message *);
 
     bool send2NodeWakeupMsg(long);
     bool send2CollectorWakeupMsg(long);
-    bool send2CollectorNodeMsg(long);
+    bool send2CollectorNodeMsg(long, const char*, long);
 
 public:
 
-	Distributor(const char *, double);
-	virtual ~Distributor();
+
+	~Distributor();
+    static Distributor* newInstance();
 
     bool reset();
-    static bool onTimeOut(Component*, NodeObject*);
-    static bool onWakeup(Component*);
+
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll();
 

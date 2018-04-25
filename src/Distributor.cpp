@@ -6,7 +6,23 @@
 #include "Distributor.h"
 #include "DeviceList.h"
 
-Distributor::Distributor(const char *rootPath, double backupRate) :
+Distributor* Distributor::instance = NULL;
+
+Distributor *Distributor::newInstance() {
+
+    if (instance) {
+        return instance;
+    }
+
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s", getcwd(NULL, 0), DISTRIBUTOR_PATH);
+    mkdir(path, 0777);
+
+    instance = new Distributor(path);
+    return instance;
+}
+
+Distributor::Distributor(const char *rootPath) :
             Component(COMP_DISTRIBUTOR, rootPath){
 
 	processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
@@ -14,9 +30,11 @@ Distributor::Distributor(const char *rootPath, double backupRate) :
 	processMsg[COMP_NODE][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg);
 	processMsg[COMP_NODE][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeAliveMsg);
 	processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
-	processMsg[COMP_NODE][MSGTYPE_TIMEOUT] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeTimeoutMsg);
+	//processMsg[COMP_NODE][MSGTYPE_TIMEOUT] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeTimeoutMsg);
 
-	nodeManager = new NodeManager(this, onTimeOut, onWakeup, backupRate);
+	nodeManager = new NodeManager();
+
+	collectorManager = new CollectorManager();
 
     LOG_U(UI_UPDATE_DIST_ADDRESS, getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE));
 };
@@ -34,25 +52,44 @@ bool Distributor::processCollectorAliveMsg(long address, Message *msg) {
 
 bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 
-	return send2CollectorNodeMsg(address);
+    long nodeAddress = nodeManager->getIdle();
+
+    if (nodeAddress > 0) {
+
+        LOG_U(UI_UPDATE_DIST_NODE_LIST, nodeAddress, PREBUSY);
+        LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
+              InterfaceTypes::getAddressString(nodeAddress).c_str());
+
+        LOG_U(UI_UPDATE_DIST_COLL_LIST, address, nodeAddress);
+
+        return send2CollectorNodeMsg(address, msg->getData()->getJobDir(), nodeAddress);
+
+    } else {
+
+        collectorManager->add(address, msg->getData()->getJobDir());
+
+        LOG_U(UI_UPDATE_DIST_LOG, "No available node");
+        LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
+    }
+
+    return false;
 }
 
 bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
-	bool status = false;
+	nodeManager->setState(address, IDLE);
 
-	nodeManager->setIdle(address);
+    bool status = false;
 
-	if (collectorWaitingList.size() > 0) {
+    TypeWaitingCollector collector = collectorManager->get();
 
-		long collectorAddress = collectorWaitingList.front();
-		collectorWaitingList.pop_front();
+	if (collector.first > 0) {
 
 		LOG_U(UI_UPDATE_DIST_LOG,
 			  "Processing a collector from the waiting list: %s",
-			  InterfaceTypes::getAddressString(collectorAddress).c_str());
+			  InterfaceTypes::getAddressString(collector.first).c_str());
 
-		status = send2CollectorNodeMsg(collectorAddress);
+		status = send2CollectorNodeMsg(collector.first, collector.second, address);
 
 	} else {
 
@@ -66,43 +103,41 @@ bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
 bool Distributor::processNodeAliveMsg(long address, Message *msg) {
 
-	bool status = false;
+    if (!nodeManager->add(address)) {
 
-	if (!nodeManager->validate(address)
-		&& collectorWaitingList.size() > 0) {
+        return true;
+    }
 
-		long collectorAddress = collectorWaitingList.front();
-		collectorWaitingList.pop_front();
+    bool status = false;
 
-		LOG_U(UI_UPDATE_DIST_LOG,
-			  "Processing a collector from the waiting list: %s",
-			  InterfaceTypes::getAddressString(collectorAddress).c_str());
+    TypeWaitingCollector collector = collectorManager->get();
 
-		status = send2CollectorNodeMsg(collectorAddress);
-	} else {
+    if (collector.first) {
 
-		status = true;
-	}
+        LOG_U(UI_UPDATE_DIST_LOG,
+              "Processing a collector from the waiting list: %s",
+              InterfaceTypes::getAddressString(collector.first).c_str());
 
-	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
+        status = send2CollectorNodeMsg(collector.first, collector.second, address);
 
-	return status;
+    } else {
+
+        status = true;
+    }
+
+    LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
+
+    return status;
+
 }
 
 bool Distributor::processNodeBusyMsg(long address, Message *msg) {
 
-	nodeManager->setBusy(address);
+	nodeManager->setState(address, BUSY);
+
 	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
 
 	return true;
-}
-
-bool Distributor::processNodeTimeoutMsg(long address, Message *msg) {
-
-	nodeManager->remove(address);
-	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, REMOVE);
-
-	return send2CollectorNodeMsg(msg->getHeader()->getVariant(0));
 }
 
 bool Distributor::send2NodeWakeupMsg(long address) {
@@ -119,32 +154,13 @@ bool Distributor::send2CollectorWakeupMsg(long address) {
     return send(COMP_COLLECTOR, address, msg);
 }
 
-bool Distributor::send2CollectorNodeMsg(long address) {
+bool Distributor::send2CollectorNodeMsg(long address, const char* jobDir, long nodeAddress) {
 
 	auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_NODE);
 
-    NodeObject *node = nodeManager->getIdle();
-
-    if (node != nullptr) {
-
-        LOG_U(UI_UPDATE_DIST_NODE_LIST, node->getAddress(), PREBUSY);
-        LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
-              InterfaceTypes::getAddressString(node->getAddress()).c_str());
-
-        msg->getHeader()->setVariant(0, node->getAddress());
-
-        LOG_U(UI_UPDATE_DIST_COLL_LIST, address, node->getAddress());
-
-    } else {
-
-        collectorWaitingList.push_back(address);
-
-        LOG_U(UI_UPDATE_DIST_LOG, "No available node");
-
-        msg->getHeader()->setVariant(0, 0);
-
-        LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
-    }
+    msg->getData()->setStreamFlag(STREAM_JOB);
+    msg->getHeader()->setVariant(0, nodeAddress);
+    msg->getData()->setJobDir(jobDir);
 
 	return send(COMP_COLLECTOR, address, msg);
 }
@@ -185,22 +201,9 @@ bool Distributor::sendWakeupMessagesAll() {
 bool Distributor::reset() {
 
 	nodeManager->clear();
-	collectorWaitingList.clear();
-	return true;
 
-}
-
-bool Distributor::onTimeOut(Component *component, NodeObject *node) {
-
-    auto *msg = new Message(COMP_NODE, MSGTYPE_TIMEOUT);
-
-    component->put(COMP_NODE, node->getAddress(), msg);
+	collectorManager->clear();
 
 	return true;
-}
 
-
-bool Distributor::onWakeup(Component *component) {
-
-    return ((Distributor*)component)->sendWakeupMessage(COMP_NODE);
 }

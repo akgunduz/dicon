@@ -14,6 +14,8 @@ private:
 
 	long distributorAddress;
 
+	Node(const char *rootPath);
+
 	long getDistributorAddress();
 	void setDistributorAddress(long);
 
@@ -30,14 +32,14 @@ private:
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);
-    bool processFinal();
 
 	TypeFileInfoList checkFileExistence(TypeFileInfoList*);
 
 public:
-	Node(const char *rootPath);
 
-	virtual ~Node();
+
+	~Node();
+    static Node* newInstance(int);
 };
 
 

@@ -13,49 +13,24 @@
 #include "NodeObject.h"
 #include "NodeWatchdog.h"
 
-struct NodeManagerArgument {
-    Connector *nodeConnector;
-    NodeObject *nodeMap;
-    long collectorAddress;
-    fTimeoutCB timeoutCB;
-    NodeManagerArgument(Connector *cc, fTimeoutCB cb, NodeObject *c, long a) :
-            nodeConnector(cc), timeoutCB(cb), nodeMap(c), collectorAddress(a) {}
-};
-
-typedef std::map<long, NodeObject *> TypeNodeList;
+typedef std::map<long, NodeObject> TypeNodeList;
 
 class NodeManager {
 private:
 
+    std::mutex mutex;
     TypeNodeList nodes;
-
-    Component *component;
-    fTimeoutCB timeoutCB;
-
-#ifndef DISABLE_BACKUP
-    double backupRate;
-	int readyBackup;
-	int totalBackup;
-#endif
-
-#ifndef DISABLE_RECOVERY
-    fWakeupCB wakeupCB;
-    NodeWatchdog *nodeWatchdog;
-#endif
 
 public:
 
-	NodeManager(Component*, fTimeoutCB, fWakeupCB, double);
+	NodeManager();
 
 	virtual ~NodeManager();
 
-	bool setIdle(long);
-	bool setBusy(long);
-	bool remove(long);
-	bool validate(long);
 	bool add(long);
+	bool setState(long, NODE_STATES);
 
-	NodeObject* getIdle();
+	long getIdle();
 
 	void clear();
 

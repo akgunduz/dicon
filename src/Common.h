@@ -88,9 +88,9 @@ enum UI_UPDATE {
 };
 
 struct char_cmp {
-	bool operator () (const char *a,const char *b) const
+	bool operator () (const std::string a,const std::string b) const
 	{
-		return strcmp(a,b) < 0;
+		return a.compare(b) < 0;
 	}
 };
 

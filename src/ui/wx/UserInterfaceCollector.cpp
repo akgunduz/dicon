@@ -37,11 +37,8 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
     if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
 
         try {
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
-            mkdir(path, 0777);
 
-            collObject = new Collector(path);
+            collObject = Collector::newInstance(1);
 
         } catch (std::runtime_error &e) {
 
@@ -72,7 +69,7 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    collObject->processJob();
+    collObject->processJobs();
 }
 
 //void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )

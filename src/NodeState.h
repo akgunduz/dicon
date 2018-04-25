@@ -9,9 +9,8 @@
 
 enum NODE_STATES {
     IDLE,
-    BUSY,
     PREBUSY,
-    REMOVE
+    BUSY,
 };
 
 class NodeState {

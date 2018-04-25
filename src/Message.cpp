@@ -78,14 +78,14 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
     }
 
 	if (!readMD5(desc, content)) {
-		LOG_E("%s : Can not read md5", ComponentTypes::getName(getHost()));
+		LOG_E("%s : readFileMD5 Can not read md5", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
 	return true;
 }
 
-bool Message::readJobInfo(int desc, char *jobDir, char *execution, Block *header) {
+bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
 
     if (header->getType() != BLOCK_JOB_INFO) {
         LOG_E("%s : readJobInfo can not read other blocks", ComponentTypes::getName(getHost()));
@@ -93,12 +93,22 @@ bool Message::readJobInfo(int desc, char *jobDir, char *execution, Block *header
     }
 
     if (!readString(desc, jobDir, header->getSize(0))) {
-        LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
+        LOG_E("%s : readJobInfo can not read job dir", ComponentTypes::getName(getHost()));
         return false;
     }
 
-    if (!readString(desc, execution, header->getSize(1))) {
-        LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
+    return true;
+}
+
+bool Message::readExecutionInfo(int desc, char *execution, Block *header) {
+
+    if (header->getType() != BLOCK_EXECUTION_INFO) {
+        LOG_E("%s : readExecutionInfo can not read other blocks", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    if (!readString(desc, execution, header->getSize(0))) {
+        LOG_E("%s : readExecutionInfo can not read execution info", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -142,14 +152,24 @@ bool Message::readMessageBlock(int in, Block *header) {
 
         case BLOCK_JOB_INFO:
 
-            if (!readJobInfo(in, getData()->getJobDir(),
-                             getData()->getExecutor(), header)) {
+            if (!readJobInfo(in, getData()->getJobDir(), header)) {
                 return false;
             }
 
-            LOG_I("%s : New job info %s received", ComponentTypes::getName(getHost()), getData()->getExecutor());
+            LOG_I("%s : New job info %s received", ComponentTypes::getName(getHost()), getData()->getJobDir());
 
             break;
+
+        case BLOCK_EXECUTION_INFO:
+
+            if (!readExecutionInfo(in, getData()->getExecutor(), header)) {
+                return false;
+            }
+
+            LOG_I("%s : New execution info %s received", ComponentTypes::getName(getHost()), getData()->getExecutor());
+
+            break;
+
 
         default:
             return false;
@@ -163,22 +183,42 @@ bool Message::readFinalize() {
     return true;
 }
 
-bool Message::writeJobInfo(int desc, char *jobDir, char *executor) {
+bool Message::writeJobInfo(int desc, char *jobDir) {
 
-    Block blockHeader(2, BLOCK_JOB_INFO);
+    Block blockHeader(1, BLOCK_JOB_INFO);
 
     blockHeader.setSize(0, (int) strlen(jobDir));
-    blockHeader.setSize(1, (int) strlen(executor));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
+        LOG_E("%s : writeJobInfo can not write block header", ComponentTypes::getName(getHost()));
         return false;
     }
 
     if (!writeString(desc, jobDir)) {
+        LOG_E("%s : writeJobInfo can not write job info", ComponentTypes::getName(getHost()));
         return false;
     }
 
-    return writeString(desc, executor);
+    return true;
+}
+
+bool Message::writeExecutionInfo(int desc, char *executor) {
+
+    Block blockHeader(1, BLOCK_EXECUTION_INFO);
+
+    blockHeader.setSize(0, (int) strlen(executor));
+
+    if (!writeBlockHeader(desc, &blockHeader)) {
+        LOG_E("%s : writeExecutionInfo can not write block header", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    if (!writeString(desc, executor)) {
+        LOG_E("%s : writeExecutionInfo can not write execution info", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    return true;
 }
 
 bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) {
@@ -198,18 +238,22 @@ bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) 
     }
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
+        LOG_E("%s : writeFile can not write block header", ComponentTypes::getName(getHost()));
 		return false;
 	}
 
     if (!writeNumber(desc, content->getID())) {
+        LOG_E("%s : writeFile can not write file ID", ComponentTypes::getName(getHost()));
         return false;
     }
 
     if (!writeNumber(desc, state)) {
+        LOG_E("%s : writeFile can not write file state", ComponentTypes::getName(getHost()));
         return false;
     }
 
 	if (!writeString(desc, content->getFileName())) {
+        LOG_E("%s : writeFile can not write file name", ComponentTypes::getName(getHost()));
         return false;
     }
 
@@ -230,10 +274,16 @@ bool Message::writeFileMD5(int desc, Md5 *md5) {
     Block blockHeader(0, BLOCK_FILE_MD5);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
+        LOG_E("%s : writeFileMD5 can not write block header", ComponentTypes::getName(getHost()));
         return false;
     }
 
-    return writeMD5(desc, md5);
+    if (!writeMD5(desc, md5)) {
+        LOG_E("%s : writeFileMD5 can not write md5 data", ComponentTypes::getName(getHost()));
+        return false;
+    }
+
+    return true;
 }
 
 bool Message::writeMessageStream(int out) {
@@ -245,7 +295,11 @@ bool Message::writeMessageStream(int out) {
         case STREAM_INFO:
         case STREAM_BINARY:
 
-            if (!writeJobInfo(out, getData()->getJobDir(), getData()->getExecutor())) {
+            if (!writeJobInfo(out, getData()->getJobDir())) {
+                return false;
+            }
+
+            if (!writeExecutionInfo(out, getData()->getExecutor())) {
                 return false;
             }
 
@@ -263,6 +317,10 @@ bool Message::writeMessageStream(int out) {
 
         case STREAM_MD5:
 
+            if (!writeJobInfo(out, getData()->getJobDir())) {
+                return false;
+            }
+
             for (i = 0; i < getData()->getMD5Count(); i++) {
 
                 if (!writeFileMD5(out, getData()->getMD5(i))) {
@@ -271,6 +329,15 @@ bool Message::writeMessageStream(int out) {
             }
 
             LOG_I("%s : %d file md5 content sent to network", ComponentTypes::getName(getHost()), i);
+            break;
+
+        case STREAM_JOB:
+
+            if (!writeJobInfo(out, getData()->getJobDir())) {
+                return false;
+            }
+
+            LOG_I("%s : Job : %s sent to network", ComponentTypes::getName(getHost()), getData()->getJobDir());
             break;
 
         case STREAM_NONE:

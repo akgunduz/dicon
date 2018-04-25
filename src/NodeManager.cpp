@@ -5,202 +5,113 @@
 
 #include "NodeManager.h"
 
-NodeManager::NodeManager(Component* component,
-						 fTimeoutCB timeoutCB, fWakeupCB wakeupCB, double backupRate)
-{
+NodeManager::NodeManager() {
 
-    this->component = component;
-	this->timeoutCB = timeoutCB;
-
-#ifndef DISABLE_BACKUP
-	this->backupRate = backupRate;
-    this->readyBackup = 0;
-    this->totalBackup = 0;
-#endif
-
-#ifndef DISABLE_RECOVERY
-    this->wakeupCB = wakeupCB;
-	nodeWatchdog = new NodeWatchdog(component, wakeupCB);
-#endif
 };
 
 NodeManager::~NodeManager() {
 
-#ifndef DISABLE_RECOVERY
-    if (nodeWatchdog != nullptr) {
-        delete nodeWatchdog;
-    }
-#endif
-	for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
-		NodeObject* node = i->second;
-		delete node;
-	}
 }
 
-NodeObject *NodeManager::getIdle() {
+long NodeManager::getIdle() {
 
 //TODO coklu collector de burada thread korumasi olmasi lazim
 
-    NodeObject *leastUsedNode = NULL;
+    NodeObject leastUsedNode(IDLE, 0x7FFFFFFF);
+    long leastUsedAddress = 0;
 
     int idleCount = 0;
 
-    for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
-        NodeObject *node = i->second;
-        if (node->getState() != IDLE) {
+    for (auto i = nodes.begin(); i != nodes.end(); i++) {
+        NodeObject node = i->second;
+        if (node.getState() != IDLE) {
             continue;
         }
 
         idleCount++;
 
-        if (leastUsedNode == NULL) {
+        if (node.getUsage() < leastUsedNode.getUsage()) {
             leastUsedNode = node;
-            continue;
-        }
-
-        if (node->getUsage() < leastUsedNode->getUsage()) {
-            leastUsedNode = node;
+            leastUsedAddress = i->first;
         }
     }
 
-    if (leastUsedNode != NULL
-#ifndef DISABLE_BACKUP
-        && idleCount - totalBackup + readyBackup > 0
-#endif
-            ) {
-        leastUsedNode->setState(PREBUSY);
+    if (leastUsedAddress != 0) {
 
-#ifndef DISABLE_RECOVERY
-        if (leastUsedNode->watchdog != nullptr) {
-            delete leastUsedNode->watchdog;
-            leastUsedNode->watchdog = nullptr;
-        }
-        leastUsedNode->watchdog = new NodeWatchdog(component, leastUsedNode, timeoutCB);
-#endif
-        return leastUsedNode;
+        setState(leastUsedAddress, PREBUSY);
 
-    } else {
+        return leastUsedAddress;
 
-        LOG_W("No available node right now.");
     }
 
-    return NULL;
-}
+    LOG_W("No available node right now.");
 
-bool NodeManager::setIdle(long address) {
-
-    TypeNodeList::iterator search = nodes.find(address);
-
-    if (search == nodes.end()) {
-        add(address);
-        return false;
-    }
-
-    search->second->setState(IDLE);
-
-    LOG_I("%s : Node at address : %s switch to state : %s", ComponentTypes::getName(component->getHost()),
-          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(IDLE));
-
-	return true;
-}
-
-bool NodeManager::validate(long address) {
-
-    TypeNodeList::iterator search = nodes.find(address);
-	if (search == nodes.end()) {
-		add(address);
-		return false;
-	}
-
-	LOG_I("%s : Node at address : %s is Alive", ComponentTypes::getName(component->getHost()),
-          InterfaceTypes::getAddressString(address).c_str());
-	return true;
-
-}
-
-bool NodeManager::setBusy(long address) {
-
-    TypeNodeList::iterator search = nodes.find(address);
-    if (search == nodes.end()) {
-        LOG_W("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(address).c_str());
-        return false;
-    }
-
-
-    NodeObject *node = search->second;
-
-#ifndef DISABLE_RECOVERY
-    if (node->watchdog != nullptr) {
-        delete node->watchdog;
-        node->watchdog = nullptr;
-    }
-#endif
-
-    node->setState(BUSY);
-    node->iterateUsage(true);
-
-    LOG_T("%s : Node at address : %s switch to state : %s", ComponentTypes::getName(component->getHost()),
-          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
-
-	return true;
-
-}
-
-bool NodeManager::remove(long address) {
-
-    TypeNodeList::iterator search = nodes.find(address);
-    if (search == nodes.end()) {
-        LOG_W("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(address).c_str());
-        return false;
-    }
-
-    NodeObject *node = search->second;
-    nodes.erase(address);
-    delete node;
-
-#ifndef DISABLE_BACKUP
-    readyBackup = (int) fmin(totalBackup, readyBackup + 1);
-
-    LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-    LOG_T("Node at address %s removed from the list",
-          InterfaceTypes::getAddressString(address).c_str());
-#endif
-
-	return true;
-
+    return 0;
 }
 
 bool NodeManager::add(long address) {
 
-	nodes[address] = new NodeObject(address);
+    auto search = nodes.find(address);
+    if (search == nodes.end()) {
 
-#ifndef DISABLE_BACKUP
-	totalBackup = nodes.size() == 1 ? 0 : (uint32_t) ceil(nodes.size() * backupRate);
+        mutex.lock();
 
-	readyBackup = 0;
+        nodes[address] = NodeObject();
 
-	LOG_U(UI_UPDATE_DIST_BACKUP, totalBackup, readyBackup);
-#endif
+        mutex.unlock();
 
-	LOG_I("%s : Node at address : %s added to the list", ComponentTypes::getName(component->getHost()),
-          InterfaceTypes::getAddressString(address).c_str());
+        LOG_I("Node at address : %s added to the list",
+              InterfaceTypes::getAddressString(address).c_str());
+
+        return true;
+    }
 
 	return true;
 }
 
 void NodeManager::clear() {
 
-    for (TypeNodeList::iterator i = nodes.begin(); i != nodes.end(); i++) {
-        NodeObject* node = i->second;
-        delete node;
-    }
+    mutex.lock();
 
     nodes.clear();
 
-#ifndef DISABLE_BACKUP
-	readyBackup = 0;
-	totalBackup = 0;
-#endif
+    mutex.unlock();
+}
+
+bool NodeManager::setState(long address, NODE_STATES state) {
+
+    auto search = nodes.find(address);
+    if (search == nodes.end()) {
+        LOG_I("Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(address).c_str());
+        return false;
+    }
+
+    NodeObject node = search->second;
+
+    mutex.lock();
+
+    switch(state) {
+
+        case IDLE:
+            nodes[address] = NodeObject(IDLE, node.getUsage());
+            break;
+
+        case PREBUSY:
+            nodes[address] = NodeObject(PREBUSY, node.getUsage());
+            break;
+
+        case BUSY:
+            nodes[address] = NodeObject(BUSY, node.iterateUsage(true));
+            break;
+
+        default:
+            break;
+    }
+
+    mutex.unlock();
+
+    LOG_T("Node at address : %s switch to state : %s",
+          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
+    return true;
 }

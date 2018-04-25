@@ -8,8 +8,8 @@
 
 const char* sNodeStates[] = {
         "IDLE",
+        "PREBUSY",
         "BUSY",
-        "PREBUSY"
 };
 
 const char* NodeState::getName(NODE_STATES state) {

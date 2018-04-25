@@ -7,6 +7,18 @@
 #include "ExecutorItem.h"
 #include "NodeState.h"
 
+
+Node *Node::newInstance(int id) {
+
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s_%d", getcwd(NULL, 0), NODE_PATH, id);
+    mkdir(path, 0777);
+
+    auto *instance = new Node(path);
+
+    return instance;
+}
+
 Node::Node(const char *rootPath) :
         Component(COMP_NODE, rootPath) {
 
@@ -228,11 +240,4 @@ bool Node::processCommand(const char *cmd) {
 
     return true;
 
-}
-
-bool Node::processFinal() {
-
-    LOG_I("Processing final steps!!!");
-
-    return true;
 }

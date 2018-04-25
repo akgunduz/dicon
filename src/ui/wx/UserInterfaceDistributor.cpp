@@ -56,15 +56,8 @@ void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
         try {
             distCollList->DeleteAllItems();
             distNodeList->DeleteAllItems();
-
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
-            mkdir(path, 0777);
-
-            double backupRate = 0;
-            distBackupRate->GetLineText(0).ToDouble(&backupRate);
-
-            distObject = new Distributor(path, backupRate);
+            //distBackupRate->GetLineText(0).ToDouble(&backupRate);
+            distObject = Distributor::newInstance();
 
         } catch (std::runtime_error &e) {
 
@@ -98,7 +91,7 @@ void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
 
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
+    auto *data = (EventData *)event.GetClientData();
     distCollDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
     distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_2));
 
@@ -108,7 +101,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 
     long i = 0;
 
-    EventData *data = (EventData *)event.GetClientData();
+    auto *data = (EventData *)event.GetClientData();
 
     for (; i < distCollList->GetItemCount(); i++) {
 
@@ -140,14 +133,14 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
 
     long i = 0;
 
-    EventData *data = (EventData *)event.GetClientData();
+    auto *data = (EventData *)event.GetClientData();
 
     for (; i < distNodeList->GetItemCount(); i++) {
 
         std::string item = distNodeList->GetItemText(i, 0).ToStdString();
         std::string address = InterfaceTypes::getAddressString(data->data64_1);
 
-        if (address.compare(item) == 0) {
+        if (address == item) {
             break;
         }
 
@@ -164,7 +157,7 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
 
 void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
+    auto *data = (EventData *)event.GetClientData();
 
     distBackupStatus->SetLabelText(wxString::Format(wxT("%ld"), data->data64_1));
 
@@ -172,7 +165,7 @@ void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
 void UserInterface::distUpdateLog(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
+    auto *data = (EventData *)event.GetClientData();
 
     distLog->Append(wxString::Format("%s", data->dataStr));
     LOG_S("%s : %s", ComponentTypes::getName(COMP_DISTRIBUTOR), data->dataStr.c_str());

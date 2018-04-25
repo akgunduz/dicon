@@ -23,10 +23,9 @@ typedef std::map<const ExecutorItem*, long> TypeExecAddressList;
 class Job : public JsonItem {
 
     char name[50];
-    JobInfo nodes;
+
     std::vector<ExecutorItem *> orderedList;
-    std::vector<ExecutorItem *> independentList;
-    int servedIndicator;
+    std::list<ExecutorItem *> independentList;
 
 public:
 
@@ -35,27 +34,27 @@ public:
     void init();
     ~Job();
 
-    const char* getName();
-    void setName(const char*);
-
     static bool parseNameNode(JsonItem*, json_object *node);
     static bool parseFileNode(JsonItem*, json_object *node);
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
 
+    const char* getName();
+    void setName(const char*);
+
     int getExecutorCount();
     ExecutorItem* getExecutor(int);
-    ExecutorItem* getUnServed();
-    ExecutorItem* getByOutput(int);
 
-    ExecutorItem* getOrdered(int);
+    int getFileCount();
+    FileItem* getFile(int);
+
     size_t getOrderedCount();
+    ExecutorItem* getOrdered(int);
+
     size_t getUnServedCount();
+    ExecutorItem* getUnServed();
 
-//    bool attachNode(ExecutorItem*, long);
-//    bool detachNode(ExecutorItem*);
-//    void resetNodes();
-
+    ExecutorItem* getByOutput(int);
     bool createDependencyMap();
     bool createIndepentExecutions();
     bool updateIndependentExecutions(TypeFileInfoList*);

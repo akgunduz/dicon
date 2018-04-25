@@ -45,11 +45,8 @@ void UserInterface::OnNodeInitClickWrapper( wxCommandEvent& event )
     if (wxStrcmp(nodeInitBtn->GetLabel(), "Init") == 0) {
 
         try {
-            char path[PATH_MAX];
-            sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
-            mkdir(path, 0777);
 
-            nodeObject = new Node(path);
+            nodeObject = Node::newInstance(1);
 
         } catch (std::runtime_error &e) {
 
