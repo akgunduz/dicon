@@ -44,8 +44,6 @@ long NodeManager::getIdle() {
 
     }
 
-    LOG_W("No available node right now.");
-
     return 0;
 }
 
@@ -59,9 +57,6 @@ bool NodeManager::add(long address) {
         nodes[address] = NodeObject();
 
         mutex.unlock();
-
-        LOG_I("Node at address : %s added to the list",
-              InterfaceTypes::getAddressString(address).c_str());
 
         return true;
     }
@@ -82,8 +77,6 @@ bool NodeManager::setState(long address, NODE_STATES state) {
 
     auto search = nodes.find(address);
     if (search == nodes.end()) {
-        LOG_I("Could not found a node with address : %s",
-              InterfaceTypes::getAddressString(address).c_str());
         return false;
     }
 

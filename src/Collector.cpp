@@ -187,8 +187,8 @@ bool Collector::processJob(int index) {
     //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
-    for (int k = 0; k < 1; k++) {
-//    for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
+//    for (int k = 0; k < 1; k++) {
+    for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
 
         TypeMD5List md5List;
         send2DistributorNodeMsg(getDistributorAddress(),

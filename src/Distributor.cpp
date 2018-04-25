@@ -77,7 +77,14 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 
 bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
-	nodeManager->setState(address, IDLE);
+	if (!nodeManager->setState(address, IDLE)) {
+        LOG_U(UI_UPDATE_DIST_LOG,
+              "Could not found a node with address : %s",
+              InterfaceTypes::getAddressString(address).c_str());
+
+	}
+
+	//TODO     urgent!!!!!!!!
 
     bool status = false;
 
@@ -107,6 +114,9 @@ bool Distributor::processNodeAliveMsg(long address, Message *msg) {
 
         return true;
     }
+
+    LOG_U(UI_UPDATE_DIST_LOG, "Node at address : %s added to the list",
+          InterfaceTypes::getAddressString(address).c_str());
 
     bool status = false;
 
