@@ -84,7 +84,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
     TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_ALL);
 
-    return send2NodeJobMsg(nodeAddress, getJobs()->get(0)->getJobDir(),
+    return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(),
                            executor->getParsedExec(), &list);
 }
 
@@ -102,7 +102,7 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_LOG, "%d File output binary received", msg->getData()->getFileCount());
 
-    getJobs()->get(0)->updateIndependentExecutions(msg->getData()->getFileList());
+    getJobs()->get(msg->getData()->getJobDir())->updateIndependentExecutions(msg->getData()->getFileList());
 
     TypeMD5List md5List;
 
