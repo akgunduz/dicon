@@ -23,15 +23,21 @@ private:
 	CollectorManager *collectorManager;
 
     Distributor(const char *);
+
     bool processCollectorAliveMsg(long, Message *);
     bool processCollectorNodeMsg(long, Message *);
+
     bool processNodeReadyMsg(long, Message *);
     bool processNodeAliveMsg(long, Message *);
     bool processNodeBusyMsg(long, Message *);
+    bool processNodeIDMsg(long, Message *);
+
+	bool send2CollectorWakeupMsg(long);
+	bool send2CollectorNodeMsg(long, const char*, long);
 
     bool send2NodeWakeupMsg(long);
-    bool send2CollectorWakeupMsg(long);
-    bool send2CollectorNodeMsg(long, const char*, long);
+    bool send2NodeIDMsg(long, int);
+
 
 public:
 

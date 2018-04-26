@@ -45,7 +45,7 @@ long NodeManager::getIdle() {
     return 0;
 }
 
-bool NodeManager::add(long address) {
+int NodeManager::add(long address) {
 
     auto search = nodes.find(address);
     if (search == nodes.end()) {
@@ -56,10 +56,10 @@ bool NodeManager::add(long address) {
 
         mutex.unlock();
 
-        return true;
+        return nodes[address].getID();
     }
 
-	return true;
+	return 0;
 }
 
 void NodeManager::clear() {

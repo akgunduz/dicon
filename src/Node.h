@@ -20,13 +20,17 @@ private:
 	void setDistributorAddress(long);
 
     bool processDistributorWakeupMsg(long, Message *);
+    bool processDistributorIDMsg(long, Message *);
+
     bool processCollectorJobMsg(long, Message *);
     bool processCollectorBinaryMsg(long, Message *);
     bool processCollectorReadyMsg(long, Message *);
 
     bool send2DistributorReadyMsg(long);
     bool send2DistributorAliveMsg(long);
+    bool send2DistributorIDMsg(long);
     bool send2DistributorBusyMsg(long);
+
     bool send2CollectorInfoMsg(long, const char*, const char*, TypeFileInfoList*);
 	bool send2CollectorBinaryMsg(long, const char*, const char*, TypeFileInfoList*);
 

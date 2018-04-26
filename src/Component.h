@@ -19,6 +19,8 @@ class Component {
 
     COMPONENT host;
 
+    int id;
+
     Interface *interfaces[COMP_MAX];
 
 protected :
@@ -33,7 +35,12 @@ public:
 
     Component(COMPONENT host, const char* rootPath);
     virtual ~Component();
+
     COMPONENT getHost();
+
+    int getID();
+    void setID(int);
+
     long getInterfaceAddress(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);

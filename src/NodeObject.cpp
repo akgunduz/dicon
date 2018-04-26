@@ -4,13 +4,16 @@
 
 #include "NodeObject.h"
 
+int NodeObject::idCounter = 1;
+
 NodeObject::NodeObject(NODE_STATES state, int usage) :
         state(state), usage(usage) {
 
+    id = idCounter++;
 }
 
 NodeObject::NodeObject() :
-        state(IDLE), usage(0) {
+        NodeObject(IDLE, 0) {
 }
 
 NodeObject::~NodeObject() {
@@ -40,6 +43,11 @@ std::vector<Md5> *NodeObject::getMD5List() {
 void NodeObject::setState(NODE_STATES state) {
 
     this->state = state;
+}
+
+int NodeObject::getID() {
+
+    return this->id;
 }
 
 

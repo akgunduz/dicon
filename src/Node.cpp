@@ -23,6 +23,7 @@ Node::Node(const char *rootPath) :
         Component(COMP_NODE, rootPath) {
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
@@ -42,6 +43,15 @@ bool Node::processDistributorWakeupMsg(long address, Message *msg) {
     setDistributorAddress(address);
 
     return send2DistributorAliveMsg(address);
+}
+
+bool Node::processDistributorIDMsg(long address, Message *msg) {
+
+    setID((int)msg->getHeader()->getVariant(0));
+
+    LOG_U(UI_UPDATE_NODE_LOG, "New ID : %d is assigned by Distributor", getID());
+
+    return send2DistributorIDMsg(address);
 }
 
 bool Node::processCollectorJobMsg(long address, Message *msg) {
@@ -106,6 +116,13 @@ bool Node::send2DistributorReadyMsg(long address) {
 bool Node::send2DistributorAliveMsg(long address) {
 
     auto *msg = new Message(COMP_NODE, MSGTYPE_ALIVE);
+
+    return send(COMP_DISTRIBUTOR, address, msg);
+}
+
+bool Node::send2DistributorIDMsg(long address) {
+
+    auto *msg = new Message(COMP_NODE, MSGTYPE_ID);
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }

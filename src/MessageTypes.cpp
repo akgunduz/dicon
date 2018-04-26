@@ -17,6 +17,7 @@ const char* sMsgTypes[MSGTYPE_MAX] = {
         "BUSY",
         "TIMEOUT",
         "ALIVE",
+        "ID",
 };
 
 const char* MessageTypes::getName(MSG_TYPE type) {

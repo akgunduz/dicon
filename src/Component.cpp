@@ -7,6 +7,7 @@
 Component::Component(COMPONENT host, const char* rootPath) {
 
     setHost(host);
+    setID(0);
     ComponentTypes::setRootPath(getHost(), rootPath);
 
     callback = new InterfaceCallback(receiveCB, this);
@@ -40,6 +41,14 @@ COMPONENT Component::getHost() {
 void Component::setHost(COMPONENT host) {
 
     this->host = host;
+}
+
+int Component::getID() {
+    return id;
+}
+
+void Component::setID(int id) {
+    this->id = id;
 }
 
 bool Component::receiveCB(void *arg, SchedulerItem* item) {
@@ -122,6 +131,8 @@ bool Component::send(COMPONENT target, long address, Message *msg) {
             ComponentTypes::getName(target),
             InterfaceTypes::getAddressString(address).c_str());
 
+    msg->getHeader()->setID(getID());
+
     return interfaces[target]->push(MESSAGE_SEND, address, msg);
 }
 
@@ -131,10 +142,14 @@ bool Component::send(COMPONENT target, Message *msg) {
           "Send --> \"%s\" as MultiCast",
           MessageTypes::getName(msg->getHeader()->getType()));
 
+    msg->getHeader()->setID(getID());
+
     return interfaces[target]->push(MESSAGE_SEND, interfaces[target]->getMulticastAddress(), msg);
 }
 
 bool Component::put(COMPONENT target, long address, Message *msg) {
+
+    msg->getHeader()->setID(getID());
 
     return interfaces[target]->push(MESSAGE_RECEIVE, address, msg);
 }

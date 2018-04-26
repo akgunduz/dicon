@@ -20,14 +20,13 @@ private:
     
 public:
 
-    static INTERFACE getInterface(long address);
+    static INTERFACE getInterface(long);
     static long getBase(long);
     static int getPort(long);
     static int getHelper(long);
-    static int getID(long);
     static int address2prefix(long);
 
-    static long createAddress(INTERFACE, long base, int port, int helper);
+    static long createAddress(INTERFACE, long, int, int);
 };
 
 #endif //BANKOR_ADDRESS_H

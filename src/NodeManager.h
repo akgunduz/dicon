@@ -11,7 +11,6 @@
 #include "Util.h"
 #include "StopWatch.h"
 #include "NodeObject.h"
-#include "NodeWatchdog.h"
 
 typedef std::map<long, NodeObject> TypeNodeList;
 
@@ -27,7 +26,7 @@ public:
 
 	virtual ~NodeManager();
 
-	bool add(long);
+	int add(long);
 	bool setState(long, NODE_STATES);
 
 	long getIdle();

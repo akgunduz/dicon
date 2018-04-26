@@ -5,11 +5,8 @@
 #ifndef BANKOR_NODEOBJECT_H
 #define BANKOR_NODEOBJECT_H
 
-#include "StopWatch.h"
-#include "NodeWatchdog.h"
 #include "NodeState.h"
-
-class NodeWatchdog;
+#include "Md5.h"
 
 class NodeObject {
 
@@ -17,11 +14,9 @@ private:
 
     NODE_STATES state;
     int usage;
+    int id;
+    static int idCounter;
     std::vector<Md5> md5List;
-
-#ifndef DISABLE_RECOVERY
-    NodeWatchdog *watchdog;
-#endif
 
 public:
 
@@ -29,6 +24,7 @@ public:
     NodeObject();
     ~NodeObject();
 
+    int getID();
     NODE_STATES getState();
     void setState(NODE_STATES);
     int getUsage();

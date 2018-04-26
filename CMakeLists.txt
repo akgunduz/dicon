@@ -34,7 +34,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Node.cpp
         ${SOURCE_PATH}/NodeObject.cpp
         ${SOURCE_PATH}/NodeManager.cpp
-        ${SOURCE_PATH}/NodeWatchdog.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/Util.cpp

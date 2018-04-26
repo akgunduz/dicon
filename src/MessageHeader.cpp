@@ -11,6 +11,11 @@ MessageHeader::MessageHeader() {
 
 }
 
+int MessageHeader::getSize() {
+
+    return sizeof(MessageHeader);
+}
+
 void MessageHeader::setType(MSG_TYPE type) {
     this->type = (int)type;
 }
@@ -35,16 +40,12 @@ void MessageHeader::setOwnerAddress(long address) {
     ownerAddress = address;
 }
 
-long MessageHeader::getTime() {
-    return time;
+int MessageHeader::getID() {
+    return id;
 }
 
-long MessageHeader::getDeviceID() {
-    return deviceID;
-}
-
-long MessageHeader::getMessageID() {
-    return messageID;
+void MessageHeader::setID(int id) {
+    this->id = id;
 }
 
 long MessageHeader::getVariant(int id) {
@@ -91,11 +92,8 @@ bool MessageHeader::set(const uint8_t* buffer) {
     type = ntohl(*((int *) buffer)); buffer += 4;
     priority = ntohl(*((int *) buffer)); buffer += 4;
     owner = ntohl(*((int *) buffer)); buffer += 4;
+    id = ntohl(*((int *) buffer)); buffer += 4;
     ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
-    time = ntohll(*((long *) buffer)); buffer += 8;
-    deviceID = ntohll(*((long *) buffer)); buffer += 8;
-    messageID = ntohll(*((long *) buffer)); buffer += 8;
-
     for (int i = 0; i < MAX_VARIANT; i++) {
         variant[i] = ntohll(*((long *) buffer)); buffer += 8;
     }
@@ -108,19 +106,11 @@ bool MessageHeader::extract(uint8_t *buffer) {
     *((int *) buffer) = htonl(type); buffer += 4;
     *((int *) buffer) = htonl(priority); buffer += 4;
     *((int *) buffer) = htonl(owner); buffer += 4;
+    *((int *) buffer) = htonl(id); buffer += 4;
     *((long *) buffer) = htonll(ownerAddress); buffer += 8;
-    *((long *) buffer) = htonll(time); buffer += 8;
-    *((long *) buffer) = htonll(deviceID); buffer += 8;
-    *((long *) buffer) = htonll(messageID); buffer += 8;
-
     for (int i = 0; i < MAX_VARIANT; i++) {
         *((long *) buffer) = htonll(variant[i]); buffer += 8;
     }
 
     return true;
-}
-
-int MessageHeader::getSize() {
-
-    return sizeof(MessageHeader);
 }

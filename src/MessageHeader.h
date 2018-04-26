@@ -10,7 +10,7 @@
 #include "MessageTypes.h"
 #include "ComponentTypes.h"
 
-#define MAX_VARIANT 2
+#define MAX_VARIANT 3
 
 #define PRIORITY_COEFFICIENT 10
 
@@ -21,28 +21,30 @@ class MessageHeader {
     int type;
     int priority;
     int owner;
+    int id;
+
     long ownerAddress;
-    long time;
-    long deviceID;
-    long messageID;
     long variant[MAX_VARIANT];
 
 public:
     MessageHeader();
+
+    int getSize();
+
     void setType(MSG_TYPE);
     MSG_TYPE getType();
+
     COMPONENT getOwner();
     void setOwner(COMPONENT);
 
     long getOwnerAddress();
     void setOwnerAddress(long);
+
+    int getID();
+    void setID(int);
+
     long getVariant(int id);
     void setVariant(int id, long variant);
-    int getSize();
-
-    long getTime();
-    long getDeviceID();
-    long getMessageID();
 
     int getPriority();
     void setPriority(int);
