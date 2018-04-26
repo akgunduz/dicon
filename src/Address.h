@@ -10,7 +10,8 @@
 #define INTERFACE_MASK 0x01
 #define ADDRESS_MASK 0xFFFFFFFF
 #define PORT_MASK 0xFFFF
-#define HELPER_MASK 0xFF
+#define ID_MASK 0x1FF
+#define HELPER_MASK 0x1F
 
 class Address {
 
@@ -23,6 +24,7 @@ public:
     static long getBase(long);
     static int getPort(long);
     static int getHelper(long);
+    static int getID(long);
     static int address2prefix(long);
 
     static long createAddress(INTERFACE, long base, int port, int helper);
