@@ -74,7 +74,7 @@ Interface::~Interface() {
 
 bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
-	if (Address::getInterface(target) == getType()) {
+	if (AddressHelper::getInterface(target) == getType()) {
 
 		scheduler->push(new MessageItem(type, target, msg));
 		return true;

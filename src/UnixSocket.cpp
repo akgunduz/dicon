@@ -30,7 +30,7 @@ bool UnixSocket::initUnixSocket() {
 
 	for (int j = tryCount; j > 0; j--) {
 
-        long address = Address::createAddress(getDevice()->getType(), getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
+        long address = AddressHelper::createAddress(getDevice()->getType(), getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
 
 		sockaddr_un serverAddress = getUnixAddress(address);
 

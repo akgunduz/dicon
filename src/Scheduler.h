@@ -8,7 +8,7 @@
 
 #include "Common.h"
 #include "Message.h"
-#include "Address.h"
+#include "AddressHelper.h"
 #include "InterfaceCallback.h"
 #include "MessageDirection.h"
 #include "SchedulerItem.h"

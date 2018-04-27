@@ -1,45 +1,71 @@
 //
-// Created by Haluk AKGUNDUZ on 25/09/15.
+// Created by Haluk AKGUNDUZ on 27.04.2018.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
 #include "Address.h"
 
-long Address::createAddress(INTERFACE interface, long base, int port, int helper) {
+Address::Address(INTERFACE interface, long base, int port, int helper, int id) :
+    interface(interface), base(base), port(port), helper(helper), id(id) {
 
-    return ((long)(interface & INTERFACE_MASK) << 62) |
-            ((long)(helper & HELPER_MASK) << 48) |
-            ((long)(port & PORT_MASK) << 32) |
-            (base & ADDRESS_MASK);
 }
 
-INTERFACE Address::getInterface(long address) {
+Address::Address(long address) {
 
-    return (INTERFACE)((address >> 62) & INTERFACE_MASK);
+    deserialize(address);
 }
 
-long Address::getBase(long address) {
+INTERFACE Address::getInterface() {
 
-    return address & ADDRESS_MASK;
+    return interface;
 }
 
-int Address::getPort(long address) {
+long Address::getBase() {
 
-    return (int)((address >> 32) & PORT_MASK);
+    return base;
 }
 
-int Address::getHelper(long address) {
+int Address::getPort() {
 
-    return (int)((address >> 48) & HELPER_MASK);
+    return port;
 }
 
-int Address::address2prefix(long address) {
+int Address::getHelper() {
+
+    return helper;
+}
+
+int Address::getID() {
+
+    return id;
+}
+
+int Address::address2prefix() {
 
     int i = 0;
-    uint32_t ip = (uint32_t) Address::getBase(address);
+    uint32_t ip = (uint32_t) base;
     while(ip > 0) {
         ip = ip >> 1;
         i++;
     }
 
     return i;
+}
+
+long Address::serialize() {
+
+    return ((long)(interface & INTERFACE_MASK) << 62) |
+           ((long)(id & ID_MASK) << 53) |
+           ((long)(helper & HELPER_MASK) << 48) |
+           ((long)(port & PORT_MASK) << 32) |
+           (base & ADDRESS_MASK);
+}
+
+void Address::deserialize(long address) {
+
+    interface = (INTERFACE)((address >> 62) & INTERFACE_MASK);
+    id = (int)((address >> 53) & ID_MASK);
+    base = address & ADDRESS_MASK;
+    port = (int)((address >> 32) & PORT_MASK);
+    helper = (int)((address >> 48) & HELPER_MASK);
 }

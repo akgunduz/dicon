@@ -45,7 +45,7 @@ bool Net::initTCP() {
 
     for (int j = tryCount; j > 0; j--) {
 
-        long address = Address::createAddress(getDevice()->getType(),
+        long address = AddressHelper::createAddress(getDevice()->getType(),
                                               getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
 
         struct sockaddr_in serverAddress = getInetAddressByAddress(address);
@@ -86,7 +86,7 @@ bool Net::initTCP() {
 
 bool Net::initMulticast() {
 
-    long multicastAddress = Address::createAddress(getDevice()->getType(), MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
+    long multicastAddress = AddressHelper::createAddress(getDevice()->getType(), MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT, 0);
 
     multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (multicastSocket < 0) {
@@ -276,14 +276,14 @@ bool Net::isSupportMulticast() {
 std::string Net::getAddressString(long address) {
 
     char sAddress[50];
-    sprintf(sAddress, "%s:%d", getIPString(address).c_str(), Address::getPort(address));
+    sprintf(sAddress, "%s:%d", getIPString(address).c_str(), AddressHelper::getPort(address));
     return std::string(sAddress);
 }
 
 std::string Net::getIPString(long address) {
 
     struct in_addr addr;
-    addr.s_addr = htonl(Address::getBase(address));
+    addr.s_addr = htonl(AddressHelper::getBase(address));
     char cIP[INET_ADDRSTRLEN];
 
     const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
@@ -318,9 +318,7 @@ long Net::parseAddress(std::string address) {
     long ip = parseIPAddress(sIP);
     int port = atoi(sPort.c_str());
 
-    long final = Address::createAddress(INTERFACE_NET, ip, port, 24);
-
-    return Address::createAddress(INTERFACE_NET, ip, port, 24);
+    return AddressHelper::createAddress(INTERFACE_NET, ip, port, 24);
 }
 
 
@@ -329,8 +327,8 @@ sockaddr_in Net::getInetAddressByAddress(long address) {
     sockaddr_in inet_addr;
     memset((char *) &inet_addr, 0, sizeof(inet_addr));
     inet_addr.sin_family = AF_INET;
-    inet_addr.sin_port = htons((uint16_t)Address::getPort(address));
-    inet_addr.sin_addr.s_addr = htonl((uint32_t)Address::getBase(address));
+    inet_addr.sin_port = htons((uint16_t)AddressHelper::getPort(address));
+    inet_addr.sin_addr.s_addr = htonl((uint32_t)AddressHelper::getBase(address));
     return inet_addr;
 }
 
@@ -350,7 +348,7 @@ ip_mreq Net::getInetMulticastAddress(long address) {
     memset((char *) &imreq, 0, sizeof(imreq));
 
     imreq.imr_multiaddr.s_addr = htonl(MULTICAST_ADDRESS);
-    imreq.imr_interface.s_addr = htonl((uint32_t)Address::getBase(address));
+    imreq.imr_interface.s_addr = htonl((uint32_t)AddressHelper::getBase(address));
     return imreq;
 
 }
@@ -363,7 +361,7 @@ std::vector<long> Net::getAddressList(Device* device) {
 
         for (int i = 0; i < LOOPBACK_RANGE; i++) {
 
-            long destAddress = Address::createAddress(device->getType(),
+            long destAddress = AddressHelper::createAddress(device->getType(),
                                                       device->getBase(), DEFAULT_PORT + i, device->getHelper());
 
             if (destAddress != device->getBase()) {
@@ -388,7 +386,7 @@ std::vector<long> Net::getAddressList(Device* device) {
 
             if (startIP != device->getBase()) {
 
-                long destAddress = Address::createAddress(device->getType(),
+                long destAddress = AddressHelper::createAddress(device->getType(),
                                                           startIP, DEFAULT_PORT, device->getHelper());
 
                 list.push_back(destAddress);

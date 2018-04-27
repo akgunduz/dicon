@@ -4,7 +4,7 @@
 //
 
 #include "BaseMessage.h"
-#include "Address.h"
+#include "AddressHelper.h"
 
 BaseMessage::BaseMessage() {
 

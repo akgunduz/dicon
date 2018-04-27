@@ -40,6 +40,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/Address.cpp
+        ${SOURCE_PATH}/AddressHelper.cpp
         ${SOURCE_PATH}/Job.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp

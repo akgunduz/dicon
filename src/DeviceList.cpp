@@ -5,7 +5,7 @@
 
 
 #include "DeviceList.h"
-#include "Address.h"
+#include "AddressHelper.h"
 #include "Log.h"
 
 DeviceList* DeviceList::instance = NULL;
@@ -31,7 +31,7 @@ DeviceList::DeviceList() {
 
             device = new Device(loop->ifa_name, INTERFACE_NET,
                                                ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                               Address::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                                               AddressHelper::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                                (loop->ifa_flags & IFF_LOOPBACK) > 0);
 
             add(device);

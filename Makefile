@@ -60,7 +60,7 @@ FILES = \
         ${SOURCE_PATH}/Unit.cpp \
         ${SOURCE_PATH}/StopWatch.cpp \
         ${SOURCE_PATH}/UnixSocket.cpp \
-        ${SOURCE_PATH}/Address.cpp \
+        ${SOURCE_PATH}/AddressHelper.cpp \
         ${SOURCE_PATH}/NetAddress.cpp \
         ${SOURCE_PATH}/PipeAddress.cpp \
         ${SOURCE_PATH}/UnixSocketAddress.cpp \

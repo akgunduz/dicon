@@ -32,7 +32,7 @@ fGetAddressList InterfaceTypes::getAddressList(INTERFACE type) {
 
 std::string InterfaceTypes::getAddressString(long address) {
 
-    INTERFACE type = Address::getInterface(address);
+    INTERFACE type = AddressHelper::getInterface(address);
 
     switch (type) {
 

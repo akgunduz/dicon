@@ -10,7 +10,7 @@
 #include "Scheduler.h"
 #include "Interface.h"
 #include "Message.h"
-#include "Address.h"
+#include "AddressHelper.h"
 
 class Connector {
 

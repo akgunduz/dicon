@@ -7,7 +7,7 @@
 
 #include "Scheduler.h"
 #include "Message.h"
-#include "Address.h"
+#include "AddressHelper.h"
 #include "Device.h"
 #include "MessageItem.h"
 

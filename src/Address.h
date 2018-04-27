@@ -1,9 +1,11 @@
 //
-// Created by Haluk AKGUNDUZ on 25/09/15.
+// Created by Haluk AKGUNDUZ on 27.04.2018.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef BANKOR_ADDRESS_H
 #define BANKOR_ADDRESS_H
+
 
 #include "InterfaceTypes.h"
 
@@ -15,18 +17,25 @@
 
 class Address {
 
-private:
-    Address(){};
-    
+    INTERFACE interface;
+    int id;
+    int port;
+    int helper;
+    long base;
+
 public:
 
-    static INTERFACE getInterface(long);
-    static long getBase(long);
-    static int getPort(long);
-    static int getHelper(long);
-    static int address2prefix(long);
-
-    static long createAddress(INTERFACE, long, int, int);
+    Address(INTERFACE, long, int, int, int = 0);
+    Address(long);
+    INTERFACE getInterface();
+    int getID();
+    long getBase();
+    int getPort();
+    int getHelper();
+    int address2prefix();
+    long serialize();
+    void deserialize(long);
 };
+
 
 #endif //BANKOR_ADDRESS_H
