@@ -8,18 +8,29 @@
 
 #include "Common.h"
 
-typedef std::pair<long, const char*> TypeWaitingCollector;
+typedef std::pair<long, std::string> TypeWaitingCollector;
+typedef std::map<long, int> TypeCollectorList;
 
 class CollectorManager {
 
     std::mutex mutex;
+    TypeCollectorList collectors;
     std::deque<TypeWaitingCollector> waitingList;
+
+    static int idCounter;
 
 public:
 
-    bool add(long, const char*);
-    TypeWaitingCollector get();
-    size_t getCount();
+    virtual ~CollectorManager();
+    bool addWaiting(long, std::string);
+    TypeWaitingCollector getWaiting();
+    size_t getWaitingCount();
+    void clearWaiting();
+    int add(long);
+    int getID(long);
+
+    static int getFreeID();
+
     void clear();
 };
 

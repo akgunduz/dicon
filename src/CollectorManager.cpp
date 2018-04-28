@@ -4,13 +4,16 @@
 //
 
 #include "CollectorManager.h"
+#include "AddressHelper.h"
 
-size_t CollectorManager::getCount() {
+int CollectorManager::idCounter = 1;
+
+size_t CollectorManager::getWaitingCount() {
 
     return waitingList.size();
 }
 
-TypeWaitingCollector CollectorManager::get() {
+TypeWaitingCollector CollectorManager::getWaiting() {
 
     mutex.lock();
 
@@ -29,7 +32,7 @@ TypeWaitingCollector CollectorManager::get() {
     return collector;
 }
 
-bool CollectorManager::add(long address, const char *jobDir) {
+bool CollectorManager::addWaiting(long address, std::string jobDir) {
 
     mutex.lock();
 
@@ -40,12 +43,56 @@ bool CollectorManager::add(long address, const char *jobDir) {
     return true;
 }
 
-void CollectorManager::clear() {
+void CollectorManager::clearWaiting() {
 
     mutex.lock();
 
     waitingList.clear();
 
     mutex.unlock();
+}
+
+int CollectorManager::add(long address) {
+
+    auto search = collectors.find(address);
+    if (search == collectors.end()) {
+
+        mutex.lock();
+
+        collectors[address] = AddressHelper::getID(address);
+
+        mutex.unlock();
+
+        return true;
+    }
+
+    return false;
+}
+
+int CollectorManager::getID(long address) {
+
+    auto search = collectors.find(address);
+    if (search == collectors.end()) {
+        return 0;
+    }
+
+    return collectors[address];
+}
+
+void CollectorManager::clear() {
+
+    clearWaiting();
+    collectors.clear();
+}
+
+CollectorManager::~CollectorManager() {
+
+    clearWaiting();
+    collectors.clear();
+}
+
+int CollectorManager::getFreeID() {
+
+    return idCounter++;
 }
 

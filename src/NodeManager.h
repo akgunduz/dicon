@@ -19,6 +19,7 @@ private:
 
     std::mutex mutex;
     TypeNodeList nodes;
+
 	static int idCounter;
 
 public:

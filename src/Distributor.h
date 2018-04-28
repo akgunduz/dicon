@@ -33,6 +33,7 @@ private:
     bool processNodeIDMsg(long, Message *);
 
 	bool send2CollectorWakeupMsg(long);
+	bool send2CollectorIDMsg(long, int);
 	bool send2CollectorNodeMsg(long, const char*, long);
 
     bool send2NodeWakeupMsg(long);

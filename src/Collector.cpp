@@ -72,7 +72,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
         return false;
     }
 
-    if (!Util::checkPath(ComponentTypes::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
+    if (strcmp(msg->getData()->getJobDir(), "") == 0 || !Util::checkPath(ComponentTypes::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
         LOGS_I(COMP_COLLECTOR, getID(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
         delete msg;
         return false;
