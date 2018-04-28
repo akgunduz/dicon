@@ -7,30 +7,27 @@
 
 #include "NodeState.h"
 #include "Md5.h"
+#include "ComponentObject.h"
 
-class NodeObject {
+class NodeObject : public ComponentObject {
 
 private:
 
     NODE_STATES state;
     int usage;
-    int id;
-    std::vector<Md5> md5List;
 
 public:
 
     NodeObject(NODE_STATES, int, int);
-    NodeObject(int);
     NodeObject();
+    NodeObject(int);
     ~NodeObject();
 
-    int getID();
+
     NODE_STATES getState();
     void setState(NODE_STATES);
     int getUsage();
     int iterateUsage(bool);
-    std::vector<Md5>* getMD5List();
-
 };
 
 

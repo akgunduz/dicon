@@ -75,12 +75,12 @@ bool Component::onReceive(long address, Message *msg) {
            msg->getHeader()->getOwner(),
            AddressHelper::getID(address),
           false,
-          "\"%s\" is processed",
+          "\"%s\" is received",
           MessageTypes::getName(msg->getHeader()->getType()));
 
     if (msg->getHeader()->getOwner() >= COMP_MAX) {
 
-        LOG_E("Wrong message received : %d from %s, disgarding",
+        LOGS_E(getHost(), getID(), "Wrong message received : %d from %s, disgarding",
               msg->getHeader()->getType(),
               InterfaceTypes::getAddressString(address).c_str());
 
@@ -141,7 +141,7 @@ bool Component::send(COMPONENT target, long address, Message *msg) {
            target,
            AddressHelper::getID(address),
            true,
-           "\"%s\" is processed",
+           "\"%s\" is sent",
            MessageTypes::getName(msg->getHeader()->getType()));
 
     msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));
@@ -153,7 +153,7 @@ bool Component::send(COMPONENT target, Message *msg) {
 
     LOGS_I(getHost(),
            getID(),
-           "Multicast \"%s\" is processed",
+           "Multicast \"%s\" is sent",
            MessageTypes::getName(msg->getHeader()->getType()));
 
     msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));

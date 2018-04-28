@@ -58,6 +58,9 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/History.cpp
         ${SOURCE_PATH}/FileInfo.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
+        ${SOURCE_PATH}/ComponentObject.cpp
+        ${SOURCE_PATH}/ComponentManager.cpp
+        ${SOURCE_PATH}/CollectorObject.cpp
         )
 
 set(WX_FILES

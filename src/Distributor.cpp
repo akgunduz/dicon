@@ -48,7 +48,7 @@ Distributor::~Distributor() {
 
 bool Distributor::processCollectorAliveMsg(long address, Message *msg) {
 
-    address = AddressHelper::setID(address, CollectorManager::getFreeID());
+    address = AddressHelper::setID(address, collectorManager->getFreeID());
 
     if (!collectorManager->add(address)) {
 
@@ -93,7 +93,7 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 
 bool Distributor::processNodeAliveMsg(long address, Message *msg) {
 
-    address = AddressHelper::setID(address, NodeManager::getFreeID());
+    address = AddressHelper::setID(address, nodeManager->getFreeID());
 
     if (!nodeManager->add(address)) {
 

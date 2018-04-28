@@ -4,8 +4,7 @@
 //
 
 #include "NodeManager.h"
-
-int NodeManager::idCounter = 1;
+#include "AddressHelper.h"
 
 NodeManager::NodeManager() {
 
@@ -17,97 +16,62 @@ NodeManager::~NodeManager() {
 
 long NodeManager::getIdle() {
 
-    NodeObject leastUsedNode(IDLE, 0x7FFFFFFF, 0);
-    long leastUsedAddress = 0;
+    TypeComponentList::iterator leastUsedNode = components.end();
 
-    int idleCount = 0;
+    mutex.lock();
 
-    for (auto i = nodes.begin(); i != nodes.end(); i++) {
-        NodeObject node = i->second;
-        if (node.getState() != IDLE) {
+    for (auto i = components.begin(); i != components.end(); i++) {
+
+        auto *node = (NodeObject*) i->second;
+
+        if (node->getState() != IDLE) {
             continue;
         }
 
-        idleCount++;
+        if (leastUsedNode == components.end()) {
+            leastUsedNode = i;
+            continue;
+        }
 
-        if (node.getUsage() < leastUsedNode.getUsage()) {
-            leastUsedNode = node;
-            leastUsedAddress = i->first;
+        if (node->getUsage() < ((NodeObject*)leastUsedNode->second)->getUsage()) {
+            leastUsedNode = i;
         }
     }
 
-    if (leastUsedAddress != 0) {
+    if (leastUsedNode != components.end()) {
 
-        setState(leastUsedAddress, PREBUSY);
+        ((NodeObject*)leastUsedNode->second)->setState(PREBUSY);
 
-        return leastUsedAddress;
+        mutex.unlock();
+
+        return leastUsedNode->first;
 
     }
+
+    mutex.unlock();
 
     return 0;
 }
 
-bool NodeManager::add(long address) {
-
-    auto search = nodes.find(address);
-    if (search == nodes.end()) {
-
-        mutex.lock();
-
-        nodes[address] = NodeObject(AddressHelper::getID(address));
-
-        mutex.unlock();
-
-        return true;
-    }
-
-	return false;
-}
-
-void NodeManager::clear() {
-
-    mutex.lock();
-
-    nodes.clear();
-
-    mutex.unlock();
-}
-
 bool NodeManager::setState(long address, NODE_STATES state) {
 
-    auto search = nodes.find(address);
-    if (search == nodes.end()) {
+    auto search = components.find(address);
+    if (search == components.end()) {
         return false;
     }
 
-    NodeObject node = search->second;
+    auto *node = (NodeObject*) search->second;
 
     mutex.lock();
 
-    switch(state) {
-
-        case IDLE:
-            nodes[address] = NodeObject(IDLE, node.getUsage(), node.getID());
-            break;
-
-        case PREBUSY:
-            nodes[address] = NodeObject(PREBUSY, node.getUsage(), node.getID());
-            break;
-
-        case BUSY:
-            nodes[address] = NodeObject(BUSY, node.iterateUsage(true), node.getID());
-            break;
-
-        default:
-            break;
-    }
+    node->setState(state);
 
     mutex.unlock();
 
     return true;
 }
 
-int NodeManager::getFreeID() {
+void NodeManager::setObject(long address) {
 
-    return idCounter++;
+    components[address] = new NodeObject(AddressHelper::getID(address));
 }

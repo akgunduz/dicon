@@ -6,32 +6,26 @@
 #ifndef BANKOR_COLLECTORMANAGER_H
 #define BANKOR_COLLECTORMANAGER_H
 
-#include "Common.h"
+#include "ComponentManager.h"
 
 typedef std::pair<long, std::string> TypeWaitingCollector;
-typedef std::map<long, int> TypeCollectorList;
 
-class CollectorManager {
+class CollectorManager : public ComponentManager {
 
-    std::mutex mutex;
-    TypeCollectorList collectors;
     std::deque<TypeWaitingCollector> waitingList;
-
-    static int idCounter;
 
 public:
 
-    virtual ~CollectorManager();
+    CollectorManager();
+    ~CollectorManager();
     bool addWaiting(long, std::string);
     TypeWaitingCollector getWaiting();
     size_t getWaitingCount();
     void clearWaiting();
-    int add(long);
-    int getID(long);
 
-    static int getFreeID();
+    void setObject(long);
 
-    void clear();
+
 };
 
 

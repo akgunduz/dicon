@@ -5,8 +5,13 @@
 
 #include "CollectorManager.h"
 #include "AddressHelper.h"
+#include "ComponentManager.h"
+#include "CollectorObject.h"
 
-int CollectorManager::idCounter = 1;
+
+CollectorManager::CollectorManager() {
+
+}
 
 size_t CollectorManager::getWaitingCount() {
 
@@ -52,47 +57,13 @@ void CollectorManager::clearWaiting() {
     mutex.unlock();
 }
 
-int CollectorManager::add(long address) {
-
-    auto search = collectors.find(address);
-    if (search == collectors.end()) {
-
-        mutex.lock();
-
-        collectors[address] = AddressHelper::getID(address);
-
-        mutex.unlock();
-
-        return true;
-    }
-
-    return false;
-}
-
-int CollectorManager::getID(long address) {
-
-    auto search = collectors.find(address);
-    if (search == collectors.end()) {
-        return 0;
-    }
-
-    return collectors[address];
-}
-
-void CollectorManager::clear() {
-
-    clearWaiting();
-    collectors.clear();
-}
-
 CollectorManager::~CollectorManager() {
 
     clearWaiting();
-    collectors.clear();
 }
 
-int CollectorManager::getFreeID() {
+void CollectorManager::setObject(long address) {
 
-    return idCounter++;
+    components[address] = new CollectorObject(AddressHelper::getID(address));
 }
 

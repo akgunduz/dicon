@@ -6,37 +6,24 @@
 #ifndef NODEMANAGER_H
 #define	NODEMANAGER_H
 
-#include "Node.h"
-#include "Connector.h"
-#include "Util.h"
-#include "StopWatch.h"
 #include "NodeObject.h"
+#include "ComponentManager.h"
 
-typedef std::map<long, NodeObject> TypeNodeList;
+class NodeManager : public ComponentManager {
 
-class NodeManager {
 private:
-
-    std::mutex mutex;
-    TypeNodeList nodes;
-
-	static int idCounter;
 
 public:
 
 	NodeManager();
 
-	virtual ~NodeManager();
+	~NodeManager();
 
-	bool add(long);
 	bool setState(long, NODE_STATES);
 
 	long getIdle();
 
-	static int getFreeID();
-
-	void clear();
-
+    void setObject(long);
 };
 
 #endif	/* DISTRIBUTOR_H */
