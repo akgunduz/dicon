@@ -17,35 +17,33 @@ int MessageHeader::getSize() {
 }
 
 void MessageHeader::setType(MSG_TYPE type) {
+
     this->type = (int)type;
 }
 
 MSG_TYPE MessageHeader::getType() {
+
     return (MSG_TYPE)type;
 }
 
 COMPONENT MessageHeader::getOwner() {
+
     return (COMPONENT)owner;
 }
 
 void MessageHeader::setOwner(COMPONENT owner) {
-    this->owner = owner;
+
+    this->owner = (int)owner;
 }
 
 long MessageHeader::getOwnerAddress() {
+
     return ownerAddress;
 }
 
-void MessageHeader::setOwnerAddress(long address) {
-    ownerAddress = address;
-}
+void MessageHeader::setOwnerAddress(long ownerAddress) {
 
-int MessageHeader::getID() {
-    return id;
-}
-
-void MessageHeader::setID(int id) {
-    this->id = id;
+    this->ownerAddress = ownerAddress;
 }
 
 long MessageHeader::getVariant(int id) {
@@ -67,6 +65,7 @@ void MessageHeader::setVariant(int id, long variant) {
 }
 
 int MessageHeader::getPriority() {
+
     return priority;
 }
 
@@ -80,10 +79,12 @@ int MessageHeader::iteratePriority() {
 }
 
 void MessageHeader::setPriority(int priority) {
+
     this->priority = priority;
 }
 
 void MessageHeader::normalizePriority() {
+
     priority *= PRIORITY_COEFFICIENT;
 }
 
@@ -92,7 +93,6 @@ bool MessageHeader::set(const uint8_t* buffer) {
     type = ntohl(*((int *) buffer)); buffer += 4;
     priority = ntohl(*((int *) buffer)); buffer += 4;
     owner = ntohl(*((int *) buffer)); buffer += 4;
-    id = ntohl(*((int *) buffer)); buffer += 4;
     ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
     for (int i = 0; i < MAX_VARIANT; i++) {
         variant[i] = ntohll(*((long *) buffer)); buffer += 8;
@@ -106,7 +106,6 @@ bool MessageHeader::extract(uint8_t *buffer) {
     *((int *) buffer) = htonl(type); buffer += 4;
     *((int *) buffer) = htonl(priority); buffer += 4;
     *((int *) buffer) = htonl(owner); buffer += 4;
-    *((int *) buffer) = htonl(id); buffer += 4;
     *((long *) buffer) = htonll(ownerAddress); buffer += 8;
     for (int i = 0; i < MAX_VARIANT; i++) {
         *((long *) buffer) = htonll(variant[i]); buffer += 8;

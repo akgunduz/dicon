@@ -4,19 +4,19 @@
 
 #include "Component.h"
 
-Component::Component(COMPONENT host, const char* rootPath) {
+Component::Component(COMPONENT host, const char* rootPath) :
+    host(host), id(0) {
 
-    setHost(host);
-    setID(0);
     ComponentTypes::setRootPath(getHost(), rootPath);
 
-    callback = new InterfaceCallback(receiveCB, this);
+    schedulerCB = new InterfaceSchedulerCB(receiveCB, this);
+    hostCB = new InterfaceHostCB(getHostCB, getIDCB, this);
 
     DeviceList *deviceList = DeviceList::getInstance();
 
-    interfaces[COMP_NODE] = Connector::createInterface(host, deviceList->getActive(1), callback);
+    interfaces[COMP_NODE] = Connector::createInterface(deviceList->getActive(1), schedulerCB, hostCB);
     interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host != COMP_NODE ?
-                                   Connector::createInterface(host, deviceList->getActive(0), callback) :
+                                   Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
@@ -30,7 +30,9 @@ Component::~Component() {
 
     delete interfaces[COMP_NODE];
 
-    delete callback;
+    delete schedulerCB;
+
+    delete hostCB;
 }
 
 COMPONENT Component::getHost() {
@@ -38,16 +40,23 @@ COMPONENT Component::getHost() {
     return host;
 }
 
-void Component::setHost(COMPONENT host) {
+int Component::getHostCB(void *arg) {
 
-    this->host = host;
+    return (int)((Component*) arg)->getHost();
 }
 
 int Component::getID() {
+
     return id;
 }
 
+int Component::getIDCB(void *arg) {
+
+    return ((Component*) arg)->getID();
+}
+
 void Component::setID(int id) {
+
     this->id = id;
 }
 
@@ -61,11 +70,13 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
 bool Component::onReceive(long address, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-          "Receive --> \"%s\" from %s: at %s",
-          MessageTypes::getName(msg->getHeader()->getType()),
-          ComponentTypes::getName(msg->getHeader()->getOwner()),
-          InterfaceTypes::getAddressString(address).c_str());
+    LOGC_I(getHost(),
+           getID(),
+           msg->getHeader()->getOwner(),
+           AddressHelper::getID(address),
+          false,
+          "\"%s\" is processed",
+          MessageTypes::getName(msg->getHeader()->getType()));
 
     if (msg->getHeader()->getOwner() >= COMP_MAX) {
 
@@ -125,31 +136,32 @@ bool Component::isSupportMulticast(COMPONENT target) {
 
 bool Component::send(COMPONENT target, long address, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-            "Send --> \"%s\" to %s: at %s",
-            MessageTypes::getName(msg->getHeader()->getType()),
-            ComponentTypes::getName(target),
-            InterfaceTypes::getAddressString(address).c_str());
+    LOGC_I(getHost(),
+           getID(),
+           target,
+           AddressHelper::getID(address),
+           true,
+           "\"%s\" is processed",
+           MessageTypes::getName(msg->getHeader()->getType()));
 
-    msg->getHeader()->setID(getID());
+    msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));
 
     return interfaces[target]->push(MESSAGE_SEND, address, msg);
 }
 
 bool Component::send(COMPONENT target, Message *msg) {
 
-    LOG_U(ComponentTypes::getAssignedUILog(getHost()),
-          "Send --> \"%s\" as MultiCast",
-          MessageTypes::getName(msg->getHeader()->getType()));
+    LOGS_I(getHost(),
+           getID(),
+           "Multicast \"%s\" is processed",
+           MessageTypes::getName(msg->getHeader()->getType()));
 
-    msg->getHeader()->setID(getID());
+    msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));
 
     return interfaces[target]->push(MESSAGE_SEND, interfaces[target]->getMulticastAddress(), msg);
 }
 
 bool Component::put(COMPONENT target, long address, Message *msg) {
-
-    msg->getHeader()->setID(getID());
 
     return interfaces[target]->push(MESSAGE_RECEIVE, address, msg);
 }

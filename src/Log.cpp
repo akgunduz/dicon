@@ -4,6 +4,7 @@
 //
 
 #include "Log.h"
+#include "ComponentTypes.h"
 
 LOGLEVEL Log::mLevel = LEVEL_ERROR;
 void* Log::uiContext = NULL;
@@ -110,37 +111,72 @@ void Log::display_at_ui(int id, void *data) {
 
 }
 
-void Log::log(LOGLEVEL level, const char *file, int line, const char *format, ...) {
+void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
 
 	if (mLevel < level) {
 		return;
 	}
 
-	char buf[256];
-	va_list ap;
-	va_start(ap, format);
-	vsnprintf(buf, sizeof(buf), format, ap);
-	va_end(ap);
-	char rfile[255];
-	strcpy(rfile, file);
-	char *p = strrchr(rfile, '/');
-	if (!p) {
-		p = rfile;
-	} else {
-		p += 1;
-	}
-	char *d = strchr(p, '.');
-	if (d) {
-		*d = '\0';
-	}
+    char buf[PATH_MAX];
+    char extra[PATH_MAX];
+    char logout[PATH_MAX];
 
-	char logout[255];
+    strcpy(logout, "");
 
-#ifdef DISABLE_LOGFILEINFO
-	sprintf(logout, "%s \n", buf);
-#else
-	sprintf(logout, "%s : %s[%d]: %s \n", sLogLevels[level], p, line, buf);
+    std::string fileName = extractFile(file);
+    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
+
+#ifndef DISABLE_LOGFILEINFO
+    sprintf(logout, "%s %s", extra, logout);
 #endif
+
+    va_list ap;
+    va_start(ap, type);
+
+    switch(type) {
+
+        case LOG_DUMP: {
+            char * fmt = va_arg(ap, char *);
+            vsnprintf(buf, sizeof(buf), fmt, ap);
+            sprintf(logout, "%s \n", buf);
+        }
+            break;
+
+        case LOG_STD: {
+            COMPONENT host = (COMPONENT)va_arg(ap, int);
+            int hostID = va_arg(ap, int);
+            char * fmt = va_arg(ap, char *);
+            vsnprintf(buf, sizeof(buf), fmt, ap);
+            sprintf(logout, "%11s[%d] : %s \n",
+                    ComponentTypes::getName(host),
+                    hostID,
+                    buf);
+        }
+            break;
+
+        case LOG_COMM: {
+            COMPONENT host = (COMPONENT)va_arg(ap, int);
+            int hostID = va_arg(ap, int);
+            COMPONENT target = (COMPONENT)va_arg(ap, int);
+            int targetID = va_arg(ap, int);
+            bool direction = va_arg(ap, bool);
+            char * fmt = va_arg(ap, char *);
+            vsnprintf(buf, sizeof(buf), fmt, ap);
+            sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",
+                    ComponentTypes::getName(host),
+                    hostID,
+                    direction ? "==>" : "<==",
+                    ComponentTypes::getName(target),
+                    targetID,
+                    buf);
+        }
+            break;
+
+        default:
+            break;
+    }
+
+    va_end(ap);
 
     printf("%s", logout);
 }
@@ -158,5 +194,13 @@ void Log::update_ui(int id, void *data) {
 	}
 }
 
+std::string Log::extractFile(const char *path) {
+
+    std::string file = path;
+    size_t pos = file.find_last_of('/');
+    file = file.substr(pos + 1);
+    pos = file.find_first_of('.');
+    return file.substr(0, pos);
+}
 
 

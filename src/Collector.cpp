@@ -21,6 +21,7 @@ Collector::Collector(const char *rootPath) :
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg);
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorIDMsg);
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
@@ -51,19 +52,28 @@ bool Collector::processDistributorWakeupMsg(long address, Message *msg) {
     return send2DistributorAliveMsg(address);
 }
 
+bool Collector::processDistributorIDMsg(long address, Message *msg) {
+
+    setID((int)msg->getHeader()->getVariant(0));
+
+    LOGS_I(COMP_COLLECTOR, getID(), "New ID : %d is assigned by Distributor", getID());
+
+    return true;
+}
+
 bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
     long nodeAddress = msg->getHeader()->getVariant(0);
 
     if (nodeAddress == 0) {
 
-        LOG_U(UI_UPDATE_COLL_LOG, "No Available Node");
+        LOGS_I(COMP_COLLECTOR, getID(), "No Available Node");
         delete msg;
         return false;
     }
 
     if (!Util::checkPath(ComponentTypes::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
-        LOG_U(UI_UPDATE_COLL_LOG, "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
+        LOGS_I(COMP_COLLECTOR, getID(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
         delete msg;
         return false;
     }
@@ -71,14 +81,14 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     ExecutorItem* executor = getJobs()->get(msg->getData()->getJobDir())->getUnServed();
 
     if (executor == NULL) {
-        LOG_U(UI_UPDATE_COLL_LOG, "No available unServed job right now. So WHY this Node message Come?????");
+        LOGS_I(COMP_COLLECTOR, getID(), "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
     }
 
-    LOG_U(UI_UPDATE_COLL_LOG, "Job execution at path : %s has started", msg->getData()->getJobDir());
+    LOGS_I(COMP_COLLECTOR, getID(), "Job execution at path : %s has started", msg->getData()->getJobDir());
 
-    LOG_U(UI_UPDATE_COLL_LOG, "Available Node : %s",
+    LOGS_I(COMP_COLLECTOR, getID(), "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
     TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_ALL);
@@ -89,7 +99,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
 bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
-    LOG_U(UI_UPDATE_COLL_LOG, "%d File info received", msg->getData()->getFileCount());
+    LOGS_I(COMP_COLLECTOR, getID(), "%d File info received", msg->getData()->getFileCount());
 
     return send2NodeBinaryMsg(address, msg->getData()->getJobDir(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
@@ -99,7 +109,7 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     //TODO next step integrate node output to dependancy list
 
-    LOG_U(UI_UPDATE_COLL_LOG, "%d File output binary received", msg->getData()->getFileCount());
+    LOGS_I(COMP_COLLECTOR, getID(), "%d File output binary received", msg->getData()->getFileCount());
 
     getJobs()->get(msg->getData()->getJobDir())->updateIndependentExecutions(msg->getData()->getFileList());
 
@@ -117,55 +127,55 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
 bool Collector::send2DistributorAliveMsg(long address) {
 
-    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_ALIVE);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_ALIVE);
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
 bool Collector::send2DistributorNodeMsg(long address, const char* jobDir, TypeMD5List *md5List) {
 
-    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_NODE);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_NODE);
 
     msg->getData()->setStreamFlag(STREAM_MD5);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->addMD5List(md5List);
 
-    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" necessary file md5s are prepared", md5List->size());
+    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" necessary file md5s are prepared", md5List->size());
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
 bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
 
-    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_JOB);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_JOB);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
-    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
+    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
 
     return send(COMP_NODE, address, msg);
 }
 
 bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
 
-    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_BINARY);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
-    LOG_U(UI_UPDATE_COLL_LOG, "\"%d\" file binary is prepared", fileList->size());
+    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" file binary is prepared", fileList->size());
 
     return send(COMP_NODE, address, msg);
 }
 
 bool Collector::send2NodeReadyMsg(long address) {
 
-    auto *msg = new Message(COMP_COLLECTOR, MSGTYPE_READY);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_READY);
 
     return send(COMP_NODE, address, msg);
 }

@@ -20,7 +20,9 @@ private:
 
 public:
 
-    static Interface* createInterface(COMPONENT component, Device* device, const InterfaceCallback *cb);
+    static Interface* createInterface(Device*,
+                                      const InterfaceSchedulerCB*,
+                                      const InterfaceHostCB*);
 };
 
 

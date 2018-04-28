@@ -23,12 +23,15 @@ private :
 	static bool runSenderCB(void *, SchedulerItem *);
 
 	Device *device;
-	COMPONENT host;
+	//COMPONENT host;
 
     long address;
     long multicastAddress;
 
-    void setHost(COMPONENT);
+    const InterfaceSchedulerCB *schedulerCB;
+    const InterfaceHostCB *hostCB;
+
+   // void setHost(COMPONENT);
     void setDevice(Device*);
 
 protected :
@@ -37,19 +40,23 @@ protected :
 	std::thread threadRcv;
 	int notifierPipe[2];
 
-	virtual void runReceiver(COMPONENT host) = 0;
+	virtual void runReceiver() = 0;
 	virtual void runSender(long, Message *) = 0;
 	virtual void runMulticastSender(Message *) = 0;
 
 	bool initThread();
 	void end();
-	Interface(COMPONENT host, Device *, const InterfaceCallback *);
+	Interface(Device *,
+              const InterfaceSchedulerCB*,
+              const InterfaceHostCB*);
 
 public :
+
     virtual ~Interface();
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	COMPONENT getHost();
+	int getID();
 	Device* getDevice();
     long getAddress();
     long getMulticastAddress();

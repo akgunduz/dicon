@@ -32,16 +32,18 @@ Distributor::Distributor(const char *rootPath) :
 	processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
 	processMsg[COMP_NODE][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg);
 
+    LOG_U(UI_UPDATE_DIST_ADDRESS, getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE));
+
 	nodeManager = new NodeManager();
 
 	collectorManager = new CollectorManager();
-
-    LOG_U(UI_UPDATE_DIST_ADDRESS, getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE));
 };
 
 Distributor::~Distributor() {
 
 	delete nodeManager;
+
+	delete collectorManager;
 }
 
 bool Distributor::processCollectorAliveMsg(long address, Message *msg) {
@@ -57,10 +59,10 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
     if (nodeAddress > 0) {
 
         LOG_U(UI_UPDATE_DIST_NODE_LIST, nodeAddress, PREBUSY);
-        LOG_U(UI_UPDATE_DIST_LOG, "Available node: %s",
-              InterfaceTypes::getAddressString(nodeAddress).c_str());
-
         LOG_U(UI_UPDATE_DIST_COLL_LIST, address, nodeAddress);
+
+        LOGS_I(getHost(), getID(), "Available node: %s",
+               InterfaceTypes::getAddressString(nodeAddress).c_str());
 
         return send2CollectorNodeMsg(address, msg->getData()->getJobDir(), nodeAddress);
 
@@ -68,7 +70,7 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 
         collectorManager->add(address, msg->getData()->getJobDir());
 
-        LOG_U(UI_UPDATE_DIST_LOG, "No available node, adding Collector at %s with Job : %s to Wait List with new Count %d",
+        LOGS_I(getHost(), getID(), "No available node, adding Collector at %s with Job : %s to Wait List with new Count %d",
               InterfaceTypes::getAddressString(address).c_str(), msg->getData()->getJobDir(), collectorManager->getCount());
         LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
     }
@@ -79,8 +81,8 @@ bool Distributor::processCollectorNodeMsg(long address, Message *msg) {
 bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
 	if (!nodeManager->setState(address, IDLE)) {
-        LOG_U(UI_UPDATE_DIST_LOG,
-              "Could not found a node with address : %s",
+        LOGS_I(getHost(), getID(),
+               "Could not found a node with address : %s",
               InterfaceTypes::getAddressString(address).c_str());
         return false;
 	}
@@ -91,8 +93,8 @@ bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
 	if (collector.first > 0) {
 
-		LOG_U(UI_UPDATE_DIST_LOG,
-			  "Processing a collector %s with Job : %s from the waiting list with new Count %d",
+        LOGS_I(getHost(), getID(),
+               "Processing a collector %s with Job : %s from the waiting list with new Count %d",
 			  InterfaceTypes::getAddressString(collector.first).c_str(),
               collector.second, collectorManager->getCount());
 
@@ -110,19 +112,19 @@ bool Distributor::processNodeReadyMsg(long address, Message *msg) {
 
 bool Distributor::processNodeAliveMsg(long address, Message *msg) {
 
-    int id = nodeManager->add(address);
+    address = AddressHelper::setID(address, NodeManager::getFreeID());
 
-    if (id == 0) {
+    if (!nodeManager->add(address)) {
 
         return true;
     }
 
-    LOG_U(UI_UPDATE_DIST_LOG, "Node at address : %s added to the list with ID : %d",
-          InterfaceTypes::getAddressString(address).c_str(), id);
-
     LOG_U(UI_UPDATE_DIST_NODE_LIST, address, IDLE);
 
-    return send2NodeIDMsg(address, id);
+    LOGS_I(getHost(), getID(), "Node at address : %s added to the list with ID : %d",
+          InterfaceTypes::getAddressString(address).c_str(), AddressHelper::getID(address));
+
+    return send2NodeIDMsg(address, AddressHelper::getID(address));
 }
 
 bool Distributor::processNodeIDMsg(long address, Message *msg) {
@@ -131,8 +133,8 @@ bool Distributor::processNodeIDMsg(long address, Message *msg) {
 
     if (collector.first) {
 
-        LOG_U(UI_UPDATE_DIST_LOG,
-              "Processing a collector %s with Job : %s from the waiting list with new Count %d",
+        LOGS_I(getHost(), getID(),
+               "Processing a collector %s with Job : %s from the waiting list with new Count %d",
               InterfaceTypes::getAddressString(collector.first).c_str(),
               collector.second, collectorManager->getCount());
 
@@ -147,25 +149,25 @@ bool Distributor::processNodeBusyMsg(long address, Message *msg) {
 
 	nodeManager->setState(address, BUSY);
 
-    LOG_U(UI_UPDATE_DIST_LOG,
-          "Node at address : %s switch to state : %s",
-          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
+    LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
 
-	LOG_U(UI_UPDATE_DIST_NODE_LIST, address, BUSY);
+    LOGS_I(getHost(), getID(),
+           "Node at address : %s switch to state : %s",
+          InterfaceTypes::getAddressString(address).c_str(), NodeState::getName(BUSY));
 
 	return true;
 }
 
 bool Distributor::send2CollectorWakeupMsg(long address) {
 
-    auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_WAKEUP);
 
     return send(COMP_COLLECTOR, address, msg);
 }
 
 bool Distributor::send2CollectorNodeMsg(long address, const char* jobDir, long nodeAddress) {
 
-	auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_NODE);
+	auto *msg = new Message(getHost(), getID(), MSGTYPE_NODE);
 
     msg->getData()->setStreamFlag(STREAM_JOB);
     msg->getHeader()->setVariant(0, nodeAddress);
@@ -176,14 +178,14 @@ bool Distributor::send2CollectorNodeMsg(long address, const char* jobDir, long n
 
 bool Distributor::send2NodeWakeupMsg(long address) {
 
-    auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_WAKEUP);
 
     return send(COMP_NODE, address, msg);
 }
 
 bool Distributor::send2NodeIDMsg(long address, int id) {
 
-    auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_ID);
+    auto *msg = new Message(getHost(), getID(), MSGTYPE_ID);
 
     msg->getHeader()->setVariant(0, id);
 
@@ -194,7 +196,7 @@ bool Distributor::sendWakeupMessage(COMPONENT component) {
 
     if (isSupportMulticast(component)) {
 
-        auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
+        auto *msg = new Message(getHost(), getID(), MSGTYPE_WAKEUP);
         send(component, msg);
 
     } else {
@@ -203,7 +205,7 @@ bool Distributor::sendWakeupMessage(COMPONENT component) {
 
         for (int i = 0; i < list.size(); i++) {
 
-            auto *msg = new Message(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP);
+            auto *msg = new Message(getHost(), getID(), MSGTYPE_WAKEUP);
 
             send(component, list[i], msg);
         }

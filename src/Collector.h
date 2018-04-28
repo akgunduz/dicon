@@ -23,6 +23,7 @@ class Collector : public Component {
 	bool setDistributorAddress(long);
 
 	bool processDistributorWakeupMsg(long, Message *);
+	bool processDistributorIDMsg(long, Message *);
 	bool processDistributorNodeMsg(long, Message *);
 	bool processNodeInfoMsg(long, Message *);
 	bool processNodeBinaryMsg(long, Message *);

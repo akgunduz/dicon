@@ -97,7 +97,7 @@ void *Scheduler::run(void *arg) {
             break;
         }
 
-        const InterfaceCallback* iCB = scheduler->callbacks[item->type];
+        const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
         if (iCB != nullptr) {
             iCB->cb(iCB->arg, item);
         }
@@ -122,6 +122,7 @@ void Scheduler::end() {
     items.clear();
 }
 
-void Scheduler::setCB(int id, const InterfaceCallback *cb) {
+void Scheduler::setCB(int id, const InterfaceSchedulerCB *cb) {
+
 	callbacks[id] = cb;
 }

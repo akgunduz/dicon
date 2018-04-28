@@ -5,10 +5,11 @@
 
 #include "Message.h"
 
-Message::Message(COMPONENT host)
+Message::Message(COMPONENT host, int hostID)
 		: header() {
 
     setHost(host);
+    setID(hostID);
 
     getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 
@@ -16,13 +17,14 @@ Message::Message(COMPONENT host)
 
 }
 
-Message::Message(COMPONENT owner, MSG_TYPE type)
+Message::Message(COMPONENT host, int hostID, MSG_TYPE type)
 		: header() {
 
-    setHost(owner);
+    setHost(host);
+    setID(hostID);
 
     getHeader()->setType(type);
-    getHeader()->setOwner(owner);
+    getHeader()->setOwner(host);
     getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 
     getData()->setStreamFlag(STREAM_NONE);
@@ -31,24 +33,24 @@ Message::Message(COMPONENT owner, MSG_TYPE type)
 bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *header) {
 
     if (header->getType() != BLOCK_FILE_BINARY && header->getType() != BLOCK_FILE_INFO) {
-        LOG_E("%s : readFile can not read other blocks", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readFile can not read other blocks");
         return false;
     }
 
 	long id;
     if (!readNumber(desc, &id)) {
-        LOG_E("%s : readFile can not read id data", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readFile can not read id data");
         return false;
     }
 
     if (!readNumber(desc, state)) {
-        LOG_E("%s : readFile can not read id data", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readFile can not read id data");
         return false;
     }
 
 	char fileName[PATH_MAX];
 	if (!readString(desc, fileName, header->getSize(0))) {
-		LOG_E("%s : readFile can not read path data", ComponentTypes::getName(getHost()));
+		LOGS_E(getHost(), getID(), "readFile can not read path data");
 		return false;
 	}
 
@@ -61,7 +63,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
     Md5 calcMD5;
 	if (!readBinary(desc, Util::getAbsRefPath(getHost(), content->getJobDir(),
                                               fileName).c_str(), &calcMD5, header->getSize(1))) {
-		LOG_E("%s : readFile can not read Binary data", ComponentTypes::getName(getHost()));
+		LOGS_E(getHost(), getID(), "readFile can not read Binary data");
 		return false;
 	}
 
@@ -73,12 +75,12 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 
     if (header->getType() != BLOCK_FILE_MD5) {
-        LOG_E("%s : readFileMD5 can not read other blocks", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readFileMD5 can not read other blocks");
         return false;
     }
 
 	if (!readMD5(desc, content)) {
-		LOG_E("%s : readFileMD5 Can not read md5", ComponentTypes::getName(getHost()));
+		LOGS_E(getHost(), getID(), "readFileMD5 Can not read md5");
 		return false;
 	}
 
@@ -88,12 +90,12 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
 
     if (header->getType() != BLOCK_JOB_INFO) {
-        LOG_E("%s : readJobInfo can not read other blocks", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readJobInfo can not read other blocks");
         return false;
     }
 
     if (!readString(desc, jobDir, header->getSize(0))) {
-        LOG_E("%s : readJobInfo can not read job dir", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readJobInfo can not read job dir");
         return false;
     }
 
@@ -103,12 +105,12 @@ bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
 bool Message::readExecutionInfo(int desc, char *execution, Block *header) {
 
     if (header->getType() != BLOCK_EXECUTION_INFO) {
-        LOG_E("%s : readExecutionInfo can not read other blocks", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readExecutionInfo can not read other blocks");
         return false;
     }
 
     if (!readString(desc, execution, header->getSize(0))) {
-        LOG_E("%s : readExecutionInfo can not read execution info", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "readExecutionInfo can not read execution info");
         return false;
     }
 
@@ -129,7 +131,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOG_I("%s : New %s with path %s/%s received", ComponentTypes::getName(getHost()),
+            LOGS_I(getHost(), getID(), "New %s with path %s/%s received",
                   header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
                   fileItem->getJobDir(), fileItem->getFileName());
 
@@ -144,7 +146,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOG_I("%s : New md5 info %s received", ComponentTypes::getName(getHost()), md5.getStr().c_str());
+            LOGS_I(getHost(), getID(), "New md5 info %s received", md5.getStr().c_str());
 
             getData()->addMD5(md5);
         }
@@ -156,7 +158,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOG_I("%s : New job info %s received", ComponentTypes::getName(getHost()), getData()->getJobDir());
+            LOGS_I(getHost(), getID(), "New job info %s received", getData()->getJobDir());
 
             break;
 
@@ -166,7 +168,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOG_I("%s : New execution info %s received", ComponentTypes::getName(getHost()), getData()->getExecutor());
+            LOGS_I(getHost(), getID(), "New execution info %s received", getData()->getExecutor());
 
             break;
 
@@ -190,12 +192,12 @@ bool Message::writeJobInfo(int desc, char *jobDir) {
     blockHeader.setSize(0, (int) strlen(jobDir));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOG_E("%s : writeJobInfo can not write block header", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeJobInfo can not write block header");
         return false;
     }
 
     if (!writeString(desc, jobDir)) {
-        LOG_E("%s : writeJobInfo can not write job info", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeJobInfo can not write job info");
         return false;
     }
 
@@ -209,12 +211,12 @@ bool Message::writeExecutionInfo(int desc, char *executor) {
     blockHeader.setSize(0, (int) strlen(executor));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOG_E("%s : writeExecutionInfo can not write block header", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeExecutionInfo can not write block header");
         return false;
     }
 
     if (!writeString(desc, executor)) {
-        LOG_E("%s : writeExecutionInfo can not write execution info", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeExecutionInfo can not write execution info");
         return false;
     }
 
@@ -238,29 +240,29 @@ bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) 
     }
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
-        LOG_E("%s : writeFile can not write block header", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFile can not write block header");
 		return false;
 	}
 
     if (!writeNumber(desc, content->getID())) {
-        LOG_E("%s : writeFile can not write file ID", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFile can not write file ID");
         return false;
     }
 
     if (!writeNumber(desc, state)) {
-        LOG_E("%s : writeFile can not write file state", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFile can not write file state");
         return false;
     }
 
 	if (!writeString(desc, content->getFileName())) {
-        LOG_E("%s : writeFile can not write file name", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFile can not write file name");
         return false;
     }
 
     if (isBinaryTransfer) {
 
         if (!writeBinary(desc, absPath.c_str(), NULL, blockHeader.getSize(1))) {
-            LOG_E("%s : writeFile can not write Binary data", ComponentTypes::getName(getHost()));
+            LOGS_E(getHost(), getID(), "writeFile can not write Binary data");
             return false;
         }
     }
@@ -274,12 +276,12 @@ bool Message::writeFileMD5(int desc, Md5 *md5) {
     Block blockHeader(0, BLOCK_FILE_MD5);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOG_E("%s : writeFileMD5 can not write block header", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFileMD5 can not write block header");
         return false;
     }
 
     if (!writeMD5(desc, md5)) {
-        LOG_E("%s : writeFileMD5 can not write md5 data", ComponentTypes::getName(getHost()));
+        LOGS_E(getHost(), getID(), "writeFileMD5 can not write md5 data");
         return false;
     }
 
@@ -311,7 +313,7 @@ bool Message::writeMessageStream(int out) {
                 }
             }
 
-            LOG_I("%s : %d %s's sent to network", ComponentTypes::getName(getHost()), i,
+            LOGS_I(getHost(), getID(), "%d %s's sent to network", i,
                   getData()->getStreamFlag() == STREAM_INFO ? "File Info" : "File Binary");
             break;
 
@@ -328,7 +330,7 @@ bool Message::writeMessageStream(int out) {
                 }
             }
 
-            LOG_I("%s : %d file md5 content sent to network", ComponentTypes::getName(getHost()), i);
+            LOGS_I(getHost(), getID(), "%d file md5 content sent to network", i);
             break;
 
         case STREAM_JOB:
@@ -337,7 +339,7 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            LOG_I("%s : Job : %s sent to network", ComponentTypes::getName(getHost()), getData()->getJobDir());
+            LOGS_I(getHost(), getID(), "Job : %s sent to network", getData()->getJobDir());
             break;
 
         case STREAM_NONE:

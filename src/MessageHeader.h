@@ -21,7 +21,6 @@ class MessageHeader {
     int type;
     int priority;
     int owner;
-    int id;
 
     long ownerAddress;
     long variant[MAX_VARIANT];

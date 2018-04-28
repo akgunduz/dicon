@@ -7,18 +7,20 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-Interface* Connector::createInterface(const COMPONENT component, Device *device, const InterfaceCallback *cb) {
+Interface* Connector::createInterface(Device *device,
+                                      const InterfaceSchedulerCB *scb,
+                                      const InterfaceHostCB *hcb) {
 
     Interface *interface = NULL;
 
     switch(device->getType()) {
 
         case INTERFACE_NET:
-            interface = new Net(component, device, cb);
+            interface = new Net(device, scb, hcb);
             break;
 
         case INTERFACE_UNIXSOCKET:
-            interface = new UnixSocket(component, device, cb);
+            interface = new UnixSocket(device, scb, hcb);
             break;
 
         default:

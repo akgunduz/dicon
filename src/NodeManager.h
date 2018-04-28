@@ -19,6 +19,7 @@ private:
 
     std::mutex mutex;
     TypeNodeList nodes;
+	static int idCounter;
 
 public:
 
@@ -26,10 +27,12 @@ public:
 
 	virtual ~NodeManager();
 
-	int add(long);
+	bool add(long);
 	bool setState(long, NODE_STATES);
 
 	long getIdle();
+
+	static int getFreeID();
 
 	void clear();
 

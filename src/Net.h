@@ -17,7 +17,6 @@
 #define MAX_SIMUL_CLIENTS 10
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101
-#define PORT_MASK 0xFFFF
 #define DEFAULT_PORT 61001
 #define DEFAULT_MULTICAST_PORT 62001
 
@@ -29,7 +28,7 @@ private :
 
 	bool initTCP();
 	bool initMulticast();
-	void runReceiver(COMPONENT);
+	void runReceiver();
 	static void runAccepter(Interface *, int);
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
@@ -43,7 +42,7 @@ private :
 
 public :
 
-	Net(COMPONENT, Device*, const InterfaceCallback *);
+	Net(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
 	~Net();
 
     INTERFACE getType();

@@ -5,6 +5,8 @@
 
 #include "NodeManager.h"
 
+int NodeManager::idCounter = 1;
+
 NodeManager::NodeManager() {
 
 };
@@ -15,7 +17,7 @@ NodeManager::~NodeManager() {
 
 long NodeManager::getIdle() {
 
-    NodeObject leastUsedNode(IDLE, 0x7FFFFFFF);
+    NodeObject leastUsedNode(IDLE, 0x7FFFFFFF, 0);
     long leastUsedAddress = 0;
 
     int idleCount = 0;
@@ -45,21 +47,21 @@ long NodeManager::getIdle() {
     return 0;
 }
 
-int NodeManager::add(long address) {
+bool NodeManager::add(long address) {
 
     auto search = nodes.find(address);
     if (search == nodes.end()) {
 
         mutex.lock();
 
-        nodes[address] = NodeObject();
+        nodes[address] = NodeObject(AddressHelper::getID(address));
 
         mutex.unlock();
 
-        return nodes[address].getID();
+        return true;
     }
 
-	return 0;
+	return false;
 }
 
 void NodeManager::clear() {
@@ -85,15 +87,15 @@ bool NodeManager::setState(long address, NODE_STATES state) {
     switch(state) {
 
         case IDLE:
-            nodes[address] = NodeObject(IDLE, node.getUsage());
+            nodes[address] = NodeObject(IDLE, node.getUsage(), node.getID());
             break;
 
         case PREBUSY:
-            nodes[address] = NodeObject(PREBUSY, node.getUsage());
+            nodes[address] = NodeObject(PREBUSY, node.getUsage(), node.getID());
             break;
 
         case BUSY:
-            nodes[address] = NodeObject(BUSY, node.iterateUsage(true));
+            nodes[address] = NodeObject(BUSY, node.iterateUsage(true), node.getID());
             break;
 
         default:
@@ -103,4 +105,9 @@ bool NodeManager::setState(long address, NODE_STATES state) {
     mutex.unlock();
 
     return true;
+}
+
+int NodeManager::getFreeID() {
+
+    return idCounter++;
 }

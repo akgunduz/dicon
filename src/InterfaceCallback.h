@@ -8,13 +8,25 @@
 #include "Message.h"
 #include "SchedulerItem.h"
 
-typedef bool (*fSchedulerCB)(void*, SchedulerItem*);
+typedef bool (*TypeSchedulerCB)(void*, SchedulerItem*);
+typedef int (*TypeGetHostCB)(void*);
+typedef int (*TypeGetIDCB)(void*);
 
-class InterfaceCallback {
+class InterfaceSchedulerCB {
 public:
-    fSchedulerCB cb;
+    TypeSchedulerCB cb;
     void *arg;
-    InterfaceCallback(fSchedulerCB _cb, void *_arg) : cb(_cb), arg(_arg) {}
+    InterfaceSchedulerCB(TypeSchedulerCB cb, void *arg) :
+            cb(cb), arg(arg) {}
+};
+
+class InterfaceHostCB {
+public:
+    TypeGetHostCB hcb;
+    TypeGetIDCB icb;
+    void *arg;
+    InterfaceHostCB(TypeGetHostCB hcb, TypeGetIDCB icb, void *arg) :
+            hcb(hcb), icb(icb), arg(arg) {}
 };
 
 

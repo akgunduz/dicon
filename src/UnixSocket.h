@@ -20,7 +20,7 @@ private :
 	int unixSocket;
 
 	bool initUnixSocket();
-	void runReceiver(COMPONENT);
+	void runReceiver();
 	static void runAccepter(Interface *, int);
 	void runSender(long, Message *);
     void runMulticastSender(Message *);
@@ -29,7 +29,7 @@ private :
 
 public :
 
-	UnixSocket(COMPONENT, Device*, const InterfaceCallback *);
+	UnixSocket(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
 	~UnixSocket();
 
     INTERFACE getType();

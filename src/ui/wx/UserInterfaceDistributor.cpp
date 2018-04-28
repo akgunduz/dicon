@@ -168,5 +168,5 @@ void UserInterface::distUpdateLog(wxCommandEvent &event) {
     auto *data = (EventData *)event.GetClientData();
 
     distLog->Append(wxString::Format("%s", data->dataStr));
-    LOG_S("%s : %s", ComponentTypes::getName(COMP_DISTRIBUTOR), data->dataStr.c_str());
+    LOG_S("%s", data->dataStr.c_str());
 }

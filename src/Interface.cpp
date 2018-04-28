@@ -5,18 +5,20 @@
 
 #include "Interface.h"
 
-Interface::Interface(COMPONENT host, Device *device, const InterfaceCallback *receiveCB) {
+Interface::Interface(Device *device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
+                    : hostCB(hostCB){
 
     scheduler = new Scheduler();
 
     this->address = 0;
     this->multicastAddress = 0;
 
-    setHost(host);
     setDevice(device);
 
+    schedulerCB = new InterfaceSchedulerCB(runSenderCB, this);
+
 	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
-	scheduler->setCB(MESSAGE_SEND, new InterfaceCallback(runSenderCB, this));
+	scheduler->setCB(MESSAGE_SEND, schedulerCB);
 }
 
 void Interface::end() {
@@ -32,11 +34,11 @@ void Interface::end() {
 bool Interface::initThread() {
 
 	if (pipe(notifierPipe) < 0) {
-		LOG_E("Notifier Pipe Init failed with err : %d!!!", errno);
+		LOGS_E(getHost(), getID(), "Notifier Pipe Init failed with err : %d!!!", errno);
 		return false;
 	}
 
-	LOG_T("Init Notifier PIPE OK!!!");
+	LOGS_T(getHost(), getID(), "Init Notifier PIPE OK!!!");
 
 	threadRcv = std::thread(runReceiverCB, this);
 
@@ -45,14 +47,14 @@ bool Interface::initThread() {
 
 void Interface::runReceiverCB(Interface *interface) {
 
-    interface->runReceiver(interface->getHost());
+    interface->runReceiver();
 
 }
 
 bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
 
-	Interface *interface = (Interface *) arg;
-	MessageItem *msgItem = (MessageItem*) item;
+	auto *interface = (Interface *) arg;
+    auto *msgItem = (MessageItem*) item;
 
 	if (msgItem->address != interface->getMulticastAddress()) {
 
@@ -68,6 +70,8 @@ bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
 
 Interface::~Interface() {
 
+    delete schedulerCB;
+
 	close(notifierPipe[1]);
 	close(notifierPipe[0]);
 }
@@ -80,38 +84,46 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 		return true;
 	}
 
-	LOG_E("Interface is not suitable for target : %d", target);
+	LOGS_E(getHost(), getID(), "Interface is not suitable for target : %d", target);
 	return false;
 }
 
 long Interface::getAddress() {
+
 	return address;
 }
 
 long Interface::getMulticastAddress() {
+
     return multicastAddress;
 }
 
 void Interface::setAddress(long address) {
+
     this->address = address;
 }
 
 void Interface::setMulticastAddress(long multicastAddress) {
+
     this->multicastAddress = multicastAddress;
 }
 
 COMPONENT Interface::getHost() {
-    return host;
+
+    return (COMPONENT) hostCB->hcb(hostCB->arg);
 }
 
-void Interface::setHost(COMPONENT host) {
-    this->host = host;
+int Interface::getID() {
+
+    return hostCB->icb(hostCB->arg);
 }
 
 Device *Interface::getDevice() {
+
     return device;
 }
 
 void Interface::setDevice(Device *device) {
+
     this->device = device;
 }

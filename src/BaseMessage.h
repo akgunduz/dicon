@@ -24,6 +24,7 @@ class BaseMessage {
 	uint8_t tmpBuf[TMP_BUFFER_SIZE];
 
     COMPONENT host;
+    int hostID;
 
 	sockaddr_in datagramAddress;
 
@@ -74,6 +75,9 @@ public:
 
     COMPONENT getHost();
     void setHost(COMPONENT);
+
+    int getID();
+    void setID(int);
 };
 
 #endif //__Message_H_

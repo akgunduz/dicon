@@ -27,10 +27,11 @@ protected :
 
     TypeProcessMsgMap processMsg[COMP_MAX];
 
-    InterfaceCallback *callback;
+    const InterfaceSchedulerCB *schedulerCB;
+    const InterfaceHostCB *hostCB;
 
-    void setHost(COMPONENT);
-
+    static int getHostCB(void*);
+    static int getIDCB(void*);
 public:
 
     Component(COMPONENT host, const char* rootPath);

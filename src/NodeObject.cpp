@@ -4,16 +4,18 @@
 
 #include "NodeObject.h"
 
-int NodeObject::idCounter = 1;
 
-NodeObject::NodeObject(NODE_STATES state, int usage) :
-        state(state), usage(usage) {
 
-    id = idCounter++;
+NodeObject::NodeObject(NODE_STATES state, int usage, int id) :
+        state(state), usage(usage), id(id) {
+}
+
+NodeObject::NodeObject(int id) :
+        NodeObject(IDLE, 0, id) {
 }
 
 NodeObject::NodeObject() :
-        NodeObject(IDLE, 0) {
+        NodeObject(IDLE, 0, 0) {
 }
 
 NodeObject::~NodeObject() {

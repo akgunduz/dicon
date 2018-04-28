@@ -22,13 +22,13 @@ private:
     std::condition_variable cond;
     std::thread thread;
 	std::list<SchedulerItem*> items;
-	std::map<int, const InterfaceCallback*> callbacks;
+	std::map<int, const InterfaceSchedulerCB*> callbacks;
 	int capacity;
 	bool initialized;
 	static void* run(void *);
 public:
 	Scheduler(bool seperateThread = true);
-    void setCB(int, const InterfaceCallback *);
+    void setCB(int, const InterfaceSchedulerCB*);
 	bool push(SchedulerItem *item);
     SchedulerItem* pull();
 	void end();

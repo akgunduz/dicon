@@ -19,13 +19,32 @@ enum LOGLEVEL {
 	LEVEL_MAX
 };
 
+enum LOGTYPE {
+    LOG_DUMP,
+    LOG_STD,
+    LOG_COMM,
+    LOGTYPE_MAX
+};
+
 #define LOG_S(a, ...) Log::display(a, ##__VA_ARGS__)
-#define LOG_E(a, ...) Log::log(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_W(a, ...) Log::log(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_I(a, ...) Log::log(LEVEL_INFO, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_T(a, ...) Log::log(LEVEL_TRACE, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, ##__VA_ARGS__);\
+#define LOG_E(a, ...) Log::log(LEVEL_ERROR, __FILE__, __LINE__, LOG_DUMP, a, ##__VA_ARGS__)
+#define LOG_W(a, ...) Log::log(LEVEL_WARN, __FILE__, __LINE__, LOG_DUMP, a, ##__VA_ARGS__)
+#define LOG_I(a, ...) Log::log(LEVEL_INFO, __FILE__, __LINE__, LOG_DUMP, a, ##__VA_ARGS__)
+#define LOG_T(a, ...) Log::log(LEVEL_TRACE, __FILE__, __LINE__, LOG_DUMP, a, ##__VA_ARGS__)
+#define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, LOG_DUMP, ##__VA_ARGS__);\
 				char *(_do_crash) = NULL; *(_do_crash) = 1;} assert(c)
+
+#define LOGC_S(a, ...) Log::display(a, ##__VA_ARGS__)
+#define LOGC_E(a, ...) Log::log(LEVEL_ERROR, __FILE__, __LINE__, LOG_COMM, a, ##__VA_ARGS__)
+#define LOGC_W(a, ...) Log::log(LEVEL_WARN, __FILE__, __LINE__, LOG_COMM, a, ##__VA_ARGS__)
+#define LOGC_I(a, ...) Log::log(LEVEL_INFO, __FILE__, __LINE__, LOG_COMM, a, ##__VA_ARGS__)
+#define LOGC_T(a, ...) Log::log(LEVEL_TRACE, __FILE__, __LINE__, LOG_COMM, a, ##__VA_ARGS__)
+
+#define LOGS_S(a, ...) Log::display(a, ##__VA_ARGS__)
+#define LOGS_E(a, ...) Log::log(LEVEL_ERROR, __FILE__, __LINE__, LOG_STD, a, ##__VA_ARGS__)
+#define LOGS_W(a, ...) Log::log(LEVEL_WARN, __FILE__, __LINE__, LOG_STD, a, ##__VA_ARGS__)
+#define LOGS_I(a, ...) Log::log(LEVEL_INFO, __FILE__, __LINE__, LOG_STD, a, ##__VA_ARGS__)
+#define LOGS_T(a, ...) Log::log(LEVEL_TRACE, __FILE__, __LINE__, LOG_STD, a, ##__VA_ARGS__)
 
 #define LOG_U Log::display_at_ui
 //#define LOG_U(a, b) Log::display_at_ui(a, b)
@@ -52,11 +71,13 @@ class Log {
 	static LOGLEVEL mLevel;
 	static update_ui_callback cb;
 	static void *uiContext;
+
+	static std::string extractFile(const char* path);
 public:
 
 	static void setLogLevel(LOGLEVEL level);
 	static void iterateLogLevel();
-	static void log(LOGLEVEL level, const char *file, int line, const char *format, ...);
+	static void log(LOGLEVEL level, const char *, int, LOGTYPE, ...);
 	static void display(const char *format, ...);
 
 	static void display_at_ui(int, uint64_t);

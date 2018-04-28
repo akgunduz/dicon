@@ -53,8 +53,8 @@ private:
 
 public:
 
-	Message(COMPONENT host);
-	Message(COMPONENT owner, MSG_TYPE type);
+	Message(COMPONENT host, int id);
+	Message(COMPONENT owner, int id, MSG_TYPE type);
 
 	MessageHeader *getHeader();
 	MessageData* getData();
