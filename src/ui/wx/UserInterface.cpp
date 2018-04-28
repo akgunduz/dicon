@@ -88,29 +88,9 @@ bool UserInterface::Create( wxWindow* parent, wxWindowID id, const wxString& cap
     Centre();
 ////@end UserInterface creation
 
-    ui_event = new wxEventTypeTag<wxCommandEvent>(wxNewEventType());
-    Bind(*ui_event, &UserInterface::updateUI, this, 0, UI_UPDATE_MAX - 1, NULL);
-    uiUpdater[UI_UPDATE_LOG] = &UserInterface::updateLog;
-
-    distInit();
-    collInit();
-    nodeInit();
-
-    Util::cleanup();
-
-    DeviceList *deviceList = DeviceList::getInstance();
-
-    for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-        distCollInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
-                                          " --> " + deviceList->get(i)->getName(), i);
-        nodeInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
-                                      " --> " + deviceList->get(i)->getName(), i);
-        if (deviceList->get(i)->isLoopback()) {
-            distCollInterface->SetSelection(i);
-            nodeInterface->SetSelection(i);
-        }
-    }
-
+#ifndef DIALOG_BLOCKS
+    componentInit();
+#endif
     return true;
 }
 
@@ -132,8 +112,7 @@ UserInterface::~UserInterface()
 
 void UserInterface::Init()
 {
-    Log::setLogLevel(LEVEL_INFO);
-    Log::set_ui_callback(this, updateUICallback);
+
 
 ////@begin UserInterface member initialisation
     distCollInterface = NULL;
@@ -146,7 +125,6 @@ void UserInterface::Init()
     distPollBtn = NULL;
     distCollList = NULL;
     distNodeList = NULL;
-    distLog = NULL;
     distNodeDeviceAddress = NULL;
     collDistAddress = NULL;
     collNodeDeviceAddress = NULL;
@@ -155,7 +133,6 @@ void UserInterface::Init()
     collProcessBtn = NULL;
     collFileList = NULL;
     collProcessList = NULL;
-    collLog = NULL;
     collDistDeviceAddress = NULL;
     nodeCollAddress = NULL;
     nodeDeviceAddress = NULL;
@@ -163,7 +140,6 @@ void UserInterface::Init()
     nodeInitBtn = NULL;
     nodeFileList = NULL;
     nodeExecList = NULL;
-    nodeLog = NULL;
 ////@end UserInterface member initialisation
 
 }
@@ -220,12 +196,9 @@ void UserInterface::CreateControls()
     distPollBtn = new wxButton( itemPanel3, ID_DIST_POLL, _("Poll"), wxPoint(310, 130), wxSize(270, 50), 0 );
     distPollBtn->Enable(false);
 
-    distCollList = new wxListCtrl( itemPanel3, ID_DIST_COLL_LIST, wxPoint(10, 240), wxSize(270, 200), wxLC_REPORT );
+    distCollList = new wxListCtrl( itemPanel3, ID_DIST_COLL_LIST, wxPoint(10, 240), wxSize(270, 330), wxLC_REPORT );
 
-    distNodeList = new wxListCtrl( itemPanel3, ID_DIST_NODE_LIST, wxPoint(310, 240), wxSize(270, 200), wxLC_REPORT );
-
-    wxArrayString distLogStrings;
-    distLog = new wxListBox( itemPanel3, ID_DIST_LOG, wxPoint(10, 460), wxSize(570, 190), distLogStrings, wxLB_SINGLE );
+    distNodeList = new wxListCtrl( itemPanel3, ID_DIST_NODE_LIST, wxPoint(310, 240), wxSize(270, 330), wxLC_REPORT );
 
     wxStaticText* itemStaticText21 = new wxStaticText( itemPanel3, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
 
@@ -259,13 +232,10 @@ void UserInterface::CreateControls()
     collProcessBtn->Enable(false);
 
     wxArrayString collFileListStrings;
-    collFileList = new wxListBox( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 240), wxSize(270, 200), collFileListStrings, wxLB_SINGLE );
+    collFileList = new wxListBox( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 240), wxSize(270, 330), collFileListStrings, wxLB_SINGLE );
 
     wxArrayString collProcessListStrings;
-    collProcessList = new wxListBox( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 240), wxSize(270, 200), collProcessListStrings, wxLB_SINGLE );
-
-    wxArrayString collLogStrings;
-    collLog = new wxListBox( itemPanel23, ID_COLL_LOG, wxPoint(10, 460), wxSize(570, 190), collLogStrings, wxLB_SINGLE );
+    collProcessList = new wxListBox( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 240), wxSize(270, 330), collProcessListStrings, wxLB_SINGLE );
 
     wxStaticText* itemStaticText36 = new wxStaticText( itemPanel23, wxID_STATIC, _("Binded Address :"), wxPoint(10, 30), wxDefaultSize, 0 );
 
@@ -295,13 +265,10 @@ void UserInterface::CreateControls()
     nodeInitBtn->SetValue(false);
     nodeInitBtn->Enable(false);
 
-    nodeFileList = new wxListCtrl( itemPanel38, ID_NODE_FILE_LIST, wxPoint(10, 240), wxSize(270, 200), wxLC_REPORT );
+    nodeFileList = new wxListCtrl( itemPanel38, ID_NODE_FILE_LIST, wxPoint(10, 240), wxSize(270, 330), wxLC_REPORT );
 
     wxArrayString nodeExecListStrings;
-    nodeExecList = new wxListBox( itemPanel38, ID_NODE_EXEC_LIST, wxPoint(310, 240), wxSize(270, 200), nodeExecListStrings, wxLB_SINGLE );
-
-    wxArrayString nodeLogStrings;
-    nodeLog = new wxListBox( itemPanel38, ID_NODE_LOG, wxPoint(10, 460), wxSize(570, 190), nodeLogStrings, wxLB_SINGLE );
+    nodeExecList = new wxListBox( itemPanel38, ID_NODE_EXEC_LIST, wxPoint(310, 240), wxSize(270, 330), nodeExecListStrings, wxLB_SINGLE );
 
     itemNotebook2->AddPage(itemPanel38, _("Node"));
 
@@ -345,53 +312,15 @@ wxIcon UserInterface::GetIconResource( const wxString& name )
 ////@end UserInterface icon retrieval
 }
 
-
-
-void UserInterface::updateUIEvent(int id, void *data) {
-
-    wxCommandEvent event(*ui_event);
-    event.SetId(id);
-    event.SetClientData(data);
-    wxPostEvent(this, event);
-
-}
-
-void UserInterface::updateUI(wxCommandEvent& event) {
-
-    int id = event.GetId();
-
-    if (uiUpdater[id] != nullptr) {
-        ((this)->*(uiUpdater[id]))(event);
-    }
-}
-
-void UserInterface::updateUICallback(void *context, int id, void *data) {
-    ((UserInterface*) context)->updateUIEvent(id, data);
-}
-
-void UserInterface::updateLog(wxCommandEvent& event) {
-
-//EventData *data = (EventData *)event.GetClientData();
-// genericLog->Append(data->dataStr);
-}
-
-
 /*
  * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BUTTON
  */
 
 void UserInterface::OnInterfaceInitClick( wxCommandEvent& event )
 {
-
-    DeviceList::getInstance()->setActive(distCollInterface->GetSelection(),
-                                         nodeInterface->GetSelection());
-
-    interfaceInit->Enable(false);
-    distCollInterface->Enable(false);
-    nodeInterface->Enable(false);
-    distInitBtn->Enable(true);
-    collInitBtn->Enable(true);
-    nodeInitBtn->Enable(true);
+#ifndef DIALOG_BLOCKS
+    OnInterfaceInitClickWrapper(event);
+#endif
 }
 
 
@@ -401,7 +330,9 @@ void UserInterface::OnInterfaceInitClick( wxCommandEvent& event )
 
 void UserInterface::OnDistInitClick( wxCommandEvent& event )
 {
+#ifndef DIALOG_BLOCKS
     OnDistInitClickWrapper(event);
+#endif
 }
 
 
@@ -411,7 +342,9 @@ void UserInterface::OnDistInitClick( wxCommandEvent& event )
 
 void UserInterface::OnDistPollClick( wxCommandEvent& event )
 {
+#ifndef DIALOG_BLOCKS
     OnDistPollClickWrapper(event);
+#endif
 }
 
 
@@ -421,7 +354,9 @@ void UserInterface::OnDistPollClick( wxCommandEvent& event )
 
 void UserInterface::OnCollInitClick( wxCommandEvent& event )
 {
+#ifndef DIALOG_BLOCKS
     OnCollInitClickWrapper(event);
+#endif
 }
 
 
@@ -431,7 +366,9 @@ void UserInterface::OnCollInitClick( wxCommandEvent& event )
 
 void UserInterface::OnCollProcessClick( wxCommandEvent& event )
 {
+#ifndef DIALOG_BLOCKS
     OnCollProcessClickWrapper(event);
+#endif
 }
 
 
@@ -441,6 +378,8 @@ void UserInterface::OnCollProcessClick( wxCommandEvent& event )
 
 void UserInterface::OnNodeInitClick( wxCommandEvent& event )
 {
+#ifndef DIALOG_BLOCKS
     OnNodeInitClickWrapper(event);
+#endif
 }
 

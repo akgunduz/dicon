@@ -65,11 +65,12 @@ set(FRAMEWORK_FILES
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/UserInterface.cpp
+        ${SOURCE_PATH}/ui/wx/UserInterfaceComponent.cpp
         ${SOURCE_PATH}/ui/wx/UserInterfaceDistributor.cpp
         ${SOURCE_PATH}/ui/wx/UserInterfaceCollector.cpp
         ${SOURCE_PATH}/ui/wx/UserInterfaceNode.cpp
         ${SOURCE_PATH}/ui/wx/UserInterfaceApp.cpp
-)
+        )
 
 set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/Console.cpp

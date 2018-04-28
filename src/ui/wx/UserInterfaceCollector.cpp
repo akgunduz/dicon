@@ -9,8 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "ExecutorItem.h"
-#include "UserInterface.h"
+#include "UserInterfaceComponent.h"
 
 void UserInterface::collInit() {
 
@@ -24,7 +23,6 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
-    uiUpdater[UI_UPDATE_COLL_LOG] = &UserInterface::collUpdateLog;
 
 }
 
@@ -45,20 +43,18 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
             return;
         }
 
-        collLog->Clear();
         collProcessBtn->Enable(true);
         collInitBtn->SetLabel("Stop");
 
     } else {
 
-        delete collObject;
+        delete ((Collector*)collObject);
         collProcessBtn->Enable(false);
         collInitBtn->SetLabel("Init");
         collDistDeviceAddress->SetLabel("");
         collNodeDeviceAddress->SetLabel("");
         collFileList->Clear();
         collProcessList->Clear();
-      //  collJobList->DeleteAllItems();
     }
 }
 
@@ -69,7 +65,7 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    collObject->processJobs();
+    ((Collector*)collObject)->processJobs();
 }
 
 //void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
@@ -105,13 +101,13 @@ void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
 }
 
-void UserInterface::collUpdateLog(wxCommandEvent &event) {
-
-    EventData *data = (EventData *)event.GetClientData();
-
-    collLog->Append(wxString::Format("%s", data->dataStr));
-    LOG_S("%s", data->dataStr.c_str());
-}
+//void UserInterface::collUpdateLog(wxCommandEvent &event) {
+//
+//    EventData *data = (EventData *)event.GetClientData();
+//
+//    collLog->Append(wxString::Format("%s", data->dataStr));
+//    LOG_S("%s", data->dataStr.c_str());
+//}
 
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 

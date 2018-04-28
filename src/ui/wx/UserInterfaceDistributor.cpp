@@ -9,7 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "UserInterface.h"
+#include "UserInterfaceComponent.h"
 
 void UserInterface::distInit() {
 
@@ -42,7 +42,6 @@ void UserInterface::distInit() {
     uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &UserInterface::distAddtoCollectorList;
     uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &UserInterface::distAddtoNodeList;
     uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
-    uiUpdater[UI_UPDATE_DIST_LOG] = &UserInterface::distUpdateLog;
 }
 
 /*
@@ -64,14 +63,13 @@ void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
             return;
         }
 
-        distLog->Clear();
         distBackupRate->SetEditable(false);
         distPollBtn->Enable(true);
         distInitBtn->SetLabel("Stop");
 
     } else {
 
-        delete distObject;
+        delete ((Distributor*)distObject);
         distBackupRate->SetEditable(true);
         distPollBtn->Enable(false);
         distInitBtn->SetLabel("Init");
@@ -82,11 +80,11 @@ void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
 {
-    distObject->reset();
+    ((Distributor*)distObject)->reset();
     distCollList->DeleteAllItems();
     distNodeList->DeleteAllItems();
 
-    distObject->sendWakeupMessagesAll();
+    ((Distributor*)distObject)->sendWakeupMessagesAll();
 }
 
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
@@ -163,10 +161,10 @@ void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
 }
 
-void UserInterface::distUpdateLog(wxCommandEvent &event) {
-
-    auto *data = (EventData *)event.GetClientData();
-
-    distLog->Append(wxString::Format("%s", data->dataStr));
-    LOG_S("%s", data->dataStr.c_str());
-}
+//void UserInterface::distUpdateLog(wxCommandEvent &event) {
+//
+//    auto *data = (EventData *)event.GetClientData();
+//
+//    distLog->Append(wxString::Format("%s", data->dataStr));
+//    LOG_S("%s", data->dataStr.c_str());
+//}

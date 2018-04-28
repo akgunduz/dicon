@@ -9,7 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "UserInterface.h"
+#include "UserInterfaceComponent.h"
 
 void UserInterface::nodeInit() {
 
@@ -32,7 +32,6 @@ void UserInterface::nodeInit() {
     uiUpdater[UI_UPDATE_NODE_FILE_LIST] = &UserInterface::nodeUpdateFileList;
     uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &UserInterface::nodeUpdateExecList;
     uiUpdater[UI_UPDATE_NODE_CLEAR] = &UserInterface::nodeUpdateClear;
-    uiUpdater[UI_UPDATE_NODE_LOG] = &UserInterface::nodeUpdateLog;
 
 }
 
@@ -53,12 +52,11 @@ void UserInterface::OnNodeInitClickWrapper( wxCommandEvent& event )
             return;
         }
 
-        nodeLog->Clear();
         nodeInitBtn->SetLabel("Stop");
 
     } else {
 
-        delete nodeObject;
+        delete ((Node*)nodeObject);
         nodeInitBtn->SetLabel("Init");
         nodeDeviceAddress->SetLabel("");
     }
@@ -88,13 +86,13 @@ void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
     nodeExecList->Clear();
 }
 
-void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
-
-    EventData *data = (EventData *)event.GetClientData();
-
-    nodeLog->Append(wxString::Format("%s", data->dataStr));
-    LOG_S("%s", data->dataStr.c_str());
-}
+//void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
+//
+//    EventData *data = (EventData *)event.GetClientData();
+//
+//    nodeLog->Append(wxString::Format("%s", data->dataStr));
+//    LOG_S("%s", data->dataStr.c_str());
+//}
 
 void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 

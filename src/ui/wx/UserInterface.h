@@ -33,10 +33,6 @@
 ////@end includes
 #include "wx/treelist.h"
 
-#include "Distributor.h"
-#include "Collector.h"
-#include "Node.h"
-
 /*!
  * Forward declarations
  */
@@ -68,7 +64,6 @@ typedef void (UserInterface::*fUIUpdater)(wxCommandEvent &event);
 #define ID_DIST_POLL 10011
 #define ID_DIST_COLL_LIST 10012
 #define ID_DIST_NODE_LIST 10009
-#define ID_DIST_LOG 10013
 #define ID_STATICTEXT 10024
 #define ID_PANEL_COLLECTOR 10014
 #define ID_COLL_DIST_ADDRESS 10004
@@ -78,7 +73,6 @@ typedef void (UserInterface::*fUIUpdater)(wxCommandEvent &event);
 #define ID_COLL_PROCESS 10020
 #define ID_COLL_FILE_LIST 10032
 #define ID_COLL_PROCESS_LIST 10003
-#define ID_COLL_LOG 10023
 #define ID_STATICTEXT1 10025
 #define ID_NODE_BINDED_ADDRESS 10015
 #define ID_NODE_COLL_ADDRESS 10022
@@ -86,11 +80,10 @@ typedef void (UserInterface::*fUIUpdater)(wxCommandEvent &event);
 #define ID_NODE_INIT 10027
 #define ID_NODE_FILE_LIST 10029
 #define ID_NODE_EXEC_LIST 10030
-#define ID_NODE_LOG 10031
 #define SYMBOL_USERINTERFACE_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
 #define SYMBOL_USERINTERFACE_TITLE _("Bankor")
 #define SYMBOL_USERINTERFACE_IDNAME ID_USERINTERFACE
-#define SYMBOL_USERINTERFACE_SIZE wxSize(600, 800)
+#define SYMBOL_USERINTERFACE_SIZE wxSize(600, 700)
 #define SYMBOL_USERINTERFACE_POSITION wxDefaultPosition
 ////@end control identifiers
 #define ID_COLL_JOB_LIST 10100
@@ -122,7 +115,7 @@ public:
 
     wxEventTypeTag<wxCommandEvent> *ui_event;
 
-    fUIUpdater uiUpdater[UI_UPDATE_MAX];
+    fUIUpdater *uiUpdater;
 
     //Generic
 
@@ -133,9 +126,11 @@ public:
     void updateUI(wxCommandEvent &event);
     void updateLog(wxCommandEvent &event);
 
+    void componentInit();
+
     //Distributor
 
-    Distributor *distObject;
+    void *distObject;
 
     void distInit();
 
@@ -143,12 +138,12 @@ public:
     void distAddtoCollectorList(wxCommandEvent& event);
     void distAddtoNodeList(wxCommandEvent& event);
 
-    void distUpdateLog(wxCommandEvent &event);
+    //void distUpdateLog(wxCommandEvent &event);
     void distUpdateBackup(wxCommandEvent &event);
 
     //Collector
 
-    Collector *collObject;
+    void *collObject;
 
     void collInit();
 
@@ -156,13 +151,13 @@ public:
     void collUpdateAttachedDistAddress(wxCommandEvent& event);
     void collUpdateAttachedNodeAddress(wxCommandEvent& event);
 
-    void collUpdateLog(wxCommandEvent &event);
+    //void collUpdateLog(wxCommandEvent &event);
     void collUpdateFileList(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
 
     //Node
 
-    Node *nodeObject;
+    void *nodeObject;
 
     void nodeInit();
 
@@ -170,7 +165,7 @@ public:
     void nodeUpdateState(wxCommandEvent& event);
     void nodeUpdateAttachedCollAddress(wxCommandEvent& event);
 
-    void nodeUpdateLog(wxCommandEvent &event);
+    //void nodeUpdateLog(wxCommandEvent &event);
     void nodeUpdateFileList(wxCommandEvent &event);
     void nodeUpdateExecList(wxCommandEvent &event);
     void nodeUpdateClear(wxCommandEvent &event);
@@ -196,6 +191,8 @@ public:
     void OnNodeInitClick( wxCommandEvent& event );
 
 ////@end UserInterface event handler declarations
+
+    void OnInterfaceInitClickWrapper( wxCommandEvent& event );
 
     void OnDistInitClickWrapper( wxCommandEvent& event );
     void OnDistPollClickWrapper( wxCommandEvent& event );
@@ -230,7 +227,6 @@ public:
     wxButton* distPollBtn;
     wxListCtrl* distCollList;
     wxListCtrl* distNodeList;
-    wxListBox* distLog;
     wxStaticText* distNodeDeviceAddress;
     wxStaticText* collDistAddress;
     wxStaticText* collNodeDeviceAddress;
@@ -239,7 +235,6 @@ public:
     wxButton* collProcessBtn;
     wxListBox* collFileList;
     wxListBox* collProcessList;
-    wxListBox* collLog;
     wxStaticText* collDistDeviceAddress;
     wxStaticText* nodeCollAddress;
     wxStaticText* nodeDeviceAddress;
@@ -247,7 +242,6 @@ public:
     wxToggleButton* nodeInitBtn;
     wxListCtrl* nodeFileList;
     wxListBox* nodeExecList;
-    wxListBox* nodeLog;
 ////@end UserInterface member variables
 };
 
