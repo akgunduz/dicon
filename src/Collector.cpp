@@ -117,7 +117,7 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     bool status = send2NodeReadyMsg(address);
 
-    if (getJobs()->get(msg->getData()->getJobDir())->getUnServedCount() > 0) {
+    if (getJobs()->get(msg->getData()->getJobDir())->getIndependentCount() > 0) {
 
         status &= send2DistributorNodeMsg(getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
     }
@@ -202,7 +202,7 @@ bool Collector::processJob(int index) {
     //TODO Also will add other jobs, after the prev. job is done.
 
 //    for (int k = 0; k < 1; k++) {
-    for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
+    for (int k = 0; k < getJobs()->get(index)->getIndependentCount(); k++) {
 
         TypeMD5List md5List;
         send2DistributorNodeMsg(getDistributorAddress(),

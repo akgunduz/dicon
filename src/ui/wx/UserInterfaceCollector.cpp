@@ -18,6 +18,21 @@ void UserInterface::collInit() {
 //    collJobList->AppendColumn("ID", width * 4, wxALIGN_LEFT, 0);
 //    collJobList->AppendColumn("Repeat", width, wxALIGN_RIGHT, 0);
 
+    int width = collFileList->GetSize().GetWidth() - 1;
+
+    wxListItem column;
+    column.SetId(0);
+    column.SetText( _("Files") );
+    column.SetWidth(width);
+    collFileList->InsertColumn(0, column);
+
+    width = collProcessList->GetSize().GetWidth() - 1;
+
+    column.SetId(0);
+    column.SetText( _("Processes") );
+    column.SetWidth(width);
+    collProcessList->InsertColumn(0, column);
+
     uiUpdater[UI_UPDATE_COLL_ADDRESS] = &UserInterface::collUpdateAddresses;
     uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
     uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
@@ -53,8 +68,8 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
         collInitBtn->SetLabel("Init");
         collDistDeviceAddress->SetLabel("");
         collNodeDeviceAddress->SetLabel("");
-        collFileList->Clear();
-        collProcessList->Clear();
+        collFileList->ClearAll ();
+        collProcessList->ClearAll ();
     }
 }
 
@@ -101,33 +116,49 @@ void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
 }
 
-//void UserInterface::collUpdateLog(wxCommandEvent &event) {
-//
-//    EventData *data = (EventData *)event.GetClientData();
-//
-//    collLog->Append(wxString::Format("%s", data->dataStr));
-//    LOG_S("%s", data->dataStr.c_str());
-//}
-
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
     auto *job = (Job*)event.GetClientData();
 
-    for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
+    TypeFileInfoList list;
+    for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        auto *content = (FileItem *) job->getContent(CONTENT_FILE, j);
+        TypeFileInfoList ins = FileInfo::getFileList(job->getOrdered(j)->getFileList(), FILEINFO_EXIST);
+        list.insert(list.end(), ins.begin(), ins.end());
+    }
+
+    for (int j = 0; j < job->getFileCount(); j++) {
+
+        auto *content = job->getFile(j);
         if (content == nullptr) {
             return;
         }
 
-        collFileList->Append(content->getFileName());
+        collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
 
+        if (FileInfo::isInclude(&list, content)) {
+            collFileList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
+        }
     }
+}
+
+void UserInterface::collUpdateFileListItem(wxCommandEvent &event) {
+
+    EventData *data = (EventData *)event.GetClientData();
+
 }
 
 void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
 
     auto *job = (Job *)event.GetClientData();
+
+    TypeFileInfoList list;
+    for (int j = 0; j < job->getIndependentCount(); j++) {
+
+        TypeFileInfoList ins = FileInfo::getFileList(job->getIndependent(j)->getFileList(), FILEINFO_EXIST);
+        list.insert(list.end(), ins.begin(), ins.end());
+    }
+
 
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
@@ -136,8 +167,10 @@ void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
             return;
         }
 
-        collProcessList->Append(content->getExec());
-
+        collProcessList->InsertItem(collProcessList->GetItemCount(), content->getExec());
+        if (job->isIndependent(content)) {
+            collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
+        }
     }
 
 }

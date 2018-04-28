@@ -59,3 +59,14 @@ TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, long state) {
 
     return list;
 }
+
+bool FileInfo::isInclude(TypeFileInfoList *list, FileItem *file) {
+
+    for (int i = 0; i < list->size(); i++) {
+
+        if (list->at(i).get() == file) {
+            return true;
+        }
+    }
+    return false;
+}

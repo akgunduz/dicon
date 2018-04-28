@@ -137,8 +137,6 @@ public:
     void distUpdateAddresses(wxCommandEvent& event);
     void distAddtoCollectorList(wxCommandEvent& event);
     void distAddtoNodeList(wxCommandEvent& event);
-
-    //void distUpdateLog(wxCommandEvent &event);
     void distUpdateBackup(wxCommandEvent &event);
 
     //Collector
@@ -150,9 +148,8 @@ public:
     void collUpdateAddresses(wxCommandEvent& event);
     void collUpdateAttachedDistAddress(wxCommandEvent& event);
     void collUpdateAttachedNodeAddress(wxCommandEvent& event);
-
-    //void collUpdateLog(wxCommandEvent &event);
     void collUpdateFileList(wxCommandEvent &event);
+    void collUpdateFileListItem(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
 
     //Node
@@ -164,8 +161,6 @@ public:
     void nodeUpdateAddresses(wxCommandEvent& event);
     void nodeUpdateState(wxCommandEvent& event);
     void nodeUpdateAttachedCollAddress(wxCommandEvent& event);
-
-    //void nodeUpdateLog(wxCommandEvent &event);
     void nodeUpdateFileList(wxCommandEvent &event);
     void nodeUpdateExecList(wxCommandEvent &event);
     void nodeUpdateClear(wxCommandEvent &event);
@@ -233,8 +228,8 @@ public:
     wxStaticText* collNodeAddress;
     wxToggleButton* collInitBtn;
     wxButton* collProcessBtn;
-    wxListBox* collFileList;
-    wxListBox* collProcessList;
+    wxListCtrl* collFileList;
+    wxListCtrl* collProcessList;
     wxStaticText* collDistDeviceAddress;
     wxStaticText* nodeCollAddress;
     wxStaticText* nodeDeviceAddress;

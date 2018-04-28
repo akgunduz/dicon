@@ -192,9 +192,30 @@ ExecutorItem *Job::getOrdered(int index) {
     return orderedList[index];
 }
 
-size_t Job::getUnServedCount() {
+size_t Job::getIndependentCount() {
 
     return independentList.size();
+}
+
+ExecutorItem* Job::getIndependent(int index) {
+
+    if (index >= independentList.size()) {
+        return NULL;
+    }
+
+    return independentList[index];
+}
+
+bool Job::isIndependent(ExecutorItem *item) {
+
+    for (int j = 0; j < getIndependentCount(); j++) {
+
+        if (getIndependent(j) == item) {
+            return true;
+        }
+
+    }
+    return false;
 }
 
 ExecutorItem* Job::getUnServed() {

@@ -57,14 +57,25 @@ struct EventData {
 	uint64_t data64_1;
 	uint64_t data64_2;
 	std::string dataStr;
-	void *dataPtr;
+	void *dataPtr[3];
 
 	EventData(uint64_t data) : data64_1(data) {}
 	EventData(uint64_t data, uint64_t data2) : data64_1(data), data64_2(data2) {}
 	EventData(uint64_t data, const char *data2) : data64_1(data), dataStr(data2) {}
 	EventData(uint64_t data, uint64_t data2, const char *data3) : data64_1(data), data64_2(data2), dataStr(data3) {}
 	EventData(const char *data) : dataStr(data) {}
-	EventData(void *data) : dataPtr(data) {}
+	EventData(void *data1) {
+		dataPtr[0] = data1;
+	}
+	EventData(void *data1, void *data2) {
+		dataPtr[0] = data1;
+		dataPtr[1] = data2;
+	}
+	EventData(void *data1, void *data2, void *data3) {
+		dataPtr[0] = data1;
+		dataPtr[1] = data2;
+		dataPtr[2] = data3;
+	}
 };
 
 class Log {

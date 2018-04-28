@@ -212,13 +212,13 @@ void UserInterface::CreateControls()
 
     wxStaticText* itemStaticText25 = new wxStaticText( itemPanel23, wxID_STATIC, _("Distributor Address :"), wxPoint(10, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel23, wxID_STATIC, _("Jobs :"), wxPoint(10, 200), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel23, wxID_STATIC, _("Job Files :"), wxPoint(10, 200), wxDefaultSize, 0 );
 
     wxStaticText* itemStaticText27 = new wxStaticText( itemPanel23, wxID_STATIC, _("Binded Address :"), wxPoint(310, 30), wxDefaultSize, 0 );
 
     wxStaticText* itemStaticText28 = new wxStaticText( itemPanel23, wxID_STATIC, _("Last Node Address :"), wxPoint(310, 70), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel23, wxID_STATIC, _("Process :"), wxPoint(310, 200), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel23, wxID_STATIC, _("Process List :"), wxPoint(310, 200), wxDefaultSize, 0 );
 
     collNodeDeviceAddress = new wxStaticText( itemPanel23, ID_COLL_BINDED_ADDRESS, _("0"), wxPoint(450, 30), wxSize(130, -1), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
@@ -231,11 +231,9 @@ void UserInterface::CreateControls()
     collProcessBtn = new wxButton( itemPanel23, ID_COLL_PROCESS, _("Process"), wxPoint(310, 130), wxSize(270, 50), 0 );
     collProcessBtn->Enable(false);
 
-    wxArrayString collFileListStrings;
-    collFileList = new wxListBox( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 240), wxSize(270, 330), collFileListStrings, wxLB_SINGLE );
+    collFileList = new wxListCtrl( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 240), wxSize(270, 330), wxLC_REPORT|wxLC_NO_HEADER );
 
-    wxArrayString collProcessListStrings;
-    collProcessList = new wxListBox( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 240), wxSize(270, 330), collProcessListStrings, wxLB_SINGLE );
+    collProcessList = new wxListCtrl( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 240), wxSize(270, 330), wxLC_REPORT );
 
     wxStaticText* itemStaticText36 = new wxStaticText( itemPanel23, wxID_STATIC, _("Binded Address :"), wxPoint(10, 30), wxDefaultSize, 0 );
 

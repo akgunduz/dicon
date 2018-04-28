@@ -25,7 +25,7 @@ class Job : public JsonItem {
     char name[50];
 
     std::vector<ExecutorItem *> orderedList;
-    std::list<ExecutorItem *> independentList;
+    std::deque<ExecutorItem *> independentList;
 
 public:
 
@@ -51,7 +51,10 @@ public:
     size_t getOrderedCount();
     ExecutorItem* getOrdered(int);
 
-    size_t getUnServedCount();
+    size_t getIndependentCount();
+    ExecutorItem* getIndependent(int);
+    bool isIndependent(ExecutorItem*);
+
     ExecutorItem* getUnServed();
 
     ExecutorItem* getByOutput(int);

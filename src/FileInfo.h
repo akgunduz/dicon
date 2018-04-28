@@ -33,6 +33,7 @@ public:
     static TypeFileInfoList getFileList(TypeFileInfoList*, long);
     static void setFileListState(TypeFileInfoList*, long);
     static void setFileItemState(TypeFileInfoList*, long, long);
+    static bool isInclude(TypeFileInfoList*, FileItem*);
 };
 
 
