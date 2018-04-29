@@ -273,6 +273,9 @@ bool Job::createDependencyMap() {
 
     for (int i = 0; i < getExecutorCount(); i++) {
 
+        outList.clear();
+        depList.clear();
+
         TypeFileInfoList *fileList = getExecutor(i)->getFileList();
 
         for (int j = 0; j < fileList->size(); j++) {
@@ -282,11 +285,12 @@ bool Job::createDependencyMap() {
             fileList->at(j).isOutput() ? outList.push_back(file) : depList.push_back(file);
         }
 
+        int id = outList[0]->getID();
+
         for (int j = 0; j < depList.size(); j++) {
 
             //TODO will be updated with multi output files
-            int id = outList[0]->getID();
-
+            
             adj[depList[j]->getID()].push_back(id);
 
             depth[id]++;
