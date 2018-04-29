@@ -98,7 +98,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     LOGS_I(getHost(), getID(), "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, executor.getID(), PROCESS_STATE_STARTED);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
     return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(), executor.getID(),
                            executor.get()->getParsedExec(), executor.get()->getFileList());
@@ -125,7 +125,11 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
+    Job* job = getJobs()->get(msg->getData()->getJobDir());
+
+    job->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
+
+    LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
     TypeMD5List md5List;
 

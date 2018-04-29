@@ -34,7 +34,6 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &UserInterface::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
-    uiUpdater[UI_UPDATE_COLL_PROCESS_LISTITEM] = &UserInterface::collUpdateProcessListItem;
 }
 
 /*
@@ -130,40 +129,34 @@ void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
 
     auto *job = (Job *)event.GetClientData();
 
+    if (job->getOrderedCount() != collProcessList->GetItemCount()) {
+
+        for (int j = 0; j < job->getOrderedCount(); j++) {
+
+            collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrderedExecution(j)->getExec());
+        }
+    }
+
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrderedExecution(j)->getExec());
+        switch(job->getOrderedState(j)) {
 
-        if (job->getOrderedExecution(j)->isValid()) {
+            case PROCESS_STATE_ENDED:
+                collProcessList->SetItemBackgroundColour(j, wxColour(128, 128, 128));
+                break;
 
-            collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
+            case PROCESS_STATE_STARTED:
+                collProcessList->SetItemBackgroundColour(j, wxColour(128, 0, 128));
+                break;
+
+            case PROCESS_STATE_NOTSTARTED:
+                collProcessList->SetItemBackgroundColour(j, job->getOrderedExecution(j)->isValid() ?
+                                                            wxColour(0, 255, 0) : wxColour(255, 255, 255));
+                break;
+
+            default:
+                break;
         }
     }
 }
 
-void UserInterface::collUpdateProcessListItem(wxCommandEvent &event) {
-
-    auto *data = (EventData *)event.GetClientData();
-
-    wxColour color = wxColour(255, 255, 255);
-
-    switch(data->data64_2) {
-
-        case PROCESS_STATE_STARTED:
-            color = wxColour(128, 0, 128);
-            break;
-
-        case PROCESS_STATE_ENDED:
-            color = wxColour(128, 128, 128);
-            break;
-
-        case PROCESS_STATE_VALID:
-            color = wxColour(0, 255, 0);
-            break;
-        case PROCESS_STATE_INVALID:
-        default:
-            break;
-    }
-
-    collProcessList->SetItemBackgroundColour(data->data64_1, color);
-}

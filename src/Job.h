@@ -18,14 +18,14 @@
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
 
-enum PROCESS_STATES {
-
-    PROCESS_STATE_INVALID,
-    PROCESS_STATE_VALID,
-    PROCESS_STATE_STARTED,
-    PROCESS_STATE_ENDED,
-    PROCESS_STATE_MAX,
-};
+//enum PROCESS_STATES {
+//
+//    PROCESS_STATE_INVALID,
+//    PROCESS_STATE_VALID,
+//    PROCESS_STATE_STARTED,
+//    PROCESS_STATE_ENDED,
+//    PROCESS_STATE_MAX,
+//};
 
 //typedef std::tuple<ExecutorItem *, int, bool> TypeExecutorProcess;
 
@@ -59,8 +59,8 @@ public:
     size_t getOrderedCount();
     ExecutorInfo getOrdered(int);
     ExecutorItem* getOrderedExecution(int);
-    bool getOrderedStatus(int);
-    void setOrderedStatus(int, bool);
+    PROCESS_STATE getOrderedState(int);
+    void setOrderedState(int, PROCESS_STATE);
 
     int getUnServedCount();
     ExecutorInfo getUnServed();

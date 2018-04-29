@@ -192,21 +192,21 @@ ExecutorItem* Job::getOrderedExecution(int index) {
     return orderedList[index].get();
 }
 
-bool Job::getOrderedStatus(int index) {
+PROCESS_STATE Job::getOrderedState(int index) {
 
-    return orderedList[index].isProcessed();
+    return orderedList[index].getState();
 }
 
-void Job::setOrderedStatus(int index, bool status) {
+void Job::setOrderedState(int index, PROCESS_STATE state) {
 
-    orderedList[index].setProcessState(status);
+    orderedList[index].setState(state);
 }
 
 ExecutorInfo Job::getUnServed() {
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
-        if (getOrderedStatus(i)) {
+        if (getOrderedState(i) != PROCESS_STATE_NOTSTARTED) {
             continue;
         }
 
@@ -214,7 +214,7 @@ ExecutorInfo Job::getUnServed() {
             continue;
         }
 
-        setOrderedStatus(i, true);
+        setOrderedState(i, PROCESS_STATE_STARTED);
 
         return getOrdered(i);
     }
@@ -228,7 +228,7 @@ int Job::getUnServedCount() {
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
-        if (getOrderedStatus(i)) {
+        if (getOrderedState(i) != PROCESS_STATE_NOTSTARTED) {
             continue;
         }
 
@@ -290,7 +290,7 @@ bool Job::createDependencyMap() {
         for (int j = 0; j < depList.size(); j++) {
 
             //TODO will be updated with multi output files
-            
+
             adj[depList[j]->getID()].push_back(id);
 
             depth[id]++;

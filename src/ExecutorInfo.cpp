@@ -5,7 +5,7 @@
 #include "ExecutorInfo.h"
 
 ExecutorInfo::ExecutorInfo(long id, ExecutorItem *item) :
-    id(id), item(item), is_processed(false) {
+    id(id), item(item), state(PROCESS_STATE_NOTSTARTED) {
 
 }
 
@@ -19,13 +19,13 @@ long ExecutorInfo::getID() {
     return id;
 }
 
-bool ExecutorInfo::isProcessed() {
+PROCESS_STATE ExecutorInfo::getState() {
 
-    return is_processed;
+    return state;
 }
 
-void ExecutorInfo::setProcessState(bool is_processed) {
+void ExecutorInfo::setState(PROCESS_STATE state) {
 
-    this->is_processed = is_processed;
+    this->state = state;
 }
 
