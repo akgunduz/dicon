@@ -56,7 +56,7 @@ bool Collector::processDistributorIDMsg(long address, Message *msg) {
 
     setID((int)msg->getHeader()->getVariant(0));
 
-    LOGS_I(COMP_COLLECTOR, getID(), "New ID : %d is assigned by Distributor", getID());
+    LOGS_I(getHost(), getID(), "New ID : %d is assigned by Distributor", getID());
 
     return true;
 }
@@ -67,13 +67,13 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
     if (nodeAddress == 0) {
 
-        LOGS_I(COMP_COLLECTOR, getID(), "No Available Node");
+        LOGS_I(getHost(), getID(), "No Available Node");
         delete msg;
         return false;
     }
 
     if (strcmp(msg->getData()->getJobDir(), "") == 0 || !Util::checkPath(ComponentTypes::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
-        LOGS_I(COMP_COLLECTOR, getID(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
+        LOGS_I(getHost(), getID(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
         delete msg;
         return false;
     }
@@ -81,14 +81,14 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     ExecutorItem* executor = getJobs()->get(msg->getData()->getJobDir())->getUnServed();
 
     if (executor == NULL) {
-        LOGS_I(COMP_COLLECTOR, getID(), "No available unServed job right now. So WHY this Node message Come?????");
+        LOGS_I(getHost(), getID(), "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
     }
 
-    LOGS_I(COMP_COLLECTOR, getID(), "Job execution at path : %s has started", msg->getData()->getJobDir());
+    LOGS_I(getHost(), getID(), "Job execution at path : %s has started", msg->getData()->getJobDir());
 
-    LOGS_I(COMP_COLLECTOR, getID(), "Available Node : %s",
+    LOGS_I(getHost(), getID(), "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
     TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_ALL);
@@ -99,7 +99,7 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
 
 bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
-    LOGS_I(COMP_COLLECTOR, getID(), "%d File info received", msg->getData()->getFileCount());
+    LOGS_I(getHost(), getID(), "%d File info received", msg->getData()->getFileCount());
 
     return send2NodeBinaryMsg(address, msg->getData()->getJobDir(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
@@ -107,11 +107,11 @@ bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
 bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
-    //TODO next step integrate node output to dependancy list
-
-    LOGS_I(COMP_COLLECTOR, getID(), "%d File output binary received", msg->getData()->getFileCount());
+    LOGS_I(getHost(), getID(), "%d File output binary received", msg->getData()->getFileCount());
 
     getJobs()->get(msg->getData()->getJobDir())->updateIndependentExecutions(msg->getData()->getFileList());
+
+    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, getJobs()->get(0));
 
     TypeMD5List md5List;
 
@@ -140,7 +140,7 @@ bool Collector::send2DistributorNodeMsg(long address, const char* jobDir, TypeMD
     msg->getData()->setJobDir(jobDir);
     msg->getData()->addMD5List(md5List);
 
-    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" necessary file md5s are prepared", md5List->size());
+    LOGS_I(getHost(), getID(), "\"%d\" necessary file md5s are prepared", md5List->size());
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
@@ -154,7 +154,7 @@ bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* ex
     msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
+    LOGS_I(getHost(), getID(), "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
 
     return send(COMP_NODE, address, msg);
 }
@@ -168,7 +168,7 @@ bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, const char*
     msg->getData()->setExecutor(executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(COMP_COLLECTOR, getID(), "\"%d\" file binary is prepared", fileList->size());
+    LOGS_I(getHost(), getID(), "\"%d\" file binary is prepared", fileList->size());
 
     return send(COMP_NODE, address, msg);
 }

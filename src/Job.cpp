@@ -250,18 +250,16 @@ ExecutorItem *Job::getByOutput(int index) {
 
 bool Job::createDependencyMap() {
 
-    int depth[getContentCount(CONTENT_FILE)];
-    std::vector<int> adj[getContentCount(CONTENT_FILE)];
+    int depth[getFileCount()];
+    std::vector<int> adj[getFileCount()];
     std::list<int> initial, final;
 
-    bzero(depth, (size_t)getContentCount(CONTENT_FILE) * sizeof(int));
+    bzero(depth, (size_t)getFileCount() * sizeof(int));
 
-    for (int i = 0; i < getContentCount(CONTENT_EXECUTOR); i++) {
+    for (int i = 0; i < getExecutorCount(); i++) {
 
-        auto *executor = (ExecutorItem*) getContent(CONTENT_EXECUTOR, i);
-
-        TypeFileInfoList depList = FileInfo::getFileList(executor->getFileList(), FILEINFO_NONOUTPUT);
-        TypeFileInfoList outList = FileInfo::getFileList(executor->getFileList(), FILEINFO_OUTPUT);
+        TypeFileInfoList depList = FileInfo::getFileList(getExecutor(i)->getFileList(), FILEINFO_NONOUTPUT);
+        TypeFileInfoList outList = FileInfo::getFileList(getExecutor(i)->getFileList(), FILEINFO_OUTPUT);
 
         for (int j = 0; j < depList.size(); j++) {
 
@@ -274,7 +272,7 @@ bool Job::createDependencyMap() {
         }
     }
 
-    for (int i = 0; i < getContentCount(CONTENT_FILE); i++) {
+    for (int i = 0; i < getFileCount(); i++) {
 
         if (depth[i] == 0) {
             initial.push_back(i);
@@ -297,7 +295,7 @@ bool Job::createDependencyMap() {
         }
     }
 
-    for (int i = 0; i < getContentCount(CONTENT_FILE); i++) {
+    for (int i = 0; i < getFileCount(); i++) {
 
         if (depth[i] > 0) {
             return false;

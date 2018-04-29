@@ -37,6 +37,7 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
     uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
+    uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &UserInterface::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
 
 }
@@ -134,7 +135,20 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
             return;
         }
 
-        collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
+        int i = 0;
+
+        for (; i < collFileList->GetItemCount(); i++) {
+
+            std::string file = collFileList->GetItemText(i, 0).ToStdString();
+
+            if (file.compare(content->getFileName()) == 0) {
+                break;
+            }
+        }
+
+        if (i == collFileList->GetItemCount()) {
+            collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
+        }
 
         if (FileInfo::isInclude(&list, content)) {
             collFileList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
