@@ -66,28 +66,18 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
         json_object *child = json_object_array_get_idx(node, i);
 
         type = json_object_get_type(child);
-        if (type != json_type_array) {
+        if (type != json_type_string) {
             LOG_E("Invalid JSON Files Node");
             return false;
         }
 
-        if (json_object_array_length(child) != 2) {
-            LOG_E("Invalid JSON Files Node");
-            return false;
-        }
+        const char* path = json_object_get_string(child);
 
-        const char* path = json_object_get_string(json_object_array_get_idx(child, 0));
-        const char* sFileType = json_object_get_string(json_object_array_get_idx(child, 1));
-
-        auto *job = (Job*) parent;
-
-        bool is_dependent = strcmp(sFileType, "d") == 0;
-
-        auto *content = new FileItem(job->getHost(), job->getJobDir(), path, i);
+        auto *content = new FileItem(((Job*)parent)->getHost(), ((Job*)parent)->getJobDir(), path, i);
 
         content->validate();
 
-        job->contentList[CONTENT_FILE].push_back(content);
+        ((Job*)parent)->contentList[CONTENT_FILE].push_back(content);
 
     }
     return true;
