@@ -27,6 +27,7 @@
 #include <queue>
 #include <map>
 #include <complex>
+#include <algorithm>
 #include <stdexcept>
 #include <condition_variable>
 #include <mutex>

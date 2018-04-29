@@ -34,7 +34,6 @@ void UserInterface::collInit() {
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &UserInterface::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
-
 }
 
 /*
@@ -79,17 +78,6 @@ void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
     ((Collector*)collObject)->processJobs();
 }
 
-//void UserInterface::OnCollJobListChecked( wxTreeListEvent& event )
-//{
-//
-//    collJobList->UpdateItemParentStateRecursively(event.GetItem());
-//
-//    wxCheckBoxState state = collJobList->GetCheckedState(event.GetItem());
-//
-//    collJobList->CheckItemRecursively(event.GetItem(), state);
-//
-//}
-
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
@@ -109,7 +97,6 @@ void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
     collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
-
 }
 
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
@@ -119,27 +106,11 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
     for (int j = 0; j < job->getFileCount(); j++) {
 
         auto *content = job->getFile(j);
-        if (content == nullptr) {
-            return;
-        }
 
-        int i = 0;
-
-        for (; i < collFileList->GetItemCount(); i++) {
-
-            std::string file = collFileList->GetItemText(i, 0).ToStdString();
-
-            if (file.compare(content->getFileName()) == 0) {
-                break;
-            }
-        }
-
-        if (i == collFileList->GetItemCount()) {
-            collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
-        }
+        long row = collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
 
         if (content->isValid()) {
-            collFileList->SetItemBackgroundColour(i, wxColour(0, 255, 0));
+            collFileList->SetItemBackgroundColour(row, wxColour(0, 255, 0));
         }
     }
 }
@@ -148,6 +119,10 @@ void UserInterface::collUpdateFileListItem(wxCommandEvent &event) {
 
     EventData *data = (EventData *)event.GetClientData();
 
+    for (int i = 0; i < data->data64_list.size(); i++) {
+
+        collFileList->SetItemBackgroundColour(data->data64_list[i], wxColour(0, 255, 0));
+    }
 }
 
 void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
@@ -157,7 +132,9 @@ void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
         collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrdered(j)->getExec());
+
         if (job->getOrdered(j)->isValid()) {
+
             collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
         }
     }

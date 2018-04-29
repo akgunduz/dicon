@@ -111,6 +111,13 @@ void Log::display_at_ui(int id, void *data) {
 
 }
 
+void Log::display_at_ui(int id, std::vector<uint64_t> dataList) {
+
+	EventData *data = new EventData(dataList);
+
+	update_ui(id, data);
+}
+
 void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
 
 	if (mLevel < level) {
@@ -202,5 +209,4 @@ std::string Log::extractFile(const char *path) {
     pos = file.find_first_of('.');
     return file.substr(0, pos);
 }
-
 

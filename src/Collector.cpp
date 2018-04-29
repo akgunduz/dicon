@@ -35,8 +35,13 @@ Collector::Collector(const char *rootPath) :
         return;
     }
 
-    LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
-	LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
+    if (getJobs()->get(0)->getFileCount()) {
+        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
+    }
+
+    if (getJobs()->get(0)->getExecutorCount()) {
+        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
+    }
 }
 
 Collector::~Collector() {
@@ -107,7 +112,14 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     LOGS_I(getHost(), getID(), "%d File output binary received", msg->getData()->getFileCount());
 
-    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, getJobs()->get(0));
+    std::vector<uint64_t> fileListIDs;
+
+    for (int i = 0; i < msg->getData()->getFileCount(); i++) {
+
+        fileListIDs.push_back(msg->getData()->getFile(i)->getID());
+    }
+
+    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
 
     TypeMD5List md5List;
 

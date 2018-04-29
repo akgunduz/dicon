@@ -56,6 +56,7 @@ struct EventData {
 
 	uint64_t data64_1;
 	uint64_t data64_2;
+	std::vector<uint64_t> data64_list;
 	std::string dataStr;
 	void *dataPtr[3];
 
@@ -63,6 +64,7 @@ struct EventData {
 	EventData(uint64_t data, uint64_t data2) : data64_1(data), data64_2(data2) {}
 	EventData(uint64_t data, const char *data2) : data64_1(data), dataStr(data2) {}
 	EventData(uint64_t data, uint64_t data2, const char *data3) : data64_1(data), data64_2(data2), dataStr(data3) {}
+	EventData(std::vector<uint64_t> data) : data64_list(data) {}
 	EventData(const char *data) : dataStr(data) {}
 	EventData(void *data1) {
 		dataPtr[0] = data1;
@@ -97,6 +99,7 @@ public:
 	static void display_at_ui(int, uint64_t, uint64_t, const char* , ...);
 	static void display_at_ui(int, const char* , ...);
 	static void display_at_ui(int, void*);
+	static void display_at_ui(int, std::vector<uint64_t>);
 
 	static void update_ui(int, void*);
 	static void set_ui_callback(void *, update_ui_callback cb);
