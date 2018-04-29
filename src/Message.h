@@ -38,7 +38,7 @@ private:
 
     bool writeJobInfo(int, char*);
     bool writeExecutionInfo(int, char*);
-    bool writeFile(int, FileItem *, long, bool);
+    bool writeFile(int, FileItem *, bool, bool);
     bool writeFileMD5(int, Md5*);
 
     bool writeMessageStream(int out);

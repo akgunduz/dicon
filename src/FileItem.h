@@ -16,7 +16,7 @@ class FileItem : public ContentItem {
 	char jobDir[PATH_MAX];
 
 	int id;
-	bool is_validated;
+	bool is_exist;
 
 	Md5 md5;
 

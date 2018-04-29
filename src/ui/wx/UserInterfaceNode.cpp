@@ -86,14 +86,6 @@ void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
     nodeExecList->Clear();
 }
 
-//void UserInterface::nodeUpdateLog(wxCommandEvent &event) {
-//
-//    EventData *data = (EventData *)event.GetClientData();
-//
-//    nodeLog->Append(wxString::Format("%s", data->dataStr));
-//    LOG_S("%s", data->dataStr.c_str());
-//}
-
 void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
     Job *job = (Job *)event.GetClientData();

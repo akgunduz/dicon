@@ -37,8 +37,6 @@ private:
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);
 
-	TypeFileInfoList checkFileExistence(TypeFileInfoList*);
-
 public:
 
 

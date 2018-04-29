@@ -30,7 +30,7 @@ public:
     unsigned long getMD5Count();
 
     FileItem* getFile(int);
-    uint8_t getState(int);
+    bool isOutput(int);
     TypeFileInfoList* getFileList();
     void addFile(FileInfo);
     void addFileList(TypeFileInfoList*);

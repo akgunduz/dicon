@@ -7,11 +7,14 @@
 
 #include "FileItem.h"
 
-#define FILEINFO_EXIST      0x01
-#define FILEINFO_NONEXIST   0x02
-#define FILEINFO_NONOUTPUT  (FILEINFO_EXIST | FILEINFO_NONEXIST)
-#define FILEINFO_OUTPUT     0x04
-#define FILEINFO_ALL        (FILEINFO_NONOUTPUT | FILEINFO_OUTPUT)
+//#define FILEINFO_EXIST      0x01
+//#define FILEINFO_NONEXIST   0x02
+//#define FILEINFO_NONOUTPUT  (FILEINFO_EXIST | FILEINFO_NONEXIST)
+//#define FILEINFO_OUTPUT     0x04
+//#define FILEINFO_ALL        (FILEINFO_NONOUTPUT | FILEINFO_OUTPUT)
+
+#define FILEINFO_OUTPUT 1
+#define FILEINFO_NONOUTPUT ~FILEINFO_OUTPUT
 
 class FileInfo;
 
@@ -19,21 +22,22 @@ typedef std::vector<FileInfo> TypeFileInfoList;
 
 class FileInfo {
 
-    FileItem *item;
-    long state;
+    FileItem *file;
+    bool is_output;
 
 public:
 
-    FileInfo(FileItem *, long);
+    FileInfo(FileItem *, bool);
     FileItem* get();
 
-    long getState();
-    void setState(long);
+    bool isOutput();
+    void setOutput(bool);
 
-    static TypeFileInfoList getFileList(TypeFileInfoList*, long);
-    static void setFileListState(TypeFileInfoList*, long);
-    static void setFileItemState(TypeFileInfoList*, long, long);
-    static bool isInclude(TypeFileInfoList*, FileItem*);
+    static TypeFileInfoList getFileList(TypeFileInfoList*, bool);
+    static void setFileListState(TypeFileInfoList*, bool);
+//    static void setFileItemState(TypeFileInfoList*, long, bool);
+//    static bool isInclude(TypeFileInfoList*, FileItem*);
+    static TypeFileInfoList checkFileExistence(COMPONENT, TypeFileInfoList*);
 };
 
 

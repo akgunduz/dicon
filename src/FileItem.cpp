@@ -26,7 +26,7 @@ FileItem::FileItem(COMPONENT host, const char *jobDir, const char *fileName, int
 
 void FileItem::set(COMPONENT host, const char *jobDir, const char *fileName, int id, Md5 *md5) {
 
-    this->is_validated = false;
+    this->is_exist = false;
 
     this->host = host;
 
@@ -40,7 +40,6 @@ void FileItem::set(COMPONENT host, const char *jobDir, const char *fileName, int
 
         this->md5.set(md5);
     }
-
 }
 
 CONTENT_TYPES FileItem::getType() {
@@ -70,7 +69,7 @@ Md5* FileItem::getMD5() {
 
 bool FileItem::isValid() {
 
-    return is_validated;
+    return validate();
 }
 
 void FileItem::setMD5(Md5 *md5) {
@@ -90,7 +89,7 @@ int FileItem::getID() {
 
 bool FileItem::validate() {
 
-    if (is_validated) {
+    if (is_exist) {
         LOG_T("FileContent %s is already validated", getFileName());
         return true;
     }
@@ -131,7 +130,7 @@ bool FileItem::validate() {
 
     fclose(file);
 
-    is_validated = true;
+    is_exist = true;
 
     return true;
 }

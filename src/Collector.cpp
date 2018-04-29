@@ -91,10 +91,8 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     LOGS_I(getHost(), getID(), "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
-    TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), FILEINFO_ALL);
-
     return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(),
-                           executor->getParsedExec(), &list);
+                           executor->getParsedExec(), executor->getFileList());
 }
 
 bool Collector::processNodeInfoMsg(long address, Message *msg) {
@@ -109,15 +107,13 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     LOGS_I(getHost(), getID(), "%d File output binary received", msg->getData()->getFileCount());
 
-    getJobs()->get(msg->getData()->getJobDir())->updateIndependentExecutions(msg->getData()->getFileList());
-
     LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, getJobs()->get(0));
 
     TypeMD5List md5List;
 
     bool status = send2NodeReadyMsg(address);
 
-    if (getJobs()->get(msg->getData()->getJobDir())->getIndependentCount() > 0) {
+    if (getJobs()->get(msg->getData()->getJobDir())->getUnServedCount() > 0) {
 
         status &= send2DistributorNodeMsg(getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
     }
@@ -202,7 +198,7 @@ bool Collector::processJob(int index) {
     //TODO Also will add other jobs, after the prev. job is done.
 
 //    for (int k = 0; k < 1; k++) {
-    for (int k = 0; k < getJobs()->get(index)->getIndependentCount(); k++) {
+    for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
 
         TypeMD5List md5List;
         send2DistributorNodeMsg(getDistributorAddress(),

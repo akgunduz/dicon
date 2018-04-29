@@ -13,11 +13,6 @@
 
 void UserInterface::collInit() {
 
-//    int width = collJobList->GetSize().GetWidth() / 5.5;
-//
-//    collJobList->AppendColumn("ID", width * 4, wxALIGN_LEFT, 0);
-//    collJobList->AppendColumn("Repeat", width, wxALIGN_RIGHT, 0);
-
     int width = collFileList->GetSize().GetWidth() - 1;
 
     wxListItem column;
@@ -121,13 +116,6 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
     auto *job = (Job*)event.GetClientData();
 
-    TypeFileInfoList list;
-    for (int j = 0; j < job->getOrderedCount(); j++) {
-
-        TypeFileInfoList ins = FileInfo::getFileList(job->getOrdered(j)->getFileList(), FILEINFO_EXIST);
-        list.insert(list.end(), ins.begin(), ins.end());
-    }
-
     for (int j = 0; j < job->getFileCount(); j++) {
 
         auto *content = job->getFile(j);
@@ -150,8 +138,8 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
             collFileList->InsertItem(collFileList->GetItemCount(), content->getFileName());
         }
 
-        if (FileInfo::isInclude(&list, content)) {
-            collFileList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
+        if (content->isValid()) {
+            collFileList->SetItemBackgroundColour(i, wxColour(0, 255, 0));
         }
     }
 }
@@ -166,23 +154,10 @@ void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
 
     auto *job = (Job *)event.GetClientData();
 
-    TypeFileInfoList list;
-    for (int j = 0; j < job->getIndependentCount(); j++) {
-
-        TypeFileInfoList ins = FileInfo::getFileList(job->getIndependent(j)->getFileList(), FILEINFO_EXIST);
-        list.insert(list.end(), ins.begin(), ins.end());
-    }
-
-
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        auto *content = job->getOrdered(j);
-        if (content == NULL) {
-            return;
-        }
-
-        collProcessList->InsertItem(collProcessList->GetItemCount(), content->getExec());
-        if (job->isIndependent(content)) {
+        collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrdered(j)->getExec());
+        if (job->getOrdered(j)->isValid()) {
             collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
         }
     }

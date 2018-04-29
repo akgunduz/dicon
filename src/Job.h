@@ -17,15 +17,14 @@
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
 
-typedef std::map<const long, ExecutorItem*> TypeAddressExecList;
-typedef std::map<const ExecutorItem*, long> TypeExecAddressList;
+typedef std::pair<ExecutorItem *, bool> TypeExecutorProcess;
 
 class Job : public JsonItem {
 
     char name[50];
 
-    std::vector<ExecutorItem *> orderedList;
-    std::deque<ExecutorItem *> independentList;
+    std::vector<TypeExecutorProcess> orderedList;
+    //std::deque<int> independentList;
 
 public:
 
@@ -50,17 +49,14 @@ public:
 
     size_t getOrderedCount();
     ExecutorItem* getOrdered(int);
+    bool getOrderedStatus(int);
+    void setOrderedStatus(int, bool);
 
-    size_t getIndependentCount();
-    ExecutorItem* getIndependent(int);
-    bool isIndependent(ExecutorItem*);
-
+    int getUnServedCount();
     ExecutorItem* getUnServed();
 
     ExecutorItem* getByOutput(int);
     bool createDependencyMap();
-    void createIndepentExecutions();
-    void updateIndependentExecutions(TypeFileInfoList*);
 };
 
 

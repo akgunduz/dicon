@@ -56,7 +56,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 
     content->set(getHost(), jobDir, fileName, (int)id);
 
-    if (header->getType() != BLOCK_FILE_BINARY || (*state & FILEINFO_OUTPUT)) {
+    if (header->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
     }
 
@@ -135,7 +135,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                   header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
                   fileItem->getJobDir(), fileItem->getFileName());
 
-            getData()->addFile(FileInfo(fileItem, state));
+            getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT));
         }
             break;
 
@@ -223,11 +223,11 @@ bool Message::writeExecutionInfo(int desc, char *executor) {
     return true;
 }
 
-bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) {
+bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinary) {
 
     Block blockHeader;
     std::string absPath = "";
-    bool isBinaryTransfer = !(state & FILEINFO_OUTPUT) && isBinary;
+    bool isBinaryTransfer = !isOutput && isBinary;
 
     if (!isBinaryTransfer) {
         blockHeader.set(1, BLOCK_FILE_INFO);
@@ -249,7 +249,7 @@ bool Message::writeFile(int desc, FileItem *content, long state, bool isBinary) 
         return false;
     }
 
-    if (!writeNumber(desc, state)) {
+    if (!writeNumber(desc, (long)isOutput)) {
         LOGS_E(getHost(), getID(), "writeFile can not write file state");
         return false;
     }
@@ -307,7 +307,7 @@ bool Message::writeMessageStream(int out) {
 
             for (i = 0; i < getData()->getFileCount(); i++) {
 
-                if (!writeFile(out, getData()->getFile(i), getData()->getState(i),
+                if (!writeFile(out, getData()->getFile(i), getData()->isOutput(i),
                                getData()->getStreamFlag() == STREAM_BINARY)) {
                     return false;
                 }

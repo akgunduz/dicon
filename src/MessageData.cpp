@@ -45,9 +45,9 @@ FileItem* MessageData::getFile(int index) {
     return fileList[index].get();
 }
 
-uint8_t MessageData::getState(int index) {
+bool MessageData::isOutput(int index) {
 
-    return fileList[index].getState();
+    return fileList[index].isOutput();
 }
 
 TypeFileInfoList *MessageData::getFileList() {

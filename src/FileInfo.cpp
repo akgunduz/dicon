@@ -4,55 +4,35 @@
 
 #include "FileInfo.h"
 
-FileItem *FileInfo::get() {
+FileItem* FileInfo::get() {
 
-    return item;
+    return file;
 }
 
-void FileInfo::setState(long state) {
+void FileInfo::setOutput(bool is_output) {
 
-    this->state = state;
+    this->is_output = is_output;
 }
 
-long FileInfo::getState() {
+bool FileInfo::isOutput() {
 
-    return state;
+    return is_output;
 }
 
-FileInfo::FileInfo(FileItem *item, long state) {
+FileInfo::FileInfo(FileItem* file, bool is_output) {
 
-    this->item = item;
-    this->state = state;
+    this->file = file;
+    this->is_output = is_output;
 }
 
-void FileInfo::setFileListState(TypeFileInfoList *fileList, long state) {
-
-    for (int i = 0; i < fileList->size(); i++) {
-
-        fileList->at(i).setState(state);
-    }
-
-}
-
-void FileInfo::setFileItemState(TypeFileInfoList *fileList, long id, long state) {
-
-    for (int i = 0; i < fileList->size(); i++) {
-
-        if (fileList->at(i).get()->getID() == id) {
-
-            fileList->at(i).setState(state);
-            break;
-        }
-    }
-
-}
-
-TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, long state) {
+TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, bool is_output) {
 
     TypeFileInfoList list;
 
     for (int i = 0; i < fileList->size(); i++) {
-        if (fileList->at(i).getState() & state) {
+
+        if (fileList->at(i).isOutput() & is_output) {
+
             list.push_back(fileList->at(i));
         }
     }
@@ -60,13 +40,37 @@ TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, long state) {
     return list;
 }
 
-bool FileInfo::isInclude(TypeFileInfoList *list, FileItem *file) {
+
+void FileInfo::setFileListState(TypeFileInfoList *fileList, bool is_output) {
+
+    for (int i = 0; i < fileList->size(); i++) {
+
+        fileList->at(i).setOutput(is_output);
+    }
+
+}
+
+TypeFileInfoList FileInfo::checkFileExistence(COMPONENT component, TypeFileInfoList *list) {
+
+    TypeFileInfoList reqList;
 
     for (int i = 0; i < list->size(); i++) {
 
-        if (list->at(i).get() == file) {
-            return true;
+        if (!Util::checkPath(ComponentTypes::getRootPath(component),
+                             list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
+
+            reqList.push_back(list->at(i));
+
+        } else {
+
+            Md5 md5(Util::getAbsMD5Path(component,
+                                        list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
+            if (!md5.equal(list->at(i).get()->getMD5())) {
+
+                reqList.push_back(list->at(i));
+            }
         }
     }
-    return false;
+
+    return reqList;
 }

@@ -65,9 +65,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
         return false;
     }
 
-    TypeFileInfoList list = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_ALL);
-
-    TypeFileInfoList requiredList = checkFileExistence(&list);
+    TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), msg->getData()->getFileList());
     if (!requiredList.empty()) {
 
         return send2CollectorInfoMsg(address, msg->getData()->getJobDir(),
@@ -77,8 +75,8 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
 
         processCommand(msg->getData()->getExecutor());
 
-        TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
-        FileInfo::setFileListState(&outputList, FILEINFO_EXIST);
+        TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
+        FileInfo::setFileListState(&outputList, false);
 
         //TODO will update with md5s including outputs
         //TODO will update with actual binary to collector including outputs
@@ -91,8 +89,8 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
 
     processCommand(msg->getData()->getExecutor());
 
-    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), FILEINFO_OUTPUT);
-    FileInfo::setFileListState(&outputList, FILEINFO_EXIST);
+    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
+    FileInfo::setFileListState(&outputList, false);
     //TODO will update with md5s including outputs
     //TODO will update with actual binary to collector including outputs
     return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(),
@@ -171,32 +169,6 @@ void Node::setDistributorAddress(long distributorAddress) {
 
     this->distributorAddress = distributorAddress;
 }
-
-TypeFileInfoList Node::checkFileExistence(TypeFileInfoList *list) {
-
-    TypeFileInfoList reqList;
-
-    for (int i = 0; i < list->size(); i++) {
-
-        if (!Util::checkPath(ComponentTypes::getRootPath(COMP_NODE),
-                             list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
-
-            reqList.push_back(list->at(i));
-
-        } else {
-
-            Md5 md5(Util::getAbsMD5Path(COMP_NODE,
-                                        list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
-            if (!md5.equal(list->at(i).get()->getMD5())) {
-
-                reqList.push_back(list->at(i));
-            }
-        }
-    }
-
-    return reqList;
-}
-
 
 void Node::parseCommand(char *cmd, char **argv) {
 

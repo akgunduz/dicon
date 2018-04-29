@@ -34,10 +34,7 @@ public:
     bool parse(void *);
     const char* getParsedExec();
 
-//	FileInfo* getFile(int);
-//	unsigned long getFileCount();
 	TypeFileInfoList* getFileList();
-
 
 	virtual CONTENT_TYPES getType();
 

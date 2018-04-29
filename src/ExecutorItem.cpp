@@ -110,11 +110,11 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
     switch (cmdType) {
 
         case EXEC_FILE: {
-            auto *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
+            auto *content = ((Job*)job)->getFile(cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
                         Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
-                fileList.push_back(FileInfo(content, content->validate() ? FILEINFO_EXIST : FILEINFO_NONEXIST));
+                fileList.push_back(FileInfo(content, false));
             }
         } break;
 
@@ -123,7 +123,7 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
                         Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
-                fileList.push_back(FileInfo(content, FILEINFO_OUTPUT));
+                fileList.push_back(FileInfo(content, true));
             }
         } break;
 
@@ -142,18 +142,20 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 }
 
 bool ExecutorItem::isValid() {
+
+	for (int i = 0; i < fileList.size(); i++) {
+
+	    if (fileList[i].isOutput()) {
+	        continue;
+	    }
+
+	    if (!fileList[i].get()->isValid()) {
+	        return false;
+	    }
+	}
+
     return true;
 }
-
-//FileInfo* ExecutorItem::getFile(int index) {
-//
-//    return &fileList[index];
-//}
-//
-//unsigned long ExecutorItem::getFileCount() {
-//
-//    return fileList.size();
-//}
 
 TypeFileInfoList* ExecutorItem::getFileList() {
 
