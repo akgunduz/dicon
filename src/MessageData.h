@@ -16,6 +16,7 @@ class MessageData {
     TypeMD5List md5List;
     TypeFileInfoList fileList;
     char executor[PATH_MAX];
+    long executorID;
     char jobDir[PATH_MAX];
 
 public:
@@ -37,7 +38,9 @@ public:
     unsigned long getFileCount();
 
     char* getExecutor();
-    void setExecutor(const char*);
+    long getExecutorID();
+    void setExecutorID(long);
+    void setExecutor(long, const char*);
 
     char* getJobDir();
     void setJobDir(const char*);

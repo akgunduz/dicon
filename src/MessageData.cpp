@@ -75,8 +75,19 @@ char* MessageData::getExecutor() {
     return executor;
 }
 
-void MessageData::setExecutor(const char *executor) {
+long MessageData::getExecutorID() {
 
+    return executorID;
+}
+
+void MessageData::setExecutorID(long id) {
+
+    this->executorID = id;
+}
+
+void MessageData::setExecutor(long id, const char *executor) {
+
+    this->executorID = id;
     strcpy(this->executor, executor);
 }
 

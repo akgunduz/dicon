@@ -182,22 +182,27 @@ size_t Job::getOrderedCount() {
     return orderedList.size();
 }
 
-ExecutorItem *Job::getOrdered(int index) {
+ExecutorInfo Job::getOrdered(int index) {
 
-    return orderedList[index].first;
+    return orderedList[index];
+}
+
+ExecutorItem* Job::getOrderedExecution(int index) {
+
+    return orderedList[index].get();
 }
 
 bool Job::getOrderedStatus(int index) {
 
-    return orderedList[index].second;
+    return orderedList[index].isProcessed();
 }
 
 void Job::setOrderedStatus(int index, bool status) {
 
-    orderedList[index].second = status;
+    orderedList[index].setProcessState(status);
 }
 
-ExecutorItem* Job::getUnServed() {
+ExecutorInfo Job::getUnServed() {
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
@@ -205,7 +210,7 @@ ExecutorItem* Job::getUnServed() {
             continue;
         }
 
-        if (!getOrdered(i)->isValid()) {
+        if (!getOrderedExecution(i)->isValid()) {
             continue;
         }
 
@@ -214,7 +219,7 @@ ExecutorItem* Job::getUnServed() {
         return getOrdered(i);
     }
 
-    return NULL;
+    return ExecutorInfo(NULL, 0);
 }
 
 int Job::getUnServedCount() {
@@ -227,7 +232,7 @@ int Job::getUnServedCount() {
             continue;
         }
 
-        if (!getOrdered(i)->isValid()) {
+        if (!getOrderedExecution(i)->isValid()) {
             continue;
         }
 
@@ -318,11 +323,13 @@ bool Job::createDependencyMap() {
         }
     }
 
+    orderedList.clear();
+
     for (int i : final) {
 
         auto *content = getByOutput(i);
         if (content) {
-            orderedList.emplace_back(TypeExecutorProcess(content, false));
+            orderedList.emplace_back(ExecutorInfo(orderedList.size(), content));
         }
     }
 

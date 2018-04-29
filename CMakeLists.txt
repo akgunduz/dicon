@@ -61,6 +61,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentObject.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
+        ${SOURCE_PATH}/ExecutorInfo.cpp
         )
 
 set(WX_FILES

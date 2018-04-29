@@ -31,8 +31,8 @@ private:
     bool send2DistributorIDMsg(long);
     bool send2DistributorBusyMsg(long);
 
-    bool send2CollectorInfoMsg(long, const char*, const char*, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(long, const char*, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(long, const char*, long, const char*, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(long, const char*, long, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(const char*);

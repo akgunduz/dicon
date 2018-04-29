@@ -10,6 +10,7 @@
 #include "FileList.h"
 #include "ExecutorItem.h"
 #include "JobInfo.h"
+#include "ExecutorInfo.h"
 
 
 #define MAX_JOB_COUNT 100
@@ -17,14 +18,22 @@
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
 
-typedef std::pair<ExecutorItem *, bool> TypeExecutorProcess;
+enum PROCESS_STATES {
+
+    PROCESS_STATE_INVALID,
+    PROCESS_STATE_VALID,
+    PROCESS_STATE_STARTED,
+    PROCESS_STATE_ENDED,
+    PROCESS_STATE_MAX,
+};
+
+//typedef std::tuple<ExecutorItem *, int, bool> TypeExecutorProcess;
 
 class Job : public JsonItem {
 
     char name[50];
 
-    std::vector<TypeExecutorProcess> orderedList;
-    //std::deque<int> independentList;
+    std::vector<ExecutorInfo> orderedList;
 
 public:
 
@@ -48,12 +57,13 @@ public:
     FileItem* getFile(int);
 
     size_t getOrderedCount();
-    ExecutorItem* getOrdered(int);
+    ExecutorInfo getOrdered(int);
+    ExecutorItem* getOrderedExecution(int);
     bool getOrderedStatus(int);
     void setOrderedStatus(int, bool);
 
     int getUnServedCount();
-    ExecutorItem* getUnServed();
+    ExecutorInfo getUnServed();
 
     ExecutorItem* getByOutput(int);
     bool createDependencyMap();

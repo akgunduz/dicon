@@ -83,9 +83,11 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
         return false;
     }
 
-    ExecutorItem* executor = getJobs()->get(msg->getData()->getJobDir())->getUnServed();
+    Job* job = getJobs()->get(msg->getData()->getJobDir());
 
-    if (executor == NULL) {
+    ExecutorInfo executor = job->getUnServed();
+
+    if (executor.get() == NULL) {
         LOGS_I(getHost(), getID(), "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
@@ -96,15 +98,17 @@ bool Collector::processDistributorNodeMsg(long address, Message *msg) {
     LOGS_I(getHost(), getID(), "Available Node : %s",
           InterfaceTypes::getAddressString(nodeAddress).c_str());
 
-    return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(),
-                           executor->getParsedExec(), executor->getFileList());
+    //LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, executorIndex, PROCESS_STATE_STARTED);
+
+    return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(), executor.getID(),
+                           executor.get()->getParsedExec(), executor.get()->getFileList());
 }
 
 bool Collector::processNodeInfoMsg(long address, Message *msg) {
 
     LOGS_I(getHost(), getID(), "%d File info received", msg->getData()->getFileCount());
 
-    return send2NodeBinaryMsg(address, msg->getData()->getJobDir(),
+    return send2NodeBinaryMsg(address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
 }
 
@@ -120,6 +124,8 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
     }
 
     LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
+
+    //LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, executorIndex, PROCESS_STATE_ENDED);
 
     TypeMD5List md5List;
 
@@ -153,13 +159,14 @@ bool Collector::send2DistributorNodeMsg(long address, const char* jobDir, TypeMD
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
-bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2NodeJobMsg(long address, const char* jobDir, long executionID,
+                                const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), getID(), MSGTYPE_JOB);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executor);
+    msg->getData()->setExecutor(executionID, executor);
     msg->getData()->addFileList(fileList);
 
     LOGS_I(getHost(), getID(), "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
@@ -167,13 +174,14 @@ bool Collector::send2NodeJobMsg(long address, const char* jobDir, const char* ex
     return send(COMP_NODE, address, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, long executionID,
+                                   const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), getID(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executor);
+    msg->getData()->setExecutor(executionID, executor);
     msg->getData()->addFileList(fileList);
 
     LOGS_I(getHost(), getID(), "\"%d\" file binary is prepared", fileList->size());

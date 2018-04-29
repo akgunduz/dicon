@@ -49,7 +49,7 @@ bool Node::processDistributorIDMsg(long address, Message *msg) {
 
     setID((int)msg->getHeader()->getVariant(0));
 
-    LOGS_I(COMP_NODE, getID(), "New ID : %d is assigned by Distributor", getID());
+    LOGS_I(getHost(), getID(), "New ID : %d is assigned by Distributor", getID());
 
     return send2DistributorIDMsg(address);
 }
@@ -61,14 +61,14 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
 
     if (!send2DistributorBusyMsg(getDistributorAddress())) {
 
-        LOGS_E(COMP_NODE, getID(),"Could not send BUSY message to Distributor!!!");
+        LOGS_E(getHost(), getID(),"Could not send BUSY message to Distributor!!!");
         return false;
     }
 
     TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), msg->getData()->getFileList());
     if (!requiredList.empty()) {
 
-        return send2CollectorInfoMsg(address, msg->getData()->getJobDir(),
+        return send2CollectorInfoMsg(address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                                      msg->getData()->getExecutor(), &requiredList);
 
     } else {
@@ -80,7 +80,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
 
         //TODO will update with md5s including outputs
         //TODO will update with actual binary to collector including outputs
-        return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(),
+        return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                                        msg->getData()->getExecutor(), &outputList);
     }
 }
@@ -93,7 +93,7 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
     FileInfo::setFileListState(&outputList, false);
     //TODO will update with md5s including outputs
     //TODO will update with actual binary to collector including outputs
-    return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(),
+    return send2CollectorBinaryMsg(address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                                    msg->getData()->getExecutor(), &outputList);
 }
 
@@ -132,30 +132,32 @@ bool Node::send2DistributorBusyMsg(long address) {
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
-bool Node::send2CollectorInfoMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorInfoMsg(long address, const char* jobDir, long executorID,
+                                 const char* executor, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(getHost(), getID(), MSGTYPE_INFO);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executor);
+    msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(COMP_NODE, getID(), "\"%d\" file info is prepared", fileList->size());
+    LOGS_I(getHost(), getID(), "\"%d\" file info is prepared", fileList->size());
 
 	return send(COMP_COLLECTOR, address, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(long address, const char* jobDir, const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorBinaryMsg(long address, const char* jobDir, long executorID,
+                                   const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), getID(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executor);
+    msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(COMP_NODE, getID(), "\"%d\" file binary is prepared", fileList->size());
+    LOGS_I(getHost(), getID(), "\"%d\" file binary is prepared", fileList->size());
 
     return send(COMP_COLLECTOR, address, msg);
 }
@@ -197,7 +199,7 @@ bool Node::processCommand(const char *cmd) {
     strcpy(fullcmd, Util::parsePath(getHost(), cmd).c_str());
 
     LOG_U(UI_UPDATE_NODE_EXEC_LIST, fullcmd);
-    LOGS_I(COMP_NODE, getID(), "Executing %s command\n", fullcmd);
+    LOGS_I(getHost(), getID(), "Executing %s command\n", fullcmd);
 
     parseCommand(fullcmd, args);
 

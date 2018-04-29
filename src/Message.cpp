@@ -102,10 +102,15 @@ bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
     return true;
 }
 
-bool Message::readExecutionInfo(int desc, char *execution, Block *header) {
+bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Block *header) {
 
     if (header->getType() != BLOCK_EXECUTION_INFO) {
         LOGS_E(getHost(), getID(), "readExecutionInfo can not read other blocks");
+        return false;
+    }
+
+    if (!readNumber(desc, executionID)) {
+        LOGS_E(getHost(), getID(), "readExecutionInfo can not read execution id");
         return false;
     }
 
@@ -164,11 +169,14 @@ bool Message::readMessageBlock(int in, Block *header) {
 
         case BLOCK_EXECUTION_INFO:
 
-            if (!readExecutionInfo(in, getData()->getExecutor(), header)) {
+            long executionID;
+            if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), header)) {
                 return false;
             }
 
             LOGS_I(getHost(), getID(), "New execution info %s received", getData()->getExecutor());
+
+            getData()->setExecutorID(executionID);
 
             break;
 
@@ -204,7 +212,7 @@ bool Message::writeJobInfo(int desc, char *jobDir) {
     return true;
 }
 
-bool Message::writeExecutionInfo(int desc, char *executor) {
+bool Message::writeExecutionInfo(int desc, long executorID, char *executor) {
 
     Block blockHeader(1, BLOCK_EXECUTION_INFO);
 
@@ -212,6 +220,11 @@ bool Message::writeExecutionInfo(int desc, char *executor) {
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         LOGS_E(getHost(), getID(), "writeExecutionInfo can not write block header");
+        return false;
+    }
+
+    if (!writeNumber(desc, executorID)) {
+        LOGS_E(getHost(), getID(), "writeExecutionInfo can not write execution ID");
         return false;
     }
 
@@ -301,7 +314,7 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            if (!writeExecutionInfo(out, getData()->getExecutor())) {
+            if (!writeExecutionInfo(out, getData()->getExecutorID(), getData()->getExecutor())) {
                 return false;
             }
 
