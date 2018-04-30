@@ -166,7 +166,7 @@ void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
             int hostID = va_arg(ap, int);
             COMPONENT target = (COMPONENT)va_arg(ap, int);
             int targetID = va_arg(ap, int);
-            bool direction = va_arg(ap, bool);
+            bool direction = (bool) va_arg(ap, int);
             char * fmt = va_arg(ap, char *);
             vsnprintf(buf, sizeof(buf), fmt, ap);
             sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",

@@ -23,7 +23,6 @@ private :
 	static bool runSenderCB(void *, SchedulerItem *);
 
 	Device *device;
-	//COMPONENT host;
 
     long address;
     long multicastAddress;
@@ -31,7 +30,6 @@ private :
     const InterfaceSchedulerCB *schedulerCB;
     const InterfaceHostCB *hostCB;
 
-   // void setHost(COMPONENT);
     void setDevice(Device*);
 
 protected :

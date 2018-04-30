@@ -259,12 +259,9 @@ bool Job::createDependencyMap() {
 
     bzero(depth, (size_t)getFileCount() * sizeof(int));
 
-    TypeFileList outList, depList;
-
     for (int i = 0; i < getExecutorCount(); i++) {
 
-        outList.clear();
-        depList.clear();
+        TypeFileList outList, depList;
 
         TypeFileInfoList *fileList = getExecutor(i)->getFileList();
 

@@ -18,17 +18,6 @@
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
 
-//enum PROCESS_STATES {
-//
-//    PROCESS_STATE_INVALID,
-//    PROCESS_STATE_VALID,
-//    PROCESS_STATE_STARTED,
-//    PROCESS_STATE_ENDED,
-//    PROCESS_STATE_MAX,
-//};
-
-//typedef std::tuple<ExecutorItem *, int, bool> TypeExecutorProcess;
-
 class Job : public JsonItem {
 
     char name[50];

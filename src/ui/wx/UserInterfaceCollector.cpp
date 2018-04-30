@@ -142,11 +142,11 @@ void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
         switch(job->getOrderedState(j)) {
 
             case PROCESS_STATE_ENDED:
-                collProcessList->SetItemBackgroundColour(j, wxColour(128, 128, 128));
+                collProcessList->SetItemBackgroundColour(j, wxColour(180, 180, 180));
                 break;
 
             case PROCESS_STATE_STARTED:
-                collProcessList->SetItemBackgroundColour(j, wxColour(128, 0, 128));
+                collProcessList->SetItemBackgroundColour(j, wxColour(255, 0, 255));
                 break;
 
             case PROCESS_STATE_NOTSTARTED:
