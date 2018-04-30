@@ -62,7 +62,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/ExecutorInfo.cpp
-        )
+        src/ui/UserInterfaceController.cpp src/ui/UserInterfaceController.h src/ui/UserInterfaceEvent.cpp src/ui/UserInterfaceEvent.h)
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/UserInterface.cpp

@@ -13,7 +13,6 @@ void UserInterface::componentInit() {
 
     ui_event = new wxEventTypeTag<wxCommandEvent>(wxNewEventType());
     Bind(*ui_event, &UserInterface::updateUI, this, 0, UI_UPDATE_MAX - 1, NULL);
-    uiUpdater[UI_UPDATE_LOG] = &UserInterface::updateLog;
 
     distInit();
     collInit();
@@ -54,7 +53,6 @@ void UserInterface::updateUIEvent(int id, void *data) {
     event.SetId(id);
     event.SetClientData(data);
     wxPostEvent(this, event);
-
 }
 
 void UserInterface::updateUI(wxCommandEvent& event) {
@@ -68,10 +66,4 @@ void UserInterface::updateUI(wxCommandEvent& event) {
 
 void UserInterface::updateUICallback(void *context, int id, void *data) {
     ((UserInterface*) context)->updateUIEvent(id, data);
-}
-
-void UserInterface::updateLog(wxCommandEvent& event) {
-
-//EventData *data = (EventData *)event.GetClientData();
-// genericLog->Append(data->dataStr);
 }

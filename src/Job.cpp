@@ -209,7 +209,7 @@ ExecutorInfo Job::getUnServed() {
         return getOrdered(i);
     }
 
-    return ExecutorInfo(NULL, 0);
+    return ExecutorInfo(0, NULL);
 }
 
 int Job::getUnServedCount() {

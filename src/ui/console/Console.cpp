@@ -9,8 +9,6 @@ Console::Console() {
 
     Log::setLogLevel(LEVEL_INFO);
     Log::set_ui_callback(this, updateUICallback);
-
-	uiUpdater[UI_UPDATE_LOG] = &Console::updateLog;
 }
 
 ConsoleEvent::ConsoleEvent() {
@@ -65,13 +63,6 @@ void Console::updateUIEvent(int id, void *data) {
 	if (uiUpdater[id] != nullptr) {
 		((this)->*(uiUpdater[id]))(event);
 	}
-}
-
-void Console::updateLog(ConsoleEvent &event) {
-
-	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("%s", data->dataStr.c_str());
-
 }
 
 void Console::updateUICallback(void *context, int id, void *data) {

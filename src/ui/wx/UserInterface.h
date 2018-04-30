@@ -124,7 +124,6 @@ public:
     void updateUIEvent(int, void*);
 
     void updateUI(wxCommandEvent &event);
-    void updateLog(wxCommandEvent &event);
 
     void componentInit();
 

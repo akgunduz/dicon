@@ -137,6 +137,33 @@ std::string Util::mixPath(const char *path1, const char *path2) {
     return std::string(path1) + "/" + path2;
 }
 
+void Util::removePath(const char *path) {
+
+    struct dirent *entry;
+    char newPath[PATH_MAX];
+
+    DIR *dir = opendir(path);
+    if (dir == nullptr) {
+        return;
+    }
+
+    while ((entry = readdir(dir)) != nullptr) {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+            snprintf(newPath, (size_t) PATH_MAX, "%s/%s", path, entry->d_name);
+            if (entry->d_type == DT_DIR) {
+                removePath(newPath);
+            } else {
+                unlink(newPath);
+            }
+
+        }
+
+    }
+    closedir(dir);
+
+    rmdir(path);
+}
+
 bool Util::checkPath(const char *path, bool dir) {
 
     if (access(path, F_OK ) == -1) {
