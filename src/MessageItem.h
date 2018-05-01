@@ -2,8 +2,8 @@
 // Created by akgunduz on 23.10.2015.
 //
 
-#ifndef BANKOR_MESSAGECAPSULE_H
-#define BANKOR_MESSAGECAPSULE_H
+#ifndef BANKOR_MESSAGEITEM_H
+#define BANKOR_MESSAGEITEM_H
 
 
 #include "Message.h"
@@ -17,14 +17,13 @@ public:
     long address;
     Message *msg;
 
-    MessageItem(MESSAGE_DIRECTION type, long address = 0, Message *msg = nullptr) : SchedulerItem(type) {
-        this->address = address;
-        if (msg != nullptr) {
-            this->msg = msg;
-            this->priority = msg->getHeader()->getPriority();
-        }
-    }
+public:
+
+    MessageItem(MESSAGE_DIRECTION, long = 0, Message * = nullptr);
+
+    long getAddress();
+    Message* getMessage();
 };
 
 
-#endif //BANKOR_MESSAGECAPSULE_H
+#endif //BANKOR_MESSAGEITEM_H

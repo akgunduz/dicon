@@ -23,9 +23,7 @@ public:
     size_t getWaitingCount();
     void clearWaiting();
 
-    void setObject(long);
-
-
+    void setObject(int, long);
 };
 
 

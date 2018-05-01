@@ -33,7 +33,7 @@ int ComponentManager::add(long address) {
 
         mutex.lock();
 
-        setObject(address);
+        setObject(getFreeID(), address);
 
         mutex.unlock();
 

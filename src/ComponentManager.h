@@ -20,7 +20,7 @@ protected:
 
     TypeComponentList components;
 
-    virtual void setObject(long) = 0;
+    virtual void setObject(int, long) = 0;
 
 public:
 

@@ -4,18 +4,18 @@
 
 #include "Component.h"
 
-Component::Component(COMPONENT host, const char* rootPath) :
-    host(host), id(0) {
+Component::Component(ComponentObject host, const char* rootPath) :
+    host(host) {
 
-    ComponentTypes::setRootPath(getHost(), rootPath);
+    ComponentObject::setRootPath(getHost(), rootPath);
 
     schedulerCB = new InterfaceSchedulerCB(receiveCB, this);
-    hostCB = new InterfaceHostCB(getHostCB, getIDCB, this);
+    hostCB = new InterfaceHostCB(getHostCB, this);
 
     DeviceList *deviceList = DeviceList::getInstance();
 
     interfaces[COMP_NODE] = Connector::createInterface(deviceList->getActive(1), schedulerCB, hostCB);
-    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host != COMP_NODE ?
+    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host.getType() != COMP_NODE ?
                                    Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
@@ -35,70 +35,61 @@ Component::~Component() {
     delete hostCB;
 }
 
-COMPONENT Component::getHost() {
+ComponentObject Component::getHost() {
 
     return host;
 }
 
-int Component::getHostCB(void *arg) {
+void Component::setHostID(int id) {
 
-    return (int)((Component*) arg)->getHost();
+    host.setID(id);
 }
 
-int Component::getID() {
+ComponentObject Component::getHostCB(void *arg) {
 
-    return id;
-}
-
-int Component::getIDCB(void *arg) {
-
-    return ((Component*) arg)->getID();
-}
-
-void Component::setID(int id) {
-
-    this->id = id;
+    return ((Component*) arg)->getHost();
 }
 
 bool Component::receiveCB(void *arg, SchedulerItem* item) {
 
-    Component *component = (Component *) arg;
-    MessageItem *messageItem = (MessageItem*) item;
+    auto *component = (Component *) arg;
+    auto *messageItem = (MessageItem*) item;
 
-    return component->onReceive(messageItem->address, messageItem->msg);
+    return component->onReceive(messageItem->getMessage()->getHeader()->getOwner(),
+                                messageItem->getAddress(),
+                                messageItem->getMessage()->getHeader()->getType(),
+                                messageItem->getMessage());
 }
 
-bool Component::onReceive(long address, Message *msg) {
+bool Component::onReceive(ComponentObject owner, long address, MSG_TYPE msgType, Message *msg) {
 
     LOGC_I(getHost(),
-           getID(),
-           msg->getHeader()->getOwner(),
-           AddressHelper::getID(address),
+           owner,
           false,
           "\"%s\" is received",
           MessageTypes::getName(msg->getHeader()->getType()));
 
-    if (msg->getHeader()->getOwner() >= COMP_MAX) {
+    if (owner.getType() >= COMP_MAX) {
 
-        LOGS_E(getHost(), getID(), "Wrong message received : %d from %s, disgarding",
-              msg->getHeader()->getType(),
+        LOGS_E(getHost(), "Wrong message received : %d from %s, disgarding",
+               msgType,
               InterfaceTypes::getAddressString(address).c_str());
 
         delete msg;
         return false;
     }
 
-    auto processCB = processMsg[msg->getHeader()->getOwner()].find(msg->getHeader()->getType());
-    if (processCB == processMsg[msg->getHeader()->getOwner()].end()) {
+    auto processCB = processMsg[owner.getType()].find(msgType);
+    if (processCB == processMsg[owner.getType()].end()) {
 
-        return defaultProcessMsg(address, msg);
+        return defaultProcessMsg(owner, address, msg);
     }
 
-    return (this->*processMsg[msg->getHeader()->getOwner()][msg->getHeader()->getType()])(address, msg);
+    return (this->*processMsg[owner.getType()][msgType])(owner, address, msg);
 }
 
 
-bool Component::defaultProcessMsg(long address, Message *msg) {
+bool Component::defaultProcessMsg(ComponentObject owner, long address, Message *msg) {
 
     delete msg;
     return true;
@@ -134,40 +125,34 @@ bool Component::isSupportMulticast(COMPONENT target) {
     return false;
 }
 
-bool Component::send(COMPONENT target, long address, Message *msg) {
+bool Component::send(ComponentObject target, long address, Message *msg) {
 
     LOGC_I(getHost(),
-           getID(),
            target,
-           AddressHelper::getID(address),
            true,
            "\"%s\" is sent",
            MessageTypes::getName(msg->getHeader()->getType()));
 
-    msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));
+    msg->getHeader()->setOwner(getHost());
+    msg->getHeader()->setOwnerAddress(interfaces[target.getType()]->getAddress());
 
-    return interfaces[target]->push(MESSAGE_SEND, address, msg);
+    return interfaces[target.getType()]->push(MESSAGE_SEND, address, msg);
 }
 
-bool Component::send(COMPONENT target, Message *msg) {
+bool Component::send(ComponentObject target, Message *msg) {
 
     LOGS_I(getHost(),
-           getID(),
            "Multicast \"%s\" is sent",
            MessageTypes::getName(msg->getHeader()->getType()));
 
-    msg->getHeader()->setOwnerAddress(AddressHelper::setID(interfaces[target]->getAddress(), getID()));
+    msg->getHeader()->setOwner(getHost());
+    msg->getHeader()->setOwnerAddress(interfaces[target.getType()]->getAddress());
 
-    return interfaces[target]->push(MESSAGE_SEND, interfaces[target]->getMulticastAddress(), msg);
+    return interfaces[target.getType()]->push(MESSAGE_SEND, interfaces[target.getType()]->getMulticastAddress(), msg);
 }
 
-bool Component::put(COMPONENT target, long address, Message *msg) {
+std::vector<long> Component::getAddressList(ComponentObject target) {
 
-    return interfaces[target]->push(MESSAGE_RECEIVE, address, msg);
-}
-
-std::vector<long> Component::getAddressList(COMPONENT target) {
-
-    return interfaces[target]->getDevice()->getAddressList();
+    return interfaces[target.getType()]->getDevice()->getAddressList();
 }
 

@@ -71,7 +71,7 @@ bool NodeManager::setState(long address, NODE_STATES state) {
     return true;
 }
 
-void NodeManager::setObject(long address) {
+void NodeManager::setObject(int id, long address) {
 
-    components[address] = new NodeObject(AddressHelper::getID(address));
+    components[address] = new NodeObject(id);
 }

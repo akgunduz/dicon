@@ -19,12 +19,12 @@ private:
 	long getDistributorAddress();
 	void setDistributorAddress(long);
 
-    bool processDistributorWakeupMsg(long, Message *);
-    bool processDistributorIDMsg(long, Message *);
+    bool processDistributorWakeupMsg(ComponentObject, long, Message *);
+    bool processDistributorIDMsg(ComponentObject, long, Message *);
 
-    bool processCollectorJobMsg(long, Message *);
-    bool processCollectorBinaryMsg(long, Message *);
-    bool processCollectorReadyMsg(long, Message *);
+    bool processCollectorJobMsg(ComponentObject, long, Message *);
+    bool processCollectorBinaryMsg(ComponentObject, long, Message *);
+    bool processCollectorReadyMsg(ComponentObject, long, Message *);
 
     bool send2DistributorReadyMsg(long);
     bool send2DistributorAliveMsg(long);

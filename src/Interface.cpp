@@ -34,11 +34,11 @@ void Interface::end() {
 bool Interface::initThread() {
 
 	if (pipe(notifierPipe) < 0) {
-		LOGS_E(getHost(), getID(), "Notifier Pipe Init failed with err : %d!!!", errno);
+		LOGS_E(getHost(), "Notifier Pipe Init failed with err : %d!!!", errno);
 		return false;
 	}
 
-	LOGS_T(getHost(), getID(), "Init Notifier PIPE OK!!!");
+	LOGS_T(getHost(), "Init Notifier PIPE OK!!!");
 
 	threadRcv = std::thread(runReceiverCB, this);
 
@@ -84,7 +84,7 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 		return true;
 	}
 
-	LOGS_E(getHost(), getID(), "Interface is not suitable for target : %d", target);
+	LOGS_E(getHost(), "Interface is not suitable for target : %d", target);
 	return false;
 }
 
@@ -108,14 +108,9 @@ void Interface::setMulticastAddress(long multicastAddress) {
     this->multicastAddress = multicastAddress;
 }
 
-COMPONENT Interface::getHost() {
+ComponentObject Interface::getHost() {
 
-    return (COMPONENT) hostCB->hcb(hostCB->arg);
-}
-
-int Interface::getID() {
-
-    return hostCB->icb(hostCB->arg);
+    return hostCB->hcb(hostCB->arg);
 }
 
 Device *Interface::getDevice() {

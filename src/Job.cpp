@@ -6,8 +6,8 @@
 #include "ParameterItem.h"
 #include "ExecutorItem.h"
 
-Job::Job(COMPONENT host, const char* jobDir)
-        : JsonItem(host, jobDir, JOB_FILE){
+Job::Job(ComponentObject host, const char* jobDir)
+        : JsonItem(host.getType(), jobDir, JOB_FILE){
 
     init();
 

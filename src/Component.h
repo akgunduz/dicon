@@ -8,18 +8,17 @@
 #include "Connector.h"
 #include "DeviceList.h"
 #include "MessageTypes.h"
+#include "ComponentObject.h"
 
 class Component;
 
-typedef bool (Component::*TypeProcessComponentMsg)(long, Message *);
+typedef bool (Component::*TypeProcessComponentMsg)(ComponentObject, long, Message *);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 
 class Component {
 
-    COMPONENT host;
-
-    int id;
+    ComponentObject host;
 
     Interface *interfaces[COMP_MAX];
 
@@ -30,29 +29,27 @@ protected :
     const InterfaceSchedulerCB *schedulerCB;
     const InterfaceHostCB *hostCB;
 
-    static int getHostCB(void*);
-    static int getIDCB(void*);
+    static ComponentObject getHostCB(void*);
+
 public:
 
-    Component(COMPONENT host, const char* rootPath);
+    Component(ComponentObject host, const char* rootPath);
     virtual ~Component();
 
-    COMPONENT getHost();
-
-    int getID();
-    void setID(int);
+    ComponentObject getHost();
+    void setHostID(int);
 
     long getInterfaceAddress(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
-    bool onReceive(long, Message *);
+    bool onReceive(ComponentObject, long, MSG_TYPE, Message *);
 
-    bool send(COMPONENT, long, Message*);
-    bool send(COMPONENT, Message*);
-    bool put(COMPONENT, long, Message*);
-    std::vector<long> getAddressList(COMPONENT);
-    bool defaultProcessMsg(long, Message *);
+    bool send(ComponentObject, long, Message*);
+    bool send(ComponentObject, Message*);
+
+    std::vector<long> getAddressList(ComponentObject);
+    bool defaultProcessMsg(ComponentObject, long, Message *);
 
 };
 

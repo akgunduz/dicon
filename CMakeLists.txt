@@ -49,7 +49,7 @@ set(FRAMEWORK_FILES
         #${SOURCE_PATH}/JobInfo.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
-        ${SOURCE_PATH}/ComponentTypes.cpp
+        #${SOURCE_PATH}/ComponentTypes.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
         ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/MessageData.cpp

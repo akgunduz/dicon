@@ -5,7 +5,7 @@
 #include "NodeObject.h"
 
 NodeObject::NodeObject(NODE_STATES state, int usage, int id) :
-        state(state), usage(usage), ComponentObject(id) {
+        state(state), usage(usage), ComponentObject(COMP_NODE, id) {
 }
 
 NodeObject::NodeObject(int id) :

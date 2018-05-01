@@ -38,30 +38,30 @@ Node::~Node() {
 
 }
 
-bool Node::processDistributorWakeupMsg(long address, Message *msg) {
+bool Node::processDistributorWakeupMsg(ComponentObject owner, long address, Message *msg) {
 
     setDistributorAddress(address);
 
     return send2DistributorAliveMsg(address);
 }
 
-bool Node::processDistributorIDMsg(long address, Message *msg) {
+bool Node::processDistributorIDMsg(ComponentObject owner, long address, Message *msg) {
 
-    setID((int)msg->getHeader()->getVariant(0));
+    setHostID((int)msg->getHeader()->getVariant(0));
 
-    LOGS_I(getHost(), getID(), "New ID : %d is assigned by Distributor", getID());
+    LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(address);
 }
 
-bool Node::processCollectorJobMsg(long address, Message *msg) {
+bool Node::processCollectorJobMsg(ComponentObject owner, long address, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, BUSY);
     LOG_U(UI_UPDATE_NODE_CLEAR, "");
 
     if (!send2DistributorBusyMsg(getDistributorAddress())) {
 
-        LOGS_E(getHost(), getID(),"Could not send BUSY message to Distributor!!!");
+        LOGS_E(getHost(), "Could not send BUSY message to Distributor!!!");
         return false;
     }
 
@@ -85,7 +85,7 @@ bool Node::processCollectorJobMsg(long address, Message *msg) {
     }
 }
 
-bool Node::processCollectorBinaryMsg(long address, Message *msg) {
+bool Node::processCollectorBinaryMsg(ComponentObject owner, long address, Message *msg) {
 
     processCommand(msg->getData()->getExecutor());
 
@@ -97,7 +97,7 @@ bool Node::processCollectorBinaryMsg(long address, Message *msg) {
                                    msg->getData()->getExecutor(), &outputList);
 }
 
-bool Node::processCollectorReadyMsg(long address, Message *msg) {
+bool Node::processCollectorReadyMsg(ComponentObject owner, long address, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
@@ -106,28 +106,28 @@ bool Node::processCollectorReadyMsg(long address, Message *msg) {
 
 bool Node::send2DistributorReadyMsg(long address) {
 
-	auto *msg = new Message(getHost(), getID(), MSGTYPE_READY);
+	auto *msg = new Message(getHost(), MSGTYPE_READY);
 
 	return send(COMP_DISTRIBUTOR, address, msg);
 }
 
 bool Node::send2DistributorAliveMsg(long address) {
 
-    auto *msg = new Message(getHost(), getID(), MSGTYPE_ALIVE);
+    auto *msg = new Message(getHost(), MSGTYPE_ALIVE);
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
 bool Node::send2DistributorIDMsg(long address) {
 
-    auto *msg = new Message(getHost(), getID(), MSGTYPE_ID);
+    auto *msg = new Message(getHost(), MSGTYPE_ID);
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
 
 bool Node::send2DistributorBusyMsg(long address) {
 
-    auto *msg = new Message(getHost(), getID(), MSGTYPE_BUSY);
+    auto *msg = new Message(getHost(), MSGTYPE_BUSY);
 
     return send(COMP_DISTRIBUTOR, address, msg);
 }
@@ -135,14 +135,14 @@ bool Node::send2DistributorBusyMsg(long address) {
 bool Node::send2CollectorInfoMsg(long address, const char* jobDir, long executorID,
                                  const char* executor, TypeFileInfoList *fileList) {
 
-	auto *msg = new Message(getHost(), getID(), MSGTYPE_INFO);
+	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(getHost(), getID(), "\"%d\" file info is prepared", fileList->size());
+    LOGS_I(getHost(), "\"%d\" file info is prepared", fileList->size());
 
 	return send(COMP_COLLECTOR, address, msg);
 }
@@ -150,14 +150,14 @@ bool Node::send2CollectorInfoMsg(long address, const char* jobDir, long executor
 bool Node::send2CollectorBinaryMsg(long address, const char* jobDir, long executorID,
                                    const char* executor, TypeFileInfoList *fileList) {
 
-    auto *msg = new Message(getHost(), getID(), MSGTYPE_BINARY);
+    auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(getHost(), getID(), "\"%d\" file binary is prepared", fileList->size());
+    LOGS_I(getHost(), "\"%d\" file binary is prepared", fileList->size());
 
     return send(COMP_COLLECTOR, address, msg);
 }
@@ -199,7 +199,7 @@ bool Node::processCommand(const char *cmd) {
     strcpy(fullcmd, Util::parsePath(getHost(), cmd).c_str());
 
     LOG_U(UI_UPDATE_NODE_EXEC_LIST, fullcmd);
-    LOGS_I(getHost(), getID(), "Executing %s command\n", fullcmd);
+    LOGS_I(getHost(), "Executing %s command\n", fullcmd);
 
     parseCommand(fullcmd, args);
 

@@ -4,7 +4,7 @@
 //
 
 #include "Log.h"
-#include "ComponentTypes.h"
+#include "ComponentObject.h"
 #include "Util.h"
 
 LOGLEVEL Log::logLevel = LEVEL_ERROR;
@@ -59,11 +59,11 @@ void Log::display(const char *format, ...) {
 
 }
 
-void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
+void Log::log(LOGLEVEL level, const char *file, int line, ...) {
 
-	if (logLevel < level) {
-		return;
-	}
+    if (logLevel < level) {
+        return;
+    }
 
     char buf[PATH_MAX];
     char extra[PATH_MAX];
@@ -79,54 +79,87 @@ void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
 #endif
 
     va_list ap;
-    va_start(ap, type);
+    va_start(ap, line);
 
-    switch(type) {
-
-        case LOG_DUMP: {
-            char * fmt = va_arg(ap, char *);
-            vsnprintf(buf, sizeof(buf), fmt, ap);
-            sprintf(logout, "%s \n", buf);
-        }
-            break;
-
-        case LOG_STD: {
-            COMPONENT host = (COMPONENT)va_arg(ap, int);
-            int hostID = va_arg(ap, int);
-            char * fmt = va_arg(ap, char *);
-            vsnprintf(buf, sizeof(buf), fmt, ap);
-            sprintf(logout, "%11s[%d] : %s \n",
-                    ComponentTypes::getName(host),
-                    hostID,
-                    buf);
-        }
-            break;
-
-        case LOG_COMM: {
-            COMPONENT host = (COMPONENT)va_arg(ap, int);
-            int hostID = va_arg(ap, int);
-            COMPONENT target = (COMPONENT)va_arg(ap, int);
-            int targetID = va_arg(ap, int);
-            bool direction = (bool) va_arg(ap, int);
-            char * fmt = va_arg(ap, char *);
-            vsnprintf(buf, sizeof(buf), fmt, ap);
-            sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",
-                    ComponentTypes::getName(host),
-                    hostID,
-                    direction ? "==>" : "<==",
-                    ComponentTypes::getName(target),
-                    targetID,
-                    buf);
-        }
-            break;
-
-        default:
-            break;
-    }
+    char * fmt = va_arg(ap, char *);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    sprintf(logout, "%s \n", buf);
 
     va_end(ap);
 
     printf("%s", logout);
+}
+
+void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, ...) {
+
+    if (logLevel < level) {
+        return;
+    }
+
+    char buf[PATH_MAX];
+    char extra[PATH_MAX];
+    char logout[PATH_MAX];
+
+    strcpy(logout, "");
+
+    std::string fileName = Util::extractFile(file);
+    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
+
+#ifndef DISABLE_LOGFILEINFO
+    sprintf(logout, "%s %s", extra, logout);
+#endif
+
+    va_list ap;
+    va_start(ap, host);
+
+    char * fmt = va_arg(ap, char *);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    sprintf(logout, "%11s[%d] : %s \n",
+            host.getName(),
+            host.getID(),
+            buf);
+
+    va_end(ap);
+
+    printf("%s", logout);
+}
+
+void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, ComponentObject target, bool direction, ...) {
+
+    if (logLevel < level) {
+        return;
+    }
+
+    char buf[PATH_MAX];
+    char extra[PATH_MAX];
+    char logout[PATH_MAX];
+
+    strcpy(logout, "");
+
+    std::string fileName = Util::extractFile(file);
+    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
+
+#ifndef DISABLE_LOGFILEINFO
+    sprintf(logout, "%s %s", extra, logout);
+#endif
+
+    va_list ap;
+    va_start(ap, direction);
+
+    char * fmt = va_arg(ap, char *);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",
+            host.getName(),
+            host.getID(),
+            direction ? "==>" : "<==",
+            target.getName(),
+            target.getID(),
+            buf);
+
+    va_end(ap);
+
+    printf("%s", logout);
+
 }
 
 UserInterfaceController *Log::getController() {

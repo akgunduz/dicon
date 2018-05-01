@@ -24,13 +24,13 @@ private:
 
     Distributor(const char *);
 
-    bool processCollectorAliveMsg(long, Message *);
-    bool processCollectorNodeMsg(long, Message *);
+    bool processCollectorAliveMsg(ComponentObject, long, Message *);
+    bool processCollectorNodeMsg(ComponentObject, long, Message *);
 
-    bool processNodeReadyMsg(long, Message *);
-    bool processNodeAliveMsg(long, Message *);
-    bool processNodeBusyMsg(long, Message *);
-    bool processNodeIDMsg(long, Message *);
+    bool processNodeReadyMsg(ComponentObject, long, Message *);
+    bool processNodeAliveMsg(ComponentObject, long, Message *);
+    bool processNodeBusyMsg(ComponentObject, long, Message *);
+    bool processNodeIDMsg(ComponentObject, long, Message *);
 
 	bool send2CollectorWakeupMsg(long);
 	bool send2CollectorIDMsg(long, int);

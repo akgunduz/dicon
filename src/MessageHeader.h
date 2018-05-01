@@ -8,9 +8,9 @@
 #define BANKOR_MESSAGEHEADER_H
 
 #include "MessageTypes.h"
-#include "ComponentTypes.h"
+#include "ComponentObject.h"
 
-#define MAX_VARIANT 3
+#define MAX_VARIANT 2
 
 #define PRIORITY_COEFFICIENT 10
 
@@ -20,8 +20,8 @@ class MessageHeader {
 
     int type;
     int priority;
-    int owner;
 
+    long owner;
     long ownerAddress;
     long variant[MAX_VARIANT];
 
@@ -33,14 +33,11 @@ public:
     void setType(MSG_TYPE);
     MSG_TYPE getType();
 
-    COMPONENT getOwner();
-    void setOwner(COMPONENT);
+    ComponentObject getOwner();
+    void setOwner(ComponentObject);
 
     long getOwnerAddress();
     void setOwnerAddress(long);
-
-    int getID();
-    void setID(int);
 
     long getVariant(int id);
     void setVariant(int id, long variant);

@@ -5,12 +5,12 @@
 #include "CollectorObject.h"
 
 CollectorObject::CollectorObject() :
-        ComponentObject(0) {
+        ComponentObject(COMP_COLLECTOR, 0) {
 
 }
 
 CollectorObject::CollectorObject(int id) :
-        ComponentObject(id) {
+        ComponentObject(COMP_COLLECTOR, id) {
 
 }
 

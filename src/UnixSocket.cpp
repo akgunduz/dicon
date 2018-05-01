@@ -9,12 +9,12 @@ UnixSocket::UnixSocket(Device *device, const InterfaceSchedulerCB *scb, const In
 		: Interface(device, scb, hcb) {
 
 	if (!initUnixSocket()) {
-		LOGS_E(getHost(), getID(), "initUnixSocket failed!!!");
+		LOGS_E(getHost(), "initUnixSocket failed!!!");
 		throw std::runtime_error("UnixSocket : initUnixSocket failed!!!");
 	}
 
     if (!initThread()) {
-		LOGS_E(getHost(), getID(), "initThread failed!!!");
+		LOGS_E(getHost(), "initThread failed!!!");
 		throw std::runtime_error("UnixSocket : initThread failed!!!");
     }
 }
@@ -23,7 +23,7 @@ bool UnixSocket::initUnixSocket() {
 
     unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (unixSocket < 0) {
-        LOGS_E(getHost(), getID(), "Socket receiver open with err : %d!!!", errno);
+        LOGS_E(getHost(), "Socket receiver open with err : %d!!!", errno);
         return false;
     }
 
@@ -45,25 +45,25 @@ bool UnixSocket::initUnixSocket() {
 		}
 
 		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
-            LOGS_E(getHost(), getID(), "Socket listen with err : %d!!!", errno);
+            LOGS_E(getHost(), "Socket listen with err : %d!!!", errno);
 			close(unixSocket);
 			return false;
 		}
 
 		if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
-            LOGS_E(getHost(), getID(), "Could not set socket Non-Blocking!!!");
+            LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
 			close(unixSocket);
 			return false;
 		}
 
 		setAddress(address);
 
-        LOGS_I(getHost(), getID(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
+        LOGS_I(getHost(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
 
 		return true;
 	}
 
-    LOGS_E(getHost(), getID(), "Could not set create unix socket!!!");
+    LOGS_E(getHost(), "Could not set create unix socket!!!");
 
     close(unixSocket);
 
@@ -122,7 +122,7 @@ void UnixSocket::runReceiver() {
 
 void UnixSocket::runAccepter(Interface *interface, int acceptSocket) {
 
-	Message *msg = new Message(interface->getHost(), interface->getID());
+	Message *msg = new Message(interface->getHost());
 
 	if (msg->readFromStream(acceptSocket)) {
 		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
@@ -133,23 +133,23 @@ void UnixSocket::runSender(long target, Message *msg) {
 
 	int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (clientSocket < 0) {
-        LOGS_E(getHost(), getID(), "Socket sender open with err : %d!!!", errno);
+        LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
 		return;
 	}
 
-    LOGS_T(getHost(), getID(), "Socket sender %d is opened !!!", clientSocket);
+    LOGS_T(getHost(), "Socket sender %d is opened !!!", clientSocket);
 
     sockaddr_un clientAddress = getUnixAddress(target);
 
 	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
 
 	if (connect(clientSocket, (struct sockaddr *)&clientAddress, len) == -1) {
-        LOGS_E(getHost(), getID(), "Socket can not connect!!!");
+        LOGS_E(getHost(), "Socket can not connect!!!");
 		close(clientSocket);
 		return;
 	}
 
-    LOGS_T(getHost(), getID(), "Socket sender %d is connected !!!", clientSocket);
+    LOGS_T(getHost(), "Socket sender %d is connected !!!", clientSocket);
 
 	//msg->getHeader()->setOwnerAddress(getAddress());
 	msg->writeToStream(clientSocket);

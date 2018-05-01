@@ -33,15 +33,15 @@ int AddressHelper::getHelper(long address) {
     return (int) GET(address, HELPER_POS, HELPER_MASK);
 }
 
-int AddressHelper::getID(long address) {
-
-    return (int) GET(address, ID_POS, ID_MASK);
-}
-
-long AddressHelper::setID(long address, int id) {
-
-    return CLEAR_AND_SET(address, id, ID_POS, ID_MASK);
-}
+//int AddressHelper::getID(long address) {
+//
+//    return (int) GET(address, ID_POS, ID_MASK);
+//}
+//
+//long AddressHelper::setID(long address, int id) {
+//
+//    return CLEAR_AND_SET(address, id, ID_POS, ID_MASK);
+//}
 
 int AddressHelper::address2prefix(long address) {
 

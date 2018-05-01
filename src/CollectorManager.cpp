@@ -62,8 +62,7 @@ CollectorManager::~CollectorManager() {
     clearWaiting();
 }
 
-void CollectorManager::setObject(long address) {
+void CollectorManager::setObject(int id, long address) {
 
-    components[address] = new CollectorObject(AddressHelper::getID(address));
+    components[address] = new CollectorObject(id);
 }
-

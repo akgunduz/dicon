@@ -22,8 +22,8 @@ public:
     Jobs();
     ~Jobs();
     bool add(Job*);
-    bool add(COMPONENT , const char*);
-    bool addPath(COMPONENT, const char *, bool = false);
+    bool add(ComponentObject , const char*);
+    bool addPath(ComponentObject, const char *, bool = false);
 
     Job* get(const char*);
     Job* get(int);

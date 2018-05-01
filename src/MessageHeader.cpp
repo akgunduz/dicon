@@ -26,14 +26,14 @@ MSG_TYPE MessageHeader::getType() {
     return (MSG_TYPE)type;
 }
 
-COMPONENT MessageHeader::getOwner() {
+ComponentObject MessageHeader::getOwner() {
 
-    return (COMPONENT)owner;
+    return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF));
 }
 
-void MessageHeader::setOwner(COMPONENT owner) {
+void MessageHeader::setOwner(ComponentObject owner) {
 
-    this->owner = (int)owner;
+    this->owner = (((long)owner.getType()) << 32) | owner.getID();
 }
 
 long MessageHeader::getOwnerAddress() {
@@ -92,7 +92,7 @@ bool MessageHeader::set(const uint8_t* buffer) {
 
     type = ntohl(*((int *) buffer)); buffer += 4;
     priority = ntohl(*((int *) buffer)); buffer += 4;
-    owner = ntohl(*((int *) buffer)); buffer += 4;
+    owner = ntohll(*((long *) buffer)); buffer += 8;
     ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
     for (int i = 0; i < MAX_VARIANT; i++) {
         variant[i] = ntohll(*((long *) buffer)); buffer += 8;
@@ -105,7 +105,7 @@ bool MessageHeader::extract(uint8_t *buffer) {
 
     *((int *) buffer) = htonl(type); buffer += 4;
     *((int *) buffer) = htonl(priority); buffer += 4;
-    *((int *) buffer) = htonl(owner); buffer += 4;
+    *((long *) buffer) = htonll(owner); buffer += 8;
     *((long *) buffer) = htonll(ownerAddress); buffer += 8;
     for (int i = 0; i < MAX_VARIANT; i++) {
         *((long *) buffer) = htonll(variant[i]); buffer += 8;

@@ -19,13 +19,13 @@ bool Jobs::add(Job *job) {
     return true;
 }
 
-bool Jobs::add(COMPONENT host, const char *path) {
+bool Jobs::add(ComponentObject host, const char *path) {
 
     jobs[std::string(path)] = new Job(host, path);
     return true;
 }
 
-bool Jobs::addPath(COMPONENT host, const char *path, bool init) {
+bool Jobs::addPath(ComponentObject host, const char *path, bool init) {
 
     if (init) {
         clear();

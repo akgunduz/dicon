@@ -23,14 +23,13 @@ class BaseMessage {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE];
 
-    COMPONENT host;
-    int hostID;
+	ComponentObject host;
 
 	sockaddr_in datagramAddress;
 
 public:
 
-    BaseMessage();
+    BaseMessage(ComponentObject);
 
     void setDatagramAddress(sockaddr_in);
 
@@ -73,11 +72,7 @@ public:
     virtual bool extractHeader(uint8_t *) = 0;
     virtual int getHeaderSize() = 0;
 
-    COMPONENT getHost();
-    void setHost(COMPONENT);
-
-    int getID();
-    void setID(int);
+	ComponentObject getHost();
 };
 
 #endif //__Message_H_

@@ -23,7 +23,7 @@ public:
 
 	long getIdle();
 
-    void setObject(long);
+    void setObject(int, long);
 };
 
 #endif	/* DISTRIBUTOR_H */

@@ -50,13 +50,13 @@ void FileInfo::setFileListState(TypeFileInfoList *fileList, bool is_output) {
 
 }
 
-TypeFileInfoList FileInfo::checkFileExistence(COMPONENT component, TypeFileInfoList *list) {
+TypeFileInfoList FileInfo::checkFileExistence(ComponentObject component, TypeFileInfoList *list) {
 
     TypeFileInfoList reqList;
 
     for (int i = 0; i < list->size(); i++) {
 
-        if (!Util::checkPath(ComponentTypes::getRootPath(component),
+        if (!Util::checkPath(ComponentObject::getRootPath(component),
                              list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
 
             reqList.push_back(list->at(i));

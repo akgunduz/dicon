@@ -26,7 +26,7 @@ class Job : public JsonItem {
 
 public:
 
-    Job(COMPONENT host, const char* jobDir);
+    Job(ComponentObject host, const char* jobDir);
 
     void init();
     ~Job();

@@ -6,7 +6,8 @@
 #include "BaseMessage.h"
 #include "AddressHelper.h"
 
-BaseMessage::BaseMessage() {
+BaseMessage::BaseMessage(ComponentObject host)
+		: host(host) {
 
     bzero(&datagramAddress, sizeof(sockaddr_in));
 }
@@ -20,7 +21,7 @@ int BaseMessage::getBinarySize(const char* path) {
 
     FILE *fd = fopen(path, "rb");
     if (!fd) {
-		LOGS_E(getHost(), getID(), "File %s could not found", path);
+		LOGS_E(getHost(), "File %s could not found", path);
         return 0;
     }
 
@@ -53,13 +54,13 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
         }
 
         if (!readBlock(in, buf, (unsigned)readSize)) {
-			LOGS_E(getHost(), getID(), "Can not read data in transferBinary");
+			LOGS_E(getHost(), "Can not read data in transferBinary");
             error = true;
             break;
         }
 
         if (!writeBlock(out, buf, (unsigned)readSize)) {
-			LOGS_E(getHost(), getID(), "Can not write data in transferBinary");
+			LOGS_E(getHost(), "Can not write data in transferBinary");
             error = true;
             break;
         }
@@ -95,23 +96,23 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 		if (count == -1) {
 
 			if (errno == EINTR) {
-				LOGS_W(getHost(), getID(), "Interrupt Block, retry");
+				LOGS_W(getHost(), "Interrupt Block, retry");
 				continue;
 			}
 
 			if (errno == EAGAIN && !busy) {
-				LOGS_E(getHost(), getID(), "Busy state, sleep and retry");
+				LOGS_E(getHost(), "Busy state, sleep and retry");
 				busy = true;
 				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 
-			LOGS_E(getHost(), getID(), "Can not read data block");
+			LOGS_E(getHost(), "Can not read data block");
 			return false;
 		}
 
 		if (count == 0) {
-			LOGS_E(getHost(), getID(), "Empty read operation");
+			LOGS_E(getHost(), "Empty read operation");
 			return false;
 		}
 
@@ -139,14 +140,14 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 bool BaseMessage::readSignature(int in) {
 
 	if (!readBlock(in, tmpBuf, SIGNATURE_SIZE)) {
-		LOGS_E(getHost(), getID(), "Can not read correct signature from stream");
+		LOGS_E(getHost(), "Can not read correct signature from stream");
 		return false;
 	}
 
 	short signature = ntohs(*((short *) tmpBuf));
 
     if (signature != SIGNATURE) {
-		LOGS_E(getHost(), getID(), "Can not read correct signature from stream");
+		LOGS_E(getHost(), "Can not read correct signature from stream");
         return false;
     }
 
@@ -156,7 +157,7 @@ bool BaseMessage::readSignature(int in) {
 bool BaseMessage::readHeader(int in) {
 
 	if (!readBlock(in, tmpBuf, getHeaderSize())) {
-		LOGS_E(getHost(), getID(), "Can not read message header from stream");
+		LOGS_E(getHost(), "Can not read message header from stream");
 		return false;
 	}
 
@@ -166,7 +167,7 @@ bool BaseMessage::readHeader(int in) {
 bool BaseMessage::readBlockHeader(int in, Block *header) {
 
 	if (!readBlock(in, tmpBuf, BLOCK_HEADER_SIZE)) {
-		LOGS_E(getHost(), getID(), "Can not read block header from stream");
+		LOGS_E(getHost(), "Can not read block header from stream");
 		return false;
 	}
 
@@ -177,7 +178,7 @@ bool BaseMessage::readBlockHeader(int in, Block *header) {
     if (header->getCount() > 0) {
 
         if (!readBlock(in, tmpBuf, header->getCount() * 4)) {
-            LOGS_E(getHost(), getID(), "Can not read block header from stream");
+            LOGS_E(getHost(), "Can not read block header from stream");
             return false;
         }
 
@@ -197,7 +198,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 	while(size > TMP_BUFFER_SIZE - 1) {
 
 		if (!readBlock(in, tmpBuf, TMP_BUFFER_SIZE - 1)) {
-			LOGS_E(getHost(), getID(), "Can not read object data from stream");
+			LOGS_E(getHost(), "Can not read object data from stream");
 			return false;
 		}
 
@@ -208,7 +209,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 	}
 
 	if (!readBlock(in, tmpBuf, size)) {
-		LOGS_E(getHost(), getID(), "Can not read object data from stream");
+		LOGS_E(getHost(), "Can not read object data from stream");
 		return false;
 	}
 
@@ -221,7 +222,7 @@ bool BaseMessage::readString(int in, char* object, int size) {
 bool BaseMessage::readNumber(int in, long *number) {
 	//size must be 8;
 	if (!readBlock(in, tmpBuf, 8)) {
-		LOGS_E(getHost(), getID(), "Can not read number from stream");
+		LOGS_E(getHost(), "Can not read number from stream");
 		return false;
 	}
 
@@ -233,7 +234,7 @@ bool BaseMessage::readNumber(int in, long *number) {
 bool BaseMessage::readMD5(int desc, Md5* md5) {
 
 	if (!readBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-		LOGS_E(getHost(), getID(), "Can not read MD5 from stream");
+		LOGS_E(getHost(), "Can not read MD5 from stream");
 		return false;
 	}
 
@@ -246,7 +247,7 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
-		LOGS_E(getHost(), getID(), "File %s could not created or opened", path);
+		LOGS_E(getHost(), "File %s could not created or opened", path);
 		return false;
 	}
 
@@ -306,23 +307,23 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 		if (count == -1) {
 
 			if (errno == EINTR) {
-				LOGS_W(getHost(), getID(), "Interrupt Block, retry");
+				LOGS_W(getHost(), "Interrupt Block, retry");
 				continue;
 			}
 
 			if (errno == EAGAIN && !busy) {
-				LOGS_W(getHost(), getID(), "Busy state, sleep and retry");
+				LOGS_W(getHost(), "Busy state, sleep and retry");
 				busy = true;
 				usleep(BUSY_SLEEP_TIME);
 				continue;
 			}
 
-			LOGS_E(getHost(), getID(), "Can not write data block");
+			LOGS_E(getHost(), "Can not write data block");
 			return false;
 		}
 
 		if (count == 0) {
-			LOGS_E(getHost(), getID(), "Empty write operation");
+			LOGS_E(getHost(), "Empty write operation");
 			return false;
 		}
 
@@ -351,7 +352,7 @@ bool BaseMessage::writeSignature(int out) {
 	*((short *) tmpBuf) = htons(SIGNATURE);
 
     if (!writeBlock(out, tmpBuf, 2)) {
-        LOGS_E(getHost(), getID(), "Can not write signature to stream");
+        LOGS_E(getHost(), "Can not write signature to stream");
         return false;
     }
 
@@ -361,12 +362,12 @@ bool BaseMessage::writeSignature(int out) {
 bool BaseMessage::writeHeader(int out) {
 
     if (!extractHeader(tmpBuf)) {
-        LOGS_E(getHost(), getID(), "Can not prepare header");
+        LOGS_E(getHost(), "Can not prepare header");
         return false;
     }
 
 	if (!writeBlock(out, tmpBuf, getHeaderSize())) {
-		LOGS_E(getHost(), getID(), "Can not write message header to stream");
+		LOGS_E(getHost(), "Can not write message header to stream");
 		return false;
 	}
 
@@ -383,7 +384,7 @@ bool BaseMessage::writeBlockHeader(int out, Block *header) {
     }
 
     if (!writeBlock(out, tmpBuf, BLOCK_HEADER_SIZE + header->getCount() * 4)) {
-        LOGS_E(getHost(), getID(), "Can not write block header to stream");
+        LOGS_E(getHost(), "Can not write block header to stream");
         return false;
     }
 
@@ -393,7 +394,7 @@ bool BaseMessage::writeBlockHeader(int out, Block *header) {
 bool BaseMessage::writeString(int out, const char* str) {
 
 	if (!writeBlock(out, (uint8_t*)str, (int)strlen(str))) {
-		LOGS_E(getHost(), getID(), "Can not write string to stream");
+		LOGS_E(getHost(), "Can not write string to stream");
 		return false;
 	}
 
@@ -403,7 +404,7 @@ bool BaseMessage::writeString(int out, const char* str) {
 bool BaseMessage::writeNumber(int out, long number) {
 
 	if (!writeBlock(out, (uint8_t *)&number, 8)) {
-		LOGS_E(getHost(), getID(), "Can not write char array to stream");
+		LOGS_E(getHost(), "Can not write char array to stream");
 		return false;
 	}
 	return true;
@@ -412,7 +413,7 @@ bool BaseMessage::writeNumber(int out, long number) {
 bool BaseMessage::writeMD5(int desc, Md5* md5) {
 
     if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-        LOGS_E(getHost(), getID(), "Can not write md5 to stream");
+        LOGS_E(getHost(), "Can not write md5 to stream");
         return false;
     }
 
@@ -424,7 +425,7 @@ bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 
 	int in = open(path, O_RDONLY);
 	if (in == -1) {
-		LOGS_E(getHost(), getID(), "File %s could not created or opened", path);
+		LOGS_E(getHost(), "File %s could not created or opened", path);
 		return false;
 	}
 
@@ -462,23 +463,7 @@ bool BaseMessage::writeToStream(int out) {
 	return writeFinalize();
 }
 
-COMPONENT BaseMessage::getHost() {
+ComponentObject BaseMessage::getHost() {
 
     return this->host;
 }
-
-void BaseMessage::setHost(COMPONENT host) {
-
-     this->host = host;
-}
-
-int BaseMessage::getID() {
-
-	return this->hostID;
-}
-
-void BaseMessage::setID(int hostID) {
-
-	this->hostID = hostID;
-}
-

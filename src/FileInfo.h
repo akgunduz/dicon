@@ -37,7 +37,7 @@ public:
     static void setFileListState(TypeFileInfoList*, bool);
 //    static void setFileItemState(TypeFileInfoList*, long, bool);
 //    static bool isInclude(TypeFileInfoList*, FileItem*);
-    static TypeFileInfoList checkFileExistence(COMPONENT, TypeFileInfoList*);
+    static TypeFileInfoList checkFileExistence(ComponentObject, TypeFileInfoList*);
 };
 
 
