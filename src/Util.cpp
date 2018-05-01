@@ -283,3 +283,12 @@ void Util::cleanup() {
 
     closedir(unixdir);
 }
+
+std::string Util::extractFile(const char *path) {
+
+    std::string file = path;
+    size_t pos = file.find_last_of('/');
+    file = file.substr(pos + 1);
+    pos = file.find_first_of('.');
+    return file.substr(0, pos);
+}

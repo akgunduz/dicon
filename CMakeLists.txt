@@ -62,15 +62,17 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/ExecutorInfo.cpp
-        src/ui/UserInterfaceController.cpp src/ui/UserInterfaceController.h src/ui/UserInterfaceEvent.cpp src/ui/UserInterfaceEvent.h)
+        ${SOURCE_PATH}/ui/UserInterfaceController.cpp
+        ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
+        )
 
 set(WX_FILES
-        ${SOURCE_PATH}/ui/wx/UserInterface.cpp
-        ${SOURCE_PATH}/ui/wx/UserInterfaceComponent.cpp
-        ${SOURCE_PATH}/ui/wx/UserInterfaceDistributor.cpp
-        ${SOURCE_PATH}/ui/wx/UserInterfaceCollector.cpp
-        ${SOURCE_PATH}/ui/wx/UserInterfaceNode.cpp
-        ${SOURCE_PATH}/ui/wx/UserInterfaceApp.cpp
+        ${SOURCE_PATH}/ui/wx/Wx.cpp
+        ${SOURCE_PATH}/ui/wx/WxComponent.cpp
+        ${SOURCE_PATH}/ui/wx/WxDistributor.cpp
+        ${SOURCE_PATH}/ui/wx/WxCollector.cpp
+        ${SOURCE_PATH}/ui/wx/WxNode.cpp
+        ${SOURCE_PATH}/ui/wx/WxApp.cpp
         )
 
 set(CONSOLE_FILES

@@ -116,7 +116,7 @@ bool Collector::processNodeBinaryMsg(long address, Message *msg) {
 
     LOGS_I(getHost(), getID(), "%d File output binary received", msg->getData()->getFileCount());
 
-    std::vector<uint64_t> fileListIDs;
+    std::vector<long> fileListIDs;
 
     for (int i = 0; i < msg->getData()->getFileCount(); i++) {
 

@@ -9,7 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "UserInterfaceComponent.h"
+#include "WxComponent.h"
 
 void UserInterface::collInit() {
 
@@ -80,28 +80,33 @@ void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
 
 void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    collDistDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
-    collNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_2));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    collDistDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
+    collNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
 
 }
 
 void UserInterface::collUpdateAttachedDistAddress(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    collDistAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    collDistAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 
 }
 
 void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 }
 
 void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
-    auto *job = (Job*)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    auto *job = (Job*)data->getPointer(0);
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
@@ -117,17 +122,19 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
 
 void UserInterface::collUpdateFileListItem(wxCommandEvent &event) {
 
-    auto *data = (EventData *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    for (int i = 0; i < data->data64_list.size(); i++) {
+    for (int i = 0; i < data->getDataSize(); i++) {
 
-        collFileList->SetItemBackgroundColour(data->data64_list[i], wxColour(0, 255, 0));
+        collFileList->SetItemBackgroundColour(data->getData(i), wxColour(0, 255, 0));
     }
 }
 
 void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
 
-    auto *job = (Job *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    auto *job = (Job *)data->getPointer(0);
 
     if (job->getOrderedCount() != collProcessList->GetItemCount()) {
 

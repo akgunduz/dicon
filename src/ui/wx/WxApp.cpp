@@ -23,7 +23,7 @@
 ////@begin includes
 ////@end includes
 
-#include "UserInterfaceApp.h"
+#include "WxApp.h"
 
 ////@begin XPM images
 ////@end XPM images

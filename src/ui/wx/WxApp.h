@@ -19,7 +19,7 @@
 
 ////@begin includes
 #include "wx/image.h"
-#include "UserInterface.h"
+#include "Wx.h"
 ////@end includes
 
 /*!

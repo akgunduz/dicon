@@ -9,7 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "UserInterfaceComponent.h"
+#include "WxComponent.h"
 
 void UserInterface::distInit() {
 
@@ -89,22 +89,22 @@ void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
 
 void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
 
-    auto *data = (EventData *)event.GetClientData();
-    distCollDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
-    distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_2));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
 
+    distCollDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
+    distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
 }
 
 void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 
     long i = 0;
 
-    auto *data = (EventData *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
 
     for (; i < distCollList->GetItemCount(); i++) {
 
         std::string item = distCollList->GetItemText(i, 0).ToStdString();
-        std::string address = InterfaceTypes::getAddressString(data->data64_1);
+        std::string address = InterfaceTypes::getAddressString(data->getData(0));
 
         if (address.compare(item) == 0) {
             break;
@@ -116,11 +116,11 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
         i = distCollList->InsertItem(distCollList->GetItemCount(), 0);
     }
 
-    distCollList->SetItem(i, 0, InterfaceTypes::getAddressString(data->data64_1));
-    distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->data64_1));
+    distCollList->SetItem(i, 0, InterfaceTypes::getAddressString(data->getData(0)));
+    distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->getData(0)));
 
-    if (data->data64_2 > 0) {
-        distCollList->SetItem(i, 1, InterfaceTypes::getAddressString(data->data64_2));
+    if (data->getData(1) > 0) {
+        distCollList->SetItem(i, 1, InterfaceTypes::getAddressString(data->getData(1)));
     } else {
         distCollList->SetItem(i, 1, "No Available Node!!");
     }
@@ -131,12 +131,12 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
 
     long i = 0;
 
-    auto *data = (EventData *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
 
     for (; i < distNodeList->GetItemCount(); i++) {
 
         std::string item = distNodeList->GetItemText(i, 0).ToStdString();
-        std::string address = InterfaceTypes::getAddressString(data->data64_1);
+        std::string address = InterfaceTypes::getAddressString(data->getData(0));
 
         if (address == item) {
             break;
@@ -148,23 +148,15 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
         i = distNodeList->InsertItem(distNodeList->GetItemCount(), 0);
     }
 
-    distNodeList->SetItem(i, 0, InterfaceTypes::getAddressString(data->data64_1));
-    distNodeList->SetItem(i, 1, NodeState::getName((NODE_STATES)data->data64_2));
+    distNodeList->SetItem(i, 0, InterfaceTypes::getAddressString(data->getData(0)));
+    distNodeList->SetItem(i, 1, NodeState::getName((NODE_STATES)data->getData(1)));
 
 }
 
 void UserInterface::distUpdateBackup(wxCommandEvent &event) {
 
-    auto *data = (EventData *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    distBackupStatus->SetLabelText(wxString::Format(wxT("%ld"), data->data64_1));
+    distBackupStatus->SetLabelText(wxString::Format(wxT("%ld"), data->getData(0)));
 
 }
-
-//void UserInterface::distUpdateLog(wxCommandEvent &event) {
-//
-//    auto *data = (EventData *)event.GetClientData();
-//
-//    distLog->Append(wxString::Format("%s", data->dataStr));
-//    LOG_S("%s", data->dataStr.c_str());
-//}

@@ -5,7 +5,7 @@
 #ifndef BANKOR_USERINTERFACECOMPONENT_H
 #define BANKOR_USERINTERFACECOMPONENT_H
 
-#include "UserInterface.h"
+#include "Wx.h"
 
 #include "Distributor.h"
 #include "Collector.h"

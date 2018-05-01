@@ -26,7 +26,7 @@
 #include "wx/imaglist.h"
 ////@end includes
 
-#include "UserInterface.h"
+#include "Wx.h"
 
 ////@begin XPM images
 ////@end XPM images

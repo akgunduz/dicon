@@ -2,12 +2,11 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
-#include "UserInterfaceComponent.h"
+#include "WxComponent.h"
 
 void UserInterface::componentInit() {
 
-    Log::setLogLevel(LEVEL_INFO);
-    Log::set_ui_callback(this, updateUICallback);
+    Log::init(LEVEL_INFO, this, updateUICallback);
 
     uiUpdater = new fUIUpdater[UI_UPDATE_MAX];
 

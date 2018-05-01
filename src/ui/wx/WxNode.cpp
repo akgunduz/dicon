@@ -9,7 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#include "UserInterfaceComponent.h"
+#include "WxComponent.h"
 
 void UserInterface::nodeInit() {
 
@@ -64,20 +64,23 @@ void UserInterface::OnNodeInitClickWrapper( wxCommandEvent& event )
 
 void UserInterface::nodeUpdateAddresses(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    nodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    nodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 }
 
 void UserInterface::nodeUpdateState(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    nodeState->SetLabel(NodeState::getName((NODE_STATES)data->data64_1));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    nodeState->SetLabel(NodeState::getName((NODE_STATES)data->getData(0)));
 }
 
 void UserInterface::nodeUpdateAttachedCollAddress(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    nodeCollAddress->SetLabel(InterfaceTypes::getAddressString(data->data64_1));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    nodeCollAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 }
 
 void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
@@ -88,11 +91,13 @@ void UserInterface::nodeUpdateClear(wxCommandEvent &event) {
 
 void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
-    Job *job = (Job *)event.GetClientData();
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    auto *job = (Job *)data->getPointer(0);
 
     for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
 
-        FileItem *content = (FileItem *) job->getContent(CONTENT_FILE, j);
+        auto *content = (FileItem *) job->getContent(CONTENT_FILE, j);
         if (content == nullptr) {
             return;
         }
@@ -118,6 +123,7 @@ void UserInterface::nodeUpdateFileList(wxCommandEvent &event) {
 
 void UserInterface::nodeUpdateExecList(wxCommandEvent &event) {
 
-    EventData *data = (EventData *)event.GetClientData();
-    nodeExecList->Append(wxString::Format("%s", data->dataStr));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    nodeExecList->Append(wxString::Format("%s", data->getString(0)));
 }

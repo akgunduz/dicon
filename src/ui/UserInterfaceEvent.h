@@ -17,14 +17,16 @@ class UserInterfaceEvent {
 
 public:
 
-    UserInterfaceEvent();
+    UserInterfaceEvent(int);
 
     long getData(int);
+    long getDataSize();
     std::string getString(int);
     void* getPointer(int);
 
     void setID(int);
     void addData(long);
+    void addDataList(std::vector<long>);
     void addString(std::string);
     void addPointer(void*);
 };

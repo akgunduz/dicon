@@ -5,7 +5,7 @@
 
 #include "UserInterfaceEvent.h"
 
-UserInterfaceEvent::UserInterfaceEvent() : id(0) {
+UserInterfaceEvent::UserInterfaceEvent(int id) : id(id) {
 
 }
 
@@ -34,6 +34,11 @@ void UserInterfaceEvent::addData(long data) {
     this->data.push_back(data);
 }
 
+void UserInterfaceEvent::addDataList(std::vector<long> dataList) {
+
+    this->data.insert(this->data.end(), dataList.begin(), dataList.end());
+}
+
 void UserInterfaceEvent::addString(std::string str) {
 
     this->str.push_back(str);
@@ -44,3 +49,7 @@ void UserInterfaceEvent::addPointer(void *pointer) {
     this->pointer.push_back(pointer);
 }
 
+long UserInterfaceEvent::getDataSize() {
+
+    return data.size();
+}
