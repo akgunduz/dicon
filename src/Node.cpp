@@ -211,7 +211,7 @@ bool Node::processCommand(const char *cmd) {
     pid_t pid = fork();
 
     if (pid == -1) {
-        LOG_E("Job Process failed in fork!!!");
+        LOGS_E(getHost(), "Job Process failed in fork!!!");
         return false;
 
     } else if (pid > 0) {
@@ -224,7 +224,7 @@ bool Node::processCommand(const char *cmd) {
     } else {
         //child part
         execv(*args, args);
-        LOG_E("ExecV failed with error : %d for command %s", errno, cmd);
+        LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, cmd);
         exit(EXIT_FAILURE);
     }
 #endif

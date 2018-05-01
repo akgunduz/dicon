@@ -89,7 +89,7 @@ void UnixSocket::runReceiver() {
 
 		int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
 		if (nready == -1) {
-			LOG_E("Problem with select call with err : %d!!!", errno);
+			LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
 			return;
 		}
 
@@ -97,7 +97,7 @@ void UnixSocket::runReceiver() {
 
 			int acceptSocket = accept(unixSocket, nullptr, nullptr);
 			if (acceptSocket < 0) {
-				LOG_E("Node Socket open with err : %d!!!", errno);
+				LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
 				return;
 			}
 

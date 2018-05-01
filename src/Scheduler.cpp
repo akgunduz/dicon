@@ -40,7 +40,6 @@ bool Scheduler::push(SchedulerItem *item) {
 		return true;
 	}
 
-    LOG_E("Too many items in scheduler, escaping them!!!");
     lock.unlock();
 
 	return false;

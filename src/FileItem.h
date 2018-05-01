@@ -11,7 +11,7 @@
 
 class FileItem : public ContentItem {
 
-    COMPONENT host;
+	ComponentObject host;
 	char fileName[PATH_MAX];
 	char jobDir[PATH_MAX];
 
@@ -22,13 +22,13 @@ class FileItem : public ContentItem {
 
 
 public:
-	FileItem(COMPONENT host);
+	FileItem(ComponentObject host);
     FileItem(FileItem*);
-    FileItem(COMPONENT host, const char*, const char*,
+    FileItem(ComponentObject host, const char*, const char*,
              int id, Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    void set(COMPONENT host, const char*, const char*,
+    void set(const char*, const char*,
              int id, Md5* = NULL);
 
 	Md5* getMD5();
@@ -36,7 +36,7 @@ public:
     const char* getFileName();
     const char* getJobDir();
 
-    COMPONENT getHost();
+	ComponentObject getHost();
     int getID();
 
     bool validate();

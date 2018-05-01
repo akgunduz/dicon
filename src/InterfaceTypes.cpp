@@ -23,7 +23,6 @@ fGetAddressList InterfaceTypes::getAddressList(INTERFACE type) {
             return UnixSocket::getAddressList;
 
         default:
-            LOG_E("Undefined Interface Type : %d", type);
             break;
     }
 

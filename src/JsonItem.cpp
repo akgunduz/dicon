@@ -4,7 +4,7 @@
 
 #include "JsonItem.h"
 
-JsonItem::JsonItem(COMPONENT host)
+JsonItem::JsonItem(ComponentObject host)
     : FileItem(host) {
 
 }
@@ -14,7 +14,7 @@ JsonItem::JsonItem(FileItem *fileItem)
 
 }
 
-JsonItem::JsonItem(COMPONENT host, const char* jobDir, const char* fileName)
+JsonItem::JsonItem(ComponentObject host, const char* jobDir, const char* fileName)
         : FileItem(host, jobDir, fileName, -1) {
 
 }
@@ -54,7 +54,7 @@ bool JsonItem::parse() {
 
     struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost(), getJobDir(), getFileName()).c_str());
     if (node == NULL){
-        LOG_E("Invalid JSON File");
+        LOGS_E(getHost(), "Invalid JSON File");
         return false;
     }
 

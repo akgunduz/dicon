@@ -59,22 +59,22 @@ void Log::display(const char *format, ...) {
 
 }
 
-void Log::log(LOGLEVEL level, const char *file, int line, ...) {
+void Log::logd(LOGLEVEL level, const char *file, int line,
+              ...) {
 
     if (logLevel < level) {
         return;
     }
 
     char buf[PATH_MAX];
-    char extra[PATH_MAX];
     char logout[PATH_MAX];
 
     strcpy(logout, "");
 
+#ifndef DISABLE_LOGFILEINFO
+    char extra[PATH_MAX];
     std::string fileName = Util::extractFile(file);
     sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
-
-#ifndef DISABLE_LOGFILEINFO
     sprintf(logout, "%s %s", extra, logout);
 #endif
 
@@ -83,29 +83,29 @@ void Log::log(LOGLEVEL level, const char *file, int line, ...) {
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%s \n", buf);
+    sprintf(logout, "%14s : %s \n", "Common", buf);
 
     va_end(ap);
 
     printf("%s", logout);
 }
 
-void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, ...) {
+void Log::logs(LOGLEVEL level, const char *file, int line,
+               ComponentObject host, ...) {
 
     if (logLevel < level) {
         return;
     }
 
     char buf[PATH_MAX];
-    char extra[PATH_MAX];
     char logout[PATH_MAX];
 
     strcpy(logout, "");
 
+#ifndef DISABLE_LOGFILEINFO
+    char extra[PATH_MAX];
     std::string fileName = Util::extractFile(file);
     sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
-
-#ifndef DISABLE_LOGFILEINFO
     sprintf(logout, "%s %s", extra, logout);
 #endif
 
@@ -124,22 +124,23 @@ void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, 
     printf("%s", logout);
 }
 
-void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, ComponentObject target, bool direction, ...) {
+void Log::logc(LOGLEVEL level, const char *file, int line,
+               ComponentObject host, ComponentObject target, int direction, ...) {
 
     if (logLevel < level) {
         return;
     }
 
     char buf[PATH_MAX];
-    char extra[PATH_MAX];
     char logout[PATH_MAX];
 
     strcpy(logout, "");
 
-    std::string fileName = Util::extractFile(file);
-    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
 
 #ifndef DISABLE_LOGFILEINFO
+    char extra[PATH_MAX];
+    std::string fileName = Util::extractFile(file);
+    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
     sprintf(logout, "%s %s", extra, logout);
 #endif
 
@@ -161,6 +162,8 @@ void Log::log(LOGLEVEL level, const char *file, int line, ComponentObject host, 
     printf("%s", logout);
 
 }
+
+
 
 UserInterfaceController *Log::getController() {
 

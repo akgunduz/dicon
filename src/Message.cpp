@@ -48,7 +48,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 		return false;
 	}
 
-    content->set(getHost().getType(), jobDir, fileName, (int)id);
+    content->set(jobDir, fileName, (int)id);
 
     if (header->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
@@ -123,7 +123,7 @@ bool Message::readMessageBlock(int in, Block *header) {
         case BLOCK_FILE_INFO:
         case BLOCK_FILE_BINARY: {
 
-            auto *fileItem = new FileItem(getHost().getType());
+            auto *fileItem = new FileItem(getHost());
             long state;
 
             if (!readFile(in, fileItem, getData()->getJobDir(), &state, header)) {

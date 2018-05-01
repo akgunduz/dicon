@@ -7,7 +7,7 @@
 #include "ExecutorItem.h"
 
 Job::Job(ComponentObject host, const char* jobDir)
-        : JsonItem(host.getType(), jobDir, JOB_FILE){
+        : JsonItem(host, jobDir, JOB_FILE){
 
     init();
 
@@ -25,7 +25,7 @@ void Job::init() {
     contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
 
     if (!parse()) {
-        LOG_E("Job could not parsed!!!");
+        LOGS_E(getHost(), "Job could not parsed!!!");
         return;
     }
 
@@ -34,7 +34,7 @@ void Job::init() {
     }
 
     if (!createDependencyMap()){
-        LOG_E("Dependency Loop Detected in the Job!!!");
+        LOGS_E(getHost(), "Dependency Loop Detected in the Job!!!");
         return;
     }
 }
@@ -43,7 +43,7 @@ bool Job::parseNameNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_string) {
-        LOG_E("Invalid JSON Name Node");
+        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Name Node");
         return false;
     }
 
@@ -58,7 +58,7 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
-        LOG_E("Invalid JSON Files Node");
+        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Files Node");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
 
         type = json_object_get_type(child);
         if (type != json_type_string) {
-            LOG_E("Invalid JSON Files Node");
+            LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Files Node");
             return false;
         }
 
@@ -87,7 +87,7 @@ bool Job::parseParamNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
-        LOG_E("Invalid JSON Parameter Node");
+        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Parameter Node");
         return false;
     }
 
@@ -96,7 +96,7 @@ bool Job::parseParamNode(JsonItem *parent, json_object *node) {
 
         type = json_object_get_type(child);
         if (type != json_type_string) {
-            LOG_E("Invalid JSON Parameter Node");
+            LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Parameter Node");
             return false;
         }
 
@@ -114,7 +114,7 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
-        LOG_E("Invalid JSON Executor Node");
+        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Executor Node");
         return false;
     }
 
@@ -123,7 +123,7 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
 
         type = json_object_get_type(child);
         if (type != json_type_string) {
-            LOG_E("Invalid JSON Executor Node");
+            LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Executor Node");
             return false;
         }
 
