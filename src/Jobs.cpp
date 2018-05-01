@@ -25,13 +25,13 @@ bool Jobs::add(ComponentObject host, const char *path) {
     return true;
 }
 
-bool Jobs::addPath(ComponentObject host, const char *path, bool init) {
+bool Jobs::addPath(ComponentObject host, bool init) {
 
     if (init) {
         clear();
     }
 
-    std::vector<std::string> dirList = Util::getDirList(path, JOB_DIR_PREFIX);
+    std::vector<std::string> dirList = Util::getDirList(host.getRootPath(), JOB_DIR_PREFIX);
 
     for (int i = 0; i < dirList.size(); i++) {
         add(host, dirList[i].c_str());

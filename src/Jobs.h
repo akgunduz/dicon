@@ -23,7 +23,7 @@ public:
     ~Jobs();
     bool add(Job*);
     bool add(ComponentObject , const char*);
-    bool addPath(ComponentObject, const char *, bool = false);
+    bool addPath(ComponentObject, bool = false);
 
     Job* get(const char*);
     Job* get(int);

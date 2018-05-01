@@ -56,7 +56,7 @@ TypeFileInfoList FileInfo::checkFileExistence(ComponentObject component, TypeFil
 
     for (int i = 0; i < list->size(); i++) {
 
-        if (!Util::checkPath(ComponentObject::getRootPath(component),
+        if (!Util::checkPath(component.getRootPath(),
                              list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
 
             reqList.push_back(list->at(i));

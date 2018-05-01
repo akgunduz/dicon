@@ -217,39 +217,39 @@ std::string Util::parsePath(ComponentObject host, const char *str) {
             break;
         }
 
-        newstr.replace(pos, len, ComponentObject::getRootPath(host));
+        newstr.replace(pos, len, host.getRootPath());
 
     } while(true);
 
     return newstr;
 }
 
-std::string Util::getAbsPath(const ComponentObject host, const char *path2) {
+std::string Util::getAbsPath(ComponentObject host, const char *path2) {
 
-    return std::string(ComponentObject::getRootPath(host)) + "/" + path2;
+    return std::string(host.getRootPath()) + "/" + path2;
 }
 
-std::string Util::getAbsRefPath(const ComponentObject host, const char* jobDir, const char* fileName) {
+std::string Util::getAbsRefPath(ComponentObject host, const char* jobDir, const char* fileName) {
 
     return getAbsPath(host, getRefPath(host, jobDir, fileName).c_str());
 }
 
-std::string Util::getAbsMD5Path(const ComponentObject host, const char* jobDir, const char* fileName) {
+std::string Util::getAbsMD5Path(ComponentObject host, const char* jobDir, const char* fileName) {
 
     return getAbsPath(host, getMD5Path(host, jobDir, fileName).c_str());
 }
 
-std::string Util::getRefPath(const ComponentObject host, const char* jobDir, const char* fileName) {
+std::string Util::getRefPath(ComponentObject host, const char* jobDir, const char* fileName) {
 
     return getPath(host, jobDir, fileName, false);
 }
 
-std::string Util::getMD5Path(const ComponentObject host, const char* jobDir, const char* fileName) {
+std::string Util::getMD5Path(ComponentObject host, const char* jobDir, const char* fileName) {
 
     return getPath(host, jobDir, fileName, true);
 }
 
-std::string Util::getPath(const ComponentObject host, const char* jobDir, const char* fileName, bool type) {
+std::string Util::getPath(ComponentObject host, const char* jobDir, const char* fileName, bool type) {
 
     char format[PATH_MAX];
     char path[PATH_MAX];
@@ -257,7 +257,7 @@ std::string Util::getPath(const ComponentObject host, const char* jobDir, const 
     !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
     sprintf(path, format, jobDir, fileName);
 
-    checkPath(ComponentObject::getRootPath(host), path, true);
+    checkPath(host.getRootPath(), path, true);
 
     return std::string(path);
 }

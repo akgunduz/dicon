@@ -42,7 +42,7 @@ public:
     COMPONENT getNextType();
     COMPONENT getPrevType();
 
-    static const char* getRootPath(ComponentObject);
+    const char* getRootPath();
     static void setRootPath(ComponentObject, const char*);
 
 };

@@ -29,7 +29,7 @@ Collector::Collector(const char *rootPath) :
 
     setDistributorAddress(0);
 
-    getJobs()->addPath(getHost(), ComponentObject::getRootPath(COMP_COLLECTOR), true);
+    getJobs()->addPath(getHost(), true);
 
     if (getJobs()->isEmpty()) {
         return;
@@ -78,7 +78,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, long address, M
     }
 
     if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
-            !Util::checkPath(ComponentObject::getRootPath(getHost()), msg->getData()->getJobDir(), false)) {
+            !Util::checkPath(getHost().getRootPath(), msg->getData()->getJobDir(), false)) {
         LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
         delete msg;
         return false;
