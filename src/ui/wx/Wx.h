@@ -150,7 +150,6 @@ public:
     void collUpdateFileList(wxCommandEvent &event);
     void collUpdateFileListItem(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
-    void collUpdateProcessListItem(wxCommandEvent &event);
 
     //Node
 

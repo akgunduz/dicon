@@ -34,7 +34,7 @@ class UserInterfaceController;
 class UserInterfaceController {
 
 private:
-//    fUIUpdater *uiUpdater;
+
     void *uiContext;
     TypeUIUpdateCB uiUpdateCB;
     static UserInterfaceController *instance;

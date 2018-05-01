@@ -8,8 +8,6 @@
 #include "Util.h"
 
 LOGLEVEL Log::logLevel = LEVEL_ERROR;
-//void* Log::uiContext = NULL;
-//update_ui_callback Log::cb = NULL;
 UserInterfaceController* Log::controller = NULL;
 
 static const char* sLogLevels[LEVEL_MAX] = {
@@ -60,77 +58,6 @@ void Log::display(const char *format, ...) {
 	printf("%s \n", buf);
 
 }
-
-//void Log::display_at_ui(int id, uint64_t data64_1) {
-//
-//	EventData *data = new EventData(data64_1);
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, uint64_t data64_1, uint64_t data64_2) {
-//
-//	EventData *data = new EventData(data64_1, data64_2);
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, uint64_t data64_1, const char *data64_2, ...) {
-//
-//	char buf[256];
-//	va_list ap;
-//	va_start(ap, data64_2);
-//	vsnprintf(buf, sizeof(buf), data64_2, ap);
-//	va_end(ap);
-//
-//	EventData *data = new EventData(data64_1, buf);
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, uint64_t data64_1, uint64_t data64_2, char const *data64_3, ...) {
-//
-//	char buf[256];
-//	va_list ap;
-//	va_start(ap, data64_3);
-//	vsnprintf(buf, sizeof(buf), data64_3, ap);
-//	va_end(ap);
-//
-//	EventData *data = new EventData(data64_1, data64_2, buf);
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, char const *data64_1, ...) {
-//
-//	char buf[256];
-//	va_list ap;
-//	va_start(ap, data64_1);
-//	vsnprintf(buf, sizeof(buf), data64_1, ap);
-//	va_end(ap);
-//
-//	EventData *data = new EventData(buf);
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, void *data) {
-//
-//	update_ui(id, data);
-//
-//}
-//
-//void Log::display_at_ui(int id, std::vector<uint64_t> dataList) {
-//
-//	EventData *data = new EventData(dataList);
-//
-//	update_ui(id, data);
-//}
 
 void Log::log(LOGLEVEL level, const char *file, int line, LOGTYPE type, ...) {
 
@@ -206,17 +133,3 @@ UserInterfaceController *Log::getController() {
 
     return controller;
 }
-
-//void Log::set_ui_callback(void *context, update_ui_callback cb) {
-//
-//    Log::uiContext = context;
-//	Log::cb = cb;
-//}
-//
-//void Log::update_ui(int id, void *data) {
-//
-//	if (cb && uiContext) {
-//		cb(uiContext, id, data);
-//	}
-//}
-

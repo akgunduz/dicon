@@ -22,7 +22,6 @@ class ComponentTypes {
 
 public:
     static const char* getName(COMPONENT);
-    static UI_UPDATE getAssignedUILog(COMPONENT);
 
     static COMPONENT getNextType(COMPONENT);
     static COMPONENT getPrevType(COMPONENT);
