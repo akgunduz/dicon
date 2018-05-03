@@ -4,7 +4,7 @@
 
 #include "WxComponent.h"
 
-void Wx::componentInit() {
+void Wx::componentInit(bool initStart) {
 
     Log::init(LEVEL_INFO, this, updateUICallback);
 
@@ -17,7 +17,16 @@ void Wx::componentInit() {
     collInit();
     nodeInit();
 
-    Util::cleanup();
+    if (initStart) {
+
+        interfaceInit->Enable(false);
+        distCollInterface->Enable(false);
+        nodeInterface->Enable(false);
+        distInitBtn->Enable(true);
+        collInitBtn->Enable(true);
+        nodeInitBtn->Enable(true);
+        return;
+    }
 
     DeviceList *deviceList = DeviceList::getInstance();
 

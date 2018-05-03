@@ -24,16 +24,6 @@ void *UserInterfaceEvent::getPointer(int index) {
     return pointer[index];
 }
 
-void UserInterfaceEvent::setID(int id) {
-
-    this->id = id;
-}
-
-void UserInterfaceEvent::addData(long data) {
-
-    this->data.push_back(data);
-}
-
 void UserInterfaceEvent::addDataList(std::vector<long> dataList) {
 
     this->data.insert(this->data.end(), dataList.begin(), dataList.end());

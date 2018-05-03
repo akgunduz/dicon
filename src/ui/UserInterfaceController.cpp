@@ -30,27 +30,15 @@ void UserInterfaceController::updateUI(int id, UserInterfaceEvent *event) {
     }
 }
 
-
-void UserInterfaceController::display(int id, long data1) {
-
-    auto *event = new UserInterfaceEvent(id);
-
-    event->addData(data1);
-
-    updateUI(id, event);
-
-}
-
-void UserInterfaceController::display(int id, long data1, long data2) {
+void UserInterfaceController::display(int id, std::vector<long> dataList) {
 
     auto *event = new UserInterfaceEvent(id);
 
-    event->addData(data1);
-    event->addData(data2);
+    event->addDataList(dataList);
 
     updateUI(id, event);
-
 }
+
 
 void UserInterfaceController::display(int id, char const *data1, ...) {
 
@@ -68,7 +56,7 @@ void UserInterfaceController::display(int id, char const *data1, ...) {
 
 }
 
-void UserInterfaceController::display(int id, long data1, const char *data2, ...) {
+void UserInterfaceController::display(int id, std::vector<long> data1, const char *data2, ...) {
 
     char buf[256];
     va_list ap;
@@ -78,25 +66,7 @@ void UserInterfaceController::display(int id, long data1, const char *data2, ...
 
     auto *event = new UserInterfaceEvent(id);
 
-    event->addData(data1);
-    event->addString(std::string(buf));
-
-    updateUI(id, event);
-
-}
-
-void UserInterfaceController::display(int id, long data1, long data2, char const *data3, ...) {
-
-    char buf[256];
-    va_list ap;
-    va_start(ap, data3);
-    vsnprintf(buf, sizeof(buf), data3, ap);
-    va_end(ap);
-
-    auto *event = new UserInterfaceEvent(id);
-
-    event->addData(data1);
-    event->addData(data2);
+    event->addDataList(data1);
     event->addString(std::string(buf));
 
     updateUI(id, event);
@@ -111,13 +81,4 @@ void UserInterfaceController::display(int id, void *data1) {
 
     updateUI(id, event);
 
-}
-
-void UserInterfaceController::display(int id, std::vector<long> dataList) {
-
-    auto *event = new UserInterfaceEvent(id);
-
-    event->addDataList(dataList);
-
-    updateUI(id, event);
 }

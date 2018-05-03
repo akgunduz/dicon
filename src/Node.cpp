@@ -28,8 +28,8 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
 
-	LOG_U(UI_UPDATE_NODE_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR));
-	LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+	LOG_U(UI_UPDATE_NODE_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR)});
+	LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
     setDistributorAddress(0);
 }
@@ -56,8 +56,7 @@ bool Node::processDistributorIDMsg(ComponentObject owner, long address, Message 
 
 bool Node::processCollectorJobMsg(ComponentObject owner, long address, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, BUSY);
-    LOG_U(UI_UPDATE_NODE_CLEAR, "");
+    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
 
     if (!send2DistributorBusyMsg(getDistributorAddress())) {
 
@@ -99,7 +98,7 @@ bool Node::processCollectorBinaryMsg(ComponentObject owner, long address, Messag
 
 bool Node::processCollectorReadyMsg(ComponentObject owner, long address, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, IDLE);
+    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
     return send2DistributorReadyMsg(getDistributorAddress());
 }

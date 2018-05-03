@@ -60,15 +60,15 @@ END_EVENT_TABLE()
  * Wx constructors
  */
 
-Wx::Wx()
+Wx::Wx(bool initStart)
 {
     Init();
 }
 
-Wx::Wx( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+Wx::Wx(bool initStart, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
     Init();
-    Create( parent, id, caption, pos, size, style );
+    Create(initStart, parent, id, caption, pos, size, style );
 }
 
 
@@ -76,7 +76,7 @@ Wx::Wx( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint&
  * Wx creator
  */
 
-bool Wx::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+bool Wx::Create(bool initStart, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
 ////@begin Wx creation
     wxFrame::Create( parent, id, caption, pos, size, style );
@@ -86,7 +86,7 @@ bool Wx::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const
 ////@end Wx creation
 
 #ifndef DIALOG_BLOCKS
-   componentInit();
+   componentInit(initStart);
 #endif
     return true;
 }

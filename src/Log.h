@@ -31,8 +31,8 @@ enum LOGTYPE {
 
 #define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, ##__VA_ARGS__);\
 				char *(_do_crash) = NULL; *(_do_crash) = 1;} assert(c)
-#define LOG_S(a, ...) Log::display(a, ##__VA_ARGS__)
-#define LOG_U Log::getController()->display
+#define LOG_S(a, ...) Log::show(a, ##__VA_ARGS__)
+#define LOG_U(a, ...) Log::getController()->display(a, ##__VA_ARGS__)
 
 #define LOG_E(a, ...) Log::logd(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
 #define LOG_W(a, ...) Log::logd(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
@@ -63,7 +63,7 @@ public:
 	static void logd(LOGLEVEL level, const char *, int, ...);
     static void logs(LOGLEVEL level, const char *, int, ComponentObject, ...);
     static void logc(LOGLEVEL level, const char *, int, ComponentObject, ComponentObject, int, ...);
-	static void display(const char *format, ...);
+	static void show(const char *format, ...);
 	static UserInterfaceController* getController();
 
 };

@@ -48,7 +48,7 @@ void Log::iterateLogLevel() {
 	}
 }
 
-void Log::display(const char *format, ...) {
+void Log::show(const char *format, ...) {
 
 	char buf[256];
 	va_list ap;

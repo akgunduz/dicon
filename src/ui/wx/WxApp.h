@@ -18,6 +18,7 @@
  */
 
 ////@begin includes
+#include <Application.h>
 #include "Wx.h"
 ////@end includes
 
@@ -39,16 +40,19 @@
  * WxApp class declaration
  */
 
-class WxApp: public wxApp
+class WxApp: public wxApp, public Application
 {    
     DECLARE_CLASS( WxApp )
     DECLARE_EVENT_TABLE()
 
+    bool initStart;
+
 public:
     /// Constructor
     WxApp();
+    WxApp(int, int);
 
-    void Init();
+    void Init(bool);
 
     /// Initialises the application
     virtual bool OnInit();

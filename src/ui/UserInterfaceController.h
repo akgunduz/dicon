@@ -25,12 +25,6 @@ enum UI_UPDATE2 {
     UI_UPDATE2_MAX
 };
 
-class UserInterfaceController;
-
-//typedef void (UserInterfaceController::*fUIUpdater)(UserInterfaceEvent &event);
-
-//void UserInterface::updateUIEvent(int id, void *data);
-
 class UserInterfaceController {
 
 private:
@@ -46,13 +40,10 @@ public:
     static UserInterfaceController* newInstance(void *, TypeUIUpdateCB);
     void updateUI(int, UserInterfaceEvent*);
 
-    void display(int, long);
-    void display(int, long, long);
-    void display(int, long, const char* , ...);
-    void display(int, long, long, const char* , ...);
+    void display(int, std::vector<long>);
+    void display(int, std::vector<long>, const char* , ...);
     void display(int, const char* , ...);
     void display(int, void*);
-    void display(int, std::vector<long>);
 };
 
 

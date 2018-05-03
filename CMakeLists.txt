@@ -73,13 +73,15 @@ set(WX_FILES
         ${SOURCE_PATH}/ui/wx/WxCollector.cpp
         ${SOURCE_PATH}/ui/wx/WxNode.cpp
         ${SOURCE_PATH}/ui/wx/WxApp.cpp
+        ${SOURCE_PATH}/Application.cpp
         )
 
 set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/Console.cpp
         ${SOURCE_PATH}/ui/console/ConsoleApp.cpp
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
-)
+        ${SOURCE_PATH}/Application.cpp
+        )
 
 if (APPLE)
     set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/include/json-c)
@@ -92,7 +94,6 @@ endif()
 set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
 
-add_definitions(-DMULTICAST_ENABLED)
 add_definitions(-DDISABLE_RECOVERY)
 add_definitions(-DDISABLE_BACKUP)
 add_definitions(-DDISABLE_LOGFILEINFO)
@@ -104,7 +105,7 @@ include_directories(${JSON-C_INCLUDE_DIRS})
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-if (NOT DEFINED CONSOLE)
+if (NOT DEFINED CONSOLE_ONLY)
 
     find_package(wxWidgets)
 

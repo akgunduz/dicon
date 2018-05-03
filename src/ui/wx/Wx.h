@@ -96,10 +96,10 @@ class Wx: public wxFrame
 
 public:
     /// Constructors
-    Wx();
-    Wx( wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
+    Wx(bool);
+    Wx(bool, wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
 
-    bool Create( wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
+    bool Create(bool, wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
 
     /// Destructor
     ~Wx();
@@ -122,7 +122,7 @@ public:
 
    void updateUI(wxCommandEvent &event);
 
-   void componentInit();
+   void componentInit(bool);
 
    //Distributor
 

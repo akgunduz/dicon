@@ -18,9 +18,10 @@ int main(int argc, char** argv) {
 
 		switch(cmd) {
 			case 'l':
-				LOG_S("Listing Interfaces .....");
+                LOG_S("Listing Interfaces .....");
 				for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-					LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(i)->getType()), deviceList->get(i)->getName());
+                    LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(i)->getType()),
+                          deviceList->get(i)->getName());
 				}
 				break;
 			case 'd':

@@ -25,7 +25,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE));
+	LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
 
     setDistributorAddress(0);
 
@@ -52,7 +52,7 @@ bool Collector::processDistributorWakeupMsg(ComponentObject owner, long address,
 
     setDistributorAddress(address);
 
-    LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, address);
+    LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, std::vector<long> {address});
 
     return send2DistributorAliveMsg(address);
 }

@@ -99,8 +99,8 @@ void Console::nodeRun(int distInterface, int collInterface) {
 void Console::nodeUpdateAddresses(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
-		  InterfaceTypes::getAddressString(data->data64_1).c_str(),
+    LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
+          InterfaceTypes::getAddressString(data->data64_1).c_str(),
           InterfaceTypes::getAddressString(data->data64_2).c_str());
 
 }
@@ -108,21 +108,21 @@ void Console::nodeUpdateAddresses(ConsoleEvent &event) {
 void Console::nodeUpdateState(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("Node State : %s", NodeState::getName((NODE_STATES)data->data64_1));
+    LOG_S("Node State : %s", NodeState::getName((NODE_STATES) data->data64_1));
 
 }
 
 void Console::nodeUpdateAttachedCollAddress(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("Node Attached Collector : %s", InterfaceTypes::getAddressString(data->data64_1).c_str());
+    LOG_S("Node Attached Collector : %s", InterfaceTypes::getAddressString(data->data64_1).c_str());
 
 }
 
 void Console::nodeUpdateLog(ConsoleEvent &event) {
 
 	EventData *data = (EventData *) event.GetClientData();
-	LOG_S("%s", data->dataStr.c_str());
+    LOG_S("%s", data->dataStr.c_str());
 
 }
 
