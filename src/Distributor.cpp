@@ -28,7 +28,7 @@ Distributor::Distributor(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
     processMsg[COMP_NODE][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg);
 
-    //LOG_U(UI_UPDATE_DIST_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE)});
+    LOG_U(UI_UPDATE_DIST_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE)});
 
     nodeManager = new NodeManager();
 

@@ -19,7 +19,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
-	//LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
+	LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
 
     setDistributorAddress(0);
 
@@ -30,11 +30,11 @@ Collector::Collector(const char *rootPath) :
     }
 
     if (getJobs()->get(0)->getFileCount()) {
-        //LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
+        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
     }
 
     if (getJobs()->get(0)->getExecutorCount()) {
-        //LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
+        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
     }
 }
 
@@ -45,8 +45,6 @@ Collector::~Collector() {
 bool Collector::processDistributorWakeupMsg(ComponentObject owner, long address, Message *msg) {
 
     setDistributorAddress(address);
-
-    LOG_U(UI_UPDATE_COLL_ATT_DIST_ADDRESS, std::vector<long> {address});
 
     return send2DistributorAliveMsg(address);
 }

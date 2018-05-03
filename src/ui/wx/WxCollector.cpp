@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include <Application.h>
+#include <ComponentController.h>
 #include "WxComponent.h"
 
 void Wx::collInit() {
@@ -30,38 +31,10 @@ void Wx::collInit() {
     collProcessList->InsertColumn(0, column);
 
     uiUpdater[UI_UPDATE_COLL_ADDRESS] = &Wx::collUpdateAddresses;
-    uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &Wx::collUpdateAttachedDistAddress;
-    uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &Wx::collUpdateAttachedNodeAddress;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &Wx::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &Wx::collUpdateProcessList;
 }
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
- */
-
-void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
-{
-    if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
-
-        ((Application*)app)->startCollector(1);
-
-        collProcessBtn->Enable(true);
-        collInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete ((Collector*)collObject);
-        collProcessBtn->Enable(false);
-        collInitBtn->SetLabel("Init");
-        collDistDeviceAddress->SetLabel("");
-        collNodeDeviceAddress->SetLabel("");
-        collFileList->ClearAll ();
-        collProcessList->ClearAll ();
-    }
-}
-
 
 /*
  * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
@@ -69,7 +42,7 @@ void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void Wx::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    ((Application*)app)->getCollector(0)->processJobs();
+    ((ComponentController *)componentController)->getCollector(0)->processJobs();
 }
 
 void Wx::collUpdateAddresses(wxCommandEvent &event) {
@@ -79,21 +52,6 @@ void Wx::collUpdateAddresses(wxCommandEvent &event) {
     collDistDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
     collNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
 
-}
-
-void Wx::collUpdateAttachedDistAddress(wxCommandEvent &event) {
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    collDistAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
-
-}
-
-void Wx::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 }
 
 void Wx::collUpdateFileList(wxCommandEvent &event) {

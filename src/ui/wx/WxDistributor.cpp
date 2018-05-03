@@ -9,6 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
+#include <ComponentController.h>
 #include "WxComponent.h"
 
 void Wx::distInit() {
@@ -41,50 +42,15 @@ void Wx::distInit() {
     uiUpdater[UI_UPDATE_DIST_ADDRESS] = &Wx::distUpdateAddresses;
     uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &Wx::distAddtoCollectorList;
     uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &Wx::distAddtoNodeList;
-    uiUpdater[UI_UPDATE_DIST_BACKUP] = &Wx::distUpdateBackup;
-}
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
- */
-
-void Wx::OnDistInitClickWrapper( wxCommandEvent& event )
-{
-    if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
-
-        try {
-            distCollList->DeleteAllItems();
-            distNodeList->DeleteAllItems();
-            //distBackupRate->GetLineText(0).ToDouble(&backupRate);
-            //distObject = Distributor::newInstance();
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
-
-        distBackupRate->SetEditable(false);
-        distPollBtn->Enable(true);
-        distInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete ((Distributor*)distObject);
-        distBackupRate->SetEditable(true);
-        distPollBtn->Enable(false);
-        distInitBtn->SetLabel("Init");
-        distCollDeviceAddress->SetLabel("");
-        distNodeDeviceAddress->SetLabel("");
-    }
 }
 
 void Wx::OnDistPollClickWrapper( wxCommandEvent& event )
 {
-    ((Distributor*)distObject)->reset();
     distCollList->DeleteAllItems();
     distNodeList->DeleteAllItems();
 
-    ((Distributor*)distObject)->sendWakeupMessagesAll();
+    ((ComponentController *)componentController)->getDistributor()->reset();
+    ((ComponentController *)componentController)->getDistributor()->sendWakeupMessagesAll();
 }
 
 void Wx::distUpdateAddresses(wxCommandEvent &event) {
@@ -153,10 +119,3 @@ void Wx::distAddtoNodeList(wxCommandEvent &event) {
 
 }
 
-void Wx::distUpdateBackup(wxCommandEvent &event) {
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    distBackupStatus->SetLabelText(wxString::Format(wxT("%ld"), data->getData(0)));
-
-}

@@ -15,24 +15,12 @@ class Application {
 
     bool initStart;
 
-    Distributor *distributor = NULL;
-    std::vector<Collector*> collectors;
-    std::vector<Node*> nodes;
-
 public:
 
     Application(int, int, bool = true);
 
     void setStartState(bool);
     bool getStartState();
-
-    Distributor* getDistributor();
-    Collector* getCollector(int);
-    Node* getNode(int);
-
-    bool startDistributor();
-    bool startCollector(int);
-    bool startNode(int);
 
 };
 

@@ -22,8 +22,8 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
 
-//	LOG_U(UI_UPDATE_NODE_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR)});
-//	LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
+	LOG_U(UI_UPDATE_NODE_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR)});
+	LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
     setDistributorAddress(0);
 }

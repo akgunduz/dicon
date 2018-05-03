@@ -26,7 +26,6 @@
 #include "WxApp.h"
 
 ////@begin XPM images
-
 ////@end XPM images
 
 
@@ -64,13 +63,12 @@ END_EVENT_TABLE()
 
 WxApp::WxApp()
 {
-    this->app = new Application(0, 0,false);
     Init();
 }
 
-WxApp::WxApp(Application* app)
+WxApp::WxApp(void* controller)
 {
-    this->app = app;
+    this->controller = controller;
     Init();
 }
 
@@ -91,23 +89,24 @@ void WxApp::Init()
 bool WxApp::OnInit()
 {    
 ////@begin WxApp initialisation
-    // Remove the comment markers above and below this block
-    // to make permanent changes to the code.
+	// Remove the comment markers above and below this block
+	// to make permanent changes to the code.
 
 #if wxUSE_XPM
-    wxImage::AddHandler(new wxXPMHandler);
+	wxImage::AddHandler(new wxXPMHandler);
 #endif
 #if wxUSE_LIBPNG
-    wxImage::AddHandler(new wxPNGHandler);
+	wxImage::AddHandler(new wxPNGHandler);
 #endif
 #if wxUSE_LIBJPEG
-    wxImage::AddHandler(new wxJPEGHandler);
+	wxImage::AddHandler(new wxJPEGHandler);
 #endif
 #if wxUSE_GIF
-    wxImage::AddHandler(new wxGIFHandler);
+	wxImage::AddHandler(new wxGIFHandler);
 #endif
-    Wx* mainWindow = new Wx(app,  NULL );
-    mainWindow->Show(true);
+	Wx* mainWindow = new Wx( controller, NULL );
+	mainWindow->Show(true);
+
 ////@end WxApp initialisation
 
     return true;
@@ -121,7 +120,8 @@ bool WxApp::OnInit()
 int WxApp::OnExit()
 {    
 ////@begin WxApp cleanup
-    return wxApp::OnExit();
+	return wxApp::OnExit();
 ////@end WxApp cleanup
 }
+
 

@@ -26,6 +26,11 @@ void Wx::nodeInit() {
     column.SetWidth(width);
     nodeFileList->InsertColumn(1, column);
 
+    column.SetId(0);
+    column.SetText( _("Process") );
+    column.SetWidth(width);
+    nodeExecList->InsertColumn(0, column);
+
     uiUpdater[UI_UPDATE_NODE_ADDRESS] = &Wx::nodeUpdateAddresses;
     uiUpdater[UI_UPDATE_NODE_STATE] = &Wx::nodeUpdateState;
     uiUpdater[UI_UPDATE_NODE_ATT_COLL_ADDRESS] = &Wx::nodeUpdateAttachedCollAddress;
@@ -33,33 +38,6 @@ void Wx::nodeInit() {
     uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &Wx::nodeUpdateExecList;
     uiUpdater[UI_UPDATE_NODE_CLEAR] = &Wx::nodeUpdateClear;
 
-}
-
-/*
- * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_NODE_INIT
- */
-
-void Wx::OnNodeInitClickWrapper( wxCommandEvent& event )
-{
-    if (wxStrcmp(nodeInitBtn->GetLabel(), "Init") == 0) {
-
-        try {
-
-//            nodeObject = Node::newInstance(1);
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
-
-        nodeInitBtn->SetLabel("Stop");
-
-    } else {
-
-        delete ((Node*)nodeObject);
-        nodeInitBtn->SetLabel("Init");
-        nodeDeviceAddress->SetLabel("");
-    }
 }
 
 void Wx::nodeUpdateAddresses(wxCommandEvent &event) {
@@ -86,7 +64,7 @@ void Wx::nodeUpdateAttachedCollAddress(wxCommandEvent &event) {
 void Wx::nodeUpdateClear(wxCommandEvent &event) {
 
     nodeFileList->DeleteAllItems();
-    nodeExecList->Clear();
+    nodeExecList->DeleteAllItems();
 }
 
 void Wx::nodeUpdateFileList(wxCommandEvent &event) {
@@ -125,5 +103,5 @@ void Wx::nodeUpdateExecList(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    nodeExecList->Append(wxString::Format("%s", data->getString(0)));
+    nodeExecList->InsertItem(nodeExecList->GetItemCount(), wxString::Format("%s", data->getString(0)));
 }

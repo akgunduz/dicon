@@ -18,7 +18,7 @@
  */
 
 ////@begin includes
-#include <Application.h>
+#include "wx/image.h"
 #include "Wx.h"
 ////@end includes
 
@@ -45,12 +45,12 @@ class WxApp: public wxApp
     DECLARE_CLASS( WxApp )
     DECLARE_EVENT_TABLE()
 
-    Application *app;
+    void* controller;
 
 public:
     /// Constructor
     WxApp();
-    WxApp(Application*);
+    WxApp(void*);
 
     void Init();
 
@@ -61,9 +61,11 @@ public:
     virtual int OnExit();
 
 ////@begin WxApp event handler declarations
+
 ////@end WxApp event handler declarations
 
 ////@begin WxApp member function declarations
+
 ////@end WxApp member function declarations
 
 ////@begin WxApp member variables

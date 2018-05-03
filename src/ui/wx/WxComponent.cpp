@@ -2,12 +2,12 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
-#include <Application.h>
+#include <ComponentController.h>
 #include "WxComponent.h"
 
 void Wx::componentInit() {
 
-    Log::init(LEVEL_INFO, this, updateUICallback);
+    Log::registerUIController(this, updateUICallback);
 
     uiUpdater = new fUIUpdater[UI_UPDATE_MAX];
 
@@ -18,42 +18,9 @@ void Wx::componentInit() {
     collInit();
     nodeInit();
 
-    if (((Application*) app)->getStartState()) {
-
-        interfaceInit->Enable(false);
-        distCollInterface->Enable(false);
-        nodeInterface->Enable(false);
-        distInitBtn->Enable(true);
-        collInitBtn->Enable(true);
-        nodeInitBtn->Enable(true);
-        return;
-    }
-
-    DeviceList *deviceList = DeviceList::getInstance();
-
-    for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-        distCollInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
-                                  " --> " + deviceList->get(i)->getName(), i);
-        nodeInterface->Insert(wxString(InterfaceTypes::getName(deviceList->get(i)->getType())) +
-                              " --> " + deviceList->get(i)->getName(), i);
-        if (deviceList->get(i)->isLoopback()) {
-            distCollInterface->SetSelection(i);
-            nodeInterface->SetSelection(i);
-        }
-    }
-}
-
-void Wx::OnInterfaceInitClickWrapper( wxCommandEvent& event )
-{
-    DeviceList::getInstance()->setActive(distCollInterface->GetSelection(),
-                                         nodeInterface->GetSelection());
-
-    interfaceInit->Enable(false);
-    distCollInterface->Enable(false);
-    nodeInterface->Enable(false);
-    distInitBtn->Enable(true);
-    collInitBtn->Enable(true);
-    nodeInitBtn->Enable(true);
+    ((ComponentController *)componentController)->startDistributor();
+    ((ComponentController *)componentController)->startCollector(1);
+    ((ComponentController *)componentController)->startNode(1);
 }
 
 void Wx::updateUIEvent(int id, void *data) {

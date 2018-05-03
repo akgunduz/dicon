@@ -32,7 +32,7 @@ enum LOGTYPE {
 #define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, ##__VA_ARGS__);\
 				char *(_do_crash) = NULL; *(_do_crash) = 1;} assert(c)
 #define LOG_S(a, ...) Log::show(a, ##__VA_ARGS__)
-#define LOG_U(a, ...) Log::getController()->display(a, ##__VA_ARGS__)
+#define LOG_U(a, ...) Log::updateUI(a, ##__VA_ARGS__)
 
 #define LOG_E(a, ...) Log::logd(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
 #define LOG_W(a, ...) Log::logd(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
@@ -57,13 +57,19 @@ class Log {
 
 public:
 
-    static void init(LOGLEVEL level, void*, TypeUIUpdateCB);
+    static void init(LOGLEVEL level);
+    static void registerUIController(void*, TypeUIUpdateCB);
 	static void setLogLevel(LOGLEVEL level);
 	static void iterateLogLevel();
 	static void logd(LOGLEVEL level, const char *, int, ...);
     static void logs(LOGLEVEL level, const char *, int, ComponentObject, ...);
     static void logc(LOGLEVEL level, const char *, int, ComponentObject, ComponentObject, int, ...);
 	static void show(const char *format, ...);
+	static void updateUI(int, std::vector<long>);
+	static void updateUI(int, std::vector<long>, const char* , ...);
+	static void updateUI(int, const char* , ...);
+	static void updateUI(int, void*);
+
 	static UserInterfaceController* getController();
 
 };

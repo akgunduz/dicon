@@ -19,9 +19,7 @@ static const char* sLogLevels[LEVEL_MAX] = {
 		"ASSERT",
 };
 
-void Log::init(LOGLEVEL level, void *context, TypeUIUpdateCB updateCB) {
-
-    controller = UserInterfaceController::newInstance(context, updateCB);
+void Log::init(LOGLEVEL level) {
 
     setLogLevel(level);
 }
@@ -163,9 +161,41 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
 
 }
 
-
-
 UserInterfaceController *Log::getController() {
 
     return controller;
+}
+
+void Log::registerUIController(void *context, TypeUIUpdateCB updateCB) {
+
+    controller = UserInterfaceController::newInstance(context, updateCB);
+}
+
+void Log::updateUI(int id, std::vector<long> dataList) {
+
+    if (controller) {
+        controller->display(id, dataList);
+    }
+}
+
+
+void Log::updateUI(int id, char const *data1, ...) {
+
+    if (controller) {
+        controller->display(id, data1);
+    }
+}
+
+void Log::updateUI(int id, std::vector<long> data1, const char *data2, ...) {
+
+    if (controller) {
+        controller->display(id, data1, data2);
+    }
+}
+
+void Log::updateUI(int id, void *data1) {
+
+    if (controller) {
+        controller->display(id, data1);
+    }
 }

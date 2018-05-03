@@ -64,6 +64,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ExecutorInfo.cpp
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
+        ${SOURCE_PATH}/ComponentController.cpp
         )
 
 set(WX_FILES
