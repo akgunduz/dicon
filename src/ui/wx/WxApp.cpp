@@ -64,14 +64,13 @@ END_EVENT_TABLE()
 
 WxApp::WxApp()
 {
-    this->app = new Application(0, 0);
+    this->app = new Application(0, 0,false);
     Init();
 }
 
 WxApp::WxApp(Application* app)
 {
     this->app = app;
-    this->app->setStartState(true);
     Init();
 }
 

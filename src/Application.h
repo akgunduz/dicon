@@ -21,7 +21,7 @@ class Application {
 
 public:
 
-    Application(int, int);
+    Application(int, int, bool = true);
 
     void setStartState(bool);
     bool getStartState();

@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
                     if (argc == 4) {
                         app = new WxApp(new Application(atoi(argv[2]), atoi(argv[3])));
                     } else {
-                        app = new WxApp();
+                        app = new WxApp(new Application(0, 0, false));
                     }
 
                     wxApp::SetInstance(app);
@@ -68,9 +68,9 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-Application::Application(int ind1, int ind2) {
+Application::Application(int ind1, int ind2, bool initState) {
 
-    setStartState(false);
+    setStartState(initState);
     DeviceList *deviceList = DeviceList::getInstance();
     deviceList->setActive(ind1, ind2);
 }
