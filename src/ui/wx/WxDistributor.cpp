@@ -56,7 +56,7 @@ void Wx::OnDistInitClickWrapper( wxCommandEvent& event )
             distCollList->DeleteAllItems();
             distNodeList->DeleteAllItems();
             //distBackupRate->GetLineText(0).ToDouble(&backupRate);
-            distObject = Distributor::newInstance();
+            //distObject = Distributor::newInstance();
 
         } catch (std::runtime_error &e) {
 

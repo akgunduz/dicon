@@ -2,9 +2,10 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
+#include <Application.h>
 #include "WxComponent.h"
 
-void Wx::componentInit(bool initStart) {
+void Wx::componentInit() {
 
     Log::init(LEVEL_INFO, this, updateUICallback);
 
@@ -17,7 +18,7 @@ void Wx::componentInit(bool initStart) {
     collInit();
     nodeInit();
 
-    if (initStart) {
+    if (((Application*) app)->getStartState()) {
 
         interfaceInit->Enable(false);
         distCollInterface->Enable(false);

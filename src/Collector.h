@@ -38,7 +38,7 @@ public:
 
 
     ~Collector();
-    static Collector* newInstance(int);
+    static Collector* newInstance(const char*);
 
     bool processJob(int);
     bool processJobs();

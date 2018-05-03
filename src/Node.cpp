@@ -8,15 +8,9 @@
 #include "NodeState.h"
 
 
-Node *Node::newInstance(int id) {
+Node *Node::newInstance(const char* path) {
 
-    char path[PATH_MAX];
-    sprintf(path, "%s/%s_%d", getcwd(NULL, 0), NODE_PATH, id);
-    mkdir(path, 0777);
-
-    auto *instance = new Node(path);
-
-    return instance;
+    return new Node(path);
 }
 
 Node::Node(const char *rootPath) :
@@ -28,8 +22,8 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
 
-	LOG_U(UI_UPDATE_NODE_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR)});
-	LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
+//	LOG_U(UI_UPDATE_NODE_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_COLLECTOR)});
+//	LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
     setDistributorAddress(0);
 }

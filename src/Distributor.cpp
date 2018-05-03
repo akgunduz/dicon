@@ -8,15 +8,11 @@
 
 Distributor *Distributor::instance = NULL;
 
-Distributor *Distributor::newInstance() {
+Distributor *Distributor::newInstance(const char* path) {
 
     if (instance) {
         return instance;
     }
-
-    char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(NULL, 0), DISTRIBUTOR_PATH);
-    mkdir(path, 0777);
 
     instance = new Distributor(path);
     return instance;
@@ -32,7 +28,7 @@ Distributor::Distributor(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
     processMsg[COMP_NODE][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg);
 
-    LOG_U(UI_UPDATE_DIST_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE)});
+    //LOG_U(UI_UPDATE_DIST_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_COLLECTOR), getInterfaceAddress(COMP_NODE)});
 
     nodeManager = new NodeManager();
 

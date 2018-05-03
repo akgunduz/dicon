@@ -44,7 +44,7 @@ public:
 
 
 	~Distributor();
-    static Distributor* newInstance();
+    static Distributor* newInstance(const char* path);
 
     bool reset();
 

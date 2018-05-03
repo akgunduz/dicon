@@ -41,7 +41,7 @@ public:
 
 
 	~Node();
-    static Node* newInstance(int);
+    static Node* newInstance(const char*);
 };
 
 

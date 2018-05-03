@@ -60,15 +60,15 @@ END_EVENT_TABLE()
  * Wx constructors
  */
 
-Wx::Wx(bool initStart)
+Wx::Wx(void* app)
 {
-    Init();
+    Init(app);
 }
 
-Wx::Wx(bool initStart, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+Wx::Wx(void* app, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
-    Init();
-    Create(initStart, parent, id, caption, pos, size, style );
+    Init(app);
+    Create(parent, id, caption, pos, size, style );
 }
 
 
@@ -76,7 +76,7 @@ Wx::Wx(bool initStart, wxWindow* parent, wxWindowID id, const wxString& caption,
  * Wx creator
  */
 
-bool Wx::Create(bool initStart, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+bool Wx::Create(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
 ////@begin Wx creation
     wxFrame::Create( parent, id, caption, pos, size, style );
@@ -86,7 +86,7 @@ bool Wx::Create(bool initStart, wxWindow* parent, wxWindowID id, const wxString&
 ////@end Wx creation
 
 #ifndef DIALOG_BLOCKS
-   componentInit(initStart);
+    componentInit();
 #endif
     return true;
 }
@@ -107,7 +107,7 @@ Wx::~Wx()
  * Member initialisation
  */
 
-void Wx::Init()
+void Wx::Init(void *app)
 {
 ////@begin Wx member initialisation
     distCollInterface = NULL;
@@ -136,6 +136,8 @@ void Wx::Init()
     nodeFileList = NULL;
     nodeExecList = NULL;
 ////@end Wx member initialisation
+
+    this->app = app;
 }
 
 

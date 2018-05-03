@@ -5,15 +5,9 @@
 
 #include "Collector.h"
 
-Collector *Collector::newInstance(int id) {
+Collector *Collector::newInstance(const char* path) {
 
-    char path[PATH_MAX];
-    sprintf(path, "%s/%s_%d", getcwd(NULL, 0), COLLECTOR_PATH, id);
-    mkdir(path, 0777);
-
-    auto *instance = new Collector(path);
-
-    return instance;
+    return new Collector(path);
 }
 
 Collector::Collector(const char *rootPath) :
@@ -25,7 +19,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
+	//LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
 
     setDistributorAddress(0);
 
@@ -36,11 +30,11 @@ Collector::Collector(const char *rootPath) :
     }
 
     if (getJobs()->get(0)->getFileCount()) {
-        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
+        //LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
     }
 
     if (getJobs()->get(0)->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
+        //LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
     }
 }
 

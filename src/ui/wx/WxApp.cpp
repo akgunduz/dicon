@@ -62,27 +62,27 @@ END_EVENT_TABLE()
  * Constructor for WxApp
  */
 
-WxApp::WxApp() : Application(0, 0)
+WxApp::WxApp()
 {
-    Init(false);
+    this->app = new Application(0, 0);
+    Init();
 }
 
-WxApp::WxApp(int ind1, int ind2) : Application(ind1, ind2)
+WxApp::WxApp(Application* app)
 {
-    Init(true);
+    this->app = app;
+    this->app->setStartState(true);
+    Init();
 }
-
 
 /*
  * Member initialisation
  */
 
-void WxApp::Init(bool start)
+void WxApp::Init()
 {
 ////@begin WxApp member initialisation
 ////@end WxApp member initialisation
-
-    this->initStart = start;
 }
 
 /*
@@ -107,7 +107,7 @@ bool WxApp::OnInit()
 #if wxUSE_GIF
     wxImage::AddHandler(new wxGIFHandler);
 #endif
-    Wx* mainWindow = new Wx( initStart, NULL );
+    Wx* mainWindow = new Wx(app,  NULL );
     mainWindow->Show(true);
 ////@end WxApp initialisation
 

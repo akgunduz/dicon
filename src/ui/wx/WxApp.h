@@ -40,19 +40,19 @@
  * WxApp class declaration
  */
 
-class WxApp: public wxApp, public Application
+class WxApp: public wxApp
 {    
     DECLARE_CLASS( WxApp )
     DECLARE_EVENT_TABLE()
 
-    bool initStart;
+    Application *app;
 
 public:
     /// Constructor
     WxApp();
-    WxApp(int, int);
+    WxApp(Application*);
 
-    void Init(bool);
+    void Init();
 
     /// Initialises the application
     virtual bool OnInit();

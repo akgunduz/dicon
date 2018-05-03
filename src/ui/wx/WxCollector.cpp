@@ -46,7 +46,7 @@ void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
 
         try {
 
-            collObject = Collector::newInstance(1);
+        //    collObject = Collector::newInstance(1);
 
         } catch (std::runtime_error &e) {
 

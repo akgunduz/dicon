@@ -45,7 +45,7 @@ void Wx::OnNodeInitClickWrapper( wxCommandEvent& event )
 
         try {
 
-            nodeObject = Node::newInstance(1);
+//            nodeObject = Node::newInstance(1);
 
         } catch (std::runtime_error &e) {
 

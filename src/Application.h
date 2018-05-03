@@ -8,13 +8,31 @@
 
 #include "Common.h"
 #include "DeviceList.h"
+#include "Distributor.h"
+#include "Collector.h"
 
 class Application {
 
-    //Application *instance;
+    bool initStart;
+
+    Distributor *distributor = NULL;
+    std::vector<Collector*> collectors;
+    std::vector<Node*> nodes;
+
 public:
 
     Application(int, int);
+
+    void setStartState(bool);
+    bool getStartState();
+
+    Distributor* getDistributor();
+    Collector* getCollector(int);
+    Node* getNode(int);
+
+    bool startDistributor();
+    bool startCollector(int);
+    bool startNode(int);
 
 };
 

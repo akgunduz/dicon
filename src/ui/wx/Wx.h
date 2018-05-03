@@ -96,70 +96,72 @@ class Wx: public wxFrame
 
 public:
     /// Constructors
-    Wx(bool);
-    Wx(bool, wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
+    Wx(void*);
+    Wx(void*, wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
 
-    bool Create(bool, wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
+    bool Create(wxWindow* parent, wxWindowID id = SYMBOL_WX_IDNAME, const wxString& caption = SYMBOL_WX_TITLE, const wxPoint& pos = SYMBOL_WX_POSITION, const wxSize& size = SYMBOL_WX_SIZE, long style = SYMBOL_WX_STYLE );
 
     /// Destructor
     ~Wx();
 
     /// Initialises member variables
-    void Init();
+    void Init(void*);
 
     /// Creates the controls and sizers
     void CreateControls();
 
+    void *app;
+
     wxEventTypeTag<wxCommandEvent> *ui_event;
 
-   fUIUpdater *uiUpdater;
+    fUIUpdater *uiUpdater;
 
-   //Generic
+    //Generic
 
-   static void updateUICallback(void*, int, void*);
+    static void updateUICallback(void*, int, void*);
 
-   void updateUIEvent(int, void*);
+    void updateUIEvent(int, void*);
 
-   void updateUI(wxCommandEvent &event);
+    void updateUI(wxCommandEvent &event);
 
-   void componentInit(bool);
+    void componentInit();
 
-   //Distributor
+    //Distributor
 
-   void *distObject;
+    void *distObject;
 
-   void distInit();
+    void distInit();
 
-   void distUpdateAddresses(wxCommandEvent& event);
-   void distAddtoCollectorList(wxCommandEvent& event);
-   void distAddtoNodeList(wxCommandEvent& event);
-   void distUpdateBackup(wxCommandEvent &event);
+    void distUpdateAddresses(wxCommandEvent& event);
+    void distAddtoCollectorList(wxCommandEvent& event);
+    void distAddtoNodeList(wxCommandEvent& event);
+    void distUpdateBackup(wxCommandEvent &event);
 
-   //Collector
+    //Collector
 
-   void *collObject;
+    void *collObject;
 
-   void collInit();
+    void collInit();
 
-   void collUpdateAddresses(wxCommandEvent& event);
-   void collUpdateAttachedDistAddress(wxCommandEvent& event);
-   void collUpdateAttachedNodeAddress(wxCommandEvent& event);
-   void collUpdateFileList(wxCommandEvent &event);
-   void collUpdateFileListItem(wxCommandEvent &event);
-   void collUpdateProcessList(wxCommandEvent &event);
+    void collUpdateAddresses(wxCommandEvent& event);
+    void collUpdateAttachedDistAddress(wxCommandEvent& event);
+    void collUpdateAttachedNodeAddress(wxCommandEvent& event);
+    void collUpdateFileList(wxCommandEvent &event);
+    void collUpdateFileListItem(wxCommandEvent &event);
+    void collUpdateProcessList(wxCommandEvent &event);
 
-   //Node
+    //Node
 
-   void *nodeObject;
+    void *nodeObject;
 
-   void nodeInit();
+    void nodeInit();
 
-   void nodeUpdateAddresses(wxCommandEvent& event);
-   void nodeUpdateState(wxCommandEvent& event);
-   void nodeUpdateAttachedCollAddress(wxCommandEvent& event);
-   void nodeUpdateFileList(wxCommandEvent &event);
-   void nodeUpdateExecList(wxCommandEvent &event);
-   void nodeUpdateClear(wxCommandEvent &event);
+    void nodeUpdateAddresses(wxCommandEvent& event);
+    void nodeUpdateState(wxCommandEvent& event);
+    void nodeUpdateAttachedCollAddress(wxCommandEvent& event);
+    void nodeUpdateFileList(wxCommandEvent &event);
+    void nodeUpdateExecList(wxCommandEvent &event);
+    void nodeUpdateClear(wxCommandEvent &event);
 
 ////@begin Wx event handler declarations
     /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BUTTON
