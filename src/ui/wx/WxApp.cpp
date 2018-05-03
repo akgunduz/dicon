@@ -1,9 +1,9 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        UserInterfaceApp.cpp
+// Name:        WxApp.cpp
 // Purpose:     
 // Author:      Haluk Akgunduz
 // Modified by: 
-// Created:     Sat 28 Apr 19:13:18 2018
+// Created:     Thu 03 May 2018 12:54:09 +03
 // RCS-ID:      
 // Copyright:   Licensed with AGPL v3.0
 // Licence:     
@@ -26,6 +26,7 @@
 #include "WxApp.h"
 
 ////@begin XPM images
+
 ////@end XPM images
 
 
@@ -34,34 +35,34 @@
  */
 
 ////@begin implement app
-IMPLEMENT_APP( UserInterfaceApp )
+IMPLEMENT_APP( WxApp )
 ////@end implement app
 
 
 /*
- * UserInterfaceApp type definition
+ * WxApp type definition
  */
 
-IMPLEMENT_CLASS( UserInterfaceApp, wxApp )
+IMPLEMENT_CLASS( WxApp, wxApp )
 
 
 /*
- * UserInterfaceApp event table definition
+ * WxApp event table definition
  */
 
-BEGIN_EVENT_TABLE( UserInterfaceApp, wxApp )
+BEGIN_EVENT_TABLE( WxApp, wxApp )
 
-////@begin UserInterfaceApp event table entries
-////@end UserInterfaceApp event table entries
+////@begin WxApp event table entries
+////@end WxApp event table entries
 
 END_EVENT_TABLE()
 
 
 /*
- * Constructor for UserInterfaceApp
+ * Constructor for WxApp
  */
 
-UserInterfaceApp::UserInterfaceApp()
+WxApp::WxApp()
 {
     Init();
 }
@@ -71,50 +72,50 @@ UserInterfaceApp::UserInterfaceApp()
  * Member initialisation
  */
 
-void UserInterfaceApp::Init()
+void WxApp::Init()
 {
-////@begin UserInterfaceApp member initialisation
-////@end UserInterfaceApp member initialisation
+////@begin WxApp member initialisation
+////@end WxApp member initialisation
 }
 
 /*
- * Initialisation for UserInterfaceApp
+ * Initialisation for WxApp
  */
 
-bool UserInterfaceApp::OnInit()
+bool WxApp::OnInit()
 {    
-////@begin UserInterfaceApp initialisation
-	// Remove the comment markers above and below this block
-	// to make permanent changes to the code.
+////@begin WxApp initialisation
+    // Remove the comment markers above and below this block
+    // to make permanent changes to the code.
 
 #if wxUSE_XPM
-	wxImage::AddHandler(new wxXPMHandler);
+    wxImage::AddHandler(new wxXPMHandler);
 #endif
 #if wxUSE_LIBPNG
-	wxImage::AddHandler(new wxPNGHandler);
+    wxImage::AddHandler(new wxPNGHandler);
 #endif
 #if wxUSE_LIBJPEG
-	wxImage::AddHandler(new wxJPEGHandler);
+    wxImage::AddHandler(new wxJPEGHandler);
 #endif
 #if wxUSE_GIF
-	wxImage::AddHandler(new wxGIFHandler);
+    wxImage::AddHandler(new wxGIFHandler);
 #endif
-	UserInterface* mainWindow = new UserInterface( NULL );
-	mainWindow->Show(true);
-////@end UserInterfaceApp initialisation
+    Wx* mainWindow = new Wx( NULL );
+    mainWindow->Show(true);
+////@end WxApp initialisation
 
     return true;
 }
 
 
 /*
- * Cleanup for UserInterfaceApp
+ * Cleanup for WxApp
  */
 
-int UserInterfaceApp::OnExit()
+int WxApp::OnExit()
 {    
-////@begin UserInterfaceApp cleanup
-	return wxApp::OnExit();
-////@end UserInterfaceApp cleanup
+////@begin WxApp cleanup
+    return wxApp::OnExit();
+////@end WxApp cleanup
 }
 

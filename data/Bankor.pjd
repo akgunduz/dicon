@@ -149,7 +149,7 @@
         <string name="Linker flags">"%AUTO%"</string>
         <long name="locked">0</long>
         <string name="Make command">"%AUTO%"</string>
-        <long name="makefile-last-written">-333377667</long>
+        <long name="makefile-last-written">3961589629</long>
         <string name="Modularity">"Modular"</string>
         <string name="Objects path">"%AUTO%"</string>
         <string name="Optimizations">"%AUTO%"</string>
@@ -197,7 +197,7 @@
           <string name="C command">"%AUTO%"</string>
           <string name="C++ command">"%AUTO%"</string>
           <string name="CFG">""</string>
-          <string name="Command for wx-config">"/usr/local/bin/wx-config"</string>
+          <string name="Command for wx-config">"/usr/bin/wx-config"</string>
           <string name="Compiler bin path">"%AUTO%"</string>
           <string name="Compiler include path">"%AUTO%"</string>
           <string name="Compiler lib path">"%AUTO%"</string>
@@ -223,7 +223,7 @@
           <string name="Linker flags">"%AUTO%"</string>
           <long name="locked">0</long>
           <string name="Make command">"%AUTO%"</string>
-          <long name="makefile-last-written">-333377667</long>
+          <long name="makefile-last-written">3961589629</long>
           <string name="Minimum OS version">"%AUTO%"</string>
           <string name="Modularity">"Modular"</string>
           <string name="Objects path">"%AUTO%"</string>
@@ -306,13 +306,13 @@
           <long name="locked">0</long>
           <long name="owns-file">1</long>
           <string name="proxy-Base class">"wxApp"</string>
-          <string name="proxy-Class">"UserInterfaceApp"</string>
+          <string name="proxy-Class">"WxApp"</string>
           <string name="proxy-Event sources">""</string>
-          <string name="proxy-Header filename">"../src/ui/wx/UserInterfaceApp.h"</string>
+          <string name="proxy-Header filename">"../src/ui/wx/WxApp.h"</string>
           <string name="proxy-Help filename">""</string>
-          <string name="proxy-Implementation filename">"../src/ui/wx/UserInterfaceApp.cpp"</string>
+          <string name="proxy-Implementation filename">"../src/ui/wx/WxApp.cpp"</string>
           <string name="proxy-Main window">"ID_USERINTERFACE"</string>
-          <string name="title">"UserInterfaceApp"</string>
+          <string name="title">"WxApp"</string>
           <long name="title-mode">0</long>
           <string name="type">"dialog-document"</string>
           <bool name="use-id-prefix">0</bool>
@@ -336,7 +336,7 @@
           <string name="proxy-Background colour">""</string>
           <string name="proxy-Base class">"wxFrame"</string>
           <bool name="proxy-Centre">1</bool>
-          <string name="proxy-Class">"UserInterface"</string>
+          <string name="proxy-Class">"Wx"</string>
           <string name="proxy-Custom styles">""</string>
           <string name="proxy-Data class header filename">""</string>
           <string name="proxy-Data class implementation filename">""</string>
@@ -349,14 +349,14 @@
           <bool name="proxy-Fit to content">0</bool>
           <string name="proxy-Font">""</string>
           <string name="proxy-Foreground colour">""</string>
-          <string name="proxy-Header filename">"../src/ui/wx/UserInterface.h"</string>
+          <string name="proxy-Header filename">"../src/ui/wx/Wx.h"</string>
           <long name="proxy-Height">700</long>
           <string name="proxy-Help text">""</string>
           <bool name="proxy-Hidden">0</bool>
           <string name="proxy-Icon">""</string>
           <string name="proxy-Id name">"ID_USERINTERFACE"</string>
           <long name="proxy-Id value">10000</long>
-          <string name="proxy-Implementation filename">"../src/ui/wx/UserInterface.cpp"</string>
+          <string name="proxy-Implementation filename">"../src/ui/wx/Wx.cpp"</string>
           <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
           <string name="proxy-Title">"Bankor"</string>
           <string name="proxy-Tooltip text">""</string>
@@ -441,8 +441,6 @@
             <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
             <bool name="proxy-Separate files">0</bool>
             <long name="proxy-Stretch factor">0</long>
-            <string name="proxy-Tab icon">""</string>
-            <string name="proxy-Tab label">"Tab"</string>
             <string name="proxy-Texture">""</string>
             <string name="proxy-Texture style">"Tiled"</string>
             <string name="proxy-Tooltip text">""</string>
@@ -673,7 +671,7 @@
             </document>
             <document>
               <string name="proxy-type">"wbButtonProxy"</string>
-              <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnInterfaceInitClick|NONE||UserInterface"</string>
+              <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnInterfaceInitClick|NONE||Wx"</string>
               <string name="filename">""</string>
               <string name="icon-name">"dialogcontrol"</string>
               <string name="identifier">"itemButton2"</string>
@@ -1557,7 +1555,7 @@ Collector"</string>
               </document>
               <document>
                 <string name="proxy-type">"wbToggleButtonProxy"</string>
-                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnDistInitClick|NONE||UserInterface"</string>
+                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnDistInitClick|NONE||Wx"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"togglebutton"</string>
                 <string name="identifier">"itemToggleButton14"</string>
@@ -1625,7 +1623,7 @@ Collector"</string>
               </document>
               <document>
                 <string name="proxy-type">"wbButtonProxy"</string>
-                <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnDistPollClick|NONE||UserInterface"</string>
+                <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnDistPollClick|NONE||Wx"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"dialogcontrol"</string>
                 <string name="identifier">"itemButton15"</string>
@@ -2661,7 +2659,7 @@ Collector"</string>
               </document>
               <document>
                 <string name="proxy-type">"wbToggleButtonProxy"</string>
-                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnCollInitClick|NONE||UserInterface"</string>
+                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnCollInitClick|NONE||Wx"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"togglebutton"</string>
                 <string name="identifier">"itemToggleButton32"</string>
@@ -2729,7 +2727,7 @@ Collector"</string>
               </document>
               <document>
                 <string name="proxy-type">"wbButtonProxy"</string>
-                <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnCollProcessClick|NONE||UserInterface"</string>
+                <string name="event-handler-0">"wxEVT_COMMAND_BUTTON_CLICKED|OnCollProcessClick|NONE||Wx"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"dialogcontrol"</string>
                 <string name="identifier">"itemButton33"</string>
@@ -3765,7 +3763,7 @@ Collector"</string>
               </document>
               <document>
                 <string name="proxy-type">"wbToggleButtonProxy"</string>
-                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnNodeInitClick|NONE||UserInterface"</string>
+                <string name="event-handler-0">"wxEVT_COMMAND_CHECKBOX_CLICKED|OnNodeInitClick|NONE||Wx"</string>
                 <string name="filename">""</string>
                 <string name="icon-name">"togglebutton"</string>
                 <string name="identifier">"itemToggleButton47"</string>

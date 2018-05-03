@@ -4,14 +4,14 @@
 
 #include "WxComponent.h"
 
-void UserInterface::componentInit() {
+void Wx::componentInit() {
 
     Log::init(LEVEL_INFO, this, updateUICallback);
 
     uiUpdater = new fUIUpdater[UI_UPDATE_MAX];
 
     ui_event = new wxEventTypeTag<wxCommandEvent>(wxNewEventType());
-    Bind(*ui_event, &UserInterface::updateUI, this, 0, UI_UPDATE_MAX - 1, NULL);
+    Bind(*ui_event, &Wx::updateUI, this, 0, UI_UPDATE_MAX - 1, NULL);
 
     distInit();
     collInit();
@@ -33,7 +33,7 @@ void UserInterface::componentInit() {
     }
 }
 
-void UserInterface::OnInterfaceInitClickWrapper( wxCommandEvent& event )
+void Wx::OnInterfaceInitClickWrapper( wxCommandEvent& event )
 {
     DeviceList::getInstance()->setActive(distCollInterface->GetSelection(),
                                          nodeInterface->GetSelection());
@@ -46,7 +46,7 @@ void UserInterface::OnInterfaceInitClickWrapper( wxCommandEvent& event )
     nodeInitBtn->Enable(true);
 }
 
-void UserInterface::updateUIEvent(int id, void *data) {
+void Wx::updateUIEvent(int id, void *data) {
 
     wxCommandEvent event(*ui_event);
     event.SetId(id);
@@ -54,7 +54,7 @@ void UserInterface::updateUIEvent(int id, void *data) {
     wxPostEvent(this, event);
 }
 
-void UserInterface::updateUI(wxCommandEvent& event) {
+void Wx::updateUI(wxCommandEvent& event) {
 
     int id = event.GetId();
 
@@ -63,6 +63,6 @@ void UserInterface::updateUI(wxCommandEvent& event) {
     }
 }
 
-void UserInterface::updateUICallback(void *context, int id, void *data) {
-    ((UserInterface*) context)->updateUIEvent(id, data);
+void Wx::updateUICallback(void *context, int id, void *data) {
+    ((Wx*) context)->updateUIEvent(id, data);
 }

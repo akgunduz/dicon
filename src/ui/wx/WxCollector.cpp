@@ -11,7 +11,7 @@
 
 #include "WxComponent.h"
 
-void UserInterface::collInit() {
+void Wx::collInit() {
 
     int width = collFileList->GetSize().GetWidth() - 1;
 
@@ -28,19 +28,19 @@ void UserInterface::collInit() {
     column.SetWidth(width);
     collProcessList->InsertColumn(0, column);
 
-    uiUpdater[UI_UPDATE_COLL_ADDRESS] = &UserInterface::collUpdateAddresses;
-    uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &UserInterface::collUpdateAttachedDistAddress;
-    uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &UserInterface::collUpdateAttachedNodeAddress;
-    uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &UserInterface::collUpdateFileList;
-    uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &UserInterface::collUpdateFileListItem;
-    uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &UserInterface::collUpdateProcessList;
+    uiUpdater[UI_UPDATE_COLL_ADDRESS] = &Wx::collUpdateAddresses;
+    uiUpdater[UI_UPDATE_COLL_ATT_DIST_ADDRESS] = &Wx::collUpdateAttachedDistAddress;
+    uiUpdater[UI_UPDATE_COLL_ATT_NODE_ADDRESS] = &Wx::collUpdateAttachedNodeAddress;
+    uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
+    uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &Wx::collUpdateFileListItem;
+    uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &Wx::collUpdateProcessList;
 }
 
 /*
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_COLL_INIT
  */
 
-void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
+void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
 
@@ -73,12 +73,12 @@ void UserInterface::OnCollInitClickWrapper( wxCommandEvent& event )
  * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
  */
 
-void UserInterface::OnCollProcessClickWrapper( wxCommandEvent& event )
+void Wx::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
     ((Collector*)collObject)->processJobs();
 }
 
-void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
+void Wx::collUpdateAddresses(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
@@ -87,7 +87,7 @@ void UserInterface::collUpdateAddresses(wxCommandEvent &event) {
 
 }
 
-void UserInterface::collUpdateAttachedDistAddress(wxCommandEvent &event) {
+void Wx::collUpdateAttachedDistAddress(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
@@ -95,14 +95,14 @@ void UserInterface::collUpdateAttachedDistAddress(wxCommandEvent &event) {
 
 }
 
-void UserInterface::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
+void Wx::collUpdateAttachedNodeAddress(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
     collNodeAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
 }
 
-void UserInterface::collUpdateFileList(wxCommandEvent &event) {
+void Wx::collUpdateFileList(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
@@ -120,7 +120,7 @@ void UserInterface::collUpdateFileList(wxCommandEvent &event) {
     }
 }
 
-void UserInterface::collUpdateFileListItem(wxCommandEvent &event) {
+void Wx::collUpdateFileListItem(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
@@ -130,7 +130,7 @@ void UserInterface::collUpdateFileListItem(wxCommandEvent &event) {
     }
 }
 
-void UserInterface::collUpdateProcessList(wxCommandEvent &event) {
+void Wx::collUpdateProcessList(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 

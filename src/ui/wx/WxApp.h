@@ -1,16 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        UserInterfaceApp.h
+// Name:        WxApp.h
 // Purpose:     
 // Author:      Haluk Akgunduz
 // Modified by: 
-// Created:     Sat 28 Apr 19:13:19 2018
+// Created:     Thu 03 May 2018 12:54:09 +03
 // RCS-ID:      
 // Copyright:   Licensed with AGPL v3.0
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _USERINTERFACEAPP_H_
-#define _USERINTERFACEAPP_H_
+#ifndef _WXAPP_H_
+#define _WXAPP_H_
 
 
 /*!
@@ -18,7 +18,6 @@
  */
 
 ////@begin includes
-#include "wx/image.h"
 #include "Wx.h"
 ////@end includes
 
@@ -37,17 +36,17 @@
 ////@end control identifiers
 
 /*!
- * UserInterfaceApp class declaration
+ * WxApp class declaration
  */
 
-class UserInterfaceApp: public wxApp
+class WxApp: public wxApp
 {    
-    DECLARE_CLASS( UserInterfaceApp )
+    DECLARE_CLASS( WxApp )
     DECLARE_EVENT_TABLE()
 
 public:
     /// Constructor
-    UserInterfaceApp();
+    WxApp();
 
     void Init();
 
@@ -57,16 +56,14 @@ public:
     /// Called on exit
     virtual int OnExit();
 
-////@begin UserInterfaceApp event handler declarations
+////@begin WxApp event handler declarations
+////@end WxApp event handler declarations
 
-////@end UserInterfaceApp event handler declarations
+////@begin WxApp member function declarations
+////@end WxApp member function declarations
 
-////@begin UserInterfaceApp member function declarations
-
-////@end UserInterfaceApp member function declarations
-
-////@begin UserInterfaceApp member variables
-////@end UserInterfaceApp member variables
+////@begin WxApp member variables
+////@end WxApp member variables
 };
 
 /*!
@@ -74,8 +71,8 @@ public:
  */
 
 ////@begin declare app
-DECLARE_APP(UserInterfaceApp)
+DECLARE_APP(WxApp)
 ////@end declare app
 
 #endif
-    // _USERINTERFACEAPP_H_
+    // _WXAPP_H_

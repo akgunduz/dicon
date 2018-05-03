@@ -11,7 +11,7 @@
 
 #include "WxComponent.h"
 
-void UserInterface::distInit() {
+void Wx::distInit() {
 
     int width = distCollList->GetSize().GetWidth() / 2 - 1;
 
@@ -38,17 +38,17 @@ void UserInterface::distInit() {
     column.SetWidth(width);
     distNodeList->InsertColumn(1, column);
 
-    uiUpdater[UI_UPDATE_DIST_ADDRESS] = &UserInterface::distUpdateAddresses;
-    uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &UserInterface::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &UserInterface::distAddtoNodeList;
-    uiUpdater[UI_UPDATE_DIST_BACKUP] = &UserInterface::distUpdateBackup;
+    uiUpdater[UI_UPDATE_DIST_ADDRESS] = &Wx::distUpdateAddresses;
+    uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &Wx::distAddtoCollectorList;
+    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &Wx::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST_BACKUP] = &Wx::distUpdateBackup;
 }
 
 /*
  * wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_DIST_INIT
  */
 
-void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
+void Wx::OnDistInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(distInitBtn->GetLabel(), "Init") == 0) {
 
@@ -78,7 +78,7 @@ void UserInterface::OnDistInitClickWrapper( wxCommandEvent& event )
     }
 }
 
-void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
+void Wx::OnDistPollClickWrapper( wxCommandEvent& event )
 {
     ((Distributor*)distObject)->reset();
     distCollList->DeleteAllItems();
@@ -87,7 +87,7 @@ void UserInterface::OnDistPollClickWrapper( wxCommandEvent& event )
     ((Distributor*)distObject)->sendWakeupMessagesAll();
 }
 
-void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
+void Wx::distUpdateAddresses(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
@@ -95,7 +95,7 @@ void UserInterface::distUpdateAddresses(wxCommandEvent &event) {
     distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
 }
 
-void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
+void Wx::distAddtoCollectorList(wxCommandEvent &event) {
 
     long i = 0;
 
@@ -127,7 +127,7 @@ void UserInterface::distAddtoCollectorList(wxCommandEvent &event) {
 
 }
 
-void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
+void Wx::distAddtoNodeList(wxCommandEvent &event) {
 
     long i = 0;
 
@@ -153,7 +153,7 @@ void UserInterface::distAddtoNodeList(wxCommandEvent &event) {
 
 }
 
-void UserInterface::distUpdateBackup(wxCommandEvent &event) {
+void Wx::distUpdateBackup(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
