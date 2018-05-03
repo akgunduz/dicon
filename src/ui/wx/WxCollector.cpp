@@ -9,6 +9,7 @@
 // Licence:     
 /////////////////////////////////////////////////////////////////////////////
 
+#include <Application.h>
 #include "WxComponent.h"
 
 void Wx::collInit() {
@@ -44,14 +45,7 @@ void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
 {
     if (wxStrcmp(collInitBtn->GetLabel(), "Init") == 0) {
 
-        try {
-
-        //    collObject = Collector::newInstance(1);
-
-        } catch (std::runtime_error &e) {
-
-            return;
-        }
+        ((Application*)app)->startCollector(1);
 
         collProcessBtn->Enable(true);
         collInitBtn->SetLabel("Stop");
@@ -75,7 +69,7 @@ void Wx::OnCollInitClickWrapper( wxCommandEvent& event )
 
 void Wx::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
-    ((Collector*)collObject)->processJobs();
+    ((Application*)app)->getCollector(0)->processJobs();
 }
 
 void Wx::collUpdateAddresses(wxCommandEvent &event) {
