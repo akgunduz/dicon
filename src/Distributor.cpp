@@ -47,10 +47,10 @@ bool Distributor::processCollectorAliveMsg(ComponentObject owner, long address, 
         return true;
     }
 
-    LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {address, 0});
+    LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(address), 0});
 
     LOGS_I(getHost(), "Collector at address : %s added to the list with ID : %d",
-           InterfaceTypes::getAddressString(address).c_str(), nodeManager->getID(address));
+           InterfaceTypes::getAddressString(address).c_str(), collectorManager->getID(address));
 
     return send2CollectorIDMsg(address, collectorManager->getID(address));
 }
@@ -61,11 +61,10 @@ bool Distributor::processCollectorNodeMsg(ComponentObject owner, long address, M
 
     if (nodeAddress > 0) {
 
-        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeAddress, PREBUSY});
-        LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {address, nodeAddress});
+        LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(address), nodeManager->getID(nodeAddress)});
+        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
 
-        LOGS_I(getHost(), "Available node: %s",
-               InterfaceTypes::getAddressString(nodeAddress).c_str());
+        LOGS_I(getHost(), "Available node ID: %d", nodeManager->getID(nodeAddress));
 
         return send2CollectorNodeMsg(address, msg->getData()->getJobDir(), nodeAddress);
 
@@ -73,11 +72,12 @@ bool Distributor::processCollectorNodeMsg(ComponentObject owner, long address, M
 
         collectorManager->addWaiting(address, msg->getData()->getJobDir());
 
+        LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(address), 0});
+
         LOGS_I(getHost(),
                "No available node, adding Collector at %s with Job : %s to Wait List with new Count %d",
                InterfaceTypes::getAddressString(address).c_str(), msg->getData()->getJobDir(),
                collectorManager->getWaitingCount());
-        LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {address, 0});
     }
 
     return false;
@@ -90,7 +90,7 @@ bool Distributor::processNodeAliveMsg(ComponentObject owner, long address, Messa
         return true;
     }
 
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {address, IDLE});
+    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(address), IDLE});
 
     LOGS_I(getHost(), "Node at address : %s added to the list with ID : %d",
            InterfaceTypes::getAddressString(address).c_str(), nodeManager->getID(address));
@@ -125,7 +125,7 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, long address, Messa
         status = true;
     }
 
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {address, IDLE});
+    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(address), IDLE});
 
     return status;
 }
@@ -152,7 +152,7 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, long address, Messag
 
     nodeManager->setState(address, BUSY);
 
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {address, BUSY});
+    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(address), BUSY});
 
     LOGS_I(getHost(),
            "Node at address : %s switch to state : %s",

@@ -60,24 +60,22 @@ void Wx::distAddtoCollectorList(wxCommandEvent &event) {
 
     for (; i < distCollList->GetItemCount(); i++) {
 
-        std::string item = distCollList->GetItemText(i, 0).ToStdString();
-        std::string address = InterfaceTypes::getAddressString(data->getData(0));
+        long itemID;
+        distCollList->GetItemText(i, 0).ToLong(&itemID);
 
-        if (address.compare(item) == 0) {
+        if (itemID == data->getData(0)) {
             break;
         }
-
     }
 
     if (i == distCollList->GetItemCount()) {
         i = distCollList->InsertItem(distCollList->GetItemCount(), 0);
     }
 
-    distCollList->SetItem(i, 0, InterfaceTypes::getAddressString(data->getData(0)));
-    distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->getData(0)));
+    distCollList->SetItem(i, 0, wxString::Format(wxT("%ld"), data->getData(0)));
 
     if (data->getData(1) > 0) {
-        distCollList->SetItem(i, 1, InterfaceTypes::getAddressString(data->getData(1)));
+        distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->getData(1)));
     } else {
         distCollList->SetItem(i, 1, "No Available Node!!");
     }
@@ -92,20 +90,19 @@ void Wx::distAddtoNodeList(wxCommandEvent &event) {
 
     for (; i < distNodeList->GetItemCount(); i++) {
 
-        std::string item = distNodeList->GetItemText(i, 0).ToStdString();
-        std::string address = InterfaceTypes::getAddressString(data->getData(0));
+        long itemID;
+        distNodeList->GetItemText(i, 0).ToLong(&itemID);
 
-        if (address == item) {
+        if (itemID == data->getData(0)) {
             break;
         }
-
     }
 
     if (i == distNodeList->GetItemCount()) {
         i = distNodeList->InsertItem(distNodeList->GetItemCount(), 0);
     }
 
-    distNodeList->SetItem(i, 0, InterfaceTypes::getAddressString(data->getData(0)));
+    distNodeList->SetItem(i, 0, wxString::Format(wxT("%ld"), data->getData(0)));
     distNodeList->SetItem(i, 1, NodeState::getName((NODE_STATES)data->getData(1)));
 
 }

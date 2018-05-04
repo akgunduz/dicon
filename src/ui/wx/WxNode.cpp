@@ -13,7 +13,7 @@
 
 void Wx::nodeInit() {
 
-    int width = nodeProcessList->GetSize().GetWidth() / 12 - 1;
+    int width = nodeProcessList->GetSize().GetWidth() / 12;
 
     wxListItem column;
     column.SetId(0);
