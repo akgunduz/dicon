@@ -30,28 +30,19 @@ void Wx::collInit() {
     column.SetWidth(width);
     collProcessList->InsertColumn(0, column);
 
-    uiUpdater[UI_UPDATE_COLL_ADDRESS] = &Wx::collUpdateAddresses;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &Wx::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &Wx::collUpdateProcessList;
 }
 
-/*
- * wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_COLL_PROCESS
- */
+void Wx::OnCollLoadClickWrapper( wxCommandEvent& event )
+{
+    ((ComponentController *)componentController)->getCollector(0)->loadJob(NULL);
+}
 
 void Wx::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
     ((ComponentController *)componentController)->getCollector(0)->processJobs();
-}
-
-void Wx::collUpdateAddresses(wxCommandEvent &event) {
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    collDistDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
-    collNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
-
 }
 
 void Wx::collUpdateFileList(wxCommandEvent &event) {

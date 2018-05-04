@@ -18,19 +18,19 @@ void Wx::distInit() {
 
     wxListItem column;
     column.SetId(0);
-    column.SetText( _("Address") );
+    column.SetText( _("ID") );
     column.SetWidth(width);
     distCollList->InsertColumn(0, column);
 
     column.SetId(1);
-    column.SetText( _("Attached Node") );
+    column.SetText( _("Node ID") );
     column.SetWidth(width);
     distCollList->InsertColumn(1, column);
 
     width = distNodeList->GetSize().GetWidth() / 2 - 1;
 
     column.SetId(0);
-    column.SetText( _("Address") );
+    column.SetText( _("ID") );
     column.SetWidth(width);
     distNodeList->InsertColumn(0, column);
 
@@ -39,7 +39,6 @@ void Wx::distInit() {
     column.SetWidth(width);
     distNodeList->InsertColumn(1, column);
 
-    uiUpdater[UI_UPDATE_DIST_ADDRESS] = &Wx::distUpdateAddresses;
     uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &Wx::distAddtoCollectorList;
     uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &Wx::distAddtoNodeList;
 }
@@ -51,14 +50,6 @@ void Wx::OnDistPollClickWrapper( wxCommandEvent& event )
 
     ((ComponentController *)componentController)->getDistributor()->reset();
     ((ComponentController *)componentController)->getDistributor()->sendWakeupMessagesAll();
-}
-
-void Wx::distUpdateAddresses(wxCommandEvent &event) {
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    distCollDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(0)));
-    distNodeDeviceAddress->SetLabel(InterfaceTypes::getAddressString(data->getData(1)));
 }
 
 void Wx::distAddtoCollectorList(wxCommandEvent &event) {

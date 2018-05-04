@@ -41,6 +41,7 @@ public:
     static Collector* newInstance(const char*);
 
     bool processJob(int);
+    bool loadJob(const char*);
     bool processJobs();
 	Jobs* getJobs();
 

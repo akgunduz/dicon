@@ -19,23 +19,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
-	LOG_U(UI_UPDATE_COLL_ADDRESS, std::vector<long> {getInterfaceAddress(COMP_DISTRIBUTOR), getInterfaceAddress(COMP_NODE)});
-
     setDistributorAddress(0);
-
-    getJobs()->addPath(getHost(), true);
-
-    if (getJobs()->isEmpty()) {
-        return;
-    }
-
-    if (getJobs()->get(0)->getFileCount()) {
-        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
-    }
-
-    if (getJobs()->get(0)->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
-    }
 }
 
 Collector::~Collector() {
@@ -230,6 +214,25 @@ bool Collector::processJobs() {
     for (int i = 0; i < getJobs()->getCount(); i++) {
 
         processJob(i);
+    }
+
+    return true;
+}
+
+bool Collector::loadJob(const char* path) {
+
+    getJobs()->addPath(getHost(), true);
+
+    if (getJobs()->isEmpty()) {
+        return false;
+    }
+
+    if (getJobs()->get(0)->getFileCount()) {
+        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
+    }
+
+    if (getJobs()->get(0)->getExecutorCount()) {
+        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
     }
 
     return true;
