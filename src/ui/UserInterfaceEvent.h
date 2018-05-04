@@ -24,6 +24,7 @@ public:
     std::string getString(int);
     void* getPointer(int);
 
+    void addData(long);
     void addDataList(std::vector<long>);
     void addString(std::string);
     void addPointer(void*);

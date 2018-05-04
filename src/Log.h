@@ -65,9 +65,11 @@ public:
     static void logs(LOGLEVEL level, const char *, int, ComponentObject, ...);
     static void logc(LOGLEVEL level, const char *, int, ComponentObject, ComponentObject, int, ...);
 	static void show(const char *format, ...);
+
 	static void updateUI(int, std::vector<long>);
 	static void updateUI(int, std::vector<long>, const char* , ...);
 	static void updateUI(int, const char* , ...);
+	static void updateUI(int, int, const char* , const char*);
 	static void updateUI(int, void*);
 
 	static UserInterfaceController* getController();

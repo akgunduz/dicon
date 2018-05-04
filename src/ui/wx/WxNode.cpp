@@ -53,7 +53,11 @@ void Wx::nodeUpdateClear(wxCommandEvent &event) {
 
 void Wx::nodeUpdateProcessList(wxCommandEvent &event) {
 
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    nodeExecList->InsertItem(nodeExecList->GetItemCount(), wxString::Format("%s", data->getString(0)));
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    long row = nodeProcessList->InsertItem(nodeProcessList->GetItemCount(), 0);
+
+    nodeProcessList->SetItem(row, 0, wxString::Format(wxT("%ld"), data->getData(0)));
+    nodeProcessList->SetItem(row, 1, data->getString(0));
+    nodeProcessList->SetItem(row, 2, data->getString(1));
 }

@@ -63,7 +63,7 @@ bool Node::processCollectorJobMsg(ComponentObject owner, long address, Message *
 
     } else {
 
-        processCommand(msg->getData()->getExecutor());
+        processCommand(msg->getHeader()->getOwner().getID(), msg->getData()->getJobDir(), msg->getData()->getExecutor());
 
         TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
         FileInfo::setFileListState(&outputList, false);
@@ -77,7 +77,7 @@ bool Node::processCollectorJobMsg(ComponentObject owner, long address, Message *
 
 bool Node::processCollectorBinaryMsg(ComponentObject owner, long address, Message *msg) {
 
-    processCommand(msg->getData()->getExecutor());
+    processCommand(msg->getHeader()->getOwner().getID(), msg->getData()->getJobDir(), msg->getData()->getExecutor());
 
     TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
     FileInfo::setFileListState(&outputList, false);
@@ -179,7 +179,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(const char *cmd) {
+bool Node::processCommand(int collID, const char* jobDir, const char *cmd) {
 
     int status;
     char *args[100];
@@ -188,7 +188,7 @@ bool Node::processCommand(const char *cmd) {
 
     strcpy(fullcmd, Util::parsePath(getHost(), cmd).c_str());
 
-    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, fullcmd);
+    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, fullcmd);
     LOGS_I(getHost(), "Executing %s command\n", fullcmd);
 
     parseCommand(fullcmd, args);

@@ -43,6 +43,7 @@ public:
     void display(int, std::vector<long>);
     void display(int, std::vector<long>, const char* , ...);
     void display(int, const char* , ...);
+    void display(int, int, const char* , const char*);
     void display(int, void*);
 };
 
