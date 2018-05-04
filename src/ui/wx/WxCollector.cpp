@@ -37,6 +37,9 @@ void Wx::collInit() {
 
 void Wx::OnCollLoadClickWrapper( wxCommandEvent& event )
 {
+    collFileList->DeleteAllItems();
+    collProcessList->DeleteAllItems();
+
     ((ComponentController *)componentController)->getCollector(0)->loadJob(NULL);
 }
 
