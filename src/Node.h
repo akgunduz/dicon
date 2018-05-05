@@ -26,13 +26,13 @@ private:
     bool processCollectorBinaryMsg(ComponentObject, long, Message *);
     bool processCollectorReadyMsg(ComponentObject, long, Message *);
 
-    bool send2DistributorReadyMsg(long);
-    bool send2DistributorAliveMsg(long);
-    bool send2DistributorIDMsg(long);
-    bool send2DistributorBusyMsg(long);
+    bool send2DistributorReadyMsg(ComponentObject, long, const char*, long);
+    bool send2DistributorAliveMsg(ComponentObject, long);
+    bool send2DistributorIDMsg(ComponentObject, long);
+    bool send2DistributorBusyMsg(ComponentObject, long, const char*, long);
 
-    bool send2CollectorInfoMsg(long, const char*, long, const char*, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(long, const char*, long, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(int, const char*, const char *);

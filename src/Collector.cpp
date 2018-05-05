@@ -4,6 +4,7 @@
 //
 
 #include "Collector.h"
+#include "NodeObject.h"
 
 Collector *Collector::newInstance(const char* path) {
 
@@ -30,7 +31,7 @@ bool Collector::processDistributorWakeupMsg(ComponentObject owner, long address,
 
     setDistributorAddress(address);
 
-    return send2DistributorAliveMsg(address);
+    return send2DistributorAliveMsg(owner, address);
 }
 
 bool Collector::processDistributorIDMsg(ComponentObject owner, long address, Message *msg) {
@@ -44,7 +45,8 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, long address, Mes
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, long address, Message *msg) {
 
-    long nodeAddress = msg->getHeader()->getVariant(0);
+    int id = msg->getHeader()->getVariant(0);
+    long nodeAddress = msg->getHeader()->getVariant(1);
 
     if (nodeAddress == 0) {
 
@@ -77,7 +79,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, long address, M
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
 
-    return send2NodeJobMsg(nodeAddress, msg->getData()->getJobDir(), executor.getID(),
+    return send2NodeJobMsg(NodeObject(id), nodeAddress, msg->getData()->getJobDir(), executor.getID(),
                            executor.get()->getParsedExec(), executor.get()->getFileList());
 }
 
@@ -85,7 +87,7 @@ bool Collector::processNodeInfoMsg(ComponentObject owner, long address, Message 
 
     LOGS_I(getHost(), "%d File info received", msg->getData()->getFileCount());
 
-    return send2NodeBinaryMsg(address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
+    return send2NodeBinaryMsg(owner, address, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
 }
 
@@ -110,24 +112,24 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, long address, Messag
 
     TypeMD5List md5List;
 
-    bool status = send2NodeReadyMsg(address);
+    bool status = send2NodeReadyMsg(owner, address, msg->getData()->getJobDir());
 
     if (getJobs()->get(msg->getData()->getJobDir())->getUnServedCount() > 0) {
 
-        status &= send2DistributorNodeMsg(getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
+        status &= send2DistributorNodeMsg(COMP_DISTRIBUTOR, getDistributorAddress(), msg->getData()->getJobDir(), &md5List);
     }
 
     return status;
 }
 
-bool Collector::send2DistributorAliveMsg(long address) {
+bool Collector::send2DistributorAliveMsg(ComponentObject target, long address) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ALIVE);
 
-    return send(COMP_DISTRIBUTOR, address, msg);
+    return send(target, address, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(long address, const char* jobDir, TypeMD5List *md5List) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target, long address, const char* jobDir, TypeMD5List *md5List) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
@@ -137,10 +139,10 @@ bool Collector::send2DistributorNodeMsg(long address, const char* jobDir, TypeMD
 
     LOGS_I(getHost(), "\"%d\" necessary file md5s are prepared", md5List->size());
 
-    return send(COMP_DISTRIBUTOR, address, msg);
+    return send(target, address, msg);
 }
 
-bool Collector::send2NodeJobMsg(long address, const char* jobDir, long executionID,
+bool Collector::send2NodeJobMsg(ComponentObject target, long address, const char* jobDir, long executionID,
                                 const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_JOB);
@@ -152,10 +154,10 @@ bool Collector::send2NodeJobMsg(long address, const char* jobDir, long execution
 
     LOGS_I(getHost(), "\"%d\" file info is prepared for execution : %s", fileList->size(), executor);
 
-    return send(COMP_NODE, address, msg);
+    return send(target, address, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, long executionID,
+bool Collector::send2NodeBinaryMsg(ComponentObject target, long address, const char* jobDir, long executionID,
                                    const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
@@ -167,14 +169,17 @@ bool Collector::send2NodeBinaryMsg(long address, const char* jobDir, long execut
 
     LOGS_I(getHost(), "\"%d\" file binary is prepared", fileList->size());
 
-    return send(COMP_NODE, address, msg);
+    return send(target, address, msg);
 }
 
-bool Collector::send2NodeReadyMsg(long address) {
+bool Collector::send2NodeReadyMsg(ComponentObject target, long address, const char* jobDir) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
 
-    return send(COMP_NODE, address, msg);
+    msg->getData()->setStreamFlag(STREAM_JOB);
+    msg->getData()->setJobDir(jobDir);
+
+    return send(target, address, msg);
 }
 
 Jobs *Collector::getJobs() {
@@ -202,7 +207,7 @@ bool Collector::processJob(int index) {
     for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
 
         TypeMD5List md5List;
-        send2DistributorNodeMsg(getDistributorAddress(),
+        send2DistributorNodeMsg(COMP_DISTRIBUTOR, getDistributorAddress(),
                                 getJobs()->get(index)->getJobDir(), &md5List);
     }
 

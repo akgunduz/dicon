@@ -28,11 +28,11 @@ class Collector : public Component {
 	bool processNodeInfoMsg(ComponentObject, long, Message *);
 	bool processNodeBinaryMsg(ComponentObject, long, Message *);
 
-	bool send2DistributorAliveMsg(long);
-	bool send2DistributorNodeMsg(long, const char*, TypeMD5List*);
-	bool send2NodeJobMsg(long, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeBinaryMsg(long, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeReadyMsg(long);
+	bool send2DistributorAliveMsg(ComponentObject, long);
+	bool send2DistributorNodeMsg(ComponentObject, long, const char*, TypeMD5List*);
+	bool send2NodeJobMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
+	bool send2NodeBinaryMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
+	bool send2NodeReadyMsg(ComponentObject, long, const char*);
 
 public:
 

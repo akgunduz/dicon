@@ -16,7 +16,7 @@ NodeManager::~NodeManager() {
 
 long NodeManager::getIdle() {
 
-    TypeComponentList::iterator leastUsedNode = components.end();
+    auto leastUsedNode = components.end();
 
     mutex.lock();
 

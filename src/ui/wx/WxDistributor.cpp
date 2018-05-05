@@ -77,7 +77,7 @@ void Wx::distAddtoCollectorList(wxCommandEvent &event) {
     if (data->getData(1) > 0) {
         distCollList->SetItem(i, 1, wxString::Format(wxT("%ld"), data->getData(1)));
     } else {
-        distCollList->SetItem(i, 1, "No Available Node!!");
+        distCollList->SetItem(i, 1, "No Assignment!!!");
     }
 
 }

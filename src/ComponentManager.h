@@ -32,6 +32,7 @@ public:
     void clear();
 
     int getID(long);
+    ComponentObject* get(long);
 
     int add(long);
 

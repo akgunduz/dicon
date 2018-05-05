@@ -15,6 +15,17 @@ ComponentManager::~ComponentManager() {
     components.clear();
 }
 
+ComponentObject* ComponentManager::get(long address) {
+
+    auto search = components.find(address);
+    if (search == components.end()) {
+        return NULL;
+    }
+
+    return components[address];
+
+}
+
 int ComponentManager::getID(long address) {
 
     auto search = components.find(address);
