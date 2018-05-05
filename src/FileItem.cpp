@@ -97,13 +97,13 @@ bool FileItem::validate() {
         return false;
     }
 
-    FILE *file = fopen(Util::getAbsRefPath(getHost(), getJobDir(), getFileName()).c_str(), "r");
+    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str(), "r");
     if (file == NULL) {
         LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 
-    bool status = getMD5()->get(Util::getAbsMD5Path(getHost(), getJobDir(), getFileName()).c_str());
+    bool status = getMD5()->get(Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
     if (!status) {
 
         char buf[BUFFER_SIZE];
@@ -123,7 +123,7 @@ bool FileItem::validate() {
 
         MD5_Final(getMD5()->data, &ctx);
 
-        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost(), getJobDir(), getFileName()).c_str());
+        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
     }
 
     fclose(file);
@@ -132,4 +132,5 @@ bool FileItem::validate() {
 
     return true;
 }
+
 

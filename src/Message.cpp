@@ -55,7 +55,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
     }
 
     Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost(), content->getJobDir(),
+	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), content->getJobDir(),
                                               fileName).c_str(), &calcMD5, header->getSize(1))) {
 		LOGS_E(getHost(), "readFile can not read Binary data");
 		return false;
@@ -242,7 +242,7 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
     } else {
         blockHeader.set(2, BLOCK_FILE_BINARY);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
-        absPath = Util::getAbsRefPath(content->getHost(), content->getJobDir(), content->getFileName());
+        absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName());
         blockHeader.setSize(1, getBinarySize(absPath.c_str()));
     }
 

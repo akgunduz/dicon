@@ -73,7 +73,8 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
 
         const char* path = json_object_get_string(child);
 
-        auto *content = new FileItem(((Job*)parent)->getHost(), ((Job*)parent)->getJobDir(), path, i);
+        auto *content = new FileItem(((Job*)parent)->getHost(),
+                                     ((Job*)parent)->getJobDir(), path, i);
 
         content->validate();
 

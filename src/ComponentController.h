@@ -22,9 +22,12 @@ class ComponentController {
 public:
 
     static ComponentController* newInstance(int, int);
+    ~ComponentController();
 
     Distributor* getDistributor();
+    long getCollectorCount();
     Collector* getCollector(int);
+    long getNodeCount();
     Node* getNode(int);
 
     bool startDistributor();

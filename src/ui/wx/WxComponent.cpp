@@ -18,9 +18,6 @@ void Wx::componentInit() {
     collInit();
     nodeInit();
 
-    ((ComponentController *)componentController)->startDistributor();
-    ((ComponentController *)componentController)->startCollector(1);
-    ((ComponentController *)componentController)->startNode(1);
 }
 
 void Wx::updateUIEvent(int id, void *data) {

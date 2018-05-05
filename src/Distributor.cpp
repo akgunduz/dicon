@@ -210,7 +210,7 @@ bool Distributor::send2NodeIDMsg(ComponentObject target, long address, int id) {
     return send(target, address, msg);
 }
 
-bool Distributor::sendWakeupMessage(COMPONENT component) {
+bool Distributor::sendWakeupMessage(ComponentObject component) {
 
     if (isSupportMulticast(component)) {
 
@@ -232,18 +232,22 @@ bool Distributor::sendWakeupMessage(COMPONENT component) {
     return true;
 }
 
-bool Distributor::sendWakeupMessagesAll() {
+bool Distributor::sendWakeupMessagesAll(bool clear) {
 
-    sendWakeupMessage(COMP_NODE);
+    if (clear) {
+        this->clear();
+    }
+
+    sendWakeupMessage(ComponentObject(COMP_NODE, getRootPath()));
 
     if (DeviceList::getInstance()->isActiveDifferent()) {
-        sendWakeupMessage(COMP_COLLECTOR);
+        sendWakeupMessage(ComponentObject(COMP_COLLECTOR, getRootPath()));
     }
 
     return true;
 }
 
-bool Distributor::reset() {
+bool Distributor::clear() {
 
     nodeManager->clear();
 

@@ -15,12 +15,14 @@
 class Collector : public Component {
 
 	Jobs jobs;
+	ComponentObject distributor;
 	long distributorAddress;
 
     Collector(const char *rootPath);
 
+	ComponentObject getDistributor();
 	long getDistributorAddress();
-	bool setDistributorAddress(long);
+	void setDistributorAddress(long);
 
 	bool processDistributorWakeupMsg(ComponentObject, long, Message *);
 	bool processDistributorIDMsg(ComponentObject, long, Message *);

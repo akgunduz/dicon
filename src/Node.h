@@ -12,10 +12,12 @@
 class Node : public Component {
 private:
 
+	ComponentObject distributor;
 	long distributorAddress;
 
 	Node(const char *rootPath);
 
+	ComponentObject getDistributor();
 	long getDistributorAddress();
 	void setDistributorAddress(long);
 

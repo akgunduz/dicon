@@ -4,20 +4,18 @@
 
 #include "ComponentObject.h"
 
-char ComponentObject::rootPath[COMP_MAX][PATH_MAX];
-
 const char* sComponentTypes[COMP_MAX] = {
         "Distributor",
         "Collector",
         "Node",
 };
 
-ComponentObject::ComponentObject(COMPONENT type, int id)
-        : type(type), id(id) {
+ComponentObject::ComponentObject(COMPONENT type, const char* rootPath, int id)
+        : type(type), id(id), rootPath(rootPath) {
 }
 
 ComponentObject::ComponentObject(const ComponentObject &copy)
-        : type(copy.type), id(copy.id) {
+        : type(copy.type), id(copy.id), rootPath(copy.rootPath) {
 }
 
 ComponentObject::~ComponentObject() {
@@ -56,14 +54,5 @@ COMPONENT ComponentObject::getPrevType() {
 
 const char* ComponentObject::getRootPath() {
 
-    return rootPath[type];
+    return rootPath;
 }
-
-void ComponentObject::setRootPath(ComponentObject component, const char *path) {
-
-    strcpy(rootPath[component.getType()], path);
-}
-
-
-
-

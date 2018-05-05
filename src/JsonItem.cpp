@@ -52,7 +52,7 @@ void JsonItem::reset() {
 
 bool JsonItem::parse() {
 
-    struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost(), getJobDir(), getFileName()).c_str());
+    struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
     if (node == NULL){
         LOGS_E(getHost(), "Invalid JSON File");
         return false;

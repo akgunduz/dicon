@@ -14,7 +14,7 @@
 class Util {
 
 private:
-	static std::string getPath(ComponentObject, const char*, const char*, bool);
+	static std::string getPath(const char *, const char*, const char*, bool);
 
 public:
 	static std::string hex2str(const uint8_t *ca, int len);
@@ -25,12 +25,12 @@ public:
     static std::vector<std::string> getFileList(const char*, const char*);
     static std::vector<std::string> getDirList(const char*, const char*);
 	static std::string mixPath(const char*, const char*);
-	static std::string parsePath(ComponentObject, const char *);
-	static std::string getAbsPath(ComponentObject, const char *);
-	static std::string getAbsRefPath(ComponentObject, const char*, const char*);
-	static std::string getAbsMD5Path(ComponentObject, const char*, const char*);
-	static std::string getRefPath(ComponentObject, const char*, const char*);
-	static std::string getMD5Path(ComponentObject, const char*, const char*);
+	static std::string parsePath(const char *, const char *);
+	static std::string getAbsPath(const char *, const char *);
+	static std::string getAbsRefPath(const char *, const char*, const char*);
+	static std::string getAbsMD5Path(const char *, const char*, const char*);
+	static std::string getRefPath(const char *, const char*, const char*);
+	static std::string getMD5Path(const char *, const char*, const char*);
 	static bool checkPath(const char*, bool);
 	static bool checkPath(const char*, const char*, bool);
 	static bool checkPath(const char*, const char*, const char*, bool);

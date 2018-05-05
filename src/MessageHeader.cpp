@@ -28,7 +28,7 @@ MSG_TYPE MessageHeader::getType() {
 
 ComponentObject MessageHeader::getOwner() {
 
-    return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF));
+    return ComponentObject((COMPONENT)(owner >> 32), NULL, (int)(owner & 0xFFFFFFFF));
 }
 
 void MessageHeader::setOwner(ComponentObject owner) {

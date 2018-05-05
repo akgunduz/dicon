@@ -48,10 +48,10 @@ public:
 	~Distributor();
     static Distributor* newInstance(const char* path);
 
-    bool reset();
+    bool clear();
 
-    bool sendWakeupMessage(COMPONENT);
-    bool sendWakeupMessagesAll();
+    bool sendWakeupMessage(ComponentObject);
+    bool sendWakeupMessagesAll(bool);
 
 
 

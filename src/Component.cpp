@@ -4,10 +4,10 @@
 
 #include "Component.h"
 
-Component::Component(ComponentObject host, const char* rootPath) :
-    host(host) {
+Component::Component(COMPONENT host, const char* rootPath) :
+    host(host, getRootPath()) {
 
-    ComponentObject::setRootPath(getHost(), rootPath);
+    strcpy(this->rootPath, rootPath);
 
     schedulerCB = new InterfaceSchedulerCB(receiveCB, this);
     hostCB = new InterfaceHostCB(getHostCB, this);
@@ -15,7 +15,7 @@ Component::Component(ComponentObject host, const char* rootPath) :
     DeviceList *deviceList = DeviceList::getInstance();
 
     interfaces[COMP_NODE] = Connector::createInterface(deviceList->getActive(1), schedulerCB, hostCB);
-    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host.getType() != COMP_NODE ?
+    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host != COMP_NODE ?
                                    Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
@@ -33,6 +33,11 @@ Component::~Component() {
     delete schedulerCB;
 
     delete hostCB;
+}
+
+const char* Component::getRootPath() {
+
+    return rootPath;
 }
 
 ComponentObject Component::getHost() {
@@ -96,30 +101,30 @@ bool Component::defaultProcessMsg(ComponentObject owner, long address, Message *
 }
 
 
-long Component::getInterfaceAddress(COMPONENT target) {
+long Component::getInterfaceAddress(ComponentObject target) {
 
-    if (interfaces[target] != NULL) {
-        return interfaces[target]->getAddress();
+    if (interfaces[target.getType()] != NULL) {
+        return interfaces[target.getType()]->getAddress();
     }
 
     return 0;
 }
 
 
-INTERFACE Component::getInterfaceType(COMPONENT target) {
+INTERFACE Component::getInterfaceType(ComponentObject target) {
 
-    if (interfaces[target] != NULL) {
-        return interfaces[target]->getType();
+    if (interfaces[target.getType()] != NULL) {
+        return interfaces[target.getType()]->getType();
     }
 
     return INTERFACE_MAX;
 }
 
 
-bool Component::isSupportMulticast(COMPONENT target) {
+bool Component::isSupportMulticast(ComponentObject target) {
 
-    if (interfaces[target] != NULL) {
-        return interfaces[target]->isSupportMulticast();
+    if (interfaces[target.getType()] != NULL) {
+        return interfaces[target.getType()]->isSupportMulticast();
     }
 
     return false;

@@ -48,8 +48,7 @@ void Wx::OnDistPollClickWrapper( wxCommandEvent& event )
     distCollList->DeleteAllItems();
     distNodeList->DeleteAllItems();
 
-    ((ComponentController *)componentController)->getDistributor()->reset();
-    ((ComponentController *)componentController)->getDistributor()->sendWakeupMessagesAll();
+    ((ComponentController *)componentController)->getDistributor()->sendWakeupMessagesAll(true);
 }
 
 void Wx::distAddtoCollectorList(wxCommandEvent &event) {

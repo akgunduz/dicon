@@ -23,11 +23,11 @@ class ContentItem : public SchedulerItem {
 
 public:
 
-	ContentItem(){};
+	ContentItem() {}
 
 	virtual CONTENT_TYPES getType() = 0;
     virtual bool isValid() = 0;
-	virtual ~ContentItem(){};
+	virtual ~ContentItem(){}
 };
 
 #endif //__Content_H_

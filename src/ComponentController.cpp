@@ -16,6 +16,21 @@ ComponentController *ComponentController::newInstance(int ind1, int ind2) {
     return instance;
 }
 
+ComponentController::~ComponentController() {
+
+    delete distributor;
+
+    for (int i = 0; i < collectors.size(); i++) {
+        delete collectors[i];
+    }
+
+    for (int i = 0; i < nodes.size(); i++) {
+        delete nodes[i];
+    }
+
+    instance = NULL;
+}
+
 ComponentController::ComponentController(int ind1, int ind2) {
 
     setInterfaces(ind1, ind2);
@@ -26,9 +41,19 @@ Distributor *ComponentController::getDistributor() {
     return distributor;
 }
 
+long ComponentController::getCollectorCount() {
+
+    return collectors.size();
+}
+
 Collector *ComponentController::getCollector(int index) {
 
     return collectors[index];
+}
+
+long ComponentController::getNodeCount() {
+
+    return nodes.size();
 }
 
 Node *ComponentController::getNode(int index) {
@@ -82,4 +107,3 @@ bool ComponentController::setInterfaces(int ind1, int ind2) {
 
     return true;
 }
-

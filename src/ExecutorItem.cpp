@@ -113,7 +113,7 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
             auto *content = ((Job*)job)->getFile(cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
-                        Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
+                        Util::getRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName()).c_str());
                 fileList.push_back(FileInfo(content, false));
             }
         } break;
@@ -122,7 +122,7 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
             auto *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
-                        Util::getRefPath(content->getHost(), content->getJobDir(), content->getFileName()).c_str());
+                        Util::getRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName()).c_str());
                 fileList.push_back(FileInfo(content, true));
             }
         } break;

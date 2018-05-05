@@ -20,6 +20,8 @@ class Component {
 
     ComponentObject host;
 
+    char rootPath[PATH_MAX];
+
     Interface *interfaces[COMP_MAX];
 
 protected :
@@ -33,15 +35,17 @@ protected :
 
 public:
 
-    Component(ComponentObject host, const char* rootPath);
+    Component(COMPONENT host, const char* rootPath);
     virtual ~Component();
 
     ComponentObject getHost();
     void setHostID(int);
 
-    long getInterfaceAddress(COMPONENT);
-    INTERFACE getInterfaceType(COMPONENT);
-    bool isSupportMulticast(COMPONENT);
+    const char* getRootPath();
+
+    long getInterfaceAddress(ComponentObject);
+    INTERFACE getInterfaceType(ComponentObject);
+    bool isSupportMulticast(ComponentObject);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(ComponentObject, long, MSG_TYPE, Message *);
 

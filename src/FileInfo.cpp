@@ -63,7 +63,7 @@ TypeFileInfoList FileInfo::checkFileExistence(ComponentObject component, TypeFil
 
         } else {
 
-            Md5 md5(Util::getAbsMD5Path(component,
+            Md5 md5(Util::getAbsMD5Path(component.getRootPath(),
                                         list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
             if (!md5.equal(list->at(i).get()->getMD5())) {
 

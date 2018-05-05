@@ -11,6 +11,12 @@
 #include "Distributor.h"
 #include "Collector.h"
 
+enum class APPMODE {
+
+    APPMODE_CONSOLE,
+    APPMODE_WXWIDGETS
+};
+
 class Application {
 
     bool initStart;

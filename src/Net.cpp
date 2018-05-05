@@ -70,7 +70,7 @@ bool Net::initTCP() {
 
         setAddress(address);
 
-        LOGS_I(getHost(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
+        LOGS_T(getHost(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
 
         return true;
     }
@@ -123,7 +123,7 @@ bool Net::initMulticast() {
 
     setMulticastAddress(multicastAddress);
 
-    LOGS_I(getHost(), "Using multicast address : %s", InterfaceTypes::getAddressString(multicastAddress).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", InterfaceTypes::getAddressString(multicastAddress).c_str());
 
     return true;
 }

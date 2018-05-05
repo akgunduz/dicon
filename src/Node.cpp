@@ -14,7 +14,7 @@ Node *Node::newInstance(const char* path) {
 }
 
 Node::Node(const char *rootPath) :
-        Component(COMP_NODE, rootPath) {
+        Component(COMP_NODE, rootPath), distributor(COMP_DISTRIBUTOR, getRootPath()){
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg);
@@ -49,7 +49,7 @@ bool Node::processCollectorJobMsg(ComponentObject owner, long address, Message *
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
 
-    if (!send2DistributorBusyMsg(COMP_DISTRIBUTOR, getDistributorAddress(), msg->getData()->getJobDir(), address)) {
+    if (!send2DistributorBusyMsg(getDistributor(), getDistributorAddress(), msg->getData()->getJobDir(), address)) {
 
         LOGS_E(getHost(), "Could not send BUSY message to Distributor!!!");
         return false;
@@ -91,7 +91,7 @@ bool Node::processCollectorReadyMsg(ComponentObject owner, long address, Message
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
-    return send2DistributorReadyMsg(COMP_DISTRIBUTOR, getDistributorAddress(), msg->getData()->getJobDir(), address);
+    return send2DistributorReadyMsg(getDistributor(), getDistributorAddress(), msg->getData()->getJobDir(), address);
 }
 
 bool Node::send2DistributorReadyMsg(ComponentObject target, long address, const char* jobDir, long collAddress) {
@@ -160,6 +160,11 @@ bool Node::send2CollectorBinaryMsg(ComponentObject target, long address, const c
     return send(target, address, msg);
 }
 
+ComponentObject Node::getDistributor() {
+
+    return distributor;
+}
+
 long Node::getDistributorAddress() {
 
     return distributorAddress;
@@ -194,7 +199,7 @@ bool Node::processCommand(int collID, const char* jobDir, const char *cmd) {
 
     char fullcmd[PATH_MAX];
 
-    strcpy(fullcmd, Util::parsePath(getHost(), cmd).c_str());
+    strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
     LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, fullcmd);
     LOGS_I(getHost(), "Executing %s command\n", fullcmd);

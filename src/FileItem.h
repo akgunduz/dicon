@@ -20,9 +20,8 @@ class FileItem : public ContentItem {
 
 	Md5 md5;
 
-
 public:
-	FileItem(ComponentObject host);
+	FileItem(ComponentObject);
     FileItem(FileItem*);
     FileItem(ComponentObject host, const char*, const char*,
              int id, Md5 *md5 = nullptr);
