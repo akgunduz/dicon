@@ -129,7 +129,12 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
 
     LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s job", nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
 
-    return true;
+    return send2NodeProcessMsg(owner, msg->getData()->getJobDir(),
+                                   msg->getData()->getExecutorID(),
+                                   msg->getData()->getExecutor(),
+                                   msg->getData()->getFileList(),
+                                   collectorManager->getID(collAddress),
+                                   collAddress);
 }
 
 
@@ -145,6 +150,7 @@ bool Distributor::processWaitingList(ComponentObject owner, Message *msg) {
 
     if (nodeAddress > 0) {
 
+        //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
         LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
 
         LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
@@ -205,6 +211,23 @@ bool Distributor::send2NodeIDMsg(ComponentObject target, int id) {
     auto *msg = new Message(getHost(), MSGTYPE_ID);
 
     msg->getHeader()->setVariant(0, id);
+
+    return send(target, msg);
+}
+
+bool Distributor::send2NodeProcessMsg(ComponentObject target,
+                                   const char* jobDir, long executionID, const char *executor,
+                                   TypeFileInfoList *fileList, int collID, long collAddress) {
+
+    auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
+
+    msg->getData()->setStreamFlag(STREAM_INFO);
+    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setExecutor(executionID, executor);
+    msg->getData()->addFileList(fileList);
+
+    msg->getHeader()->setVariant(0, collID);
+    msg->getHeader()->setVariant(1, collAddress);
 
     return send(target, msg);
 }

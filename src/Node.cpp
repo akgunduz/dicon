@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "ExecutorItem.h"
 #include "NodeState.h"
+#include "CollectorObject.h"
 
 
 Node *Node::newInstance(const char* path) {
@@ -18,10 +19,10 @@ Node::Node(const char *rootPath) :
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg);
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_PROCESS] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorProcessMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
-
 }
 
 Node::~Node() {
@@ -44,20 +45,17 @@ bool Node::processDistributorIDMsg(ComponentObject owner, Message *msg) {
     return send2DistributorIDMsg(owner);
 }
 
-bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
+bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
-
-    if (!send2DistributorBusyMsg(getDistributor(), msg->getData()->getJobDir(), owner.getAddress())) {
-
-        LOGS_E(getHost(), "Could not send BUSY message to Distributor!!!");
-        return false;
-    }
+    int collID = (int)msg->getHeader()->getVariant(0);
+    long collAddress = msg->getHeader()->getVariant(1);
 
     TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), msg->getData()->getFileList());
     if (!requiredList.empty()) {
 
-        return send2CollectorInfoMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
+        return send2CollectorInfoMsg(CollectorObject(collID, collAddress),
+                                     msg->getData()->getJobDir(),
+                                     msg->getData()->getExecutorID(),
                                      msg->getData()->getExecutor(), &requiredList);
 
     } else {
@@ -69,9 +67,23 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
         //TODO will update with md5s including outputs
         //TODO will update with actual binary to collector including outputs
-        return send2CollectorBinaryMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
+        return send2CollectorBinaryMsg(CollectorObject(collID, collAddress),
+                                       msg->getData()->getJobDir(),
+                                       msg->getData()->getExecutorID(),
                                        msg->getData()->getExecutor(), &outputList);
     }
+}
+
+bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
+
+    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
+
+    return send2DistributorBusyMsg(getDistributor(),
+                                   msg->getData()->getJobDir(),
+                                   msg->getData()->getExecutorID(),
+                                   msg->getData()->getExecutor(),
+                                   msg->getData()->getFileList(),
+                                   owner.getAddress());
 }
 
 bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
@@ -118,13 +130,17 @@ bool Node::send2DistributorIDMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Node::send2DistributorBusyMsg(ComponentObject target, const char* jobDir, long collAddress) {
+bool Node::send2DistributorBusyMsg(ComponentObject target,
+                                   const char* jobDir, long executionID, const char *executor,
+                                   TypeFileInfoList *fileList, long collAddress) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BUSY);
 
-    msg->getData()->setStreamFlag(STREAM_JOB);
-    msg->getHeader()->setVariant(0, collAddress);
+    msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
+    msg->getData()->setExecutor(executionID, executor);
+    msg->getData()->addFileList(fileList);
+    msg->getHeader()->setVariant(0, collAddress);
 
     return send(target, msg);
 }
@@ -139,8 +155,6 @@ bool Node::send2CollectorInfoMsg(ComponentObject target, const char* jobDir, lon
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
-    LOGS_I(getHost(), "\"%d\" file info is prepared", fileList->size());
-
 	return send(target, msg);
 }
 
@@ -153,8 +167,6 @@ bool Node::send2CollectorBinaryMsg(ComponentObject target, const char* jobDir, l
     msg->getData()->setJobDir(jobDir);
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
-
-    LOGS_I(getHost(), "\"%d\" file binary is prepared", fileList->size());
 
     return send(target, msg);
 }

@@ -22,6 +22,7 @@ private:
 
     bool processDistributorWakeupMsg(ComponentObject, Message *);
     bool processDistributorIDMsg(ComponentObject, Message *);
+    bool processDistributorProcessMsg(ComponentObject, Message *);
 
     bool processCollectorJobMsg(ComponentObject, Message *);
     bool processCollectorBinaryMsg(ComponentObject, Message *);
@@ -30,7 +31,8 @@ private:
     bool send2DistributorReadyMsg(ComponentObject, const char*, long);
     bool send2DistributorAliveMsg(ComponentObject);
     bool send2DistributorIDMsg(ComponentObject);
-    bool send2DistributorBusyMsg(ComponentObject, const char*, long);
+    bool send2DistributorBusyMsg(ComponentObject, const char*, long, const char *,
+								 TypeFileInfoList *, long);
 
     bool send2CollectorInfoMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 	bool send2CollectorBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);

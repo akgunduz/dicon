@@ -44,9 +44,9 @@ int main(int argc, char** argv) {
 
             LOG_S("Listing Interfaces .....");
 
-            for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-                LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(i)->getType()),
-                      deviceList->get(i)->getName());
+            for (int j = 0; j < deviceList->getCount(); j++) {
+                LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
+                      deviceList->get(j)->getName());
             }
 
             return 0;
@@ -97,7 +97,6 @@ int main(int argc, char** argv) {
 
                 return 0;
             }
-
         }
     }
 
@@ -175,5 +174,5 @@ int main(int argc, char** argv) {
                 break;
         }
 
-    } while(1);
+    } while(true);
 }
