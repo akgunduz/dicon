@@ -28,7 +28,13 @@ int main(int argc, char** argv) {
 
     void *app = NULL;
 
+#if defined(WX_UI)
+    APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
+#elif defined(CONSOLE_UI)
+    APPMODE appMode = APPMODE::APPMODE_CONSOLE;
+#else
     APPMODE appMode = APPMODE::APPMODE_NOUI;
+#endif
 
     DeviceList *deviceList = DeviceList::getInstance();
 
@@ -64,27 +70,15 @@ int main(int argc, char** argv) {
                 }
             }
 
-        } else if (!strcmp(argv[i], "-w")) {
+        } else if (!strcmp(argv[i], "-s")) {
 
-            appMode = APPMODE::APPMODE_WXWIDGETS;
-
-            distCount = 1;
-            collCount = 1;
-            nodeCount = 1;
-
-        } else if (!strcmp(argv[i], "-y")) {
-
-            appMode = APPMODE::APPMODE_CONSOLE;
+            appMode = APPMODE::APPMODE_NOUI;
 
         } else if (!strcmp(argv[i], "-d")) {
 
             distCount = 1;
 
         } else if (!strcmp(argv[i], "-c")) {
-
-            if (appMode == APPMODE::APPMODE_WXWIDGETS) {
-                continue;
-            }
 
             if (isdigit(argv[++i][0])) {
                 collCount =  atoi(argv[i]);
@@ -96,10 +90,6 @@ int main(int argc, char** argv) {
 
         } else if (!strcmp(argv[i], "-n")) {
 
-            if (appMode == APPMODE::APPMODE_WXWIDGETS) {
-                continue;
-            }
-
             if (isdigit(argv[++i][0])) {
                 nodeCount =  atoi(argv[i]);
 
@@ -110,6 +100,14 @@ int main(int argc, char** argv) {
 
         }
     }
+
+#ifdef WX_UI
+    if (appMode == APPMODE::APPMODE_WXWIDGETS) {
+        distCount = 1;
+        collCount = 1;
+        nodeCount = 1;
+    }
+#endif
 
     LOG_S("Running in %s Mode with %d Distributor, %d Collector and %d Node, using interfaces : %s and %s",
           appMode == APPMODE::APPMODE_NOUI ? "No UI" : appMode == APPMODE::APPMODE_CONSOLE ? "Console" : "WxWidgets",
@@ -130,19 +128,23 @@ int main(int argc, char** argv) {
         controller->startNode(nodeCount);
     }
 
-
-    if (appMode == APPMODE::APPMODE_WXWIDGETS) {
 #ifdef WX_UI
+    if (appMode == APPMODE::APPMODE_WXWIDGETS) {
+
         app = new WxApp(controller);
 
         wxApp::SetInstance((WxApp*)app);
         return wxEntry(argc, argv);
-#endif
-    } else if (appMode == APPMODE::APPMODE_CONSOLE) {
-#ifdef CONSOLE_UI
-        app = new ConsoleApp(controller);
-#endif
     }
+#endif
+
+#ifdef CONSOLE_UI
+    if (appMode == APPMODE::APPMODE_CONSOLE) {
+
+        app = new ConsoleApp(controller);
+
+    }
+#endif
 
     int in;
     do {
