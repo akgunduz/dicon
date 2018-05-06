@@ -18,9 +18,8 @@ private:
 
 public:
 
-    NodeObject(NODE_STATES, int, int);
-    NodeObject();
-    NodeObject(int);
+    NodeObject(NODE_STATES, int, int, long);
+    NodeObject(int, long);
     ~NodeObject();
 
 

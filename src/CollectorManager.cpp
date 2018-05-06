@@ -64,5 +64,5 @@ CollectorManager::~CollectorManager() {
 
 void CollectorManager::setObject(int id, long address) {
 
-    components[address] = new CollectorObject(id);
+    components[address] = new CollectorObject(id, address);
 }

@@ -12,8 +12,7 @@ class CollectorObject : public ComponentObject {
 
 public:
 
-    CollectorObject();
-    CollectorObject(int);
+    CollectorObject(int, long);
 
     ~CollectorObject();
 };

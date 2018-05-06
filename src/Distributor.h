@@ -24,22 +24,22 @@ private:
 
     Distributor(const char *);
 
-    bool processCollectorAliveMsg(ComponentObject, long, Message *);
-    bool processCollectorNodeMsg(ComponentObject, long, Message *);
+    bool processCollectorAliveMsg(ComponentObject, Message *);
+    bool processCollectorNodeMsg(ComponentObject, Message *);
 
-    bool processNodeReadyMsg(ComponentObject, long, Message *);
-    bool processNodeAliveMsg(ComponentObject, long, Message *);
-    bool processNodeBusyMsg(ComponentObject, long, Message *);
-    bool processNodeIDMsg(ComponentObject, long, Message *);
+    bool processNodeReadyMsg(ComponentObject, Message *);
+    bool processNodeAliveMsg(ComponentObject, Message *);
+    bool processNodeBusyMsg(ComponentObject, Message *);
+    bool processNodeIDMsg(ComponentObject, Message *);
 
     bool processWaitingList(ComponentObject, Message *);
 
-	bool send2CollectorWakeupMsg(ComponentObject, long);
-	bool send2CollectorIDMsg(ComponentObject, long, int);
-	bool send2CollectorNodeMsg(ComponentObject, long, const char*, long, int);
+	bool send2CollectorWakeupMsg(ComponentObject);
+	bool send2CollectorIDMsg(ComponentObject, int);
+	bool send2CollectorNodeMsg(ComponentObject, const char*, long, int);
 
-    bool send2NodeWakeupMsg(ComponentObject, long);
-    bool send2NodeIDMsg(ComponentObject, long, int);
+    bool send2NodeWakeupMsg(ComponentObject);
+    bool send2NodeIDMsg(ComponentObject, int);
 
 
 public:

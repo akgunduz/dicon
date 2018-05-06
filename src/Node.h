@@ -18,23 +18,22 @@ private:
 	Node(const char *rootPath);
 
 	ComponentObject getDistributor();
-	long getDistributorAddress();
-	void setDistributorAddress(long);
+	void setDistributor(ComponentObject);
 
-    bool processDistributorWakeupMsg(ComponentObject, long, Message *);
-    bool processDistributorIDMsg(ComponentObject, long, Message *);
+    bool processDistributorWakeupMsg(ComponentObject, Message *);
+    bool processDistributorIDMsg(ComponentObject, Message *);
 
-    bool processCollectorJobMsg(ComponentObject, long, Message *);
-    bool processCollectorBinaryMsg(ComponentObject, long, Message *);
-    bool processCollectorReadyMsg(ComponentObject, long, Message *);
+    bool processCollectorJobMsg(ComponentObject, Message *);
+    bool processCollectorBinaryMsg(ComponentObject, Message *);
+    bool processCollectorReadyMsg(ComponentObject, Message *);
 
-    bool send2DistributorReadyMsg(ComponentObject, long, const char*, long);
-    bool send2DistributorAliveMsg(ComponentObject, long);
-    bool send2DistributorIDMsg(ComponentObject, long);
-    bool send2DistributorBusyMsg(ComponentObject, long, const char*, long);
+    bool send2DistributorReadyMsg(ComponentObject, const char*, long);
+    bool send2DistributorAliveMsg(ComponentObject);
+    bool send2DistributorIDMsg(ComponentObject);
+    bool send2DistributorBusyMsg(ComponentObject, const char*, long);
 
-    bool send2CollectorInfoMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(ComponentObject, long, const char*, long, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
     bool processCommand(int, const char*, const char *);

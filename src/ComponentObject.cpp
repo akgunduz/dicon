@@ -10,12 +10,24 @@ const char* sComponentTypes[COMP_MAX] = {
         "Node",
 };
 
-ComponentObject::ComponentObject(COMPONENT type, const char* rootPath, int id)
-        : type(type), id(id), rootPath(rootPath) {
+ComponentObject::ComponentObject(COMPONENT type, int id)
+        : ComponentObject(type, id, 0) {
+}
+
+ComponentObject::ComponentObject(COMPONENT type, int id, long address)
+        : ComponentObject(type, "", id, address) {
+}
+
+ComponentObject::ComponentObject(COMPONENT type, const char *rootPath)
+        : ComponentObject(type, rootPath, 0, 0) {
 }
 
 ComponentObject::ComponentObject(const ComponentObject &copy)
-        : type(copy.type), id(copy.id), rootPath(copy.rootPath) {
+        : ComponentObject(copy.type, copy.rootPath, copy.id, copy.address) {
+}
+
+ComponentObject::ComponentObject(COMPONENT type, const char* rootPath, int id, long address)
+        : type(type), id(id), rootPath(rootPath), address(address) {
 }
 
 ComponentObject::~ComponentObject() {
@@ -42,6 +54,16 @@ const char* ComponentObject::getName() {
     return sComponentTypes[type];
 }
 
+long ComponentObject::getAddress() {
+
+    return address;
+}
+
+void ComponentObject::setAddress(long address) {
+
+    this->address = address;
+}
+
 COMPONENT ComponentObject::getNextType() {
 
     return (COMPONENT)(((int)type + 1) % COMP_MAX);
@@ -56,3 +78,14 @@ const char* ComponentObject::getRootPath() {
 
     return rootPath;
 }
+
+void ComponentObject::setRootPath(const char *rootPath) {
+
+    this->rootPath = rootPath;
+}
+
+
+
+
+
+

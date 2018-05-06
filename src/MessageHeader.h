@@ -36,8 +36,8 @@ public:
     ComponentObject getOwner();
     void setOwner(ComponentObject);
 
-    long getOwnerAddress();
-    void setOwnerAddress(long);
+//    long getOwnerAddress();
+//    void setOwnerAddress(long);
 
     long getVariant(int id);
     void setVariant(int id, long variant);

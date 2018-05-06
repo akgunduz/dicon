@@ -4,16 +4,12 @@
 
 #include "NodeObject.h"
 
-NodeObject::NodeObject(NODE_STATES state, int usage, int id) :
-        state(state), usage(usage), ComponentObject(COMP_NODE, NULL, id) {
+NodeObject::NodeObject(NODE_STATES state, int usage, int id, long address) :
+        state(state), usage(usage), ComponentObject(COMP_NODE, id, address) {
 }
 
-NodeObject::NodeObject(int id) :
-        NodeObject(IDLE, 0, id) {
-}
-
-NodeObject::NodeObject() :
-        NodeObject(IDLE, 0, 0) {
+NodeObject::NodeObject(int id, long address) :
+        NodeObject(IDLE, 0, id, address) {
 }
 
 NodeObject::~NodeObject() {

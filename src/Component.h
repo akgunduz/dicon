@@ -12,7 +12,7 @@
 
 class Component;
 
-typedef bool (Component::*TypeProcessComponentMsg)(ComponentObject, long, Message *);
+typedef bool (Component::*TypeProcessComponentMsg)(ComponentObject, Message *);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 
@@ -44,16 +44,17 @@ public:
     const char* getRootPath();
 
     long getInterfaceAddress(ComponentObject);
+    long getInterfaceMulticastAddress(ComponentObject);
     INTERFACE getInterfaceType(ComponentObject);
     bool isSupportMulticast(ComponentObject);
     static bool receiveCB(void *, SchedulerItem*);
-    bool onReceive(ComponentObject, long, MSG_TYPE, Message *);
+    bool onReceive(ComponentObject, MSG_TYPE, Message *);
 
-    bool send(ComponentObject, long, Message*);
+    //bool send(ComponentObject, long, Message*);
     bool send(ComponentObject, Message*);
 
     std::vector<long> getAddressList(ComponentObject);
-    bool defaultProcessMsg(ComponentObject, long, Message *);
+    bool defaultProcessMsg(ComponentObject, Message *);
 
 };
 

@@ -177,7 +177,7 @@ void Net::runReceiver() {
             address.sin_addr.s_addr = 1;
             msg->setDatagramAddress(address);
             if (msg->readFromStream(multicastSocket)) {
-                push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
+                push(MESSAGE_RECEIVE, msg->getHeader()->getOwner().getAddress(), msg);
             }
 
         }
@@ -203,7 +203,7 @@ void Net::runAccepter(Interface *interface, int acceptSocket) {
 
 	if (msg->readFromStream(acceptSocket)) {
 
-		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
+		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwner().getAddress(), msg);
 	}
 }
 

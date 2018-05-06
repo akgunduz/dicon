@@ -25,11 +25,16 @@ private:
 
     const char *rootPath;
 
+    long address;
+
 protected:
 
 public:
 
-    ComponentObject(COMPONENT, const char* = NULL, int = 0);
+    ComponentObject(COMPONENT, int = 0);
+    ComponentObject(COMPONENT, int, long);
+    ComponentObject(COMPONENT, const char*);
+    ComponentObject(COMPONENT, const char*, int, long);
     ComponentObject(const ComponentObject&);
 
     virtual ~ComponentObject();
@@ -38,7 +43,12 @@ public:
     int getID();
     void setID(int);
     const char* getName();
+
     const char* getRootPath();
+    void setRootPath(const char*);
+
+    long getAddress();
+    void setAddress(long);
 
     COMPONENT getNextType();
     COMPONENT getPrevType();

@@ -28,23 +28,24 @@ MSG_TYPE MessageHeader::getType() {
 
 ComponentObject MessageHeader::getOwner() {
 
-    return ComponentObject((COMPONENT)(owner >> 32), NULL, (int)(owner & 0xFFFFFFFF));
+    return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF), ownerAddress);
 }
 
 void MessageHeader::setOwner(ComponentObject owner) {
 
     this->owner = (((long)owner.getType()) << 32) | owner.getID();
+    this->ownerAddress = owner.getAddress();
 }
 
-long MessageHeader::getOwnerAddress() {
-
-    return ownerAddress;
-}
-
-void MessageHeader::setOwnerAddress(long ownerAddress) {
-
-    this->ownerAddress = ownerAddress;
-}
+//long MessageHeader::getOwnerAddress() {
+//
+//    return ownerAddress;
+//}
+//
+//void MessageHeader::setOwnerAddress(long ownerAddress) {
+//
+//    this->ownerAddress = ownerAddress;
+//}
 
 long MessageHeader::getVariant(int id) {
 

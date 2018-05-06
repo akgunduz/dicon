@@ -125,7 +125,7 @@ void UnixSocket::runAccepter(Interface *interface, int acceptSocket) {
 	Message *msg = new Message(interface->getHost());
 
 	if (msg->readFromStream(acceptSocket)) {
-		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwnerAddress(), msg);
+		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwner().getAddress(), msg);
 	}
 }
 
