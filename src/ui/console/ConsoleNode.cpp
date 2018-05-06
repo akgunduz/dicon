@@ -3,149 +3,32 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Console.h"
+#include <Log.h>
+#include <NodeState.h>
+#include "ConsoleApp.h"
 
-bool Console::nodeInit(int distInterface, int collInterface) {
+void ConsoleApp::nodeInit() {
 
-	uiUpdater[UI_UPDATE_NODE_ADDRESS] = &Console::nodeUpdateAddresses;
-	uiUpdater[UI_UPDATE_NODE_STATE] = &Console::nodeUpdateState;
-	uiUpdater[UI_UPDATE_NODE_ATT_COLL_ADDRESS] = &Console::nodeUpdateAttachedCollAddress;
-	uiUpdater[UI_UPDATE_NODE_FILE_LIST] = &Console::nodeUpdateFileList;
-	uiUpdater[UI_UPDATE_NODE_EXEC_LIST] = &Console::nodeUpdateExecList;
-	uiUpdater[UI_UPDATE_NODE_LOG] = &Console::nodeUpdateLog;
+	uiUpdater[UI_UPDATE_NODE_STATE] = &ConsoleApp::nodeUpdateState;
+	uiUpdater[UI_UPDATE_NODE_PROCESS_LIST] = &ConsoleApp::nodeUpdateProcessList;
+	uiUpdater[UI_UPDATE_NODE_CLEAR] = &ConsoleApp::nodeUpdateClear;
+}
 
-	char path[PATH_MAX];
-	sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
+void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {
 
-	nodeRemoveDir(path);
-	mkdir(path, 0777);
+	auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-	try {
+    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODE_STATES) data->getData(0)));
+}
 
-		DeviceList::getInstance()->setActive(distInterface, collInterface);
-
-		nodeObject = new Node(path);
-
-	} catch (std::runtime_error &e) {
-
-		return false;
-	}
-
-	return true;
+void ConsoleApp::nodeUpdateClear(ConsoleEvent &event) {
 
 }
 
-void Console::nodeDestroy() {
+void ConsoleApp::nodeUpdateProcessList(ConsoleEvent &event) {
 
-	if (nodeObject) {
-		delete nodeObject;
-	}
+	auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-}
-
-void Console::nodeRemoveDir(const char *dirpath) {
-
-	struct dirent *entry;
-	char path[PATH_MAX];
-
-	DIR *dir = opendir(dirpath);
-	if (dir == nullptr) {
-		return;
-	}
-
-	while ((entry = readdir(dir)) != nullptr) {
-		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
-			snprintf(path, (size_t) PATH_MAX, "%s/%s", dirpath, entry->d_name);
-            if (entry->d_type == DT_DIR) {
-				nodeRemoveDir(path);
-			} else {
-				unlink(path);
-			}
-
-		}
-
-	}
-	closedir(dir);
-
-	rmdir(dirpath);
-}
-
-void Console::nodeRun(int distInterface, int collInterface) {
-
-	if (!nodeInit(distInterface, collInterface) ) {
-		nodeDestroy();
-		return;
-	}
-
-	int in;
-	do {
-
-		in = getchar();
-		switch(in) {
-			case 'q':
-				nodeDestroy();
-				return;
-			case 'd':
-				Log::iterateLogLevel();
-				break;
-			default:
-				break;
-		}
-
-	} while(1);
-
-}
-
-void Console::nodeUpdateAddresses(ConsoleEvent &event) {
-
-	EventData *data = (EventData *) event.GetClientData();
-    LOG_S("Node Interface Addresses --> Distributor : %s, Collector : %s",
-          InterfaceTypes::getAddressString(data->data64_1).c_str(),
-          InterfaceTypes::getAddressString(data->data64_2).c_str());
-
-}
-
-void Console::nodeUpdateState(ConsoleEvent &event) {
-
-	EventData *data = (EventData *) event.GetClientData();
-    LOG_S("Node State : %s", NodeState::getName((NODE_STATES) data->data64_1));
-
-}
-
-void Console::nodeUpdateAttachedCollAddress(ConsoleEvent &event) {
-
-	EventData *data = (EventData *) event.GetClientData();
-    LOG_S("Node Attached Collector : %s", InterfaceTypes::getAddressString(data->data64_1).c_str());
-
-}
-
-void Console::nodeUpdateLog(ConsoleEvent &event) {
-
-	EventData *data = (EventData *) event.GetClientData();
-    LOG_S("%s", data->dataStr.c_str());
-
-}
-
-void Console::nodeUpdateFileList(ConsoleEvent &event) {
-
-	Job *job = (Job *)event.GetClientData();
-
-	for (int j = 0; j < job->getContentCount(CONTENT_FILE); j++) {
-
-		FileItem *content = (FileItem *) job->getContent(CONTENT_FILE, j);
-		if (content == nullptr) {
-			return;
-		}
-
-		long i = 0;
-
-        LOG_S("Node File --> Path : %s, MD5 : %s",
-              content->getFileName(), content->getMD5()->getStr().c_str());
-	}
-}
-
-void Console::nodeUpdateExecList(ConsoleEvent &event) {
-
-    EventData *data = (EventData *)event.GetClientData();
-    LOG_S("Node Executor : %s", data->dataStr.c_str());
+    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %s",
+          data->getData(0), data->getString(0).c_str(), data->getString(1).c_str()) ;
 }

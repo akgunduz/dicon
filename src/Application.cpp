@@ -3,28 +3,16 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
+#ifdef WX_UI
 #include <ui/wx/WxApp.h>
+#endif
+#ifdef CONSOLE_UI
+#include <ui/console/ConsoleApp.h>
+#endif
 #include "Application.h"
 #include "DeviceList.h"
 #include "Util.h"
 #include "ComponentController.h"
-
-Application::Application(int ind1, int ind2, bool initState) {
-
-    setStartState(initState);
-    DeviceList *deviceList = DeviceList::getInstance();
-    deviceList->setActive(ind1, ind2);
-}
-
-void Application::setStartState(bool state) {
-
-    this->initStart = state;
-}
-
-bool Application::getStartState() {
-
-    return initStart;
-}
 
 int main(int argc, char** argv) {
 
@@ -38,7 +26,9 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    APPMODE appMode = APPMODE::APPMODE_CONSOLE;
+    void *app = NULL;
+
+    APPMODE appMode = APPMODE::APPMODE_NOUI;
 
     DeviceList *deviceList = DeviceList::getInstance();
 
@@ -82,6 +72,10 @@ int main(int argc, char** argv) {
             collCount = 1;
             nodeCount = 1;
 
+        } else if (!strcmp(argv[i], "-y")) {
+
+            appMode = APPMODE::APPMODE_CONSOLE;
+
         } else if (!strcmp(argv[i], "-d")) {
 
             distCount = 1;
@@ -118,7 +112,8 @@ int main(int argc, char** argv) {
     }
 
     LOG_S("Running in %s Mode with %d Distributor, %d Collector and %d Node, using interfaces : %s and %s",
-          appMode == APPMODE::APPMODE_CONSOLE ? "Console" : "WxWidgets", distCount, collCount, nodeCount,
+          appMode == APPMODE::APPMODE_NOUI ? "No UI" : appMode == APPMODE::APPMODE_CONSOLE ? "Console" : "WxWidgets",
+          distCount, collCount, nodeCount,
           deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
 
     ComponentController *controller = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
@@ -135,12 +130,18 @@ int main(int argc, char** argv) {
         controller->startNode(nodeCount);
     }
 
+
     if (appMode == APPMODE::APPMODE_WXWIDGETS) {
+#ifdef WX_UI
+        app = new WxApp(controller);
 
-        wxApp *app = new WxApp(controller);
-
-        wxApp::SetInstance(app);
+        wxApp::SetInstance((WxApp*)app);
         return wxEntry(argc, argv);
+#endif
+    } else if (appMode == APPMODE::APPMODE_CONSOLE) {
+#ifdef CONSOLE_UI
+        app = new ConsoleApp(controller);
+#endif
     }
 
     int in;
@@ -159,6 +160,11 @@ int main(int argc, char** argv) {
                 break;
             case 'q':
                 delete controller;
+#ifdef CONSOLE_UI
+                if (appMode == APPMODE::APPMODE_CONSOLE) {
+                    delete ((ConsoleApp*)app);
+                }
+#endif
                 return 0;
             case 'd':
                 Log::iterateLogLevel();

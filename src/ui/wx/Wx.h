@@ -23,6 +23,7 @@
 #endif
 #include <wx/app.h>
 #include <wx/event.h>
+#include <Common.h>
 
 ////@begin includes
 #include "wx/frame.h"
@@ -96,7 +97,7 @@ public:
 
     wxEventTypeTag<wxCommandEvent> *ui_event;
 
-    fUIUpdater *uiUpdater;
+    fUIUpdater uiUpdater[UI_UPDATE_MAX];
 
     //Generic
 
@@ -122,6 +123,7 @@ public:
     void collUpdateFileList(wxCommandEvent &event);
     void collUpdateFileListItem(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
+    void collUpdateProcessListItem(wxCommandEvent &event);
 
     //Node
 

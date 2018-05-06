@@ -1,52 +1,40 @@
 //
-// Created by Haluk AKGUNDUZ on 27/07/14.
+// Created by Haluk Akgunduz on 02/09/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Log.h"
+#include <Log.h>
 #include "ConsoleApp.h"
 
-int main(int argc, char** argv) {
+ConsoleApp::ConsoleApp(void *controller)
+    : componentController(controller) {
 
-	if (argc > 1) {
+	Log::registerUIController(this, updateUICallback);
 
-        Console *c_ui = new Console();
-
-		char cmd = argv[1][0];
-
-		DeviceList *deviceList = DeviceList::getInstance();
-
-		switch(cmd) {
-			case 'l':
-                LOG_S("Listing Interfaces .....");
-				for (uint32_t i = 0; i < deviceList->getCount(); i++) {
-                    LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(i)->getType()),
-                          deviceList->get(i)->getName());
-				}
-				break;
-			case 'd':
-				LOG_I("Running in Console Distributor Mode");
-				break;
-			case 'o':
-				LOG_I("Running in Console Collector Mode");
-				break;
-			case 'n':
-				LOG_I("Running in Console Node Mode");
-
-				if (argc != 4) {
-					LOG_E("Invalid Parameter, Must be \"Mode Interface Interface\"");
-					break;
-				}
-
-                c_ui->nodeRun(atoi(argv[2]), atoi(argv[3]));
-				break;
-			default:
-				break;
-		}
-
-		return 0;
-	}
-
-	return 0;
+    distInit();
+    collInit();
+    nodeInit();
 }
 
+void ConsoleApp::updateUIEvent(int id, void *data) {
+
+	ConsoleEvent event;
+	event.SetId(id);
+    event.SetClientData(data);
+
+    updateUI(event);
+}
+
+void ConsoleApp::updateUI(ConsoleEvent& event) {
+
+    int id = event.GetId();
+
+    if (uiUpdater[id] != nullptr) {
+        ((this)->*(uiUpdater[id]))(event);
+    }
+}
+
+void ConsoleApp::updateUICallback(void *context, int id, void *data) {
+
+    ((ConsoleApp*) context)->updateUIEvent(id, data);
+}

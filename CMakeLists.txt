@@ -78,9 +78,15 @@ set(WX_FILES
         )
 
 set(CONSOLE_FILES
-        ${SOURCE_PATH}/ui/console/Console.cpp
         ${SOURCE_PATH}/ui/console/ConsoleApp.cpp
+        ${SOURCE_PATH}/ui/console/ConsoleEvent.cpp
+        ${SOURCE_PATH}/ui/console/ConsoleDistributor.cpp
+        ${SOURCE_PATH}/ui/console/ConsoleCollector.cpp
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
+        ${SOURCE_PATH}/Application.cpp
+        )
+
+set(NOUI_FILES
         ${SOURCE_PATH}/Application.cpp
         )
 
@@ -95,6 +101,9 @@ endif()
 set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
 
+set(WX_UI YES)
+set(CONSOLE_UI YES)
+
 add_definitions(-DDISABLE_RECOVERY)
 add_definitions(-DDISABLE_BACKUP)
 add_definitions(-DDISABLE_LOGFILEINFO)
@@ -106,21 +115,27 @@ include_directories(${JSON-C_INCLUDE_DIRS})
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-if (NOT DEFINED CONSOLE_ONLY)
+if (DEFINED WX_UI)
 
     find_package(wxWidgets)
 
     add_executable(bankor-wx ${WX_FILES})
-    target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS})
+    target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
     target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
     target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
     target_link_libraries(bankor-wx bankor-framework
             ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 endif()
 
-add_executable(bankor-console ${CONSOLE_FILES})
-target_link_libraries(bankor-console bankor-framework
+if (DEFINED CONSOLE_UI)
+
+    add_executable(bankor-console ${CONSOLE_FILES})
+    target_compile_definitions(bankor-console PUBLIC -DCONSOLE_UI)
+    target_link_libraries(bankor-console bankor-framework
+            ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+
+endif()
+
+add_executable(bankor ${NOUI_FILES})
+target_link_libraries(bankor bankor-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
-
-
-

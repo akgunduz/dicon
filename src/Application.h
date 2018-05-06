@@ -13,22 +13,9 @@
 
 enum class APPMODE {
 
+    APPMODE_NOUI,
     APPMODE_CONSOLE,
     APPMODE_WXWIDGETS
 };
-
-class Application {
-
-    bool initStart;
-
-public:
-
-    Application(int, int, bool = true);
-
-    void setStartState(bool);
-    bool getStartState();
-
-};
-
 
 #endif //BANKOR_APPLICATION_H

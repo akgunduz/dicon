@@ -33,6 +33,7 @@ void Wx::collInit() {
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &Wx::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &Wx::collUpdateProcessList;
+    uiUpdater[UI_UPDATE_COLL_PROCESS_LISTITEM] = &Wx::collUpdateProcessListItem;
 }
 
 void Wx::OnCollLoadClickWrapper( wxCommandEvent& event )
@@ -82,13 +83,19 @@ void Wx::collUpdateProcessList(wxCommandEvent &event) {
 
     auto *job = (Job *)data->getPointer(0);
 
-    if (job->getOrderedCount() != collProcessList->GetItemCount()) {
+    for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        for (int j = 0; j < job->getOrderedCount(); j++) {
-
-            collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrderedExecution(j)->getExec());
-        }
+        long row = collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrderedExecution(j)->getExec());
+        collProcessList->SetItemBackgroundColour(row, job->getOrderedExecution(j)->isValid() ?
+                                                    wxColour(0, 255, 0) : wxColour(255, 255, 255));
     }
+}
+
+void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
+
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    auto *job = (Job *)data->getPointer(0);
 
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
@@ -112,4 +119,5 @@ void Wx::collUpdateProcessList(wxCommandEvent &event) {
         }
     }
 }
+
 

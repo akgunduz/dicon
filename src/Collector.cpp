@@ -73,7 +73,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), id);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
     return send2NodeJobMsg(NodeObject(id, nodeAddress), msg->getData()->getJobDir(), executor.getID(),
                            executor.get()->getParsedExec(), executor.get()->getFileList());
@@ -104,7 +104,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     job->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LIST, job);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
     TypeMD5List md5List;
 
