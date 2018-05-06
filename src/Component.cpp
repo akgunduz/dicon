@@ -72,17 +72,7 @@ bool Component::onReceive(ComponentObject owner, MSG_TYPE msgType, Message *msg)
            owner,
           false,
           "\"%s\" is received",
-          MessageTypes::getName(msg->getHeader()->getType()));
-
-//    if (owner.getType() >= COMP_MAX) {
-//
-//        LOGS_E(getHost(), "Wrong message received : %d from %s, disgarding",
-//               msgType,
-//              InterfaceTypes::getAddressString(address).c_str());
-//
-//        delete msg;
-//        return false;
-//    }
+          MessageTypes::getName(msgType));
 
     auto processCB = processMsg[owner.getType()].find(msgType);
     if (processCB == processMsg[owner.getType()].end()) {
@@ -153,20 +143,6 @@ bool Component::send(ComponentObject target, Message *msg) {
 
     return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(), msg);
 }
-
-//bool Component::send(ComponentObject target, Message *msg) {
-//
-//    LOGS_I(getHost(),
-//           "Multicast \"%s\" is sent",
-//           MessageTypes::getName(msg->getHeader()->getType()));
-//
-//    ComponentObject object(getHost().getType(), getHost().getRootPath(),
-//                           getHost().getID(), interfaces[target.getType()]->getAddress());
-//
-//    msg->getHeader()->setOwner(object);
-//
-//    return interfaces[target.getType()]->push(MESSAGE_SEND, interfaces[target.getType()]->getMulticastAddress(), msg);
-//}
 
 std::vector<long> Component::getAddressList(ComponentObject target) {
 

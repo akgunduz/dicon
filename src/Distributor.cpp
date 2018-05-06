@@ -165,7 +165,6 @@ bool Distributor::processWaitingList(ComponentObject owner, Message *msg) {
     return false;
 }
 
-
 bool Distributor::send2CollectorWakeupMsg(ComponentObject target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
