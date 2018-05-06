@@ -124,34 +124,35 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
 
 bool Distributor::processWaitingList(long collAddress, long collUnservedCount, const char* jobDir) {
 
+    bool status = false;
+
     while(collUnservedCount--) {
 
         collectorManager->addWaiting(collAddress, jobDir);
     }
 
-    LOGS_I(getHost(), "Waiting list size : %d", collectorManager->getWaitingCount());
-
-    if (collectorManager->getWaitingCount() > 0) {
+    while(collectorManager->getWaitingCount()) {
 
         long nodeAddress = nodeManager->getIdle();
 
-        if (nodeAddress > 0) {
-
-            TypeWaitingCollector collector = collectorManager->getWaiting();
-
-            //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
-            LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
-
-            LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
-                   nodeManager->getID(nodeAddress), collectorManager->getID(collector.first), collectorManager->getWaitingCount());
-
-            return send2CollectorNodeMsg(*collectorManager->get(collector.first),
-                                         jobDir, nodeAddress, nodeManager->getID(nodeAddress));
-
+        if (nodeAddress == 0) {
+            break;
         }
+
+        TypeWaitingCollector collector = collectorManager->getWaiting();
+
+        //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
+        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
+
+        LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
+               nodeManager->getID(nodeAddress), collectorManager->getID(collector.first), collectorManager->getWaitingCount());
+
+        status &= send2CollectorNodeMsg(*collectorManager->get(collector.first),
+                                     jobDir, nodeAddress, nodeManager->getID(nodeAddress));
+
     }
 
-    return true;
+    return status;
 }
 
 bool Distributor::send2CollectorWakeupMsg(ComponentObject target) {
