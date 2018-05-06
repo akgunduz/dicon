@@ -30,10 +30,10 @@ class Collector : public Component {
 	bool processNodeBinaryMsg(ComponentObject, Message *);
 
 	bool send2DistributorAliveMsg(ComponentObject);
-	bool send2DistributorNodeMsg(ComponentObject, const char*, TypeMD5List*);
+	bool send2DistributorNodeMsg(ComponentObject, const char*, long, TypeMD5List*);
 	bool send2NodeJobMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 	bool send2NodeBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeReadyMsg(ComponentObject, const char*);
+	bool send2NodeReadyMsg(ComponentObject, const char*, long);
 
 public:
 

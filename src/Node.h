@@ -28,7 +28,7 @@ private:
     bool processCollectorBinaryMsg(ComponentObject, Message *);
     bool processCollectorReadyMsg(ComponentObject, Message *);
 
-    bool send2DistributorReadyMsg(ComponentObject, const char*, long);
+    bool send2DistributorReadyMsg(ComponentObject, const char*, long, long);
     bool send2DistributorAliveMsg(ComponentObject);
     bool send2DistributorIDMsg(ComponentObject);
     bool send2DistributorBusyMsg(ComponentObject, const char*, long, const char *,

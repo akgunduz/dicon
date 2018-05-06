@@ -44,13 +44,14 @@ public:
     int getFileCount();
     FileItem* getFile(int);
 
-    size_t getOrderedCount();
+    long getOrderedCount();
+    long getProvisionCount();
     ExecutorInfo getOrdered(int);
     ExecutorItem* getOrderedExecution(int);
     PROCESS_STATE getOrderedState(int);
     void setOrderedState(int, PROCESS_STATE);
 
-    int getUnServedCount();
+    long getUnServedCount();
     ExecutorInfo getUnServed();
 
     ExecutorItem* getByOutput(int);

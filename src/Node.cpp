@@ -102,15 +102,18 @@ bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
-    return send2DistributorReadyMsg(getDistributor(), msg->getData()->getJobDir(), owner.getAddress());
+    long collUnservedCount = msg->getHeader()->getVariant(0);
+
+    return send2DistributorReadyMsg(getDistributor(), msg->getData()->getJobDir(), owner.getAddress(), collUnservedCount);
 }
 
-bool Node::send2DistributorReadyMsg(ComponentObject target, const char* jobDir, long collAddress) {
+bool Node::send2DistributorReadyMsg(ComponentObject target, const char* jobDir, long collAddress, long collUnservedCount) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_READY);
 
     msg->getData()->setStreamFlag(STREAM_JOB);
     msg->getHeader()->setVariant(0, collAddress);
+    msg->getHeader()->setVariant(1, collUnservedCount);
     msg->getData()->setJobDir(jobDir);
 
 	return send(target, msg);

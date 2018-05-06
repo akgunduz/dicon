@@ -32,7 +32,7 @@ private:
     bool processNodeBusyMsg(ComponentObject, Message *);
     bool processNodeIDMsg(ComponentObject, Message *);
 
-    bool processWaitingList(ComponentObject, Message *);
+    bool processWaitingList(long, long, const char*);
 
 	bool send2CollectorWakeupMsg(ComponentObject);
 	bool send2CollectorIDMsg(ComponentObject, int);

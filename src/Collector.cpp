@@ -44,7 +44,7 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
-    int id = msg->getHeader()->getVariant(0);
+    int id = (int)msg->getHeader()->getVariant(0);
     long nodeAddress = msg->getHeader()->getVariant(1);
 
     if (nodeAddress == 0) {
@@ -108,14 +108,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     TypeMD5List md5List;
 
-    bool status = send2NodeReadyMsg(owner, msg->getData()->getJobDir());
-
-    if (getJobs()->get(msg->getData()->getJobDir())->getUnServedCount() > 0) {
-
-        status &= send2DistributorNodeMsg(getDistributor(), msg->getData()->getJobDir(), &md5List);
-    }
-
-    return status;
+    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), job->getProvisionCount());
 }
 
 bool Collector::send2DistributorAliveMsg(ComponentObject target) {
@@ -125,13 +118,17 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, const char* jobDir, TypeMD5List *md5List) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target,
+                                        const char* jobDir, long collUnservedCount,
+                                        TypeMD5List *md5List) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
     msg->getData()->setStreamFlag(STREAM_MD5);
     msg->getData()->setJobDir(jobDir);
     msg->getData()->addMD5List(md5List);
+
+    msg->getHeader()->setVariant(0, collUnservedCount);
 
     return send(target, msg);
 }
@@ -162,12 +159,14 @@ bool Collector::send2NodeBinaryMsg(ComponentObject target, const char* jobDir, l
     return send(target, msg);
 }
 
-bool Collector::send2NodeReadyMsg(ComponentObject target, const char* jobDir) {
+bool Collector::send2NodeReadyMsg(ComponentObject target, const char* jobDir, long collUnservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
 
     msg->getData()->setStreamFlag(STREAM_JOB);
     msg->getData()->setJobDir(jobDir);
+
+    msg->getHeader()->setVariant(0, collUnservedCount);
 
     return send(target, msg);
 }
@@ -192,14 +191,10 @@ bool Collector::processJob(int index) {
     //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
-//    for (int k = 0; k < 1; k++) {
-    for (int k = 0; k < getJobs()->get(index)->getUnServedCount(); k++) {
+    Job* job = getJobs()->get(index);
 
-        TypeMD5List md5List;
-        send2DistributorNodeMsg(getDistributor(), getJobs()->get(index)->getJobDir(), &md5List);
-    }
-
-    return true;
+    TypeMD5List md5List;
+    return send2DistributorNodeMsg(getDistributor(), job->getJobDir(), job->getProvisionCount(), &md5List);
 }
 
 bool Collector::processJobs() {

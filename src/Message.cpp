@@ -130,7 +130,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOGS_I(getHost(), "New %s with path %s/%s received",
+            LOGS_T(getHost(), "New %s with path %s/%s received",
                   header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
                   fileItem->getJobDir(), fileItem->getFileName());
 
@@ -145,7 +145,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOGS_I(getHost(), "New md5 info %s received", md5.getStr().c_str());
+            LOGS_T(getHost(), "New md5 info %s received", md5.getStr().c_str());
 
             getData()->addMD5(md5);
         }
@@ -157,7 +157,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOGS_I(getHost(), "New job info %s received", getData()->getJobDir());
+            LOGS_T(getHost(), "New job info %s received", getData()->getJobDir());
 
             break;
 
@@ -168,7 +168,7 @@ bool Message::readMessageBlock(int in, Block *header) {
                 return false;
             }
 
-            LOGS_I(getHost(), "New execution info %s received", getData()->getExecutor());
+            LOGS_T(getHost(), "New execution info %s received", getData()->getExecutor());
 
             getData()->setExecutorID(executionID);
 
@@ -320,7 +320,7 @@ bool Message::writeMessageStream(int out) {
                 }
             }
 
-            LOGS_I(getHost(), "%d %s's sent to network", i,
+            LOGS_T(getHost(), "%d %s's sent to network", i,
                   getData()->getStreamFlag() == STREAM_INFO ? "File Info" : "File Binary");
             break;
 
@@ -337,7 +337,7 @@ bool Message::writeMessageStream(int out) {
                 }
             }
 
-            LOGS_I(getHost(), "%d file md5 content sent to network", i);
+            LOGS_T(getHost(), "%d file md5 content sent to network", i);
             break;
 
         case STREAM_JOB:
@@ -346,7 +346,7 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            LOGS_I(getHost(), "Job : %s sent to network", getData()->getJobDir());
+            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
             break;
 
         case STREAM_NONE:

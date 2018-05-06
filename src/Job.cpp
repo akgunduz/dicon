@@ -168,7 +168,7 @@ FileItem* Job::getFile(int index) {
     return (FileItem*)getContent(CONTENT_FILE, index);
 }
 
-size_t Job::getOrderedCount() {
+long Job::getOrderedCount() {
 
     return orderedList.size();
 }
@@ -197,7 +197,8 @@ ExecutorInfo Job::getUnServed() {
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
-        if (getOrderedState(i) != PROCESS_STATE_NOTSTARTED) {
+        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
+            getOrderedState(i) == PROCESS_STATE_ENDED) {
             continue;
         }
 
@@ -213,13 +214,14 @@ ExecutorInfo Job::getUnServed() {
     return ExecutorInfo(0, NULL);
 }
 
-int Job::getUnServedCount() {
+long Job::getUnServedCount() {
 
     int count = 0;
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
-        if (getOrderedState(i) != PROCESS_STATE_NOTSTARTED) {
+        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
+            getOrderedState(i) == PROCESS_STATE_ENDED) {
             continue;
         }
 
@@ -228,6 +230,31 @@ int Job::getUnServedCount() {
         }
 
         count++;
+    }
+
+    return count;
+}
+
+long Job::getProvisionCount() {
+
+    int count = 0;
+
+    for (int i = 0; i < getOrderedCount(); i++) {
+
+        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
+            getOrderedState(i) == PROCESS_STATE_ENDED) {
+            continue;
+        }
+
+        if (!getOrderedExecution(i)->isValid()) {
+            continue;
+        }
+
+        if (getOrderedState(i) == PROCESS_STATE_NOTSTARTED) {
+
+            setOrderedState(i, PROCESS_STATE_PROVISION);
+            count++;
+        }
     }
 
     return count;

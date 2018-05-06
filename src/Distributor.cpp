@@ -57,25 +57,7 @@ bool Distributor::processCollectorAliveMsg(ComponentObject owner, Message *msg) 
 
 bool Distributor::processCollectorNodeMsg(ComponentObject owner, Message *msg) {
 
-    long nodeAddress = nodeManager->getIdle();
-
-    if (nodeAddress > 0) {
-
-        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
-
-        LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d]", nodeManager->getID(nodeAddress), collectorManager->getID(owner.getAddress()));
-
-        return send2CollectorNodeMsg(owner, msg->getData()->getJobDir(), nodeAddress, nodeManager->getID(nodeAddress));
-
-    } else {
-
-        collectorManager->addWaiting(owner.getAddress(), msg->getData()->getJobDir());
-
-        LOGS_I(getHost(), "No node can be assigned to Collector[%d], moving it to Wait List with size %d",
-               collectorManager->getID(owner.getAddress()), collectorManager->getWaitingCount());
-    }
-
-    return false;
+    return processWaitingList(owner.getAddress(), msg->getHeader()->getVariant(0), msg->getData()->getJobDir());
 }
 
 bool Distributor::processNodeAliveMsg(ComponentObject owner, Message *msg) {
@@ -103,6 +85,7 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     }
 
     long collAddress = msg->getHeader()->getVariant(0);
+    long collUnservedCount = msg->getHeader()->getVariant(1);
 
     LOGS_I(getHost(), "Node[%d] is done with Collector[%d]\'s process, setting to IDLE",
            nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
@@ -110,12 +93,13 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), 0});
     LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), IDLE});
 
-    return processWaitingList(owner, msg);
+    return processWaitingList(collAddress, collUnservedCount, msg->getData()->getJobDir());
 }
 
 bool Distributor::processNodeIDMsg(ComponentObject owner, Message *msg) {
 
-    return processWaitingList(owner, msg);
+    //return processWaitingList(0, 0, msg->getData()->getJobDir());
+    return true;
 }
 
 bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
@@ -138,37 +122,36 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
 }
 
 
-bool Distributor::processWaitingList(ComponentObject owner, Message *msg) {
+bool Distributor::processWaitingList(long collAddress, long collUnservedCount, const char* jobDir) {
 
-    TypeWaitingCollector collector = collectorManager->getWaiting();
+    while(collUnservedCount--) {
 
-    if (collector.first == 0) {
-        return false;
+        collectorManager->addWaiting(collAddress, jobDir);
     }
 
-    long nodeAddress = nodeManager->getIdle();
+    LOGS_I(getHost(), "Waiting list size : %d", collectorManager->getWaitingCount());
 
-    if (nodeAddress > 0) {
+    if (collectorManager->getWaitingCount() > 0) {
 
-        //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
-        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
+        long nodeAddress = nodeManager->getIdle();
 
-        LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
-               nodeManager->getID(nodeAddress), collectorManager->getID(collector.first), collectorManager->getWaitingCount());
+        if (nodeAddress > 0) {
 
-        return send2CollectorNodeMsg(*collectorManager->get(collector.first),
-                                     msg->getData()->getJobDir(), nodeAddress, nodeManager->getID(nodeAddress));
+            TypeWaitingCollector collector = collectorManager->getWaiting();
 
-    } else {
+            //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
+            LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
 
-        collectorManager->addWaiting(collector.first, msg->getData()->getJobDir());
+            LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
+                   nodeManager->getID(nodeAddress), collectorManager->getID(collector.first), collectorManager->getWaitingCount());
 
-        LOGS_I(getHost(), "No node can be assigned to Collector[%d], moving it to Wait List with size %d",
-               collectorManager->getID(collector.first), collectorManager->getWaitingCount());
+            return send2CollectorNodeMsg(*collectorManager->get(collector.first),
+                                         jobDir, nodeAddress, nodeManager->getID(nodeAddress));
+
+        }
     }
 
-
-    return false;
+    return true;
 }
 
 bool Distributor::send2CollectorWakeupMsg(ComponentObject target) {
