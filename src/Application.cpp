@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 
     void *app = NULL;
 
-    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_INFO};
+    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
 
 #if defined(WX_UI)
     APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
