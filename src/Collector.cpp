@@ -37,6 +37,7 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
     setHostID((int)msg->getHeader()->getVariant(0));
 
+    LOG_U(UI_UPDATE_COLL_ID, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return true;

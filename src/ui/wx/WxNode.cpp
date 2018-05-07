@@ -27,16 +27,23 @@ void Wx::nodeInit() {
     nodeProcessList->InsertColumn(1, column);
 
     column.SetId(2);
-    column.SetText( _("Process") );
+    column.SetText( _("Process ID") );
     column.SetWidth(width * 7);
     nodeProcessList->InsertColumn(2, column);
 
     nodeState->SetLabel(NodeState::getName(IDLE));
 
+    uiUpdater[UI_UPDATE_NODE_ID] = &Wx::nodeUpdateID;
     uiUpdater[UI_UPDATE_NODE_STATE] = &Wx::nodeUpdateState;
     uiUpdater[UI_UPDATE_NODE_PROCESS_LIST] = &Wx::nodeUpdateProcessList;
     uiUpdater[UI_UPDATE_NODE_CLEAR] = &Wx::nodeUpdateClear;
+}
 
+void Wx::nodeUpdateID(wxCommandEvent &event) {
+
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    mainPanel->SetPageText(2, wxString::Format(wxT("Node[%ld]"), data->getData(0)));
 }
 
 void Wx::nodeUpdateState(wxCommandEvent &event) {
@@ -59,5 +66,5 @@ void Wx::nodeUpdateProcessList(wxCommandEvent &event) {
 
     nodeProcessList->SetItem(row, 0, wxString::Format(wxT("%ld"), data->getData(0)));
     nodeProcessList->SetItem(row, 1, data->getString(0));
-    nodeProcessList->SetItem(row, 2, data->getString(1));
+    nodeProcessList->SetItem(row, 2, wxString::Format(wxT("%ld"), data->getData(1)));
 }

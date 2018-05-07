@@ -107,13 +107,17 @@ Wx::~Wx()
 void Wx::Init(void* controller)
 {
 ////@begin Wx member initialisation
+    mainPanel = NULL;
+    distPanel = NULL;
     distPollBtn = NULL;
     distCollList = NULL;
     distNodeList = NULL;
+    collPanel = NULL;
     collLoadBtn = NULL;
     collProcessBtn = NULL;
     collFileList = NULL;
     collProcessList = NULL;
+    nodePanel = NULL;
     nodeState = NULL;
     nodeProcessList = NULL;
 ////@end Wx member initialisation
@@ -131,49 +135,49 @@ void Wx::CreateControls()
 ////@begin Wx content construction
     Wx* itemFrame1 = this;
 
-    wxNotebook* itemNotebook2 = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT );
+    mainPanel = new wxNotebook( itemFrame1, ID_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxBK_DEFAULT );
 
-    wxPanel* itemPanel3 = new wxPanel( itemNotebook2, ID_PANEL_DISTRIBUTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    itemPanel3->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    wxStaticText* itemStaticText6 = new wxStaticText( itemPanel3, wxID_STATIC, _("Collectors :"), wxPoint(10, 90), wxDefaultSize, 0 );
+    distPanel = new wxPanel( mainPanel, ID_PANEL_DISTRIBUTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    distPanel->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    wxStaticText* itemStaticText6 = new wxStaticText( distPanel, wxID_STATIC, _("Collectors :"), wxPoint(10, 90), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel3, wxID_STATIC, _("Nodes :"), wxPoint(310, 90), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText11 = new wxStaticText( distPanel, wxID_STATIC, _("Nodes :"), wxPoint(310, 90), wxDefaultSize, 0 );
 
-    distPollBtn = new wxButton( itemPanel3, ID_DIST_POLL, _("Poll"), wxPoint(10, 10), wxSize(570, 50), 0 );
+    distPollBtn = new wxButton( distPanel, ID_DIST_POLL, _("Poll"), wxPoint(10, 10), wxSize(570, 50), 0 );
 
-    distCollList = new wxListCtrl( itemPanel3, ID_DIST_COLL_LIST, wxPoint(10, 130), wxSize(270, 360), wxLC_REPORT );
+    distCollList = new wxListCtrl( distPanel, ID_DIST_COLL_LIST, wxPoint(10, 130), wxSize(270, 360), wxLC_REPORT );
 
-    distNodeList = new wxListCtrl( itemPanel3, ID_DIST_NODE_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT );
+    distNodeList = new wxListCtrl( distPanel, ID_DIST_NODE_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT );
 
-    itemNotebook2->AddPage(itemPanel3, _("Distributor"));
+    mainPanel->AddPage(distPanel, _("Distributor"));
 
-    wxPanel* itemPanel23 = new wxPanel( itemNotebook2, ID_PANEL_COLLECTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    itemPanel23->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    wxStaticText* itemStaticText26 = new wxStaticText( itemPanel23, wxID_STATIC, _("Job Files :"), wxPoint(10, 90), wxDefaultSize, 0 );
+    collPanel = new wxPanel( mainPanel, ID_PANEL_COLLECTOR, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    collPanel->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    wxStaticText* itemStaticText26 = new wxStaticText( collPanel, wxID_STATIC, _("Job Files :"), wxPoint(10, 90), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText29 = new wxStaticText( itemPanel23, wxID_STATIC, _("Process List :"), wxPoint(310, 90), wxDefaultSize, 0 );
+    wxStaticText* itemStaticText29 = new wxStaticText( collPanel, wxID_STATIC, _("Process List :"), wxPoint(310, 90), wxDefaultSize, 0 );
 
-    collLoadBtn = new wxButton( itemPanel23, ID_COLL_LOAD, _("Load Job"), wxPoint(10, 10), wxSize(270, 50), 0 );
+    collLoadBtn = new wxButton( collPanel, ID_COLL_LOAD, _("Load Job"), wxPoint(10, 10), wxSize(270, 50), 0 );
 
-    collProcessBtn = new wxButton( itemPanel23, ID_COLL_PROCESS, _("Process"), wxPoint(310, 10), wxSize(270, 50), 0 );
+    collProcessBtn = new wxButton( collPanel, ID_COLL_PROCESS, _("Process"), wxPoint(310, 10), wxSize(270, 50), 0 );
 
-    collFileList = new wxListCtrl( itemPanel23, ID_COLL_FILE_LIST, wxPoint(10, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
+    collFileList = new wxListCtrl( collPanel, ID_COLL_FILE_LIST, wxPoint(10, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
 
-    collProcessList = new wxListCtrl( itemPanel23, ID_COLL_PROCESS_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
+    collProcessList = new wxListCtrl( collPanel, ID_COLL_PROCESS_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
 
-    itemNotebook2->AddPage(itemPanel23, _("Collector"));
+    mainPanel->AddPage(collPanel, _("Collector"));
 
-    wxPanel* itemPanel38 = new wxPanel( itemNotebook2, ID_NODE_BINDED_ADDRESS, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-    itemPanel38->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    wxStaticText* itemStaticText41 = new wxStaticText( itemPanel38, wxID_STATIC, _("Processes :"), wxPoint(10, 90), wxDefaultSize, 0 );
+    nodePanel = new wxPanel( mainPanel, ID_PANEL_NODE, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+    nodePanel->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    wxStaticText* itemStaticText41 = new wxStaticText( nodePanel, wxID_STATIC, _("Processes :"), wxPoint(10, 90), wxDefaultSize, 0 );
 
-    wxStaticText* itemStaticText43 = new wxStaticText( itemPanel38, wxID_STATIC, _("State :"), wxPoint(10, 10), wxSize(270, 50), 0 );
+    wxStaticText* itemStaticText43 = new wxStaticText( nodePanel, wxID_STATIC, _("State :"), wxPoint(10, 10), wxSize(270, 50), 0 );
 
-    nodeState = new wxStaticText( itemPanel38, ID_NODE_STATE, _("0"), wxPoint(310, 10), wxSize(270, 50), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    nodeState = new wxStaticText( nodePanel, ID_NODE_STATE, _("0"), wxPoint(310, 10), wxSize(270, 50), wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
 
-    nodeProcessList = new wxListCtrl( itemPanel38, ID_NODE_FILE_LIST, wxPoint(10, 130), wxSize(570, 360), wxLC_REPORT );
+    nodeProcessList = new wxListCtrl( nodePanel, ID_NODE_FILE_LIST, wxPoint(10, 130), wxSize(570, 360), wxLC_REPORT );
 
-    itemNotebook2->AddPage(itemPanel38, _("Node"));
+    mainPanel->AddPage(nodePanel, _("Node"));
 
 ////@end Wx content construction
 }

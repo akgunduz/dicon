@@ -98,7 +98,6 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
 
 bool Distributor::processNodeIDMsg(ComponentObject owner, Message *msg) {
 
-    //return processWaitingList(0, 0, msg->getData()->getJobDir());
     return true;
 }
 

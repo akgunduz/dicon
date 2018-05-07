@@ -40,6 +40,7 @@ bool Node::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
     setHostID((int)msg->getHeader()->getVariant(0));
 
+    LOG_U(UI_UPDATE_NODE_ID, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);
@@ -216,7 +217,7 @@ bool Node::processCommand(int collID, const char* jobDir, long execID, const cha
 
     strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
-    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, fullcmd);
+    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, execID);
     LOGS_I(getHost(), "Collector[%d]\'s Process[%d] is executing", collID, execID);
     LOGS_T(getHost(), "Command : %s", fullcmd);
 

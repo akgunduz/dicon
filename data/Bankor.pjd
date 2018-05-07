@@ -149,7 +149,7 @@
         <string name="Linker flags">"%AUTO%"</string>
         <long name="locked">0</long>
         <string name="Make command">"%AUTO%"</string>
-        <long name="makefile-last-written">3961589629</long>
+        <long name="makefile-last-written">-333377667</long>
         <string name="Modularity">"Modular"</string>
         <string name="Objects path">"%AUTO%"</string>
         <string name="Optimizations">"%AUTO%"</string>
@@ -223,7 +223,7 @@
           <string name="Linker flags">"%AUTO%"</string>
           <long name="locked">0</long>
           <string name="Make command">"%AUTO%"</string>
-          <long name="makefile-last-written">3961589629</long>
+          <long name="makefile-last-written">-333377667</long>
           <string name="Minimum OS version">"%AUTO%"</string>
           <string name="Modularity">"Modular"</string>
           <string name="Objects path">"%AUTO%"</string>
@@ -435,7 +435,7 @@
             <string name="proxy-Id name">"ID_NOTEBOOK"</string>
             <long name="proxy-Id value">10001</long>
             <string name="proxy-Implementation filename">""</string>
-            <string name="proxy-Member variable name">""</string>
+            <string name="proxy-Member variable name">"mainPanel"</string>
             <string name="proxy-Name">""</string>
             <bool name="proxy-Notebook sizer">0</bool>
             <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
@@ -513,7 +513,7 @@
               <string name="proxy-Id name">"ID_PANEL_DISTRIBUTOR"</string>
               <long name="proxy-Id value">10002</long>
               <string name="proxy-Implementation filename">""</string>
-              <string name="proxy-Member variable name">""</string>
+              <string name="proxy-Member variable name">"distPanel"</string>
               <string name="proxy-Name">""</string>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
               <bool name="proxy-Separate files">0</bool>
@@ -973,7 +973,7 @@
               <string name="proxy-Id name">"ID_PANEL_COLLECTOR"</string>
               <long name="proxy-Id value">10014</long>
               <string name="proxy-Implementation filename">""</string>
-              <string name="proxy-Member variable name">""</string>
+              <string name="proxy-Member variable name">"collPanel"</string>
               <string name="proxy-Name">""</string>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
               <bool name="proxy-Separate files">0</bool>
@@ -1498,10 +1498,10 @@
               <long name="proxy-Height">-1</long>
               <string name="proxy-Help text">""</string>
               <bool name="proxy-Hidden">0</bool>
-              <string name="proxy-Id name">"ID_NODE_BINDED_ADDRESS"</string>
+              <string name="proxy-Id name">"ID_PANEL_NODE"</string>
               <long name="proxy-Id value">10015</long>
               <string name="proxy-Implementation filename">""</string>
-              <string name="proxy-Member variable name">""</string>
+              <string name="proxy-Member variable name">"nodePanel"</string>
               <string name="proxy-Name">""</string>
               <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
               <bool name="proxy-Separate files">0</bool>
@@ -1539,7 +1539,7 @@
               <bool name="proxy-wxWS_EX_VALIDATE_RECURSIVELY">1</bool>
               <long name="proxy-X">-1</long>
               <long name="proxy-Y">-1</long>
-              <string name="title">"wxPanel: ID_NODE_BINDED_ADDRESS"</string>
+              <string name="title">"wxPanel: ID_PANEL_NODE"</string>
               <long name="title-mode">0</long>
               <string name="type">"dialog-control-document"</string>
               <document>

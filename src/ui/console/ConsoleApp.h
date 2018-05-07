@@ -14,11 +14,13 @@ class ConsoleApp;
 
 typedef void (ConsoleApp::*fConsoleUpdater)(ConsoleEvent &event);
 
+#define MAX_UI_CB 100
+
 class ConsoleApp {
 
     void* componentController;
 
-	fConsoleUpdater uiUpdater[UI_UPDATE_MAX];
+	fConsoleUpdater uiUpdater[MAX_UI_CB];
 
 public:
     ConsoleApp(void *);

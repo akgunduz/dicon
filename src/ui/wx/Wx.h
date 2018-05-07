@@ -23,7 +23,6 @@
 #endif
 #include <wx/app.h>
 #include <wx/event.h>
-#include <Common.h>
 
 ////@begin includes
 #include "wx/frame.h"
@@ -36,6 +35,7 @@
  */
 
 ////@begin forward declarations
+class wxNotebook;
 class wxListCtrl;
 ////@end forward declarations
 
@@ -57,7 +57,7 @@ typedef void (Wx::*fUIUpdater)(wxCommandEvent &event);
 #define ID_COLL_PROCESS 10020
 #define ID_COLL_FILE_LIST 10032
 #define ID_COLL_PROCESS_LIST 10003
-#define ID_NODE_BINDED_ADDRESS 10015
+#define ID_PANEL_NODE 10015
 #define ID_NODE_STATE 10026
 #define ID_NODE_FILE_LIST 10029
 #define SYMBOL_WX_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
@@ -67,6 +67,7 @@ typedef void (Wx::*fUIUpdater)(wxCommandEvent &event);
 #define SYMBOL_WX_POSITION wxDefaultPosition
 ////@end control identifiers
 
+#define MAX_UI_CB 100
 
 /*!
  * Wx class declaration
@@ -97,7 +98,7 @@ public:
 
     wxEventTypeTag<wxCommandEvent> *ui_event;
 
-    fUIUpdater uiUpdater[UI_UPDATE_MAX];
+    fUIUpdater uiUpdater[MAX_UI_CB];
 
     //Generic
 
@@ -120,6 +121,7 @@ public:
 
     //Collector
 
+    void collUpdateID(wxCommandEvent &event);
     void collUpdateFileList(wxCommandEvent &event);
     void collUpdateFileListItem(wxCommandEvent &event);
     void collUpdateProcessList(wxCommandEvent &event);
@@ -127,6 +129,7 @@ public:
 
     //Node
 
+    void nodeUpdateID(wxCommandEvent& event);
     void nodeUpdateState(wxCommandEvent& event);
     void nodeUpdateProcessList(wxCommandEvent &event);
     void nodeUpdateClear(wxCommandEvent &event);
@@ -161,13 +164,17 @@ public:
     static bool ShowToolTips();
 
 ////@begin Wx member variables
+    wxNotebook* mainPanel;
+    wxPanel* distPanel;
     wxButton* distPollBtn;
     wxListCtrl* distCollList;
     wxListCtrl* distNodeList;
+    wxPanel* collPanel;
     wxButton* collLoadBtn;
     wxButton* collProcessBtn;
     wxListCtrl* collFileList;
     wxListCtrl* collProcessList;
+    wxPanel* nodePanel;
     wxStaticText* nodeState;
     wxListCtrl* nodeProcessList;
 ////@end Wx member variables

@@ -10,19 +10,23 @@
 
 typedef void (*TypeUIUpdateCB)(void*, int, void*);
 
-enum UI_UPDATE2 {
+enum UI_UPDATE {
 
-    UI_UPDATE_ADDRESS1,
-    UI_UPDATE_ADDRESS2,
-    UI_UPDATE_ADDRESS3,
-    UI_UPDATE_LIST1,
-    UI_UPDATE_LIST2,
-    UI_UPDATE_ITEM1,
-    UI_UPDATE_ITEM2,
-    UI_UPDATE_STATE,
-    UI_UPDATE_CLEAR,
+    UI_UPDATE_DIST_COLL_LIST,
+    UI_UPDATE_DIST_NODE_LIST,
 
-    UI_UPDATE2_MAX
+    UI_UPDATE_COLL_ID,
+    UI_UPDATE_COLL_FILE_LIST,
+    UI_UPDATE_COLL_FILE_LISTITEM,
+    UI_UPDATE_COLL_PROCESS_LIST,
+    UI_UPDATE_COLL_PROCESS_LISTITEM,
+
+    UI_UPDATE_NODE_ID,
+    UI_UPDATE_NODE_STATE,
+    UI_UPDATE_NODE_PROCESS_LIST,
+    UI_UPDATE_NODE_CLEAR,
+
+    UI_UPDATE_MAX
 };
 
 class UserInterfaceController {
@@ -44,6 +48,7 @@ public:
     void display(int, std::vector<long>, const char* , ...);
     void display(int, const char* , ...);
     void display(int, int, const char* , const char*);
+    void display(int, int, const char* , long);
     void display(int, void*);
 };
 

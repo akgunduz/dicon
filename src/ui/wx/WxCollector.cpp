@@ -30,6 +30,7 @@ void Wx::collInit() {
     column.SetWidth(width);
     collProcessList->InsertColumn(0, column);
 
+    uiUpdater[UI_UPDATE_COLL_ID] = &Wx::collUpdateID;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &Wx::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &Wx::collUpdateProcessList;
@@ -47,6 +48,13 @@ void Wx::OnCollLoadClickWrapper( wxCommandEvent& event )
 void Wx::OnCollProcessClickWrapper( wxCommandEvent& event )
 {
     ((ComponentController *)componentController)->getCollector(0)->processJobs();
+}
+
+void Wx::collUpdateID(wxCommandEvent &event) {
+
+    auto *data = (UserInterfaceEvent *)event.GetClientData();
+
+    mainPanel->SetPageText(1, wxString::Format(wxT("Collector[%ld]"), data->getData(0)));
 }
 
 void Wx::collUpdateFileList(wxCommandEvent &event) {

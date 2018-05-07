@@ -181,6 +181,12 @@ void Log::updateUI(int id, int data1, char const *data2, char const *data3) {
     }
 }
 
+void Log::updateUI(int id, int data1, char const *data2, long data3) {
+
+    if (controller) {
+        controller->display(id, data1, data2, data3);
+    }
+}
 
 void Log::updateUI(int id, std::vector<long> data1, const char *data2, ...) {
 

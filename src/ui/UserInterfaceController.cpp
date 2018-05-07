@@ -68,6 +68,17 @@ void UserInterfaceController::display(int id, int data1, char const *data2, char
 
 }
 
+void UserInterfaceController::display(int id, int data1, char const *data2, long data3) {
+
+    auto *event = new UserInterfaceEvent(id);
+
+    event->addData(data1);
+    event->addString(std::string(data2));
+    event->addData(data3);
+
+    updateUI(id, event);
+}
+
 void UserInterfaceController::display(int id, std::vector<long> data1, const char *data2, ...) {
 
     char buf[256];
