@@ -31,8 +31,8 @@ public:
     Node* getNode(int);
 
     bool startDistributor();
-    bool startCollector(int);
-    bool startNode(int);
+    bool startCollector(int, int = 1);
+    bool startNode(int, int = 1);
 
     bool setInterfaces(int, int);
 };

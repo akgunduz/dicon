@@ -70,7 +70,7 @@ std::vector<std::string> Util::getFileList(const char *path, const char* filter)
 
     DIR *dir = opendir(path);
     if (dir == nullptr) {
-        LOG_E("Directory : %s could not opened\n err: %d", path, errno);
+        //LOG_E("Directory : %s could not opened\n err: %d", path, errno);
         return fileList;
     }
 
@@ -100,7 +100,7 @@ std::vector<std::string> Util::getDirList(const char *path, const char* filter) 
 
     DIR *dir = opendir(path);
     if (dir == nullptr) {
-        LOG_E("Directory : %s could not opened\n err: %d", path, errno);
+        //LOG_E("Directory : %s could not opened\n err: %d", path, errno);
         return fileList;
     }
 

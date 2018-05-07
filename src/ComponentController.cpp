@@ -72,12 +72,12 @@ bool ComponentController::startDistributor() {
     return true;
 }
 
-bool ComponentController::startCollector(int count) {
+bool ComponentController::startCollector(int count, int startIndex) {
 
     for (int i = 0; i < count; i++) {
 
         char path[PATH_MAX];
-        sprintf(path, "%s/%s_%ld", getcwd(NULL, 0), COLLECTOR_PATH, collectors.size() + 1);
+        sprintf(path, "%s/%s_%ld", getcwd(NULL, 0), COLLECTOR_PATH, collectors.size() + startIndex);
         mkdir(path, 0777);
 
         collectors.push_back(Collector::newInstance(path));
@@ -86,12 +86,12 @@ bool ComponentController::startCollector(int count) {
     return true;
 }
 
-bool ComponentController::startNode(int count) {
+bool ComponentController::startNode(int count, int startIndex) {
 
     for (int i = 0; i < count; i++) {
 
         char path[PATH_MAX];
-        sprintf(path, "%s/%s_%ld", getcwd(NULL, 0), NODE_PATH, nodes.size() + 1);
+        sprintf(path, "%s/%s_%ld", getcwd(NULL, 0), NODE_PATH, nodes.size() + startIndex);
         mkdir(path, 0777);
 
         nodes.push_back(Node::newInstance(path));

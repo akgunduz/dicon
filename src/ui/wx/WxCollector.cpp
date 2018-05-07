@@ -109,6 +109,10 @@ void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
                 collProcessList->SetItemBackgroundColour(j, wxColour(255, 0, 255));
                 break;
 
+            case PROCESS_STATE_PROVISION:
+                collProcessList->SetItemBackgroundColour(j, wxColour(0, 0, 255));
+                break;
+
             case PROCESS_STATE_NOTSTARTED:
                 collProcessList->SetItemBackgroundColour(j, job->getOrderedExecution(j)->isValid() ?
                                                             wxColour(0, 255, 0) : wxColour(255, 255, 255));

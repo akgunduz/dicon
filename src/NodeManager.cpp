@@ -16,7 +16,7 @@ NodeManager::~NodeManager() {
 
 long NodeManager::getIdle() {
 
-    auto leastUsedNode = components.end();
+    NodeObject* leastUsedNode = NULL;
 
     mutex.lock();
 
@@ -28,23 +28,24 @@ long NodeManager::getIdle() {
             continue;
         }
 
-        if (leastUsedNode == components.end()) {
-            leastUsedNode = i;
+        if (leastUsedNode == NULL) {
+            leastUsedNode = node;
             continue;
         }
 
-        if (node->getUsage() < ((NodeObject*)leastUsedNode->second)->getUsage()) {
-            leastUsedNode = i;
+        if (node->getUsage() < leastUsedNode->getUsage()) {
+            leastUsedNode = node;
         }
     }
 
-    if (leastUsedNode != components.end()) {
+    if (leastUsedNode != NULL) {
 
-        ((NodeObject*)leastUsedNode->second)->setState(PREBUSY);
+        leastUsedNode->iterateUsage(true);
+        leastUsedNode->setState(PREBUSY);
 
         mutex.unlock();
 
-        return leastUsedNode->first;
+        return leastUsedNode->getAddress();
 
     }
 

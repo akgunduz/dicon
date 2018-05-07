@@ -87,7 +87,7 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     long collAddress = msg->getHeader()->getVariant(0);
     long collUnservedCount = msg->getHeader()->getVariant(1);
 
-    LOGS_I(getHost(), "Node[%d] is done with Collector[%d]\'s process, setting to IDLE",
+    LOGS_I(getHost(), "Node[%d] is Done with Collector[%d]\'s process",
            nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
 
     LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), 0});
@@ -111,7 +111,7 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
     LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), nodeManager->getID(owner.getAddress())});
     LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), BUSY});
 
-    LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s job", nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
+    LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
 
     return send2NodeProcessMsg(owner, msg->getData()->getJobDir(),
                                    msg->getData()->getExecutorID(),
@@ -141,11 +141,10 @@ bool Distributor::processWaitingList(long collAddress, long collUnservedCount, c
 
         TypeWaitingCollector collector = collectorManager->getWaiting();
 
-        //LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collector.first), nodeManager->getID(nodeAddress)});
         LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
 
-        LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d] from Wait List with size : %d",
-               nodeManager->getID(nodeAddress), collectorManager->getID(collector.first), collectorManager->getWaitingCount());
+        LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d]\'s process",
+               nodeManager->getID(nodeAddress), collectorManager->getID(collector.first));
 
         status &= send2CollectorNodeMsg(*collectorManager->get(collector.first),
                                      jobDir, nodeAddress, nodeManager->getID(nodeAddress));

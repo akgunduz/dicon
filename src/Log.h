@@ -34,10 +34,10 @@ enum LOGTYPE {
 #define LOG_S(a, ...) Log::show(a, ##__VA_ARGS__)
 #define LOG_U(a, ...) Log::updateUI(a, ##__VA_ARGS__)
 
-#define LOG_E(a, ...) Log::logd(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_W(a, ...) Log::logd(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_I(a, ...) Log::logd(LEVEL_INFO, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOG_T(a, ...) Log::logd(LEVEL_TRACE, __FILE__, __LINE__, a, ##__VA_ARGS__)
+//#define LOG_E(a, ...) Log::logd(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
+//#define LOG_W(a, ...) Log::logd(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
+//#define LOG_I(a, ...) Log::logd(LEVEL_INFO, __FILE__, __LINE__, a, ##__VA_ARGS__)
+//#define LOG_T(a, ...) Log::logd(LEVEL_TRACE, __FILE__, __LINE__, a, ##__VA_ARGS__)
 
 #define LOGC_E(a, b, c, ...) Log::logc(LEVEL_ERROR, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
 #define LOGC_W(a, b, c, ...) Log::logc(LEVEL_WARN, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
@@ -51,17 +51,16 @@ enum LOGTYPE {
 
 class Log {
 
-	static LOGLEVEL logLevel;
+	static LOGLEVEL logLevel[2];
 
 	static UserInterfaceController *controller;
 
 public:
 
-    static void init(LOGLEVEL level);
+    static void init(LOGLEVEL, LOGLEVEL);
     static void registerUIController(void*, TypeUIUpdateCB);
-	static void setLogLevel(LOGLEVEL level);
-	static void iterateLogLevel();
-	static void logd(LOGLEVEL level, const char *, int, ...);
+	static void setLogLevel(LOGLEVEL, LOGLEVEL);
+	//static void logd(LOGLEVEL level, const char *, int, ...);
     static void logs(LOGLEVEL level, const char *, int, ComponentObject, ...);
     static void logc(LOGLEVEL level, const char *, int, ComponentObject, ComponentObject, int, ...);
 	static void show(const char *format, ...);

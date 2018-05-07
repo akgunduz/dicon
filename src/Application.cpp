@@ -16,17 +16,19 @@
 
 int main(int argc, char** argv) {
 
-    Log::init(LEVEL_INFO);
-
     Util::cleanup();
 
     int distCount = 0;
     int collCount = 0;
     int nodeCount = 0;
+    int collIndex = 1;
+    int nodeIndex = 1;
 
     int interfaceID[2] = {0, 0};
 
     void *app = NULL;
+
+    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_INFO};
 
 #if defined(WX_UI)
     APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
@@ -88,6 +90,11 @@ int main(int argc, char** argv) {
                 return 0;
             }
 
+            if (isdigit(argv[i + 1][0])) {
+                collIndex =  atoi(argv[++i]);
+
+            }
+
         } else if (!strcmp(argv[i], "-n")) {
 
             if (isdigit(argv[++i][0])) {
@@ -97,6 +104,29 @@ int main(int argc, char** argv) {
 
                 return 0;
             }
+
+            if (isdigit(argv[i + 1][0])) {
+                nodeIndex =  atoi(argv[++i]);
+
+            }
+        } else if (!strcmp(argv[i], "-g")) {
+
+            if (argc > i + 1) {
+
+                if (isdigit(argv[++i][0])) {
+                    logLevel[0] = (LOGLEVEL)atoi(argv[i]);
+
+                } else {
+                    return 0;
+                }
+
+                if (isdigit(argv[++i][0])) {
+                    logLevel[1] = (LOGLEVEL)atoi(argv[i]);
+
+                } else {
+                    return 0;
+                }
+            }
         }
     }
 
@@ -105,8 +135,12 @@ int main(int argc, char** argv) {
         distCount = 1;
         collCount = 1;
         nodeCount = 1;
+        collIndex = 1;
+        nodeIndex = 1;
     }
 #endif
+
+    Log::init(logLevel[0], logLevel[1]);
 
     LOG_S("Running in %s Mode with %d Distributor, %d Collector and %d Node, using interfaces : %s and %s",
           appMode == APPMODE::APPMODE_NOUI ? "No UI" : appMode == APPMODE::APPMODE_CONSOLE ? "Console" : "WxWidgets",
@@ -120,11 +154,11 @@ int main(int argc, char** argv) {
     }
 
     if (collCount) {
-        controller->startCollector(collCount);
+        controller->startCollector(collCount, collIndex);
     }
 
     if (nodeCount) {
-        controller->startNode(nodeCount);
+        controller->startNode(nodeCount, nodeIndex);
     }
 
 #ifdef WX_UI
@@ -151,7 +185,7 @@ int main(int argc, char** argv) {
         in = getchar();
         switch(in) {
             case 'p':
-                controller->getDistributor()->sendWakeupMessagesAll(true);
+                controller->getDistributor()->sendWakeupMessagesAll(false);
                 break;
             case 'l':
                 controller->getCollector(0)->loadJob(NULL);
@@ -167,9 +201,6 @@ int main(int argc, char** argv) {
                 }
 #endif
                 return 0;
-            case 'd':
-                Log::iterateLogLevel();
-                break;
             default:
                 break;
         }

@@ -7,7 +7,7 @@
 #include "ComponentObject.h"
 #include "Util.h"
 
-LOGLEVEL Log::logLevel = LEVEL_ERROR;
+LOGLEVEL Log::logLevel[] = {LEVEL_ERROR, LEVEL_ERROR};
 UserInterfaceController* Log::controller = NULL;
 
 static const char* sLogLevels[LEVEL_MAX] = {
@@ -19,31 +19,19 @@ static const char* sLogLevels[LEVEL_MAX] = {
 		"ASSERT",
 };
 
-void Log::init(LOGLEVEL level) {
+void Log::init(LOGLEVEL stdlevel, LOGLEVEL comlevel) {
 
-    setLogLevel(level);
+    setLogLevel(stdlevel, comlevel);
 }
 
-void Log::setLogLevel(LOGLEVEL level) {
+void Log::setLogLevel(LOGLEVEL stdlevel, LOGLEVEL comlevel) {
 
-	logLevel = level;
+	logLevel[0] = stdlevel;
+	logLevel[1] = comlevel;
 
 	setbuf(stdout, NULL);
 
-	printf("Log Level Set to %s\n", sLogLevels[level]);
-}
-
-void Log::iterateLogLevel() {
-
-	if (logLevel == LEVEL_TRACE) {
-
-		Log::setLogLevel(LEVEL_ERROR);
-
-	} else {
-
-		Log::setLogLevel(LOGLEVEL((int)logLevel + 1));
-
-	}
+	printf("Log Level Set to Std : %s, Comm : %s\n", sLogLevels[stdlevel], sLogLevels[comlevel]);
 }
 
 void Log::show(const char *format, ...) {
@@ -57,41 +45,41 @@ void Log::show(const char *format, ...) {
 
 }
 
-void Log::logd(LOGLEVEL level, const char *file, int line,
-              ...) {
-
-    if (logLevel < level) {
-        return;
-    }
-
-    char buf[PATH_MAX];
-    char logout[PATH_MAX];
-
-    strcpy(logout, "");
-
-#ifndef DISABLE_LOGFILEINFO
-    char extra[PATH_MAX];
-    std::string fileName = Util::extractFile(file);
-    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
-    sprintf(logout, "%s %s", extra, logout);
-#endif
-
-    va_list ap;
-    va_start(ap, line);
-
-    char * fmt = va_arg(ap, char *);
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%14s : %s \n", "Common", buf);
-
-    va_end(ap);
-
-    printf("%s", logout);
-}
+//void Log::logd(LOGLEVEL level, const char *file, int line,
+//              ...) {
+//
+//    if (logLevel < level) {
+//        return;
+//    }
+//
+//    char buf[PATH_MAX];
+//    char logout[PATH_MAX];
+//
+//    strcpy(logout, "");
+//
+//#ifndef DISABLE_LOGFILEINFO
+//    char extra[PATH_MAX];
+//    std::string fileName = Util::extractFile(file);
+//    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
+//    sprintf(logout, "%s %s", extra, logout);
+//#endif
+//
+//    va_list ap;
+//    va_start(ap, line);
+//
+//    char * fmt = va_arg(ap, char *);
+//    vsnprintf(buf, sizeof(buf), fmt, ap);
+//    sprintf(logout, "%14s : %s \n", "Common", buf);
+//
+//    va_end(ap);
+//
+//    printf("%s", logout);
+//}
 
 void Log::logs(LOGLEVEL level, const char *file, int line,
                ComponentObject host, ...) {
 
-    if (logLevel < level) {
+    if (logLevel[0] < level) {
         return;
     }
 
@@ -125,7 +113,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 void Log::logc(LOGLEVEL level, const char *file, int line,
                ComponentObject host, ComponentObject target, int direction, ...) {
 
-    if (logLevel < level) {
+    if (logLevel[1] < level) {
         return;
     }
 

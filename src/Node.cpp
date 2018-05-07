@@ -211,14 +211,9 @@ bool Node::processCommand(int collID, const char* jobDir, const char *cmd) {
     strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
     LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, fullcmd);
-    LOGS_I(getHost(), "Executing %s command\n", fullcmd);
+    LOGS_I(getHost(), "Executing %s command", fullcmd);
 
     parseCommand(fullcmd, args);
-
-
-#ifdef CYGWIN
-    LOG_I("Simulating fork in Windows!!!");
-#else
 
     pid_t pid = fork();
 
@@ -239,7 +234,6 @@ bool Node::processCommand(int collID, const char* jobDir, const char *cmd) {
         LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, cmd);
         exit(EXIT_FAILURE);
     }
-#endif
 
     return true;
 

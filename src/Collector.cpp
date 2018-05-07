@@ -81,7 +81,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
 bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
 
-    LOGS_I(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
+    LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
     return send2NodeBinaryMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
@@ -89,7 +89,7 @@ bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
 
 bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
-    LOGS_I(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
+    LOGS_T(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
     std::vector<long> fileListIDs;
 

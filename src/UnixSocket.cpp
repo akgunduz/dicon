@@ -202,7 +202,7 @@ std::vector<long> UnixSocket::getAddressList(Device* device) {
 
     DIR *unixdir = opendir(UNIXSOCKET_PATH);
     if (!unixdir) {
-        LOG_E("Can not open unix socket path!!!");
+        //LOG_E("Can not open unix socket path!!!");
         return list;
     }
 
