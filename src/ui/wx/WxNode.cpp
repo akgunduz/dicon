@@ -11,7 +11,13 @@
 
 #include "WxComponent.h"
 
-void Wx::nodeInit() {
+void Wx::nodeInit(bool enable) {
+
+    if (!enable) {
+
+        mainPanel->GetPage(2)->Hide();
+        return;
+    }
 
     int width = nodeProcessList->GetSize().GetWidth() / 12;
 

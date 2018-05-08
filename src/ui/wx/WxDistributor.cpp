@@ -12,7 +12,13 @@
 #include <ComponentController.h>
 #include "WxComponent.h"
 
-void Wx::distInit() {
+void Wx::distInit(bool enable) {
+
+    if (!enable) {
+
+        mainPanel->GetPage(0)->Hide();
+        return;
+    }
 
     int width = distCollList->GetSize().GetWidth() / 2 - 1;
 

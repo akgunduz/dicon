@@ -102,9 +102,9 @@ public:
 
     //Generic
 
-    void distInit();
-    void collInit();
-    void nodeInit();
+    void distInit(bool);
+    void collInit(bool);
+    void nodeInit(bool);
 
     static void updateUICallback(void*, int, void*);
 

@@ -24,9 +24,12 @@ public:
     static ComponentController* newInstance(int, int);
     ~ComponentController();
 
+    long getDistributorCount();
     Distributor* getDistributor();
+
     long getCollectorCount();
     Collector* getCollector(int);
+
     long getNodeCount();
     Node* getNode(int);
 

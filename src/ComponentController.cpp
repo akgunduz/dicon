@@ -36,6 +36,11 @@ ComponentController::ComponentController(int ind1, int ind2) {
     setInterfaces(ind1, ind2);
 }
 
+long ComponentController::getDistributorCount() {
+
+    return distributor == NULL ? 0 : 1;
+}
+
 Distributor *ComponentController::getDistributor() {
 
     return distributor;

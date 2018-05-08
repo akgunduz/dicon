@@ -13,7 +13,13 @@
 #include <ComponentController.h>
 #include "WxComponent.h"
 
-void Wx::collInit() {
+void Wx::collInit(bool enable) {
+
+    if (!enable) {
+
+        mainPanel->GetPage(1)->Hide();
+        return;
+    }
 
     int width = collFileList->GetSize().GetWidth() - 1;
 

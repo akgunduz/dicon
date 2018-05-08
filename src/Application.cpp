@@ -31,11 +31,21 @@ int main(int argc, char** argv) {
     LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
 
 #if defined(WX_UI)
+
     APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
+
+    distCount = 1;
+    collCount = 1;
+    nodeCount = 1;
+
 #elif defined(CONSOLE_UI)
+
     APPMODE appMode = APPMODE::APPMODE_CONSOLE;
+
 #else
+
     APPMODE appMode = APPMODE::APPMODE_NOUI;
+
 #endif
 
     DeviceList *deviceList = DeviceList::getInstance();
@@ -78,7 +88,13 @@ int main(int argc, char** argv) {
 
         } else if (!strcmp(argv[i], "-d")) {
 
-            distCount = 1;
+            if (isdigit(argv[++i][0])) {
+                distCount =  std::min(atoi(argv[i]), 1);
+
+            } else {
+
+                return 0;
+            }
 
         } else if (!strcmp(argv[i], "-c")) {
 
@@ -109,6 +125,7 @@ int main(int argc, char** argv) {
                 nodeIndex =  atoi(argv[++i]);
 
             }
+
         } else if (!strcmp(argv[i], "-g")) {
 
             if (argc > i + 1) {
@@ -130,11 +147,19 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (distCount == 0 && collCount == 0 && nodeCount == 0) {
+
+        LOG_S("Application should enable at least one component, enabling distributor");
+
+        distCount = 1;
+    }
+
 #ifdef WX_UI
     if (appMode == APPMODE::APPMODE_WXWIDGETS) {
-        distCount = 1;
-        collCount = 1;
-        nodeCount = 1;
+
+        distCount = std::min(distCount, 1);
+        collCount = std::min(collCount, 1);
+        nodeCount = std::min(nodeCount, 1);
         collIndex = 1;
         nodeIndex = 1;
     }

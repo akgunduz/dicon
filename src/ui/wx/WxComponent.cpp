@@ -12,9 +12,12 @@ void Wx::componentInit() {
     ui_event = new wxEventTypeTag<wxCommandEvent>(wxNewEventType());
     Bind(*ui_event, &Wx::updateUI, this, 0, UI_UPDATE_MAX - 1, NULL);
 
-    distInit();
-    collInit();
-    nodeInit();
+
+    auto *controller = (ComponentController *)componentController;
+
+    distInit(controller->getDistributorCount() > 0);
+    collInit(controller->getCollectorCount() > 0);
+    nodeInit(controller->getNodeCount() > 0);
 
 }
 
