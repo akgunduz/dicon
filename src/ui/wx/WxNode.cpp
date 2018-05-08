@@ -19,23 +19,28 @@ void Wx::nodeInit(bool enable) {
         return;
     }
 
-    int width = nodeProcessList->GetSize().GetWidth() / 12;
+    int width = nodeProcessList->GetSize().GetWidth() / 8;
 
     wxListItem column;
     column.SetId(0);
     column.SetText( _("Collector ID") );
-    column.SetWidth(width * 2);
+    column.SetWidth(width * 1);
     nodeProcessList->InsertColumn(0, column);
 
     column.SetId(1);
-    column.SetText( _("Job Name") );
-    column.SetWidth(width * 3);
+    column.SetText( _("Job ID") );
+    column.SetWidth(width * 2);
     nodeProcessList->InsertColumn(1, column);
 
     column.SetId(2);
-    column.SetText( _("Process ID") );
-    column.SetWidth(width * 7);
+    column.SetText( _("Job Name") );
+    column.SetWidth(width * 4);
     nodeProcessList->InsertColumn(2, column);
+
+    column.SetId(3);
+    column.SetText( _("Process ID") );
+    column.SetWidth(width * 1);
+    nodeProcessList->InsertColumn(3, column);
 
     nodeState->SetLabel(NodeState::getName(IDLE));
 

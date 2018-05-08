@@ -7,19 +7,19 @@
 #ifndef __Common_H_
 #define __Common_H_
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #include <iostream>
 #include <iosfwd>
 #include <fstream>
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include <cstdarg>
 #include <cstring>
 #include <list>
@@ -41,11 +41,12 @@
 #include <sys/time.h>
 #include <dirent.h>
 #include <json.h>
-#include <signal.h>
-#include <time.h>
+#include <csignal>
+#include <ctime>
 #include <thread>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#include <uuid/uuid.h>
 
 #ifdef __APPLE__
 #include "Common_apple.h"

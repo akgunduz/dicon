@@ -20,6 +20,7 @@
 class Job : public JsonItem {
 
     char name[50];
+    uuid_t id;
 
     std::vector<ExecutorInfo> orderedList;
 
@@ -34,6 +35,8 @@ public:
     static bool parseFileNode(JsonItem*, json_object *node);
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
+
+    uuid_t* getID();
 
     const char* getName();
     void setName(const char*);

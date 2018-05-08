@@ -37,6 +37,8 @@ void Job::init() {
         LOGS_E(getHost(), "Dependency Loop Detected in the Job!!!");
         return;
     }
+
+    uuid_generate(id);
 }
 
 bool Job::parseNameNode(JsonItem *parent, json_object *node) {
@@ -136,6 +138,11 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
     }
 
     return true;
+}
+
+uuid_t* Job::getID() {
+
+    return &id;
 }
 
 const char *Job::getName() {
