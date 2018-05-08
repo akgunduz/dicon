@@ -53,6 +53,7 @@ public:
 
     long getUnServedCount();
     ExecutorInfo getUnServed();
+    bool isEnded();
 
     ExecutorItem* getByOutput(int);
     bool createDependencyMap();

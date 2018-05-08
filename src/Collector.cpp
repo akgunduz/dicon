@@ -189,7 +189,6 @@ void Collector::setDistributor(ComponentObject distributor) {
 
 bool Collector::processJob(int index) {
 
-    //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
     Job* job = getJobs()->get(index);

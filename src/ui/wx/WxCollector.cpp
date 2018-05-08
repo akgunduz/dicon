@@ -124,7 +124,7 @@ void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
                 break;
 
             case PROCESS_STATE_PROVISION:
-                collProcessList->SetItemBackgroundColour(j, wxColour(0, 0, 255));
+                collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
                 break;
 
             case PROCESS_STATE_NOTSTARTED:

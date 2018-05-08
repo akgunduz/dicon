@@ -46,14 +46,11 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/JsonItem.cpp
         ${SOURCE_PATH}/Jobs.cpp
-        #${SOURCE_PATH}/JobInfo.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
-        #${SOURCE_PATH}/ComponentTypes.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
         ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/MessageData.cpp
-        #${SOURCE_PATH}/NodeTracker.cpp
         ${SOURCE_PATH}/NodeState.cpp
         ${SOURCE_PATH}/History.cpp
         ${SOURCE_PATH}/FileInfo.cpp

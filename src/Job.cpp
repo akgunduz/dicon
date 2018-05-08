@@ -260,6 +260,18 @@ long Job::getProvisionCount() {
     return count;
 }
 
+bool Job::isEnded() {
+
+    for (int i = 0; i < getOrderedCount(); i++) {
+
+        if (getOrderedState(i) != PROCESS_STATE_ENDED) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 ExecutorItem *Job::getByOutput(int index) {
 
     for (int i = 0; i < getExecutorCount(); i++) {
