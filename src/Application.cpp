@@ -210,13 +210,19 @@ int main(int argc, char** argv) {
         in = getchar();
         switch(in) {
             case 'p':
-                controller->getDistributor()->sendWakeupMessagesAll(false);
+                if (controller->getDistributorCount()) {
+                    controller->getDistributor()->sendWakeupMessagesAll(false);
+                }
                 break;
             case 'l':
-                controller->getCollector(0)->loadJob(NULL);
+                if (controller->getCollectorCount()) {
+                    controller->getCollector(0)->loadJob(NULL);
+                }
                 break;
             case 'x':
-                controller->getCollector(0)->processJobs();
+                if (controller->getCollectorCount()) {
+                    controller->getCollector(0)->processJobs();
+                }
                 break;
             case 'q':
                 delete controller;
