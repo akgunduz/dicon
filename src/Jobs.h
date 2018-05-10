@@ -9,8 +9,7 @@
 #include "Job.h"
 #include "JobInfo.h"
 
-
-typedef std::map<std::string, Job*, char_cmp> TypeJobList;
+typedef std::map<TypeUUID , Job*> TypeJobList;
 
 
 class Jobs {
@@ -22,10 +21,10 @@ public:
     Jobs();
     ~Jobs();
     bool add(Job*);
-    bool add(ComponentObject , const char*);
+    bool add(ComponentObject , const char *);
     bool addPath(ComponentObject, bool = false);
 
-    Job* get(const char*);
+    Job* get(TypeUUID&);
     Job* get(int);
 
     bool clear();

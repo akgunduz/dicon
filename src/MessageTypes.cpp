@@ -8,7 +8,7 @@
 
 const char* sMsgTypes[MSGTYPE_MAX] = {
         "NODE",
-        "JOB",
+        "PROCESS",
         "BINARY",
         "MD5",
         "INFO",
@@ -17,8 +17,7 @@ const char* sMsgTypes[MSGTYPE_MAX] = {
         "BUSY",
         "TIMEOUT",
         "ALIVE",
-        "ID",
-        "PROCESS"
+        "ID"
 };
 
 const char* MessageTypes::getName(MSG_TYPE type) {

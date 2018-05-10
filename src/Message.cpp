@@ -73,7 +73,7 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
         return false;
     }
 
-	if (!readMD5(desc, content)) {
+	if (!readArray(desc, content->data, MD5_DIGEST_LENGTH)) {
 		LOGS_E(getHost(), "readFileMD5 Can not read md5");
 		return false;
 	}
@@ -81,10 +81,15 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
+bool Message::readJobInfo(int desc, TypeUUID &jobID, char *jobDir, Block *header) {
 
     if (header->getType() != BLOCK_JOB_INFO) {
         LOGS_E(getHost(), "readJobInfo can not read other blocks");
+        return false;
+    }
+
+    if (!readArray(desc, jobID.data(), jobID.size())) {
+        LOGS_E(getHost(), "readJobInfo Can not read array");
         return false;
     }
 
@@ -153,7 +158,7 @@ bool Message::readMessageBlock(int in, Block *header) {
 
         case BLOCK_JOB_INFO:
 
-            if (!readJobInfo(in, getData()->getJobDir(), header)) {
+            if (!readJobInfo(in, getData()->getJobID(), getData()->getJobDir(), header)) {
                 return false;
             }
 
@@ -187,7 +192,7 @@ bool Message::readFinalize() {
     return true;
 }
 
-bool Message::writeJobInfo(int desc, char *jobDir) {
+bool Message::writeJobInfo(int desc, TypeUUID &jobID, char *jobDir) {
 
     Block blockHeader(1, BLOCK_JOB_INFO);
 
@@ -195,6 +200,11 @@ bool Message::writeJobInfo(int desc, char *jobDir) {
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         LOGS_E(getHost(), "writeJobInfo can not write block header");
+        return false;
+    }
+
+    if (!writeArray(desc, jobID.data(), jobID.size())) {
+        LOGS_E(getHost(), "writeExecutionInfo can not write execution info");
         return false;
     }
 
@@ -287,7 +297,7 @@ bool Message::writeFileMD5(int desc, Md5 *md5) {
         return false;
     }
 
-    if (!writeMD5(desc, md5)) {
+    if (!writeArray(desc, md5->data, MD5_DIGEST_LENGTH)) {
         LOGS_E(getHost(), "writeFileMD5 can not write md5 data");
         return false;
     }
@@ -304,7 +314,7 @@ bool Message::writeMessageStream(int out) {
         case STREAM_INFO:
         case STREAM_BINARY:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
                 return false;
             }
 
@@ -326,7 +336,7 @@ bool Message::writeMessageStream(int out) {
 
         case STREAM_MD5:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
                 return false;
             }
 
@@ -342,7 +352,7 @@ bool Message::writeMessageStream(int out) {
 
         case STREAM_JOB:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
                 return false;
             }
 

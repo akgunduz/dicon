@@ -45,7 +45,7 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
-    int id = (int)msg->getHeader()->getVariant(0);
+    int nodeID = (int)msg->getHeader()->getVariant(0);
     long nodeAddress = msg->getHeader()->getVariant(1);
 
     if (nodeAddress == 0) {
@@ -55,14 +55,14 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
-            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
-        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
-        delete msg;
-        return false;
-    }
+//    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
+//            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
+//        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
+//        delete msg;
+//        return false;
+//    }
 
-    Job* job = getJobs()->get(msg->getData()->getJobDir());
+    Job* job = getJobs()->get(msg->getData()->getJobID());
 
     ExecutorInfo executor = job->getUnServed();
 
@@ -72,11 +72,11 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), id);
+    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), nodeID);
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
-    return send2NodeJobMsg(NodeObject(id, nodeAddress), msg->getData()->getJobDir(), executor.getID(),
+    return send2NodeJobMsg(NodeObject(nodeID, nodeAddress), job->getJobID(), job->getJobDir(), executor.getID(),
                            executor.get()->getParsedExec(), executor.get()->getFileList());
 }
 
@@ -84,7 +84,7 @@ bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
-    return send2NodeBinaryMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
+    return send2NodeBinaryMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
 }
 
@@ -101,7 +101,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
 
-    Job* job = getJobs()->get(msg->getData()->getJobDir());
+    Job* job = getJobs()->get(msg->getData()->getJobID());
 
     job->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
 
@@ -109,7 +109,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     TypeMD5List md5List;
 
-    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), job->getProvisionCount());
+    return send2NodeReadyMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), job->getProvisionCount());
 }
 
 bool Collector::send2DistributorAliveMsg(ComponentObject target) {
@@ -119,14 +119,14 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target,
+bool Collector::send2DistributorNodeMsg(ComponentObject target, TypeUUID &jobID,
                                         const char* jobDir, long collUnservedCount,
                                         TypeMD5List *md5List) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
     msg->getData()->setStreamFlag(STREAM_MD5);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJob(jobID, jobDir);
     msg->getData()->addMD5List(md5List);
 
     msg->getHeader()->setVariant(0, collUnservedCount);
@@ -134,38 +134,38 @@ bool Collector::send2DistributorNodeMsg(ComponentObject target,
     return send(target, msg);
 }
 
-bool Collector::send2NodeJobMsg(ComponentObject target, const char* jobDir, long executionID,
+bool Collector::send2NodeJobMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executionID,
                                 const char* executor, TypeFileInfoList *fileList) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_JOB);
+    auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJob(jobID, jobDir);
     msg->getData()->setExecutor(executionID, executor);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(ComponentObject target, const char* jobDir, long executionID,
+bool Collector::send2NodeBinaryMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executionID,
                                    const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJob(jobID, jobDir);
     msg->getData()->setExecutor(executionID, executor);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeReadyMsg(ComponentObject target, const char* jobDir, long collUnservedCount) {
+bool Collector::send2NodeReadyMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long collUnservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
 
     msg->getData()->setStreamFlag(STREAM_JOB);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJob(jobID, jobDir);
 
     msg->getHeader()->setVariant(0, collUnservedCount);
 
@@ -194,7 +194,7 @@ bool Collector::processJob(int index) {
     Job* job = getJobs()->get(index);
 
     TypeMD5List md5List;
-    return send2DistributorNodeMsg(getDistributor(), job->getJobDir(), job->getProvisionCount(), &md5List);
+    return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getJobDir(), job->getProvisionCount(), &md5List);
 }
 
 bool Collector::processJobs() {

@@ -15,13 +15,15 @@ Jobs::~Jobs() {
 
 bool Jobs::add(Job *job) {
 
-    jobs[std::string(job->getJobDir())] = job;
+    jobs[job->getJobID()] = job;
     return true;
 }
 
 bool Jobs::add(ComponentObject host, const char *path) {
 
-    jobs[std::string(path)] = new Job(host, path);
+    auto *job = new Job(host, path);
+    jobs[job->getJobID()] = job;
+
     return true;
 }
 
@@ -40,14 +42,14 @@ bool Jobs::addPath(ComponentObject host, bool init) {
     return true;
 }
 
-Job* Jobs::get(const char* path) {
+Job* Jobs::get(TypeUUID &id) {
 
-    auto search = jobs.find(path);
+    auto search = jobs.find(id);
     if (search == jobs.end()) {
         return NULL;
     }
 
-    return jobs[std::string(path)];
+    return jobs[id];
 }
 
 Job* Jobs::get(int index) {

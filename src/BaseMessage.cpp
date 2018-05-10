@@ -33,7 +33,7 @@ int BaseMessage::getBinarySize(const char* path) {
     return fileSize;
 }
 
-bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
+bool BaseMessage::transferBinary(int in, int out, Md5 *md5, size_t size) {
 
     uint8_t buf[BUFFER_SIZE];
 
@@ -78,7 +78,7 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
 
 }
 
-bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
+bool BaseMessage::readBlock(int in, uint8_t *buf, size_t size) {
 
 	int offset = 0;
 	bool busy = false;
@@ -231,10 +231,10 @@ bool BaseMessage::readNumber(int in, long *number) {
 }
 
 
-bool BaseMessage::readMD5(int desc, Md5* md5) {
+bool BaseMessage::readArray(int desc, unsigned char* data, size_t size) {
 
-	if (!readBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-		LOGS_E(getHost(), "Can not read MD5 from stream");
+	if (!readBlock(desc, data, size)) {
+		LOGS_E(getHost(), "Can not read array from stream");
 		return false;
 	}
 
@@ -404,16 +404,16 @@ bool BaseMessage::writeString(int out, const char* str) {
 bool BaseMessage::writeNumber(int out, long number) {
 
 	if (!writeBlock(out, (uint8_t *)&number, 8)) {
-		LOGS_E(getHost(), "Can not write char array to stream");
+		LOGS_E(getHost(), "Can not write number value to stream");
 		return false;
 	}
 	return true;
 }
 
-bool BaseMessage::writeMD5(int desc, Md5* md5) {
+bool BaseMessage::writeArray(int desc, unsigned char* data, size_t size) {
 
-    if (!writeBlock(desc, md5->data, MD5_DIGEST_LENGTH)) {
-        LOGS_E(getHost(), "Can not write md5 to stream");
+    if (!writeBlock(desc, data, size)) {
+        LOGS_E(getHost(), "Can not write array to stream");
         return false;
     }
 
@@ -421,7 +421,7 @@ bool BaseMessage::writeMD5(int desc, Md5* md5) {
 }
 
 
-bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
+bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, size_t size) {
 
 	int in = open(path, O_RDONLY);
 	if (in == -1) {

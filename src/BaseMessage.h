@@ -34,16 +34,16 @@ public:
     void setDatagramAddress(sockaddr_in);
 
     int getBinarySize(const char*);
-    bool transferBinary(int, int, Md5 *, int);
+    bool transferBinary(int, int, Md5 *, size_t);
 
-	bool readBlock(int, uint8_t *, int);
+	bool readBlock(int, uint8_t *, size_t);
 
 	bool readSignature(int);
 	bool readHeader(int);
 	bool readBlockHeader(int, Block*);
 	bool readString(int, char*, int);
 	bool readNumber(int, long*);
-	bool readMD5(int, Md5*);
+	bool readArray(int, unsigned char*, size_t);
     bool readBinary(int, const char*, Md5 *, int);
 
 	bool readFromStream(int);
@@ -58,8 +58,8 @@ public:
 	bool writeBlockHeader(int, struct Block*);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
-    bool writeMD5(int, Md5*);
-	bool writeBinary(int, const char*, Md5 *, int);
+    bool writeArray(int, unsigned char*, size_t);
+	bool writeBinary(int, const char*, Md5 *, size_t);
 
 	bool writeToStream(int);
 

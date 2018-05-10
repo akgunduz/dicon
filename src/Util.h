@@ -11,6 +11,14 @@
 
 #define ROOT_SIGN "@@@root@@@"
 
+struct cmp_uuid {
+	bool operator()(uuid_t *a, uuid_t *b) const {
+		return memcmp(a, b, sizeof(uuid_t)) < 0;
+	}
+};
+
+typedef std::array<unsigned char, sizeof(uuid_t)> TypeUUID;
+
 class Util {
 
 private:

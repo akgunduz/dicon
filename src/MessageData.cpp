@@ -10,9 +10,10 @@ int MessageData::getStreamFlag() {
     return streamFlag;
 }
 
-void MessageData::setStreamFlag(int streamFlag) {
+MessageData& MessageData::setStreamFlag(int streamFlag) {
 
     this->streamFlag = streamFlag;
+    return *this;
 }
 
 Md5* MessageData::getMD5(int index) {
@@ -25,14 +26,16 @@ TypeMD5List *MessageData::getMD5List() {
     return &md5List;
 }
 
-void MessageData::addMD5(Md5 md5) {
+MessageData& MessageData::addMD5(Md5 md5) {
 
     md5List.push_back(md5);
+    return *this;
 }
 
-void MessageData::addMD5List(TypeMD5List *list) {
+MessageData& MessageData::addMD5List(TypeMD5List *list) {
 
     md5List.insert(md5List.end(), list->begin(), list->end());
+    return *this;
 }
 
 unsigned long MessageData::getMD5Count() {
@@ -55,14 +58,16 @@ TypeFileInfoList *MessageData::getFileList() {
     return &fileList;
 }
 
-void MessageData::addFile(FileInfo file) {
+MessageData& MessageData::addFile(FileInfo file) {
 
     fileList.push_back(file);
+    return *this;
 }
 
-void MessageData::addFileList(TypeFileInfoList *list) {
+MessageData& MessageData::addFileList(TypeFileInfoList *list) {
 
     fileList.insert(fileList.end(), list->begin(), list->end());
+    return *this;
 }
 
 unsigned long MessageData::getFileCount() {
@@ -80,15 +85,17 @@ long MessageData::getExecutorID() {
     return executorID;
 }
 
-void MessageData::setExecutorID(long id) {
+MessageData& MessageData::setExecutorID(long id) {
 
     this->executorID = id;
+    return *this;
 }
 
-void MessageData::setExecutor(long id, const char *executor) {
+MessageData& MessageData::setExecutor(long id, const char *executor) {
 
     this->executorID = id;
     strcpy(this->executor, executor);
+    return *this;
 }
 
 char *MessageData::getJobDir() {
@@ -96,7 +103,19 @@ char *MessageData::getJobDir() {
     return jobDir;
 }
 
-void MessageData::setJobDir(const char *jobDir) {
+MessageData& MessageData::setJob(TypeUUID& jobID, const char *jobDir) {
 
     strcpy(this->jobDir, jobDir);
+    return setJobID(jobID);
+}
+
+TypeUUID& MessageData::getJobID() {
+
+    return jobID;
+}
+
+MessageData& MessageData::setJobID(TypeUUID &jobID) {
+
+    this->jobID = jobID;
+    return *this;
 }

@@ -6,8 +6,14 @@
 #ifndef BANKOR_MESSAGEDATA_H
 #define BANKOR_MESSAGEDATA_H
 
-
 #include "ExecutorItem.h"
+
+#define STREAM_NONE 0xFFFF
+
+#define STREAM_INFO 0x01
+#define STREAM_BINARY 0x02
+#define STREAM_MD5 0x03
+#define STREAM_JOB 0x04
 
 class MessageData {
 
@@ -17,33 +23,37 @@ class MessageData {
     TypeFileInfoList fileList;
     char executor[PATH_MAX];
     long executorID;
+    TypeUUID jobID;
     char jobDir[PATH_MAX];
 
 public:
 
     int getStreamFlag();
-    void setStreamFlag(int);
+    MessageData& setStreamFlag(int);
 
     Md5* getMD5(int);
     TypeMD5List* getMD5List();
-    void addMD5(Md5);
-    void addMD5List(TypeMD5List*);
+    MessageData& addMD5(Md5);
+    MessageData& addMD5List(TypeMD5List*);
     unsigned long getMD5Count();
 
     FileItem* getFile(int);
     bool isOutput(int);
     TypeFileInfoList* getFileList();
-    void addFile(FileInfo);
-    void addFileList(TypeFileInfoList*);
+    MessageData& addFile(FileInfo);
+    MessageData& addFileList(TypeFileInfoList*);
     unsigned long getFileCount();
 
     char* getExecutor();
     long getExecutorID();
-    void setExecutorID(long);
-    void setExecutor(long, const char*);
+    MessageData& setExecutorID(long);
+    MessageData& setExecutor(long, const char*);
 
+    TypeUUID& getJobID();
     char* getJobDir();
-    void setJobDir(const char*);
+    MessageData& setJob(TypeUUID&, const char*);
+    MessageData& setJobID(TypeUUID&);
+
 };
 
 
