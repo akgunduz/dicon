@@ -34,10 +34,6 @@ int main(int argc, char** argv) {
 
     APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
 
-    distCount = 1;
-    collCount = 1;
-    nodeCount = 1;
-
 #elif defined(CONSOLE_UI)
 
     APPMODE appMode = APPMODE::APPMODE_CONSOLE;
@@ -149,9 +145,9 @@ int main(int argc, char** argv) {
 
     if (distCount == 0 && collCount == 0 && nodeCount == 0) {
 
-        LOG_S("Application should enable at least one component, enabling distributor");
-
         distCount = 1;
+        collCount = 1;
+        nodeCount = 1;
     }
 
 #ifdef WX_UI
