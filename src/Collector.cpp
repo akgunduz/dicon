@@ -55,13 +55,6 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-//    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
-//            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
-//        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
-//        delete msg;
-//        return false;
-//    }
-
     Job* job = getJobs()->get(msg->getData()->getJobID());
 
     ExecutorInfo executor = job->getUnServed();
@@ -119,15 +112,9 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, TypeUUID &jobID,
-                                        const char* jobDir, long collUnservedCount,
-                                        TypeMD5List *md5List) {
+bool Collector::send2DistributorNodeMsg(ComponentObject &&target, long collUnservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
-
-    msg->getData()->setStreamFlag(STREAM_MD5);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->addMD5List(md5List);
 
     msg->getHeader()->setVariant(0, collUnservedCount);
 
@@ -194,7 +181,7 @@ bool Collector::processJob(int index) {
     Job* job = getJobs()->get(index);
 
     TypeMD5List md5List;
-    return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getJobDir(), job->getProvisionCount(), &md5List);
+    return send2DistributorNodeMsg(getDistributor(), job->getProvisionCount());
 }
 
 bool Collector::processJobs() {

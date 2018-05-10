@@ -26,7 +26,7 @@ TypeWaitingCollector CollectorManager::getWaiting() {
 
         mutex.unlock();
 
-        return TypeWaitingCollector(0, "");
+        return 0;
     }
 
     TypeWaitingCollector collector = waitingList.front();
@@ -37,11 +37,11 @@ TypeWaitingCollector CollectorManager::getWaiting() {
     return collector;
 }
 
-bool CollectorManager::addWaiting(long address, std::string jobDir) {
+bool CollectorManager::addWaiting(long address) {
 
     mutex.lock();
 
-    waitingList.emplace_back(TypeWaitingCollector(address, jobDir));
+    waitingList.emplace_back(address);
 
     mutex.unlock();
 

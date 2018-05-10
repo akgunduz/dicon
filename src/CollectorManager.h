@@ -8,7 +8,8 @@
 
 #include "ComponentManager.h"
 
-typedef std::pair<long, std::string> TypeWaitingCollector;
+//typedef std::pair<long, std::string> TypeWaitingCollector;
+typedef long TypeWaitingCollector;
 
 class CollectorManager : public ComponentManager {
 
@@ -18,7 +19,7 @@ public:
 
     CollectorManager();
     ~CollectorManager();
-    bool addWaiting(long, std::string);
+    bool addWaiting(long);
     TypeWaitingCollector getWaiting();
     size_t getWaitingCount();
     void clearWaiting();
