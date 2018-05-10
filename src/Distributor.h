@@ -40,7 +40,7 @@ private:
 
     bool send2NodeWakeupMsg(ComponentObject);
     bool send2NodeIDMsg(ComponentObject, int);
-	bool send2NodeProcessMsg(ComponentObject, TypeUUID &,
+	bool send2NodeProcessMsg(ComponentObject, Uuid,
 							 const char*, long, const char *,
 								   TypeFileInfoList *, int, long);
 

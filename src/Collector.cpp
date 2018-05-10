@@ -112,16 +112,16 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject &&target, long collUnservedCount) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target, long unservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
-    msg->getHeader()->setVariant(0, collUnservedCount);
+    msg->getHeader()->setVariant(0, unservedCount);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeJobMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executionID,
+bool Collector::send2NodeJobMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executionID,
                                 const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
@@ -134,7 +134,7 @@ bool Collector::send2NodeJobMsg(ComponentObject target, TypeUUID &jobID, const c
     return send(target, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executionID,
+bool Collector::send2NodeBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executionID,
                                    const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
@@ -147,7 +147,7 @@ bool Collector::send2NodeBinaryMsg(ComponentObject target, TypeUUID &jobID, cons
     return send(target, msg);
 }
 
-bool Collector::send2NodeReadyMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long collUnservedCount) {
+bool Collector::send2NodeReadyMsg(ComponentObject target, Uuid jobID, const char* jobDir, long collUnservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
 

@@ -62,6 +62,8 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
         ${SOURCE_PATH}/ComponentController.cpp
+        ${SOURCE_PATH}/Array.cpp
+        ${SOURCE_PATH}/Uuid.cpp
         )
 
 set(WX_FILES

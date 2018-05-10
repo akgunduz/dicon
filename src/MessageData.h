@@ -7,6 +7,7 @@
 #define BANKOR_MESSAGEDATA_H
 
 #include "ExecutorItem.h"
+#include "Uuid.h"
 
 #define STREAM_NONE 0xFFFF
 
@@ -19,14 +20,19 @@ class MessageData {
 
     int streamFlag;
 
-    TypeMD5List md5List;
-    TypeFileInfoList fileList;
-    char executor[PATH_MAX];
     long executorID;
-    TypeUUID jobID;
+    char executor[PATH_MAX];
+    Uuid jobID;
     char jobDir[PATH_MAX];
 
+    TypeMD5List md5List;
+    TypeFileInfoList fileList;
+
 public:
+
+    MessageData();
+    MessageData(MessageData &);
+    MessageData& operator=(MessageData*);
 
     int getStreamFlag();
     MessageData& setStreamFlag(int);
@@ -49,10 +55,10 @@ public:
     MessageData& setExecutorID(long);
     MessageData& setExecutor(long, const char*);
 
-    TypeUUID& getJobID();
+    Uuid getJobID();
     char* getJobDir();
-    MessageData& setJob(TypeUUID&, const char*);
-    MessageData& setJobID(TypeUUID&);
+    MessageData& setJob(Uuid, const char*);
+    MessageData& setJobID(Uuid);
 
 };
 

@@ -23,13 +23,13 @@ private:
 	MessageHeader header;
     MessageData data;
 
-    bool readJobInfo(int, TypeUUID &, char*, struct Block*);
+    bool readJobInfo(int, Uuid, char*, struct Block*);
     bool readExecutionInfo(int, long*, char*, struct Block*);
     bool readFile(int, FileItem *, const char*, long *, struct Block *);
     bool readFileMD5(int, Md5*, struct Block*);
     bool readMessageBlock(int in, Block*);
 
-    bool writeJobInfo(int, TypeUUID&, char*);
+    bool writeJobInfo(int, Uuid, char*);
     bool writeExecutionInfo(int, long, char*);
     bool writeFile(int, FileItem *, bool, bool);
     bool writeFileMD5(int, Md5*);

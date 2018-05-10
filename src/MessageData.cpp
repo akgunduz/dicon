@@ -5,6 +5,23 @@
 
 #include "MessageData.h"
 
+MessageData::MessageData() :
+        streamFlag(STREAM_NONE),
+        executorID(0),
+        executor(""),
+        jobDir("") {
+
+}
+
+MessageData::MessageData(MessageData &copy) {
+
+    setStreamFlag(copy.getStreamFlag());
+    setExecutor(copy.getExecutorID(), copy.getExecutor());
+    setJob(copy.getJobID(), copy.getJobDir());
+    addMD5List(copy.getMD5List());
+    addFileList(copy.getFileList());
+}
+
 int MessageData::getStreamFlag() {
 
     return streamFlag;
@@ -103,19 +120,33 @@ char *MessageData::getJobDir() {
     return jobDir;
 }
 
-MessageData& MessageData::setJob(TypeUUID& jobID, const char *jobDir) {
+MessageData& MessageData::setJob(Uuid jobID, const char *jobDir) {
 
     strcpy(this->jobDir, jobDir);
     return setJobID(jobID);
 }
 
-TypeUUID& MessageData::getJobID() {
+Uuid MessageData::getJobID() {
 
     return jobID;
 }
 
-MessageData& MessageData::setJobID(TypeUUID &jobID) {
+MessageData& MessageData::setJobID(Uuid jobID) {
 
-    this->jobID = jobID;
+    this->jobID.set(&jobID);
     return *this;
 }
+
+MessageData &MessageData::operator=(MessageData *other) {
+
+    if (this != other) {
+        setStreamFlag(other->getStreamFlag());
+        setExecutor(other->getExecutorID(), other->getExecutor());
+        setJob(other->getJobID(), other->getJobDir());
+        addMD5List(other->getMD5List());
+        addFileList(other->getFileList());
+    }
+
+    return *this;
+}
+

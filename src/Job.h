@@ -10,6 +10,7 @@
 #include "ExecutorItem.h"
 #include "JobInfo.h"
 #include "ExecutorInfo.h"
+#include "Uuid.h"
 
 
 #define MAX_JOB_COUNT 100
@@ -20,7 +21,7 @@
 class Job : public JsonItem {
 
     char name[50];
-    TypeUUID id;
+    Uuid id;
 
     std::vector<ExecutorInfo> orderedList;
 
@@ -36,7 +37,7 @@ public:
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
 
-    TypeUUID& getJobID();
+    Uuid getJobID();
 
     const char* getName();
     void setName(const char*);

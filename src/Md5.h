@@ -8,34 +8,24 @@
 #include "Common.h"
 #include "Util.h"
 #include "ContentItem.h"
+#include "Array.h"
 
-const static uint8_t emptyData[MD5_DIGEST_LENGTH] = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-class Md5 {
+class Md5 : public Array {
 
 public:
 
-    uint8_t data[MD5_DIGEST_LENGTH];
 
-    Md5() {
-
-        memset(data, 0, MD5_DIGEST_LENGTH);
+    Md5() : Array(MD5_DIGEST_LENGTH) {
     }
 
-    Md5(const char *path) {
+    Md5(const char *path) : Md5() {
 
-        if (!get(path)) {
-            memset(data, 0, MD5_DIGEST_LENGTH);
-        }
+        load(path);
     }
 
-    void set(Md5 *ref, const char *path = nullptr) {
+    void save(Md5 *ref, const char *path = nullptr) {
 
-        if (ref != nullptr) {
-            memcpy(data, ref->data, MD5_DIGEST_LENGTH);
-        }
+        set(ref);
 
         if (path != nullptr) {
             FILE *md5file = fopen(path, "w");
@@ -44,7 +34,7 @@ public:
         }
     }
 
-    bool get(const char *path) {
+    bool load(const char *path) {
 
         FILE *md5file = fopen(path, "r");
         if (md5file == nullptr) {
@@ -58,31 +48,6 @@ public:
         return Util::str2hex(data, buf, MD5_DIGEST_LENGTH);
     }
 
-    void reset() {
-        memset(data, 0, MD5_DIGEST_LENGTH);
-    }
-
-    std::string getStr() {
-        return Util::hex2str(data, MD5_DIGEST_LENGTH);
-    }
-
-    bool equal(Md5 *ref) {
-        return memcmp(data, ref->data, MD5_DIGEST_LENGTH) == 0;
-    }
-
-    bool empty() {
-        return memcmp(data, emptyData, MD5_DIGEST_LENGTH) == 0;
-    }
-
-    bool compare(Md5 *ref) {
-        return memcmp(data, ref->data, MD5_DIGEST_LENGTH) < 0;
-    }
-};
-
-struct cmp_md5 {
-    bool operator()(Md5 *a, Md5 *b) const {
-        return a->compare(b);
-    }
 };
 
 typedef std::vector<Md5> TypeMD5List;

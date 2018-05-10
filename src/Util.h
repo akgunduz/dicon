@@ -11,21 +11,13 @@
 
 #define ROOT_SIGN "@@@root@@@"
 
-struct cmp_uuid {
-	bool operator()(uuid_t *a, uuid_t *b) const {
-		return memcmp(a, b, sizeof(uuid_t)) < 0;
-	}
-};
-
-typedef std::array<unsigned char, sizeof(uuid_t)> TypeUUID;
-
 class Util {
 
 private:
 	static std::string getPath(const char *, const char*, const char*, bool);
 
 public:
-	static std::string hex2str(const uint8_t *ca, int len);
+	static std::string hex2str(const uint8_t *ca, size_t len);
 	static bool str2hex(uint8_t *buf, const char *s, uint32_t len);
 	static void mkPath(const char *dir);
 	static void removePath(const char *path);

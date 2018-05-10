@@ -16,7 +16,6 @@ class Collector : public Component {
 
 	Jobs jobs;
 	ComponentObject distributor;
-	long distributorAddress;
 
     Collector(const char *rootPath);
 
@@ -30,10 +29,10 @@ class Collector : public Component {
 	bool processNodeBinaryMsg(ComponentObject, Message *);
 
 	bool send2DistributorAliveMsg(ComponentObject);
-	bool send2DistributorNodeMsg(ComponentObject&&, long);
-	bool send2NodeJobMsg(ComponentObject, TypeUUID &, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeBinaryMsg(ComponentObject, TypeUUID &, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeReadyMsg(ComponentObject, TypeUUID &, const char*, long);
+	bool send2DistributorNodeMsg(ComponentObject, long);
+	bool send2NodeJobMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
+	bool send2NodeBinaryMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
+	bool send2NodeReadyMsg(ComponentObject, Uuid, const char*, long);
 
 public:
 

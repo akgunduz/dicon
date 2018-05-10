@@ -196,7 +196,7 @@ bool Distributor::send2NodeIDMsg(ComponentObject target, int id) {
     return send(target, msg);
 }
 
-bool Distributor::send2NodeProcessMsg(ComponentObject target, TypeUUID &jobID,
+bool Distributor::send2NodeProcessMsg(ComponentObject target, Uuid jobID,
                                       const char* jobDir, long executionID, const char *executor,
                                    TypeFileInfoList *fileList, int collID, long collAddress) {
 

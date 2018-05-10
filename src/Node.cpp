@@ -84,6 +84,8 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
 
+    this->data = msg->getData();
+
     return send2DistributorBusyMsg(getDistributor(),
                                    msg->getData()->getJobID(),
                                    msg->getData()->getJobDir(),
@@ -117,7 +119,7 @@ bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
     return send2DistributorReadyMsg(getDistributor(), msg->getData()->getJobID(), msg->getData()->getJobDir(), owner.getAddress(), collUnservedCount);
 }
 
-bool Node::send2DistributorReadyMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long collAddress, long collUnservedCount) {
+bool Node::send2DistributorReadyMsg(ComponentObject target, Uuid jobID, const char* jobDir, long collAddress, long collUnservedCount) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_READY);
 
@@ -143,7 +145,7 @@ bool Node::send2DistributorIDMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Node::send2DistributorBusyMsg(ComponentObject target, TypeUUID &jobID,
+bool Node::send2DistributorBusyMsg(ComponentObject target, Uuid jobID,
                                    const char* jobDir, long executionID, const char *executor,
                                    TypeFileInfoList *fileList, long collAddress) {
 
@@ -158,7 +160,7 @@ bool Node::send2DistributorBusyMsg(ComponentObject target, TypeUUID &jobID,
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executorID,
+bool Node::send2CollectorInfoMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executorID,
                                  const char* executor, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
@@ -171,7 +173,7 @@ bool Node::send2CollectorInfoMsg(ComponentObject target, TypeUUID &jobID, const 
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(ComponentObject target, TypeUUID &jobID, const char* jobDir, long executorID,
+bool Node::send2CollectorBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executorID,
                                    const char* executor, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);

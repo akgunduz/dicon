@@ -38,9 +38,6 @@ void Job::init() {
         return;
     }
 
-    uuid_t uid = {};
-    uuid_generate(uid);
-    memcpy(id.data(), uid, sizeof(uuid_t));
 }
 
 bool Job::parseNameNode(JsonItem *parent, json_object *node) {
@@ -142,7 +139,7 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
     return true;
 }
 
-TypeUUID& Job::getJobID() {
+Uuid Job::getJobID() {
 
     return id;
 }

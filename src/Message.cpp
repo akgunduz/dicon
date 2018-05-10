@@ -81,14 +81,14 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, TypeUUID &jobID, char *jobDir, Block *header) {
+bool Message::readJobInfo(int desc, Uuid jobID, char *jobDir, Block *header) {
 
     if (header->getType() != BLOCK_JOB_INFO) {
         LOGS_E(getHost(), "readJobInfo can not read other blocks");
         return false;
     }
 
-    if (!readArray(desc, jobID.data(), jobID.size())) {
+    if (!readArray(desc, jobID.get(), jobID.getSize())) {
         LOGS_E(getHost(), "readJobInfo Can not read array");
         return false;
     }
@@ -192,7 +192,7 @@ bool Message::readFinalize() {
     return true;
 }
 
-bool Message::writeJobInfo(int desc, TypeUUID &jobID, char *jobDir) {
+bool Message::writeJobInfo(int desc, Uuid jobID, char *jobDir) {
 
     Block blockHeader(1, BLOCK_JOB_INFO);
 
@@ -203,7 +203,7 @@ bool Message::writeJobInfo(int desc, TypeUUID &jobID, char *jobDir) {
         return false;
     }
 
-    if (!writeArray(desc, jobID.data(), jobID.size())) {
+    if (!writeArray(desc, jobID.get(), jobID.getSize())) {
         LOGS_E(getHost(), "writeExecutionInfo can not write execution info");
         return false;
     }

@@ -42,7 +42,7 @@ bool Jobs::addPath(ComponentObject host, bool init) {
     return true;
 }
 
-Job* Jobs::get(TypeUUID &id) {
+Job* Jobs::get(Uuid id) {
 
     auto search = jobs.find(id);
     if (search == jobs.end()) {

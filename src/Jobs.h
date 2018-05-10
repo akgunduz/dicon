@@ -9,7 +9,7 @@
 #include "Job.h"
 #include "JobInfo.h"
 
-typedef std::map<TypeUUID , Job*> TypeJobList;
+typedef std::map<Uuid , Job*, cmp_array> TypeJobList;
 
 
 class Jobs {
@@ -24,7 +24,7 @@ public:
     bool add(ComponentObject , const char *);
     bool addPath(ComponentObject, bool = false);
 
-    Job* get(TypeUUID&);
+    Job* get(Uuid);
     Job* get(int);
 
     bool clear();

@@ -6,7 +6,7 @@
 #include "Util.h"
 #include "ArchTypes.h"
 
-std::string Util::hex2str(const uint8_t *in, int len) {
+std::string Util::hex2str(const uint8_t *in, size_t len) {
 	static const char* const lut = "0123456789ABCDEF";
 	std::string output;
 	output.reserve((uint32_t)2 * len);

@@ -103,7 +103,7 @@ bool FileItem::validate() {
         return false;
     }
 
-    bool status = getMD5()->get(Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
+    bool status = getMD5()->load(Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
     if (!status) {
 
         char buf[BUFFER_SIZE];
@@ -113,7 +113,7 @@ bool FileItem::validate() {
         MD5_Init(&ctx);
 
         while(true) {
-            int count = (int)fread(buf, 1, BUFFER_SIZE, file);
+            size_t count = fread(buf, 1, BUFFER_SIZE, file);
             if (count != BUFFER_SIZE) {
                 MD5_Update(&ctx, buf, (unsigned)count);
                 break;
@@ -123,7 +123,7 @@ bool FileItem::validate() {
 
         MD5_Final(getMD5()->data, &ctx);
 
-        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
+        getMD5()->save(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
     }
 
     fclose(file);
