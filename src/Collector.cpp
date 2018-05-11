@@ -57,6 +57,12 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     Job* job = getJobs()->get(msg->getData()->getJobID());
 
+    if (job == NULL) {
+        LOGS_I(getHost(), "No available job with this ID : %s", msg->getData()->getJobID().getStr().c_str());
+        delete msg;
+        return false;
+    }
+
     ExecutorInfo executor = job->getUnServed();
 
     if (executor.get() == NULL) {
@@ -112,11 +118,14 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, long unservedCount) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target, Uuid jobID, long unservedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
     msg->getHeader()->setVariant(0, unservedCount);
+
+    msg->getData()->setStreamFlag(STREAM_JOBID)
+            .setJobID(jobID);
 
     return send(target, msg);
 }
@@ -181,7 +190,7 @@ bool Collector::processJob(int index) {
     Job* job = getJobs()->get(index);
 
     TypeMD5List md5List;
-    return send2DistributorNodeMsg(getDistributor(), job->getProvisionCount());
+    return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getProvisionCount());
 }
 
 bool Collector::processJobs() {

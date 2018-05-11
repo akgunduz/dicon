@@ -7,9 +7,9 @@
 #define BANKOR_COLLECTORMANAGER_H
 
 #include "ComponentManager.h"
+#include "Uuid.h"
 
-//typedef std::pair<long, std::string> TypeWaitingCollector;
-typedef long TypeWaitingCollector;
+typedef std::pair<long, Uuid> TypeWaitingCollector;
 
 class CollectorManager : public ComponentManager {
 
@@ -19,7 +19,7 @@ public:
 
     CollectorManager();
     ~CollectorManager();
-    bool addWaiting(long);
+    bool addWaiting(long, Uuid);
     TypeWaitingCollector getWaiting();
     size_t getWaitingCount();
     void clearWaiting();

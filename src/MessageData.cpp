@@ -115,6 +115,11 @@ MessageData& MessageData::setExecutor(long id, const char *executor) {
     return *this;
 }
 
+Uuid MessageData::getJobID() {
+
+    return jobID;
+}
+
 char *MessageData::getJobDir() {
 
     return jobDir;
@@ -124,11 +129,6 @@ MessageData& MessageData::setJob(Uuid jobID, const char *jobDir) {
 
     strcpy(this->jobDir, jobDir);
     return setJobID(jobID);
-}
-
-Uuid MessageData::getJobID() {
-
-    return jobID;
 }
 
 MessageData& MessageData::setJobID(Uuid jobID) {

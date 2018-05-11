@@ -15,6 +15,7 @@
 #define STREAM_BINARY 0x02
 #define STREAM_MD5 0x03
 #define STREAM_JOB 0x04
+#define STREAM_JOBID 0x05
 
 class MessageData {
 

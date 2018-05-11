@@ -26,7 +26,7 @@ TypeWaitingCollector CollectorManager::getWaiting() {
 
         mutex.unlock();
 
-        return 0;
+        return TypeWaitingCollector(0, Uuid());
     }
 
     TypeWaitingCollector collector = waitingList.front();
@@ -37,11 +37,11 @@ TypeWaitingCollector CollectorManager::getWaiting() {
     return collector;
 }
 
-bool CollectorManager::addWaiting(long address) {
+bool CollectorManager::addWaiting(long address, Uuid jobID) {
 
     mutex.lock();
 
-    waitingList.emplace_back(address);
+    waitingList.emplace_back(address, jobID);
 
     mutex.unlock();
 

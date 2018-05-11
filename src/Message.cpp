@@ -81,14 +81,29 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, Uuid jobID, char *jobDir, Block *header) {
+bool Message::readJobID(int desc, Uuid *jobID, Block *header) {
+
+    if (header->getType() != BLOCK_JOB_ID) {
+        LOGS_E(getHost(), "readJobID can not read other blocks");
+        return false;
+    }
+
+    if (!readArray(desc, jobID->get(), jobID->getSize())) {
+        LOGS_E(getHost(), "readJobID Can not read array");
+        return false;
+    }
+
+    return true;
+}
+
+bool Message::readJobInfo(int desc, Uuid *jobID, char *jobDir, Block *header) {
 
     if (header->getType() != BLOCK_JOB_INFO) {
         LOGS_E(getHost(), "readJobInfo can not read other blocks");
         return false;
     }
 
-    if (!readArray(desc, jobID.get(), jobID.getSize())) {
+    if (!readArray(desc, jobID->get(), jobID->getSize())) {
         LOGS_E(getHost(), "readJobInfo Can not read array");
         return false;
     }
@@ -156,14 +171,32 @@ bool Message::readMessageBlock(int in, Block *header) {
         }
             break;
 
-        case BLOCK_JOB_INFO:
+        case BLOCK_JOB_ID: {
 
-            if (!readJobInfo(in, getData()->getJobID(), getData()->getJobDir(), header)) {
+            Uuid id;
+            if (!readJobID(in, &id, header)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New job info %s received", getData()->getJobDir());
+            LOGS_T(getHost(), "New Job[%s] ID is received",
+                   id.getStr().c_str());
 
+            getData()->setJobID(id);
+        }
+            break;
+
+        case BLOCK_JOB_INFO: {
+
+            Uuid id;
+            if (!readJobInfo(in, &id, getData()->getJobDir(), header)) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "New Job[%s] at %s is received",
+                   id.getStr().c_str(), getData()->getJobDir());
+
+            getData()->setJobID(id);
+        }
             break;
 
         case BLOCK_EXECUTION_INFO:
@@ -192,6 +225,23 @@ bool Message::readFinalize() {
     return true;
 }
 
+bool Message::writeJobID(int desc, Uuid jobID) {
+
+    Block blockHeader(0, BLOCK_JOB_ID);
+
+    if (!writeBlockHeader(desc, &blockHeader)) {
+        LOGS_E(getHost(), "writeJobID can not write block header");
+        return false;
+    }
+
+    if (!writeArray(desc, jobID.get(), jobID.getSize())) {
+        LOGS_E(getHost(), "writeJobID can not write execution info");
+        return false;
+    }
+
+    return true;
+}
+
 bool Message::writeJobInfo(int desc, Uuid jobID, char *jobDir) {
 
     Block blockHeader(1, BLOCK_JOB_INFO);
@@ -204,7 +254,7 @@ bool Message::writeJobInfo(int desc, Uuid jobID, char *jobDir) {
     }
 
     if (!writeArray(desc, jobID.get(), jobID.getSize())) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write execution info");
+        LOGS_E(getHost(), "writeJobInfo can not write execution info");
         return false;
     }
 
@@ -356,7 +406,18 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
+            LOGS_T(getHost(), "Job[%s] at %s sent to network",
+                   getData()->getJobID().getStr().c_str(), getData()->getJobDir());
+            break;
+
+        case STREAM_JOBID:
+
+            if (!writeJobID(out, getData()->getJobID())) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "Job[%s] ID sent to network",
+                   getData()->getJobID().getStr().c_str());
             break;
 
         case STREAM_NONE:
