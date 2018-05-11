@@ -62,9 +62,8 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
         return send2CollectorInfoMsg(CollectorObject(collID, collAddress),
                                      getData()->getJobID(),
-                                     getData()->getJobDir(),
                                      getData()->getExecutorID(),
-                                     getData()->getExecutor(), &requiredList);
+                                     &requiredList);
 
     } else {
 
@@ -159,8 +158,7 @@ bool Node::send2DistributorBusyMsg(ComponentObject target, Uuid jobID, long coll
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executorID,
-                                 const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorInfoMsg(ComponentObject target, Uuid jobID, long executorID, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 

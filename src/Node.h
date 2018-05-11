@@ -33,7 +33,7 @@ private:
     bool send2DistributorIDMsg(ComponentObject);
     bool send2DistributorBusyMsg(ComponentObject, Uuid, long);
 
-    bool send2CollectorInfoMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(ComponentObject, Uuid, long, TypeFileInfoList*);
 	bool send2CollectorBinaryMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
 
 	MessageData* getData();

@@ -106,8 +106,6 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
-    TypeMD5List md5List;
-
     return send2NodeReadyMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), job->getProvisionCount());
 }
 
