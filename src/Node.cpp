@@ -51,32 +51,38 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
     int collID = (int)msg->getHeader()->getVariant(0);
     long collAddress = msg->getHeader()->getVariant(1);
 
-    TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), msg->getData()->getFileList());
+    if (!getData()->getJobID().equal(msg->getData()->getJobID())) {
+        LOGS_E(getHost(), "Wrong Job ID came from Distributor, it should not!!!");
+        delete msg;
+        return false;
+    }
+
+    TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), getData()->getFileList());
     if (!requiredList.empty()) {
 
         return send2CollectorInfoMsg(CollectorObject(collID, collAddress),
-                                     msg->getData()->getJobID(),
-                                     msg->getData()->getJobDir(),
-                                     msg->getData()->getExecutorID(),
-                                     msg->getData()->getExecutor(), &requiredList);
+                                     getData()->getJobID(),
+                                     getData()->getJobDir(),
+                                     getData()->getExecutorID(),
+                                     getData()->getExecutor(), &requiredList);
 
     } else {
 
         processCommand(collID,
-                       msg->getData()->getJobDir(),
-                       msg->getData()->getExecutorID(),
-                       msg->getData()->getExecutor());
+                       getData()->getJobDir(),
+                       getData()->getExecutorID(),
+                       getData()->getExecutor());
 
-        TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
+        TypeFileInfoList outputList = FileInfo::getFileList(getData()->getFileList(), true);
         FileInfo::setFileListState(&outputList, false);
 
         //TODO will update with md5s including outputs
         //TODO will update with actual binary to collector including outputs
         return send2CollectorBinaryMsg(CollectorObject(collID, collAddress),
-                                       msg->getData()->getJobID(),
-                                       msg->getData()->getJobDir(),
-                                       msg->getData()->getExecutorID(),
-                                       msg->getData()->getExecutor(), &outputList);
+                                       getData()->getJobID(),
+                                       getData()->getJobDir(),
+                                       getData()->getExecutorID(),
+                                       getData()->getExecutor(), &outputList);
     }
 }
 
@@ -88,10 +94,6 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
     return send2DistributorBusyMsg(getDistributor(),
                                    msg->getData()->getJobID(),
-                                   msg->getData()->getJobDir(),
-                                   msg->getData()->getExecutorID(),
-                                   msg->getData()->getExecutor(),
-                                   msg->getData()->getFileList(),
                                    owner.getAddress());
 }
 
@@ -145,17 +147,14 @@ bool Node::send2DistributorIDMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Node::send2DistributorBusyMsg(ComponentObject target, Uuid jobID,
-                                   const char* jobDir, long executionID, const char *executor,
-                                   TypeFileInfoList *fileList, long collAddress) {
+bool Node::send2DistributorBusyMsg(ComponentObject target, Uuid jobID, long collAddress) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BUSY);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executionID, executor);
-    msg->getData()->addFileList(fileList);
     msg->getHeader()->setVariant(0, collAddress);
+
+    msg->getData()->setStreamFlag(STREAM_JOBID)
+            .setJobID(jobID);
 
     return send(target, msg);
 }
@@ -250,4 +249,9 @@ bool Node::processCommand(int collID, const char* jobDir, long execID, const cha
 
     return true;
 
+}
+
+MessageData *Node::getData() {
+
+    return &data;
 }

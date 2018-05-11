@@ -65,9 +65,9 @@ public:
         return Util::hex2str(data, size);
     }
 
-    bool equal(Array *ref) const {
+    bool equal(const Array &ref) const {
 
-        return memcmp(data, ref->data, size) == 0;
+        return memcmp(data, ref.data, size) == 0;
     }
 
     bool empty() const {
@@ -81,9 +81,9 @@ public:
         return true;
     }
 
-    bool compare(const Array *ref) const {
+    bool compare(const Array &ref) const {
 
-        return memcmp(data, ref->data, size) < 0;
+        return memcmp(data, ref.data, size) < 0;
     }
 };
 
@@ -91,7 +91,7 @@ struct cmp_array {
 
     bool operator()(const Array &a, const Array &b) const {
 
-        return a.compare(&b);
+        return a.compare(b);
     }
 };
 

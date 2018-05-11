@@ -65,7 +65,7 @@ TypeFileInfoList FileInfo::checkFileExistence(ComponentObject component, TypeFil
 
             Md5 md5(Util::getAbsMD5Path(component.getRootPath(),
                                         list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
-            if (!md5.equal(list->at(i).get()->getMD5())) {
+            if (!md5.equal(*list->at(i).get()->getMD5())) {
 
                 reqList.push_back(list->at(i));
             }

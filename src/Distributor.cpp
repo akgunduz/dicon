@@ -114,10 +114,6 @@ bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
 
     return send2NodeProcessMsg(owner,
                                msg->getData()->getJobID(),
-                               msg->getData()->getJobDir(),
-                               msg->getData()->getExecutorID(),
-                               msg->getData()->getExecutor(),
-                               msg->getData()->getFileList(),
                                collectorManager->getID(collAddress),
                                collAddress);
 }
@@ -200,19 +196,15 @@ bool Distributor::send2NodeIDMsg(ComponentObject target, int id) {
     return send(target, msg);
 }
 
-bool Distributor::send2NodeProcessMsg(ComponentObject target, Uuid jobID,
-                                      const char* jobDir, long executionID, const char *executor,
-                                   TypeFileInfoList *fileList, int collID, long collAddress) {
+bool Distributor::send2NodeProcessMsg(ComponentObject target, Uuid jobID, int collID, long collAddress) {
 
     auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executionID, executor);
-    msg->getData()->addFileList(fileList);
-
     msg->getHeader()->setVariant(0, collID);
     msg->getHeader()->setVariant(1, collAddress);
+
+    msg->getData()->setStreamFlag(STREAM_JOBID)
+            .setJobID(jobID);
 
     return send(target, msg);
 }
