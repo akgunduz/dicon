@@ -163,7 +163,7 @@ void Wx::CreateControls()
 
     collFileList = new wxListCtrl( collPanel, ID_COLL_FILE_LIST, wxPoint(10, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
 
-    collProcessList = new wxListCtrl( collPanel, ID_COLL_PROCESS_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT|wxLC_NO_HEADER );
+    collProcessList = new wxListCtrl( collPanel, ID_COLL_PROCESS_LIST, wxPoint(310, 130), wxSize(270, 360), wxLC_REPORT );
 
     mainPanel->AddPage(collPanel, _("Collector"));
 

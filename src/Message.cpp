@@ -10,7 +10,7 @@ Message::Message(ComponentObject host)
 
     getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 
-    getData()->setStreamFlag(STREAM_NONE);
+    getData()->setStreamFlag(FLAG_NONE);
 
 }
 
@@ -21,12 +21,72 @@ Message::Message(ComponentObject host, MSG_TYPE type)
     getHeader()->setOwner(host);
     getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
 
-    getData()->setStreamFlag(STREAM_NONE);
+    getData()->setStreamFlag(FLAG_NONE);
+}
+
+bool Message::readJobID(int desc, Uuid *jobID, Block *header) {
+
+    if (header->getType() != FLAG_JOBID) {
+        LOGS_E(getHost(), "readJobID can not read other blocks");
+        return false;
+    }
+
+    if (!readArray(desc, jobID->get(), jobID->getSize())) {
+        LOGS_E(getHost(), "readJobID Can not read array");
+        return false;
+    }
+
+    return true;
+}
+
+bool Message::readJobDir(int desc, char *jobDir, Block *header) {
+
+    if (header->getType() != FLAG_JOBDIR) {
+        LOGS_E(getHost(), "readJobDir can not read other blocks");
+        return false;
+    }
+
+    if (!readString(desc, jobDir, header->getSize(0))) {
+        LOGS_E(getHost(), "readJobDir can not read job directory");
+        return false;
+    }
+
+    return true;
+}
+
+bool Message::readProcessID(int desc, long *processID, Block *header) {
+
+    if (header->getType() != FLAG_PROCESSID) {
+        LOGS_E(getHost(), "readProcessID can not read other blocks");
+        return false;
+    }
+
+    if (!readNumber(desc, processID)) {
+        LOGS_E(getHost(), "readProcessID can not read process ID");
+        return false;
+    }
+
+    return true;
+}
+
+bool Message::readProcessCommand(int desc, char *command, Block *header) {
+
+    if (header->getType() != FLAG_PROCESSCMD) {
+        LOGS_E(getHost(), "readProcessCommand can not read other blocks");
+        return false;
+    }
+
+    if (!readString(desc, command, header->getSize(0))) {
+        LOGS_E(getHost(), "readProcessCommand can not read process command");
+        return false;
+    }
+
+    return true;
 }
 
 bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *header) {
 
-    if (header->getType() != BLOCK_FILE_BINARY && header->getType() != BLOCK_FILE_INFO) {
+    if (header->getType() != FLAG_FILEINFO && header->getType() != FLAG_FILEBINARY) {
         LOGS_E(getHost(), "readFile can not read other blocks");
         return false;
     }
@@ -50,7 +110,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 
     content->set(jobDir, fileName, (int)id);
 
-    if (header->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
+    if (header->getType() != FLAG_FILEBINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
     }
 
@@ -68,7 +128,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 
 bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 
-    if (header->getType() != BLOCK_FILE_MD5) {
+    if (header->getType() != FLAG_FILEMD5) {
         LOGS_E(getHost(), "readFileMD5 can not read other blocks");
         return false;
     }
@@ -81,97 +141,11 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 	return true;
 }
 
-bool Message::readJobID(int desc, Uuid *jobID, Block *header) {
-
-    if (header->getType() != BLOCK_JOB_ID) {
-        LOGS_E(getHost(), "readJobID can not read other blocks");
-        return false;
-    }
-
-    if (!readArray(desc, jobID->get(), jobID->getSize())) {
-        LOGS_E(getHost(), "readJobID Can not read array");
-        return false;
-    }
-
-    return true;
-}
-
-bool Message::readJobInfo(int desc, Uuid *jobID, char *jobDir, Block *header) {
-
-    if (header->getType() != BLOCK_JOB_INFO) {
-        LOGS_E(getHost(), "readJobInfo can not read other blocks");
-        return false;
-    }
-
-    if (!readArray(desc, jobID->get(), jobID->getSize())) {
-        LOGS_E(getHost(), "readJobInfo Can not read array");
-        return false;
-    }
-
-    if (!readString(desc, jobDir, header->getSize(0))) {
-        LOGS_E(getHost(), "readJobInfo can not read job dir");
-        return false;
-    }
-
-    return true;
-}
-
-bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Block *header) {
-
-    if (header->getType() != BLOCK_EXECUTION_INFO) {
-        LOGS_E(getHost(), "readExecutionInfo can not read other blocks");
-        return false;
-    }
-
-    if (!readNumber(desc, executionID)) {
-        LOGS_E(getHost(), "readExecutionInfo can not read execution id");
-        return false;
-    }
-
-    if (!readString(desc, execution, header->getSize(0))) {
-        LOGS_E(getHost(), "readExecutionInfo can not read execution info");
-        return false;
-    }
-
-    return true;
-}
-
 bool Message::readMessageBlock(int in, Block *header) {
 
     switch(header->getType()) {
 
-        case BLOCK_FILE_INFO:
-        case BLOCK_FILE_BINARY: {
-
-            auto *fileItem = new FileItem(getHost());
-            long state;
-
-            if (!readFile(in, fileItem, getData()->getJobDir(), &state, header)) {
-                return false;
-            }
-
-            LOGS_T(getHost(), "New %s with path %s/%s received",
-                  header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
-                  fileItem->getJobDir(), fileItem->getFileName());
-
-            getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT));
-        }
-            break;
-
-        case BLOCK_FILE_MD5: {
-
-            Md5 md5;
-            if (!readFileMD5(in, &md5, header)) {
-                return false;
-            }
-
-            LOGS_T(getHost(), "New md5 info %s received", md5.getStr().c_str());
-
-            getData()->addMD5(md5);
-        }
-            break;
-
-        case BLOCK_JOB_ID: {
+        case FLAG_JOBID: {
 
             Uuid id;
             if (!readJobID(in, &id, header)) {
@@ -185,33 +159,71 @@ bool Message::readMessageBlock(int in, Block *header) {
         }
             break;
 
-        case BLOCK_JOB_INFO: {
+        case FLAG_JOBDIR:
 
-            Uuid id;
-            if (!readJobInfo(in, &id, getData()->getJobDir(), header)) {
+            if (!readJobDir(in, getData()->getJobDir(), header)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New Job[%s] at %s is received",
-                   id.getStr().c_str(), getData()->getJobDir());
+            LOGS_T(getHost(), "New Job at %s is received",
+                   getData()->getJobDir());
 
-            getData()->setJobID(id);
+            break;
+
+        case FLAG_PROCESSID: {
+
+            long processID;
+            if (!readProcessID(in, &processID, header)) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "New Process ID : %d received", processID);
+
+            getData()->setProcessID(processID);
         }
             break;
 
-        case BLOCK_EXECUTION_INFO:
+        case FLAG_PROCESSCMD:
 
-            long executionID;
-            if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), header)) {
+            if (!readProcessCommand(in, getData()->getProcessCommand(), header)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New execution info %s received", getData()->getExecutor());
-
-            getData()->setExecutorID(executionID);
+            LOGS_T(getHost(), "New Process command :  %s received",
+                   getData()->getProcessCommand());
 
             break;
 
+        case FLAG_FILEINFO:
+        case FLAG_FILEBINARY: {
+
+            auto *fileItem = new FileItem(getHost());
+            long state;
+
+            if (!readFile(in, fileItem, getData()->getJobDir(), &state, header)) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "New %s with path %s/%s received",
+                  header->getType() == FLAG_FILEBINARY ? "File Binary" : "File Info",
+                  fileItem->getJobDir(), fileItem->getFileName());
+
+            getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT), header->getType() == FLAG_FILEBINARY);
+        }
+            break;
+
+        case FLAG_FILEMD5: {
+
+            Md5 md5;
+            if (!readFileMD5(in, &md5, header)) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "New md5 info %s received", md5.getStr().c_str());
+
+            getData()->addMD5(md5);
+        }
+            break;
 
         default:
             return false;
@@ -227,7 +239,7 @@ bool Message::readFinalize() {
 
 bool Message::writeJobID(int desc, Uuid jobID) {
 
-    Block blockHeader(0, BLOCK_JOB_ID);
+    Block blockHeader(0, FLAG_JOBID);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         LOGS_E(getHost(), "writeJobID can not write block header");
@@ -235,55 +247,61 @@ bool Message::writeJobID(int desc, Uuid jobID) {
     }
 
     if (!writeArray(desc, jobID.get(), jobID.getSize())) {
-        LOGS_E(getHost(), "writeJobID can not write execution info");
+        LOGS_E(getHost(), "writeJobID can not write job ID");
         return false;
     }
 
     return true;
 }
 
-bool Message::writeJobInfo(int desc, Uuid jobID, char *jobDir) {
+bool Message::writeJobDir(int desc, char *jobDir) {
 
-    Block blockHeader(1, BLOCK_JOB_INFO);
-
+    Block blockHeader(1, FLAG_JOBDIR);
     blockHeader.setSize(0, (int) strlen(jobDir));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeJobInfo can not write block header");
-        return false;
-    }
-
-    if (!writeArray(desc, jobID.get(), jobID.getSize())) {
-        LOGS_E(getHost(), "writeJobInfo can not write execution info");
+        LOGS_E(getHost(), "writeJobDir can not write block header");
         return false;
     }
 
     if (!writeString(desc, jobDir)) {
-        LOGS_E(getHost(), "writeJobInfo can not write job info");
+        LOGS_E(getHost(), "writeJobDir can not write job directory");
         return false;
     }
 
     return true;
 }
 
-bool Message::writeExecutionInfo(int desc, long executorID, char *executor) {
+bool Message::writeProcessID(int desc, long processID) {
 
-    Block blockHeader(1, BLOCK_EXECUTION_INFO);
-
-    blockHeader.setSize(0, (int) strlen(executor));
+    Block blockHeader(0, FLAG_PROCESSID);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write block header");
+        LOGS_E(getHost(), "writeProcessID can not write block header");
         return false;
     }
 
-    if (!writeNumber(desc, executorID)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write execution ID");
+    if (!writeNumber(desc, processID)) {
+        LOGS_E(getHost(), "writeProcessID can not write process ID");
         return false;
     }
 
-    if (!writeString(desc, executor)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write execution info");
+    return true;
+}
+
+bool Message::writeProcessCommand(int desc, char *command) {
+
+    Block blockHeader(1, FLAG_PROCESSCMD);
+
+    blockHeader.setSize(0, (int) strlen(command));
+
+    if (!writeBlockHeader(desc, &blockHeader)) {
+        LOGS_E(getHost(), "writeProcessCommand can not write block header");
+        return false;
+    }
+
+    if (!writeString(desc, command)) {
+        LOGS_E(getHost(), "writeProcessCommand can not write process command");
         return false;
     }
 
@@ -297,10 +315,14 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
     bool isBinaryTransfer = !isOutput && isBinary;
 
     if (!isBinaryTransfer) {
-        blockHeader.set(1, BLOCK_FILE_INFO);
+        blockHeader.set(1, FLAG_FILEINFO);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
     } else {
-        blockHeader.set(2, BLOCK_FILE_BINARY);
+        if (strcmp(content->getJobDir(), "") == 0) {
+            LOGS_E(getHost(), "writeFile can not write file binary without job directory info, set job directory first!!!");
+            return false;
+        }
+        blockHeader.set(2, FLAG_FILEBINARY);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
         absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName());
         blockHeader.setSize(1, getBinarySize(absPath.c_str()));
@@ -340,7 +362,7 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
 
 bool Message::writeFileMD5(int desc, Md5 *md5) {
 
-    Block blockHeader(0, BLOCK_FILE_MD5);
+    Block blockHeader(0, FLAG_FILEMD5);
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         LOGS_E(getHost(), "writeFileMD5 can not write block header");
@@ -359,70 +381,73 @@ bool Message::writeMessageStream(int out) {
 
     int i = 0;
 
-    switch(getData()->getStreamFlag()) {
+    unsigned long flag = getData()->getStreamFlag();
 
-        case STREAM_INFO:
-        case STREAM_BINARY:
+    if (flag & FLAG_JOBID) {
 
-            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
+        if (!writeJobID(out, getData()->getJobID())) {
+            return false;
+        }
+
+        LOGS_T(getHost(), "Job[%s] ID sent to network",
+               getData()->getJobID().getStr().c_str());
+    }
+
+    if (flag & FLAG_JOBDIR) {
+
+        if (!writeJobDir(out, getData()->getJobDir())) {
+            return false;
+        }
+
+        LOGS_T(getHost(), "Job Directory : %s sent to network",
+               getData()->getJobDir());
+    }
+
+    if (flag & FLAG_PROCESSID) {
+
+        if (!writeProcessID(out, getData()->getProcessID())) {
+            return false;
+        }
+
+        LOGS_T(getHost(), "Process[%ld] ID sent to network",
+               getData()->getProcessID());
+    }
+
+    if (flag & FLAG_PROCESSCMD) {
+
+        if (!writeProcessCommand(out, getData()->getProcessCommand())) {
+            return false;
+        }
+
+        LOGS_T(getHost(), "Process Command : %s sent to network",
+               getData()->getProcessCommand());
+    }
+
+    if (flag & FLAG_FILE) {
+
+        for (i = 0; i < getData()->getFileCount(); i++) {
+
+            if (!writeFile(out, getData()->getFile(i),
+                           getData()->isOutput(i),
+                           (flag & FLAG_FILEBINARY) > 0)) {
                 return false;
             }
+        }
 
-            if (!writeExecutionInfo(out, getData()->getExecutorID(), getData()->getExecutor())) {
+        LOGS_T(getHost(), "%d %s's sent to network", i,
+               flag & FLAG_FILEBINARY ? "File Binary" : "File Info");
+    }
+
+    if (flag & FLAG_FILEMD5) {
+
+        for (i = 0; i < getData()->getMD5Count(); i++) {
+
+            if (!writeFileMD5(out, getData()->getMD5(i))) {
                 return false;
             }
+        }
 
-            for (i = 0; i < getData()->getFileCount(); i++) {
-
-                if (!writeFile(out, getData()->getFile(i), getData()->isOutput(i),
-                               getData()->getStreamFlag() == STREAM_BINARY)) {
-                    return false;
-                }
-            }
-
-            LOGS_T(getHost(), "%d %s's sent to network", i,
-                  getData()->getStreamFlag() == STREAM_INFO ? "File Info" : "File Binary");
-            break;
-
-        case STREAM_MD5:
-
-            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
-                return false;
-            }
-
-            for (i = 0; i < getData()->getMD5Count(); i++) {
-
-                if (!writeFileMD5(out, getData()->getMD5(i))) {
-                    return false;
-                }
-            }
-
-            LOGS_T(getHost(), "%d file md5 content sent to network", i);
-            break;
-
-        case STREAM_JOB:
-
-            if (!writeJobInfo(out, getData()->getJobID(), getData()->getJobDir())) {
-                return false;
-            }
-
-            LOGS_T(getHost(), "Job[%s] at %s sent to network",
-                   getData()->getJobID().getStr().c_str(), getData()->getJobDir());
-            break;
-
-        case STREAM_JOBID:
-
-            if (!writeJobID(out, getData()->getJobID())) {
-                return false;
-            }
-
-            LOGS_T(getHost(), "Job[%s] ID sent to network",
-                   getData()->getJobID().getStr().c_str());
-            break;
-
-        case STREAM_NONE:
-        default :
-            break;
+        LOGS_T(getHost(), "%d file md5 content sent to network", i);
     }
 
     return true;

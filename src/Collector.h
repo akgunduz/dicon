@@ -25,14 +25,15 @@ class Collector : public Component {
 	bool processDistributorWakeupMsg(ComponentObject, Message *);
 	bool processDistributorIDMsg(ComponentObject, Message *);
 	bool processDistributorNodeMsg(ComponentObject, Message *);
+	bool processDistributorReadyMsg(ComponentObject, Message *);
 	bool processNodeInfoMsg(ComponentObject, Message *);
 	bool processNodeBinaryMsg(ComponentObject, Message *);
 
 	bool send2DistributorAliveMsg(ComponentObject);
 	bool send2DistributorNodeMsg(ComponentObject, Uuid, long);
 	bool send2NodeJobMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeBinaryMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
-	bool send2NodeReadyMsg(ComponentObject, Uuid, const char*, long);
+	bool send2NodeBinaryMsg(ComponentObject, Uuid, const char*, TypeFileInfoList*);
+	bool send2NodeReadyMsg(ComponentObject);
 
 public:
 

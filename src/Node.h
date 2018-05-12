@@ -28,13 +28,13 @@ private:
     bool processCollectorBinaryMsg(ComponentObject, Message *);
     bool processCollectorReadyMsg(ComponentObject, Message *);
 
-    bool send2DistributorReadyMsg(ComponentObject, Uuid, const char*, long, long);
+    bool send2DistributorReadyMsg(ComponentObject, Uuid, long);
     bool send2DistributorAliveMsg(ComponentObject);
     bool send2DistributorIDMsg(ComponentObject);
     bool send2DistributorBusyMsg(ComponentObject, Uuid, long);
 
-    bool send2CollectorInfoMsg(ComponentObject, Uuid, long, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(ComponentObject, Uuid, const char*, long, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(ComponentObject, Uuid, const char*, long, TypeFileInfoList*);
+	bool send2CollectorBinaryMsg(ComponentObject, Uuid, const char*, long, TypeFileInfoList*);
 
 	MessageData* getData();
     void parseCommand(char *cmd, char **argv);

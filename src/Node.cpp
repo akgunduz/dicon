@@ -62,15 +62,16 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
         return send2CollectorInfoMsg(CollectorObject(collID, collAddress),
                                      getData()->getJobID(),
-                                     getData()->getExecutorID(),
+                                     getData()->getJobDir(),
+                                     getData()->getProcessID(),
                                      &requiredList);
 
     } else {
 
         processCommand(collID,
                        getData()->getJobDir(),
-                       getData()->getExecutorID(),
-                       getData()->getExecutor());
+                       getData()->getProcessID(),
+                       getData()->getProcessCommand());
 
         TypeFileInfoList outputList = FileInfo::getFileList(getData()->getFileList(), true);
         FileInfo::setFileListState(&outputList, false);
@@ -80,8 +81,8 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
         return send2CollectorBinaryMsg(CollectorObject(collID, collAddress),
                                        getData()->getJobID(),
                                        getData()->getJobDir(),
-                                       getData()->getExecutorID(),
-                                       getData()->getExecutor(), &outputList);
+                                       getData()->getProcessID(),
+                                       &outputList);
     }
 }
 
@@ -99,35 +100,35 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
     processCommand(msg->getHeader()->getOwner().getID(),
-                   msg->getData()->getJobDir(),
-                   msg->getData()->getExecutorID(),
-                   msg->getData()->getExecutor());
+                   getData()->getJobDir(),
+                   getData()->getProcessID(),
+                   getData()->getProcessCommand());
 
     TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
     FileInfo::setFileListState(&outputList, false);
     //TODO will update with md5s including outputs
     //TODO will update with actual binary to collector including outputs
-    return send2CollectorBinaryMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
-                                   msg->getData()->getExecutor(), &outputList);
+    return send2CollectorBinaryMsg(owner,
+                                   getData()->getJobID(),
+                                   getData()->getJobDir(),
+                                   getData()->getProcessID(),
+                                   &outputList);
 }
 
 bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
 
-    long collUnservedCount = msg->getHeader()->getVariant(0);
-
-    return send2DistributorReadyMsg(getDistributor(), msg->getData()->getJobID(), msg->getData()->getJobDir(), owner.getAddress(), collUnservedCount);
+    return send2DistributorReadyMsg(getDistributor(), getData()->getJobID(), owner.getAddress());
 }
 
-bool Node::send2DistributorReadyMsg(ComponentObject target, Uuid jobID, const char* jobDir, long collAddress, long collUnservedCount) {
+bool Node::send2DistributorReadyMsg(ComponentObject target, Uuid jobID, long collAddress) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_READY);
 
-    msg->getData()->setStreamFlag(STREAM_JOB);
     msg->getHeader()->setVariant(0, collAddress);
-    msg->getHeader()->setVariant(1, collUnservedCount);
-    msg->getData()->setJob(jobID, jobDir);
+
+    msg->getData()->setJobID(jobID);
 
 	return send(target, msg);
 }
@@ -152,33 +153,31 @@ bool Node::send2DistributorBusyMsg(ComponentObject target, Uuid jobID, long coll
 
     msg->getHeader()->setVariant(0, collAddress);
 
-    msg->getData()->setStreamFlag(STREAM_JOBID)
-            .setJobID(jobID);
+    msg->getData()->setJobID(jobID);
 
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(ComponentObject target, Uuid jobID, long executorID, TypeFileInfoList *fileList) {
+bool Node::send2CollectorInfoMsg(ComponentObject target, Uuid jobID,
+                                 const char* jobDir, long processID, TypeFileInfoList *fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executorID, executor);
-    msg->getData()->addFileList(fileList);
+    msg->getData()->setJob(jobID, jobDir)
+            .setProcessID(processID)
+            .addFileList(fileList,false);
 
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executorID,
-                                   const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, long processID,
+                                   TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
-    msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executorID, executor);
-    msg->getData()->addFileList(fileList);
+    msg->getData()->setJob(jobID, jobDir)
+            .setProcessID(processID)
+            .addFileList(fileList,true);
 
     return send(target, msg);
 }

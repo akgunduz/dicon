@@ -37,6 +37,7 @@ private:
 	bool send2CollectorWakeupMsg(ComponentObject);
 	bool send2CollectorIDMsg(ComponentObject, int);
 	bool send2CollectorNodeMsg(ComponentObject, long, int, Uuid);
+	bool send2CollectorReadyMsg(ComponentObject, Uuid);
 
     bool send2NodeWakeupMsg(ComponentObject);
     bool send2NodeIDMsg(ComponentObject, int);

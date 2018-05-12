@@ -201,3 +201,10 @@ void Log::updateUI(int id, void *data1) {
         controller->display(id, data1);
     }
 }
+
+void Log::updateUI(int id, int data1, void *data2) {
+
+    if (controller) {
+        controller->display(id, data1, data2);
+    }
+}

@@ -6,112 +6,37 @@
 #include "MessageData.h"
 
 MessageData::MessageData() :
-        streamFlag(STREAM_NONE),
-        executorID(0),
-        executor(""),
+        streamFlag(FLAG_NONE),
+        processID(0),
+        processCommand(""),
         jobDir("") {
 
 }
 
 MessageData::MessageData(MessageData &copy) {
 
-    setStreamFlag(copy.getStreamFlag());
-    setExecutor(copy.getExecutorID(), copy.getExecutor());
+    setProcess(copy.getProcessID(), copy.getProcessCommand());
     setJob(copy.getJobID(), copy.getJobDir());
     addMD5List(copy.getMD5List());
-    addFileList(copy.getFileList());
+    addFileList(copy.getFileList(), false);
+
+    setStreamFlag(copy.getStreamFlag());
 }
 
-int MessageData::getStreamFlag() {
+unsigned long MessageData::getStreamFlag() {
 
     return streamFlag;
 }
 
-MessageData& MessageData::setStreamFlag(int streamFlag) {
+MessageData& MessageData::setStreamMask(unsigned long mask) {
 
-    this->streamFlag = streamFlag;
+    this->streamFlag |= mask;
     return *this;
 }
 
-Md5* MessageData::getMD5(int index) {
+MessageData& MessageData::setStreamFlag(unsigned long flag) {
 
-    return &md5List[index];
-}
-
-TypeMD5List *MessageData::getMD5List() {
-
-    return &md5List;
-}
-
-MessageData& MessageData::addMD5(Md5 md5) {
-
-    md5List.push_back(md5);
-    return *this;
-}
-
-MessageData& MessageData::addMD5List(TypeMD5List *list) {
-
-    md5List.insert(md5List.end(), list->begin(), list->end());
-    return *this;
-}
-
-unsigned long MessageData::getMD5Count() {
-
-    return md5List.size();
-}
-
-FileItem* MessageData::getFile(int index) {
-
-    return fileList[index].get();
-}
-
-bool MessageData::isOutput(int index) {
-
-    return fileList[index].isOutput();
-}
-
-TypeFileInfoList *MessageData::getFileList() {
-
-    return &fileList;
-}
-
-MessageData& MessageData::addFile(FileInfo file) {
-
-    fileList.push_back(file);
-    return *this;
-}
-
-MessageData& MessageData::addFileList(TypeFileInfoList *list) {
-
-    fileList.insert(fileList.end(), list->begin(), list->end());
-    return *this;
-}
-
-unsigned long MessageData::getFileCount() {
-
-    return fileList.size();
-}
-
-char* MessageData::getExecutor() {
-
-    return executor;
-}
-
-long MessageData::getExecutorID() {
-
-    return executorID;
-}
-
-MessageData& MessageData::setExecutorID(long id) {
-
-    this->executorID = id;
-    return *this;
-}
-
-MessageData& MessageData::setExecutor(long id, const char *executor) {
-
-    this->executorID = id;
-    strcpy(this->executor, executor);
+    this->streamFlag = flag;
     return *this;
 }
 
@@ -125,28 +50,131 @@ char *MessageData::getJobDir() {
     return jobDir;
 }
 
-MessageData& MessageData::setJob(Uuid jobID, const char *jobDir) {
-
-    strcpy(this->jobDir, jobDir);
-    return setJobID(jobID);
-}
-
 MessageData& MessageData::setJobID(Uuid jobID) {
 
+    setStreamMask(FLAG_JOBID);
+
     this->jobID.set(&jobID);
+
+    return *this;
+}
+
+MessageData& MessageData::setJob(Uuid jobID, const char *jobDir) {
+
+    setStreamMask(FLAG_JOB);
+
+    strcpy(this->jobDir, jobDir);
+    this->jobID.set(&jobID);
+
+    return *this;
+}
+
+long MessageData::getProcessID() {
+
+    return processID;
+}
+
+char* MessageData::getProcessCommand() {
+
+    return processCommand;
+}
+
+MessageData& MessageData::setProcessID(long id) {
+
+    setStreamMask(FLAG_PROCESSID);
+
+    this->processID = id;
+
+    return *this;
+}
+
+MessageData& MessageData::setProcess(long id, const char *executor) {
+
+    setStreamMask(FLAG_PROCESS);
+
+    this->processID = id;
+    strcpy(this->processCommand, executor);
+
+    return *this;
+}
+
+Md5* MessageData::getMD5(int index) {
+
+    return &md5List[index];
+}
+
+TypeMD5List *MessageData::getMD5List() {
+
+    return &md5List;
+}
+
+unsigned long MessageData::getMD5Count() {
+
+    return md5List.size();
+}
+
+MessageData& MessageData::addMD5(Md5 md5) {
+
+    setStreamMask(FLAG_FILEMD5);
+
+    md5List.push_back(md5);
+
+    return *this;
+}
+
+MessageData& MessageData::addMD5List(TypeMD5List *list) {
+
+    setStreamMask(FLAG_FILEMD5);
+
+    md5List.insert(md5List.end(), list->begin(), list->end());
+
+    return *this;
+}
+
+bool MessageData::isOutput(int index) {
+
+    return fileList[index].isOutput();
+}
+
+FileItem* MessageData::getFile(int index) {
+
+    return fileList[index].get();
+}
+
+TypeFileInfoList *MessageData::getFileList() {
+
+    return &fileList;
+}
+
+unsigned long MessageData::getFileCount() {
+
+    return fileList.size();
+}
+
+MessageData& MessageData::addFile(FileInfo file, bool isBinary) {
+
+    setStreamMask(isBinary ? FLAG_FILEBINARY : FLAG_FILEINFO);
+    fileList.push_back(file);
+    return *this;
+}
+
+MessageData& MessageData::addFileList(TypeFileInfoList *list, bool isBinary) {
+
+    setStreamMask(isBinary ? FLAG_FILEBINARY : FLAG_FILEINFO);
+    fileList.insert(fileList.end(), list->begin(), list->end());
     return *this;
 }
 
 MessageData &MessageData::operator=(MessageData *other) {
 
     if (this != other) {
-        setStreamFlag(other->getStreamFlag());
-        setExecutor(other->getExecutorID(), other->getExecutor());
+        setProcess(other->getProcessID(), other->getProcessCommand());
         setJob(other->getJobID(), other->getJobDir());
         addMD5List(other->getMD5List());
-        addFileList(other->getFileList());
+        addFileList(other->getFileList(), false);
+
+        setStreamFlag(other->getStreamFlag());
     }
 
     return *this;
 }
-

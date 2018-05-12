@@ -17,6 +17,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorIDMsg);
+    processMsg[COMP_DISTRIBUTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorReadyMsg);
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
@@ -43,6 +44,24 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
     return true;
 }
 
+bool Collector::processDistributorReadyMsg(ComponentObject owner, Message *msg) {
+
+    Job* job = getJobs()->get(msg->getData()->getJobID());
+    if (job == NULL) {
+        LOGS_I(getHost(), "No available job with this ID : %s", msg->getData()->getJobID().getStr().c_str());
+        delete msg;
+        return false;
+    }
+
+    long nodeReqCount = job->getProvisionCount();
+
+    if (nodeReqCount > 0) {
+        return send2DistributorNodeMsg(getDistributor(), job->getJobID(), nodeReqCount);
+    }
+
+    return true;
+}
+
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     int nodeID = (int)msg->getHeader()->getVariant(0);
@@ -56,7 +75,6 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
     }
 
     Job* job = getJobs()->get(msg->getData()->getJobID());
-
     if (job == NULL) {
         LOGS_I(getHost(), "No available job with this ID : %s", msg->getData()->getJobID().getStr().c_str());
         delete msg;
@@ -73,18 +91,24 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), nodeID);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {executor.getID(), executor.getState(), nodeID});
 
-    return send2NodeJobMsg(NodeObject(nodeID, nodeAddress), job->getJobID(), job->getJobDir(), executor.getID(),
-                           executor.get()->getParsedExec(), executor.get()->getFileList());
+    return send2NodeJobMsg(NodeObject(nodeID, nodeAddress),
+                           job->getJobID(),
+                           job->getJobDir(),
+                           executor.getID(),
+                           executor.get()->getParsedExec(),
+                           executor.get()->getFileList());
 }
 
 bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
-    return send2NodeBinaryMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
-                              msg->getData()->getExecutor(), msg->getData()->getFileList());
+    return send2NodeBinaryMsg(owner,
+                              msg->getData()->getJobID(),
+                              msg->getData()->getJobDir(),
+                              msg->getData()->getFileList());
 }
 
 bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
@@ -102,11 +126,11 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     Job* job = getJobs()->get(msg->getData()->getJobID());
 
-    job->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
+    job->setOrderedState(msg->getData()->getProcessID(), PROCESS_STATE_ENDED);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {msg->getData()->getProcessID(), PROCESS_STATE_ENDED, 0});
 
-    return send2NodeReadyMsg(owner, msg->getData()->getJobID(), msg->getData()->getJobDir(), job->getProvisionCount());
+    return send2NodeReadyMsg(owner);
 }
 
 bool Collector::send2DistributorAliveMsg(ComponentObject target) {
@@ -122,46 +146,36 @@ bool Collector::send2DistributorNodeMsg(ComponentObject target, Uuid jobID, long
 
     msg->getHeader()->setVariant(0, unservedCount);
 
-    msg->getData()->setStreamFlag(STREAM_JOBID)
-            .setJobID(jobID);
+    msg->getData()->setJobID(jobID);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeJobMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executionID,
-                                const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2NodeJobMsg(ComponentObject target, Uuid jobID, const char* jobDir, long processID,
+                                const char* processCommand, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executionID, executor);
-    msg->getData()->addFileList(fileList);
+    msg->getData()->setJob(jobID, jobDir)
+            .setProcess(processID, processCommand)
+            .addFileList(fileList, false);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, long executionID,
-                                   const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2NodeBinaryMsg(ComponentObject target, Uuid jobID, const char* jobDir, TypeFileInfoList *fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
-    msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJob(jobID, jobDir);
-    msg->getData()->setExecutor(executionID, executor);
-    msg->getData()->addFileList(fileList);
+    msg->getData()->setJob(jobID, jobDir)
+            .addFileList(fileList, true);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeReadyMsg(ComponentObject target, Uuid jobID, const char* jobDir, long collUnservedCount) {
+bool Collector::send2NodeReadyMsg(ComponentObject target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
-
-    msg->getData()->setStreamFlag(STREAM_JOB);
-    msg->getData()->setJob(jobID, jobDir);
-
-    msg->getHeader()->setVariant(0, collUnservedCount);
 
     return send(target, msg);
 }
@@ -187,7 +201,6 @@ bool Collector::processJob(int index) {
 
     Job* job = getJobs()->get(index);
 
-    TypeMD5List md5List;
     return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getProvisionCount());
 }
 
@@ -214,7 +227,7 @@ bool Collector::loadJob(const char* path) {
     }
 
     if (getJobs()->get(0)->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
+        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, 0, getJobs()->get(0));
     }
 
     return true;

@@ -5,6 +5,7 @@
 
 #include "Distributor.h"
 #include "DeviceList.h"
+#include "CollectorObject.h"
 
 Distributor *Distributor::instance = NULL;
 
@@ -85,7 +86,6 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     }
 
     long collAddress = msg->getHeader()->getVariant(0);
-    long collUnservedCount = msg->getHeader()->getVariant(1);
 
     LOGS_I(getHost(), "Node[%d] is Done with Collector[%d]\'s process",
            nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
@@ -93,7 +93,7 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), 0});
     LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), IDLE});
 
-    return processWaitingList(collAddress, msg->getData()->getJobID(), collUnservedCount);
+    return processWaitingList(collAddress, msg->getData()->getJobID(), 0);
 }
 
 bool Distributor::processNodeIDMsg(ComponentObject owner, Message *msg) {
@@ -128,6 +128,11 @@ bool Distributor::processWaitingList(long collAddress, Uuid jobID, long nodeReqC
         collectorManager->addWaiting(collAddress, jobID);
     }
 
+    if (collectorManager->getWaitingCount() == 0) {
+
+        return send2CollectorReadyMsg(CollectorObject(collectorManager->getID(collAddress), collAddress), jobID);
+    }
+
     while(collectorManager->getWaitingCount()) {
 
         long nodeAddress = nodeManager->getIdle();
@@ -143,7 +148,7 @@ bool Distributor::processWaitingList(long collAddress, Uuid jobID, long nodeReqC
         LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d]\'s process",
                nodeManager->getID(nodeAddress), collectorManager->getID(collector.first));
 
-        status &= send2CollectorNodeMsg(*collectorManager->get(collector.first),
+        status |= send2CollectorNodeMsg(*collectorManager->get(collector.first),
                                         nodeAddress, nodeManager->getID(nodeAddress), collector.second);
 
     }
@@ -174,8 +179,16 @@ bool Distributor::send2CollectorNodeMsg(ComponentObject target, long nodeAddress
     msg->getHeader()->setVariant(0, nodeID);
     msg->getHeader()->setVariant(1, nodeAddress);
 
-    msg->getData()->setStreamFlag(STREAM_JOBID)
-            .setJobID(jobID);
+    msg->getData()->setJobID(jobID);
+
+    return send(target, msg);
+}
+
+bool Distributor::send2CollectorReadyMsg(ComponentObject target, Uuid jobID) {
+
+    auto *msg = new Message(getHost(), MSGTYPE_READY);
+
+    msg->getData()->setJobID(jobID);
 
     return send(target, msg);
 }
@@ -203,8 +216,7 @@ bool Distributor::send2NodeProcessMsg(ComponentObject target, Uuid jobID, int co
     msg->getHeader()->setVariant(0, collID);
     msg->getHeader()->setVariant(1, collAddress);
 
-    msg->getData()->setStreamFlag(STREAM_JOBID)
-            .setJobID(jobID);
+    msg->getData()->setJobID(jobID);
 
     return send(target, msg);
 }

@@ -105,3 +105,14 @@ void UserInterfaceController::display(int id, void *data1) {
     updateUI(id, event);
 
 }
+
+void UserInterfaceController::display(int id, int data1, void *data2) {
+
+    auto *event = new UserInterfaceEvent(id);
+
+    event->addData(data1);
+    event->addPointer(data2);
+
+    updateUI(id, event);
+
+}

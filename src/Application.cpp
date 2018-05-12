@@ -153,9 +153,9 @@ int main(int argc, char** argv) {
 #ifdef WX_UI
     if (appMode == APPMODE::APPMODE_WXWIDGETS) {
 
-        distCount = std::min(distCount, 1);
-        collCount = std::min(collCount, 1);
-        nodeCount = std::min(nodeCount, 1);
+//        distCount = std::min(distCount, 1);
+//        collCount = std::min(collCount, 1);
+//        nodeCount = std::min(nodeCount, 1);
         collIndex = 1;
         nodeIndex = 1;
     }

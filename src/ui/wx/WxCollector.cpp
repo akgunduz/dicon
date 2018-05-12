@@ -29,12 +29,17 @@ void Wx::collInit(bool enable) {
     column.SetWidth(width);
     collFileList->InsertColumn(0, column);
 
-    width = collProcessList->GetSize().GetWidth() - 1;
+    width = collProcessList->GetSize().GetWidth() / 8;
 
     column.SetId(0);
-    column.SetText( _("Processes") );
+    column.SetText( _("Node") );
     column.SetWidth(width);
     collProcessList->InsertColumn(0, column);
+
+    column.SetId(1);
+    column.SetText( _("Processes") );
+    column.SetWidth(width * 7);
+    collProcessList->InsertColumn(1, column);
 
     uiUpdater[UI_UPDATE_COLL_ID] = &Wx::collUpdateID;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
@@ -99,7 +104,10 @@ void Wx::collUpdateProcessList(wxCommandEvent &event) {
 
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        long row = collProcessList->InsertItem(collProcessList->GetItemCount(), job->getOrderedExecution(j)->getExec());
+        long row = collProcessList->InsertItem(collProcessList->GetItemCount(), 0);
+
+        collProcessList->SetItem(row, 0, wxString::Format(wxT("%ld"), data->getData(0)));
+        collProcessList->SetItem(row, 1, job->getOrderedExecution(j)->getExec());
         collProcessList->SetItemBackgroundColour(row, job->getOrderedExecution(j)->isValid() ?
                                                     wxColour(0, 255, 0) : wxColour(255, 255, 255));
     }
@@ -109,33 +117,35 @@ void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    auto *job = (Job *)data->getPointer(0);
+    auto processID = data->getData(0);
+    auto processState = data->getData(1);
+    auto nodeID = data->getData(2);
 
-    for (int j = 0; j < job->getOrderedCount(); j++) {
+    if (nodeID > 0) {
+        collProcessList->SetItem(processID, 0, wxString::Format(wxT("%ld"), nodeID));
+    }
 
-        switch(job->getOrderedState(j)) {
+    switch(processState) {
 
             case PROCESS_STATE_ENDED:
-                collProcessList->SetItemBackgroundColour(j, wxColour(180, 180, 180));
+                collProcessList->SetItemBackgroundColour(processID, wxColour(180, 180, 180));
                 break;
 
             case PROCESS_STATE_STARTED:
-                collProcessList->SetItemBackgroundColour(j, wxColour(255, 0, 255));
+                collProcessList->SetItemBackgroundColour(processID, wxColour(255, 0, 255));
                 break;
 
             case PROCESS_STATE_PROVISION:
-                collProcessList->SetItemBackgroundColour(j, wxColour(0, 255, 0));
+                collProcessList->SetItemBackgroundColour(processID, wxColour(0, 255, 0));
                 break;
 
             case PROCESS_STATE_NOTSTARTED:
-                collProcessList->SetItemBackgroundColour(j, job->getOrderedExecution(j)->isValid() ?
-                                                            wxColour(0, 255, 0) : wxColour(255, 255, 255));
+                collProcessList->SetItemBackgroundColour(processID, wxColour(255, 255, 255));
                 break;
 
             default:
                 break;
         }
-    }
 }
 
 

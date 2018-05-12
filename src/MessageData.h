@@ -9,20 +9,26 @@
 #include "ExecutorItem.h"
 #include "Uuid.h"
 
-#define STREAM_NONE 0xFFFF
+#define FLAG_NONE           0x00000000
+#define FLAG_JOBID          0x00000001
+#define FLAG_JOBDIR         0x00000002
+#define FLAG_PROCESSID      0x00000004
+#define FLAG_PROCESSCMD     0x00000008
+#define FLAG_FILEINFO       0x00000010
+#define FLAG_FILEBINARY     0x00000020
+#define FLAG_FILEMD5        0x00000040
 
-#define STREAM_INFO 0x01
-#define STREAM_BINARY 0x02
-#define STREAM_MD5 0x03
-#define STREAM_JOB 0x04
-#define STREAM_JOBID 0x05
+#define FLAG_JOB            FLAG_JOBID | FLAG_JOBDIR
+#define FLAG_PROCESS        FLAG_PROCESSID | FLAG_PROCESSCMD
+#define FLAG_FILE           FLAG_FILEINFO | FLAG_FILEBINARY
+
 
 class MessageData {
 
-    int streamFlag;
+    unsigned long streamFlag;
 
-    long executorID;
-    char executor[PATH_MAX];
+    long processID;
+    char processCommand[PATH_MAX];
     Uuid jobID;
     char jobDir[PATH_MAX];
 
@@ -35,8 +41,9 @@ public:
     MessageData(MessageData &);
     MessageData& operator=(MessageData*);
 
-    int getStreamFlag();
-    MessageData& setStreamFlag(int);
+    unsigned long getStreamFlag();
+    MessageData& setStreamMask(unsigned long);
+    MessageData& setStreamFlag(unsigned long);
 
     Md5* getMD5(int);
     TypeMD5List* getMD5List();
@@ -47,14 +54,14 @@ public:
     FileItem* getFile(int);
     bool isOutput(int);
     TypeFileInfoList* getFileList();
-    MessageData& addFile(FileInfo);
-    MessageData& addFileList(TypeFileInfoList*);
+    MessageData& addFile(FileInfo, bool);
+    MessageData& addFileList(TypeFileInfoList*, bool);
     unsigned long getFileCount();
 
-    char* getExecutor();
-    long getExecutorID();
-    MessageData& setExecutorID(long);
-    MessageData& setExecutor(long, const char*);
+    char* getProcessCommand();
+    long getProcessID();
+    MessageData& setProcessID(long);
+    MessageData& setProcess(long, const char *);
 
     Uuid getJobID();
     char* getJobDir();

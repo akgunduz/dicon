@@ -49,6 +49,7 @@ public:
     void display(int, const char* , ...);
     void display(int, int, const char* , const char*);
     void display(int, int, const char* , long);
+    void display(int, int, void*);
     void display(int, void*);
 };
 
