@@ -19,7 +19,7 @@ void Wx::nodeInit(bool enable) {
         return;
     }
 
-    int width = nodeProcessList->GetSize().GetWidth() / 8;
+    int width = nodeProcessList->GetSize().GetWidth() / 10;
 
     wxListItem column;
     column.SetId(0);
@@ -29,12 +29,12 @@ void Wx::nodeInit(bool enable) {
 
     column.SetId(1);
     column.SetText( _("Job ID") );
-    column.SetWidth(width * 2);
+    column.SetWidth(width * 5);
     nodeProcessList->InsertColumn(1, column);
 
     column.SetId(2);
     column.SetText( _("Job Name") );
-    column.SetWidth(width * 4);
+    column.SetWidth(width * 3);
     nodeProcessList->InsertColumn(2, column);
 
     column.SetId(3);
@@ -77,5 +77,6 @@ void Wx::nodeUpdateProcessList(wxCommandEvent &event) {
 
     nodeProcessList->SetItem(row, 0, wxString::Format(wxT("%ld"), data->getData(0)));
     nodeProcessList->SetItem(row, 1, data->getString(0));
-    nodeProcessList->SetItem(row, 2, wxString::Format(wxT("%ld"), data->getData(1)));
+    nodeProcessList->SetItem(row, 2, data->getString(1));
+    nodeProcessList->SetItem(row, 3, wxString::Format(wxT("%ld"), data->getData(1)));
 }

@@ -38,7 +38,7 @@ private:
 
 	MessageData* getData();
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(int, const char*, long, const char *);
+    bool processCommand(int, Uuid, const char*, long, const char *);
 
 public:
 

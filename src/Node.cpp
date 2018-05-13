@@ -69,6 +69,7 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
     } else {
 
         processCommand(collID,
+                       getData()->getJobID(),
                        getData()->getJobDir(),
                        getData()->getProcessID(),
                        getData()->getProcessCommand());
@@ -100,6 +101,7 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
     processCommand(msg->getHeader()->getOwner().getID(),
+                   getData()->getJobID(),
                    getData()->getJobDir(),
                    getData()->getProcessID(),
                    getData()->getProcessCommand());
@@ -209,7 +211,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(int collID, const char* jobDir, long execID, const char *cmd) {
+bool Node::processCommand(int collID, Uuid jobID, const char* jobDir, long processID, const char *cmd) {
 
     int status;
     char *args[100];
@@ -218,8 +220,8 @@ bool Node::processCommand(int collID, const char* jobDir, long execID, const cha
 
     strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
-    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, execID);
-    LOGS_I(getHost(), "Collector[%d]\'s Process[%d] is executing", collID, execID);
+    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, processID, jobID.getStr().c_str(), jobDir);
+    LOGS_I(getHost(), "Collector[%d]\'s Process[%d] is executing", collID, processID);
     LOGS_T(getHost(), "Command : %s", fullcmd);
 
     parseCommand(fullcmd, args);

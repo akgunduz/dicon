@@ -68,6 +68,19 @@ void UserInterfaceController::display(int id, int data1, char const *data2, char
 
 }
 
+void UserInterfaceController::display(int id, int data1, long data2, char const *data3, char const *data4) {
+
+    auto *event = new UserInterfaceEvent(id);
+
+    event->addData(data1);
+    event->addData(data2);
+    event->addString(std::string(data3));
+    event->addString(std::string(data4));
+
+    updateUI(id, event);
+
+}
+
 void UserInterfaceController::display(int id, int data1, char const *data2, long data3) {
 
     auto *event = new UserInterfaceEvent(id);

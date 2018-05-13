@@ -48,6 +48,7 @@ public:
     void display(int, std::vector<long>, const char* , ...);
     void display(int, const char* , ...);
     void display(int, int, const char* , const char*);
+    void display(int, int, long, const char* , const char*);
     void display(int, int, const char* , long);
     void display(int, int, void*);
     void display(int, void*);

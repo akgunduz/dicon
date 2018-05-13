@@ -69,6 +69,7 @@ public:
 	static void updateUI(int, std::vector<long>, const char* , ...);
 	static void updateUI(int, const char* , ...);
 	static void updateUI(int, int, const char* , const char*);
+	static void updateUI(int, int, long, const char* , const char*);
 	static void updateUI(int, int, const char* , long);
 	static void updateUI(int, void*);
 	static void updateUI(int, int, void*);
