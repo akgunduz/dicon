@@ -20,6 +20,8 @@
 
 class Job : public JsonItem {
 
+private:
+
     char name[50];
     Uuid id;
     long unServedCount;
@@ -28,42 +30,44 @@ class Job : public JsonItem {
 
     std::mutex mutex;
 
-public:
-
-    Job(ComponentObject host, const char* jobDir);
-
     void init();
-    ~Job();
 
     static bool parseNameNode(JsonItem*, json_object *node);
     static bool parseFileNode(JsonItem*, json_object *node);
     static bool parseParamNode(JsonItem*, json_object *node);
     static bool parseExecutorNode(JsonItem*, json_object *node);
 
-    Uuid getJobID();
-
     const char* getName();
     void setName(const char*);
 
-    int getExecutorCount();
-    ExecutorItem* getExecutor(int);
+    ExecutorInfo getOrdered(int);
+    PROCESS_STATE getOrderedState(int);
+    void setOrderedState(int, PROCESS_STATE);
+
+    ExecutorItem* getByOutput(int);
+    bool createDependencyMap();
+
+public:
+
+    Job(ComponentObject host, const char* jobDir);
+
+    ~Job();
+
+    Uuid getJobID();
 
     int getFileCount();
     FileItem* getFile(int);
 
+    int getExecutorCount();
+    ExecutorItem* getExecutor(int);
+
     long getOrderedCount();
-    ExecutorInfo getOrdered(int);
     ExecutorItem* getOrderedExecution(int);
-    PROCESS_STATE getOrderedState(int);
-    void setOrderedState(int, PROCESS_STATE);
 
     long getUnServedCount();
     ExecutorInfo getUnServed();
     void updateUnServed(int = 0, PROCESS_STATE = PROCESS_STATE_MAX);
     bool isEnded();
-
-    ExecutorItem* getByOutput(int);
-    bool createDependencyMap();
 };
 
 
