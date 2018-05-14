@@ -22,8 +22,11 @@ class Job : public JsonItem {
 
     char name[50];
     Uuid id;
+    long unServedCount;
 
     std::vector<ExecutorInfo> orderedList;
+
+    std::mutex mutex;
 
 public:
 
@@ -49,7 +52,6 @@ public:
     FileItem* getFile(int);
 
     long getOrderedCount();
-    long getProvisionCount();
     ExecutorInfo getOrdered(int);
     ExecutorItem* getOrderedExecution(int);
     PROCESS_STATE getOrderedState(int);
@@ -57,6 +59,7 @@ public:
 
     long getUnServedCount();
     ExecutorInfo getUnServed();
+    void updateUnServed(int = 0, PROCESS_STATE = PROCESS_STATE_MAX);
     bool isEnded();
 
     ExecutorItem* getByOutput(int);

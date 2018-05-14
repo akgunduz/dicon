@@ -135,10 +135,6 @@ void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
                 collProcessList->SetItemBackgroundColour(processID, wxColour(255, 0, 255));
                 break;
 
-            case PROCESS_STATE_PROVISION:
-                collProcessList->SetItemBackgroundColour(processID, wxColour(0, 255, 0));
-                break;
-
             case PROCESS_STATE_NOTSTARTED:
                 collProcessList->SetItemBackgroundColour(processID, wxColour(255, 255, 255));
                 break;

@@ -7,7 +7,7 @@
 #include "ExecutorItem.h"
 
 Job::Job(ComponentObject host, const char* jobDir)
-        : JsonItem(host, jobDir, JOB_FILE){
+        : JsonItem(host, jobDir, JOB_FILE), unServedCount(0) {
 
     init();
 
@@ -38,6 +38,7 @@ void Job::init() {
         return;
     }
 
+    updateUnServed();
 }
 
 bool Job::parseNameNode(JsonItem *parent, json_object *node) {
@@ -201,6 +202,14 @@ void Job::setOrderedState(int index, PROCESS_STATE state) {
 
 ExecutorInfo Job::getUnServed() {
 
+    mutex.lock();
+
+    if (unServedCount == 0) {
+
+        mutex.unlock();
+        return ExecutorInfo(0, NULL);
+    }
+
     for (int i = 0; i < getOrderedCount(); i++) {
 
         if (getOrderedState(i) == PROCESS_STATE_STARTED ||
@@ -213,37 +222,27 @@ ExecutorInfo Job::getUnServed() {
         }
 
         setOrderedState(i, PROCESS_STATE_STARTED);
+        unServedCount--;
+
+        mutex.unlock();
 
         return getOrdered(i);
     }
 
+    mutex.unlock();
+
     return ExecutorInfo(0, NULL);
 }
 
-long Job::getUnServedCount() {
+void Job::updateUnServed(int processID, PROCESS_STATE state) {
 
-    int count = 0;
+    mutex.lock();
 
-    for (int i = 0; i < getOrderedCount(); i++) {
-
-        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-            getOrderedState(i) == PROCESS_STATE_ENDED) {
-            continue;
-        }
-
-        if (!getOrderedExecution(i)->isValid()) {
-            continue;
-        }
-
-        count++;
+    if (state != PROCESS_STATE_MAX) {
+        setOrderedState(processID, state);
     }
 
-    return count;
-}
-
-long Job::getProvisionCount() {
-
-    int count = 0;
+    unServedCount = 0;
 
     for (int i = 0; i < getOrderedCount(); i++) {
 
@@ -257,11 +256,20 @@ long Job::getProvisionCount() {
         }
 
         if (getOrderedState(i) == PROCESS_STATE_NOTSTARTED) {
-
-            setOrderedState(i, PROCESS_STATE_PROVISION);
-            count++;
+            unServedCount++;
         }
     }
+
+    mutex.unlock();
+}
+
+long Job::getUnServedCount() {
+
+    mutex.lock();
+
+    long count = unServedCount;
+
+    mutex.unlock();
 
     return count;
 }

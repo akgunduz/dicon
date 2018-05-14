@@ -113,7 +113,10 @@ include_directories(${JSON-C_INCLUDE_DIRS})
 
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
-#target_link_libraries(bankor-framework -luuid)
+if (NOT DEFINED APPLE)
+    target_link_libraries(bankor-framework -luuid)
+endif()
+
 
 if (DEFINED WX_UI)
 

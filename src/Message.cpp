@@ -115,9 +115,9 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
     }
 
     Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), content->getJobDir(),
-                                              fileName).c_str(), &calcMD5, header->getSize(1))) {
-		LOGS_E(getHost(), "readFile can not read Binary data");
+    const char *binPath = Util::getAbsRefPath(getHost().getRootPath(), content->getJobDir(), fileName).c_str();
+	if (!readBinary(desc, binPath, &calcMD5, header->getSize(1))) {
+		LOGS_E(getHost(), "readFile can not write Binary data to the file system at path : %s, errno : %d", binPath, errno);
 		return false;
 	}
 
@@ -311,7 +311,8 @@ bool Message::writeProcessCommand(int desc, char *command) {
 bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinary) {
 
     Block blockHeader;
-    std::string absPath = "";
+    int binarySize = 0;
+    std::string absPath;
     bool isBinaryTransfer = !isOutput && isBinary;
 
     if (!isBinaryTransfer) {
@@ -325,7 +326,12 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
         blockHeader.set(2, FLAG_FILEBINARY);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
         absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName());
-        blockHeader.setSize(1, getBinarySize(absPath.c_str()));
+        binarySize = getBinarySize(absPath.c_str());
+        if (binarySize == 0) {
+            LOGS_E(getHost(), "writeFile can not read Binary data from the file system at path : %s, errno : %d", absPath.c_str(), errno);
+            return false;
+        }
+        blockHeader.setSize(1, binarySize);
     }
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
@@ -350,8 +356,8 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(desc, absPath.c_str(), NULL, blockHeader.getSize(1))) {
-            LOGS_E(getHost(), "writeFile can not write Binary data");
+        if (!writeBinary(desc, absPath.c_str(), NULL, (size_t)binarySize)) {
+            LOGS_E(getHost(), "writeFile can not read Binary data from the file system at path : %s, errno : %d", absPath.c_str(), errno);
             return false;
         }
     }

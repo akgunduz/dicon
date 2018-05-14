@@ -53,10 +53,8 @@ bool Collector::processDistributorReadyMsg(ComponentObject owner, Message *msg) 
         return false;
     }
 
-    long nodeReqCount = job->getProvisionCount();
-
-    if (nodeReqCount > 0) {
-        return send2DistributorNodeMsg(getDistributor(), job->getJobID(), nodeReqCount);
+    if (job->getUnServedCount() > 0) {
+        return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getUnServedCount());
     }
 
     return true;
@@ -126,7 +124,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     Job* job = getJobs()->get(msg->getData()->getJobID());
 
-    job->setOrderedState(msg->getData()->getProcessID(), PROCESS_STATE_ENDED);
+    job->updateUnServed(msg->getData()->getProcessID(), PROCESS_STATE_ENDED);
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {msg->getData()->getProcessID(), PROCESS_STATE_ENDED, 0});
 
@@ -140,11 +138,11 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, Uuid jobID, long unservedCount) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target, Uuid jobID, long unServedCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
-    msg->getHeader()->setVariant(0, unservedCount);
+    msg->getHeader()->setVariant(0, unServedCount);
 
     msg->getData()->setJobID(jobID);
 
@@ -201,7 +199,7 @@ bool Collector::processJob(int index) {
 
     Job* job = getJobs()->get(index);
 
-    return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getProvisionCount());
+    return send2DistributorNodeMsg(getDistributor(), job->getJobID(), job->getUnServedCount());
 }
 
 bool Collector::processJobs() {
