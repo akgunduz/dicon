@@ -91,7 +91,8 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
 
-    this->data = msg->getData();
+    getData()->reset();
+    getData()->set(msg->getData());
 
     return send2DistributorBusyMsg(getDistributor(),
                                    msg->getData()->getJobID(),

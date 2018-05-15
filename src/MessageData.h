@@ -40,6 +40,8 @@ public:
     MessageData();
     MessageData(MessageData &);
     MessageData& operator=(MessageData*);
+    void set(MessageData*);
+    void reset();
 
     unsigned long getStreamFlag();
     MessageData& setStreamMask(unsigned long);

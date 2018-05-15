@@ -168,13 +168,27 @@ MessageData& MessageData::addFileList(TypeFileInfoList *list, bool isBinary) {
 MessageData &MessageData::operator=(MessageData *other) {
 
     if (this != other) {
-        setProcess(other->getProcessID(), other->getProcessCommand());
-        setJob(other->getJobID(), other->getJobDir());
-        addMD5List(other->getMD5List());
-        addFileList(other->getFileList(), false);
-
-        setStreamFlag(other->getStreamFlag());
+        set(other);
     }
 
     return *this;
+}
+
+void MessageData::reset() {
+
+    setStreamFlag(FLAG_NONE);
+    setProcess(0, "");
+    setJob(Uuid(0), "");
+    fileList.clear();
+    md5List.clear();
+}
+
+void MessageData::set(MessageData *other) {
+
+    setProcess(other->getProcessID(), other->getProcessCommand());
+    setJob(other->getJobID(), other->getJobDir());
+    addMD5List(other->getMD5List());
+    addFileList(other->getFileList(), false);
+//Stream flag must be set after the other assignments
+    setStreamFlag(other->getStreamFlag());
 }

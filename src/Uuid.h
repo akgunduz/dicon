@@ -18,6 +18,13 @@ public:
         uuid_generate(tmp);
         set(tmp);
     }
+
+    Uuid(uint8_t val) : Array(sizeof(uuid_t)) {
+
+        uuid_t tmp = {};
+        memset(tmp, val, sizeof(uuid_t));
+        set(tmp);
+    }
 };
 
 

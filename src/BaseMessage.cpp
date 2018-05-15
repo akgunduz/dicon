@@ -246,12 +246,17 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
+        LOGS_E(getHost(), "readBinary : Can not create binary at path : %s", path);
 		return false;
 	}
+
+    LOGS_T(getHost(), "readBinary : Binary at path : %s is created for incoming transfer", path);
 
 	bool status = transferBinary(in, out, md5, size);
 
 	close(out);
+
+    LOGS_T(getHost(), "readBinary : Binary at path : %s is received", path);
 
 	return status;
 
@@ -423,12 +428,17 @@ bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, size_t size) 
 
 	int in = open(path, O_RDONLY);
 	if (in == -1) {
+		LOGS_E(getHost(), "writeBinary : Can not open binary at path : %s", path);
 		return false;
 	}
+
+    LOGS_T(getHost(), "writeBinary : Binary at path : %s is opened for outgoing transfer", path);
 
 	bool status = transferBinary(in, out, md5, size);
 
 	close(in);
+
+    LOGS_T(getHost(), "writeBinary : Binary at path : %s is sent", path);
 
 	return status;
 

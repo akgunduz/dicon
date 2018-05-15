@@ -40,7 +40,7 @@ bool Net::initTCP() {
         return false;
     }
 
-    int tryCount = 10;
+    int tryCount = 65535;
     int lastFreePort = DEFAULT_PORT;
 
     for (int j = tryCount; j > 0; j--) {

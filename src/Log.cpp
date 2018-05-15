@@ -107,7 +107,8 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 
     va_end(ap);
 
-    printf("%s", logout);
+    printf(level == LEVEL_ERROR ? ANSI_COLOR_RED : ANSI_COLOR_RESET "%s", logout);
+    printf(ANSI_COLOR_RESET);
 }
 
 void Log::logc(LOGLEVEL level, const char *file, int line,
