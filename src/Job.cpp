@@ -251,7 +251,7 @@ void Job::updateUnServed(int processID, PROCESS_STATE state) {
             continue;
         }
 
-        if (!getOrderedExecution(i)->isValid()) {
+        if (!getOrderedExecution(i)->validate()) {
             continue;
         }
 

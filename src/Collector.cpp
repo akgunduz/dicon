@@ -62,7 +62,7 @@ bool Collector::processDistributorReadyMsg(ComponentObject owner, Message *msg) 
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
-    int nodeID = (int)msg->getHeader()->getVariant(0);
+    auto nodeID = (int)msg->getHeader()->getVariant(0);
     long nodeAddress = msg->getHeader()->getVariant(1);
 
     if (nodeAddress == 0) {

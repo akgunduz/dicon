@@ -67,7 +67,7 @@ Md5* FileItem::getMD5() {
 
 bool FileItem::isValid() {
 
-    return validate();
+    return is_exist;
 }
 
 void FileItem::setMD5(Md5 *md5) {
@@ -132,5 +132,6 @@ bool FileItem::validate() {
 
     return true;
 }
+
 
 

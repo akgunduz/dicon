@@ -157,6 +157,22 @@ bool ExecutorItem::isValid() {
     return true;
 }
 
+bool ExecutorItem::validate() {
+
+	for (int i = 0; i < fileList.size(); i++) {
+
+		if (fileList[i].isOutput()) {
+			continue;
+		}
+
+		if (!fileList[i].get()->validate()) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 TypeFileInfoList* ExecutorItem::getFileList() {
 
     return &fileList;

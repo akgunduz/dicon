@@ -39,6 +39,7 @@ public:
 	virtual CONTENT_TYPES getType();
 
     virtual bool isValid();
+    virtual bool validate();
 };
 
 
