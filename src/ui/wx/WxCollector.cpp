@@ -29,17 +29,22 @@ void Wx::collInit(bool enable) {
     column.SetWidth(width);
     collFileList->InsertColumn(0, column);
 
-    width = collProcessList->GetSize().GetWidth() / 8;
+    width = collProcessList->GetSize().GetWidth() / 9;
 
     column.SetId(0);
-    column.SetText( _("Node") );
-    column.SetWidth(width);
+    column.SetText( _("ID") );
+    column.SetWidth(width * 1);
     collProcessList->InsertColumn(0, column);
 
     column.SetId(1);
+    column.SetText( _("Node") );
+    column.SetWidth(width * 1);
+    collProcessList->InsertColumn(1, column);
+
+    column.SetId(2);
     column.SetText( _("Processes") );
     column.SetWidth(width * 7);
-    collProcessList->InsertColumn(1, column);
+    collProcessList->InsertColumn(2, column);
 
     uiUpdater[UI_UPDATE_COLL_ID] = &Wx::collUpdateID;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &Wx::collUpdateFileList;
@@ -106,8 +111,9 @@ void Wx::collUpdateProcessList(wxCommandEvent &event) {
 
         long row = collProcessList->InsertItem(collProcessList->GetItemCount(), 0);
 
-        collProcessList->SetItem(row, 0, wxString::Format(wxT("%ld"), data->getData(0)));
-        collProcessList->SetItem(row, 1, job->getOrderedExecution(j)->getExec());
+        collProcessList->SetItem(row, 0, wxString::Format(wxT("%d"), j));
+        collProcessList->SetItem(row, 1, wxString::Format(wxT("%ld"), data->getData(0)));
+        collProcessList->SetItem(row, 2, job->getOrderedExecution(j)->getExec());
         collProcessList->SetItemBackgroundColour(row, job->getOrderedExecution(j)->isValid() ?
                                                     wxColour(0, 255, 0) : wxColour(255, 255, 255));
     }
@@ -122,7 +128,7 @@ void Wx::collUpdateProcessListItem(wxCommandEvent &event) {
     auto nodeID = data->getData(2);
 
     if (nodeID > 0) {
-        collProcessList->SetItem(processID, 0, wxString::Format(wxT("%ld"), nodeID));
+        collProcessList->SetItem(processID, 1, wxString::Format(wxT("%ld"), nodeID));
     }
 
     switch(processState) {
