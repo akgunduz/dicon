@@ -87,7 +87,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), nodeID);
+    LOGS_I(getHost(), "Node[%d] is triggered with Process[%d]", nodeID, executor.getID());
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {executor.getID(), executor.getState(), nodeID});
 
@@ -127,6 +127,8 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
     job->updateUnServed(msg->getData()->getProcessID(), PROCESS_STATE_ENDED);
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {msg->getData()->getProcessID(), PROCESS_STATE_ENDED, 0});
+
+    LOGS_I(getHost(), "Node[%d]'s output is received for Process[%d]", owner.getID(), msg->getData()->getProcessID());
 
     return send2NodeReadyMsg(owner);
 }

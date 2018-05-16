@@ -93,13 +93,13 @@ bool FileItem::validate() {
     }
 
     if (strcmp(getJobDir(), "") == 0 || strcmp(getFileName(), "") == 0) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        LOGS_E(getHost(), "FileContent path is invalid");
         return false;
     }
 
     FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str(), "r");
     if (file == NULL) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        LOGS_E(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 
@@ -129,6 +129,8 @@ bool FileItem::validate() {
     fclose(file);
 
     is_exist = true;
+
+    LOGS_T(getHost(), "FileContent %s is validated", getFileName());
 
     return true;
 }
