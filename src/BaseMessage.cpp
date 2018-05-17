@@ -244,7 +244,7 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	Util::mkPath(path);
 
-	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
+	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC|O_CLOEXEC, 00755);
 	if (out == -1) {
         LOGS_E(getHost(), "readBinary : Can not create binary at path : %s", path);
 		return false;

@@ -244,6 +244,11 @@ bool Node::processCommand(int collID, Uuid jobID, const char* jobDir, long proce
         //child part
         execv(*args, args);
         LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, cmd);
+        if (errno == ETXTBSY) {
+            LOGS_I(getHost(), "ExecV trying one more time for command %s", cmd);
+            usleep(100000);
+            execv(*args, args);
+        }
         exit(EXIT_FAILURE);
     }
 
