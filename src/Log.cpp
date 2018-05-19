@@ -76,7 +76,7 @@ void Log::show(const char *format, ...) {
 //    printf("%s", logout);
 //}
 
-void Log::logs(LOGLEVEL level, const char *file, int line,
+void Log::logs(LOGLEVEL level, const char *file, const char *function, int line,
                ComponentObject host, ...) {
 
     if (logLevel[0] < level) {
@@ -91,8 +91,8 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 #ifndef DISABLE_LOGFILEINFO
     char extra[PATH_MAX];
     std::string fileName = Util::extractFile(file);
-    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
-    sprintf(logout, "%s %s", extra, logout);
+    sprintf(extra, "%s : %s->%s[%d]:", sLogLevels[level], fileName.c_str(), function, line);
+    strcpy(logout, extra);
 #endif
 
     va_list ap;
@@ -100,7 +100,8 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%11s[%d] : %s \n",
+    sprintf(logout, "%s %11s[%d] : %s \n",
+            logout,
             host.getName(),
             host.getID(),
             buf);
@@ -111,7 +112,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
     printf(ANSI_COLOR_RESET);
 }
 
-void Log::logc(LOGLEVEL level, const char *file, int line,
+void Log::logc(LOGLEVEL level, const char *file, const char *function, int line,
                ComponentObject host, ComponentObject target, int direction, ...) {
 
     if (logLevel[1] < level) {
@@ -123,12 +124,11 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
 
     strcpy(logout, "");
 
-
 #ifndef DISABLE_LOGFILEINFO
     char extra[PATH_MAX];
     std::string fileName = Util::extractFile(file);
-    sprintf(extra, "%s : %s[%d]:", sLogLevels[level], fileName.c_str(), line);
-    sprintf(logout, "%s %s", extra, logout);
+    sprintf(extra, "%s : %s->%s[%d]:", sLogLevels[level], fileName.c_str(), function, line);
+    strcpy(logout, extra);
 #endif
 
     va_list ap;
@@ -136,7 +136,8 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",
+    sprintf(logout, "%s %11s[%d] %s %11s[%d] : %s \n",
+            logout,
             host.getName(),
             host.getID(),
             direction ? "==>" : "<==",
@@ -146,7 +147,8 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
 
     va_end(ap);
 
-    printf("%s", logout);
+    printf("%s%s", level == LEVEL_ERROR ? ANSI_COLOR_RED : ANSI_COLOR_RESET , logout);
+    printf(ANSI_COLOR_RESET);
 
 }
 
