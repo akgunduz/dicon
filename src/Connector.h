@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __Connector_H_
-#define __Connector_H_
+#ifndef BANKOR_CONNECTOR_H
+#define BANKOR_CONNECTOR_H
 
 #include "Log.h"
 #include "Scheduler.h"
@@ -26,4 +26,4 @@ public:
 };
 
 
-#endif //__Connector_H_
+#endif //BANKOR_CONNECTOR_H

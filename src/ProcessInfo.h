@@ -2,11 +2,11 @@
 // Created by Haluk AKGUNDUZ on 29.04.2018.
 //
 
-#ifndef BANKOR_EXECUTORINFO_H
-#define BANKOR_EXECUTORINFO_H
+#ifndef BANKOR_PROCESSINFO_H
+#define BANKOR_PROCESSINFO_H
 
 
-#include "ExecutorItem.h"
+#include "ProcessItem.h"
 
 enum PROCESS_STATE {
     PROCESS_STATE_NOTSTARTED,
@@ -15,20 +15,20 @@ enum PROCESS_STATE {
     PROCESS_STATE_MAX,
 };
 
-class ExecutorInfo {
+class ProcessInfo {
 
-    ExecutorItem *item;
+    ProcessItem *item;
     long id;
     PROCESS_STATE state;
 
 public:
 
-    ExecutorInfo(long, ExecutorItem *);
-    ExecutorItem* get();
+    ProcessInfo(long, ProcessItem *);
+    ProcessItem* get();
     long getID();
     PROCESS_STATE getState();
     void setState(PROCESS_STATE);
 };
 
 
-#endif //BANKOR_EXECUTORINFO_H
+#endif //BANKOR_PROCESSINFO_H

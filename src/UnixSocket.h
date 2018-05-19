@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __UnixSocket_H_
-#define __UnixSocket_H_
+#ifndef BANKOR_UNIXSOCKET_H
+#define BANKOR_UNIXSOCKET_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -39,4 +39,4 @@ public :
 	static std::vector<long> getAddressList(Device*);
 };
 
-#endif //__UnixSocket_H_
+#endif //BANKOR_UNIXSOCKET_H

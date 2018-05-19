@@ -34,7 +34,7 @@ FILES = \
         ${SOURCE_PATH}/FileItem.cpp \
         ${SOURCE_PATH}/FileList.cpp \
         ${SOURCE_PATH}/ParameterItem.cpp \
-        ${SOURCE_PATH}/ExecutorItem.cpp \
+        ${SOURCE_PATH}/ProcessItem.cpp \
         ${SOURCE_PATH}/Distributor.cpp \
         ${SOURCE_PATH}/Interface.cpp \
         ${SOURCE_PATH}/InterfaceCallback.cpp \

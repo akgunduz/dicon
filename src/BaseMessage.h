@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __BaseMessage_H_
-#define __BaseMessage_H_
+#ifndef BANKOR_BASEMESSAGE_H
+#define BANKOR_BASEMESSAGE_H
 
 #include "Md5.h"
 #include "Block.h"
@@ -75,4 +75,4 @@ public:
 	ComponentObject getHost();
 };
 
-#endif //__Message_H_
+#endif //BANKOR_BASEMESSAGE_H

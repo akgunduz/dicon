@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef SCHEDULER_H
-#define	SCHEDULER_H
+#ifndef BANKOR_SCHEDULER_H
+#define	BANKOR_SCHEDULER_H
 
 #include "Common.h"
 #include "Message.h"
@@ -37,4 +37,4 @@ private:
 
 };
 
-#endif	/* SCHEDULER_H */
+#endif	/* BANKOR_SCHEDULER_H */

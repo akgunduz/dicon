@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/12/15.
 //
 
-#ifndef BANKOR_CONNECTINTERFACE_H
-#define BANKOR_CONNECTINTERFACE_H
+#ifndef BANKOR_DEVICE_H
+#define BANKOR_DEVICE_H
 
 #include "InterfaceTypes.h"
 
@@ -30,4 +30,4 @@ public:
 };
 
 
-#endif //BANKOR_CONNECTINTERFACE_H
+#endif //BANKOR_DEVICE_H

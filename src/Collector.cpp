@@ -79,24 +79,24 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    ExecutorInfo executor = job->getUnServed();
+    ProcessInfo process = job->getUnServed();
 
-    if (executor.get() == NULL) {
+    if (process.get() == NULL) {
         LOGS_I(getHost(), "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
     }
 
-    LOGS_I(getHost(), "Node[%d] is triggered with Process[%d]", nodeID, executor.getID());
+    LOGS_I(getHost(), "Node[%d] is triggered with Process[%d]", nodeID, process.getID());
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {executor.getID(), executor.getState(), nodeID});
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {process.getID(), process.getState(), nodeID});
 
     return send2NodeJobMsg(NodeObject(nodeID, nodeAddress),
                            job->getJobID(),
                            job->getJobDir(),
-                           executor.getID(),
-                           executor.get()->getParsedExec(),
-                           executor.get()->getFileList());
+                           process.getID(),
+                           process.get()->getParsedProcess(),
+                           process.get()->getFileList());
 }
 
 bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
@@ -226,7 +226,7 @@ bool Collector::loadJob(const char* path) {
         LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
     }
 
-    if (getJobs()->get(0)->getExecutorCount()) {
+    if (getJobs()->get(0)->getProcessCount()) {
         LOG_U(UI_UPDATE_COLL_PROCESS_LIST, 0, getJobs()->get(0));
     }
 

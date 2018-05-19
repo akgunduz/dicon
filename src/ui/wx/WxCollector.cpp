@@ -113,8 +113,8 @@ void Wx::collUpdateProcessList(wxCommandEvent &event) {
 
         collProcessList->SetItem(row, 0, wxString::Format(wxT("%d"), j));
         collProcessList->SetItem(row, 1, wxString::Format(wxT("%ld"), data->getData(0)));
-        collProcessList->SetItem(row, 2, job->getOrderedExecution(j)->getExec());
-        collProcessList->SetItemBackgroundColour(row, job->getOrderedExecution(j)->isValid() ?
+        collProcessList->SetItem(row, 2, job->getOrderedProcess(j)->getProcess());
+        collProcessList->SetItemBackgroundColour(row, job->getOrderedProcess(j)->isValid() ?
                                                     wxColour(0, 255, 0) : wxColour(255, 255, 255));
     }
 }

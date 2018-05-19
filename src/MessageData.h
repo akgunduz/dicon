@@ -6,7 +6,7 @@
 #ifndef BANKOR_MESSAGEDATA_H
 #define BANKOR_MESSAGEDATA_H
 
-#include "ExecutorItem.h"
+#include "ProcessItem.h"
 #include "Uuid.h"
 
 #define FLAG_NONE           0x00000000

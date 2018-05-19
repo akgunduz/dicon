@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __Util_H_
-#define __Util_H_
+#ifndef BANKOR_UTIL_H
+#define BANKOR_UTIL_H
 
 #include "Log.h"
 #include "ComponentObject.h"
@@ -40,4 +40,4 @@ public:
 };
 
 
-#endif //__Tools_H_
+#endif //BANKOR_UTIL_H

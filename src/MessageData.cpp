@@ -88,12 +88,12 @@ MessageData& MessageData::setProcessID(long id) {
     return *this;
 }
 
-MessageData& MessageData::setProcess(long id, const char *executor) {
+MessageData& MessageData::setProcess(long id, const char *process) {
 
     setStreamMask(FLAG_PROCESS);
 
     this->processID = id;
-    strcpy(this->processCommand, executor);
+    strcpy(this->processCommand, process);
 
     return *this;
 }

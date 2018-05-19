@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __Content_H_
-#define __Content_H_
+#ifndef BANKOR_CONTENTITEM_H
+#define BANKOR_CONTENTITEM_H
 
 #include "Log.h"
 #include "SchedulerItem.h"
@@ -15,7 +15,7 @@ enum CONTENT_TYPES {
     CONTENT_NAME,
 	CONTENT_FILE,
 	CONTENT_PARAM,
-	CONTENT_EXECUTOR,
+	CONTENT_PROCESS,
     CONTENT_MAX
 };
 
@@ -30,4 +30,4 @@ public:
 	virtual ~ContentItem(){}
 };
 
-#endif //__Content_H_
+#endif //BANKOR_CONTENTITEM_H

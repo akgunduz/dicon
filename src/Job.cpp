@@ -4,7 +4,7 @@
 
 #include "Job.h"
 #include "ParameterItem.h"
-#include "ExecutorItem.h"
+#include "ProcessItem.h"
 
 Job::Job(ComponentObject host, const char* jobDir)
         : JsonItem(host, jobDir, JOB_FILE), unServedCount(0) {
@@ -22,15 +22,15 @@ void Job::init() {
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
-    contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
+    contentTypes[CONTENT_PROCESS] = new JsonType(CONTENT_PROCESS, "processes", this, parseProcessNode);
 
     if (!parse()) {
         LOGS_E(getHost(), "Job could not parsed!!!");
         return;
     }
 
-    for (int i = 0; i < getExecutorCount(); i++) {
-        getExecutor(i)->parse(this);
+    for (int i = 0; i < getProcessCount(); i++) {
+        getProcess(i)->parse(this);
     }
 
     if (!createDependencyMap()){
@@ -113,11 +113,11 @@ bool Job::parseParamNode(JsonItem *parent, json_object *node) {
     return true;
 }
 
-bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
+bool Job::parseProcessNode(JsonItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
-        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Executor Node");
+        LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Process Node");
         return false;
     }
 
@@ -126,15 +126,15 @@ bool Job::parseExecutorNode(JsonItem *parent, json_object *node) {
 
         type = json_object_get_type(child);
         if (type != json_type_string) {
-            LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Executor Node");
+            LOGS_E(((Job*)parent)->getHost(), "Invalid JSON Process Node");
             return false;
         }
 
-        const char *exec = json_object_get_string(child);
+        const char *process = json_object_get_string(child);
 
-        auto *content = new ExecutorItem(exec);
+        auto *content = new ProcessItem(process);
 
-        ((Job*)parent)->contentList[CONTENT_EXECUTOR].push_back(content);
+        ((Job*)parent)->contentList[CONTENT_PROCESS].push_back(content);
     }
 
     return true;
@@ -155,14 +155,14 @@ void Job::setName(const char *name) {
     strncpy(this->name, name, 50);
 }
 
-int Job::getExecutorCount() {
+int Job::getProcessCount() {
 
-    return getContentCount(CONTENT_EXECUTOR);
+    return getContentCount(CONTENT_PROCESS);
 }
 
-ExecutorItem* Job::getExecutor(int index) {
+ProcessItem* Job::getProcess(int index) {
 
-    return (ExecutorItem*)getContent(CONTENT_EXECUTOR, index);
+    return (ProcessItem*)getContent(CONTENT_PROCESS, index);
 }
 
 int Job::getFileCount() {
@@ -180,12 +180,12 @@ long Job::getOrderedCount() {
     return orderedList.size();
 }
 
-ExecutorInfo Job::getOrdered(int index) {
+ProcessInfo Job::getOrdered(int index) {
 
     return orderedList[index];
 }
 
-ExecutorItem* Job::getOrderedExecution(int index) {
+ProcessItem* Job::getOrderedProcess(int index) {
 
     return orderedList[index].get();
 }
@@ -200,14 +200,14 @@ void Job::setOrderedState(int index, PROCESS_STATE state) {
     orderedList[index].setState(state);
 }
 
-ExecutorInfo Job::getUnServed() {
+ProcessInfo Job::getUnServed() {
 
     mutex.lock();
 
     if (unServedCount == 0) {
 
         mutex.unlock();
-        return ExecutorInfo(0, NULL);
+        return ProcessInfo(0, NULL);
     }
 
     for (int i = 0; i < getOrderedCount(); i++) {
@@ -217,7 +217,7 @@ ExecutorInfo Job::getUnServed() {
             continue;
         }
 
-        if (!getOrderedExecution(i)->isValid()) {
+        if (!getOrderedProcess(i)->isValid()) {
             continue;
         }
 
@@ -231,7 +231,7 @@ ExecutorInfo Job::getUnServed() {
 
     mutex.unlock();
 
-    return ExecutorInfo(0, NULL);
+    return ProcessInfo(0, NULL);
 }
 
 void Job::updateUnServed(int processID, PROCESS_STATE state) {
@@ -251,7 +251,7 @@ void Job::updateUnServed(int processID, PROCESS_STATE state) {
             continue;
         }
 
-        if (!getOrderedExecution(i)->validate()) {
+        if (!getOrderedProcess(i)->validate()) {
             continue;
         }
 
@@ -286,19 +286,19 @@ bool Job::isEnded() {
     return true;
 }
 
-ExecutorItem *Job::getByOutput(int index) {
+ProcessItem *Job::getByOutput(int index) {
 
-    for (int i = 0; i < getExecutorCount(); i++) {
+    for (int i = 0; i < getProcessCount(); i++) {
 
-        auto *executor = getExecutor(i);
+        auto *process = getProcess(i);
 
-        TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), true);
+        TypeFileInfoList list = FileInfo::getFileList(process->getFileList(), true);
         if (list.empty()) {
             continue;
         }
 
         if (list[0].get()->getID() == index) {
-            return executor;
+            return process;
         }
     }
 
@@ -313,11 +313,11 @@ bool Job::createDependencyMap() {
 
     bzero(depth, (size_t)getFileCount() * sizeof(int));
 
-    for (int i = 0; i < getExecutorCount(); i++) {
+    for (int i = 0; i < getProcessCount(); i++) {
 
         TypeFileList outList, depList;
 
-        TypeFileInfoList *fileList = getExecutor(i)->getFileList();
+        TypeFileInfoList *fileList = getProcess(i)->getFileList();
 
         for (int j = 0; j < fileList->size(); j++) {
 
@@ -374,7 +374,7 @@ bool Job::createDependencyMap() {
 
         auto *content = getByOutput(i);
         if (content) {
-            orderedList.emplace_back(ExecutorInfo(orderedList.size(), content));
+            orderedList.emplace_back(ProcessInfo(orderedList.size(), content));
         }
     }
 

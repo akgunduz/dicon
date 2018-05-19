@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef NODEMANAGER_H
-#define	NODEMANAGER_H
+#ifndef BANKOR_NODEMANAGER_H
+#define	BANKOR_NODEMANAGER_H
 
 #include "NodeObject.h"
 #include "ComponentManager.h"
@@ -26,4 +26,4 @@ public:
     void setObject(int, long);
 };
 
-#endif	/* DISTRIBUTOR_H */
+#endif	/* BANKOR_NODEMANAGER_H */

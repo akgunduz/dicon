@@ -2,8 +2,8 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#ifndef BANKOR_JSONFILE_H
-#define BANKOR_JSONFILE_H
+#ifndef BANKOR_JSONITEM_H
+#define BANKOR_JSONITEM_H
 
 
 #include "FileItem.h"
@@ -34,4 +34,4 @@ public:
 };
 
 
-#endif //BANKOR_JSONFILE_H
+#endif //BANKOR_JSONITEM_H

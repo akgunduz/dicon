@@ -18,7 +18,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ContentItem.cpp
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/ParameterItem.cpp
-        ${SOURCE_PATH}/ExecutorItem.cpp
+        ${SOURCE_PATH}/ProcessItem.cpp
         ${SOURCE_PATH}/Distributor.cpp
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
@@ -40,7 +40,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/AddressHelper.cpp
-        ${SOURCE_PATH}/Job.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/JsonType.cpp
@@ -58,7 +57,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentObject.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
-        ${SOURCE_PATH}/ExecutorInfo.cpp
+        ${SOURCE_PATH}/ProcessInfo.cpp
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
         ${SOURCE_PATH}/ComponentController.cpp

@@ -7,7 +7,6 @@
 
 
 #include "Job.h"
-#include "JobInfo.h"
 
 typedef std::map<Uuid , Job*, cmp_array> TypeJobList;
 

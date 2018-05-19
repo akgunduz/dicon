@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __ParameterContent_H_
-#define __ParameterContent_H_
+#ifndef BANKOR_PARAMETERITEM_H
+#define BANKOR_PARAMETERITEM_H
 
 #include "ContentItem.h"
 
@@ -21,4 +21,4 @@ public:
     virtual bool isValid();
 };
 
-#endif //__Content_H_
+#endif //BANKOR_PARAMETERITEM_H

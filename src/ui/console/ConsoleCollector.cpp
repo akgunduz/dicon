@@ -48,7 +48,7 @@ void ConsoleApp::collUpdateProcessList(ConsoleEvent &event) {
 
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
-        LOG_S("Console UI ------> Collector Process[%d] : %s is triggered", j, job->getOrderedExecution(j)->getExec());
+        LOG_S("Console UI ------> Collector Process[%d] : %s is triggered", j, job->getOrderedProcess(j)->getProcess());
 
     }
 }

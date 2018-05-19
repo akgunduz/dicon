@@ -7,9 +7,8 @@
 
 #include "JsonItem.h"
 #include "Md5.h"
-#include "ExecutorItem.h"
-#include "JobInfo.h"
-#include "ExecutorInfo.h"
+#include "ProcessItem.h"
+#include "ProcessInfo.h"
 #include "Uuid.h"
 
 
@@ -26,7 +25,7 @@ private:
     Uuid id;
     long unServedCount;
 
-    std::vector<ExecutorInfo> orderedList;
+    std::vector<ProcessInfo> orderedList;
 
     std::mutex mutex;
 
@@ -35,16 +34,16 @@ private:
     static bool parseNameNode(JsonItem*, json_object *node);
     static bool parseFileNode(JsonItem*, json_object *node);
     static bool parseParamNode(JsonItem*, json_object *node);
-    static bool parseExecutorNode(JsonItem*, json_object *node);
+    static bool parseProcessNode(JsonItem *, json_object *node);
 
     const char* getName();
     void setName(const char*);
 
-    ExecutorInfo getOrdered(int);
+    ProcessInfo getOrdered(int);
     PROCESS_STATE getOrderedState(int);
     void setOrderedState(int, PROCESS_STATE);
 
-    ExecutorItem* getByOutput(int);
+    ProcessItem* getByOutput(int);
     bool createDependencyMap();
 
 public:
@@ -58,14 +57,14 @@ public:
     int getFileCount();
     FileItem* getFile(int);
 
-    int getExecutorCount();
-    ExecutorItem* getExecutor(int);
+    int getProcessCount();
+    ProcessItem* getProcess(int);
 
     long getOrderedCount();
-    ExecutorItem* getOrderedExecution(int);
+    ProcessItem* getOrderedProcess(int);
 
     long getUnServedCount();
-    ExecutorInfo getUnServed();
+    ProcessInfo getUnServed();
     void updateUnServed(int = 0, PROCESS_STATE = PROCESS_STATE_MAX);
     bool isEnded();
 };

@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 24/06/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
-#ifndef __Interface_H_
-#define __Interface_H_
+#ifndef BANKOR_INTERFACE_H
+#define BANKOR_INTERFACE_H
 
 #include "Scheduler.h"
 #include "Message.h"
@@ -66,4 +66,4 @@ public :
 };
 
 
-#endif //__Connector_H_
+#endif //BANKOR_INTERFACE_H

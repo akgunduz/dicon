@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Log_H_
-#define __Log_H_
+#ifndef BANKOR_LOG_H
+#define BANKOR_LOG_H
 
 #include <ui/UserInterfaceController.h>
 #include "ComponentObject.h"
@@ -86,4 +86,4 @@ public:
 
 };
 
-#endif //__Log_H_
+#endif //BANKOR_LOG_H

@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Common_H_
-#define __Common_H_
+#ifndef BANKOR_COMMON_H
+#define BANKOR_COMMON_H
 
 #include <cstdio>
 #include <cstdlib>

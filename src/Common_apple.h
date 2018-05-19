@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Common_APPLE_H_
-#define __Common_APPLE_H_
+#ifndef BANKOR_COMMONAPPLE_H
+#define BANKOR_COMMONAPPLE_H
 
 #include <IOKit/IOKitKeys.h>
 #include <CommonCrypto/CommonDigest.h>

@@ -4,19 +4,12 @@
 //
 
 
-#ifndef __Message_H_
-#define __Message_H_
+#ifndef BANKOR_MESSAGE_H
+#define BANKOR_MESSAGE_H
 
 #include "BaseMessage.h"
 #include "MessageHeader.h"
 #include "MessageData.h"
-
-//#define BLOCK_JOB_ID 0x01
-//#define BLOCK_JOB_INFO 0x02
-//#define BLOCK_EXECUTION_INFO 0x03
-//#define BLOCK_FILE_BINARY 0x04
-//#define BLOCK_FILE_MD5 0x05
-//#define BLOCK_FILE_INFO 0x06
 
 class Message : public BaseMessage {
 
@@ -34,7 +27,6 @@ private:
 
     bool writeJobID(int, Uuid);
     bool writeJobDir(int, char*);
-    //bool writeJobInfo(int, Uuid, char*);
     bool writeProcessID(int, long);
     bool writeProcessCommand(int, char*);
     bool writeFile(int, FileItem *, bool, bool);
@@ -59,4 +51,4 @@ public:
 	MessageData* getData();
 };
 
-#endif //__Message_H_
+#endif //BANKOR_MESSAGE_H

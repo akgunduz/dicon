@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Net_H_
-#define __Net_H_
+#ifndef BANKOR_NET_H
+#define BANKOR_NET_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -55,4 +55,4 @@ public :
 
 };
 
-#endif //__Server_H_
+#endif //BANKOR_NET_H

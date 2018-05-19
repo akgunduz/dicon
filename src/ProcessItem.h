@@ -3,36 +3,36 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __ExecutorContent_H_
-#define __ExecutorContent_H_
+#ifndef BANKOR_PROCESSITEM_H
+#define BANKOR_PROCESSITEM_H
 
 #include "ContentItem.h"
 #include "FileItem.h"
 #include "FileInfo.h"
 
-enum EXEC_OPTIONS {
-	EXEC_FILE,
-	EXEC_PARAM,
-	EXEC_OUTPUT,
-	EXEC_MAX
+enum PROCESS_OPTIONS {
+	PROCESS_FILE,
+	PROCESS_PARAM,
+	PROCESS_OUTPUT,
+	PROCESS_MAX
 };
 
-class ExecutorItem : public ContentItem {
+class ProcessItem : public ContentItem {
 
-	char exec[PATH_MAX];
-	char parsedExec[PATH_MAX];
+	char process[PATH_MAX];
+	char parsedProcess[PATH_MAX];
 
 	TypeFileInfoList fileList;
 
 	bool parseCommand(void*, int, int);
 
 public:
-	ExecutorItem();
-	ExecutorItem(const char *exec);
-	~ExecutorItem(){};
-    const char* getExec();
+	ProcessItem();
+	ProcessItem(const char *);
+	~ProcessItem(){};
+    const char* getProcess();
     bool parse(void *);
-    const char* getParsedExec();
+    const char* getParsedProcess();
 
 	TypeFileInfoList* getFileList();
 
@@ -44,4 +44,4 @@ public:
 
 
 
-#endif //__Content_H_
+#endif //BANKOR_PROCESSITEM_H

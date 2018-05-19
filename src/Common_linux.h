@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Common_LINUX_H_
-#define __Common_LINUX_H_
+#ifndef BANKOR_COMMONLINUX_H
+#define BANKOR_COMMONLINUX_H
 
 #include <openssl/md5.h>
 #define ntohll(x) be64toh(x)

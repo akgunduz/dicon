@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __FileContent_H_
-#define __FileContent_H_
+#ifndef BANKOR_FILEITEM_H
+#define BANKOR_FILEITEM_H
 
 #include "ContentItem.h"
 #include "Md5.h"
@@ -47,4 +47,4 @@ public:
 
 typedef std::vector<FileItem*> TypeFileList;
 
-#endif //__Content_H_
+#endif //BANKOR_FILEITEM_H

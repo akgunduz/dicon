@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 25/09/15.
 //
 
-#ifndef BANKOR_ADDRESS_H
-#define BANKOR_ADDRESS_H
+#ifndef BANKOR_ADDRESSHELPER_H
+#define BANKOR_ADDRESSHELPER_H
 
 #include "InterfaceTypes.h"
 
@@ -41,4 +41,4 @@ public:
     static long createAddress(INTERFACE, long, int, int, int = 0);
 };
 
-#endif //BANKOR_ADDRESS_H
+#endif //BANKOR_ADDRESSHELPER_H
