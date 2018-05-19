@@ -15,12 +15,7 @@ MessageData::MessageData() :
 
 MessageData::MessageData(MessageData &copy) {
 
-    setProcess(copy.getProcessID(), copy.getProcessCommand());
-    setJob(copy.getJobID(), copy.getJobDir());
-    addMD5List(copy.getMD5List());
-    addFileList(copy.getFileList(), false);
-
-    setStreamFlag(copy.getStreamFlag());
+    set(&copy);
 }
 
 unsigned long MessageData::getStreamFlag() {
