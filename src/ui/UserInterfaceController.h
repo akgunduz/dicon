@@ -44,14 +44,40 @@ public:
     static UserInterfaceController* newInstance(void *, TypeUIUpdateCB);
     void updateUI(int, UserInterfaceEvent*);
 
-    void display(int, std::vector<long>);
-    void display(int, std::vector<long>, const char* , ...);
-    void display(int, const char* , ...);
-    void display(int, int, const char* , const char*);
-    void display(int, int, long, const char* , const char*);
-    void display(int, int, const char* , long);
-    void display(int, int, void*);
-    void display(int, void*);
+    template <typename T, typename _ = void>
+    struct is_vector {
+        static const bool value = false;
+    };
+    template <typename T>
+    struct is_vector< T,
+            typename std::enable_if<
+                    std::is_same<T, std::vector< typename T::value_type, typename T::allocator_type >
+                    >::value
+            >::type
+    >
+    {
+        static const bool value = true;
+    };
+
+    template<typename T, typename... Args>
+    void display(int id, T&& var, Args&&... args) {
+
+        auto *event = new UserInterfaceEvent(id);
+        if (is_vector<T>::value) {
+            event->addDataList(var);
+        }
+
+        //std::tuple<Args> t = args;
+    }
+
+//    void display(int, std::vector<long>);
+//    void display(int, std::vector<long>, const char* , ...);
+//    void display(int, const char* , ...);
+//    void display(int, int, const char* , const char*);
+//    void display(int, int, long, const char* , const char*);
+//    void display(int, int, const char* , long);
+//    void display(int, int, void*);
+//    void display(int, void*);
 };
 
 

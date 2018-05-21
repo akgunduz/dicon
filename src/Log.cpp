@@ -162,59 +162,59 @@ void Log::registerUIController(void *context, TypeUIUpdateCB updateCB) {
     controller = UserInterfaceController::newInstance(context, updateCB);
 }
 
-void Log::updateUI(int id, std::vector<long> dataList) {
-
-    if (controller) {
-        controller->display(id, dataList);
-    }
-}
-
-
-void Log::updateUI(int id, char const *data1, ...) {
-
-    if (controller) {
-        controller->display(id, data1);
-    }
-}
-
-void Log::updateUI(int id, int data1, char const *data2, char const *data3) {
-
-    if (controller) {
-        controller->display(id, data1, data2, data3);
-    }
-}
-
-void Log::updateUI(int id, int data1, char const *data2, long data3) {
-
-    if (controller) {
-        controller->display(id, data1, data2, data3);
-    }
-}
-
-void Log::updateUI(int id, int data1, long data2, char const *data3, char const *data4) {
-
-    if (controller) {
-        controller->display(id, data1, data2, data3, data4);
-    }
-}
-
-void Log::updateUI(int id, std::vector<long> data1, const char *data2, ...) {
-
-    if (controller) {
-        controller->display(id, data1, data2);
-    }
-}
-
-void Log::updateUI(int id, void *data1) {
-
-    if (controller) {
-        controller->display(id, data1);
-    }
-}
-
-void Log::updateUI(int id, int data1, void *data2) {
-
-    if (controller) {
-        controller->display(id, data1, data2);
-    }
-}
+//void Log::updateUI(int id, std::vector<long> dataList) {
+//
+//    if (controller) {
+//        controller->display(id, dataList);
+//    }
+//}
+//
+//
+//void Log::updateUI(int id, char const *data1, ...) {
+//
+//    if (controller) {
+//        controller->display(id, data1);
+//    }
+//}
+//
+//void Log::updateUI(int id, int data1, char const *data2, char const *data3) {
+//
+//    if (controller) {
+//        controller->display(id, data1, data2, data3);
+//    }
+//}
+//
+//void Log::updateUI(int id, int data1, char const *data2, long data3) {
+//
+//    if (controller) {
+//        controller->display(id, data1, data2, data3);
+//    }
+//}
+//
+//void Log::updateUI(int id, int data1, long data2, char const *data3, char const *data4) {
+//
+//    if (controller) {
+//        controller->display(id, data1, data2, data3, data4);
+//    }
+//}
+//
+//void Log::updateUI(int id, std::vector<long> data1, const char *data2, ...) {
+//
+//    if (controller) {
+//        controller->display(id, data1, data2);
+//    }
+//}
+//
+//void Log::updateUI(int id, void *data1) {
+//
+//    if (controller) {
+//        controller->display(id, data1);
+//    }
+//}
+//
+//void Log::updateUI(int id, int data1, void *data2) {
+//
+//    if (controller) {
+//        controller->display(id, data1, data2);
+//    }
+//}

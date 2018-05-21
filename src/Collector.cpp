@@ -38,7 +38,7 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
     setHostID((int)msg->getHeader()->getVariant(0));
 
-    LOG_U(UI_UPDATE_COLL_ID, std::vector<long>{getHost().getID()});
+    LOG_U(UI_UPDATE_COLL_ID, getHost().getID());
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return true;
@@ -89,7 +89,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     LOGS_I(getHost(), "Node[%d] is triggered with Process[%d]", nodeID, process.getID());
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {process.getID(), process.getState(), nodeID});
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, process.getID(), process.getState(), nodeID);
 
     return send2NodeJobMsg(NodeObject(nodeID, nodeAddress),
                            job->getJobID(),
@@ -126,7 +126,7 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     job->updateUnServed(msg->getData()->getProcessID(), PROCESS_STATE_ENDED);
 
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, std::vector<long> {msg->getData()->getProcessID(), PROCESS_STATE_ENDED, 0});
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, msg->getData()->getProcessID(), PROCESS_STATE_ENDED, 0);
 
     LOGS_I(getHost(), "Node[%d]'s output is received for Process[%d]", owner.getID(), msg->getData()->getProcessID());
 

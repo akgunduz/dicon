@@ -40,7 +40,7 @@ bool Node::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
     setHostID((int)msg->getHeader()->getVariant(0));
 
-    LOG_U(UI_UPDATE_NODE_ID, std::vector<long>{getHost().getID()});
+    LOG_U(UI_UPDATE_NODE_ID, getHost().getID());
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);
@@ -89,7 +89,7 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
+    LOG_U(UI_UPDATE_NODE_STATE, BUSY);
 
     getData()->reset();
     getData()->set(msg->getData());
@@ -120,7 +120,7 @@ bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
+    LOG_U(UI_UPDATE_NODE_STATE, IDLE);
 
     return send2DistributorReadyMsg(getDistributor(), getData()->getJobID(), owner.getAddress());
 }
