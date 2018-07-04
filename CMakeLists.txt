@@ -91,7 +91,7 @@ set(NOUI_FILES
         )
 
 if (APPLE)
-    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/include/json-c)
+    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/opt/json-c/include/json-c)
     set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/openssl/1.0.2n/include/)
 else()
     set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
@@ -116,9 +116,7 @@ add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
 if (DEFINED WX_UI)
-
     find_package(wxWidgets)
-
     add_executable(bankor-wx ${WX_FILES})
     target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
     target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
