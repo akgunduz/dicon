@@ -89,11 +89,15 @@ set(NOUI_FILES
         )
 
 if (APPLE)
-    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/include/json-c)
+    set(JSON-C_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/include/json-c)
+    set(JSON-C_LIB_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/json-c/0.12.1/lib)
     set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/openssl/1.0.2n/include/)
+    set(OPENSSL_LIB_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/openssl/1.0.2n/lib/)
 else()
-    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
+    set(JSON-C_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include/json-c)
+    set(JSON-C_LIB_DIR ${CMAKE_SYSROOT}/usr/lib)
     set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
+    set(OPENSSL_LIB_DIR ${CMAKE_SYSROOT}/usr/lib)
 endif()
 
 set(JSON-C_LIBRARIES json-c)
@@ -108,7 +112,10 @@ add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})
-include_directories(${JSON-C_INCLUDE_DIRS})
+include_directories(${JSON-C_INCLUDE_DIR})
+
+link_directories(${JSON-C_LIB_DIR})
+link_directories(${OPENSSL_LIB_DIR})
 
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})

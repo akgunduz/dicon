@@ -57,26 +57,29 @@ void ConsoleApp::collUpdateProcessListItem(ConsoleEvent &event) {
 
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    auto *job = (Job *)data->getPointer(0);
+    auto processID = data->getData(0);
+    auto processState = data->getData(1);
+    auto nodeID = data->getData(2);
 
-    for (int j = 0; j < job->getOrderedCount(); j++) {
+    if (nodeID > 0) {
+        LOG_S("Console UI ------> Collector Process[%d] is attached to Node[%d]", processID, nodeID);
+    }
 
-        switch(job->getOrderedState(j)) {
+    switch(processState) {
 
-            case PROCESS_STATE_ENDED:
-                LOG_S("Console UI ------> Collector Process[%d] is ended", j);
-                break;
+        case PROCESS_STATE_ENDED:
+            LOG_S("Console UI ------> Collector Process[%d] is ended", processID);
+            break;
 
-            case PROCESS_STATE_STARTED:
-                LOG_S("Console UI ------> Collector Process[%d] is started", j);
-                break;
+        case PROCESS_STATE_STARTED:
+            LOG_S("Console UI ------> Collector Process[%d] is started", processID);
+            break;
 
-            case PROCESS_STATE_NOTSTARTED:
-                LOG_S("Console UI ------> Collector Process[%d] is not started", j);
-                break;
+        case PROCESS_STATE_NOTSTARTED:
+            LOG_S("Console UI ------> Collector Process[%d] is not started", processID);
+            break;
 
-            default:
-                break;
-        }
+        default:
+            break;
     }
 }
