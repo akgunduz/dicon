@@ -46,7 +46,7 @@ int AddressHelper::getHelper(long address) {
 int AddressHelper::address2prefix(long address) {
 
     int i = 0;
-    uint32_t ip = (uint32_t) AddressHelper::getBase(address);
+    auto ip = (uint32_t) AddressHelper::getBase(address);
     while(ip > 0) {
         ip = ip >> 1;
         i++;

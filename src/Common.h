@@ -61,7 +61,7 @@
 #define SHUTDOWN_NOTIFIER 'Q'
 
 struct char_cmp {
-	bool operator () (const std::string a,const std::string b) const
+	bool operator () (const std::string &a,const std::string &b) const
 	{
 		return a.compare(b) < 0;
 	}
