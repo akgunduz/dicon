@@ -114,6 +114,7 @@ include_directories(${JSON-C_INCLUDE_DIRS})
 
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
+target_link_directories(bankor-framework PUBLIC /usr/local/lib)
 
 if (DEFINED WX_UI)
     find_package(wxWidgets)

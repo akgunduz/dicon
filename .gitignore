@@ -60,3 +60,4 @@ Objects/
 /Node/
 /cmake-build*
 GCCDebug
+.DS_Store
