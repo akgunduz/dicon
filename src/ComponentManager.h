@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
-#ifndef BANKOR_COMPONENTMANAGER_H
-#define BANKOR_COMPONENTMANAGER_H
+#ifndef DICON_COMPONENTMANAGER_H
+#define DICON_COMPONENTMANAGER_H
 
 #include "Common.h"
 #include "ComponentObject.h"
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif //BANKOR_COMPONENTMANAGER_H
+#endif //DICON_COMPONENTMANAGER_H

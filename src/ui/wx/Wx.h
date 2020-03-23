@@ -61,7 +61,7 @@ typedef void (Wx::*fUIUpdater)(wxCommandEvent &event);
 #define ID_NODE_STATE 10026
 #define ID_NODE_FILE_LIST 10029
 #define SYMBOL_WX_STYLE wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
-#define SYMBOL_WX_TITLE _("Bankor")
+#define SYMBOL_WX_TITLE _("Dicon")
 #define SYMBOL_WX_IDNAME ID_USERINTERFACE
 #define SYMBOL_WX_SIZE wxSize(600, 570)
 #define SYMBOL_WX_POSITION wxDefaultPosition

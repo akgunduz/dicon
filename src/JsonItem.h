@@ -2,8 +2,8 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#ifndef BANKOR_JSONFILE_H
-#define BANKOR_JSONFILE_H
+#ifndef DICON_JSONFILE_H
+#define DICON_JSONFILE_H
 
 
 #include "FileItem.h"
@@ -34,4 +34,4 @@ public:
 };
 
 
-#endif //BANKOR_JSONFILE_H
+#endif //DICON_JSONFILE_H

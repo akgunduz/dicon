@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 23.04.2018.
 //
 
-#ifndef BANKOR_FILEINFO_H
-#define BANKOR_FILEINFO_H
+#ifndef DICON_FILEINFO_H
+#define DICON_FILEINFO_H
 
 #include "FileItem.h"
 
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif //BANKOR_FILEINFO_H
+#endif //DICON_FILEINFO_H

@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
-#ifndef BANKOR_COLLECTOROBJECT_H
-#define BANKOR_COLLECTOROBJECT_H
+#ifndef DICON_COLLECTOROBJECT_H
+#define DICON_COLLECTOROBJECT_H
 
 
 #include "ComponentObject.h"
@@ -18,4 +18,4 @@ public:
 };
 
 
-#endif //BANKOR_COLLECTOROBJECT_H
+#endif //DICON_COLLECTOROBJECT_H

@@ -2,8 +2,8 @@
 // Created by akgunduz on 23.10.2015.
 //
 
-#ifndef BANKOR_JOB_H
-#define BANKOR_JOB_H
+#ifndef DICON_JOB_H
+#define DICON_JOB_H
 
 #include "JsonItem.h"
 #include "Md5.h"
@@ -59,4 +59,4 @@ public:
 };
 
 
-#endif //BANKOR_JOB_H
+#endif //DICON_JOB_H

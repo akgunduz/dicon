@@ -31,10 +31,8 @@
 *.out
 *.app
 
-/Bankor.xcodeproj/
 /.idea/
-Bankor.asta.lock
-data/Bankor.rc
+data/Dicon.rc
 data/Makefile
 /Debug/
 .cproject
@@ -43,13 +41,13 @@ data/Makefile
 .depend
 .settings/
 libjson/
-Bankor.sdf
-Bankor.sln
-Bankor.v12.suo
+Dicon.sdf
+Dicon.sln
+Dicon.v12.suo
 /nbproject/
-Bankor.pro
-Bankor.pro.user*
-Bankor.1
+Dicon.pro
+Dicon.pro.user*
+Dicon.1
 *.zip
 *.bak
 *.xrc

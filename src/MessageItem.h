@@ -2,8 +2,8 @@
 // Created by akgunduz on 23.10.2015.
 //
 
-#ifndef BANKOR_MESSAGEITEM_H
-#define BANKOR_MESSAGEITEM_H
+#ifndef DICON_MESSAGEITEM_H
+#define DICON_MESSAGEITEM_H
 
 
 #include "Message.h"
@@ -26,4 +26,4 @@ public:
 };
 
 
-#endif //BANKOR_MESSAGEITEM_H
+#endif //DICON_MESSAGEITEM_H

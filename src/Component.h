@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/14/15.
 //
 
-#ifndef BANKOR_COMPONENT_H
-#define BANKOR_COMPONENT_H
+#ifndef DICON_COMPONENT_H
+#define DICON_COMPONENT_H
 
 #include "Connector.h"
 #include "DeviceList.h"
@@ -59,4 +59,4 @@ public:
 };
 
 
-#endif //BANKOR_COMPONENT_H
+#endif //DICON_COMPONENT_H

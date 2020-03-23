@@ -2,8 +2,8 @@
 // Created by akgunduz on 23.03.2018.
 //
 
-#ifndef BANKOR_BLOCK_H
-#define BANKOR_BLOCK_H
+#ifndef DICON_BLOCK_H
+#define DICON_BLOCK_H
 
 #include "Common.h"
 
@@ -40,4 +40,4 @@ public:
 };
 
 
-#endif //BANKOR_BLOCK_H
+#endif //DICON_BLOCK_H

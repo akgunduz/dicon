@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_INTERFACETYPES_H
-#define BANKOR_INTERFACETYPES_H
+#ifndef DICON_INTERFACETYPES_H
+#define DICON_INTERFACETYPES_H
 
 #include "Common.h"
 
@@ -26,4 +26,4 @@ public:
 };
 
 
-#endif //BANKOR_INTERFACETYPES_H
+#endif //DICON_INTERFACETYPES_H

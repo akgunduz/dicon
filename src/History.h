@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_HISTORY_H
-#define BANKOR_HISTORY_H
+#ifndef DICON_HISTORY_H
+#define DICON_HISTORY_H
 
 
 #include "Md5.h"
@@ -27,4 +27,4 @@ public:
 };
 
 
-#endif //BANKOR_HISTORY_H
+#endif //DICON_HISTORY_H

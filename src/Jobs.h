@@ -2,8 +2,8 @@
 // Created by akgunduz on 19.03.2018.
 //
 
-#ifndef BANKOR_JOBS_H
-#define BANKOR_JOBS_H
+#ifndef DICON_JOBS_H
+#define DICON_JOBS_H
 
 
 #include "Job.h"
@@ -36,4 +36,4 @@ public:
 };
 
 
-#endif //BANKOR_JOBS_H
+#endif //DICON_JOBS_H

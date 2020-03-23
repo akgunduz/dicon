@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/17/15.
 //
 
-#ifndef BANKOR_STOPWATCH_H
-#define BANKOR_STOPWATCH_H
+#ifndef DICON_STOPWATCH_H
+#define DICON_STOPWATCH_H
 
 #include "Common.h"
 
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //BANKOR_STOPWATCH_H
+#endif //DICON_STOPWATCH_H

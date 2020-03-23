@@ -21,7 +21,7 @@
 #define MD5_CTX             CC_MD5_CTX
 
 #define UNIXSOCKET_PATH "/var/tmp/"
-#define UNIXSOCKET_FILE_PREFIX "bankor_"
+#define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
 #define DISTRIBUTOR_PATH "Distributor"

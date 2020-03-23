@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/30/15.
 //
 
-#ifndef BANKOR_MD5_H
-#define BANKOR_MD5_H
+#ifndef DICON_MD5_H
+#define DICON_MD5_H
 
 #include "Common.h"
 #include "Util.h"
@@ -87,4 +87,4 @@ struct cmp_md5 {
 
 typedef std::vector<Md5> TypeMD5List;
 
-#endif //BANKOR_MD5_H
+#endif //DICON_MD5_H

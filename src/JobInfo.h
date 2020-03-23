@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_JOBINFO_H
-#define BANKOR_JOBINFO_H
+#ifndef DICON_JOBINFO_H
+#define DICON_JOBINFO_H
 
 
 //#include "Job.h"
@@ -33,4 +33,4 @@ public:
 };
 
 
-#endif //BANKOR_JOBINFO_H
+#endif //DICON_JOBINFO_H

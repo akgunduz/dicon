@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_DEVICELIST_H
-#define BANKOR_DEVICELIST_H
+#ifndef DICON_DEVICELIST_H
+#define DICON_DEVICELIST_H
 
 #include "Device.h"
 
@@ -33,4 +33,4 @@ public:
 };
 
 
-#endif //BANKOR_DEVICELIST_H
+#endif //DICON_DEVICELIST_H

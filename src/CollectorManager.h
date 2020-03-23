@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_COLLECTORMANAGER_H
-#define BANKOR_COLLECTORMANAGER_H
+#ifndef DICON_COLLECTORMANAGER_H
+#define DICON_COLLECTORMANAGER_H
 
 #include "ComponentManager.h"
 
@@ -27,4 +27,4 @@ public:
 };
 
 
-#endif //BANKOR_COLLECTORMANAGER_H
+#endif //DICON_COLLECTORMANAGER_H

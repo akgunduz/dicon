@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/18/15.
 //
 
-#ifndef BANKOR_ARCHTYPES_H
-#define BANKOR_ARCHTYPES_H
+#ifndef DICON_ARCHTYPES_H
+#define DICON_ARCHTYPES_H
 
 enum ARCH {
     ARCH_MACOS_X86_64,
@@ -22,4 +22,4 @@ public:
 };
 
 
-#endif //BANKOR_ARCHTYPES_H
+#endif //DICON_ARCHTYPES_H

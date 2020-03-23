@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/18/15.
 //
 
-#ifndef BANKOR_NODEOBJECT_H
-#define BANKOR_NODEOBJECT_H
+#ifndef DICON_NODEOBJECT_H
+#define DICON_NODEOBJECT_H
 
 #include "NodeState.h"
 #include "Md5.h"
@@ -30,4 +30,4 @@ public:
 };
 
 
-#endif //BANKOR_NODEOBJECT_H
+#endif //DICON_NODEOBJECT_H

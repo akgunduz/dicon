@@ -1,4 +1,4 @@
-# Dicon - A distributed architecture for embedded systems
+# Dicon - An HPC architecture for embedded systems
 
 The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability and efficiency.
 
@@ -53,13 +53,22 @@ if not installed already, install **HomeBrew** package system
 	ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Then install build utilities
+Install build utilities
 
 ```
 	brew install cmake
-	brew install gcc
+	brew install g++
 ```
-To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the TOOLCHAIN_DIR variable in the corresponding toolchain cmake files.
+
+Install dependencies
+
+```
+	brew install wxmac
+	brew install json-c
+	brew install openssl
+```
+
+To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
 
 Create build directory
 

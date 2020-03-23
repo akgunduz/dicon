@@ -2,8 +2,8 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#ifndef BANKOR_JSONTYPE_H
-#define BANKOR_JSONTYPE_H
+#ifndef DICON_JSONTYPE_H
+#define DICON_JSONTYPE_H
 
 #include "Common.h"
 
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //BANKOR_JSONTYPE_H
+#endif //DICON_JSONTYPE_H

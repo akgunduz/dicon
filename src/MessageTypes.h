@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_MESSAGETYPES_H
-#define BANKOR_MESSAGETYPES_H
+#ifndef DICON_MESSAGETYPES_H
+#define DICON_MESSAGETYPES_H
 
 enum MSG_TYPE {
     MSGTYPE_NODE,
@@ -31,4 +31,4 @@ public:
 };
 
 
-#endif //BANKOR_MESSAGETYPES_H
+#endif //DICON_MESSAGETYPES_H

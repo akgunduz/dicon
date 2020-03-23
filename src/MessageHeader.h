@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_MESSAGEHEADER_H
-#define BANKOR_MESSAGEHEADER_H
+#ifndef DICON_MESSAGEHEADER_H
+#define DICON_MESSAGEHEADER_H
 
 #include "MessageTypes.h"
 #include "ComponentObject.h"
@@ -53,4 +53,4 @@ public:
 };
 
 
-#endif //BANKOR_MESSAGEHEADER_H
+#endif //DICON_MESSAGEHEADER_H

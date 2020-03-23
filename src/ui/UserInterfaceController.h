@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_USERINTERFACECONTROLLER_H
-#define BANKOR_USERINTERFACECONTROLLER_H
+#ifndef DICON_USERINTERFACECONTROLLER_H
+#define DICON_USERINTERFACECONTROLLER_H
 
 #include "UserInterfaceEvent.h"
 
@@ -53,4 +53,4 @@ public:
 };
 
 
-#endif //BANKOR_USERINTERFACECONTROLLER_H
+#endif //DICON_USERINTERFACECONTROLLER_H

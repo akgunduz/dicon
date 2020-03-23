@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 29.04.2018.
 //
 
-#ifndef BANKOR_EXECUTORINFO_H
-#define BANKOR_EXECUTORINFO_H
+#ifndef DICON_EXECUTORINFO_H
+#define DICON_EXECUTORINFO_H
 
 
 #include "ExecutorItem.h"
@@ -32,4 +32,4 @@ public:
 };
 
 
-#endif //BANKOR_EXECUTORINFO_H
+#endif //DICON_EXECUTORINFO_H

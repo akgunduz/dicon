@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/18/15.
 //
 
-#ifndef BANKOR_MESSAGEDIRECTION_H
-#define BANKOR_MESSAGEDIRECTION_H
+#ifndef DICON_MESSAGEDIRECTION_H
+#define DICON_MESSAGEDIRECTION_H
 
 enum MESSAGE_DIRECTION {
     MESSAGE_RECEIVE,
@@ -15,4 +15,4 @@ class MessageDirection {
 };
 
 
-#endif //BANKOR_MESSAGEDIRECTION_H
+#endif //DICON_MESSAGEDIRECTION_H

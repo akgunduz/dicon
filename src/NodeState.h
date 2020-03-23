@@ -4,8 +4,8 @@
 //
 
 
-#ifndef BANKOR_NODESTATE_H
-#define BANKOR_NODESTATE_H
+#ifndef DICON_NODESTATE_H
+#define DICON_NODESTATE_H
 
 enum NODE_STATES {
     IDLE,
@@ -20,4 +20,4 @@ public:
 };
 
 
-#endif //BANKOR_NODESTATE_H
+#endif //DICON_NODESTATE_H

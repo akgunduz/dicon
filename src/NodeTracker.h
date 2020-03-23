@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_NODETRACKER_H
-#define BANKOR_NODETRACKER_H
+#ifndef DICON_NODETRACKER_H
+#define DICON_NODETRACKER_H
 
 #include "Common.h"
 #include "Md5.h"
@@ -31,4 +31,4 @@ public:
 };
 
 
-#endif //BANKOR_NODETRACKER_H
+#endif //DICON_NODETRACKER_H

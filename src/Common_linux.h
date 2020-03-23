@@ -12,7 +12,7 @@
 #define htonll(x) htobe64(x)
 
 #define UNIXSOCKET_PATH "/var/tmp/"
-#define UNIXSOCKET_FILE_PREFIX "bankor_"
+#define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
 #define DISTRIBUTOR_PATH "Distributor"

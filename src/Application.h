@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_APPLICATION_H
-#define BANKOR_APPLICATION_H
+#ifndef DICON_APPLICATION_H
+#define DICON_APPLICATION_H
 
 #include "Common.h"
 #include "DeviceList.h"
@@ -18,4 +18,4 @@ enum class APPMODE {
     APPMODE_WXWIDGETS
 };
 
-#endif //BANKOR_APPLICATION_H
+#endif //DICON_APPLICATION_H

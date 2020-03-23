@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef BANKOR_MESSAGEDATA_H
-#define BANKOR_MESSAGEDATA_H
+#ifndef DICON_MESSAGEDATA_H
+#define DICON_MESSAGEDATA_H
 
 
 #include "ExecutorItem.h"
@@ -47,4 +47,4 @@ public:
 };
 
 
-#endif //BANKOR_MESSAGEDATA_H
+#endif //DICON_MESSAGEDATA_H

@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
-#ifndef BANKOR_COMPONENTOBJECT_H
-#define BANKOR_COMPONENTOBJECT_H
+#ifndef DICON_COMPONENTOBJECT_H
+#define DICON_COMPONENTOBJECT_H
 
 #include "Common.h"
 
@@ -55,4 +55,4 @@ public:
 };
 
 
-#endif //BANKOR_COMPONENTOBJECT_H
+#endif //DICON_COMPONENTOBJECT_H

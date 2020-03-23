@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 6.05.2018.
 //
 
-#ifndef BANKOR_CONSOLEEVENT_H
-#define BANKOR_CONSOLEEVENT_H
+#ifndef DICON_CONSOLEEVENT_H
+#define DICON_CONSOLEEVENT_H
 
 class ConsoleEvent {
 
@@ -23,4 +23,4 @@ public:
 
 
 
-#endif //BANKOR_CONSOLEEVENT_H
+#endif //DICON_CONSOLEEVENT_H

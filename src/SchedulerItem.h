@@ -2,8 +2,8 @@
 // Created by akgunduz on 23.10.2015.
 //
 
-#ifndef BANKOR_SCHEDULERITEM_H
-#define BANKOR_SCHEDULERITEM_H
+#ifndef DICON_SCHEDULERITEM_H
+#define DICON_SCHEDULERITEM_H
 
 #define END_ITEM -1
 #define DEFAULT_PRIORITY 3
@@ -19,4 +19,4 @@ public:
 };
 
 
-#endif //BANKOR_SCHEDULERITEM_H
+#endif //DICON_SCHEDULERITEM_H
