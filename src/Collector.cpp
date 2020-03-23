@@ -200,7 +200,7 @@ bool Collector::processJob(int index) {
 
 bool Collector::processJobs() {
 
-    for (int i = 0; i < getJobs()->getCount(); i++) {
+    for (size_t i = 0; i < getJobs()->getCount(); i++) {
 
         processJob(i);
     }

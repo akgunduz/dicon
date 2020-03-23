@@ -92,17 +92,16 @@ set(NOUI_FILES
 
 if (APPLE)
     set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/opt/json-c/include/json-c)
-    set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/Cellar/openssl/1.0.2n/include/)
+    set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/local/opt/openssl/include)
+    set(LIBRARY_DIR ${CMAKE_SYSROOT}/usr/local/lib)
 else()
     set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
     set(OPENSSL_INCLUDE_DIR ${CMAKE_SYSROOT}/usr/include)
+    set(LIBRARY_DIR ${CMAKE_SYSROOT}/usr/lib)
 endif()
 
 set(JSON-C_LIBRARIES json-c)
 set(OPENSSL_CRYPTO_LIBRARY crypto)
-
-set(WX_UI YES)
-set(CONSOLE_UI YES)
 
 add_definitions(-DDISABLE_RECOVERY)
 add_definitions(-DDISABLE_BACKUP)
@@ -111,29 +110,23 @@ add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
+link_directories(${LIBRARY_DIR})
 
 add_library(bankor-framework ${FRAMEWORK_FILES})
 target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
-target_link_directories(bankor-framework PUBLIC /usr/local/lib)
 
-if (DEFINED WX_UI)
-    find_package(wxWidgets)
-    add_executable(bankor-wx ${WX_FILES})
-    target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
-    target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
-    target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
-    target_link_libraries(bankor-wx bankor-framework
-            ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
-endif()
+add_executable(bankor-wx ${WX_FILES})
+find_package(wxWidgets)
+target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
+target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
+target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
+target_link_libraries(bankor-wx bankor-framework
+        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 
-if (DEFINED CONSOLE_UI)
-
-    add_executable(bankor-console ${CONSOLE_FILES})
-    target_compile_definitions(bankor-console PUBLIC -DCONSOLE_UI)
-    target_link_libraries(bankor-console bankor-framework
-            ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
-
-endif()
+add_executable(bankor-console ${CONSOLE_FILES})
+target_compile_definitions(bankor-console PUBLIC -DCONSOLE_UI)
+target_link_libraries(bankor-console bankor-framework
+        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
 add_executable(bankor ${NOUI_FILES})
 target_link_libraries(bankor bankor-framework

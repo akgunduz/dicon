@@ -43,40 +43,61 @@ The architecture source code is bundled with the UI code, which will be seperate
 
 #### Compilation
 
-The compile process can be divided into two parts; 
+Compile process is carried out with **CMake** build system and **gcc** or **clang** toolchains.
 
-- **Native** : If the compilation aims for all components (Distributor, Collector and Node) running in desktop computers then Cmake based compile platform is used.
+On **MacOS** Platform;
 
-Basically first it is needed to precompile for makefile generation with cmake tool. Then standard Make compile can be processed.
-
-```
-~/bankor $ mkdir build
-~/bankor $ cd build
-~/bankor/build $ cmake ..
-~/bankor/build $ make
-```
-
-- **CrossCompile** : If the compilation aims for nodes running on Linux based embedded computers then external toolchain (currently only arm supported) and GNU make based compile platform is used. Toolchain path should be updated in Makefile with **TOOLCHAIN_PATH** definition. It is also possible to compile the whole project with UI only using GNU make. It is only needed to define the target platform through parameter
+if not installed already, install **HomeBrew** package system
 
 ```
-~/bankor $ make pi 			#Raspberry pi v1
-~/bankor $ make c15			#Arm Cortex A15 optimized compilation
-~/bankor $ make c9			#Arm Cortex A9 optimized compilation
-~/bankor $ make c8			#Arm Cortex A8 optimized compilation
-~/bankor $ make c7			#Arm Cortex A7 optimized compilation
-~/bankor $ make arm			#Generic Arm compilation
-~/bankor $ make cmd			#Console based compilation for x86_64
-~/bankor $ make ui			#UI based compilation for x86_64 on macOS OS
-~/bankor $ make uilnx		#UI based compilation for x86_64 on Linux OS
+	ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
+
+Then install build utilities
+
+```
+	brew install cmake
+	brew install gcc
+```
+To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the TOOLCHAIN_DIR variable in the corresponding toolchain cmake files.
+
+Create build directory
+
+```
+	mkdir build
+	cd build
+```
+Build process
+
+- for target ==> MacOS
+
+```
+	cmake ..
+	cmake --build .
+```
+
+- for target ==> ARM based Linux
+
+```
+	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-linux-arm.cmake
+	cmake --build . --target dicon
+```
+
+- for target ==> x86 based Linux
+
+```
+	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-linux-x86.cmake
+	cmake --build . --target dicon
+```
+
 
 #### Locating Target Files
 
-Demo Application is in alpha stage therefore most of the target application file locations are prefixed (will be changed in the future :)) Currently all target files are located in directories based on their components; ie Collectors read the target files from Collector/Job_X directories and Nodes creates the files to be processed under the Node directory.
+Demo Application is in alpha stage therefore most of the target application file locations are prefixed (will be changed in the future :)) Currently all target files are located in directories based on their components; ie Collectors read the target files from ***Collector/Job_X*** directories and Nodes creates the files to be processed under the Node directory.
 
 ### Workflow
 
-The workflow of the whole process starts at computers running collectors and finishes at the nodes depicted as follows; 
+The workflow of the whole process starts at computers running collectors and finishes at the nodes depicted as follows;
 
 1. Distributor sends **Wakeup** broadcast to the network, and keeps it on with specific intervals to dynamically add and remove nodes from the system.
 
@@ -90,7 +111,7 @@ The workflow of the whole process starts at computers running collectors and fin
 
 6. Collector picks a rule from the rule set to be processed and  sends a **Node** message to distributor to request a available node.
 
-7. Distributor gets the node message from the collector and search for a available node in the node list. If found, it marks the node with **pre-busy** and sends the address of the node to the collector with **Node** message. At the same time it starts a timer, waits for **Busy** message from the node. If not found, it sends a **Node** message to collector with no available node info. 
+7. Distributor gets the node message from the collector and search for a available node in the node list. If found, it marks the node with **pre-busy** and sends the address of the node to the collector with **Node** message. At the same time it starts a timer, waits for **Busy** message from the node. If not found, it sends a **Node** message to collector with no available node info.
 
 8. Collector gets the node message from distributor, if there is no available node then it waits in message waiting state. If there is, then it analyzes the rule and sends it to the node  with **Rule** message
 
@@ -150,32 +171,32 @@ The communication interface is structured based on sockets and it includes messa
 
 The subtasks of the applications that are going to execute in nodes are defined in job files.  Each job has its own directory starting with **"Job_"** prefix. In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplied as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface. (Currently fixed to directory starts with Job_ prefix, near to application service).
 
-Job files includes all of the dependencies and process details of the subtasks in order to execute properly. 
- 
+Job files includes all of the dependencies and process details of the subtasks in order to execute properly.
+
 There are four types of contents that can be defined in job files;
-	
+
 - **Name Content** It contains the name of the job;
 
 - **File Content** It includes the necessary file information that are going to be used by subtasks in the nodes. First field defines the name of the file and second field reserved for future use, currently only common type is supported. It defines with files tag in the json file. The related parameters are;
 
 	- **"c"** : common file
 
-- **Parameter Content** It includes the parameter sets that are going to pass to executable files; It defines with "parameters" tag in the json file. 
+- **Parameter Content** It includes the parameter sets that are going to pass to executable files; It defines with "parameters" tag in the json file.
 
 - **Executable Content** It contains the command sequence of the executable list that is going to be run in nodes. Basically it is defined as macro which has references to file and parameter contents.  It defines with "executors" tag in the json file. The structure of the macro is;
 
 		"$(F/P)INDEX"
-		
+
 
 
 	The definition of the macro items are;
-	
+
 	- **"$"** : Start of the macro
 	- **"F"** : Reference to the file list in the rule file
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
-		
-	
+
+
 Sample  Job.json file is as follows;
 
         "Job": {
@@ -227,11 +248,11 @@ Finally on Node side, after the initialization is done, node get interacts with 
 
 ![alt text](docs/node-ui.png)
 
-Since the UI is designed only for test & demo purposes, the main progress can be shown with UI elements especially through **Log** window at the bottom. 
+Since the UI is designed only for test & demo purposes, the main progress can be shown with UI elements especially through **Log** window at the bottom.
 
 ### Open Issues
 
-- Project is in still early development stage therefore lots of corner cases and scenarios should be tested. 
+- Project is in still early development stage therefore lots of corner cases and scenarios should be tested.
 - Demo application is developed just for testing the architecture purpose and can only be used as a reference; it is not suitable to be used in a final product.
 - After the nodes finish the assigned process, there is no feedback or collection of results mechanism; ie subtasks are all on their own like uploading the results somewhere else etc. Distributor & Collector only gets job is done feedback from the nodes, thats all.
 - UI will be replaced with webserver based framework.
