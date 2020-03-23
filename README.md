@@ -1,4 +1,4 @@
-# Bankor - A distributed architecture for embedded systems
+# Dicon - A distributed architecture for embedded systems
 
 The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability and efficiency.
 
