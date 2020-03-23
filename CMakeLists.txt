@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(Bankor)
+project(Dicon)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -112,22 +112,22 @@ include_directories(${SOURCE_PATH})
 include_directories(${JSON-C_INCLUDE_DIRS})
 link_directories(${LIBRARY_DIR})
 
-add_library(bankor-framework ${FRAMEWORK_FILES})
-target_include_directories(bankor-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
+add_library(dicon-framework ${FRAMEWORK_FILES})
+target_include_directories(dicon-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-add_executable(bankor-wx ${WX_FILES})
+add_executable(dicon-wx ${WX_FILES})
 find_package(wxWidgets)
-target_compile_definitions(bankor-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
-target_include_directories(bankor-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
-target_compile_options(bankor-wx PUBLIC ${wxWidgets_CXX_FLAGS})
-target_link_libraries(bankor-wx bankor-framework
+target_compile_definitions(dicon-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
+target_include_directories(dicon-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
+target_compile_options(dicon-wx PUBLIC ${wxWidgets_CXX_FLAGS})
+target_link_libraries(dicon-wx dicon-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 
-add_executable(bankor-console ${CONSOLE_FILES})
-target_compile_definitions(bankor-console PUBLIC -DCONSOLE_UI)
-target_link_libraries(bankor-console bankor-framework
+add_executable(dicon-console ${CONSOLE_FILES})
+target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+target_link_libraries(dicon-console dicon-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
-add_executable(bankor ${NOUI_FILES})
-target_link_libraries(bankor bankor-framework
+add_executable(dicon ${NOUI_FILES})
+target_link_libraries(dicon dicon-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)

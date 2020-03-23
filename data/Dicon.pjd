@@ -107,7 +107,7 @@
     <string name="whitespace_after_return_type">" "</string>
     <long name="working_mode">1</long>
     <string name="xrc_encoding">"utf-8"</string>
-    <string name="xrc_filename">"Bankor.xrc"</string>
+    <string name="xrc_filename">"Dicon.xrc"</string>
     <bool name="xrc_generate_id_tags">0</bool>
     <bool name="xrc_retain_relative_paths">1</bool>
     <bool name="xrc_use_name_property">0</bool>
@@ -358,7 +358,7 @@
           <long name="proxy-Id value">10000</long>
           <string name="proxy-Implementation filename">"../src/ui/wx/Wx.cpp"</string>
           <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
-          <string name="proxy-Title">"Bankor"</string>
+          <string name="proxy-Title">"Dicon"</string>
           <string name="proxy-Tooltip text">""</string>
           <long name="proxy-Width">600</long>
           <bool name="proxy-wxBORDER_THEME">0</bool>
@@ -393,7 +393,7 @@
           <long name="proxy-X">-1</long>
           <string name="proxy-XRC filename">""</string>
           <long name="proxy-Y">-1</long>
-          <string name="title">"Bankor"</string>
+          <string name="title">"Dicon"</string>
           <long name="title-mode">0</long>
           <string name="type">"dialog-document"</string>
           <bool name="use-id-prefix">0</bool>
@@ -1857,9 +1857,9 @@
         <long name="title-mode">0</long>
         <long name="locked">1</long>
         <document>
-          <string name="title">"Bankor.rc"</string>
+          <string name="title">"Dicon.rc"</string>
           <string name="type">"source-editor-document"</string>
-          <string name="filename">"Bankor.rc"</string>
+          <string name="filename">"Dicon.rc"</string>
           <string name="icon-name">"source-editor"</string>
           <long name="is-transient">0</long>
           <long name="owns-file">0</long>
