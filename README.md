@@ -66,6 +66,8 @@ Install dependencies
 	brew install wxmac
 	brew install json-c
 	brew install openssl
+	ln -s /usr/local/opt/openssl/lib/libssl.a /usr/local/lib/
+	ln -s /usr/local/opt/openssl/lib/libcrypto.a /usr/local/lib/
 ```
 
 To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
