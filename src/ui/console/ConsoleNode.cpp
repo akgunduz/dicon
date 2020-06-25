@@ -34,6 +34,6 @@ void ConsoleApp::nodeUpdateProcessList(ConsoleEvent &event) {
 
 	auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %s",
-          data->getData(0), data->getString(0).c_str(), data->getString(1).c_str()) ;
+    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %d",
+          data->getData(0), data->getString(0).c_str(), data->getData(1)) ;
 }
