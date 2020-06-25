@@ -9,49 +9,32 @@
 #ifdef CONSOLE_UI
 #include <ui/console/ConsoleApp.h>
 #endif
-#include "Application.h"
-#include "DeviceList.h"
-#include "Util.h"
-#include "ComponentController.h"
-
-int main(int argc, char** argv) {
-
-    Util::cleanup();
-
-    int distCount = 0;
-    int collCount = 0;
-    int nodeCount = 0;
-    int collIndex = 1;
-    int nodeIndex = 1;
-
-    int interfaceID[2] = {0, 0};
-
-    void *app = NULL;
-
-    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
-
-#if defined(WX_UI)
-    APPMODE appMode = APPMODE::APPMODE_WXWIDGETS;
-#elif defined(CONSOLE_UI)
-    APPMODE appMode = APPMODE::APPMODE_CONSOLE;
-#else
-    APPMODE appMode = APPMODE::APPMODE_NOUI;
+#ifdef WEB_UI
+#include <ui/web/WebApp.h>
 #endif
 
+int listDevices() {
+
     DeviceList *deviceList = DeviceList::getInstance();
+
+    LOG_S("Listing Interfaces .....");
+
+    for (int j = 0; j < deviceList->getCount(); j++) {
+        LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
+              deviceList->get(j)->getName());
+    }
+
+    return 0;
+}
+
+bool parseParameters(int argc, char** argv, int *interfaceID,
+                     LOGLEVEL* logLevel, int* disCount, int* collInfo, int* nodeInfo) {
 
     for (int i = 1; i < argc; i++) {
 
         if (!strcmp(argv[i], "-l")) {
 
-            LOG_S("Listing Interfaces .....");
-
-            for (int j = 0; j < deviceList->getCount(); j++) {
-                LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
-                      deviceList->get(j)->getName());
-            }
-
-            return 0;
+            return listDevices();
 
         } else if (!strcmp(argv[i], "-i")) {
 
@@ -61,52 +44,48 @@ int main(int argc, char** argv) {
                     interfaceID[0] = atoi(argv[i]);
 
                 } else {
-                    return 0;
+                    return false;
                 }
 
                 if (isdigit(argv[++i][0])) {
                     interfaceID[1] = atoi(argv[i]);
 
                 } else {
-                    return 0;
+                    return false;
                 }
             }
 
-        } else if (!strcmp(argv[i], "-s")) {
-
-            appMode = APPMODE::APPMODE_NOUI;
-
         } else if (!strcmp(argv[i], "-d")) {
 
-            distCount = 1;
+            *disCount = 1;
 
         } else if (!strcmp(argv[i], "-c")) {
 
             if (isdigit(argv[++i][0])) {
-                collCount =  atoi(argv[i]);
+                collInfo[0] =  atoi(argv[i]);
 
             } else {
 
-                return 0;
+                return false;
             }
 
             if (isdigit(argv[i + 1][0])) {
-                collIndex =  atoi(argv[++i]);
+                collInfo[1] =  atoi(argv[++i]);
 
             }
 
         } else if (!strcmp(argv[i], "-n")) {
 
             if (isdigit(argv[++i][0])) {
-                nodeCount =  atoi(argv[i]);
+                nodeInfo[0] =  atoi(argv[i]);
 
             } else {
 
-                return 0;
+                return false;
             }
 
             if (isdigit(argv[i + 1][0])) {
-                nodeIndex =  atoi(argv[++i]);
+                nodeInfo[1] =  atoi(argv[++i]);
 
             }
         } else if (!strcmp(argv[i], "-g")) {
@@ -117,93 +96,65 @@ int main(int argc, char** argv) {
                     logLevel[0] = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
-                    return 0;
+                    return false;
                 }
 
                 if (isdigit(argv[++i][0])) {
                     logLevel[1] = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
-                    return 0;
+                    return false;
                 }
             }
         }
     }
 
-#ifdef WX_UI
-    if (appMode == APPMODE::APPMODE_WXWIDGETS) {
-        distCount = 1;
-        collCount = 1;
-        nodeCount = 1;
-        collIndex = 1;
-        nodeIndex = 1;
+    return true;
+}
+
+int main(int argc, char** argv) {
+
+    Util::cleanup();
+
+    int interfaceID[2] = {0, 0};
+
+    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
+
+    int distCount = 0;
+    int collInfo[2] = {0, 1};
+    int nodeInfo[2] = {0, 1};
+
+    if (!parseParameters(argc, argv, interfaceID, logLevel,
+            &distCount, collInfo, nodeInfo)) {
+        LOG_S("Parameter problem, exiting.....");
+        return 0;
     }
+
+    UserInterfaceApp *app = nullptr;
+
+#if defined(WX_UI)
+
+    distCount = 1;
+    collInfo[0] = 1;
+    collInfo[1] = 1;
+    nodeInfo[0] = 1;
+    nodeInfo[1] = 1;
+
+    app = new WxApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
+
+#elif defined(CONSOLE_UI)
+
+    app = new ConsoleApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
+
+#elif defined(WEB_UI)
+
+    app = new WebApp(interfaceID, logLevel, &distCount, collInfo, nodeInfo);
+
+#else
+
+#error "Application Default mode is not selected"
+
 #endif
 
-    Log::init(logLevel[0], logLevel[1]);
-
-    LOG_S("Running in %s Mode with %d Distributor, %d Collector and %d Node, using interfaces : %s and %s",
-          appMode == APPMODE::APPMODE_NOUI ? "No UI" : appMode == APPMODE::APPMODE_CONSOLE ? "Console" : "WxWidgets",
-          distCount, collCount, nodeCount,
-          deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
-
-    ComponentController *controller = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
-
-    if (distCount) {
-        controller->startDistributor();
-    }
-
-    if (collCount) {
-        controller->startCollector(collCount, collIndex);
-    }
-
-    if (nodeCount) {
-        controller->startNode(nodeCount, nodeIndex);
-    }
-
-#ifdef WX_UI
-    if (appMode == APPMODE::APPMODE_WXWIDGETS) {
-
-        app = new WxApp(controller);
-
-        wxApp::SetInstance((WxApp*)app);
-        return wxEntry(argc, argv);
-    }
-#endif
-
-#ifdef CONSOLE_UI
-    if (appMode == APPMODE::APPMODE_CONSOLE) {
-
-        app = new ConsoleApp(controller);
-
-    }
-#endif
-
-    int in;
-    do {
-
-        in = getchar();
-        switch(in) {
-            case 'p':
-                controller->getDistributor()->sendWakeupMessagesAll(false);
-                break;
-            case 'l':
-                controller->getCollector(0)->loadJob(NULL);
-                break;
-            case 'x':
-                controller->getCollector(0)->processJobs();
-                break;
-            case 'q':
-                delete controller;
-#ifdef CONSOLE_UI
-                if (appMode == APPMODE::APPMODE_CONSOLE) {
-                    delete ((ConsoleApp*)app);
-                }
-#endif
-                return 0;
-            default:
-                break;
-        }
-
-    } while(true);
+    return app->run();
 }

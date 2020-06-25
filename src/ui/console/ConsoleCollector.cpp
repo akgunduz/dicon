@@ -9,10 +9,16 @@
 
 void ConsoleApp::collInit() {
 
+    uiUpdater[UI_UPDATE_COLL_ID] = &ConsoleApp::collUpdateID;
     uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &ConsoleApp::collUpdateFileList;
     uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &ConsoleApp::collUpdateFileListItem;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &ConsoleApp::collUpdateProcessList;
     uiUpdater[UI_UPDATE_COLL_PROCESS_LISTITEM] = &ConsoleApp::collUpdateProcessListItem;
+
+}
+
+void ConsoleApp::collUpdateID(ConsoleEvent &event) {
+
 }
 
 void ConsoleApp::collUpdateFileList(ConsoleEvent &event) {

@@ -7,15 +7,4 @@
 #define DICON_APPLICATION_H
 
 #include "Common.h"
-#include "DeviceList.h"
-#include "Distributor.h"
-#include "Collector.h"
-
-enum class APPMODE {
-
-    APPMODE_NOUI,
-    APPMODE_CONSOLE,
-    APPMODE_WXWIDGETS
-};
-
 #endif //DICON_APPLICATION_H

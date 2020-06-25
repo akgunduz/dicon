@@ -18,6 +18,11 @@ void Wx::componentInit() {
 
 }
 
+void Wx::updateUICallback(void *context, int id, void *data) {
+
+    ((Wx*) context)->updateUIEvent(id, data);
+}
+
 void Wx::updateUIEvent(int id, void *data) {
 
     wxCommandEvent event(*ui_event);
@@ -33,9 +38,4 @@ void Wx::updateUI(wxCommandEvent& event) {
     if (uiUpdater[id] != nullptr) {
         ((this)->*(uiUpdater[id]))(event);
     }
-}
-
-void Wx::updateUICallback(void *context, int id, void *data) {
-
-    ((Wx*) context)->updateUIEvent(id, data);
 }

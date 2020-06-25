@@ -59,4 +59,4 @@ Objects/
 /cmake-build*
 GCCDebug
 .DS_Store
-build/
+build*/

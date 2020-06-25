@@ -26,6 +26,8 @@
 
 ////@begin includes
 #include "wx/frame.h"
+#include "wx/button.h"
+#include "wx/stattext.h"
 #include "wx/notebook.h"
 #include "wx/listctrl.h"
 ////@end includes
@@ -102,25 +104,21 @@ public:
 
     //Generic
 
-    void distInit();
-    void collInit();
-    void nodeInit();
-
     static void updateUICallback(void*, int, void*);
-
     void updateUIEvent(int, void*);
-
     void updateUI(wxCommandEvent &event);
 
     void componentInit();
 
     //Distributor
 
+    void distInit();
     void distAddtoCollectorList(wxCommandEvent& event);
     void distAddtoNodeList(wxCommandEvent& event);
 
     //Collector
 
+    void collInit();
     void collUpdateID(wxCommandEvent &event);
     void collUpdateFileList(wxCommandEvent &event);
     void collUpdateFileListItem(wxCommandEvent &event);
@@ -129,6 +127,7 @@ public:
 
     //Node
 
+    void nodeInit();
     void nodeUpdateID(wxCommandEvent& event);
     void nodeUpdateState(wxCommandEvent& event);
     void nodeUpdateProcessList(wxCommandEvent &event);

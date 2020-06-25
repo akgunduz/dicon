@@ -65,6 +65,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
         ${SOURCE_PATH}/ComponentController.cpp
+        ${SOURCE_PATH}/ui/UserInterfaceApp.cpp
         )
 
 set(WX_FILES
@@ -73,6 +74,7 @@ set(WX_FILES
         ${SOURCE_PATH}/ui/wx/WxDistributor.cpp
         ${SOURCE_PATH}/ui/wx/WxCollector.cpp
         ${SOURCE_PATH}/ui/wx/WxNode.cpp
+        ${SOURCE_PATH}/ui/wx/WxMain.cpp
         ${SOURCE_PATH}/ui/wx/WxApp.cpp
         ${SOURCE_PATH}/Application.cpp
         )
@@ -83,6 +85,13 @@ set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/ConsoleDistributor.cpp
         ${SOURCE_PATH}/ui/console/ConsoleCollector.cpp
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
+        ${SOURCE_PATH}/Application.cpp
+        )
+
+set(WEB_FILES
+        ${SOURCE_PATH}/ui/web/civetweb.c
+        ${SOURCE_PATH}/ui/web/CivetServer.cpp
+        ${SOURCE_PATH}/ui/web/WebApp.cpp
         ${SOURCE_PATH}/Application.cpp
         )
 
@@ -108,7 +117,7 @@ add_definitions(-DDISABLE_BACKUP)
 add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)
 
-include_directories(${SOURCE_PATH})
+include_directories(${SOURCE_PATH} ${SOURCE_PATH}/ui)
 include_directories(${JSON-C_INCLUDE_DIRS})
 link_directories(${LIBRARY_DIR})
 
@@ -128,6 +137,7 @@ target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
 target_link_libraries(dicon-console dicon-framework
         ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
-add_executable(dicon ${NOUI_FILES})
-target_link_libraries(dicon dicon-framework
-        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+#add_executable(dicon-web ${WEB_FILES})
+#target_compile_definitions(dicon-web PUBLIC -DWEB_UI)
+#target_link_libraries(dicon-web dicon-framework
+#        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)

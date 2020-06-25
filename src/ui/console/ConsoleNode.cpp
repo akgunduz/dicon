@@ -9,9 +9,14 @@
 
 void ConsoleApp::nodeInit() {
 
+    uiUpdater[UI_UPDATE_NODE_ID] = &ConsoleApp::nodeUpdateID;
 	uiUpdater[UI_UPDATE_NODE_STATE] = &ConsoleApp::nodeUpdateState;
 	uiUpdater[UI_UPDATE_NODE_PROCESS_LIST] = &ConsoleApp::nodeUpdateProcessList;
 	uiUpdater[UI_UPDATE_NODE_CLEAR] = &ConsoleApp::nodeUpdateClear;
+}
+
+void ConsoleApp::nodeUpdateID(ConsoleEvent& event) {
+
 }
 
 void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {

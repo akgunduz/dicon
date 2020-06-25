@@ -1,84 +1,26 @@
-/////////////////////////////////////////////////////////////////////////////
-// Name:        WxApp.h
-// Purpose:     
-// Author:      Haluk Akgunduz
-// Modified by: 
-// Created:     Thu 03 May 2018 12:54:09 +03
-// RCS-ID:      
-// Copyright:   Licensed with AGPL v3.0
-// Licence:     
-/////////////////////////////////////////////////////////////////////////////
-
-#ifndef _WXAPP_H_
-#define _WXAPP_H_
+//
+// Created by Haluk AKGUNDUZ on 24.06.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
+//
 
 
-/*!
- * Includes
- */
+#ifndef DICON_WXAPP_H
+#define DICON_WXAPP_H
 
-////@begin includes
-#include "wx/image.h"
-#include "Wx.h"
-////@end includes
+#include "Common.h"
+#include "UserInterfaceApp.h"
+#include "WxMain.h"
 
-/*!
- * Forward declarations
- */
+class WxApp : public UserInterfaceApp {
 
-////@begin forward declarations
-////@end forward declarations
-
-/*!
- * Control identifiers
- */
-
-////@begin control identifiers
-////@end control identifiers
-
-/*!
- * WxApp class declaration
- */
-
-class WxApp: public wxApp
-{    
-    DECLARE_CLASS( WxApp )
-    DECLARE_EVENT_TABLE()
-
-    void* controller;
+    WxMain *app;
 
 public:
-    /// Constructor
-    WxApp();
-    WxApp(void*);
+    WxApp(int argc, char** argv, int *interfaceID,
+            LOGLEVEL* logLevel, int* distCount, int* collInfo, int* nodeInfo);
 
-    void Init();
-
-    /// Initialises the application
-    virtual bool OnInit();
-
-    /// Called on exit
-    virtual int OnExit();
-
-////@begin WxApp event handler declarations
-
-////@end WxApp event handler declarations
-
-////@begin WxApp member function declarations
-
-////@end WxApp member function declarations
-
-////@begin WxApp member variables
-////@end WxApp member variables
+    int run() override;
 };
 
-/*!
- * Application instance declaration 
- */
 
-////@begin declare app
-DECLARE_APP(WxApp)
-////@end declare app
-
-#endif
-    // _WXAPP_H_
+#endif //DICON_WXAPP_H
