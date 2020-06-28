@@ -271,7 +271,7 @@ void Util::cleanup() {
     }
 
     dirent *entry;
-    char path[255];
+    char path[300];
 
     while ((entry = readdir(unixdir)) != NULL) {
 

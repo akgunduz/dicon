@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-color: #bababa;
+        font-family: "Lato", sans-serif;
+      }
+
+      /* Fixed sidenav, full height */
+      .sidenav {
+        height: 100%;
+        width: 12rem;
+        position: fixed;
+        z-index: auto;
+        top: 0;
+        left: 0;
+        background-color: #222;
+        overflow-x: hidden;
+        padding-top: 2rem;
+      }
+
+      /* Style the sidenav links and the dropdown button */
+      .sidenav a,
+      .dropdown-btn {
+        padding: 0.5rem 1rem 0.5rem 1rem;
+        text-decoration: none;
+        font-size: 1.4rem;
+        color: #818181;
+        display: block;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        outline: none;
+      }
+
+      /* On mouse-over */
+      .sidenav a:hover,
+      .dropdown-btn:hover {
+        color: #f1f1f1;
+      }
+
+      /* Add an active class to the active dropdown button */
+      .sidebar_btn_active {
+        background-color: green;
+        color: white;
+      }
+
+      /* Optional: Style the caret down icon */
+      .fa-caret-down {
+        padding-top: 0.2rem;
+        float: right;
+        padding-right: 0.5rem;
+      }
+
+      /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+      .dropdown-container {
+        display: none;
+        background-color: #262626;
+        padding-left: 8px;
+      }
+
+      /* Main content */
+      .distributor {
+        margin-left: 12rem; /* Same as the width of the sidenav */
+        text-align: center;
+        font-size: 1rem; /* Increased text to enable scrolling */
+        padding: 1rem;
+        background-color: #bababa;
+      }
+
+      .btn_poll {
+        width: 100%;
+        height: 6rem;
+        font-size: 2rem;
+        background-color: #90e3ff;
+      }
+
+      .dist-devices {
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .dist-table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      td,
+      th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 0.5rem;
+      }
+
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+
+      .dist-colls {
+        width: 49%;
+      }
+
+      .dist-nodes {
+        width: 49%;
+      }
+    </style>
+  </head>
+  <body onload="wsOpen()">
+    <div class="sidenav">
+      <a href="#distributor">Distributor</a>
+      <button class="dropdown-btn">
+        Collectors
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="dropdown-container">
+        <a href="#collector1">Collector 1</a>
+        <a href="#collector2">Collector 2</a>
+        <a href="#collector3">Collector 3</a>
+      </div>
+      <button class="dropdown-btn">
+        Nodes
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="dropdown-container">
+        <a href="#node1">Node 1</a>
+        <a href="#node2">Node 2</a>
+        <a href="#node3">Node 3</a>
+      </div>
+    </div>
+
+    <div class="distributor">
+      <h1>Distributor</h1>
+      <button type="button" class="button btn_poll" onclick="onDistPoll()">
+        Poll
+      </button>
+      <div class="dist-devices">
+        <div class="dist-colls">
+          <h3>Collectors</h3>
+          <table id="dist-colls-table" class="dist-table">
+            <tr>
+              <th>ID</th>
+              <th>Node ID</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Not Assigned</td>
+            </tr>
+          </table>
+        </div>
+        <div class="dist-nodes">
+          <h3>Nodes</h3>
+          <table id="dist-nodes-table" class="dist-table">
+            <tr>
+              <th>ID</th>
+              <th>State</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>IDLE</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <p id=wstest> WS-Test</p>
+    </div>
+    <script>
+      
+      var PORT = "8081";
+      var HOSTING = "http://localhost:" + PORT;
+      var REST_URI = HOSTING + "/rest";
+      var REST_DIST_URI = REST_URI + "/dist";
+      var REST_DIST_POLL = REST_DIST_URI + "/poll";
+
+      var WS_URI = "ws://localhost:" + PORT + "/ws";
+
+      var dropdown = document.getElementsByClassName("dropdown-btn");
+      var i;
+
+      for (i = 0; i < dropdown.length; i++) {
+        dropdown[i].addEventListener("click", function () {
+          this.classList.toggle("sidebar_btn_active");
+          var dropdownContent = this.nextElementSibling;
+          if (dropdownContent.style.display === "block") {
+            dropdownContent.style.display = "none";
+          } else {
+            dropdownContent.style.display = "block";
+          }
+        });
+      }
+
+      function addToTable(tableID, id, val) {
+        let table = document.getElementById(tableID);
+        let newRow = table.insertRow();
+        let newID = newRow.insertCell();
+        let newVal = newRow.insertCell();
+
+        newID.innerHTML = id;
+        newVal.innerHTML = val;
+
+        console.log(newVal);
+      }
+
+      function onDistPoll() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+  //          alert(this.responseText);
+          }
+        };
+        xhttp.open("GET", REST_DIST_POLL, true);
+ //       xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send();
+      }
+
+      function wsOpen() {
+        var wsConn = new WebSocket(WS_URI);
+        var wsField = document.getElementById("wstest");
+        wsConn.onmessage = function (info) {
+          wsField.innerHTML = info.data;
+        }
+        wsConn.onerror = function (error) {
+          alert("Websocket error");
+          wsConn.close();
+        }
+        console.log(wsConn);
+      }
+    </script>
+  </body>
+</html>

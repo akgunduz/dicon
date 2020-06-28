@@ -27,7 +27,7 @@ void ConsoleApp::distAddtoCollectorList(ConsoleEvent &event) {
     } else {
 
         LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], No Assigned Node",
-              data->getData(0), data->getData(1));
+              data->getData(0));
     }
 }
 

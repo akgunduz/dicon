@@ -80,8 +80,8 @@ set(WX_FILES
         )
 
 set(CONSOLE_FILES
-        ${SOURCE_PATH}/ui/console/ConsoleApp.cpp
         ${SOURCE_PATH}/ui/console/ConsoleEvent.cpp
+        ${SOURCE_PATH}/ui/console/ConsoleApp.cpp
         ${SOURCE_PATH}/ui/console/ConsoleDistributor.cpp
         ${SOURCE_PATH}/ui/console/ConsoleCollector.cpp
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
@@ -90,8 +90,11 @@ set(CONSOLE_FILES
 
 set(WEB_FILES
         ${SOURCE_PATH}/ui/web/civetweb.c
-        ${SOURCE_PATH}/ui/web/CivetServer.cpp
+        ${SOURCE_PATH}/ui/web/WebEvent.cpp
         ${SOURCE_PATH}/ui/web/WebApp.cpp
+        ${SOURCE_PATH}/ui/web/WebDistributor.cpp
+        ${SOURCE_PATH}/ui/web/WebCollector.cpp
+        ${SOURCE_PATH}/ui/web/WebNode.cpp
         ${SOURCE_PATH}/Application.cpp
         )
 
@@ -124,20 +127,21 @@ link_directories(${LIBRARY_DIR})
 add_library(dicon-framework ${FRAMEWORK_FILES})
 target_include_directories(dicon-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 
-add_executable(dicon-wx ${WX_FILES})
-find_package(wxWidgets)
-target_compile_definitions(dicon-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
-target_include_directories(dicon-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
-target_compile_options(dicon-wx PUBLIC ${wxWidgets_CXX_FLAGS})
-target_link_libraries(dicon-wx dicon-framework
-        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
-
-add_executable(dicon-console ${CONSOLE_FILES})
-target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
-target_link_libraries(dicon-console dicon-framework
-        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
-
-#add_executable(dicon-web ${WEB_FILES})
-#target_compile_definitions(dicon-web PUBLIC -DWEB_UI)
-#target_link_libraries(dicon-web dicon-framework
+#add_executable(dicon-wx ${WX_FILES})
+#find_package(wxWidgets)
+#target_compile_definitions(dicon-wx PUBLIC ${wxWidgets_DEFINITIONS} -DWX_UI)
+#target_include_directories(dicon-wx PUBLIC ${wxWidgets_INCLUDE_DIRS})
+#target_compile_options(dicon-wx PUBLIC ${wxWidgets_CXX_FLAGS})
+#target_link_libraries(dicon-wx dicon-framework
+#        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
+#
+#add_executable(dicon-console ${CONSOLE_FILES})
+#target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+#target_link_libraries(dicon-console dicon-framework
 #        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+
+add_executable(dicon-web ${WEB_FILES})
+target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)
+#target_compile_options(dicon-web PUBLIC -Wall -Wextra -Wshadow -Wformat-security -Winit-self -Wmissing-prototypes -DLINUX -Iinclude  -DUSE_STACK_SIZE=102400 -O2 -DNDEBUG -fPIC)
+target_link_libraries(dicon-web dicon-framework
+        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread dl rt)

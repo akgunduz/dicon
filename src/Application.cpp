@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 
 #elif defined(WEB_UI)
 
-    app = new WebApp(interfaceID, logLevel, &distCount, collInfo, nodeInfo);
+    app = new WebApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
 
 #else
 
