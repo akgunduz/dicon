@@ -23,8 +23,6 @@
 #define COLL_URI "/coll"
 #define NODE_URI "/node"
 
-#define MAX_WS_CLIENTS 100
-
 struct ws_client {
     struct mg_connection *conn;
     int state;
@@ -38,7 +36,7 @@ class WebApp : public UserInterfaceApp {
 
     struct mg_callbacks callbacks;
     struct mg_context *context;
-    struct ws_client ws_clients[MAX_WS_CLIENTS];
+    struct ws_client wsClients[UI_UPDATE_MAX];
 
     fWebUpdater uiUpdater[MAX_UI_CB];
 

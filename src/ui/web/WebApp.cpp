@@ -118,11 +118,11 @@ int WebApp::wsConnectHandler(const struct mg_connection *conn)
     int i;
 
     mg_lock_context(ctx);
-    for (i = 0; i < MAX_WS_CLIENTS; i++) {
-        if (ws_clients[i].conn == nullptr) {
-            ws_clients[i].conn = (struct mg_connection *)conn;
-            ws_clients[i].state = 1;
-            mg_set_user_connection_data(ws_clients[i].conn,(void *)(ws_clients + i));
+    for (i = 0; i < UI_UPDATE_MAX; i++) {
+        if (wsClients[i].conn == nullptr) {
+            wsClients[i].conn = (struct mg_connection *)conn;
+            wsClients[i].state = 1;
+            mg_set_user_connection_data(wsClients[i].conn,(void *)(wsClients + i));
             reject = 0;
             break;
         }
@@ -222,8 +222,6 @@ void WebApp::wsCloseHandler(const struct mg_connection *conn)
             "Client dropped from the set of webserver connections\r\n\r\n");
 }
 
-
-
 void WebApp::wsInform()
 {
     static unsigned long cnt = 0;
@@ -234,24 +232,24 @@ void WebApp::wsInform()
     sprintf(text, "%lu", ++cnt);
     textlen = strlen(text);
 
-    for (i = 0; i < MAX_WS_CLIENTS; i++) {
+    for (i = 0; i < UI_UPDATE_MAX; i++) {
         int inform = 0;
 
         mg_lock_context(context);
-        if (ws_clients[i].state == 2) {
+        if (wsClients[i].state == 2) {
             /* move to "inform" state */
-            ws_clients[i].state = 3;
+            wsClients[i].state = 3;
             inform = 1;
         }
         mg_unlock_context(context);
 
         if (inform) {
-            mg_websocket_write(ws_clients[i].conn,
+            mg_websocket_write(wsClients[i].conn,
                                MG_WEBSOCKET_OPCODE_TEXT,
                                text,
                                textlen);
             mg_lock_context(context);
-            ws_clients[i].state = 2;
+            wsClients[i].state = 2;
             mg_unlock_context(context);
         }
     }
@@ -321,7 +319,7 @@ int WebApp::run() {
 
     while (!exitNow) {
         sleep(1);
-        wsInform();
+  //      wsInform();
     }
 
     /* Stop the server */
