@@ -46,9 +46,15 @@ long ComponentController::getCollectorCount() {
     return collectors.size();
 }
 
-Collector *ComponentController::getCollector(int index) {
+Collector *ComponentController::getCollector(int id) {
 
-    return collectors[index];
+    for (auto & collector : collectors) {
+        if (collector->getHostID() == id) {
+            return collector;
+        }
+    }
+
+    return nullptr;
 }
 
 long ComponentController::getNodeCount() {
@@ -56,9 +62,15 @@ long ComponentController::getNodeCount() {
     return nodes.size();
 }
 
-Node *ComponentController::getNode(int index) {
+Node *ComponentController::getNode(int id) {
 
-    return nodes[index];
+    for (auto & node : nodes) {
+        if (node->getHostID() == id) {
+            return node;
+        }
+    }
+
+    return nullptr;
 }
 
 bool ComponentController::startDistributor() {

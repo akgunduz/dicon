@@ -6,18 +6,16 @@
 #include <ui/UserInterfaceEvent.h>
 #include <Log.h>
 #include <NodeState.h>
+#include <CollectorObject.h>
 #include "WebApp.h"
-
-#define REST_DIST_URI REST_URI DIST_URI
-#define REST_DIST_POLL REST_DIST_URI "/poll"
 
 void WebApp::distInit() {
 
-    uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &WebApp::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &WebApp::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST_COLL_LISTITEM] = &WebApp::distUpdateCollectorListItem;
+    uiUpdater[UI_UPDATE_DIST_NODE_LISTITEM] = &WebApp::distUpdateNodeListItem;
 }
 
-int WebApp::distHandler(struct mg_connection *conn, const char * uri) {
+bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
 
@@ -25,42 +23,84 @@ int WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
         if (0 == strcmp(uri, "/poll")) {
 
-            componentController->getDistributor()->sendWakeupMessagesAll(false);
+            return distPollHandler(conn);
+        }
 
-            mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        if (0 == strcmp(uri, "/devices")) {
 
-            return 1;
+            return distDevicesHandler(conn);
         }
     }
 
-    return 0;
+    return false;
 }
 
-void WebApp::distAddtoCollectorList(WebEvent &event) {
+bool WebApp::distPollHandler(struct mg_connection *conn) {
 
-    long i = 0;
+    componentController->getDistributor()->sendWakeupMessagesAll(false);
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
+    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
 
-    if (data->getData(1) > 0) {
+    return true;
+}
 
-        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], Assigned Node[%d]",
-              data->getData(0), data->getData(1));
-    } else {
+bool WebApp::distDevicesHandler(struct mg_connection *conn) {
 
-        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], No Assigned Node",
-              data->getData(0));
+    auto* jsonObj = json_object_new_object();
+    if (jsonObj == nullptr) {
+        LOG_S("Can not create json object!!!");
+        return false;
     }
 
+    auto* collList = json_object_new_array();
+
+    for (int i = 0 ; i < componentController->getDistributor()->getCollectors()->size(); i++) {
+
+        auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
+        auto* collItem = json_object_new_object();
+        json_object_object_add(collItem, "collectorID", json_object_new_int(collector->getID()));
+        json_object_object_add(collItem, "assignedNode", json_object_new_int(((CollectorObject*)collector)->getAttached().getID()));
+
+        json_object_array_add(collList, collItem);
+    }
+
+    json_object_object_add(jsonObj, "collList", collList);
+
+    auto* nodeList = json_object_new_array();
+
+    for (int i = 0 ; i < componentController->getDistributor()->getNodes()->size(); i++) {
+
+        auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
+        auto* nodeItem = json_object_new_object();
+        json_object_object_add(nodeItem, "nodeID", json_object_new_int(node->getID()));
+        json_object_object_add(nodeItem, "state", json_object_new_int(((NodeObject*)node)->getState()));
+
+        json_object_array_add(nodeList, nodeItem);
+    }
+
+    json_object_object_add(jsonObj, "nodeList", nodeList);
+
+    size_t json_str_len;
+
+    const char *json_str = json_object_to_json_string_length(jsonObj, JSON_C_TO_STRING_SPACED, &json_str_len);
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
+
+    mg_write(conn, json_str, json_str_len);
+
+    json_object_put(jsonObj);
+
+    return true;
 }
 
-void WebApp::distAddtoNodeList(WebEvent &event) {
+void WebApp::distUpdateCollectorListItem(WebEvent &event) {
 
-    long i = 0;
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    LOG_S("Console UI ------> Distributor Node Updated : Node[%d], State : %s",
-          data->getData(0), NodeState::getName((NODE_STATES)data->getData(1)));
-
+    Timer::set("devices", 2000, WebApp::wsInform, this);
 }
+
+void WebApp::distUpdateNodeListItem(WebEvent &event) {
+
+    Timer::set("devices", 2000, WebApp::wsInform, this);
+}
+
+

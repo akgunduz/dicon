@@ -16,7 +16,6 @@ class Collector : public Component {
 
 	Jobs jobs;
 	ComponentObject distributor;
-	long distributorAddress;
 
     Collector(const char *rootPath);
 
@@ -45,7 +44,6 @@ public:
     bool loadJob(const char*);
     bool processJobs();
 	Jobs* getJobs();
-
 };
 
 #endif	/* COLLECTOR_H */

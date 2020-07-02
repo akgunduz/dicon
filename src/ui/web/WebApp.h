@@ -23,9 +23,17 @@
 #define COLL_URI "/coll"
 #define NODE_URI "/node"
 
+enum WSSTATE {
+    WSSTATE_NOTCONNECTED,
+    WSSTATE_CONNECTED,
+    WSSTATE_READY,
+    WSSTATE_PROCESS,
+    WSSTATE_MAX
+};
+
 struct ws_client {
     struct mg_connection *conn;
-    int state;
+    enum WSSTATE state;
 };
 
 class WebApp;
@@ -36,7 +44,7 @@ class WebApp : public UserInterfaceApp {
 
     struct mg_callbacks callbacks;
     struct mg_context *context;
-    struct ws_client wsClients[UI_UPDATE_MAX];
+    struct ws_client wsClients[MAX_UI_CB];
 
     fWebUpdater uiUpdater[MAX_UI_CB];
 
@@ -56,18 +64,20 @@ public:
     void wsReadyHandler(struct mg_connection *conn);
     int wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len);
     void wsCloseHandler(const struct mg_connection *conn);
-    void wsInform();
-
-    int distHandler(struct mg_connection *conn, const char * uri);
+    static bool wsInform(void*, const char*);
 
     void distInit();
-    void OnDistPollClick();
-    void distAddtoCollectorList(WebEvent &event);
-    void distAddtoNodeList(WebEvent &event);
+    bool distHandler(struct mg_connection *conn, const char * uri);
+    bool distPollHandler(struct mg_connection *conn);
+    bool distDevicesHandler(struct mg_connection *conn);
+    void distUpdateCollectorListItem(WebEvent &event);
+    void distUpdateNodeListItem(WebEvent &event);
 
     void collInit();
-    void OnCollLoadClick(WebEvent &event);
-    void OnCollProcessClick(WebEvent &event);
+    bool collHandler(struct mg_connection *conn, const char * uri);
+    bool collLoadJobHandler(struct mg_connection *conn, long id);
+    bool collProcessHandler(struct mg_connection *conn, long id);
+    bool collListHandler(struct mg_connection *conn, long id);
     void collUpdateID(WebEvent &event);
     void collUpdateFileList(WebEvent &event);
     void collUpdateFileListItem(WebEvent &event);

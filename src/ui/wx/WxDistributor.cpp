@@ -39,8 +39,8 @@ void Wx::distInit() {
     column.SetWidth(width);
     distNodeList->InsertColumn(1, column);
 
-    uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &Wx::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &Wx::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST_COLL_LISTITEM] = &Wx::distAddtoCollectorList;
+    uiUpdater[UI_UPDATE_DIST_NODE_LISTITEM] = &Wx::distAddtoNodeList;
 }
 
 void Wx::OnDistPollClickWrapper( wxCommandEvent& event )

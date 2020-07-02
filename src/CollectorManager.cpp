@@ -66,3 +66,53 @@ void CollectorManager::setObject(int id, long address) {
 
     components[address] = new CollectorObject(id, address);
 }
+
+//ComponentObject *CollectorManager::getWaiting() {
+//
+//    for (auto & component : components) {
+//
+//        auto *collector = (CollectorObject*) component.second;
+//
+//        if (collector->getState() == COLLSTATE_WAITING) {
+//            return collector;
+//        }
+//    }
+//
+//    return nullptr;
+//}
+
+bool CollectorManager::attachNode(long address, ComponentObject &node) {
+
+    auto search = components.find(address);
+    if (search == components.end()) {
+        return false;
+    }
+
+    auto *collector = (CollectorObject*) search->second;
+
+    mutex.lock();
+
+    collector->setAttached(node);
+
+    mutex.unlock();
+
+    return true;
+}
+
+bool CollectorManager::detachNode(long address) {
+
+    auto search = components.find(address);
+    if (search == components.end()) {
+        return false;
+    }
+
+    auto *collector = (CollectorObject*) search->second;
+
+    mutex.lock();
+
+    collector->setAttached(ComponentObject());
+
+    mutex.unlock();
+
+    return true;
+}

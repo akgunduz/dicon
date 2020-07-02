@@ -13,18 +13,19 @@ class NodeObject : public ComponentObject {
 
 private:
 
-    NODE_STATES state;
+    NODESTATES state;
+
     int usage;
 
 public:
 
-    NodeObject(NODE_STATES, int, int, long);
+    NodeObject(NODESTATES, int, int, long);
     NodeObject(int, long);
     ~NodeObject();
 
 
-    NODE_STATES getState();
-    void setState(NODE_STATES);
+    NODESTATES getState();
+    void setState(NODESTATES);
     int getUsage();
     int iterateUsage(bool);
 };

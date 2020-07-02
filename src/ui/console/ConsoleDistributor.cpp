@@ -10,8 +10,8 @@
 
 void ConsoleApp::distInit() {
 
-    uiUpdater[UI_UPDATE_DIST_COLL_LIST] = &ConsoleApp::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_NODE_LIST] = &ConsoleApp::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST_COLL_LISTITEM] = &ConsoleApp::distAddtoCollectorList;
+    uiUpdater[UI_UPDATE_DIST_NODE_LISTITEM] = &ConsoleApp::distAddtoNodeList;
 }
 
 void ConsoleApp::distAddtoCollectorList(ConsoleEvent &event) {
@@ -38,5 +38,5 @@ void ConsoleApp::distAddtoNodeList(ConsoleEvent &event) {
     auto *data = (UserInterfaceEvent *)event.GetClientData();
 
     LOG_S("Console UI ------> Distributor Node Updated : Node[%d], State : %s",
-          data->getData(0), NodeState::getName((NODE_STATES)data->getData(1)));
+          data->getData(0), NodeState::getName((NODESTATES)data->getData(1)));
 }

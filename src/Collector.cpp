@@ -66,7 +66,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     ExecutorInfo executor = job->getUnServed();
 
-    if (executor.get() == NULL) {
+    if (executor.get() == nullptr) {
         LOGS_I(getHost(), "No available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;

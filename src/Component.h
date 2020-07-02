@@ -39,6 +39,7 @@ public:
     virtual ~Component();
 
     ComponentObject getHost();
+    int getHostID();
     void setHostID(int);
 
     const char* getRootPath();

@@ -47,7 +47,7 @@ bool Distributor::processCollectorAliveMsg(ComponentObject owner, Message *msg) 
         return true;
     }
 
-    LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(owner.getAddress()), 0});
+    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {collectorManager->getID(owner.getAddress()), 0});
 
     LOGS_I(getHost(), "Collector at address : %s added to the list with ID : %d",
            InterfaceTypes::getAddressString(owner.getAddress()).c_str(), collectorManager->getID(owner.getAddress()));
@@ -67,7 +67,7 @@ bool Distributor::processNodeAliveMsg(ComponentObject owner, Message *msg) {
         return true;
     }
 
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), IDLE});
+    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(owner.getAddress()), NODESTATE_IDLE});
 
     LOGS_I(getHost(), "Node at address : %s added to the list with ID : %d",
            InterfaceTypes::getAddressString(owner.getAddress()).c_str(), nodeManager->getID(owner.getAddress()));
@@ -77,7 +77,7 @@ bool Distributor::processNodeAliveMsg(ComponentObject owner, Message *msg) {
 
 bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
 
-    if (!nodeManager->setState(owner.getAddress(), IDLE)) {
+    if (!nodeManager->setState(owner.getAddress(), NODESTATE_IDLE)) {
         LOGS_I(getHost(),
                "Could not found a node with address : %s",
                InterfaceTypes::getAddressString(owner.getAddress()).c_str());
@@ -90,8 +90,10 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
     LOGS_I(getHost(), "Node[%d] is Done with Collector[%d]\'s process",
            nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
 
-    LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), 0});
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), IDLE});
+    collectorManager->detachNode(collAddress);
+
+    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {collectorManager->getID(collAddress), 0});
+    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(owner.getAddress()), NODESTATE_IDLE});
 
     return processWaitingList(collAddress, collUnservedCount, msg->getData()->getJobDir());
 }
@@ -103,12 +105,14 @@ bool Distributor::processNodeIDMsg(ComponentObject owner, Message *msg) {
 
 bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
 
-    nodeManager->setState(owner.getAddress(), BUSY);
+    nodeManager->setState(owner.getAddress(), NODESTATE_BUSY);
 
     long collAddress = msg->getHeader()->getVariant(0);
 
-    LOG_U(UI_UPDATE_DIST_COLL_LIST, std::vector<long> {collectorManager->getID(collAddress), nodeManager->getID(owner.getAddress())});
-    LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(owner.getAddress()), BUSY});
+    collectorManager->attachNode(collAddress, *nodeManager->get(owner.getAddress()));
+
+    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {collectorManager->getID(collAddress), nodeManager->getID(owner.getAddress())});
+    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(owner.getAddress()), NODESTATE_BUSY});
 
     LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
 
@@ -140,7 +144,9 @@ bool Distributor::processWaitingList(long collAddress, long collUnservedCount, c
 
         TypeWaitingCollector collector = collectorManager->getWaiting();
 
-        LOG_U(UI_UPDATE_DIST_NODE_LIST, std::vector<long> {nodeManager->getID(nodeAddress), PREBUSY});
+        nodeManager->setState(nodeAddress, NODESTATE_PREBUSY);
+
+        LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(nodeAddress), NODESTATE_PREBUSY});
 
         LOGS_I(getHost(), "Node[%d] is assigned to Collector[%d]\'s process",
                nodeManager->getID(nodeAddress), collectorManager->getID(collector.first));
@@ -262,4 +268,12 @@ bool Distributor::clear() {
 
     return true;
 
+}
+
+CollectorManager *Distributor::getCollectors() const {
+    return collectorManager;
+}
+
+NodeManager *Distributor::getNodes() const {
+    return nodeManager;
 }

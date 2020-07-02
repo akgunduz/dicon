@@ -10,6 +10,10 @@ const char* sComponentTypes[COMP_MAX] = {
         "Node",
 };
 
+ComponentObject::ComponentObject()
+        : ComponentObject(COMP_MAX, 0) {
+}
+
 ComponentObject::ComponentObject(COMPONENT type, int id)
         : ComponentObject(type, id, 0) {
 }

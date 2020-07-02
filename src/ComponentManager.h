@@ -32,7 +32,9 @@ public:
     void clear();
 
     int getID(long);
+    size_t size();
     ComponentObject* get(long);
+    ComponentObject* getByIndex(int);
 
     int add(long);
 

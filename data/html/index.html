@@ -57,6 +57,10 @@
         color: white;
       }
 
+      .item-valid {
+        background-color: #00c000;
+      }
+
       /* Optional: Style the caret down icon */
       .fa-caret-down {
         padding-top: 0.2rem;
@@ -72,29 +76,35 @@
       }
 
       /* Main content */
-      .distributor {
-        margin-left: 12rem; /* Same as the width of the sidenav */
+      .component-block {
+        margin-left: 12rem;
         text-align: center;
-        font-size: 1rem; /* Increased text to enable scrolling */
+        font-size: 1rem;
         padding: 1rem;
         background-color: #bababa;
       }
 
-      .btn_poll {
+      .standard-container {
+        width: 100%;
+        padding: 1rem;
+      }
+
+      .btn-full-width {
         width: 100%;
         height: 6rem;
         font-size: 2rem;
         background-color: #90e3ff;
+        margin-bottom: 2rem;
       }
 
-      .dist-devices {
+      .dual-tables-container {
         width: 100%;
         padding: 1rem;
         display: flex;
         justify-content: space-between;
       }
 
-      .dist-table {
+      .table-wide {
         font-family: arial, sans-serif;
         border-collapse: collapse;
         width: 100%;
@@ -108,91 +118,195 @@
         padding: 0.5rem;
       }
 
-      tr:nth-child(even) {
+      /* tr:nth-child(even) {
         background-color: #dddddd;
-      }
+      } */
 
-      .dist-colls {
-        width: 49%;
-      }
-
-      .dist-nodes {
+      .single-table-container {
         width: 49%;
       }
     </style>
   </head>
-  <body onload="wsOpen()">
+  <body onload="onLoad()">
     <div class="sidenav">
-      <a href="#distributor">Distributor</a>
+      <a onclick="onDistClick()"> Distributor</a>
       <button class="dropdown-btn">
         Collectors
         <i class="fa fa-caret-down"></i>
       </button>
-      <div class="dropdown-container">
-        <a href="#collector1">Collector 1</a>
-        <a href="#collector2">Collector 2</a>
-        <a href="#collector3">Collector 3</a>
-      </div>
+      <div id="sidebar-coll-list" class="dropdown-container"></div>
       <button class="dropdown-btn">
         Nodes
         <i class="fa fa-caret-down"></i>
       </button>
-      <div class="dropdown-container">
-        <a href="#node1">Node 1</a>
-        <a href="#node2">Node 2</a>
-        <a href="#node3">Node 3</a>
+      <div id="sidebar-node-list" class="dropdown-container"></div>
+    </div>
+
+    <div class="component-block" hidden>
+      <h1>Debug</h1>
+      <p id="testField">Test</p>
+    </div>
+
+    <div id="distributor-block" class="component-block" style="display: block;">
+      <h1>Distributor</h1>
+      <button
+        type="button"
+        class="button btn-full-width"
+        onclick="onDistPoll()"
+      >
+        Poll
+      </button>
+      <div class="dual-tables-container">
+        <div class="single-table-container">
+          <h3>Collectors</h3>
+          <table id="dist-colls-table" class="table-wide">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Node ID</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="single-table-container">
+          <h3>Nodes</h3>
+          <table id="dist-nodes-table" class="table-wide">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="distributor">
-      <h1>Distributor</h1>
-      <button type="button" class="button btn_poll" onclick="onDistPoll()">
-        Poll
-      </button>
-      <div class="dist-devices">
-        <div class="dist-colls">
-          <h3>Collectors</h3>
-          <table id="dist-colls-table" class="dist-table">
-            <tr>
-              <th>ID</th>
-              <th>Node ID</th>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>Not Assigned</td>
-            </tr>
+    <div id="collector-block" class="component-block" style="display: none;">
+      <h1>Collector</h1>
+      <div id="coll-area" class="dual-tables-container">
+        <div id="coll-file" class="single-table-container">
+          <button
+            type="button"
+            class="button btn-full-width"
+            onclick="onCollLoadJob()"
+          >
+            Load Job
+          </button>
+          <table id="coll-file-table" class="table-wide">
+            <thead>
+              <tr>
+                <th>Job Files</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
-        <div class="dist-nodes">
-          <h3>Nodes</h3>
-          <table id="dist-nodes-table" class="dist-table">
-            <tr>
-              <th>ID</th>
-              <th>State</th>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>IDLE</td>
-            </tr>
+        <div id="coll-process" class="single-table-container">
+          <button
+            type="button"
+            class="button btn-full-width"
+            onclick="onCollProcess()"
+          >
+            Process
+          </button>
+          <table id="coll-process-table" class="table-wide">
+            <thead>
+              <tr>
+                <th>Process List</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </div>
-      <p id=wstest> WS-Test</p>
     </div>
+
+    <div id="node-block" class="component-block" style="display: none;">
+      <h1>Node</h1>
+      <div id="node-area" class="dual-tables-container">
+        <h3>State :</h3>
+        <h3>IDLE</h3>
+      </div>
+      <div class="standard-container">
+        <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
+        <table id="node-process-table" class="table-wide">
+          <thead>
+            <tr>
+              <th>Assigned Collector</th>
+              <th>Job Name</th>
+              <th>Process</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
     <script>
-      
+      var DISTRIBUTOR = 0x1;
+      var COLLECTOR = 0x2;
+      var NODE = 0x3;
+
       var PORT = "8081";
       var HOSTING = "http://localhost:" + PORT;
       var REST_URI = HOSTING + "/rest";
+
       var REST_DIST_URI = REST_URI + "/dist";
-      var REST_DIST_POLL = REST_DIST_URI + "/poll";
+      var REST_DIST_DEVICES = "/devices";
+      var REST_DIST_POLL = "/poll";
+
+      var REST_COLL_URI = REST_URI + "/coll";
+      var REST_COLL_JOB = "/job";
+      var REST_COLL_LOAD = "/load";
+      var REST_COLL_PROCESS = "/process";
 
       var WS_URI = "ws://localhost:" + PORT + "/ws";
 
-      var dropdown = document.getElementsByClassName("dropdown-btn");
-      var i;
+      var NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
 
-      for (i = 0; i < dropdown.length; i++) {
+      var PROCESS_STATE_NOTSTARTED = 0;
+      var PROCESS_STATE_PROVISION = 1;
+      var PROCESS_STATE_STARTED = 2;
+      var PROCESS_STATE_ENDED = 3;
+
+      var currentPage = {
+        type: DISTRIBUTOR,
+        id: 0,
+        set(_type, _id) {
+          this.type = _type;
+          this.id = _id;
+          let distPage = document.getElementById("distributor-block");
+          let collPage = document.getElementById("collector-block");
+          let nodePage = document.getElementById("node-block");
+
+          switch (this.type) {
+            case DISTRIBUTOR:
+              distPage.style.display = "block";
+              collPage.style.display = "none";
+              nodePage.style.display = "none";
+              onDistDevices();
+              break;
+            case COLLECTOR:
+              distPage.style.display = "none";
+              collPage.style.display = "block";
+              nodePage.style.display = "none";
+              onCollListJob(this.id);
+              break;
+            case NODE:
+              distPage.style.display = "none";
+              collPage.style.display = "none";
+              nodePage.style.display = "block";
+              onNodeInit(this.id);
+              break;
+          }
+        },
+      };
+
+      var dropdown = document.getElementsByClassName("dropdown-btn");
+      for (var i = 0; i < dropdown.length; i++) {
         dropdown[i].addEventListener("click", function () {
           this.classList.toggle("sidebar_btn_active");
           var dropdownContent = this.nextElementSibling;
@@ -204,40 +318,215 @@
         });
       }
 
-      function addToTable(tableID, id, val) {
-        let table = document.getElementById(tableID);
+      function onDistClick() {
+        currentPage.set(DISTRIBUTOR, this.id);
+      }
+
+      function onCollClick() {
+        currentPage.set(COLLECTOR, this.id);
+      }
+
+      function onNodeClick() {
+        currentPage.set(NODE, this.id);
+      }
+
+      function addToSingleTable(tableID, val) {
+        let newRow = document.getElementById(tableID).insertRow();
+        newRow.insertCell().innerHTML = val;
+      }
+
+      function addToDualTable(tableID, reset, id, val) {
+        let table = document
+          .getElementById(tableID)
+          .getElementsByTagName("tbody")[0];
+        if (reset) {
+          table.innerHTML = "";
+        }
         let newRow = table.insertRow();
-        let newID = newRow.insertCell();
-        let newVal = newRow.insertCell();
+        newRow.insertCell().innerHTML = id;
+        newRow.insertCell().innerHTML = val;
+      }
 
-        newID.innerHTML = id;
-        newVal.innerHTML = val;
-
-        console.log(newVal);
+      function onDistDevices() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            var data = JSON.parse(this.responseText);
+            onDistUpdateCollList(data);
+            onDistUpdateNodeList(data);
+          }
+        };
+        xhttp.open("GET", REST_DIST_URI + REST_DIST_DEVICES, true);
+        xhttp.send();
       }
 
       function onDistPoll() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
-  //          alert(this.responseText);
+            //response is async, will be get via WS
           }
         };
-        xhttp.open("GET", REST_DIST_POLL, true);
- //       xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
         xhttp.send();
       }
 
-      function wsOpen() {
+      function onDistUpdateCollList(data) {
+        let table = document
+          .getElementById("dist-colls-table")
+          .getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+        let side = document.getElementById("sidebar-coll-list");
+        side.innerHTML = "";
+
+        for (var collitem of data.collList) {
+          let newRow = table.insertRow();
+          newRow.insertCell().innerHTML = collitem.collectorID;
+          newRow.insertCell().innerHTML =
+            collitem.assignedNode == 0 ? "Not assigned" : collitem.assignedNode;
+
+          let component = document.createElement("a");
+          component.onclick = onCollClick;
+          component.id = collitem.collectorID;
+          component.appendChild(
+            document.createTextNode("Collector " + component.id)
+          );
+          side.appendChild(component);
+        }
+      }
+
+      function onDistUpdateNodeList(data) {
+        let table = document
+          .getElementById("dist-nodes-table")
+          .getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+        let side = document.getElementById("sidebar-node-list");
+        side.innerHTML = "";
+
+        for (var nodeitem of data.nodeList) {
+          let newRow = table.insertRow();
+          newRow.insertCell().innerHTML = nodeitem.nodeID;
+          newRow.insertCell().innerHTML = NODE_STATES[nodeitem.state];
+
+          let component = document.createElement("a");
+          component.onclick = onNodeClick;
+          component.id = nodeitem.nodeID;
+          component.appendChild(
+            document.createTextNode("Node " + component.id)
+          );
+          side.appendChild(component);
+        }
+      }
+
+      function onCollListJob() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            var data = JSON.parse(this.responseText);
+            onCollUpdateFileList(data);
+            onCollUpdateProcessList(data);
+          }
+        };
+        xhttp.open(
+          "GET",
+          REST_COLL_URI + "/" + currentPage.id + REST_COLL_JOB,
+          true
+        );
+        xhttp.send();
+      }
+
+      function onCollUpdateFileList(data) {
+        let table = document
+          .getElementById("coll-file-table")
+          .getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+
+        for (var fileitem of data.fileList) {
+          let newRow = table.insertRow();
+          let newcell = newRow.insertCell();
+          newcell.innerHTML = fileitem.file;
+          if (fileitem.validity) {
+            newcell.style.backgroundColor = "#00C000";
+          }
+        }
+      }
+
+      function onCollUpdateProcessList(data) {
+        let table = document
+          .getElementById("coll-process-table")
+          .getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+
+        for (var processitem of data.processList) {
+          let newRow = table.insertRow();
+          let newcell = newRow.insertCell();
+          newcell.innerHTML = processitem.process;
+          switch (processitem.state) {
+            case PROCESS_STATE_NOTSTARTED:
+              if (processitem.validity) {
+                newcell.style.backgroundColor = "#00C000";
+              }
+              break;
+            case PROCESS_STATE_PROVISION:
+              newcell.style.backgroundColor = "#000080";
+              break;
+            case PROCESS_STATE_STARTED:
+              newcell.style.backgroundColor = "#800080";
+              break;
+            case PROCESS_STATE_ENDED:
+              newcell.style.backgroundColor = "#C0C0C0";
+              break;
+          }
+        }
+      }
+
+      function onCollLoadJob() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            //response is async, will be get via WS
+          }
+        };
+        xhttp.open(
+          "GET",
+          REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
+          true
+        );
+        xhttp.send();
+      }
+
+      function onCollProcess(collID) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            testField.innerHTML = this.responseText;
+          }
+        };
+        xhttp.open(
+          "GET",
+          REST_COLL_URI + "/" + currentPage.id + REST_COLL_PROCESS,
+          true
+        );
+        xhttp.send();
+      }
+
+      function onLoad() {
         var wsConn = new WebSocket(WS_URI);
-        var wsField = document.getElementById("wstest");
+        currentPage.set(DISTRIBUTOR, this.id);
         wsConn.onmessage = function (info) {
-          wsField.innerHTML = info.data;
-        }
+          switch (info.data) {
+            case "devices":
+              onDistDevices();
+              break;
+            case "job":
+              onCollListJob();
+              break;
+          }
+        };
         wsConn.onerror = function (error) {
-          alert("Websocket error");
+          //   alert("Websocket error");
           wsConn.close();
-        }
+        };
         console.log(wsConn);
       }
     </script>

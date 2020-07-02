@@ -31,6 +31,7 @@ protected:
 
 public:
 
+    ComponentObject();
     ComponentObject(COMPONENT, int = 0);
     ComponentObject(COMPONENT, int, long);
     ComponentObject(COMPONENT, const char*);

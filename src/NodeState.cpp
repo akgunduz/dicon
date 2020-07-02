@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#include <clocale>
 #include "NodeState.h"
 
 const char* sNodeStates[] = {
@@ -12,7 +11,7 @@ const char* sNodeStates[] = {
         "BUSY",
 };
 
-const char* NodeState::getName(NODE_STATES state) {
+const char* NodeState::getName(NODESTATES state) {
 
     return sNodeStates[state];
 }

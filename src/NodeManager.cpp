@@ -24,7 +24,7 @@ long NodeManager::getIdle() {
 
         auto *node = (NodeObject*) i->second;
 
-        if (node->getState() != IDLE) {
+        if (node->getState() != NODESTATE_IDLE) {
             continue;
         }
 
@@ -41,7 +41,7 @@ long NodeManager::getIdle() {
     if (leastUsedNode != NULL) {
 
         leastUsedNode->iterateUsage(true);
-        leastUsedNode->setState(PREBUSY);
+        leastUsedNode->setState(NODESTATE_PREBUSY);
 
         mutex.unlock();
 
@@ -54,7 +54,7 @@ long NodeManager::getIdle() {
     return 0;
 }
 
-bool NodeManager::setState(long address, NODE_STATES state) {
+bool NodeManager::setState(long address, NODESTATES state) {
 
     auto search = components.find(address);
     if (search == components.end()) {

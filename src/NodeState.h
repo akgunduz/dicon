@@ -7,16 +7,17 @@
 #ifndef DICON_NODESTATE_H
 #define DICON_NODESTATE_H
 
-enum NODE_STATES {
-    IDLE,
-    PREBUSY,
-    BUSY,
+enum NODESTATES {
+    NODESTATE_IDLE,
+    NODESTATE_PREBUSY,
+    NODESTATE_BUSY,
+    NODESTATE_MAX
 };
 
 class NodeState {
 
 public:
-    static const char* getName(NODE_STATES);
+    static const char* getName(NODESTATES);
 };
 
 

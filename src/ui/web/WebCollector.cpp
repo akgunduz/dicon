@@ -17,17 +17,114 @@ void WebApp::collInit() {
 
 }
 
-void WebApp::OnCollLoadClick(WebEvent &event)
-{
-//    collFileList->DeleteAllItems();
-//    collProcessList->DeleteAllItems();
+bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
-    ((ComponentController *)componentController)->getCollector(0)->loadJob(NULL);
+    const struct mg_request_info *ri = mg_get_request_info(conn);
+
+    if (0 == strcmp(ri->request_method, "GET")) {
+
+        char *nextStr;
+
+        long collID = strtol(uri + 1, &nextStr, 10);
+
+        if (0 == strcmp(nextStr, "/load")) {
+
+            return collLoadJobHandler(conn, collID);
+        }
+
+        if (0 == strcmp(nextStr, "/process")) {
+
+            return collProcessHandler(conn, collID);
+        }
+
+        if (0 == strcmp(nextStr, "/job")) {
+
+            return collListHandler(conn, collID);
+        }
+    }
+
+    return 0;
 }
 
-void WebApp::OnCollProcessClick(WebEvent &event)
-{
-    ((ComponentController *)componentController)->getCollector(0)->processJobs();
+bool WebApp::collLoadJobHandler(struct mg_connection *conn, long id) {
+
+    auto *collector = componentController->getCollector(id);
+    if (collector != nullptr) {
+        collector->loadJob(nullptr);
+    }
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+
+    return true;
+}
+
+bool WebApp::collProcessHandler(struct mg_connection *conn, long id) {
+
+    auto *collector = componentController->getCollector(id);
+    if (collector != nullptr) {
+        collector->processJobs();
+    }
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+
+    return true;
+}
+
+bool WebApp::collListHandler(struct mg_connection *conn, long id) {
+
+    auto *collector = componentController->getCollector(id);
+
+    auto *job = collector->getJobs()->get(0);
+    if (job == nullptr) {
+        return false;
+    }
+
+    auto* jsonObj = json_object_new_object();
+    if (jsonObj == nullptr) {
+        LOG_S("Can not create json object!!!");
+        return false;
+    }
+
+    auto* fileList = json_object_new_array();
+    for (int j = 0; j < job->getFileCount(); j++) {
+
+        auto *content = job->getFile(j);
+
+        auto* fileItem = json_object_new_object();
+        json_object_object_add(fileItem, "file", json_object_new_string(content->getFileName()));
+        json_object_object_add(fileItem, "validity", json_object_new_boolean(content->isValid()));
+
+        json_object_array_add(fileList, fileItem);
+
+    }
+
+    json_object_object_add(jsonObj, "fileList", fileList);
+
+    auto* processList = json_object_new_array();
+    for (int j = 0; j < job->getOrderedCount(); j++) {
+
+        auto* processItem = json_object_new_object();
+        json_object_object_add(processItem, "process", json_object_new_string(job->getOrderedExecution(j)->getExec()));
+        json_object_object_add(processItem, "validity", json_object_new_boolean(job->getOrderedExecution(j)->isValid()));
+        json_object_object_add(processItem, "state", json_object_new_int(job->getOrderedState(j)));
+
+        json_object_array_add(processList, processItem);
+    }
+
+    json_object_object_add(jsonObj, "processList", processList);
+
+
+    size_t json_str_len;
+
+    const char *json_str = json_object_to_json_string_length(jsonObj, JSON_C_TO_STRING_SPACED, &json_str_len);
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
+
+    mg_write(conn, json_str, json_str_len);
+
+    json_object_put(jsonObj);
+
+    return true;
 }
 
 void WebApp::collUpdateID(WebEvent &event) {
@@ -36,66 +133,20 @@ void WebApp::collUpdateID(WebEvent &event) {
 
 void WebApp::collUpdateFileList(WebEvent &event) {
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    auto *job = (Job*)data->getPointer(0);
-
-//    for (int j = 0; j < job->getFileCount(); j++) {
-//
-//        auto *content = job->getFile(j);
-//
-//        LOG_S("Console UI ------> Collector File Added : %s, Validity : %s",
-//              content->getFileName(), content->isValid() ? "Valid" : "Invalid");
-//    }
+    Timer::set("job", 1000, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateFileListItem(WebEvent &event) {
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-//    for (int i = 0; i < data->getDataSize(); i++) {
-//
-//        LOG_S("Console UI ------> Collector File Validated with index : %d", data->getData(i));
-//    }
+    Timer::set("job", 500, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateProcessList(WebEvent &event) {
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    auto *job = (Job *)data->getPointer(0);
-
-//    for (int j = 0; j < job->getOrderedCount(); j++) {
-//
-//        LOG_S("Console UI ------> Collector Process[%d] : %s is triggered", j, job->getOrderedExecution(j)->getExec());
-//
-//    }
+    Timer::set("job", 1000, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateProcessListItem(WebEvent &event) {
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    auto *job = (Job *)data->getPointer(0);
-
-    for (int j = 0; j < job->getOrderedCount(); j++) {
-
-//        switch(job->getOrderedState(j)) {
-//
-//            case PROCESS_STATE_ENDED:
-//                LOG_S("Console UI ------> Collector Process[%d] is ended", j);
-//                break;
-//
-//            case PROCESS_STATE_STARTED:
-//                LOG_S("Console UI ------> Collector Process[%d] is started", j);
-//                break;
-//
-//            case PROCESS_STATE_NOTSTARTED:
-//                LOG_S("Console UI ------> Collector Process[%d] is not started", j);
-//                break;
-//
-//            default:
-//                break;
-//        }
-    }
+    Timer::set("job", 500, WebApp::wsInform, this);
 }

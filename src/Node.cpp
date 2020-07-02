@@ -80,7 +80,7 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {BUSY});
+    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_BUSY});
 
     return send2DistributorBusyMsg(getDistributor(),
                                    msg->getData()->getJobDir(),
@@ -107,7 +107,7 @@ bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {IDLE});
+    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_IDLE});
 
     long collUnservedCount = msg->getHeader()->getVariant(0);
 

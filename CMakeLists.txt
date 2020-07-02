@@ -38,6 +38,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/StopWatch.cpp
+        ${SOURCE_PATH}/Timer.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/AddressHelper.cpp
         ${SOURCE_PATH}/Job.cpp
@@ -59,12 +60,12 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/FileInfo.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/ComponentObject.cpp
+        ${SOURCE_PATH}/ComponentController.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/ExecutorInfo.cpp
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
-        ${SOURCE_PATH}/ComponentController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceApp.cpp
         )
 
@@ -95,10 +96,6 @@ set(WEB_FILES
         ${SOURCE_PATH}/ui/web/WebDistributor.cpp
         ${SOURCE_PATH}/ui/web/WebCollector.cpp
         ${SOURCE_PATH}/ui/web/WebNode.cpp
-        ${SOURCE_PATH}/Application.cpp
-        )
-
-set(NOUI_FILES
         ${SOURCE_PATH}/Application.cpp
         )
 
@@ -134,11 +131,11 @@ target_include_directories(dicon-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 #target_compile_options(dicon-wx PUBLIC ${wxWidgets_CXX_FLAGS})
 #target_link_libraries(dicon-wx dicon-framework
 #        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
-#
-#add_executable(dicon-console ${CONSOLE_FILES})
-#target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
-#target_link_libraries(dicon-console dicon-framework
-#        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+
+add_executable(dicon-console ${CONSOLE_FILES})
+target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+target_link_libraries(dicon-console dicon-framework
+        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)

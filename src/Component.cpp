@@ -46,6 +46,11 @@ ComponentObject Component::getHost() {
     return host;
 }
 
+int Component::getHostID() {
+
+    return host.getID();
+}
+
 void Component::setHostID(int id) {
 
     host.setID(id);

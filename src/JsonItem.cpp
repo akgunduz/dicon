@@ -21,7 +21,7 @@ JsonItem::JsonItem(ComponentObject host, const char* jobDir, const char* fileNam
 
 JsonItem::~JsonItem() {
 
-    for (std::map<int , JsonType *>::iterator i = contentTypes.begin(); i != contentTypes.end(); i++) {
+    for (auto i = contentTypes.begin(); i != contentTypes.end(); i++) {
         delete i->second;
     }
 
@@ -62,7 +62,7 @@ bool JsonItem::parse() {
 
     json_object_object_foreach(header, key, val) {
 
-        for (std::map<int , JsonType *>::iterator i = contentTypes.begin(); i != contentTypes.end(); i++) {
+        for (auto i = contentTypes.begin(); i != contentTypes.end(); i++) {
 
             JsonType* type = i->second;
             if (strcmp(type->name, key) == 0) {

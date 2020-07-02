@@ -85,7 +85,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     len = strlen(COLL_URI);
     if (0 == strncmp(pos, COLL_URI, len)) {
-    //    return collHandler(conn, pos + len);
+        return collHandler(conn, pos + len);
     }
 
     len = strlen(NODE_URI);
@@ -103,6 +103,8 @@ int wsHandlerWrapper(struct mg_connection *conn, void *cbData) {
 
 int WebApp::wsHandler(struct mg_connection *conn) {
 
+    //Note to myself: if /ws is needed use this handler, seems not needed now;
+    LOG_S("WS Handler is executed....");
     return 1;
 }
 
@@ -114,25 +116,24 @@ int wsConnectHandlerWrapper(const struct mg_connection *conn, void *cbData) {
 int WebApp::wsConnectHandler(const struct mg_connection *conn)
 {
     struct mg_context *ctx = mg_get_context(conn);
-    int reject = 1;
-    int i;
+    int accepted = 0;
 
     mg_lock_context(ctx);
-    for (i = 0; i < UI_UPDATE_MAX; i++) {
+    for (int i = 0; i < MAX_UI_CB; i++) {
         if (wsClients[i].conn == nullptr) {
             wsClients[i].conn = (struct mg_connection *)conn;
-            wsClients[i].state = 1;
+            wsClients[i].state = WSSTATE_CONNECTED;
             mg_set_user_connection_data(wsClients[i].conn,(void *)(wsClients + i));
-            reject = 0;
+            accepted = 1;
             break;
         }
     }
     mg_unlock_context(ctx);
 
-    fprintf(stdout,
-            "Websocket client %s\r\n\r\n",
-            (reject ? "rejected" : "accepted"));
-    return reject;
+    const struct mg_request_info *ri = mg_get_request_info(conn);
+    LOG_S("WS Client is %s from %s:%d", accepted ? "accepted" : "rejected", ri->remote_addr, ri->remote_port);
+
+    return !accepted;
 }
 
 void wsReadyHandlerWrapper(struct mg_connection *conn, void *cbData)
@@ -142,15 +143,8 @@ void wsReadyHandlerWrapper(struct mg_connection *conn, void *cbData)
 
 void WebApp::wsReadyHandler(struct mg_connection *conn)
 {
-    const char *text = "Hello from the websocket ready handler";
-    struct ws_client *client = (struct ws_client *) mg_get_user_connection_data(conn);
-
-    mg_websocket_write(conn, MG_WEBSOCKET_OPCODE_TEXT, text, strlen(text));
-    fprintf(stdout, "Greeting message sent to websocket client\r\n\r\n");
-    assert(client->conn == conn);
-    assert(client->state == 1);
-
-    client->state = 2;
+    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
+    client->state = WSSTATE_READY;
 }
 
 int wsDataHandlerWrapper(struct mg_connection *conn, int bits, char *data, size_t len, void *cbData)
@@ -158,39 +152,11 @@ int wsDataHandlerWrapper(struct mg_connection *conn, int bits, char *data, size_
     return ((WebApp*) cbData)->wsDataHandler(conn, bits, data, len);
 }
 
-int WebApp::wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len)
-{
-    struct ws_client *client = (struct ws_client *) mg_get_user_connection_data(conn);
-    assert(client->conn == conn);
-    assert(client->state >= 1);
+int WebApp::wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len) {
 
-    fprintf(stdout, "Websocket got %lu bytes of ", (unsigned long)len);
-    switch (((unsigned char)bits) & 0x0F) {
-        case MG_WEBSOCKET_OPCODE_CONTINUATION:
-            fprintf(stdout, "continuation");
-            break;
-        case MG_WEBSOCKET_OPCODE_TEXT:
-            fprintf(stdout, "text");
-            break;
-        case MG_WEBSOCKET_OPCODE_BINARY:
-            fprintf(stdout, "binary");
-            break;
-        case MG_WEBSOCKET_OPCODE_CONNECTION_CLOSE:
-            fprintf(stdout, "close");
-            break;
-        case MG_WEBSOCKET_OPCODE_PING:
-            fprintf(stdout, "ping");
-            break;
-        case MG_WEBSOCKET_OPCODE_PONG:
-            fprintf(stdout, "pong");
-            break;
-        default:
-            fprintf(stdout, "unknown(%1xh)", ((unsigned char)bits) & 0x0F);
-            break;
-    }
-    fprintf(stdout, " data:\r\n");
-    fwrite(data, len, 1, stdout);
-    fprintf(stdout, "\r\n\r\n");
+    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
+
+    LOG_S("WS Client send data : %s ", Util::hex2str((uint8_t*)data, len).c_str());
 
     return 1;
 }
@@ -203,56 +169,46 @@ void wsCloseHandlerWrapper(const struct mg_connection *conn, void *cbData)
 void WebApp::wsCloseHandler(const struct mg_connection *conn)
 {
     struct mg_context *ctx = mg_get_context(conn);
-    struct ws_client *client = (struct ws_client *) mg_get_user_connection_data(conn);
-    assert(client->conn == conn);
-    assert(client->state >= 1);
+    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
 
     mg_lock_context(ctx);
-    while (client->state == 3) {
-        /* "inform" state, wait a while */
+    while (client->state == WSSTATE_PROCESS) {
         mg_unlock_context(ctx);
         usleep(1000);
         mg_lock_context(ctx);
     }
-    client->state = 0;
-    client->conn = NULL;
+    client->state = WSSTATE_NOTCONNECTED;
+    client->conn = nullptr;
     mg_unlock_context(ctx);
 
-    fprintf(stdout,
-            "Client dropped from the set of webserver connections\r\n\r\n");
+    const struct mg_request_info *ri = mg_get_request_info(conn);
+    LOG_S("WS Client at %s:%d is disconnected", ri->remote_addr, ri->remote_port);
 }
 
-void WebApp::wsInform()
+bool WebApp::wsInform(void *data, const char* data2)
 {
-    static unsigned long cnt = 0;
-    char text[32];
-    size_t textlen;
-    int i;
+    WebApp* webApp = (WebApp*) data;
 
-    sprintf(text, "%lu", ++cnt);
-    textlen = strlen(text);
+    for (auto & wsClient : webApp->wsClients) {
 
-    for (i = 0; i < UI_UPDATE_MAX; i++) {
-        int inform = 0;
+        bool process = false;
 
-        mg_lock_context(context);
-        if (wsClients[i].state == 2) {
-            /* move to "inform" state */
-            wsClients[i].state = 3;
-            inform = 1;
+        mg_lock_context(webApp->context);
+        if (wsClient.state == WSSTATE_READY) {
+            wsClient.state = WSSTATE_PROCESS;
+            process = true;
         }
-        mg_unlock_context(context);
+        mg_unlock_context(webApp->context);
 
-        if (inform) {
-            mg_websocket_write(wsClients[i].conn,
-                               MG_WEBSOCKET_OPCODE_TEXT,
-                               text,
-                               textlen);
-            mg_lock_context(context);
-            wsClients[i].state = 2;
-            mg_unlock_context(context);
+        if (process) {
+            mg_websocket_write(wsClient.conn, MG_WEBSOCKET_OPCODE_TEXT, data2, strlen(data2));
+            mg_lock_context(webApp->context);
+            wsClient.state = WSSTATE_READY;
+            mg_unlock_context(webApp->context);
         }
     }
+
+    return true;
 }
 
 WebApp::WebApp(int argc, char** argv, int *interfaceID,
@@ -264,6 +220,7 @@ WebApp::WebApp(int argc, char** argv, int *interfaceID,
 
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));
+    memset(&wsClients, 0, sizeof(wsClients));
 
     context = mg_start(&callbacks, 0, options);
     if (!context) {
@@ -319,7 +276,6 @@ int WebApp::run() {
 
     while (!exitNow) {
         sleep(1);
-  //      wsInform();
     }
 
     /* Stop the server */
@@ -327,3 +283,4 @@ int WebApp::run() {
     LOG_S("Exiting....");
     return 1;
 }
+

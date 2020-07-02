@@ -3,7 +3,6 @@
 //
 
 #include "ComponentManager.h"
-#include "AddressHelper.h"
 
 ComponentManager::ComponentManager()
         : idCounter(1) {
@@ -15,11 +14,16 @@ ComponentManager::~ComponentManager() {
     components.clear();
 }
 
+size_t ComponentManager::size() {
+
+    return components.size();
+}
+
 ComponentObject* ComponentManager::get(long address) {
 
     auto search = components.find(address);
     if (search == components.end()) {
-        return NULL;
+        return nullptr;
     }
 
     return components[address];
@@ -74,4 +78,21 @@ void ComponentManager::clear() {
 
     mutex.unlock();
 
+}
+
+ComponentObject *ComponentManager::getByIndex(int index) {
+
+    int j = 0;
+    if (index >= size()) {
+        return nullptr;
+    }
+
+    for (auto & component : components) {
+
+        if (j++ == index) {
+            return component.second;
+        }
+    }
+
+    return nullptr;
 }

@@ -7,6 +7,7 @@
 #define __Util_H_
 
 #include "Log.h"
+#include "Timer.h"
 #include "ComponentObject.h"
 
 #define ROOT_SIGN "@@@root@@@"

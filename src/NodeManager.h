@@ -19,7 +19,7 @@ public:
 
 	~NodeManager();
 
-	bool setState(long, NODE_STATES);
+	bool setState(long, NODESTATES);
 
 	long getIdle();
 

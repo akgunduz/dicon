@@ -23,7 +23,7 @@ void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {
 
 	auto *data = (UserInterfaceEvent *)event.GetClientData();
 
-    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODE_STATES) data->getData(0)));
+    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODESTATES) data->getData(0)));
 }
 
 void ConsoleApp::nodeUpdateClear(ConsoleEvent &event) {

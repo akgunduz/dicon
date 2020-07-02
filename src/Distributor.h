@@ -51,13 +51,12 @@ public:
 	~Distributor();
     static Distributor* newInstance(const char* path);
 
-    bool clear();
-
     bool sendWakeupMessage(ComponentObject);
     bool sendWakeupMessagesAll(bool);
 
-
-
+    bool clear();
+    CollectorManager* getCollectors() const;
+    NodeManager* getNodes() const;
 };
 
 #endif	/* DISTRIBUTOR_H */

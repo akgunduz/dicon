@@ -24,6 +24,10 @@ public:
     void clearWaiting();
 
     void setObject(int, long);
+
+    //ComponentObject* getWaiting();
+    bool attachNode(long, ComponentObject&);
+    bool detachNode(long);
 };
 
 

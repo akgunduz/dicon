@@ -14,6 +14,9 @@ UserInterfaceApp::UserInterfaceApp(enum APPTYPE type, int argc, char** argv, int
 
     deviceList = DeviceList::getInstance();
 
+    LOG_S("Using network interfaces : %s and %s",
+          deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
+
     componentController = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
 
     if (*distCount) {
