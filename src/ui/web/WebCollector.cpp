@@ -27,6 +27,11 @@ bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
         long collID = strtol(uri + 1, &nextStr, 10);
 
+        if (0 == strcmp(nextStr, "/state")) {
+
+            return collStateHandler(conn, collID);
+        }
+
         if (0 == strcmp(nextStr, "/load")) {
 
             return collLoadJobHandler(conn, collID);
@@ -35,11 +40,6 @@ bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
         if (0 == strcmp(nextStr, "/process")) {
 
             return collProcessHandler(conn, collID);
-        }
-
-        if (0 == strcmp(nextStr, "/job")) {
-
-            return collListHandler(conn, collID);
         }
     }
 
@@ -70,7 +70,7 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, long id) {
     return true;
 }
 
-bool WebApp::collListHandler(struct mg_connection *conn, long id) {
+bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
 
     auto *collector = componentController->getCollector(id);
 
@@ -133,20 +133,20 @@ void WebApp::collUpdateID(WebEvent &event) {
 
 void WebApp::collUpdateFileList(WebEvent &event) {
 
-    Timer::set("job", 1000, WebApp::wsInform, this);
+    Timer::set("coll", 1000, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateFileListItem(WebEvent &event) {
 
-    Timer::set("job", 500, WebApp::wsInform, this);
+    Timer::set("coll", 500, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateProcessList(WebEvent &event) {
 
-    Timer::set("job", 1000, WebApp::wsInform, this);
+    Timer::set("coll", 1000, WebApp::wsInform, this);
 }
 
 void WebApp::collUpdateProcessListItem(WebEvent &event) {
 
-    Timer::set("job", 500, WebApp::wsInform, this);
+    Timer::set("coll", 500, WebApp::wsInform, this);
 }

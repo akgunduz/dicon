@@ -4,7 +4,6 @@
 //
 
 #include "Distributor.h"
-#include "DeviceList.h"
 
 Distributor *Distributor::instance = NULL;
 
@@ -19,7 +18,9 @@ Distributor *Distributor::newInstance(const char* path) {
 }
 
 Distributor::Distributor(const char *rootPath) :
-        Component(COMP_DISTRIBUTOR, rootPath) {
+        Component(rootPath) {
+
+    host = new DistributorObject(getRootPath());
 
     processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg);
@@ -31,6 +32,8 @@ Distributor::Distributor(const char *rootPath) :
     nodeManager = new NodeManager();
 
     collectorManager = new CollectorManager();
+
+    initInterfaces(COMP_DISTRIBUTOR);
 };
 
 Distributor::~Distributor() {

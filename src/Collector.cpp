@@ -5,6 +5,7 @@
 
 #include "Collector.h"
 #include "NodeObject.h"
+#include "CollectorObject.h"
 
 Collector *Collector::newInstance(const char* path) {
 
@@ -12,7 +13,9 @@ Collector *Collector::newInstance(const char* path) {
 }
 
 Collector::Collector(const char *rootPath) :
-        Component(COMP_COLLECTOR, rootPath), distributor(COMP_DISTRIBUTOR, getRootPath()){
+        Component(rootPath), distributor(getRootPath()) {
+
+    host = new CollectorObject(getRootPath());
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg);
@@ -20,6 +23,7 @@ Collector::Collector(const char *rootPath) :
     processMsg[COMP_NODE][MSGTYPE_INFO] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeInfoMsg);
     processMsg[COMP_NODE][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Collector::processNodeBinaryMsg);
 
+    initInterfaces(COMP_COLLECTOR);
 }
 
 Collector::~Collector() {
@@ -35,7 +39,9 @@ bool Collector::processDistributorWakeupMsg(ComponentObject owner, Message *msg)
 
 bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
-    setHostID((int)msg->getHeader()->getVariant(0));
+    getHost().setID((int)msg->getHeader()->getVariant(0));
+
+    ((CollectorObject&)getHost()).getAttached();
 
     LOG_U(UI_UPDATE_COLL_ID, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
@@ -182,9 +188,9 @@ ComponentObject Collector::getDistributor() {
     return distributor;
 }
 
-void Collector::setDistributor(ComponentObject distributor) {
+void Collector::setDistributor(const DistributorObject& _distributor) {
 
-    this->distributor = distributor;
+    this->distributor = _distributor;
 }
 
 bool Collector::processJob(int index) {

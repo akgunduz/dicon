@@ -34,6 +34,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Node.cpp
         ${SOURCE_PATH}/NodeObject.cpp
         ${SOURCE_PATH}/NodeManager.cpp
+        ${SOURCE_PATH}/NodeProcessInfo.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/Util.cpp
@@ -63,6 +64,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentController.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
+        ${SOURCE_PATH}/DistributorObject.cpp
         ${SOURCE_PATH}/ExecutorInfo.cpp
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp

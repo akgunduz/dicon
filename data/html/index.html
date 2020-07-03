@@ -228,7 +228,7 @@
       <h1>Node</h1>
       <div id="node-area" class="dual-tables-container">
         <h3>State :</h3>
-        <h3>IDLE</h3>
+        <h3 id="node-state">IDLE</h3>
       </div>
       <div class="standard-container">
         <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
@@ -253,15 +253,16 @@
       var PORT = "8081";
       var HOSTING = "http://localhost:" + PORT;
       var REST_URI = HOSTING + "/rest";
+      var REST_STATE = "/state";
 
       var REST_DIST_URI = REST_URI + "/dist";
-      var REST_DIST_DEVICES = "/devices";
       var REST_DIST_POLL = "/poll";
 
       var REST_COLL_URI = REST_URI + "/coll";
-      var REST_COLL_JOB = "/job";
       var REST_COLL_LOAD = "/load";
       var REST_COLL_PROCESS = "/process";
+
+      var REST_NODE_URI = REST_URI + "/node";
 
       var WS_URI = "ws://localhost:" + PORT + "/ws";
 
@@ -287,19 +288,19 @@
               distPage.style.display = "block";
               collPage.style.display = "none";
               nodePage.style.display = "none";
-              onDistDevices();
+              onDistState();
               break;
             case COLLECTOR:
               distPage.style.display = "none";
               collPage.style.display = "block";
               nodePage.style.display = "none";
-              onCollListJob(this.id);
+              onCollState(this.id);
               break;
             case NODE:
               distPage.style.display = "none";
               collPage.style.display = "none";
               nodePage.style.display = "block";
-              onNodeInit(this.id);
+              onNodeState(this.id);
               break;
           }
         },
@@ -347,7 +348,7 @@
         newRow.insertCell().innerHTML = val;
       }
 
-      function onDistDevices() {
+      function onDistState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
@@ -356,7 +357,7 @@
             onDistUpdateNodeList(data);
           }
         };
-        xhttp.open("GET", REST_DIST_URI + REST_DIST_DEVICES, true);
+        xhttp.open("GET", REST_DIST_URI + REST_STATE, true);
         xhttp.send();
       }
 
@@ -418,7 +419,7 @@
         }
       }
 
-      function onCollListJob() {
+      function onCollState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
@@ -429,7 +430,37 @@
         };
         xhttp.open(
           "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_COLL_JOB,
+          REST_COLL_URI + "/" + currentPage.id + REST_STATE,
+          true
+        );
+        xhttp.send();
+      }
+
+      function onCollLoadJob() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            //response is async, will be get via WS
+          }
+        };
+        xhttp.open(
+          "GET",
+          REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
+          true
+        );
+        xhttp.send();
+      }
+
+      function onCollProcess(collID) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            testField.innerHTML = this.responseText;
+          }
+        };
+        xhttp.open(
+          "GET",
+          REST_COLL_URI + "/" + currentPage.id + REST_COLL_PROCESS,
           true
         );
         xhttp.send();
@@ -480,34 +511,39 @@
         }
       }
 
-      function onCollLoadJob() {
+      function onNodeState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState == 4 && this.status == 200) {
-            //response is async, will be get via WS
+            var data = JSON.parse(this.responseText);
+            onNodeUpdateState(data);
+            onNodeUpdateProcessList(data);
           }
         };
         xhttp.open(
           "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
+          REST_NODE_URI + "/" + currentPage.id + REST_STATE,
           true
         );
         xhttp.send();
       }
 
-      function onCollProcess(collID) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            testField.innerHTML = this.responseText;
-          }
-        };
-        xhttp.open(
-          "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_COLL_PROCESS,
-          true
-        );
-        xhttp.send();
+      function onNodeUpdateState(data) {
+        document.getElementById("node-state").innerHTML = NODE_STATES[data.state];
+      }
+
+      function onNodeUpdateProcessList(data) {
+        let table = document
+          .getElementById("node-process-table")
+          .getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+
+        for (var processitem of data.processList) {
+          let newRow = table.insertRow();
+          newRow.insertCell().innerHTML = processitem.collectorID;
+          newRow.insertCell().innerHTML = processitem.jobID;
+          newRow.insertCell().innerHTML = processitem.processID;
+        }
       }
 
       function onLoad() {
@@ -515,11 +551,14 @@
         currentPage.set(DISTRIBUTOR, this.id);
         wsConn.onmessage = function (info) {
           switch (info.data) {
-            case "devices":
-              onDistDevices();
+            case "dist":
+              onDistState();
               break;
-            case "job":
-              onCollListJob();
+            case "coll":
+              onCollState();
+              break;
+            case "node":
+              onNodeState();
               break;
           }
         };

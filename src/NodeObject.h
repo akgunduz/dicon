@@ -8,6 +8,7 @@
 #include "NodeState.h"
 #include "Md5.h"
 #include "ComponentObject.h"
+#include "NodeProcessInfo.h"
 
 class NodeObject : public ComponentObject {
 
@@ -17,17 +18,26 @@ private:
 
     int usage;
 
+    NodeProcessInfo processInfo;
+
 public:
 
     NodeObject(NODESTATES, int, int, long);
     NodeObject(int, long);
+    NodeObject(const char*);
+    NodeObject(const NodeObject &);
+    NodeObject(const ComponentObject &);
+    NodeObject();
     ~NodeObject();
 
+    int getUsage();
+    int iterateUsage(bool);
 
     NODESTATES getState();
     void setState(NODESTATES);
-    int getUsage();
-    int iterateUsage(bool);
+
+    NodeProcessInfo& getProcess();
+
 };
 
 

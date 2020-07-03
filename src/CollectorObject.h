@@ -5,7 +5,7 @@
 #ifndef DICON_COLLECTOROBJECT_H
 #define DICON_COLLECTOROBJECT_H
 
-#include "ComponentObject.h"
+#include "NodeObject.h"
 #include "CollectorState.h"
 
 class CollectorObject : public ComponentObject {
@@ -14,19 +14,21 @@ private:
 
     COLLSTATES state;
 
-    ComponentObject attachedNode;
+    NodeObject attachedNode;
 
 public:
 
-    CollectorObject(COLLSTATES, ComponentObject, int, long);
+    CollectorObject();
+    CollectorObject(const char *);
     CollectorObject(int, long);
+    CollectorObject(COLLSTATES, NodeObject, int, long);
     ~CollectorObject();
 
     COLLSTATES getState();
     void setState(COLLSTATES);
 
-    ComponentObject getAttached();
-    void setAttached(ComponentObject);
+    NodeObject getAttached();
+    void setAttached(NodeObject);
 };
 
 

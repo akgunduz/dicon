@@ -68,16 +68,6 @@ void ComponentObject::setAddress(long address) {
     this->address = address;
 }
 
-COMPONENT ComponentObject::getNextType() {
-
-    return (COMPONENT)(((int)type + 1) % COMP_MAX);
-}
-
-COMPONENT ComponentObject::getPrevType() {
-
-    return (COMPONENT)(((int)type + COMP_MAX - 1) % COMP_MAX);
-}
-
 const char* ComponentObject::getRootPath() {
 
     return rootPath;
@@ -87,9 +77,3 @@ void ComponentObject::setRootPath(const char *rootPath) {
 
     this->rootPath = rootPath;
 }
-
-
-
-
-
-

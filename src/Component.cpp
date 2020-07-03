@@ -3,24 +3,27 @@
 //
 
 #include "Component.h"
+#include "DistributorObject.h"
+#include "CollectorObject.h"
+#include "NodeObject.h"
 
-Component::Component(COMPONENT host, const char* rootPath) :
-    host(host) {
+Component::Component(const char* rootPath) {
 
     strcpy(this->rootPath, rootPath);
-    this->host.setRootPath(getRootPath());
 
     schedulerCB = new InterfaceSchedulerCB(receiveCB, this);
     hostCB = new InterfaceHostCB(getHostCB, this);
+}
+
+bool Component::initInterfaces(COMPONENT type) {
 
     DeviceList *deviceList = DeviceList::getInstance();
 
     interfaces[COMP_NODE] = Connector::createInterface(deviceList->getActive(1), schedulerCB, hostCB);
-    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && host != COMP_NODE ?
+    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && type != COMP_NODE ?
                                    Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
-
 }
 
 Component::~Component() {
@@ -39,21 +42,6 @@ Component::~Component() {
 const char* Component::getRootPath() {
 
     return rootPath;
-}
-
-ComponentObject Component::getHost() {
-
-    return host;
-}
-
-int Component::getHostID() {
-
-    return host.getID();
-}
-
-void Component::setHostID(int id) {
-
-    host.setID(id);
 }
 
 ComponentObject Component::getHostCB(void *arg) {
@@ -152,5 +140,9 @@ bool Component::send(ComponentObject target, Message *msg) {
 std::vector<long> Component::getAddressList(ComponentObject target) {
 
     return interfaces[target.getType()]->getDevice()->getAddressList();
+}
+
+ComponentObject &Component::getHost() {
+    return (*host);
 }
 

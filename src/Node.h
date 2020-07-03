@@ -8,12 +8,15 @@
 #define NODE_H
 
 #include "Component.h"
+#include "NodeObject.h"
+#include "DistributorObject.h"
 
 class Node : public Component {
 private:
 
-	ComponentObject distributor;
-	long distributorAddress;
+	DistributorObject distributor;
+
+    std::vector<NodeProcessInfo> processList;
 
 	Node(const char *rootPath);
 
@@ -38,13 +41,16 @@ private:
 	bool send2CollectorBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(int, const char*, long, const char *);
+    bool processCommand(const char *);
 
 public:
 
 
 	~Node();
     static Node* newInstance(const char*);
+
+    std::vector<NodeProcessInfo>* getProcessList();
+
 };
 
 

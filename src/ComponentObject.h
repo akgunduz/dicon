@@ -19,6 +19,10 @@ class ComponentObject {
 
 private:
 
+protected:
+
+public:
+
     COMPONENT type;
 
     int id;
@@ -26,10 +30,6 @@ private:
     const char *rootPath;
 
     long address;
-
-protected:
-
-public:
 
     ComponentObject();
     ComponentObject(COMPONENT, int = 0);
@@ -50,9 +50,6 @@ public:
 
     long getAddress();
     void setAddress(long);
-
-    COMPONENT getNextType();
-    COMPONENT getPrevType();
 };
 
 

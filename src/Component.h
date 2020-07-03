@@ -18,13 +18,13 @@ typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 
 class Component {
 
-    ComponentObject host;
-
     char rootPath[PATH_MAX];
 
     Interface *interfaces[COMP_MAX];
 
 protected :
+
+    ComponentObject *host;
 
     TypeProcessMsgMap processMsg[COMP_MAX];
 
@@ -33,14 +33,14 @@ protected :
 
     static ComponentObject getHostCB(void*);
 
+    bool initInterfaces(COMPONENT type);
+
 public:
 
-    Component(COMPONENT host, const char* rootPath);
+    Component(const char* rootPath);
     virtual ~Component();
 
-    ComponentObject getHost();
-    int getHostID();
-    void setHostID(int);
+    ComponentObject& getHost();
 
     const char* getRootPath();
 

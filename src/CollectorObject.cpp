@@ -4,12 +4,20 @@
 
 #include "CollectorObject.h"
 
-CollectorObject::CollectorObject(COLLSTATES state, ComponentObject attachedNode, int id, long address) :
+CollectorObject::CollectorObject(COLLSTATES state, NodeObject attachedNode, int id, long address) :
         state(state), attachedNode(attachedNode), ComponentObject(COMP_COLLECTOR, id, address) {
 }
 
 CollectorObject::CollectorObject(int id, long address) :
-        CollectorObject(COLLSTATE_IDLE, ComponentObject(), id, address) {
+        CollectorObject(COLLSTATE_IDLE, NodeObject(), id, address) {
+}
+
+CollectorObject::CollectorObject(const char* rootPath) :
+        ComponentObject(COMP_COLLECTOR, rootPath)  {
+}
+
+CollectorObject::CollectorObject() :
+        CollectorObject(0, 0) {
 }
 
 CollectorObject::~CollectorObject() {
@@ -26,12 +34,12 @@ void CollectorObject::setState(COLLSTATES state) {
     this->state = state;
 }
 
-ComponentObject CollectorObject::getAttached() {
+NodeObject CollectorObject::getAttached() {
 
     return attachedNode;
 }
 
-void CollectorObject::setAttached(ComponentObject attachedNode) {
+void CollectorObject::setAttached(NodeObject attachedNode) {
 
     this->attachedNode = attachedNode;
 }

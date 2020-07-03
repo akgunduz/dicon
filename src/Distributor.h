@@ -12,6 +12,7 @@
 #include "Util.h"
 #include "NodeManager.h"
 #include "CollectorManager.h"
+#include "DistributorObject.h"
 
 class Distributor : public Component {
 private:
@@ -43,7 +44,6 @@ private:
 	bool send2NodeProcessMsg(ComponentObject,
 								   const char*, long, const char *,
 								   TypeFileInfoList *, int, long);
-
 
 public:
 

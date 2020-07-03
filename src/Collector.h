@@ -11,16 +11,18 @@
 #include "Message.h"
 #include "Job.h"
 #include "Jobs.h"
+#include "DistributorObject.h"
+#include "CollectorObject.h"
 
 class Collector : public Component {
 
 	Jobs jobs;
-	ComponentObject distributor;
+	DistributorObject distributor;
 
-    Collector(const char *rootPath);
+    explicit Collector(const char *rootPath);
 
 	ComponentObject getDistributor();
-	void setDistributor(ComponentObject);
+	void setDistributor(const DistributorObject&);
 
 	bool processDistributorWakeupMsg(ComponentObject, Message *);
 	bool processDistributorIDMsg(ComponentObject, Message *);
@@ -35,7 +37,6 @@ class Collector : public Component {
 	bool send2NodeReadyMsg(ComponentObject, const char*, long);
 
 public:
-
 
     ~Collector();
     static Collector* newInstance(const char*);

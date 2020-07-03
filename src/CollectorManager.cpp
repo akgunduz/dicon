@@ -81,7 +81,7 @@ void CollectorManager::setObject(int id, long address) {
 //    return nullptr;
 //}
 
-bool CollectorManager::attachNode(long address, ComponentObject &node) {
+bool CollectorManager::attachNode(long address, const NodeObject &node) {
 
     auto search = components.find(address);
     if (search == components.end()) {

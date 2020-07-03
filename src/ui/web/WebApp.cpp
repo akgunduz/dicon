@@ -90,7 +90,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     len = strlen(NODE_URI);
     if (0 == strncmp(pos, NODE_URI, len)) {
-     //   return nodeHandler(conn, pos + len);
+        return nodeHandler(conn, pos + len);
     }
 
     return 0;

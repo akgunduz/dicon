@@ -4,7 +4,7 @@
 
 #include "ComponentController.h"
 
-ComponentController *ComponentController::instance = NULL;
+ComponentController *ComponentController::instance = nullptr;
 
 ComponentController *ComponentController::newInstance(int ind1, int ind2) {
 
@@ -49,7 +49,7 @@ long ComponentController::getCollectorCount() {
 Collector *ComponentController::getCollector(int id) {
 
     for (auto & collector : collectors) {
-        if (collector->getHostID() == id) {
+        if (collector->getHost().getID() == id) {
             return collector;
         }
     }
@@ -65,7 +65,7 @@ long ComponentController::getNodeCount() {
 Node *ComponentController::getNode(int id) {
 
     for (auto & node : nodes) {
-        if (node->getHostID() == id) {
+        if (node->getHost().getID() == id) {
             return node;
         }
     }
@@ -103,7 +103,7 @@ bool ComponentController::startNode(int count, int startIndex) {
     for (int i = 0; i < count; i++) {
 
         char path[PATH_MAX];
-        sprintf(path, "%s/%s_%ld", getcwd(NULL, 0), NODE_PATH, nodes.size() + startIndex);
+        sprintf(path, "%s/%s_%ld", getcwd(nullptr, 0), NODE_PATH, nodes.size() + startIndex);
         mkdir(path, 0777);
 
         nodes.push_back(Node::newInstance(path));

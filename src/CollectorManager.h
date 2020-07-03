@@ -7,6 +7,7 @@
 #define DICON_COLLECTORMANAGER_H
 
 #include "ComponentManager.h"
+#include "NodeObject.h"
 
 typedef std::pair<long, std::string> TypeWaitingCollector;
 
@@ -26,7 +27,7 @@ public:
     void setObject(int, long);
 
     //ComponentObject* getWaiting();
-    bool attachNode(long, ComponentObject&);
+    bool attachNode(long, const NodeObject&);
     bool detachNode(long);
 };
 

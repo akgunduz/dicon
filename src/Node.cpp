@@ -4,7 +4,6 @@
 //
 
 #include "Node.h"
-#include "ExecutorItem.h"
 #include "NodeState.h"
 #include "CollectorObject.h"
 
@@ -15,7 +14,9 @@ Node *Node::newInstance(const char* path) {
 }
 
 Node::Node(const char *rootPath) :
-        Component(COMP_NODE, rootPath), distributor(COMP_DISTRIBUTOR, getRootPath()){
+        Component(rootPath), distributor(getRootPath()){
+
+    host = new NodeObject(getRootPath());
 
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg);
@@ -23,6 +24,8 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
+
+    initInterfaces(COMP_NODE);
 }
 
 Node::~Node() {
@@ -38,7 +41,7 @@ bool Node::processDistributorWakeupMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
-    setHostID((int)msg->getHeader()->getVariant(0));
+    getHost().setID((int)msg->getHeader()->getVariant(0));
 
     LOG_U(UI_UPDATE_NODE_ID, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
@@ -61,10 +64,15 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
     } else {
 
-        processCommand(collID,
-                       msg->getData()->getJobDir(),
-                       msg->getData()->getExecutorID(),
-                       msg->getData()->getExecutor());
+        ((NodeObject&)getHost()).getProcess().setAttachedColl(collID);
+        ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
+        ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
+        processList.emplace_back(((NodeObject&)getHost()).getProcess());
+
+        LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID,
+              msg->getData()->getJobDir(), msg->getData()->getExecutorID());
+
+        processCommand(msg->getData()->getExecutor());
 
         TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
         FileInfo::setFileListState(&outputList, false);
@@ -80,6 +88,8 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
+    ((NodeObject&)getHost()).setState(NODESTATE_BUSY);
+
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_BUSY});
 
     return send2DistributorBusyMsg(getDistributor(),
@@ -92,10 +102,15 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
-    processCommand(msg->getHeader()->getOwner().getID(),
-                   msg->getData()->getJobDir(),
-                   msg->getData()->getExecutorID(),
-                   msg->getData()->getExecutor());
+    ((NodeObject&)getHost()).getProcess().setAttachedColl(msg->getHeader()->getOwner().getID());
+    ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
+    ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
+    processList.emplace_back(((NodeObject&)getHost()).getProcess());
+
+    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, msg->getHeader()->getOwner().getID(),
+            msg->getData()->getJobDir(), msg->getData()->getExecutorID());
+
+    processCommand(msg->getData()->getExecutor());
 
     TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
     FileInfo::setFileListState(&outputList, false);
@@ -106,6 +121,8 @@ bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 }
 
 bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
+
+    ((NodeObject&)getHost()).setState(NODESTATE_IDLE);
 
     LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_IDLE});
 
@@ -208,7 +225,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(int collID, const char* jobDir, long execID, const char *cmd) {
+bool Node::processCommand(const char *cmd) {
 
     int status;
     char *args[100];
@@ -217,8 +234,6 @@ bool Node::processCommand(int collID, const char* jobDir, long execID, const cha
 
     strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
-    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID, jobDir, execID);
-    LOGS_I(getHost(), "Collector[%d]\'s Process[%d] is executing", collID, execID);
     LOGS_T(getHost(), "Command : %s", fullcmd);
 
     parseCommand(fullcmd, args);
@@ -244,5 +259,9 @@ bool Node::processCommand(int collID, const char* jobDir, long execID, const cha
     }
 
     return true;
+}
 
+std::vector<NodeProcessInfo> *Node::getProcessList() {
+
+    return &processList;
 }

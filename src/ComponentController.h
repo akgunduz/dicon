@@ -34,7 +34,7 @@ public:
     bool startCollector(int, int = 1);
     bool startNode(int, int = 1);
 
-    bool setInterfaces(int, int);
+    static bool setInterfaces(int, int);
 };
 
 

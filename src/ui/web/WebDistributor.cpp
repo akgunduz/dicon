@@ -21,14 +21,14 @@ bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
     if (0 == strcmp(ri->request_method, "GET")) {
 
+        if (0 == strcmp(uri, "/state")) {
+
+            return distStateHandler(conn);
+        }
+
         if (0 == strcmp(uri, "/poll")) {
 
             return distPollHandler(conn);
-        }
-
-        if (0 == strcmp(uri, "/devices")) {
-
-            return distDevicesHandler(conn);
         }
     }
 
@@ -44,7 +44,7 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
     return true;
 }
 
-bool WebApp::distDevicesHandler(struct mg_connection *conn) {
+bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
@@ -95,12 +95,12 @@ bool WebApp::distDevicesHandler(struct mg_connection *conn) {
 
 void WebApp::distUpdateCollectorListItem(WebEvent &event) {
 
-    Timer::set("devices", 2000, WebApp::wsInform, this);
+    Timer::set("dist", 1000, WebApp::wsInform, this);
 }
 
 void WebApp::distUpdateNodeListItem(WebEvent &event) {
 
-    Timer::set("devices", 2000, WebApp::wsInform, this);
+    Timer::set("dist", 1000, WebApp::wsInform, this);
 }
 
 
