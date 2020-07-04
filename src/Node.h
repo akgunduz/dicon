@@ -41,7 +41,7 @@ private:
 	bool send2CollectorBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(const char *);
+    bool processCommand(int processID, const char *);
 
 public:
 

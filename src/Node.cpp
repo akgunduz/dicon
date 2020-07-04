@@ -72,7 +72,7 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
         LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID,
               msg->getData()->getJobDir(), msg->getData()->getExecutorID());
 
-        processCommand(msg->getData()->getExecutor());
+        processCommand(msg->getData()->getExecutorID(), msg->getData()->getExecutor());
 
         TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
         FileInfo::setFileListState(&outputList, false);
@@ -110,7 +110,7 @@ bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
     LOG_U(UI_UPDATE_NODE_PROCESS_LIST, msg->getHeader()->getOwner().getID(),
             msg->getData()->getJobDir(), msg->getData()->getExecutorID());
 
-    processCommand(msg->getData()->getExecutor());
+    processCommand(msg->getData()->getExecutorID(), msg->getData()->getExecutor());
 
     TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
     FileInfo::setFileListState(&outputList, false);
@@ -225,7 +225,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(const char *cmd) {
+bool Node::processCommand(int processID, const char *cmd) {
 
     int status;
     char *args[100];
@@ -234,6 +234,7 @@ bool Node::processCommand(const char *cmd) {
 
     strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
+    LOGS_T(getHost(), "Process[%d] is started", processID);
     LOGS_T(getHost(), "Command : %s", fullcmd);
 
     parseCommand(fullcmd, args);
@@ -257,6 +258,8 @@ bool Node::processCommand(const char *cmd) {
         LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, cmd);
         exit(EXIT_FAILURE);
     }
+
+    LOGS_T(getHost(), "Process[%d] is ended", processID);
 
     return true;
 }

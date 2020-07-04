@@ -19,16 +19,24 @@ enum PROCESS_STATE {
 class ExecutorInfo {
 
     ExecutorItem *item;
-    long id;
+    int id;
     PROCESS_STATE state;
+    int assigned;
 
 public:
 
-    ExecutorInfo(long, ExecutorItem *);
+    static ExecutorInfo invalid;
+
+    ExecutorInfo(int, ExecutorItem *);
     ExecutorItem* get();
-    long getID();
+    int getID();
+
     PROCESS_STATE getState();
     void setState(PROCESS_STATE);
+
+    int getAssignedNode();
+    void setAssignedNode(int);
+
 };
 
 

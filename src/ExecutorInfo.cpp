@@ -4,9 +4,10 @@
 
 #include "ExecutorInfo.h"
 
-ExecutorInfo::ExecutorInfo(long id, ExecutorItem *item) :
-    id(id), item(item), state(PROCESS_STATE_NOTSTARTED) {
+ExecutorInfo ExecutorInfo::invalid = {0, NULL};
 
+ExecutorInfo::ExecutorInfo(int id, ExecutorItem *item) :
+    id(id), item(item), state(PROCESS_STATE_NOTSTARTED), assigned(0) {
 }
 
 ExecutorItem *ExecutorInfo::get() {
@@ -14,7 +15,7 @@ ExecutorItem *ExecutorInfo::get() {
     return item;
 }
 
-long ExecutorInfo::getID() {
+int ExecutorInfo::getID() {
 
     return id;
 }
@@ -24,8 +25,18 @@ PROCESS_STATE ExecutorInfo::getState() {
     return state;
 }
 
-void ExecutorInfo::setState(PROCESS_STATE state) {
+void ExecutorInfo::setState(PROCESS_STATE _state) {
 
-    this->state = state;
+    state = _state;
+}
+
+int ExecutorInfo::getAssignedNode() {
+
+    return assigned;
+}
+
+void ExecutorInfo::setAssignedNode(int _assigned) {
+
+    assigned = _assigned;
 }
 

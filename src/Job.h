@@ -8,7 +8,6 @@
 #include "JsonItem.h"
 #include "Md5.h"
 #include "ExecutorItem.h"
-#include "JobInfo.h"
 #include "ExecutorInfo.h"
 
 
@@ -46,13 +45,13 @@ public:
 
     long getOrderedCount();
     long getProvisionCount();
-    ExecutorInfo getOrdered(int);
+    ExecutorInfo& getOrdered(int);
     ExecutorItem* getOrderedExecution(int);
     PROCESS_STATE getOrderedState(int);
     void setOrderedState(int, PROCESS_STATE);
 
     long getUnServedCount();
-    ExecutorInfo getUnServed();
+    ExecutorInfo& getUnServed();
 
     ExecutorItem* getByOutput(int);
     bool createDependencyMap();

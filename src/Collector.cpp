@@ -51,10 +51,9 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
-    int id = (int)msg->getHeader()->getVariant(0);
-    long nodeAddress = msg->getHeader()->getVariant(1);
+    NodeObject nodeObj((int)msg->getHeader()->getVariant(0), msg->getHeader()->getVariant(1));
 
-    if (nodeAddress == 0) {
+    if (nodeObj.getAddress() == 0) {
 
         LOGS_I(getHost(), "No Available Node");
         delete msg;
@@ -70,7 +69,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     Job* job = getJobs()->get(msg->getData()->getJobDir());
 
-    ExecutorInfo executor = job->getUnServed();
+    ExecutorInfo &executor = job->getUnServed();
 
     if (executor.get() == nullptr) {
         LOGS_I(getHost(), "No available unServed job right now. So WHY this Node message Come?????");
@@ -78,11 +77,13 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), id);
+    executor.setAssignedNode(nodeObj.getID());
+
+    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), nodeObj.getID());
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
-    return send2NodeJobMsg(NodeObject(id, nodeAddress), msg->getData()->getJobDir(), executor.getID(),
+    return send2NodeJobMsg(nodeObj, msg->getData()->getJobDir(), executor.getID(),
                            executor.get()->getParsedExec(), executor.get()->getFileList());
 }
 

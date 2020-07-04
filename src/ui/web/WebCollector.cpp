@@ -95,7 +95,6 @@ bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
         json_object_object_add(fileItem, "validity", json_object_new_boolean(content->isValid()));
 
         json_object_array_add(fileList, fileItem);
-
     }
 
     json_object_object_add(jsonObj, "fileList", fileList);
@@ -104,15 +103,16 @@ bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
     for (int j = 0; j < job->getOrderedCount(); j++) {
 
         auto* processItem = json_object_new_object();
+        json_object_object_add(processItem, "id", json_object_new_int(job->getOrdered(j).getID()));
         json_object_object_add(processItem, "process", json_object_new_string(job->getOrderedExecution(j)->getExec()));
         json_object_object_add(processItem, "validity", json_object_new_boolean(job->getOrderedExecution(j)->isValid()));
         json_object_object_add(processItem, "state", json_object_new_int(job->getOrderedState(j)));
+        json_object_object_add(processItem, "node", json_object_new_int(job->getOrdered(j).getAssignedNode()));
 
         json_object_array_add(processList, processItem);
     }
 
     json_object_object_add(jsonObj, "processList", processList);
-
 
     size_t json_str_len;
 

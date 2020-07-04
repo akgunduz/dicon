@@ -7,8 +7,6 @@
 
 
 #include "Job.h"
-#include "JobInfo.h"
-
 
 typedef std::map<std::string, Job*, char_cmp> TypeJobList;
 

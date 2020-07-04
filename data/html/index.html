@@ -185,7 +185,7 @@
     </div>
 
     <div id="collector-block" class="component-block" style="display: none;">
-      <h1>Collector</h1>
+      <h1 id="coll-header">Collector</h1>
       <div id="coll-area" class="dual-tables-container">
         <div id="coll-file" class="single-table-container">
           <button
@@ -213,9 +213,16 @@
             Process
           </button>
           <table id="coll-process-table" class="table-wide">
+            <colgroup>
+              <col span="1" style="width: 10%;" />
+              <col span="1" style="width: 70%;" />
+              <col span="1" style="width: 20%;" />
+            </colgroup>
             <thead>
               <tr>
-                <th>Process List</th>
+                <th>Process ID</th>
+                <th>Process Command</th>
+                <th>Assigned Node</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -225,7 +232,7 @@
     </div>
 
     <div id="node-block" class="component-block" style="display: none;">
-      <h1>Node</h1>
+      <h1 id="node-header">Node</h1>
       <div id="node-area" class="dual-tables-container">
         <h3>State :</h3>
         <h3 id="node-state">IDLE</h3>
@@ -294,12 +301,16 @@
               distPage.style.display = "none";
               collPage.style.display = "block";
               nodePage.style.display = "none";
+              document.getElementById("coll-header").innerHTML =
+                "Collector [" + this.id + "]";
               onCollState(this.id);
               break;
             case NODE:
               distPage.style.display = "none";
               collPage.style.display = "none";
               nodePage.style.display = "block";
+              document.getElementById("node-header").innerHTML =
+                "Node [" + this.id + "]";
               onNodeState(this.id);
               break;
           }
@@ -329,23 +340,6 @@
 
       function onNodeClick() {
         currentPage.set(NODE, this.id);
-      }
-
-      function addToSingleTable(tableID, val) {
-        let newRow = document.getElementById(tableID).insertRow();
-        newRow.insertCell().innerHTML = val;
-      }
-
-      function addToDualTable(tableID, reset, id, val) {
-        let table = document
-          .getElementById(tableID)
-          .getElementsByTagName("tbody")[0];
-        if (reset) {
-          table.innerHTML = "";
-        }
-        let newRow = table.insertRow();
-        newRow.insertCell().innerHTML = id;
-        newRow.insertCell().innerHTML = val;
       }
 
       function onDistState() {
@@ -490,22 +484,24 @@
 
         for (var processitem of data.processList) {
           let newRow = table.insertRow();
-          let newcell = newRow.insertCell();
-          newcell.innerHTML = processitem.process;
+          newRow.insertCell().innerHTML = processitem.id;
+          newRow.insertCell().innerHTML = processitem.process;
+          newRow.insertCell().innerHTML = processitem.node != 0 ? processitem.node : "Not Assigned";
+
           switch (processitem.state) {
             case PROCESS_STATE_NOTSTARTED:
               if (processitem.validity) {
-                newcell.style.backgroundColor = "#00C000";
+                newRow.style.backgroundColor = "#00C000";
               }
               break;
             case PROCESS_STATE_PROVISION:
               newcell.style.backgroundColor = "#000080";
               break;
             case PROCESS_STATE_STARTED:
-              newcell.style.backgroundColor = "#800080";
+              newRow.style.backgroundColor = "#800080";
               break;
             case PROCESS_STATE_ENDED:
-              newcell.style.backgroundColor = "#C0C0C0";
+              newRow.style.backgroundColor = "#C0C0C0";
               break;
           }
         }
@@ -529,7 +525,8 @@
       }
 
       function onNodeUpdateState(data) {
-        document.getElementById("node-state").innerHTML = NODE_STATES[data.state];
+        document.getElementById("node-state").innerHTML =
+          NODE_STATES[data.state];
       }
 
       function onNodeUpdateProcessList(data) {
