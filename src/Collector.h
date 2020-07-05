@@ -10,13 +10,12 @@
 #include "Connector.h"
 #include "Message.h"
 #include "Job.h"
-#include "Jobs.h"
 #include "DistributorObject.h"
 #include "CollectorObject.h"
 
 class Collector : public Component {
 
-	Jobs jobs;
+	Job *job;
 	DistributorObject distributor;
 
     explicit Collector(const char *rootPath);
@@ -31,7 +30,8 @@ class Collector : public Component {
 	bool processNodeBinaryMsg(ComponentObject, Message *);
 
 	bool send2DistributorAliveMsg(ComponentObject);
-	bool send2DistributorNodeMsg(ComponentObject, const char*, long, TypeMD5List*);
+	bool send2DistributorIDMsg(ComponentObject);
+	bool send2DistributorNodeMsg(ComponentObject, long);
 	bool send2NodeJobMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 	bool send2NodeBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
 	bool send2NodeReadyMsg(ComponentObject, const char*, long);
@@ -41,10 +41,9 @@ public:
     ~Collector();
     static Collector* newInstance(const char*);
 
-    bool processJob(int);
+    Job* getJob();
+    bool processJob();
     bool loadJob(const char*);
-    bool processJobs();
-	Jobs* getJobs();
 };
 
 #endif	/* COLLECTOR_H */

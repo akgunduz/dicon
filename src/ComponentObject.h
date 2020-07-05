@@ -19,10 +19,6 @@ class ComponentObject {
 
 private:
 
-protected:
-
-public:
-
     COMPONENT type;
 
     int id;
@@ -30,6 +26,10 @@ public:
     const char *rootPath;
 
     long address;
+
+protected:
+
+public:
 
     ComponentObject();
     ComponentObject(COMPONENT, int = 0);
@@ -40,15 +40,15 @@ public:
 
     virtual ~ComponentObject();
 
-    COMPONENT getType();
-    int getID();
+    const COMPONENT getType() const;
+    const int getID() const;
     void setID(int);
-    const char* getName();
+    const char* getName() const;
 
-    const char* getRootPath();
+    const char* getRootPath() const;
     void setRootPath(const char*);
 
-    long getAddress();
+    const long getAddress() const;
     void setAddress(long);
 };
 

@@ -16,7 +16,7 @@ public:
 	~ParameterItem(){};
 	const char* getParam();
 	void setParam(const char*);
-	virtual CONTENT_TYPES getType();
+	virtual CONTENT_TYPES getType() const;
 
     virtual bool isValid();
 };

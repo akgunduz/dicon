@@ -18,7 +18,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ContentItem.cpp
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/ParameterItem.cpp
-        ${SOURCE_PATH}/ExecutorItem.cpp
+        ${SOURCE_PATH}/ProcessItem.cpp
         ${SOURCE_PATH}/Distributor.cpp
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
@@ -47,7 +47,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/JsonItem.cpp
-        ${SOURCE_PATH}/Jobs.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
         #${SOURCE_PATH}/ComponentTypes.cpp
@@ -64,11 +63,11 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/DistributorObject.cpp
-        ${SOURCE_PATH}/ExecutorInfo.cpp
+        ${SOURCE_PATH}/ProcessInfo.cpp
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
         ${SOURCE_PATH}/ui/UserInterfaceApp.cpp
-        )
+        src/JobOrdered.cpp)
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/Wx.cpp

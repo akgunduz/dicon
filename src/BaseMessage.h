@@ -43,6 +43,7 @@ public:
 	bool readBlockHeader(int, Block*);
 	bool readString(int, char*, int);
 	bool readNumber(int, long*);
+    bool readNumberList(int, std::vector<long> &, int);
 	bool readMD5(int, Md5*);
     bool readBinary(int, const char*, Md5 *, int);
 
@@ -58,6 +59,7 @@ public:
 	bool writeBlockHeader(int, struct Block*);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
+    bool writeNumberList(int, std::vector<long>&);
     bool writeMD5(int, Md5*);
 	bool writeBinary(int, const char*, Md5 *, int);
 
@@ -68,8 +70,8 @@ public:
     virtual bool writeMessageStream(int out) = 0;
     virtual bool writeFinalize() = 0;
 
-    virtual bool setHeader(const uint8_t*) = 0;
-    virtual bool extractHeader(uint8_t *) = 0;
+    virtual bool deSerializeHeader(const uint8_t*) = 0;
+    virtual bool serializeHeader(uint8_t *) = 0;
     virtual int getHeaderSize() = 0;
 
 	ComponentObject getHost();

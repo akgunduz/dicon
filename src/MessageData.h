@@ -6,8 +6,7 @@
 #ifndef DICON_MESSAGEDATA_H
 #define DICON_MESSAGEDATA_H
 
-
-#include "ExecutorItem.h"
+#include "ProcessItem.h"
 
 class MessageData {
 
@@ -18,6 +17,7 @@ class MessageData {
     char executor[PATH_MAX];
     long executorID;
     char jobDir[PATH_MAX];
+    std::vector<ComponentObject> componentList;
 
 public:
 
@@ -44,6 +44,9 @@ public:
 
     char* getJobDir();
     void setJobDir(const char*);
+
+    std::vector<ComponentObject>& getComponentList();
+    void setComponentList(std::vector<ComponentObject>&);
 };
 
 

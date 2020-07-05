@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
+    LOGLEVEL logLevel[2] = {LEVEL_TRACE, LEVEL_TRACE};
 
     int distCount = 0;
     int collInfo[2] = {0, 1};

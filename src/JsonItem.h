@@ -27,8 +27,8 @@ public:
     JsonItem(ComponentObject host, const char* jobDir,
              const char* fileName);
     virtual ~JsonItem();
-    ContentItem * getContent(int type, int index);
-    int getContentCount(int type);
+    ContentItem * getContent(int type, int index) const;
+    int getContentCount(int type) const;
     void reset();
     bool parse();
 };

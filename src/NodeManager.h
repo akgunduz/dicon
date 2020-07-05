@@ -13,17 +13,20 @@ class NodeManager : public ComponentManager {
 
 private:
 
+    std::mutex nodeMutex;
+
 public:
 
 	NodeManager();
-
 	~NodeManager();
 
-	bool setState(long, NODESTATES);
+    NODESTATES getState(int);
+	void setState(int, NODESTATES);
 
-	long getIdle();
+    NodeObject getIdle();
+	int getIdleCount();
 
-    void setObject(int, long);
+    ComponentObject* createObject(int, long) final;
 };
 
 #endif	/* DISTRIBUTOR_H */

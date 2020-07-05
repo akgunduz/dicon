@@ -6,29 +6,27 @@
 #include "NodeManager.h"
 #include "AddressHelper.h"
 
-NodeManager::NodeManager() {
+NodeManager::NodeManager() = default;
 
-};
+NodeManager::~NodeManager() = default;
 
-NodeManager::~NodeManager() {
+NodeObject NodeManager::getIdle() {
 
-}
+    NodeObject nodeObject;
 
-long NodeManager::getIdle() {
+    NodeObject* leastUsedNode = nullptr;
 
-    NodeObject* leastUsedNode = NULL;
+    nodeMutex.lock();
 
-    mutex.lock();
+    for (int i = 0; i < size(); i++) {
 
-    for (auto i = components.begin(); i != components.end(); i++) {
-
-        auto *node = (NodeObject*) i->second;
+        auto *node = (NodeObject*) getByIndex(i);
 
         if (node->getState() != NODESTATE_IDLE) {
             continue;
         }
 
-        if (leastUsedNode == NULL) {
+        if (leastUsedNode == nullptr) {
             leastUsedNode = node;
             continue;
         }
@@ -38,41 +36,69 @@ long NodeManager::getIdle() {
         }
     }
 
-    if (leastUsedNode != NULL) {
+    if (leastUsedNode != nullptr) {
 
         leastUsedNode->iterateUsage(true);
         leastUsedNode->setState(NODESTATE_PREBUSY);
 
-        mutex.unlock();
-
-        return leastUsedNode->getAddress();
+        nodeObject = *leastUsedNode;
 
     }
 
-    mutex.unlock();
+    nodeMutex.unlock();
 
-    return 0;
+    return nodeObject;
 }
 
-bool NodeManager::setState(long address, NODESTATES state) {
+int NodeManager::getIdleCount() {
 
-    auto search = components.find(address);
-    if (search == components.end()) {
-        return false;
+    int count = 0;
+
+    nodeMutex.lock();
+
+    for (int i = 0; i < size(); i++) {
+
+        auto *node = (NodeObject*) getByIndex(i);
+
+        if (node->getState() == NODESTATE_IDLE) {
+            count++;
+        }
     }
 
-    auto *node = (NodeObject*) search->second;
+    nodeMutex.unlock();
 
-    mutex.lock();
-
-    node->setState(state);
-
-    mutex.unlock();
-
-    return true;
+    return count;
 }
 
-void NodeManager::setObject(int id, long address) {
+NODESTATES NodeManager::getState(int id) {
 
-    components[address] = new NodeObject(id, address);
+    NODESTATES state = NODESTATE_MAX;
+
+    nodeMutex.lock();
+
+    auto *node = (NodeObject*)get(id);
+    if (node) {
+        state = node->getState();
+    }
+
+    nodeMutex.unlock();
+
+    return state;
+}
+
+void NodeManager::setState(int id, NODESTATES state) {
+
+    nodeMutex.lock();
+
+    auto *node = (NodeObject*)get(id);
+    if (node) {
+        node->setState(state);
+    }
+
+    nodeMutex.unlock();
+}
+
+ComponentObject* NodeManager::createObject(int id, long address) {
+
+    new NodeObject(id, address);
 }

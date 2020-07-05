@@ -19,25 +19,31 @@ private:
 
     static Distributor *instance;
 
+    volatile bool runCollThread = true;
+
 	NodeManager *nodeManager;
 
 	CollectorManager *collectorManager;
 
-    Distributor(const char *);
+    std::thread collThread;
+
+    explicit Distributor(const char *);
+
+    static void collProcessCB(Distributor *);
+    void collProcess();
 
     bool processCollectorAliveMsg(ComponentObject, Message *);
+    bool processCollectorIDMsg(ComponentObject, Message *);
     bool processCollectorNodeMsg(ComponentObject, Message *);
 
-    bool processNodeReadyMsg(ComponentObject, Message *);
     bool processNodeAliveMsg(ComponentObject, Message *);
-    bool processNodeBusyMsg(ComponentObject, Message *);
     bool processNodeIDMsg(ComponentObject, Message *);
-
-    bool processWaitingList(long, long, const char*);
+    bool processNodeBusyMsg(ComponentObject, Message *);
+    bool processNodeReadyMsg(ComponentObject, Message *);
 
 	bool send2CollectorWakeupMsg(ComponentObject);
 	bool send2CollectorIDMsg(ComponentObject, int);
-	bool send2CollectorNodeMsg(ComponentObject, const char*, long, int);
+	bool send2CollectorNodeMsg(ComponentObject, std::vector<ComponentObject>&);
 
     bool send2NodeWakeupMsg(ComponentObject);
     bool send2NodeIDMsg(ComponentObject, int);
@@ -48,7 +54,7 @@ private:
 public:
 
 
-	~Distributor();
+	~Distributor() override;
     static Distributor* newInstance(const char* path);
 
     bool sendWakeupMessage(ComponentObject);

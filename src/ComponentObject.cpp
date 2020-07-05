@@ -38,42 +38,42 @@ ComponentObject::~ComponentObject() {
 
 }
 
-COMPONENT ComponentObject::getType() {
+const COMPONENT ComponentObject::getType() const {
 
     return this->type;
 }
 
-int ComponentObject::getID() {
+const int ComponentObject::getID() const {
 
     return this->id;
 }
 
-void ComponentObject::setID(int id) {
+void ComponentObject::setID(int _id) {
 
-    this->id = id;
+    this->id = _id;
 }
 
-const char* ComponentObject::getName() {
+const char* ComponentObject::getName() const {
 
     return sComponentTypes[type];
 }
 
-long ComponentObject::getAddress() {
+const long ComponentObject::getAddress() const {
 
     return address;
 }
 
-void ComponentObject::setAddress(long address) {
+void ComponentObject::setAddress(long _address) {
 
-    this->address = address;
+    this->address = _address;
 }
 
-const char* ComponentObject::getRootPath() {
+const char* ComponentObject::getRootPath() const {
 
     return rootPath;
 }
 
-void ComponentObject::setRootPath(const char *rootPath) {
+void ComponentObject::setRootPath(const char *_rootPath) {
 
-    this->rootPath = rootPath;
+    this->rootPath = _rootPath;
 }

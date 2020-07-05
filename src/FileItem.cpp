@@ -24,38 +24,38 @@ FileItem::FileItem(ComponentObject host, const char *jobDir, const char *fileNam
     set(jobDir, fileName, id, md5);
 };
 
-void FileItem::set(const char *jobDir, const char *fileName, int id, Md5 *md5) {
+void FileItem::set(const char *_jobDir, const char *_fileName, const int _id, const Md5 *_md5) {
 
     this->is_exist = false;
 
-    this->id = id;
+    this->id = _id;
 
-    strcpy(this->jobDir, jobDir);
+    strcpy(this->jobDir, _jobDir);
 
-    strcpy(this->fileName, fileName);
+    strcpy(this->fileName, _fileName);
 
-    if (md5 != NULL) {
+    if (_md5 != NULL) {
 
-        this->md5.set(md5);
+        this->md5.set(_md5);
     }
 }
 
-CONTENT_TYPES FileItem::getType() {
+CONTENT_TYPES FileItem::getType() const {
 
 	return CONTENT_FILE;
 }
 
-ComponentObject FileItem::getHost() {
+ComponentObject FileItem::getHost() const {
 
     return host;
 }
 
-const char *FileItem::getJobDir() {
+const char *FileItem::getJobDir() const {
 
     return jobDir;
 }
 
-const char* FileItem::getFileName() {
+const char* FileItem::getFileName() const {
 
 	return fileName;
 }
@@ -80,7 +80,7 @@ void FileItem::setMD5(Md5 *md5) {
     this->md5.set(md5);
 }
 
-int FileItem::getID() {
+int FileItem::getID() const {
 
     return id;
 }
@@ -88,18 +88,21 @@ int FileItem::getID() {
 bool FileItem::validate() {
 
     if (is_exist) {
-        LOGS_T(getHost(), "FileContent %s is already validated", getFileName());
+        //TODO dont forget to reenable
+       // LOGS_T(getHost(), "FileContent %s is already validated", getFileName());
         return true;
     }
 
     if (strcmp(getJobDir(), "") == 0 || strcmp(getFileName(), "") == 0) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        //TODO dont forget to reenable
+     //   LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 
     FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str(), "r");
     if (file == NULL) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        //TODO dont forget to reenable
+      //  LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 

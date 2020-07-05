@@ -28,19 +28,19 @@ public:
 	~FileItem(){};
 
     void set(const char*, const char*,
-             int id, Md5* = NULL);
+             const int id, const Md5* = nullptr);
 
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
-    const char* getFileName();
-    const char* getJobDir();
+    const char* getFileName() const;
+    const char* getJobDir() const;
 
-	ComponentObject getHost();
-    int getID();
+	ComponentObject getHost() const;
+    int getID() const;
 
     bool validate();
 
-	virtual CONTENT_TYPES getType();
+	virtual CONTENT_TYPES getType() const;
 
     virtual bool isValid();
 };

@@ -18,16 +18,18 @@ private:
 
     int usage;
 
-    NodeProcessInfo processInfo;
+    //NodeProcessInfo processInfo;
 
 public:
 
     NodeObject(NODESTATES, int, int, long);
     NodeObject(int, long);
     NodeObject(const char*);
+    NodeObject();
     NodeObject(const NodeObject &);
     NodeObject(const ComponentObject &);
-    NodeObject();
+//    NodeObject(const ComponentObject &);
+
     ~NodeObject();
 
     int getUsage();
@@ -36,7 +38,7 @@ public:
     NODESTATES getState();
     void setState(NODESTATES);
 
-    NodeProcessInfo& getProcess();
+    //NodeProcessInfo& getProcess();
 
 };
 

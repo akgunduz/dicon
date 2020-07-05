@@ -31,10 +31,10 @@ ComponentObject MessageHeader::getOwner() {
     return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF), ownerAddress);
 }
 
-void MessageHeader::setOwner(ComponentObject owner) {
+void MessageHeader::setOwner(ComponentObject _owner) {
 
-    this->owner = (((long)owner.getType()) << 32) | owner.getID();
-    this->ownerAddress = owner.getAddress();
+    this->owner = (((long)_owner.getType()) << 32) | _owner.getID();
+    this->ownerAddress = _owner.getAddress();
 }
 
 //long MessageHeader::getOwnerAddress() {
@@ -89,7 +89,7 @@ void MessageHeader::normalizePriority() {
     priority *= PRIORITY_COEFFICIENT;
 }
 
-bool MessageHeader::set(const uint8_t* buffer) {
+bool MessageHeader::deSerialize(const uint8_t* buffer) {
 
     type = ntohl(*((int *) buffer)); buffer += 4;
     priority = ntohl(*((int *) buffer)); buffer += 4;
@@ -102,7 +102,7 @@ bool MessageHeader::set(const uint8_t* buffer) {
     return true;
 }
 
-bool MessageHeader::extract(uint8_t *buffer) {
+bool MessageHeader::serialize(uint8_t *buffer) {
 
     *((int *) buffer) = htonl(type); buffer += 4;
     *((int *) buffer) = htonl(priority); buffer += 4;

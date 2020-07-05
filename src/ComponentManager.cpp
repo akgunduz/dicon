@@ -6,93 +6,97 @@
 
 ComponentManager::ComponentManager()
         : idCounter(1) {
-
 }
 
 ComponentManager::~ComponentManager() {
 
-    components.clear();
+    clear();
 }
 
 size_t ComponentManager::size() {
 
-    return components.size();
+    mutex.lock();
+
+    size_t size = componentsMap.size();
+
+    mutex.unlock();
+
+    return size;
 }
 
-ComponentObject* ComponentManager::get(long address) {
+ComponentObject* ComponentManager::get(int id) {
 
-    auto search = components.find(address);
-    if (search == components.end()) {
-        return nullptr;
+    ComponentObject *object = nullptr;
+
+    mutex.lock();
+
+    auto search = componentsMap.find(id);
+    if (search != componentsMap.end()) {
+
+        object = componentsMap[id];
     }
 
-    return components[address];
+    mutex.unlock();
 
+    return object;
 }
 
-int ComponentManager::getID(long address) {
+ComponentObject *ComponentManager::getByIndex(int index) {
 
-    auto search = components.find(address);
-    if (search == components.end()) {
-        return 0;
+    ComponentObject *object = nullptr;
+
+    mutex.lock();
+
+    if (index < componentsMap.size()) {
+
+        object = componentsIndex[index];
     }
 
-    return components[address]->getID();
+    mutex.unlock();
 
+    return object;
 }
 
 int ComponentManager::add(long address) {
 
-    auto search = components.find(address);
-    if (search == components.end()) {
+    int newID = 0;
 
-        mutex.lock();
+    mutex.lock();
 
-        setObject(getFreeID(), address);
+    auto search = componentsMap.find(address);
+    if (search == componentsMap.end()) {
 
-        mutex.unlock();
-
-        return true;
+        newID = idCounter++;
+        ComponentObject *object = createObject(newID, address);
+        componentsMap[newID] = object;
+        componentsIndex.emplace_back(object);
     }
 
-    return false;
-}
+    mutex.unlock();
 
-
-int ComponentManager::getFreeID() {
-
-    return idCounter++;
+    return newID;
 }
 
 void ComponentManager::clear() {
 
     mutex.lock();
 
-    for (auto i = components.begin(); i != components.end(); i++) {
+    for (auto & component : componentsMap) {
 
-        delete i->second;
+        delete component.second;
 
     }
 
-    components.clear();
+    componentsMap.clear();
+    componentsIndex.clear();
 
     mutex.unlock();
 
 }
 
-ComponentObject *ComponentManager::getByIndex(int index) {
+bool ComponentManager::isExist(int id) {
 
-    int j = 0;
-    if (index >= size()) {
-        return nullptr;
-    }
-
-    for (auto & component : components) {
-
-        if (j++ == index) {
-            return component.second;
-        }
-    }
-
-    return nullptr;
+    return get(id) != nullptr;
 }
+
+

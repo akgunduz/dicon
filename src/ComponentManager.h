@@ -8,38 +8,34 @@
 #include "Common.h"
 #include "ComponentObject.h"
 
-typedef std::map<long, ComponentObject*> TypeComponentList;
+typedef std::map<int, ComponentObject*> TypeComponentMapList;
+typedef std::vector<ComponentObject*> TypeComponentVectorList;
 
 class ComponentManager {
 
     int idCounter;
 
-protected:
-
     std::mutex mutex;
 
-    TypeComponentList components;
+    TypeComponentMapList componentsMap;
+    TypeComponentVectorList componentsIndex;
 
-    virtual void setObject(int, long) = 0;
+protected:
+
+    virtual ComponentObject* createObject(int, long) = 0;
 
 public:
 
     ComponentManager();
     virtual ~ComponentManager();
 
-    int getFreeID();
-
-    void clear();
-
-    int getID(long);
-    size_t size();
-    ComponentObject* get(long);
+    ComponentObject* get(int);
     ComponentObject* getByIndex(int);
+    size_t size();
+    void clear();
+    bool isExist(int);
 
     int add(long);
-
-
-
 };
 
 

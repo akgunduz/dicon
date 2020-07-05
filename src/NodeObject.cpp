@@ -4,30 +4,28 @@
 
 #include "NodeObject.h"
 
-NodeObject::NodeObject(NODESTATES state, int usage, int id, long address) :
-        state(state), usage(usage), ComponentObject(COMP_NODE, id, address) {
+NodeObject::NodeObject(NODESTATES _state, int _usage, int id, long address) :
+        state(_state), usage(_usage), ComponentObject(COMP_NODE, id, address) {
 }
 
 NodeObject::NodeObject(int id, long address) :
-        NodeObject(NODESTATE_IDLE, 0, id, address) {
+        NodeObject(NODESTATE_START, 0, id, address) {
 }
 
 NodeObject::NodeObject(const char* rootPath) :
         ComponentObject(COMP_NODE, rootPath)  {
 }
 
-NodeObject::NodeObject(const NodeObject &copy)
-        : state(copy.state), usage(copy.usage),
-        ComponentObject(copy.type, copy.rootPath, copy.id, copy.address) {
-}
-
-NodeObject::NodeObject(const ComponentObject &copy)
-        : state(NODESTATE_IDLE), usage(0),
-          ComponentObject(copy.type, copy.rootPath, copy.id, copy.address) {
-}
-
 NodeObject::NodeObject() :
-        NodeObject(NODESTATE_IDLE, 0, 0, 0) {
+        NodeObject(0, 0) {
+}
+
+NodeObject::NodeObject(const NodeObject &copy) :
+        NodeObject(copy.state, copy.usage, copy.getID(), copy.getAddress()) {
+}
+
+NodeObject::NodeObject(const ComponentObject &copy) :
+        NodeObject(copy.getID(), copy.getAddress()) {
 }
 
 NodeObject::~NodeObject() {
@@ -37,6 +35,11 @@ NodeObject::~NodeObject() {
 NODESTATES NodeObject::getState() {
 
     return state;
+}
+
+void NodeObject::setState(NODESTATES _state) {
+
+    this->state = _state;
 }
 
 int NodeObject::getUsage() {
@@ -49,12 +52,7 @@ int NodeObject::iterateUsage(bool direction) {
     return direction ? ++usage : --usage;
 }
 
-void NodeObject::setState(NODESTATES _state) {
-
-    this->state = _state;
-}
-
-NodeProcessInfo &NodeObject::getProcess() {
-
-    return processInfo;
-}
+//NodeProcessInfo &NodeObject::getProcess() {
+//
+//    return processInfo;
+//}

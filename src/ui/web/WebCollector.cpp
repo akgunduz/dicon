@@ -62,7 +62,7 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, long id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
-        collector->processJobs();
+        collector->processJob();
     }
 
     mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
@@ -74,7 +74,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
 
     auto *collector = componentController->getCollector(id);
 
-    auto *job = collector->getJobs()->get(0);
+    auto *job = collector->getJob();
     if (job == nullptr) {
         return false;
     }

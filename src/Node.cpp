@@ -67,10 +67,10 @@ bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
 
     } else {
 
-        ((NodeObject&)getHost()).getProcess().setAttachedColl(collID);
-        ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
-        ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
-        processList.emplace_back(((NodeObject&)getHost()).getProcess());
+//        ((NodeObject&)getHost()).getProcess().setAttachedColl(collID);
+//        ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
+//        ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
+//        processList.emplace_back(((NodeObject&)getHost()).getProcess());
 
         LOGS_I(getHost(), "Process[%d] from Collector[%d] is executing",
                msg->getData()->getExecutorID(), collID);
@@ -116,10 +116,10 @@ bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
 
 bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
 
-    ((NodeObject&)getHost()).getProcess().setAttachedColl(msg->getHeader()->getOwner().getID());
-    ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
-    ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
-    processList.emplace_back(((NodeObject&)getHost()).getProcess());
+//    ((NodeObject&)getHost()).getProcess().setAttachedColl(msg->getHeader()->getOwner().getID());
+//    ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
+//    ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
+//    processList.emplace_back(((NodeObject&)getHost()).getProcess());
 
     LOGS_I(getHost(), "Process[%d] binaries are received from Collector[%d]",
            msg->getData()->getExecutorID(), owner.getID());

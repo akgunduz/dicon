@@ -24,6 +24,8 @@ bool Component::initInterfaces(COMPONENT type) {
                                    Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
+
+    return true;
 }
 
 Component::~Component() {

@@ -3,35 +3,35 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "ExecutorItem.h"
+#include "ProcessItem.h"
 #include "ParameterItem.h"
 #include "Job.h"
 
-ExecutorItem::ExecutorItem()
-        : ExecutorItem("") {
+ProcessItem::ProcessItem()
+        : ProcessItem("") {
 
 };
 
-ExecutorItem::ExecutorItem(const char *line)
+ProcessItem::ProcessItem(const char *line)
         : ContentItem () {
 
 	strcpy(exec, line);
     strcpy(parsedExec, "");
 }
 
-CONTENT_TYPES ExecutorItem::getType() {
+CONTENT_TYPES ProcessItem::getType() const {
 	return CONTENT_EXECUTOR;
 }
 
-const char* ExecutorItem::getExec() {
+const char* ProcessItem::getExec() {
 	return exec;
 }
 
-const char *ExecutorItem::getParsedExec() {
+const char *ProcessItem::getParsedExec() {
     return parsedExec;
 }
 
-bool ExecutorItem::parse(void *job) {
+bool ProcessItem::parse(void *job) {
 
 	bool cmdMode = false;
 	int cmdIndex = 0;
@@ -105,7 +105,7 @@ bool ExecutorItem::parse(void *job) {
 	return true;
 }
 
-bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
+bool ProcessItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 
     switch (cmdType) {
 
@@ -141,7 +141,7 @@ bool ExecutorItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 	return true;
 }
 
-bool ExecutorItem::isValid() {
+bool ProcessItem::isValid() {
 
 	for (int i = 0; i < fileList.size(); i++) {
 
@@ -157,7 +157,7 @@ bool ExecutorItem::isValid() {
     return true;
 }
 
-TypeFileInfoList* ExecutorItem::getFileList() {
+TypeFileInfoList* ProcessItem::getFileList() {
 
     return &fileList;
 }

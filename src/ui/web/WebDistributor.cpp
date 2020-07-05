@@ -59,7 +59,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
         auto* collItem = json_object_new_object();
         json_object_object_add(collItem, "collectorID", json_object_new_int(collector->getID()));
-        json_object_object_add(collItem, "assignedNode", json_object_new_int(((CollectorObject*)collector)->getAttached().getID()));
+      //  json_object_object_add(collItem, "assignedNode", json_object_new_int(((CollectorObject*)collector)->getAttached().getID()));
 
         json_object_array_add(collList, collItem);
     }

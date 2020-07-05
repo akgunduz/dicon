@@ -55,7 +55,7 @@ int ConsoleApp::run() {
                 componentController->getCollector(1)->loadJob(NULL);
                 break;
             case 'x':
-                componentController->getCollector(1)->processJobs();
+                componentController->getCollector(1)->processJob();
                 break;
             case 'q':
 

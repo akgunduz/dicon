@@ -47,8 +47,8 @@ public:
     void normalizePriority();
     int iteratePriority();
 
-    bool set(const uint8_t*);
-    bool extract(uint8_t*);
+    bool deSerialize(const uint8_t*);
+    bool serialize(uint8_t*);
 
 };
 

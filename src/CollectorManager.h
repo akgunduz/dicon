@@ -8,27 +8,38 @@
 
 #include "ComponentManager.h"
 #include "NodeObject.h"
+#include "CollectorObject.h"
 
-typedef std::pair<long, std::string> TypeWaitingCollector;
+struct CollectorRequest {
+    int collID;
+    int reqCount;
+    CollectorRequest(int _collID, int _reqCount)
+    : collID(_collID), reqCount(_reqCount){};
+};
 
 class CollectorManager : public ComponentManager {
 
-    std::deque<TypeWaitingCollector> waitingList;
+    std::mutex collMutex;
+
+    std::map<int, CollectorObject> collList;
+    std::deque<struct CollectorRequest> collReqList;
+
+protected:
+
+    ComponentObject* createObject(int, long) final;
 
 public:
 
     CollectorManager();
     ~CollectorManager();
-    bool addWaiting(long, std::string);
-    TypeWaitingCollector getWaiting();
-    size_t getWaitingCount();
-    void clearWaiting();
 
-    void setObject(int, long);
+    COLLSTATES getState(int);
+    void setState(int, COLLSTATES);
 
-    //ComponentObject* getWaiting();
-    bool attachNode(long, const NodeObject&);
-    bool detachNode(long);
+    bool addRequest(int, int);
+    CollectorRequest* getRequest();
+    void updateRequest(int);
+    void removeRequest();
 };
 
 

@@ -33,12 +33,12 @@ JsonItem::~JsonItem() {
     }
 }
 
-ContentItem *JsonItem::getContent(int type, int index) {
+ContentItem *JsonItem::getContent(int type, int index) const {
 
     return contentList[type][index];
 }
 
-int JsonItem::getContentCount(int type) {
+int JsonItem::getContentCount(int type) const {
 
     return (int) contentList[type].size();
 }

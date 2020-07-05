@@ -6,8 +6,8 @@
 #include "CollState.h"
 
 const char* sCollStates[] = {
+        "START",
         "IDLE",
-        "WAITING",
         "BUSY",
 };
 

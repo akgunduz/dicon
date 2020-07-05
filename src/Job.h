@@ -7,20 +7,20 @@
 
 #include "JsonItem.h"
 #include "Md5.h"
-#include "ExecutorItem.h"
-#include "ExecutorInfo.h"
-
+#include "ProcessItem.h"
+#include "ProcessInfo.h"
 
 #define MAX_JOB_COUNT 100
 #define JOB_ITEM 0
 #define JOB_FILE "Job.json"
 #define JOB_DIR_PREFIX "Job_"
+#define JOB_MAX_NAME 50
 
 class Job : public JsonItem {
 
-    char name[50];
+    char name[JOB_MAX_NAME];
 
-    std::vector<ExecutorInfo> orderedList;
+    std::vector<ProcessInfo> orderedList;
 
 public:
 
@@ -38,22 +38,22 @@ public:
     void setName(const char*);
 
     int getExecutorCount();
-    ExecutorItem* getExecutor(int);
+    ProcessItem* getExecutor(int);
 
     int getFileCount();
     FileItem* getFile(int);
 
-    long getOrderedCount();
-    long getProvisionCount();
-    ExecutorInfo& getOrdered(int);
-    ExecutorItem* getOrderedExecution(int);
-    PROCESS_STATE getOrderedState(int);
+    long getOrderedCount() const;
+    long getReadyCount();
+    ProcessInfo& getOrdered(int);
+    ProcessItem *const getOrderedExecution(int) const;
+    const PROCESS_STATE getOrderedState(int) const;
     void setOrderedState(int, PROCESS_STATE);
 
     long getUnServedCount();
-    ExecutorInfo& getUnServed();
+    ProcessInfo& getUnServed();
 
-    ExecutorItem* getByOutput(int);
+    ProcessItem* getByOutput(int);
     bool createDependencyMap();
 };
 

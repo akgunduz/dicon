@@ -24,9 +24,31 @@ Message::Message(ComponentObject host, MSG_TYPE type)
     getData()->setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *header) {
+bool Message::readComponentList(int desc, std::vector<ComponentObject> &componentList, Block* block) {
 
-    if (header->getType() != BLOCK_FILE_BINARY && header->getType() != BLOCK_FILE_INFO) {
+    if (block->getType() != BLOCK_COMPONENT_LIST) {
+        LOGS_E(getHost(), "readComponentList can not read other blocks");
+        return false;
+    }
+
+    std::vector<long> list;
+
+    if (!readNumberList(desc, list, block->getSize(0))) {
+        LOGS_E(getHost(), "readNumberList can not read number");
+        return false;
+    }
+
+    for (int i = 0; i < list.size(); i=i+2) {
+
+        componentList.emplace_back(ComponentObject((COMPONENT)block->getSize(1), list[i], list[i+1]));
+    }
+
+    return true;
+}
+
+bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *block) {
+
+    if (block->getType() != BLOCK_FILE_BINARY && block->getType() != BLOCK_FILE_INFO) {
         LOGS_E(getHost(), "readFile can not read other blocks");
         return false;
     }
@@ -43,20 +65,20 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
     }
 
 	char fileName[PATH_MAX];
-	if (!readString(desc, fileName, header->getSize(0))) {
+	if (!readString(desc, fileName, block->getSize(0))) {
 		LOGS_E(getHost(), "readFile can not read path data");
 		return false;
 	}
 
     content->set(jobDir, fileName, (int)id);
 
-    if (header->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
+    if (block->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
     }
 
     Md5 calcMD5;
 	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), content->getJobDir(),
-                                              fileName).c_str(), &calcMD5, header->getSize(1))) {
+                                              fileName).c_str(), &calcMD5, block->getSize(1))) {
 		LOGS_E(getHost(), "readFile can not read Binary data");
 		return false;
 	}
@@ -66,9 +88,9 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 	return true;
 }
 
-bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
+bool Message::readFileMD5(int desc, Md5 *content, Block* block) {
 
-    if (header->getType() != BLOCK_FILE_MD5) {
+    if (block->getType() != BLOCK_FILE_MD5) {
         LOGS_E(getHost(), "readFileMD5 can not read other blocks");
         return false;
     }
@@ -81,14 +103,14 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* header) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
+bool Message::readJobInfo(int desc, char *jobDir, Block *block) {
 
-    if (header->getType() != BLOCK_JOB_INFO) {
+    if (block->getType() != BLOCK_JOB_INFO) {
         LOGS_E(getHost(), "readJobInfo can not read other blocks");
         return false;
     }
 
-    if (!readString(desc, jobDir, header->getSize(0))) {
+    if (!readString(desc, jobDir, block->getSize(0))) {
         LOGS_E(getHost(), "readJobInfo can not read job dir");
         return false;
     }
@@ -96,9 +118,9 @@ bool Message::readJobInfo(int desc, char *jobDir, Block *header) {
     return true;
 }
 
-bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Block *header) {
+bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Block *block) {
 
-    if (header->getType() != BLOCK_EXECUTION_INFO) {
+    if (block->getType() != BLOCK_EXECUTION_INFO) {
         LOGS_E(getHost(), "readExecutionInfo can not read other blocks");
         return false;
     }
@@ -108,7 +130,7 @@ bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Bl
         return false;
     }
 
-    if (!readString(desc, execution, header->getSize(0))) {
+    if (!readString(desc, execution, block->getSize(0))) {
         LOGS_E(getHost(), "readExecutionInfo can not read execution info");
         return false;
     }
@@ -116,9 +138,9 @@ bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Bl
     return true;
 }
 
-bool Message::readMessageBlock(int in, Block *header) {
+bool Message::readMessageBlock(int in, Block *block) {
 
-    switch(header->getType()) {
+    switch(block->getType()) {
 
         case BLOCK_FILE_INFO:
         case BLOCK_FILE_BINARY: {
@@ -126,12 +148,12 @@ bool Message::readMessageBlock(int in, Block *header) {
             auto *fileItem = new FileItem(getHost());
             long state;
 
-            if (!readFile(in, fileItem, getData()->getJobDir(), &state, header)) {
+            if (!readFile(in, fileItem, getData()->getJobDir(), &state, block)) {
                 return false;
             }
 
             LOGS_T(getHost(), "New %s with path %s/%s received",
-                  header->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
+                   block->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
                   fileItem->getJobDir(), fileItem->getFileName());
 
             getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT));
@@ -141,7 +163,7 @@ bool Message::readMessageBlock(int in, Block *header) {
         case BLOCK_FILE_MD5: {
 
             Md5 md5;
-            if (!readFileMD5(in, &md5, header)) {
+            if (!readFileMD5(in, &md5, block)) {
                 return false;
             }
 
@@ -153,7 +175,7 @@ bool Message::readMessageBlock(int in, Block *header) {
 
         case BLOCK_JOB_INFO:
 
-            if (!readJobInfo(in, getData()->getJobDir(), header)) {
+            if (!readJobInfo(in, getData()->getJobDir(), block)) {
                 return false;
             }
 
@@ -164,7 +186,7 @@ bool Message::readMessageBlock(int in, Block *header) {
         case BLOCK_EXECUTION_INFO:
 
             long executionID;
-            if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), header)) {
+            if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), block)) {
                 return false;
             }
 
@@ -174,6 +196,17 @@ bool Message::readMessageBlock(int in, Block *header) {
 
             break;
 
+        case BLOCK_COMPONENT_LIST:{
+
+            std::vector<ComponentObject> &list = getData()->getComponentList();
+
+            if (!readComponentList(in, list, block)) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "New component list is received");
+            break;
+        }
 
         default:
             return false;
@@ -183,6 +216,33 @@ bool Message::readMessageBlock(int in, Block *header) {
 }
 
 bool Message::readFinalize() {
+
+    return true;
+}
+
+bool Message::writeComponentList(int desc, std::vector<ComponentObject>& componentList) {
+
+    std::vector<long> list;
+
+    for (auto component : componentList) {
+        list.emplace_back(component.getID());
+        list.emplace_back(component.getAddress());
+    }
+
+    Block blockHeader(2, BLOCK_COMPONENT_LIST);
+
+    blockHeader.setSize(0, (int) list.size());
+    blockHeader.setSize(1, (int) componentList[0].getType());
+
+    if (!writeBlockHeader(desc, &blockHeader)) {
+        LOGS_E(getHost(), "writeComponentList can not write block header");
+        return false;
+    }
+
+    if (!writeNumberList(desc, list)) {
+        LOGS_E(getHost(), "writeNumberList can not write component list");
+        return false;
+    }
 
     return true;
 }
@@ -349,6 +409,16 @@ bool Message::writeMessageStream(int out) {
             LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
             break;
 
+        case STREAM_COMPONENT: {
+
+            if (!writeComponentList(out, getData()->getComponentList())) {
+                return false;
+            }
+
+            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
+            break;
+        }
+
         case STREAM_NONE:
         default :
             break;
@@ -366,12 +436,12 @@ MessageHeader *Message::getHeader() {
     return &header;
 }
 
-bool Message::setHeader(const uint8_t *buffer) {
-    return getHeader()->set(buffer);
+bool Message::deSerializeHeader(const uint8_t *buffer) {
+    return getHeader()->deSerialize(buffer);
 }
 
-bool Message::extractHeader(uint8_t *buffer) {
-    return getHeader()->extract(buffer);
+bool Message::serializeHeader(uint8_t *buffer) {
+    return getHeader()->serialize(buffer);
 }
 
 int Message::getHeaderSize() {

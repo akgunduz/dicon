@@ -41,50 +41,54 @@ bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
 
     getHost().setID((int)msg->getHeader()->getVariant(0));
 
-    ((CollectorObject&)getHost()).getAttached();
-
     LOG_U(UI_UPDATE_COLL_ID, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
-    return true;
+    return send2DistributorIDMsg(owner);
 }
 
 bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
-    NodeObject nodeObj((int)msg->getHeader()->getVariant(0), msg->getHeader()->getVariant(1));
+    std::vector<ComponentObject>& nodes = msg->getData()->getComponentList();
 
-    if (nodeObj.getAddress() == 0) {
+    LOGS_I(getHost(), "%d available node information is came from Distributor", nodes.size());
 
-        LOGS_I(getHost(), "Node message is received but 'NO' Available Node is exists");
+    if (nodes.size() == 0) {
+
         delete msg;
         return false;
     }
 
-    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
-            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
-        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
-        delete msg;
-        return false;
-    }
+    ProcessInfo &executor = job->getUnServed();
 
-    Job* job = getJobs()->get(msg->getData()->getJobDir());
 
-    ExecutorInfo &executor = job->getUnServed();
 
-    if (executor.get() == nullptr) {
-        LOGS_I(getHost(), "Node[%d] is assigned by distributor, but NO available unServed job right now. So WHY this Node message Come?????");
-        delete msg;
-        return false;
-    }
 
-    executor.setAssignedNode(nodeObj.getID());
-
-    LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", nodeObj.getID(), executor.getID());
-
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
-
-    return send2NodeJobMsg(nodeObj, msg->getData()->getJobDir(), executor.getID(),
-                           executor.get()->getParsedExec(), executor.get()->getFileList());
+//    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
+//            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
+//        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
+//        delete msg;
+//        return false;
+//    }
+//
+//    Job* job = getJobs()->get(msg->getData()->getJobDir());
+//
+//    ProcessInfo &executor = job->getUnServed();
+//
+//    if (executor.get() == nullptr) {
+//        LOGS_I(getHost(), "Node[%d] is assigned by distributor, but NO available unServed job right now. So WHY this Node message Come?????");
+//        delete msg;
+//        return false;
+//    }
+//
+//    executor.setAssignedNode(nodeObj.getID());
+//
+//    LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", nodeObj.getID(), executor.getID());
+//
+//    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
+//
+//    return send2NodeJobMsg(nodeObj, msg->getData()->getJobDir(), executor.getID(),
+//                           executor.get()->getParsedExec(), executor.get()->getFileList());
 }
 
 bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
@@ -108,15 +112,13 @@ bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
 
-    Job* job = getJobs()->get(msg->getData()->getJobDir());
+    getJob()->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
 
-    job->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
-
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
+    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, getJob());
 
     TypeMD5List md5List;
 
-    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), job->getProvisionCount());
+    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), getJob()->getReadyCount());
 }
 
 bool Collector::send2DistributorAliveMsg(ComponentObject target) {
@@ -126,17 +128,18 @@ bool Collector::send2DistributorAliveMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target,
-                                        const char* jobDir, long collUnservedCount,
-                                        TypeMD5List *md5List) {
+bool Collector::send2DistributorIDMsg(ComponentObject target) {
+
+    auto *msg = new Message(getHost(), MSGTYPE_ID);
+
+    return send(target, msg);
+}
+
+bool Collector::send2DistributorNodeMsg(ComponentObject target, long collIPC) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
-    msg->getData()->setStreamFlag(STREAM_MD5);
-    msg->getData()->setJobDir(jobDir);
-    msg->getData()->addMD5List(md5List);
-
-    msg->getHeader()->setVariant(0, collUnservedCount);
+    msg->getHeader()->setVariant(0, collIPC);
 
     return send(target, msg);
 }
@@ -179,11 +182,6 @@ bool Collector::send2NodeReadyMsg(ComponentObject target, const char* jobDir, lo
     return send(target, msg);
 }
 
-Jobs *Collector::getJobs() {
-
-    return &jobs;
-}
-
 ComponentObject Collector::getDistributor() {
 
     return distributor;
@@ -194,42 +192,27 @@ void Collector::setDistributor(const DistributorObject& _distributor) {
     this->distributor = _distributor;
 }
 
-bool Collector::processJob(int index) {
+bool Collector::processJob() {
 
     //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
-    Job* job = getJobs()->get(index);
-
     TypeMD5List md5List;
-    return send2DistributorNodeMsg(getDistributor(), job->getJobDir(), job->getProvisionCount(), &md5List);
-}
-
-bool Collector::processJobs() {
-
-    for (size_t i = 0; i < getJobs()->getCount(); i++) {
-
-        processJob(i);
-    }
-
-    return true;
+    return send2DistributorNodeMsg(getDistributor(), getJob()->getReadyCount());
 }
 
 bool Collector::loadJob(const char* path) {
 
-    getJobs()->addPath(getHost(), true);
+    std::vector<std::string> dirList = Util::getDirList(getHost().getRootPath(), JOB_DIR_PREFIX);
 
-    if (getJobs()->isEmpty()) {
-        return false;
+    job = new Job(getHost(), dirList[0].c_str());
+
+    if (job->getFileCount() && job->getExecutorCount()) {
+        LOG_U(UI_UPDATE_COLL_FILE_LIST, job);
     }
+}
 
-    if (getJobs()->get(0)->getFileCount()) {
-        LOG_U(UI_UPDATE_COLL_FILE_LIST, getJobs()->get(0));
-    }
+Job *Collector::getJob() {
 
-    if (getJobs()->get(0)->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL_PROCESS_LIST, getJobs()->get(0));
-    }
-
-    return true;
+    return job;
 }

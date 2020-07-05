@@ -10,9 +10,9 @@ int MessageData::getStreamFlag() {
     return streamFlag;
 }
 
-void MessageData::setStreamFlag(int streamFlag) {
+void MessageData::setStreamFlag(int _streamFlag) {
 
-    this->streamFlag = streamFlag;
+    this->streamFlag = _streamFlag;
 }
 
 Md5* MessageData::getMD5(int index) {
@@ -85,10 +85,10 @@ void MessageData::setExecutorID(long id) {
     this->executorID = id;
 }
 
-void MessageData::setExecutor(long id, const char *executor) {
+void MessageData::setExecutor(long id, const char *_executor) {
 
     this->executorID = id;
-    strcpy(this->executor, executor);
+    strcpy(this->executor, _executor);
 }
 
 char *MessageData::getJobDir() {
@@ -96,7 +96,17 @@ char *MessageData::getJobDir() {
     return jobDir;
 }
 
-void MessageData::setJobDir(const char *jobDir) {
+void MessageData::setJobDir(const char *_jobDir) {
 
-    strcpy(this->jobDir, jobDir);
+    strcpy(this->jobDir, _jobDir);
+}
+
+std::vector<ComponentObject> &MessageData::getComponentList() {
+
+    return componentList;
+}
+
+void MessageData::setComponentList(std::vector<ComponentObject> &list) {
+
+    componentList = list;
 }

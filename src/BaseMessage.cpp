@@ -161,7 +161,7 @@ bool BaseMessage::readHeader(int in) {
 		return false;
 	}
 
-	return setHeader(tmpBuf);
+	return deSerializeHeader(tmpBuf);
 }
 
 bool BaseMessage::readBlockHeader(int in, Block *header) {
@@ -220,14 +220,30 @@ bool BaseMessage::readString(int in, char* object, int size) {
 }
 
 bool BaseMessage::readNumber(int in, long *number) {
-	//size must be 8;
-	if (!readBlock(in, tmpBuf, 8)) {
+	//size must be 64;
+	if (!readBlock(in, tmpBuf, 64)) {
 		LOGS_E(getHost(), "Can not read number from stream");
 		return false;
 	}
 
-    number[0] = *((int *) tmpBuf);
+    number[0] = ntohll(*((long *) tmpBuf));
 	return true;
+}
+
+bool BaseMessage::readNumberList(int in, std::vector<long> &list, int size) {
+    //size must be 64;
+
+    for (int i = 0; i < size; i++) {
+
+        if (!readBlock(in, tmpBuf, 64)) {
+            LOGS_E(getHost(), "Can not read number from stream");
+            return false;
+        }
+
+        list.emplace_back(ntohll(*((long *) tmpBuf)));
+    }
+
+    return true;
 }
 
 
@@ -361,7 +377,7 @@ bool BaseMessage::writeSignature(int out) {
 
 bool BaseMessage::writeHeader(int out) {
 
-    if (!extractHeader(tmpBuf)) {
+    if (!serializeHeader(tmpBuf)) {
         LOGS_E(getHost(), "Can not prepare header");
         return false;
     }
@@ -403,11 +419,30 @@ bool BaseMessage::writeString(int out, const char* str) {
 
 bool BaseMessage::writeNumber(int out, long number) {
 
-	if (!writeBlock(out, (uint8_t *)&number, 8)) {
+    uint8_t buffer[64];
+    *((long *) buffer) = htonll(number);
+
+	if (!writeBlock(out, buffer, 64)) {
 		LOGS_E(getHost(), "Can not write char array to stream");
 		return false;
 	}
 	return true;
+}
+
+bool BaseMessage::writeNumberList(int out, std::vector<long>& list) {
+
+    uint8_t buffer[64];
+
+    for (auto number : list) {
+
+        *((long *) buffer) = htonll(number);
+        if (!writeBlock(out, buffer, 64)) {
+            LOGS_E(getHost(), "Can not write char array to stream");
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool BaseMessage::writeMD5(int desc, Md5* md5) {

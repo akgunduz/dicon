@@ -14,21 +14,17 @@ private:
 
     COLLSTATES state;
 
-    NodeObject attachedNode;
-
 public:
 
-    CollectorObject();
-    CollectorObject(const char *);
+    CollectorObject(COLLSTATES, int, long);
     CollectorObject(int, long);
-    CollectorObject(COLLSTATES, NodeObject, int, long);
+    CollectorObject(const char *);
+    CollectorObject();
+
     ~CollectorObject();
 
     COLLSTATES getState();
     void setState(COLLSTATES);
-
-    NodeObject getAttached();
-    void setAttached(NodeObject);
 };
 
 

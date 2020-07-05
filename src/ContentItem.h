@@ -25,7 +25,7 @@ public:
 
 	ContentItem() {}
 
-	virtual CONTENT_TYPES getType() = 0;
+	virtual CONTENT_TYPES getType() const = 0;
     virtual bool isValid() = 0;
 	virtual ~ContentItem(){}
 };

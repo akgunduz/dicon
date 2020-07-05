@@ -6,6 +6,7 @@
 #include "NodeState.h"
 
 const char* sNodeStates[] = {
+        "START",
         "IDLE",
         "PREBUSY",
         "BUSY",

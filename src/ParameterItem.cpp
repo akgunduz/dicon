@@ -16,7 +16,7 @@ ParameterItem::ParameterItem(const char *param)
 	strcpy(sPtr, param);
 };
 
-CONTENT_TYPES ParameterItem::getType() {
+CONTENT_TYPES ParameterItem::getType() const {
 	return CONTENT_PARAM;
 }
 

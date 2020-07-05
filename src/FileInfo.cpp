@@ -4,17 +4,17 @@
 
 #include "FileInfo.h"
 
-FileItem* FileInfo::get() {
+FileItem* FileInfo::get() const {
 
     return file;
 }
 
-void FileInfo::setOutput(bool is_output) {
+void FileInfo::setOutput(bool _is_output) {
 
-    this->is_output = is_output;
+    this->is_output = _is_output;
 }
 
-bool FileInfo::isOutput() {
+bool FileInfo::isOutput() const {
 
     return is_output;
 }

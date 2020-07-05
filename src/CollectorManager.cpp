@@ -8,111 +8,86 @@
 #include "ComponentManager.h"
 #include "CollectorObject.h"
 
+CollectorManager::CollectorManager() = default;
 
-CollectorManager::CollectorManager() {
+CollectorManager::~CollectorManager() = default;
 
-}
+COLLSTATES CollectorManager::getState(int id) {
 
-size_t CollectorManager::getWaitingCount() {
+    COLLSTATES state = COLLSTATE_MAX;
 
-    return waitingList.size();
-}
+    collMutex.lock();
 
-TypeWaitingCollector CollectorManager::getWaiting() {
-
-    mutex.lock();
-
-    if (waitingList.empty()) {
-
-        mutex.unlock();
-
-        return TypeWaitingCollector(0, "");
+    auto *coll = (CollectorObject*)get(id);
+    if (coll) {
+        state = coll->getState();
     }
 
-    TypeWaitingCollector collector = waitingList.front();
-    waitingList.pop_front();
+    collMutex.unlock();
 
-    mutex.unlock();
-
-    return collector;
+    return state;
 }
 
-bool CollectorManager::addWaiting(long address, std::string jobDir) {
+void CollectorManager::setState(int id, COLLSTATES state) {
 
-    mutex.lock();
+    collMutex.lock();
 
-    waitingList.emplace_back(TypeWaitingCollector(address, jobDir));
+    auto *coll = (CollectorObject*)get(id);
+    if (coll) {
+        coll->setState(state);
+    }
 
-    mutex.unlock();
+    collMutex.unlock();
+}
+
+ComponentObject *CollectorManager::createObject(int id, long address) {
+
+    return new CollectorObject(id, address);
+}
+
+bool CollectorManager::addRequest(int collID, int reqNodeCount) {
+
+    collMutex.lock();
+
+    collReqList.emplace_back(CollectorRequest(collID, reqNodeCount));
+
+    collMutex.unlock();
 
     return true;
 }
 
-void CollectorManager::clearWaiting() {
+CollectorRequest* CollectorManager::getRequest() {
 
-    mutex.lock();
+    CollectorRequest* request = nullptr;
 
-    waitingList.clear();
+    collMutex.lock();
 
-    mutex.unlock();
-}
+    if (!collReqList.empty()) {
 
-CollectorManager::~CollectorManager() {
-
-    clearWaiting();
-}
-
-void CollectorManager::setObject(int id, long address) {
-
-    components[address] = new CollectorObject(id, address);
-}
-
-//ComponentObject *CollectorManager::getWaiting() {
-//
-//    for (auto & component : components) {
-//
-//        auto *collector = (CollectorObject*) component.second;
-//
-//        if (collector->getState() == COLLSTATE_WAITING) {
-//            return collector;
-//        }
-//    }
-//
-//    return nullptr;
-//}
-
-bool CollectorManager::attachNode(long address, const NodeObject &node) {
-
-    auto search = components.find(address);
-    if (search == components.end()) {
-        return false;
+        request = &collReqList.front();
     }
 
-    auto *collector = (CollectorObject*) search->second;
+    collMutex.unlock();
 
-    mutex.lock();
-
-    collector->setAttached(node);
-
-    mutex.unlock();
-
-    return true;
+    return request;
 }
 
-bool CollectorManager::detachNode(long address) {
+void CollectorManager::updateRequest(int reqCount) {
 
-    auto search = components.find(address);
-    if (search == components.end()) {
-        return false;
-    }
+    collMutex.lock();
 
-    auto *collector = (CollectorObject*) search->second;
+    collReqList.front().reqCount = reqCount;
 
-    mutex.lock();
-
-    collector->setAttached(ComponentObject());
-
-    mutex.unlock();
-
-    return true;
+    collMutex.unlock();
 }
+
+void CollectorManager::removeRequest() {
+
+    collMutex.lock();
+
+    collReqList.pop_front();
+
+    collMutex.unlock();
+}
+
+

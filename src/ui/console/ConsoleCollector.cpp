@@ -78,7 +78,7 @@ void ConsoleApp::collUpdateProcessListItem(ConsoleEvent &event) {
                 LOG_S("Console UI ------> Collector Process[%d] is started", j);
                 break;
 
-            case PROCESS_STATE_NOTSTARTED:
+            case PROCESS_STATE_DEPENDENT:
                 LOG_S("Console UI ------> Collector Process[%d] is not started", j);
                 break;
 

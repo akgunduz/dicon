@@ -28,9 +28,9 @@ class FileInfo {
 public:
 
     FileInfo(FileItem *, bool);
-    FileItem* get();
+    FileItem* get() const;
 
-    bool isOutput();
+    bool isOutput() const;
     void setOutput(bool);
 
     static TypeFileInfoList getFileList(TypeFileInfoList*, bool);

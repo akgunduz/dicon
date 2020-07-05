@@ -17,7 +17,7 @@ enum EXEC_OPTIONS {
 	EXEC_MAX
 };
 
-class ExecutorItem : public ContentItem {
+class ProcessItem : public ContentItem {
 
 	char exec[PATH_MAX];
 	char parsedExec[PATH_MAX];
@@ -27,16 +27,16 @@ class ExecutorItem : public ContentItem {
 	bool parseCommand(void*, int, int);
 
 public:
-	ExecutorItem();
-	ExecutorItem(const char *exec);
-	~ExecutorItem(){};
+	ProcessItem();
+	ProcessItem(const char *exec);
+	~ProcessItem(){};
     const char* getExec();
     bool parse(void *);
     const char* getParsedExec();
 
 	TypeFileInfoList* getFileList();
 
-	virtual CONTENT_TYPES getType();
+	virtual CONTENT_TYPES getType() const;
 
     virtual bool isValid();
 };

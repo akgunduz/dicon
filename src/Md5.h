@@ -31,7 +31,7 @@ public:
         }
     }
 
-    void set(Md5 *ref, const char *path = nullptr) {
+    void set(const Md5 *ref, const char *path = nullptr) {
 
         if (ref != nullptr) {
             memcpy(data, ref->data, MD5_DIGEST_LENGTH);
