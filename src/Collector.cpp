@@ -55,7 +55,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     if (nodeObj.getAddress() == 0) {
 
-        LOGS_I(getHost(), "No Available Node");
+        LOGS_I(getHost(), "Node message is received but 'NO' Available Node is exists");
         delete msg;
         return false;
     }
@@ -72,14 +72,14 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
     ExecutorInfo &executor = job->getUnServed();
 
     if (executor.get() == nullptr) {
-        LOGS_I(getHost(), "No available unServed job right now. So WHY this Node message Come?????");
+        LOGS_I(getHost(), "Node[%d] is assigned by distributor, but NO available unServed job right now. So WHY this Node message Come?????");
         delete msg;
         return false;
     }
 
     executor.setAssignedNode(nodeObj.getID());
 
-    LOGS_I(getHost(), "Process[%d] is triggered at Node[%d]", executor.getID(), nodeObj.getID());
+    LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", nodeObj.getID(), executor.getID());
 
     LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
 
