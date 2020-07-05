@@ -4,102 +4,107 @@
 
 #include "Job.h"
 
-long Job::getOrderedCount() const {
+//ProcessItem *const Job::getOrderedExecution(int index) const {
+//
+//    return orderedList[index].get();
+//}
+//
+//const PROCESS_STATE Job::getOrderedState(int index) const {
+//
+//    return orderedList[index].getState();
+//}
 
-    return orderedList.size();
+//void Job::setOrderedState(int index, PROCESS_STATE state) {
+//
+//    orderedList[index].setState(state);
+//}
+
+//ProcessInfo& Job::getUnServed() {
+//
+//    for (int i = 0; i < getOrderedCount(); i++) {
+//
+//        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
+//            getOrderedState(i) == PROCESS_STATE_ENDED) {
+//            continue;
+//        }
+//
+//        if (!getOrderedExecution(i)->isValid()) {
+//            continue;
+//        }
+//
+//        setOrderedState(i, PROCESS_STATE_STARTED);
+//
+//        return getOrdered(i);
+//    }
+//
+//    return ProcessInfo::invalid;
+//}
+
+//long Job::getUnServedCount() {
+//
+//    int count = 0;
+//
+//    for (int i = 0; i < getOrderedCount(); i++) {
+//
+//        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
+//            getOrderedState(i) == PROCESS_STATE_ENDED) {
+//            continue;
+//        }
+//
+//        if (!getOrderedExecution(i)->isValid()) {
+//            continue;
+//        }
+//
+//        count++;
+//    }
+//
+//    return count;
+//}
+
+ProcessInfo& Job::getProcess(int index) {
+
+    return processList[index];
 }
 
-ProcessInfo& Job::getOrdered(int index) {
+int Job::getProcessCount() const {
 
-    return orderedList[index];
+    return processList.size();
 }
 
-ProcessItem *const Job::getOrderedExecution(int index) const {
+int Job::getProcessCount(PROCESS_STATE state) {
 
-    return orderedList[index].get();
-}
+    long count = 0;
 
-const PROCESS_STATE Job::getOrderedState(int index) const {
+    mutex.lock();
 
-    return orderedList[index].getState();
-}
-
-void Job::setOrderedState(int index, PROCESS_STATE state) {
-
-    orderedList[index].setState(state);
-}
-
-ProcessInfo& Job::getUnServed() {
-
-    for (int i = 0; i < getOrderedCount(); i++) {
-
-        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-            getOrderedState(i) == PROCESS_STATE_ENDED) {
-            continue;
-        }
-
-        if (!getOrderedExecution(i)->isValid()) {
-            continue;
-        }
-
-        setOrderedState(i, PROCESS_STATE_STARTED);
-
-        return getOrdered(i);
-    }
-
-    return ProcessInfo::invalid;
-}
-
-long Job::getUnServedCount() {
-
-    int count = 0;
-
-    for (int i = 0; i < getOrderedCount(); i++) {
-
-        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-            getOrderedState(i) == PROCESS_STATE_ENDED) {
-            continue;
-        }
-
-        if (!getOrderedExecution(i)->isValid()) {
-            continue;
-        }
-
-        count++;
-    }
-
-    return count;
-}
-
-
-
-long Job::getReadyCount() {
-
-    int count = 0;
-
-    for (int i = 0; i < getOrderedCount(); i++) {
-
-        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-            getOrderedState(i) == PROCESS_STATE_ENDED) {
-            continue;
-        }
-
-        if (!getOrderedExecution(i)->isValid()) {
-            continue;
-        }
-
-        if (getOrderedState(i) == PROCESS_STATE_DEPENDENT) {
-
-            setOrderedState(i, PROCESS_STATE_READY);
-        }
-
-        if (getOrderedState(i) == PROCESS_STATE_READY) {
-
+    for (auto process : processList) {
+        if (process.getState() == state) {
             count++;
         }
     }
 
+    mutex.unlock();
+
     return count;
+}
+
+bool Job::updateDependency() {
+
+    bool modified = false;
+
+    mutex.lock();
+
+    for (auto process : processList) {
+        if (process.getState() == PROCESS_STATE_DEPENDENT
+                && process.get()->isValid()) {
+            process.setState(PROCESS_STATE_READY);
+            modified = true;
+        }
+    }
+
+    mutex.unlock();
+
+    return modified;
 }
 
 ProcessItem *Job::getByOutput(int index) {
@@ -184,13 +189,13 @@ bool Job::createDependencyMap() {
         }
     }
 
-    orderedList.clear();
+    processList.clear();
 
     for (int i : final) {
 
         auto *content = getByOutput(i);
         if (content) {
-            orderedList.emplace_back(ProcessInfo(orderedList.size() + 1, content));
+            processList.emplace_back(ProcessInfo(processList.size() + 1, content));
         }
     }
 

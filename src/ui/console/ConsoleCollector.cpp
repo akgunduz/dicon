@@ -52,12 +52,12 @@ void ConsoleApp::collUpdateProcessList(ConsoleEvent &event) {
 
     auto *job = (Job *)data->getPointer(0);
 
-    for (int j = 0; j < job->getOrderedCount(); j++) {
-
-        LOG_S("Console UI ------> Collector Process[%d] : %s is going to triggered",
-                j, job->getOrderedExecution(j)->getExec());
-
-    }
+//    for (int j = 0; j < job->getOrderedCount(); j++) {
+//
+//        LOG_S("Console UI ------> Collector Process[%d] : %s is going to triggered",
+//                j, job->getOrderedExecution(j)->getExec());
+//
+//    }
 }
 
 void ConsoleApp::collUpdateProcessListItem(ConsoleEvent &event) {
@@ -66,24 +66,24 @@ void ConsoleApp::collUpdateProcessListItem(ConsoleEvent &event) {
 
     auto *job = (Job *)data->getPointer(0);
 
-    for (int j = 0; j < job->getOrderedCount(); j++) {
-
-        switch(job->getOrderedState(j)) {
-
-            case PROCESS_STATE_ENDED:
-                LOG_S("Console UI ------> Collector Process[%d] is ended", j);
-                break;
-
-            case PROCESS_STATE_STARTED:
-                LOG_S("Console UI ------> Collector Process[%d] is started", j);
-                break;
-
-            case PROCESS_STATE_DEPENDENT:
-                LOG_S("Console UI ------> Collector Process[%d] is not started", j);
-                break;
-
-            default:
-                break;
-        }
-    }
+//    for (int j = 0; j < job->getOrderedCount(); j++) {
+//
+//        switch(job->getOrderedState(j)) {
+//
+//            case PROCESS_STATE_ENDED:
+//                LOG_S("Console UI ------> Collector Process[%d] is ended", j);
+//                break;
+//
+//            case PROCESS_STATE_STARTED:
+//                LOG_S("Console UI ------> Collector Process[%d] is started", j);
+//                break;
+//
+//            case PROCESS_STATE_DEPENDENT:
+//                LOG_S("Console UI ------> Collector Process[%d] is not started", j);
+//                break;
+//
+//            default:
+//                break;
+//        }
+//    }
 }

@@ -51,7 +51,7 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
 
     std::vector<ComponentObject>& nodes = msg->getData()->getComponentList();
 
-    LOGS_I(getHost(), "%d available node information is came from Distributor", nodes.size());
+    LOGS_I(getHost(), "%d assigned node information is came from Distributor", nodes.size());
 
     if (nodes.size() == 0) {
 
@@ -59,7 +59,20 @@ bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
         return false;
     }
 
-    ProcessInfo &executor = job->getUnServed();
+    job->updateDependency();
+
+    if (nodes.size() > job->getProcessCount(PROCESS_STATE_READY)) {
+
+        LOGS_I(getHost(), "%d assigned node is bigger than the request, WHY!!!", nodes.size());
+        assert(true);
+        delete msg;
+        return false;
+    }
+
+    std::vector<ProcessInfo> readyProcesses;
+
+
+  //  ProcessInfo &executor = job->getUnServed();
 
 
 
@@ -102,23 +115,23 @@ bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
 bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
-
-    std::vector<long> fileListIDs;
-
-    for (int i = 0; i < msg->getData()->getFileCount(); i++) {
-
-        fileListIDs.push_back(msg->getData()->getFile(i)->getID());
-    }
-
-    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
-
-    getJob()->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
-
-    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, getJob());
-
-    TypeMD5List md5List;
-
-    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), getJob()->getReadyCount());
+//
+//    std::vector<long> fileListIDs;
+//
+//    for (int i = 0; i < msg->getData()->getFileCount(); i++) {
+//
+//        fileListIDs.push_back(msg->getData()->getFile(i)->getID());
+//    }
+//
+//    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
+//
+//    getJob()->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
+//
+//    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, getJob());
+//
+//    TypeMD5List md5List;
+//
+//    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), getJob()->getReadyCount());
 }
 
 bool Collector::send2DistributorAliveMsg(ComponentObject target) {
@@ -135,11 +148,11 @@ bool Collector::send2DistributorIDMsg(ComponentObject target) {
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, long collIPC) {
+bool Collector::send2DistributorNodeMsg(ComponentObject target, long readyProcessCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
-    msg->getHeader()->setVariant(0, collIPC);
+    msg->getHeader()->setVariant(0, readyProcessCount);
 
     return send(target, msg);
 }
@@ -197,8 +210,8 @@ bool Collector::processJob() {
     //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
-    TypeMD5List md5List;
-    return send2DistributorNodeMsg(getDistributor(), getJob()->getReadyCount());
+    getJob()->updateDependency();
+    return send2DistributorNodeMsg(getDistributor(), getJob()->getProcessCount(PROCESS_STATE_READY));
 }
 
 bool Collector::loadJob(const char* path) {
