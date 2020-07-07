@@ -71,7 +71,7 @@ void Distributor::collProcess() {
 
     while(runCollThread) {
 
-        usleep(500000);
+        std::this_thread::sleep_for(std::chrono::milliseconds (500));
 
         int nodeCount = nodeManager->getIdleCount();
         if (nodeCount == 0) {
@@ -115,7 +115,7 @@ NodeManager *Distributor::getNodes() const {
     return nodeManager;
 }
 
-bool Distributor::processCollectorAliveMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processCollectorAliveMsg(const ComponentObject& owner, Message *msg) {
 
     int collID = collectorManager->add(owner.getAddress());
     if (!collID) {
@@ -128,25 +128,25 @@ bool Distributor::processCollectorAliveMsg(ComponentObject owner, Message *msg) 
     return send2CollectorIDMsg(owner, collID);
 }
 
-bool Distributor::processCollectorIDMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processCollectorIDMsg(const ComponentObject& owner, Message *msg) {
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
-    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {owner.getID(), 0});
+    LOG_U(UI_UPDATE_DIST, std::vector<long> {owner.getID(), 0});
 
     LOGS_I(getHost(), "Collector[%d] is confirmed", owner.getID());
 
     return true;
 }
 
-bool Distributor::processCollectorNodeMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processCollectorNodeMsg(const ComponentObject& owner, Message *msg) {
 
     collectorManager->addRequest(owner.getID(), msg->getHeader()->getVariant(0));
 
     return true;
 }
 
-bool Distributor::processNodeAliveMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processNodeAliveMsg(const ComponentObject& owner, Message *msg) {
 
     int nodeID = nodeManager->add(owner.getAddress());
     if (!nodeID) {
@@ -159,18 +159,41 @@ bool Distributor::processNodeAliveMsg(ComponentObject owner, Message *msg) {
     return send2NodeIDMsg(owner, nodeID);
 }
 
-bool Distributor::processNodeIDMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processNodeIDMsg(const ComponentObject& owner, Message *msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
-    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {owner.getID(), nodeManager->getState(owner.getID())});
+    LOG_U(UI_UPDATE_DIST, std::vector<long> {owner.getID(), nodeManager->getState(owner.getID())});
 
     LOGS_I(getHost(), "Node[%d] is confirmed", owner.getID());
 
     return true;
 }
 
-bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
+bool Distributor::processNodeBusyMsg(const ComponentObject& owner, Message *msg) {
+
+    if (!nodeManager->isExist(owner.getID())) {
+        LOGS_I(getHost(),
+               "Could not found a node with id : %s",
+               InterfaceTypes::getAddressString(owner.getID()).c_str());
+        return false;
+    }
+
+    int collID = (int) msg->getHeader()->getVariant(0);
+
+    nodeManager->setState(owner.getID(), NODESTATE_BUSY);
+
+    nodeManager->setAssigned(owner.getID(), collID, collectorManager->get(collID)->getAddress());
+
+    LOG_U(UI_UPDATE_DIST, std::vector<long> {1});
+
+    LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", owner.getID(), collID);
+
+
+    return send2NodeProcessMsg(owner);
+}
+
+bool Distributor::processNodeReadyMsg(const ComponentObject& owner, Message *msg) {
 
     if (!nodeManager->isExist(owner.getID())) {
         LOGS_I(getHost(),
@@ -181,58 +204,19 @@ bool Distributor::processNodeReadyMsg(ComponentObject owner, Message *msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
-    long collAddress = msg->getHeader()->getVariant(0);
+    nodeManager->setAssigned(owner.getID(), 0, 0);
 
-    //TODO
-//    long collUnservedCount = msg->getHeader()->getVariant(1);
-
-//    LOGS_I(getHost(), "Node[%d] is Done with Collector[%d]\'s process",
-//           nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
-//
-//    collectorManager->detachNode(collAddress);
-//
-//    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {collectorManager->getID(collAddress), 0});
-//    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(owner.getAddress()), NODESTATE_IDLE});
-//
-//    return processWaitingList(collAddress, collUnservedCount, msg->getData()->getJobDir());
+    return true;
 }
 
-bool Distributor::processNodeBusyMsg(ComponentObject owner, Message *msg) {
-
-    if (!nodeManager->isExist(owner.getID())) {
-        LOGS_I(getHost(),
-               "Could not found a node with id : %s",
-               InterfaceTypes::getAddressString(owner.getID()).c_str());
-        return false;
-    }
-
-    nodeManager->setState(owner.getID(), NODESTATE_BUSY);
-
-    long collAddress = msg->getHeader()->getVariant(0);
-
-//    collectorManager->attachNode(collAddress, *nodeManager->get(owner.getAddress()));
-//
-//    LOG_U(UI_UPDATE_DIST_COLL_LISTITEM, std::vector<long> {collectorManager->getID(collAddress), nodeManager->getID(owner.getAddress())});
-//    LOG_U(UI_UPDATE_DIST_NODE_LISTITEM, std::vector<long> {nodeManager->getID(owner.getAddress()), NODESTATE_BUSY});
-//
-//    LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", nodeManager->getID(owner.getAddress()), collectorManager->getID(collAddress));
-//
-//    return send2NodeProcessMsg(owner, msg->getData()->getJobDir(),
-//                                   msg->getData()->getExecutorID(),
-//                                   msg->getData()->getExecutor(),
-//                                   msg->getData()->getFileList(),
-//                                   collectorManager->getID(collAddress),
-//                                   collAddress);
-}
-
-bool Distributor::send2CollectorWakeupMsg(ComponentObject target) {
+bool Distributor::send2CollectorWakeupMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
 
     return send(target, msg);
 }
 
-bool Distributor::send2CollectorIDMsg(ComponentObject target, int id) {
+bool Distributor::send2CollectorIDMsg(const ComponentObject& target, int id) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ID);
 
@@ -241,7 +225,7 @@ bool Distributor::send2CollectorIDMsg(ComponentObject target, int id) {
     return send(target, msg);
 }
 
-bool Distributor::send2CollectorNodeMsg(ComponentObject target, std::vector<ComponentObject>& nodes) {
+bool Distributor::send2CollectorNodeMsg(const ComponentObject& target, std::vector<ComponentObject>& nodes) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
@@ -251,14 +235,14 @@ bool Distributor::send2CollectorNodeMsg(ComponentObject target, std::vector<Comp
     return send(target, msg);
 }
 
-bool Distributor::send2NodeWakeupMsg(ComponentObject target) {
+bool Distributor::send2NodeWakeupMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
 
     return send(target, msg);
 }
 
-bool Distributor::send2NodeIDMsg(ComponentObject target, int id) {
+bool Distributor::send2NodeIDMsg(const ComponentObject& target, int id) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ID);
 
@@ -267,19 +251,9 @@ bool Distributor::send2NodeIDMsg(ComponentObject target, int id) {
     return send(target, msg);
 }
 
-bool Distributor::send2NodeProcessMsg(ComponentObject target,
-                                   const char* jobDir, long executionID, const char *executor,
-                                   TypeFileInfoList *fileList, int collID, long collAddress) {
+bool Distributor::send2NodeProcessMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
-
-//    msg->getData()->setStreamFlag(STREAM_INFO);
-//    msg->getData()->setJobDir(jobDir);
-//    msg->getData()->setExecutor(executionID, executor);
-//    msg->getData()->addFileList(fileList);
-
-//    msg->getHeader()->setVariant(0, collID);
-//    msg->getHeader()->setVariant(1, collAddress);
 
     return send(target, msg);
 }
@@ -297,11 +271,11 @@ bool Distributor::sendWakeupMessage(ComponentObject component) {
 
         std::vector<long> list = getAddressList(component);
 
-        for (int i = 0; i < list.size(); i++) {
+        for (auto &address : list) {
 
             auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
 
-            component.setAddress(list[i]);
+            component.setAddress(address);
             send(component, msg);
         }
     }

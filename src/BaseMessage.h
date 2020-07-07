@@ -56,7 +56,7 @@ public:
 
 	bool writeSignature(int);
 	bool writeHeader(int);
-	bool writeBlockHeader(int, struct Block*);
+	bool writeBlockHeader(int, Block*);
 	bool writeString(int, const char*);
 	bool writeNumber(int, long);
     bool writeNumberList(int, std::vector<long>&);

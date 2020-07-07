@@ -98,14 +98,14 @@ long Interface::getMulticastAddress() {
     return multicastAddress;
 }
 
-void Interface::setAddress(long address) {
+void Interface::setAddress(long _address) {
 
-    this->address = address;
+    this->address = _address;
 }
 
-void Interface::setMulticastAddress(long multicastAddress) {
+void Interface::setMulticastAddress(long _multicastAddress) {
 
-    this->multicastAddress = multicastAddress;
+    this->multicastAddress = _multicastAddress;
 }
 
 ComponentObject Interface::getHost() {
@@ -118,7 +118,7 @@ Device *Interface::getDevice() {
     return device;
 }
 
-void Interface::setDevice(Device *device) {
+void Interface::setDevice(Device *_device) {
 
-    this->device = device;
+    this->device = _device;
 }

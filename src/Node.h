@@ -16,41 +16,39 @@ private:
 
 	DistributorObject distributor;
 
-    std::vector<NodeProcessInfo> processList;
+    std::vector<ProcessInfo> processList;
 
-	Node(const char *rootPath);
+	explicit Node(const char *rootPath);
 
 	ComponentObject getDistributor();
-	void setDistributor(ComponentObject);
+	void setDistributor(const DistributorObject&);
 
-    bool processDistributorWakeupMsg(ComponentObject, Message *);
-    bool processDistributorIDMsg(ComponentObject, Message *);
-    bool processDistributorProcessMsg(ComponentObject, Message *);
+    bool processDistributorWakeupMsg(const ComponentObject&, Message *);
+    bool processDistributorIDMsg(const ComponentObject&, Message *);
+    bool processDistributorProcessMsg(const ComponentObject&, Message *);
 
-    bool processCollectorJobMsg(ComponentObject, Message *);
-    bool processCollectorBinaryMsg(ComponentObject, Message *);
-    bool processCollectorReadyMsg(ComponentObject, Message *);
+    bool processCollectorJobMsg(const ComponentObject&, Message *);
+    bool processCollectorBinaryMsg(const ComponentObject&, Message *);
+    bool processCollectorReadyMsg(const ComponentObject&, Message *);
 
-    bool send2DistributorReadyMsg(ComponentObject, const char*, long, long);
-    bool send2DistributorAliveMsg(ComponentObject);
-    bool send2DistributorIDMsg(ComponentObject);
-    bool send2DistributorBusyMsg(ComponentObject, const char*, long, const char *,
-								 TypeFileInfoList *, long);
+    bool send2DistributorReadyMsg(const ComponentObject&);
+    bool send2DistributorAliveMsg(const ComponentObject&);
+    bool send2DistributorIDMsg(const ComponentObject&);
+    bool send2DistributorBusyMsg(const ComponentObject&, int);
 
-    bool send2CollectorInfoMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
-	bool send2CollectorBinaryMsg(ComponentObject, const char*, long, const char*, TypeFileInfoList*);
+    bool send2CollectorInfoMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
+	bool send2CollectorBinaryMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
 
+    bool processJob(const ComponentObject& owner, Message *msg);
     void parseCommand(char *cmd, char **argv);
     bool processCommand(int processID, const char *);
 
 public:
 
-
-	~Node();
+	~Node() override;
     static Node* newInstance(const char*);
 
-    std::vector<NodeProcessInfo>* getProcessList();
-
+    std::vector<ProcessInfo>& getProcessList();
 };
 
 

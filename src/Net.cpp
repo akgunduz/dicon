@@ -45,10 +45,10 @@ bool Net::initTCP() {
 
     for (int j = tryCount; j > 0; j--) {
 
-        long address = AddressHelper::createAddress(getDevice()->getType(),
+        long new_address = AddressHelper::createAddress(getDevice()->getType(),
                                               getDevice()->getBase(), lastFreePort, getDevice()->getHelper());
 
-        struct sockaddr_in serverAddress = getInetAddressByAddress(address);
+        struct sockaddr_in serverAddress = getInetAddressByAddress(new_address);
 
         if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
@@ -68,9 +68,9 @@ bool Net::initTCP() {
             return false;
         }
 
-        setAddress(address);
+        setAddress(new_address);
 
-        LOGS_T(getHost(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
+        LOGS_T(getHost(), "Using address : %s", InterfaceTypes::getAddressString(new_address).c_str());
 
         return true;
     }

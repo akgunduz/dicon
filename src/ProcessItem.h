@@ -28,17 +28,28 @@ class ProcessItem : public ContentItem {
 
 public:
 	ProcessItem();
-	ProcessItem(const char *exec);
-	~ProcessItem(){};
-    const char* getExec();
+	ProcessItem(ProcessItem &);
+	explicit ProcessItem(const char *exec);
+	~ProcessItem() override = default;
+
+
     bool parse(void *);
-    const char* getParsedExec();
 
-	TypeFileInfoList* getFileList();
+    const char* getExec() const;
+    void setExec(const char*);
 
-	virtual CONTENT_TYPES getType() const;
+    const char* getParsedExec() const;
+    void setParsedExec(const char*);
 
-    virtual bool isValid();
+    const TypeFileInfoList& getFileList() const;
+    void addFileList(const TypeFileInfoList &);
+    void setFileList(TypeFileInfoList&);
+
+
+
+	CONTENT_TYPES getType() const override;
+
+    bool isValid() override;
 };
 
 

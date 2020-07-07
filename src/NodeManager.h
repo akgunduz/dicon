@@ -23,8 +23,13 @@ public:
     NODESTATES getState(int);
 	void setState(int, NODESTATES);
 
+	long getAddress(int);
     NodeObject getIdle();
 	int getIdleCount();
+
+    ComponentInfo getAssigned(int);
+	void setAssigned(int, ComponentInfo &);
+	void setAssigned(int, int, long);
 
     ComponentObject* createObject(int, long) final;
 };

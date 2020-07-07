@@ -70,27 +70,20 @@ public:
     bool distHandler(struct mg_connection *conn, const char * uri);
     bool distPollHandler(struct mg_connection *conn);
     bool distStateHandler(struct mg_connection *conn);
-    void distUpdateCollectorListItem(WebEvent &event);
-    void distUpdateNodeListItem(WebEvent &event);
+    void distUpdate(WebEvent &event);
+
 
     void collInit();
     bool collHandler(struct mg_connection *conn, const char * uri);
     bool collStateHandler(struct mg_connection *conn, long id);
     bool collLoadJobHandler(struct mg_connection *conn, long id);
     bool collProcessHandler(struct mg_connection *conn, long id);
-    void collUpdateID(WebEvent &event);
-    void collUpdateFileList(WebEvent &event);
-    void collUpdateFileListItem(WebEvent &event);
-    void collUpdateProcessList(WebEvent &event);
-    void collUpdateProcessListItem(WebEvent &event);
+    void collUpdate(WebEvent &event);
 
     void nodeInit();
     bool nodeHandler(struct mg_connection *conn, const char * uri);
     bool nodeStateHandler(struct mg_connection *conn, long id);
-    void nodeUpdateID(WebEvent& event);
-    void nodeUpdateState(WebEvent &event);
-    void nodeUpdateProcessList(WebEvent &event);
-    void nodeUpdateClear(WebEvent &event);
+    void nodeUpdate(WebEvent& event);
 
     int run() override;
 };

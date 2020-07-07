@@ -4,8 +4,6 @@
 //
 
 #include "Collector.h"
-#include "NodeObject.h"
-#include "CollectorObject.h"
 
 Collector *Collector::newInstance(const char* path) {
 
@@ -13,7 +11,7 @@ Collector *Collector::newInstance(const char* path) {
 }
 
 Collector::Collector(const char *rootPath) :
-        Component(rootPath), distributor(getRootPath()) {
+        Component(rootPath), job(nullptr), distributor(getRootPath()) {
 
     host = new CollectorObject(getRootPath());
 
@@ -26,85 +24,60 @@ Collector::Collector(const char *rootPath) :
     initInterfaces(COMP_COLLECTOR);
 }
 
-Collector::~Collector() {
+Collector::~Collector() = default;
 
-}
+bool Collector::processDistributorWakeupMsg(const ComponentObject& owner, Message *msg) {
 
-bool Collector::processDistributorWakeupMsg(ComponentObject owner, Message *msg) {
-
-    setDistributor(owner);
+    setDistributor((DistributorObject &) owner);
 
     return send2DistributorAliveMsg(owner);
 }
 
-bool Collector::processDistributorIDMsg(ComponentObject owner, Message *msg) {
+bool Collector::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
     getHost().setID((int)msg->getHeader()->getVariant(0));
 
-    LOG_U(UI_UPDATE_COLL_ID, std::vector<long>{getHost().getID()});
+    LOG_U(UI_UPDATE_COLL, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);
 }
 
-bool Collector::processDistributorNodeMsg(ComponentObject owner, Message *msg) {
+bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message *msg) {
 
     std::vector<ComponentObject>& nodes = msg->getData()->getComponentList();
 
     LOGS_I(getHost(), "%d assigned node information is came from Distributor", nodes.size());
 
-    if (nodes.size() == 0) {
+    if (nodes.empty()) {
 
         delete msg;
         return false;
     }
-
-    job->updateDependency();
 
     if (nodes.size() > job->getProcessCount(PROCESS_STATE_READY)) {
 
-        LOGS_I(getHost(), "%d assigned node is bigger than the request, WHY!!!", nodes.size());
-        assert(true);
+        LOGS_I(getHost(), "%d assigned node is bigger than the request, ASSERTING!!!", nodes.size());
+        static_assert(true, "");
         delete msg;
         return false;
     }
 
-    std::vector<ProcessInfo> readyProcesses;
+    for (auto &node : nodes) {
+        ProcessInfo &process = job->assignNode(node);
+        LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", node.getID(), process.getID());
+        send2NodeJobMsg(node, job->getJobDir(), process.getID(),
+                        process.get().getParsedExec(), process.get().getFileList());
+    }
 
+    job->updateRequested();
 
-  //  ProcessInfo &executor = job->getUnServed();
+    LOG_U(UI_UPDATE_COLL, job);
 
-
-
-
-//    if (strcmp(msg->getData()->getJobDir(), "") == 0 ||
-//            !Util::checkPath(getRootPath(), msg->getData()->getJobDir(), false)) {
-//        LOGS_I(getHost(), "No Job at path : \"%s\" is found!!!", msg->getData()->getJobDir());
-//        delete msg;
-//        return false;
-//    }
-//
-//    Job* job = getJobs()->get(msg->getData()->getJobDir());
-//
-//    ProcessInfo &executor = job->getUnServed();
-//
-//    if (executor.get() == nullptr) {
-//        LOGS_I(getHost(), "Node[%d] is assigned by distributor, but NO available unServed job right now. So WHY this Node message Come?????");
-//        delete msg;
-//        return false;
-//    }
-//
-//    executor.setAssignedNode(nodeObj.getID());
-//
-//    LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", nodeObj.getID(), executor.getID());
-//
-//    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, job);
-//
-//    return send2NodeJobMsg(nodeObj, msg->getData()->getJobDir(), executor.getID(),
-//                           executor.get()->getParsedExec(), executor.get()->getFileList());
+    return true;
 }
 
-bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
+bool Collector::processNodeInfoMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
@@ -112,43 +85,45 @@ bool Collector::processNodeInfoMsg(ComponentObject owner, Message *msg) {
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
 }
 
-bool Collector::processNodeBinaryMsg(ComponentObject owner, Message *msg) {
+bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
-//
-//    std::vector<long> fileListIDs;
-//
-//    for (int i = 0; i < msg->getData()->getFileCount(); i++) {
-//
-//        fileListIDs.push_back(msg->getData()->getFile(i)->getID());
-//    }
-//
-//    LOG_U(UI_UPDATE_COLL_FILE_LISTITEM, fileListIDs);
-//
-//    getJob()->setOrderedState(msg->getData()->getExecutorID(), PROCESS_STATE_ENDED);
-//
-//    LOG_U(UI_UPDATE_COLL_PROCESS_LISTITEM, getJob());
-//
-//    TypeMD5List md5List;
-//
-//    return send2NodeReadyMsg(owner, msg->getData()->getJobDir(), getJob()->getReadyCount());
+
+    job->endProcess(msg->getData()->getExecutorID());
+
+    job->updateDependency();
+
+    LOG_U(UI_UPDATE_COLL, job);
+
+    send2NodeReadyMsg(owner);
+
+    int readyCount = getJob()->getProcessCount(PROCESS_STATE_READY);
+
+    if (readyCount) {
+
+        return send2DistributorNodeMsg(getDistributor(), readyCount);
+
+    } else {
+
+        return send2DistributorReadyMsg(getDistributor());
+    }
 }
 
-bool Collector::send2DistributorAliveMsg(ComponentObject target) {
+bool Collector::send2DistributorAliveMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ALIVE);
 
     return send(target, msg);
 }
 
-bool Collector::send2DistributorIDMsg(ComponentObject target) {
+bool Collector::send2DistributorIDMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ID);
 
     return send(target, msg);
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentObject target, long readyProcessCount) {
+bool Collector::send2DistributorNodeMsg(const ComponentObject& target, long readyProcessCount) {
 
     auto *msg = new Message(getHost(), MSGTYPE_NODE);
 
@@ -157,45 +132,47 @@ bool Collector::send2DistributorNodeMsg(ComponentObject target, long readyProces
     return send(target, msg);
 }
 
-bool Collector::send2NodeJobMsg(ComponentObject target, const char* jobDir, long executionID,
-                                const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2DistributorReadyMsg(const ComponentObject& target) {
+
+    auto *msg = new Message(getHost(), MSGTYPE_READY);
+
+    return send(target, msg);
+}
+
+bool Collector::send2NodeJobMsg(const ComponentObject& target, const char* jobDir, int processID,
+                                const char* processLine, const TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_JOB);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executionID, executor);
+    msg->getData()->setExecutor(processID, processLine);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(ComponentObject target, const char* jobDir, long executionID,
-                                   const char* executor, TypeFileInfoList *fileList) {
+bool Collector::send2NodeBinaryMsg(const ComponentObject& target, const char* jobDir, int processID,
+                                   const char* processLine, const TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executionID, executor);
+    msg->getData()->setExecutor(processID, processLine);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeReadyMsg(ComponentObject target, const char* jobDir, long collUnservedCount) {
+bool Collector::send2NodeReadyMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_READY);
-
-    msg->getData()->setStreamFlag(STREAM_JOB);
-    msg->getData()->setJobDir(jobDir);
-
-    msg->getHeader()->setVariant(0, collUnservedCount);
 
     return send(target, msg);
 }
 
-ComponentObject Collector::getDistributor() {
+ComponentObject& Collector::getDistributor() {
 
     return distributor;
 }
@@ -210,8 +187,8 @@ bool Collector::processJob() {
     //TODO Whole executors will be replaced with only independent executors
     //TODO Also will add other jobs, after the prev. job is done.
 
-    getJob()->updateDependency();
-    return send2DistributorNodeMsg(getDistributor(), getJob()->getProcessCount(PROCESS_STATE_READY));
+    job->updateDependency();
+    return send2DistributorNodeMsg(getDistributor(), job->getProcessCount(PROCESS_STATE_READY));
 }
 
 bool Collector::loadJob(const char* path) {
@@ -221,8 +198,10 @@ bool Collector::loadJob(const char* path) {
     job = new Job(getHost(), dirList[0].c_str());
 
     if (job->getFileCount() && job->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL_FILE_LIST, job);
+        LOG_U(UI_UPDATE_COLL, job);
+        return true;
     }
+    return false;
 }
 
 Job *Collector::getJob() {

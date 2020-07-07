@@ -9,7 +9,13 @@
 
 ProcessItem::ProcessItem()
         : ProcessItem("") {
+};
 
+ProcessItem::ProcessItem(ProcessItem &copy) {
+
+    strcpy(exec, copy.getExec());
+    strcpy(parsedExec, copy.getParsedExec());
+    fileList = copy.fileList;
 };
 
 ProcessItem::ProcessItem(const char *line)
@@ -23,11 +29,11 @@ CONTENT_TYPES ProcessItem::getType() const {
 	return CONTENT_EXECUTOR;
 }
 
-const char* ProcessItem::getExec() {
+const char* ProcessItem::getExec() const {
 	return exec;
 }
 
-const char *ProcessItem::getParsedExec() {
+const char *ProcessItem::getParsedExec() const {
     return parsedExec;
 }
 
@@ -143,13 +149,13 @@ bool ProcessItem::parseCommand(void *job, int cmdType, int cmdIndex) {
 
 bool ProcessItem::isValid() {
 
-	for (int i = 0; i < fileList.size(); i++) {
+	for (auto & file : fileList) {
 
-	    if (fileList[i].isOutput()) {
+	    if (file.isOutput()) {
 	        continue;
 	    }
 
-	    if (!fileList[i].get()->isValid()) {
+	    if (!file.get()->isValid()) {
 	        return false;
 	    }
 	}
@@ -157,8 +163,29 @@ bool ProcessItem::isValid() {
     return true;
 }
 
-TypeFileInfoList* ProcessItem::getFileList() {
+const TypeFileInfoList& ProcessItem::getFileList() const {
 
-    return &fileList;
+    return fileList;
+}
+
+void ProcessItem::setExec(const char *_exec) {
+
+    strcpy(this->exec, _exec);
+}
+
+void ProcessItem::setParsedExec(const char *_parsedExec) {
+
+    strcpy(this->parsedExec, _parsedExec);
+}
+
+void ProcessItem::addFileList(const TypeFileInfoList &_fileList) {
+
+    fileList.insert(fileList.end(), _fileList.begin(), _fileList.end());
+}
+
+void ProcessItem::setFileList(TypeFileInfoList &_fileList) {
+
+    fileList.clear();
+    addFileList(_fileList);
 }
 

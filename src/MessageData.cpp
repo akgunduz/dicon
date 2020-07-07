@@ -50,9 +50,9 @@ bool MessageData::isOutput(int index) {
     return fileList[index].isOutput();
 }
 
-TypeFileInfoList *MessageData::getFileList() {
+TypeFileInfoList& MessageData::getFileList() {
 
-    return &fileList;
+    return fileList;
 }
 
 void MessageData::addFile(FileInfo file) {
@@ -60,9 +60,9 @@ void MessageData::addFile(FileInfo file) {
     fileList.push_back(file);
 }
 
-void MessageData::addFileList(TypeFileInfoList *list) {
+void MessageData::addFileList(const TypeFileInfoList &list) {
 
-    fileList.insert(fileList.end(), list->begin(), list->end());
+    fileList.insert(fileList.end(), list.begin(), list.end());
 }
 
 unsigned long MessageData::getFileCount() {
@@ -75,17 +75,17 @@ char* MessageData::getExecutor() {
     return executor;
 }
 
-long MessageData::getExecutorID() {
+int MessageData::getExecutorID() {
 
     return executorID;
 }
 
-void MessageData::setExecutorID(long id) {
+void MessageData::setExecutorID(int id) {
 
     this->executorID = id;
 }
 
-void MessageData::setExecutor(long id, const char *_executor) {
+void MessageData::setExecutor(int id, const char *_executor) {
 
     this->executorID = id;
     strcpy(this->executor, _executor);

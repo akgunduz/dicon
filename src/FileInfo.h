@@ -33,11 +33,11 @@ public:
     bool isOutput() const;
     void setOutput(bool);
 
-    static TypeFileInfoList getFileList(TypeFileInfoList*, bool);
-    static void setFileListState(TypeFileInfoList*, bool);
+    static TypeFileInfoList getFileList(const TypeFileInfoList&, bool);
+    static void setFileListState(TypeFileInfoList&, bool);
 //    static void setFileItemState(TypeFileInfoList*, long, bool);
 //    static bool isInclude(TypeFileInfoList*, FileItem*);
-    static TypeFileInfoList checkFileExistence(ComponentObject, TypeFileInfoList*);
+    static TypeFileInfoList getReqFileList(const ComponentObject&, const TypeFileInfoList&);
 };
 
 

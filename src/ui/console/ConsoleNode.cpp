@@ -9,31 +9,28 @@
 
 void ConsoleApp::nodeInit() {
 
-    uiUpdater[UI_UPDATE_NODE_ID] = &ConsoleApp::nodeUpdateID;
-	uiUpdater[UI_UPDATE_NODE_STATE] = &ConsoleApp::nodeUpdateState;
-	uiUpdater[UI_UPDATE_NODE_PROCESS_LIST] = &ConsoleApp::nodeUpdateProcessList;
-	uiUpdater[UI_UPDATE_NODE_CLEAR] = &ConsoleApp::nodeUpdateClear;
+    uiUpdater[UI_UPDATE_NODE] = &ConsoleApp::nodeUpdate;
 }
 
-void ConsoleApp::nodeUpdateID(ConsoleEvent& event) {
+void ConsoleApp::nodeUpdate(ConsoleEvent& event) {
 
 }
 
-void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {
-
-	auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODESTATES) data->getData(0)));
-}
-
-void ConsoleApp::nodeUpdateClear(ConsoleEvent &event) {
-
-}
-
-void ConsoleApp::nodeUpdateProcessList(ConsoleEvent &event) {
-
-	auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %d",
-          data->getData(0), data->getString(0).c_str(), data->getData(1)) ;
-}
+//void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {
+//
+//	auto *data = (UserInterfaceEvent *)event.GetClientData();
+//
+//    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODESTATES) data->getData(0)));
+//}
+//
+//void ConsoleApp::nodeUpdateClear(ConsoleEvent &event) {
+//
+//}
+//
+//void ConsoleApp::nodeUpdateProcessList(ConsoleEvent &event) {
+//
+//	auto *data = (UserInterfaceEvent *)event.GetClientData();
+//
+//    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %d",
+//          data->getData(0), data->getString(0).c_str(), data->getData(1)) ;
+//}

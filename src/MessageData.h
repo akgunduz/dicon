@@ -15,7 +15,7 @@ class MessageData {
     TypeMD5List md5List;
     TypeFileInfoList fileList;
     char executor[PATH_MAX];
-    long executorID;
+    int executorID;
     char jobDir[PATH_MAX];
     std::vector<ComponentObject> componentList;
 
@@ -32,15 +32,15 @@ public:
 
     FileItem* getFile(int);
     bool isOutput(int);
-    TypeFileInfoList* getFileList();
+    TypeFileInfoList& getFileList();
     void addFile(FileInfo);
-    void addFileList(TypeFileInfoList*);
+    void addFileList(const TypeFileInfoList&);
     unsigned long getFileCount();
 
     char* getExecutor();
-    long getExecutorID();
-    void setExecutorID(long);
-    void setExecutor(long, const char*);
+    int getExecutorID();
+    void setExecutorID(int);
+    void setExecutor(int, const char*);
 
     char* getJobDir();
     void setJobDir(const char*);

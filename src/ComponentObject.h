@@ -6,6 +6,7 @@
 #define DICON_COMPONENTOBJECT_H
 
 #include "Common.h"
+#include "ComponentInfo.h"
 
 enum COMPONENT {
 
@@ -15,17 +16,15 @@ enum COMPONENT {
     COMP_MAX
 };
 
-class ComponentObject {
+class ComponentObject : public ComponentInfo {
 
 private:
 
     COMPONENT type;
 
-    int id;
-
     const char *rootPath;
 
-    long address;
+    ComponentInfo assigned;
 
 protected:
 
@@ -40,16 +39,16 @@ public:
 
     virtual ~ComponentObject();
 
-    const COMPONENT getType() const;
-    const int getID() const;
-    void setID(int);
+    COMPONENT getType() const;
+
     const char* getName() const;
 
     const char* getRootPath() const;
     void setRootPath(const char*);
 
-    const long getAddress() const;
-    void setAddress(long);
+    const ComponentInfo& getAssigned() const;
+    void setAssigned(int, long);
+
 };
 
 

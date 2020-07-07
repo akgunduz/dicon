@@ -5,7 +5,7 @@
 #include "NodeObject.h"
 
 NodeObject::NodeObject(NODESTATES _state, int _usage, int id, long address) :
-        state(_state), usage(_usage), ComponentObject(COMP_NODE, id, address) {
+        state(_state), usage(_usage), processInfo(0), ComponentObject(COMP_NODE, id, address) {
 }
 
 NodeObject::NodeObject(int id, long address) :
@@ -13,7 +13,7 @@ NodeObject::NodeObject(int id, long address) :
 }
 
 NodeObject::NodeObject(const char* rootPath) :
-        ComponentObject(COMP_NODE, rootPath)  {
+        state(NODESTATE_START), usage(0), processInfo(0), ComponentObject(COMP_NODE, rootPath)  {
 }
 
 NodeObject::NodeObject() :
@@ -28,9 +28,7 @@ NodeObject::NodeObject(const ComponentObject &copy) :
         NodeObject(copy.getID(), copy.getAddress()) {
 }
 
-NodeObject::~NodeObject() {
-
-}
+NodeObject::~NodeObject() = default;
 
 NODESTATES NodeObject::getState() {
 
@@ -42,7 +40,7 @@ void NodeObject::setState(NODESTATES _state) {
     this->state = _state;
 }
 
-int NodeObject::getUsage() {
+int NodeObject::getUsage() const {
 
     return usage;
 }
@@ -52,7 +50,7 @@ int NodeObject::iterateUsage(bool direction) {
     return direction ? ++usage : --usage;
 }
 
-//NodeProcessInfo &NodeObject::getProcess() {
-//
-//    return processInfo;
-//}
+ProcessInfo &NodeObject::getProcessInfo() {
+
+    return processInfo;
+}

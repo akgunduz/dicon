@@ -11,7 +11,7 @@ Interface* Connector::createInterface(Device *device,
                                       const InterfaceSchedulerCB *scb,
                                       const InterfaceHostCB *hcb) {
 
-    Interface *interface = NULL;
+    Interface *interface = nullptr;
 
     switch(device->getType()) {
 

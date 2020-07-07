@@ -25,15 +25,15 @@ FileInfo::FileInfo(FileItem* file, bool is_output) {
     this->is_output = is_output;
 }
 
-TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, bool is_output) {
+TypeFileInfoList FileInfo::getFileList(const TypeFileInfoList &fileList, bool is_output) {
 
     TypeFileInfoList list;
 
-    for (int i = 0; i < fileList->size(); i++) {
+    for (auto & file : fileList) {
 
-        if (fileList->at(i).isOutput() & is_output) {
+        if (file.isOutput() & is_output) {
 
-            list.push_back(fileList->at(i));
+            list.push_back(file);
         }
     }
 
@@ -41,33 +41,32 @@ TypeFileInfoList FileInfo::getFileList(TypeFileInfoList *fileList, bool is_outpu
 }
 
 
-void FileInfo::setFileListState(TypeFileInfoList *fileList, bool is_output) {
+void FileInfo::setFileListState(TypeFileInfoList &fileList, bool is_output) {
 
-    for (int i = 0; i < fileList->size(); i++) {
+    for (auto & file : fileList) {
 
-        fileList->at(i).setOutput(is_output);
+        file.setOutput(is_output);
     }
-
 }
 
-TypeFileInfoList FileInfo::checkFileExistence(ComponentObject component, TypeFileInfoList *list) {
+TypeFileInfoList FileInfo::getReqFileList(const ComponentObject& component, const TypeFileInfoList& list) {
 
     TypeFileInfoList reqList;
 
-    for (int i = 0; i < list->size(); i++) {
+    for (auto & file : list) {
 
         if (!Util::checkPath(component.getRootPath(),
-                             list->at(i).get()->getJobDir(), list->at(i).get()->getFileName(), false)) {
+                             file.get()->getJobDir(), file.get()->getFileName(), false)) {
 
-            reqList.push_back(list->at(i));
+            reqList.push_back(file);
 
         } else {
 
             Md5 md5(Util::getAbsMD5Path(component.getRootPath(),
-                                        list->at(i).get()->getJobDir(), list->at(i).get()->getFileName()).c_str());
-            if (!md5.equal(list->at(i).get()->getMD5())) {
+                                        file.get()->getJobDir(), file.get()->getFileName()).c_str());
+            if (!md5.equal(file.get()->getMD5())) {
 
-                reqList.push_back(list->at(i));
+                reqList.push_back(file);
             }
         }
     }

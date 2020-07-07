@@ -12,7 +12,7 @@
 
 class Component;
 
-typedef bool (Component::*TypeProcessComponentMsg)(ComponentObject, Message *);
+typedef bool (Component::*TypeProcessComponentMsg)(const ComponentObject&, Message *);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 
@@ -54,7 +54,7 @@ public:
     //bool send(ComponentObject, long, Message*);
     bool send(ComponentObject, Message*);
 
-    std::vector<long> getAddressList(ComponentObject);
+    std::vector<long> getAddressList(const ComponentObject&);
     bool defaultProcessMsg(ComponentObject, Message *);
 
 };

@@ -10,28 +10,27 @@
 
 void ConsoleApp::distInit() {
 
-    uiUpdater[UI_UPDATE_DIST_COLL_LISTITEM] = &ConsoleApp::distAddtoCollectorList;
-    uiUpdater[UI_UPDATE_DIST_NODE_LISTITEM] = &ConsoleApp::distAddtoNodeList;
+    uiUpdater[UI_UPDATE_DIST] = &ConsoleApp::distUpdate;
 }
 
-void ConsoleApp::distAddtoCollectorList(ConsoleEvent &event) {
+//void ConsoleApp::distAddtoCollectorList(ConsoleEvent &event) {
+//
+//    long i = 0;
+//
+//    auto *data = (UserInterfaceEvent *)event.GetClientData();
+//
+//    if (data->getData(1) > 0) {
+//
+//        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], Assigned Node[%d]",
+//              data->getData(0), data->getData(1));
+//    } else {
+//
+//        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], No Assigned Node",
+//              data->getData(0));
+//    }
+//}
 
-    long i = 0;
-
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
-
-    if (data->getData(1) > 0) {
-
-        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], Assigned Node[%d]",
-              data->getData(0), data->getData(1));
-    } else {
-
-        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], No Assigned Node",
-              data->getData(0));
-    }
-}
-
-void ConsoleApp::distAddtoNodeList(ConsoleEvent &event) {
+void ConsoleApp::distUpdate(ConsoleEvent &event) {
 
     long i = 0;
 

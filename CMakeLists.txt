@@ -34,7 +34,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Node.cpp
         ${SOURCE_PATH}/NodeObject.cpp
         ${SOURCE_PATH}/NodeManager.cpp
-        ${SOURCE_PATH}/NodeProcessInfo.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/Util.cpp
@@ -67,7 +66,9 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ui/UserInterfaceController.cpp
         ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
         ${SOURCE_PATH}/ui/UserInterfaceApp.cpp
-        src/JobOrdered.cpp)
+        ${SOURCE_PATH}/JobOrdered.cpp
+        ${SOURCE_PATH}/ComponentInfo.cpp
+        )
 
 set(WX_FILES
         ${SOURCE_PATH}/ui/wx/Wx.cpp

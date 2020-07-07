@@ -97,7 +97,7 @@ long Component::getInterfaceAddress(ComponentObject target) {
 
 long Component::getInterfaceMulticastAddress(ComponentObject target) {
 
-    if (interfaces[target.getType()] != NULL) {
+    if (interfaces[target.getType()] != nullptr) {
         return interfaces[target.getType()]->getMulticastAddress();
     }
 
@@ -106,7 +106,7 @@ long Component::getInterfaceMulticastAddress(ComponentObject target) {
 
 INTERFACE Component::getInterfaceType(ComponentObject target) {
 
-    if (interfaces[target.getType()] != NULL) {
+    if (interfaces[target.getType()] != nullptr) {
         return interfaces[target.getType()]->getType();
     }
 
@@ -116,7 +116,7 @@ INTERFACE Component::getInterfaceType(ComponentObject target) {
 
 bool Component::isSupportMulticast(ComponentObject target) {
 
-    if (interfaces[target.getType()] != NULL) {
+    if (interfaces[target.getType()] != nullptr) {
         return interfaces[target.getType()]->isSupportMulticast();
     }
 
@@ -139,7 +139,7 @@ bool Component::send(ComponentObject target, Message *msg) {
     return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(), msg);
 }
 
-std::vector<long> Component::getAddressList(ComponentObject target) {
+std::vector<long> Component::getAddressList(const ComponentObject& target) {
 
     return interfaces[target.getType()]->getDevice()->getAddressList();
 }

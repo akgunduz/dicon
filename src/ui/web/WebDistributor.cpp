@@ -11,8 +11,7 @@
 
 void WebApp::distInit() {
 
-    uiUpdater[UI_UPDATE_DIST_COLL_LISTITEM] = &WebApp::distUpdateCollectorListItem;
-    uiUpdater[UI_UPDATE_DIST_NODE_LISTITEM] = &WebApp::distUpdateNodeListItem;
+    uiUpdater[UI_UPDATE_DIST] = &WebApp::distUpdate;
 }
 
 bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
@@ -59,7 +58,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
         auto* collItem = json_object_new_object();
         json_object_object_add(collItem, "collectorID", json_object_new_int(collector->getID()));
-      //  json_object_object_add(collItem, "assignedNode", json_object_new_int(((CollectorObject*)collector)->getAttached().getID()));
+        json_object_object_add(collItem, "assignedNode", json_object_new_int(((CollectorObject*)collector)->getAssigned().getID()));
 
         json_object_array_add(collList, collItem);
     }
@@ -93,12 +92,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
     return true;
 }
 
-void WebApp::distUpdateCollectorListItem(WebEvent &event) {
-
-    Timer::set("dist", 1000, WebApp::wsInform, this);
-}
-
-void WebApp::distUpdateNodeListItem(WebEvent &event) {
+void WebApp::distUpdate(WebEvent &event) {
 
     Timer::set("dist", 1000, WebApp::wsInform, this);
 }

@@ -9,12 +9,7 @@
 
 void WebApp::collInit() {
 
-    uiUpdater[UI_UPDATE_COLL_ID] = &WebApp::collUpdateID;
-    uiUpdater[UI_UPDATE_COLL_FILE_LIST] = &WebApp::collUpdateFileList;
-    uiUpdater[UI_UPDATE_COLL_FILE_LISTITEM] = &WebApp::collUpdateFileListItem;
-    uiUpdater[UI_UPDATE_COLL_PROCESS_LIST] = &WebApp::collUpdateProcessList;
-    uiUpdater[UI_UPDATE_COLL_PROCESS_LISTITEM] = &WebApp::collUpdateProcessListItem;
-
+    uiUpdater[UI_UPDATE_COLL] = &WebApp::collUpdate;
 }
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
@@ -100,17 +95,17 @@ bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
     json_object_object_add(jsonObj, "fileList", fileList);
 
     auto* processList = json_object_new_array();
-//    for (int j = 0; j < job->getOrderedCount(); j++) {
-//
-//        auto* processItem = json_object_new_object();
-//        json_object_object_add(processItem, "id", json_object_new_int(job->getOrdered(j).getID()));
-//        json_object_object_add(processItem, "process", json_object_new_string(job->getOrderedExecution(j)->getExec()));
-//        json_object_object_add(processItem, "validity", json_object_new_boolean(job->getOrderedExecution(j)->isValid()));
-//        json_object_object_add(processItem, "state", json_object_new_int(job->getOrderedState(j)));
-//        json_object_object_add(processItem, "node", json_object_new_int(job->getOrdered(j).getAssignedNode()));
-//
-//        json_object_array_add(processList, processItem);
-//    }
+    for (int j = 0; j < job->getProcessCount(); j++) {
+
+        auto* processItem = json_object_new_object();
+        json_object_object_add(processItem, "id", json_object_new_int(job->getProcess(j).getID()));
+        json_object_object_add(processItem, "process", json_object_new_string(job->getProcess(j).get().getExec()));
+        json_object_object_add(processItem, "validity", json_object_new_boolean(job->getProcess(j).get().isValid()));
+        json_object_object_add(processItem, "state", json_object_new_int(job->getProcess(j).getState()));
+        json_object_object_add(processItem, "node", json_object_new_int(job->getProcess(j).getAssigned()));
+
+        json_object_array_add(processList, processItem);
+    }
 
     json_object_object_add(jsonObj, "processList", processList);
 
@@ -127,26 +122,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
     return true;
 }
 
-void WebApp::collUpdateID(WebEvent &event) {
-
-}
-
-void WebApp::collUpdateFileList(WebEvent &event) {
+void WebApp::collUpdate(WebEvent &event) {
 
     Timer::set("coll", 1000, WebApp::wsInform, this);
-}
-
-void WebApp::collUpdateFileListItem(WebEvent &event) {
-
-    Timer::set("coll", 500, WebApp::wsInform, this);
-}
-
-void WebApp::collUpdateProcessList(WebEvent &event) {
-
-    Timer::set("coll", 1000, WebApp::wsInform, this);
-}
-
-void WebApp::collUpdateProcessListItem(WebEvent &event) {
-
-    Timer::set("coll", 500, WebApp::wsInform, this);
 }

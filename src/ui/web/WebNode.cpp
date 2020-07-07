@@ -9,10 +9,7 @@
 
 void WebApp::nodeInit() {
 
-    uiUpdater[UI_UPDATE_NODE_ID] = &WebApp::nodeUpdateID;
-	uiUpdater[UI_UPDATE_NODE_STATE] = &WebApp::nodeUpdateState;
-	uiUpdater[UI_UPDATE_NODE_PROCESS_LIST] = &WebApp::nodeUpdateProcessList;
-	uiUpdater[UI_UPDATE_NODE_CLEAR] = &WebApp::nodeUpdateClear;
+    uiUpdater[UI_UPDATE_NODE] = &WebApp::nodeUpdate;
 }
 
 bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
@@ -54,13 +51,12 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, long id) {
     json_object_object_add(jsonObj, "state", json_object_new_int(nodeObj.getState()));
 
     auto* processList = json_object_new_array();
-    for (int j = 0; j < node->getProcessList()->size(); j++) {
+    for (auto &process : node->getProcessList()) {
 
-        NodeProcessInfo info = node->getProcessList()->at(j);
         auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "collectorID", json_object_new_int(node->getProcessList()->at(j).getAttachedColl()));
-        json_object_object_add(processItem, "jobID", json_object_new_string(node->getProcessList()->at(j).getJobID().c_str()));
-        json_object_object_add(processItem, "processID", json_object_new_int(node->getProcessList()->at(j).getProcessID()));
+        json_object_object_add(processItem, "collectorID", json_object_new_int(process.getAssigned()));
+        json_object_object_add(processItem, "jobID", json_object_new_string(process.getJobID().c_str()));
+        json_object_object_add(processItem, "processID", json_object_new_int(process.getID()));
 
         json_object_array_add(processList, processItem);
     }
@@ -81,20 +77,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, long id) {
     return true;
 }
 
-void WebApp::nodeUpdateID(WebEvent& event) {
-
-}
-
-void WebApp::nodeUpdateState(WebEvent &event) {
-
-    Timer::set("node", 1000, WebApp::wsInform, this);
-}
-
-void WebApp::nodeUpdateClear(WebEvent &event) {
-
-}
-
-void WebApp::nodeUpdateProcessList(WebEvent &event) {
+void WebApp::nodeUpdate(WebEvent& event) {
 
     Timer::set("node", 1000, WebApp::wsInform, this);
 }

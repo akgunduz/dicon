@@ -32,24 +32,22 @@ private:
     static void collProcessCB(Distributor *);
     void collProcess();
 
-    bool processCollectorAliveMsg(ComponentObject, Message *);
-    bool processCollectorIDMsg(ComponentObject, Message *);
-    bool processCollectorNodeMsg(ComponentObject, Message *);
+    bool processCollectorAliveMsg(const ComponentObject&, Message *);
+    bool processCollectorIDMsg(const ComponentObject&, Message *);
+    bool processCollectorNodeMsg(const ComponentObject&, Message *);
 
-    bool processNodeAliveMsg(ComponentObject, Message *);
-    bool processNodeIDMsg(ComponentObject, Message *);
-    bool processNodeBusyMsg(ComponentObject, Message *);
-    bool processNodeReadyMsg(ComponentObject, Message *);
+    bool processNodeAliveMsg(const ComponentObject&, Message *);
+    bool processNodeIDMsg(const ComponentObject&, Message *);
+    bool processNodeBusyMsg(const ComponentObject&, Message *);
+    bool processNodeReadyMsg(const ComponentObject&, Message *);
 
-	bool send2CollectorWakeupMsg(ComponentObject);
-	bool send2CollectorIDMsg(ComponentObject, int);
-	bool send2CollectorNodeMsg(ComponentObject, std::vector<ComponentObject>&);
+	bool send2CollectorWakeupMsg(const ComponentObject&);
+	bool send2CollectorIDMsg(const ComponentObject&, int);
+	bool send2CollectorNodeMsg(const ComponentObject&, std::vector<ComponentObject>&);
 
-    bool send2NodeWakeupMsg(ComponentObject);
-    bool send2NodeIDMsg(ComponentObject, int);
-	bool send2NodeProcessMsg(ComponentObject,
-								   const char*, long, const char *,
-								   TypeFileInfoList *, int, long);
+    bool send2NodeWakeupMsg(const ComponentObject&);
+    bool send2NodeIDMsg(const ComponentObject&, int);
+	bool send2NodeProcessMsg(const ComponentObject&);
 
 public:
 

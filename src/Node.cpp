@@ -4,7 +4,6 @@
 //
 
 #include "Node.h"
-#include "NodeState.h"
 #include "CollectorObject.h"
 
 
@@ -28,176 +27,151 @@ Node::Node(const char *rootPath) :
     initInterfaces(COMP_NODE);
 }
 
-Node::~Node() {
+Node::~Node() = default;
 
-}
+bool Node::processDistributorWakeupMsg(const ComponentObject& owner, Message *msg) {
 
-bool Node::processDistributorWakeupMsg(ComponentObject owner, Message *msg) {
-
-    setDistributor(owner);
+    setDistributor((DistributorObject &) owner);
 
     return send2DistributorAliveMsg(owner);
 }
 
-bool Node::processDistributorIDMsg(ComponentObject owner, Message *msg) {
+bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
     getHost().setID((int)msg->getHeader()->getVariant(0));
 
-    LOG_U(UI_UPDATE_NODE_ID, std::vector<long>{getHost().getID()});
+    LOG_U(UI_UPDATE_NODE, std::vector<long>{getHost().getID()});
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);
 }
 
-bool Node::processDistributorProcessMsg(ComponentObject owner, Message *msg) {
-
-    int collID = (int)msg->getHeader()->getVariant(0);
-    long collAddress = msg->getHeader()->getVariant(1);
-
-    TypeFileInfoList requiredList = FileInfo::checkFileExistence(getHost(), msg->getData()->getFileList());
-    if (!requiredList.empty()) {
-
-        LOGS_I(getHost(), "Missing files for Process[%d] is requested from Collector[%d]",
-                msg->getData()->getExecutorID(), collID);
-
-        return send2CollectorInfoMsg(CollectorObject(collID, collAddress),
-                                     msg->getData()->getJobDir(),
-                                     msg->getData()->getExecutorID(),
-                                     msg->getData()->getExecutor(), &requiredList);
-
-    } else {
-
-//        ((NodeObject&)getHost()).getProcess().setAttachedColl(collID);
-//        ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
-//        ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
-//        processList.emplace_back(((NodeObject&)getHost()).getProcess());
-
-        LOGS_I(getHost(), "Process[%d] from Collector[%d] is executing",
-               msg->getData()->getExecutorID(), collID);
-
-        LOG_U(UI_UPDATE_NODE_PROCESS_LIST, collID,
-              msg->getData()->getJobDir(), msg->getData()->getExecutorID());
-
-        processCommand(msg->getData()->getExecutorID(), msg->getData()->getExecutor());
-
-        TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
-        FileInfo::setFileListState(&outputList, false);
-
-        LOGS_I(getHost(), "Process[%d] from Collector[%d] is executed, sending back output data",
-               msg->getData()->getExecutorID(), collID);
-
-        //TODO will update with md5s including outputs
-        //TODO will update with actual binary to collector including outputs
-        return send2CollectorBinaryMsg(CollectorObject(collID, collAddress),
-                                       msg->getData()->getJobDir(),
-                                       msg->getData()->getExecutorID(),
-                                       msg->getData()->getExecutor(), &outputList);
-    }
-}
-
-bool Node::processCollectorJobMsg(ComponentObject owner, Message *msg) {
+bool Node::processCollectorJobMsg(const ComponentObject& owner, Message *msg) {
 
     ((NodeObject&)getHost()).setState(NODESTATE_BUSY);
+    ((NodeObject&)getHost()).setAssigned(owner.getID(), owner.getAddress());
+
+    ((NodeObject&)getHost()).getProcessInfo().setAssigned(owner.getID());
+    ((NodeObject&)getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
+    ((NodeObject&)getHost()).getProcessInfo().setJobID(msg->getData()->getJobDir());
+    ((NodeObject&)getHost()).getProcessInfo().setID(msg->getData()->getExecutorID());
+    ((NodeObject&)getHost()).getProcessInfo().get().setParsedExec(msg->getData()->getExecutor());
+    ((NodeObject&)getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
 
     LOGS_I(getHost(), "Process[%d] request is received from Collector[%d]",
            msg->getData()->getExecutorID(), owner.getID());
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_BUSY});
-
-    LOGS_I(getHost(), "Sending Busy message to distributor");
-
-    return send2DistributorBusyMsg(getDistributor(),
-                                   msg->getData()->getJobDir(),
-                                   msg->getData()->getExecutorID(),
-                                   msg->getData()->getExecutor(),
-                                   msg->getData()->getFileList(),
-                                   owner.getAddress());
+    return send2DistributorBusyMsg(getDistributor(), owner.getID());
 }
 
-bool Node::processCollectorBinaryMsg(ComponentObject owner, Message *msg) {
+bool Node::processJob(const ComponentObject& owner, Message *msg) {
 
-//    ((NodeObject&)getHost()).getProcess().setAttachedColl(msg->getHeader()->getOwner().getID());
-//    ((NodeObject&)getHost()).getProcess().setProcessID(msg->getData()->getExecutorID());
-//    ((NodeObject&)getHost()).getProcess().setJobID(msg->getData()->getJobDir());
-//    processList.emplace_back(((NodeObject&)getHost()).getProcess());
+    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executing",
+           ((NodeObject&)getHost()).getProcessInfo().getID(),
+           ((NodeObject&)getHost()).getAssigned().getID());
+
+    processList.emplace_back(((NodeObject&)getHost()).getProcessInfo());
+
+    LOG_U(UI_UPDATE_NODE, std::vector<long> {NODESTATE_BUSY});
+
+    processCommand(((NodeObject&)getHost()).getProcessInfo().getID(),
+                   ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec());
+
+    TypeFileInfoList outputList = FileInfo::getFileList(((NodeObject&)getHost()).getProcessInfo().get().getFileList(), true);
+    FileInfo::setFileListState(outputList, false);
+
+    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executed, sending back output data",
+           ((NodeObject&)getHost()).getProcessInfo().getID(),
+           ((NodeObject&)getHost()).getAssigned().getID());
+
+    //TODO will update with md5s including outputs
+    //TODO will update with actual binary to collector including outputs
+    return send2CollectorBinaryMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
+                                                   ((NodeObject&)getHost()).getAssigned().getAddress()),
+                                   ((NodeObject&)getHost()).getProcessInfo().getJobID().c_str(),
+                                   ((NodeObject&)getHost()).getProcessInfo().getID(),
+                                   ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
+                                   outputList);
+}
+
+bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *msg) {
+
+    LOGS_I(getHost(), "Execution order is received from distributor for Collector[%d]'s Process[%d]",
+           ((NodeObject&)getHost()).getAssigned().getID(),
+           ((NodeObject&)getHost()).getProcessInfo().getID());
+
+    TypeFileInfoList requiredList = FileInfo::getReqFileList(getHost(),
+            ((NodeObject&)getHost()).getProcessInfo().get().getFileList());
+
+    if (!requiredList.empty()) {
+
+        LOGS_I(getHost(), "Missing files for Process[%d] is requested from Collector[%d]",
+               ((NodeObject&)getHost()).getProcessInfo().getID(),
+               ((NodeObject&)getHost()).getAssigned().getID());
+
+        return send2CollectorInfoMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
+                                                     ((NodeObject&)getHost()).getAssigned().getAddress()),
+                                     ((NodeObject&)getHost()).getProcessInfo().getJobID().c_str(),
+                                     ((NodeObject&)getHost()).getProcessInfo().getID(),
+                                     ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
+                                     requiredList);
+
+    } else {
+
+        return processJob(owner, msg);
+    }
+}
+
+
+bool Node::processCollectorBinaryMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_I(getHost(), "Process[%d] binaries are received from Collector[%d]",
            msg->getData()->getExecutorID(), owner.getID());
 
-    LOG_U(UI_UPDATE_NODE_PROCESS_LIST, msg->getHeader()->getOwner().getID(),
-            msg->getData()->getJobDir(), msg->getData()->getExecutorID());
-
-    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executing",
-           msg->getData()->getExecutorID(), owner.getID());
-
-    processCommand(msg->getData()->getExecutorID(), msg->getData()->getExecutor());
-
-    TypeFileInfoList outputList = FileInfo::getFileList(msg->getData()->getFileList(), true);
-    FileInfo::setFileListState(&outputList, false);
-
-    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executed, sending back output data",
-           msg->getData()->getExecutorID(), owner.getID());
-
-    //TODO will update with md5s including outputs
-    //TODO will update with actual binary to collector including outputs
-    return send2CollectorBinaryMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
-                                   msg->getData()->getExecutor(), &outputList);
+    return processJob(owner, msg);
 }
 
-bool Node::processCollectorReadyMsg(ComponentObject owner, Message *msg) {
+bool Node::processCollectorReadyMsg(const ComponentObject& owner, Message *msg) {
 
     ((NodeObject&)getHost()).setState(NODESTATE_IDLE);
 
-    LOG_U(UI_UPDATE_NODE_STATE, std::vector<long> {NODESTATE_IDLE});
+    LOG_U(UI_UPDATE_NODE, std::vector<long> {NODESTATE_IDLE});
 
-    long collUnservedCount = msg->getHeader()->getVariant(0);
-
-    return send2DistributorReadyMsg(getDistributor(), msg->getData()->getJobDir(), owner.getAddress(), collUnservedCount);
+    return send2DistributorReadyMsg(getDistributor());
 }
 
-bool Node::send2DistributorReadyMsg(ComponentObject target, const char* jobDir, long collAddress, long collUnservedCount) {
+bool Node::send2DistributorReadyMsg(const ComponentObject& target) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_READY);
-
-    msg->getData()->setStreamFlag(STREAM_JOB);
-    msg->getHeader()->setVariant(0, collAddress);
-    msg->getHeader()->setVariant(1, collUnservedCount);
-    msg->getData()->setJobDir(jobDir);
 
 	return send(target, msg);
 }
 
-bool Node::send2DistributorAliveMsg(ComponentObject target) {
+bool Node::send2DistributorAliveMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ALIVE);
 
     return send(target, msg);
 }
 
-bool Node::send2DistributorIDMsg(ComponentObject target) {
+bool Node::send2DistributorIDMsg(const ComponentObject& target) {
 
     auto *msg = new Message(getHost(), MSGTYPE_ID);
 
     return send(target, msg);
 }
 
-bool Node::send2DistributorBusyMsg(ComponentObject target,
-                                   const char* jobDir, long executionID, const char *executor,
-                                   TypeFileInfoList *fileList, long collAddress) {
+bool Node::send2DistributorBusyMsg(const ComponentObject& target, int collID) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BUSY);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJobDir(jobDir);
-    msg->getData()->setExecutor(executionID, executor);
-    msg->getData()->addFileList(fileList);
-    msg->getHeader()->setVariant(0, collAddress);
+    msg->getHeader()->setVariant(0, collID);
 
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(ComponentObject target, const char* jobDir, long executorID,
-                                 const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobDir, int executorID,
+                                 const char* executor, TypeFileInfoList &fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 
@@ -209,8 +183,8 @@ bool Node::send2CollectorInfoMsg(ComponentObject target, const char* jobDir, lon
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(ComponentObject target, const char* jobDir, long executorID,
-                                   const char* executor, TypeFileInfoList *fileList) {
+bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobDir, int executorID,
+                                   const char* executor, TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
@@ -227,9 +201,9 @@ ComponentObject Node::getDistributor() {
     return distributor;
 }
 
-void Node::setDistributor(ComponentObject distributor) {
+void Node::setDistributor(const DistributorObject& _distributor) {
 
-    this->distributor = distributor;
+    this->distributor = _distributor;
 }
 
 void Node::parseCommand(char *cmd, char **argv) {
@@ -288,7 +262,7 @@ bool Node::processCommand(int processID, const char *cmd) {
     return true;
 }
 
-std::vector<NodeProcessInfo> *Node::getProcessList() {
+std::vector<ProcessInfo> &Node::getProcessList() {
 
-    return &processList;
+    return processList;
 }

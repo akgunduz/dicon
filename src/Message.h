@@ -33,10 +33,10 @@ private:
     MessageData data;
 
     bool readComponentList(int, std::vector<ComponentObject>&, Block*);
-    bool readJobInfo(int, char*, struct Block*);
-    bool readExecutionInfo(int, long*, char*, struct Block*);
-    bool readFile(int, FileItem *, const char*, long *, struct Block *);
-    bool readFileMD5(int, Md5*, struct Block*);
+    bool readJobInfo(int, char*, Block*);
+    bool readExecutionInfo(int, long*, char*, Block*);
+    bool readFile(int, FileItem *, const char*, long *, Block *);
+    bool readFileMD5(int, Md5*, Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeComponentList(int, std::vector<ComponentObject>&);

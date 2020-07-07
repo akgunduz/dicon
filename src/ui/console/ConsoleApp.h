@@ -28,20 +28,13 @@ public:
 
     void distInit();
     void distAddtoCollectorList(ConsoleEvent &event);
-    void distAddtoNodeList(ConsoleEvent &event);
+    void distUpdate(ConsoleEvent &event);
 
     void collInit();
-    void collUpdateID(ConsoleEvent &event);
-    void collUpdateFileList(ConsoleEvent &event);
-    void collUpdateFileListItem(ConsoleEvent &event);
-    void collUpdateProcessList(ConsoleEvent &event);
-    void collUpdateProcessListItem(ConsoleEvent &event);
+    void collUpdate(ConsoleEvent &event);
 
 	void nodeInit();
-    void nodeUpdateID(ConsoleEvent& event);
-	void nodeUpdateState(ConsoleEvent &event);
-	void nodeUpdateProcessList(ConsoleEvent &event);
-	void nodeUpdateClear(ConsoleEvent &event);
+    void nodeUpdate(ConsoleEvent& event);
 
     int run() override;
 };

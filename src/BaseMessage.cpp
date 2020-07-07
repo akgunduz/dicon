@@ -9,7 +9,7 @@
 BaseMessage::BaseMessage(ComponentObject host)
 		: host(host) {
 
-    bzero(&datagramAddress, sizeof(sockaddr_in));
+    memset(&datagramAddress, 0, sizeof(sockaddr_in));
 }
 
 void BaseMessage::setDatagramAddress(sockaddr_in address) {
@@ -103,7 +103,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOGS_E(getHost(), "Busy state, sleep and retry");
 				busy = true;
-				usleep(BUSY_SLEEP_TIME);
+                std::this_thread::sleep_for(std::chrono::microseconds (BUSY_SLEEP_TIME));
 				continue;
 			}
 
@@ -330,7 +330,7 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOGS_W(getHost(), "Busy state, sleep and retry");
 				busy = true;
-				usleep(BUSY_SLEEP_TIME);
+                std::this_thread::sleep_for(std::chrono::microseconds (BUSY_SLEEP_TIME));
 				continue;
 			}
 

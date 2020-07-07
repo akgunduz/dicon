@@ -273,12 +273,13 @@
 
       var WS_URI = "ws://localhost:" + PORT + "/ws";
 
-      var NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
+      var NODE_STATES = ["START", "IDLE", "PREBUSY", "BUSY"];
 
-      var PROCESS_STATE_NOTSTARTED = 0;
-      var PROCESS_STATE_PROVISION = 1;
-      var PROCESS_STATE_STARTED = 2;
-      var PROCESS_STATE_ENDED = 3;
+      var PROCESS_STATE_DEPENDENT = 0;
+      var PROCESS_STATE_READY = 1;
+      var PROCESS_STATE_REQUESTED = 2;
+      var PROCESS_STATE_STARTED = 3;
+      var PROCESS_STATE_ENDED = 4;
 
       var currentPage = {
         type: DISTRIBUTOR,

@@ -4,63 +4,6 @@
 
 #include "Job.h"
 
-//ProcessItem *const Job::getOrderedExecution(int index) const {
-//
-//    return orderedList[index].get();
-//}
-//
-//const PROCESS_STATE Job::getOrderedState(int index) const {
-//
-//    return orderedList[index].getState();
-//}
-
-//void Job::setOrderedState(int index, PROCESS_STATE state) {
-//
-//    orderedList[index].setState(state);
-//}
-
-//ProcessInfo& Job::getUnServed() {
-//
-//    for (int i = 0; i < getOrderedCount(); i++) {
-//
-//        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-//            getOrderedState(i) == PROCESS_STATE_ENDED) {
-//            continue;
-//        }
-//
-//        if (!getOrderedExecution(i)->isValid()) {
-//            continue;
-//        }
-//
-//        setOrderedState(i, PROCESS_STATE_STARTED);
-//
-//        return getOrdered(i);
-//    }
-//
-//    return ProcessInfo::invalid;
-//}
-
-//long Job::getUnServedCount() {
-//
-//    int count = 0;
-//
-//    for (int i = 0; i < getOrderedCount(); i++) {
-//
-//        if (getOrderedState(i) == PROCESS_STATE_STARTED ||
-//            getOrderedState(i) == PROCESS_STATE_ENDED) {
-//            continue;
-//        }
-//
-//        if (!getOrderedExecution(i)->isValid()) {
-//            continue;
-//        }
-//
-//        count++;
-//    }
-//
-//    return count;
-//}
-
 ProcessInfo& Job::getProcess(int index) {
 
     return processList[index];
@@ -71,13 +14,32 @@ int Job::getProcessCount() const {
     return processList.size();
 }
 
+//bool Job::getAllProcesses(PROCESS_STATE state, std::vector<ProcessInfo>& processes) {
+//
+//    bool hasProcess = false;
+//
+//    mutex.lock();
+//
+//    for (auto &process : processList) {
+//        if (process.getState() == state) {
+//            hasProcess = true;
+//            processes.emplace_back(process);
+//        }
+//    }
+//
+//    mutex.unlock();
+//
+//    return hasProcess;
+//}
+
+
 int Job::getProcessCount(PROCESS_STATE state) {
 
-    long count = 0;
+    int count = 0;
 
     mutex.lock();
 
-    for (auto process : processList) {
+    for (auto &process : processList) {
         if (process.getState() == state) {
             count++;
         }
@@ -94,9 +56,9 @@ bool Job::updateDependency() {
 
     mutex.lock();
 
-    for (auto process : processList) {
+    for (auto &process : processList) {
         if (process.getState() == PROCESS_STATE_DEPENDENT
-                && process.get()->isValid()) {
+                && process.get().isValid()) {
             process.setState(PROCESS_STATE_READY);
             modified = true;
         }
@@ -107,7 +69,55 @@ bool Job::updateDependency() {
     return modified;
 }
 
-ProcessItem *Job::getByOutput(int index) {
+ProcessInfo& Job::assignNode(ComponentObject &node) {
+
+    mutex.lock();
+
+    for (auto &process : processList) {
+        if (process.getState() == PROCESS_STATE_READY) {
+            process.setAssigned(node.getID());
+            process.setState(PROCESS_STATE_STARTED);
+            mutex.unlock();
+            return process;
+        }
+    }
+
+    mutex.unlock();
+
+    return ProcessInfo::invalid;
+}
+
+bool Job::updateRequested() {
+
+    mutex.lock();
+
+    for (auto &process : processList) {
+        if (process.getState() == PROCESS_STATE_READY) {
+            process.setState(PROCESS_STATE_REQUESTED);
+        }
+    }
+
+    mutex.unlock();
+
+    return true;
+}
+
+void Job::endProcess(int id) {
+
+    mutex.lock();
+
+    for (auto &process : processList) {
+        if (process.getID() == id) {
+            process.setAssigned(0);
+            process.setState(PROCESS_STATE_ENDED);
+            break;
+        }
+    }
+
+    mutex.unlock();
+}
+
+ProcessItem* Job::getByOutput(int index) {
 
     for (int i = 0; i < getExecutorCount(); i++) {
 
@@ -123,7 +133,7 @@ ProcessItem *Job::getByOutput(int index) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool Job::createDependencyMap() {
@@ -138,22 +148,22 @@ bool Job::createDependencyMap() {
 
         TypeFileList outList, depList;
 
-        TypeFileInfoList *fileList = getExecutor(i)->getFileList();
+        const TypeFileInfoList &fileList = getExecutor(i)->getFileList();
 
-        for (int j = 0; j < fileList->size(); j++) {
+        for (auto & j : fileList) {
 
-            FileItem* file = fileList->at(j).get();
+            FileItem* file = j.get();
 
-            fileList->at(j).isOutput() ? outList.push_back(file) : depList.push_back(file);
+            j.isOutput() ? outList.push_back(file) : depList.push_back(file);
         }
 
         int id = outList[0]->getID();
 
-        for (int j = 0; j < depList.size(); j++) {
+        for (auto & j : depList) {
 
             //TODO will be updated with multi output files
 
-            adj[depList[j]->getID()].push_back(id);
+            adj[j->getID()].push_back(id);
 
             depth[id]++;
         }
@@ -173,11 +183,11 @@ bool Job::createDependencyMap() {
 
         final.push_back(current);
 
-        for (int i = 0; i < adj[current].size(); i++) {
+        for (int & i : adj[current]) {
 
-            depth[adj[current][i]] -= 1;
-            if (depth[adj[current][i]] == 0) {
-                initial.push_back(adj[current][i]);
+            depth[i] -= 1;
+            if (depth[i] == 0) {
+                initial.push_back(i);
             }
         }
     }
@@ -191,11 +201,11 @@ bool Job::createDependencyMap() {
 
     processList.clear();
 
-    for (int i : final) {
+    for (auto process : final) {
 
-        auto *content = getByOutput(i);
+        auto *content = getByOutput(process);
         if (content) {
-            processList.emplace_back(ProcessInfo(processList.size() + 1, content));
+            processList.emplace_back(ProcessInfo((int)processList.size() + 1, *content));
         }
     }
 

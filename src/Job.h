@@ -48,12 +48,9 @@ public:
     int getProcessCount() const;
     int getProcessCount(PROCESS_STATE);
     ProcessInfo& getProcess(int);
-//    ProcessItem *const getOrderedExecution(int) const;
-//    const PROCESS_STATE getOrderedState(int) const;
-//    void setOrderedState(int, PROCESS_STATE);
-
-//    long getUnServedCount();
-//    ProcessInfo& getUnServed();
+    ProcessInfo& assignNode(ComponentObject &);
+    bool updateRequested();
+    void endProcess(int id);
 
     ProcessItem* getByOutput(int);
     bool createDependencyMap();

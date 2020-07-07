@@ -27,45 +27,23 @@ ComponentObject::ComponentObject(COMPONENT type, const char *rootPath)
 }
 
 ComponentObject::ComponentObject(const ComponentObject &copy)
-        : ComponentObject(copy.type, copy.rootPath, copy.id, copy.address) {
+        : ComponentObject(copy.type, copy.rootPath, copy.getID(), copy.getAddress()) {
 }
 
 ComponentObject::ComponentObject(COMPONENT type, const char* rootPath, int id, long address)
-        : type(type), id(id), rootPath(rootPath), address(address) {
+        : type(type), rootPath(rootPath), assigned(0, 0), ComponentInfo(id, address) {
 }
 
-ComponentObject::~ComponentObject() {
+ComponentObject::~ComponentObject() = default;
 
-}
-
-const COMPONENT ComponentObject::getType() const {
+COMPONENT ComponentObject::getType() const {
 
     return this->type;
-}
-
-const int ComponentObject::getID() const {
-
-    return this->id;
-}
-
-void ComponentObject::setID(int _id) {
-
-    this->id = _id;
 }
 
 const char* ComponentObject::getName() const {
 
     return sComponentTypes[type];
-}
-
-const long ComponentObject::getAddress() const {
-
-    return address;
-}
-
-void ComponentObject::setAddress(long _address) {
-
-    this->address = _address;
 }
 
 const char* ComponentObject::getRootPath() const {
@@ -76,4 +54,15 @@ const char* ComponentObject::getRootPath() const {
 void ComponentObject::setRootPath(const char *_rootPath) {
 
     this->rootPath = _rootPath;
+}
+
+const ComponentInfo &ComponentObject::getAssigned() const {
+
+    return assigned;
+}
+
+void ComponentObject::setAssigned(int id, long address) {
+
+    assigned.setID(id);
+    assigned.setAddress(address);
 }
