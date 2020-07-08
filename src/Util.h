@@ -20,7 +20,8 @@ private:
 public:
 	static std::string hex2str(const uint8_t *ca, int len);
 	static bool str2hex(uint8_t *buf, const char *s, uint32_t len);
-	static void mkPath(const char *dir);
+    static void replaceStr(std::string&, const std::string&, const std::string&);
+    static void mkPath(const char *dir);
 	static void removePath(const char *path);
 	static std::string extractFile(const char *);
     static std::vector<std::string> getFileList(const char*, const char*);

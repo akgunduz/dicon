@@ -70,7 +70,9 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
            ((NodeObject&)getHost()).getProcessInfo().getID(),
            ((NodeObject&)getHost()).getAssigned().getID());
 
-    processList.emplace_back(((NodeObject&)getHost()).getProcessInfo());
+    ProcessInfo &processInfo = ((NodeObject&)getHost()).getProcessInfo();
+
+    processList.emplace_back(processInfo);
 
     LOG_U(UI_UPDATE_NODE, std::vector<long> {NODESTATE_BUSY});
 

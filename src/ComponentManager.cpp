@@ -17,7 +17,7 @@ size_t ComponentManager::size() {
 
     mutex.lock();
 
-    size_t size = componentsMap.size();
+    size_t size = componentsMapID.size();
 
     mutex.unlock();
 
@@ -30,10 +30,10 @@ ComponentObject* ComponentManager::get(int id) {
 
     mutex.lock();
 
-    auto search = componentsMap.find(id);
-    if (search != componentsMap.end()) {
+    auto search = componentsMapID.find(id);
+    if (search != componentsMapID.end()) {
 
-        object = componentsMap[id];
+        object = componentsMapID[id];
     }
 
     mutex.unlock();
@@ -47,7 +47,7 @@ ComponentObject *ComponentManager::getByIndex(int index) {
 
     mutex.lock();
 
-    if (index < componentsMap.size()) {
+    if (index < componentsMapID.size()) {
 
         object = componentsIndex[index];
     }
@@ -63,12 +63,13 @@ int ComponentManager::add(long address) {
 
     mutex.lock();
 
-    auto search = componentsMap.find(address);
-    if (search == componentsMap.end()) {
+    auto search = componentsMapAddress.find(address);
+    if (search == componentsMapAddress.end()) {
 
         newID = idCounter++;
         ComponentObject *object = createObject(newID, address);
-        componentsMap[newID] = object;
+        componentsMapAddress[address] = object;
+        componentsMapID[newID] = object;
         componentsIndex.emplace_back(object);
     }
 
@@ -81,13 +82,14 @@ void ComponentManager::clear() {
 
     mutex.lock();
 
-    for (auto & component : componentsMap) {
+    for (auto & component : componentsMapID) {
 
         delete component.second;
 
     }
 
-    componentsMap.clear();
+    componentsMapID.clear();
+    componentsMapAddress.clear();
     componentsIndex.clear();
 
     mutex.unlock();

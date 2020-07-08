@@ -20,7 +20,7 @@ bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
         char *nextStr;
 
-        long collID = strtol(uri + 1, &nextStr, 10);
+        int collID = (int) strtol(uri + 1, &nextStr, 10);
 
         if (0 == strcmp(nextStr, "/state")) {
 
@@ -41,7 +41,7 @@ bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
     return 0;
 }
 
-bool WebApp::collLoadJobHandler(struct mg_connection *conn, long id) {
+bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
@@ -53,7 +53,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, long id) {
     return true;
 }
 
-bool WebApp::collProcessHandler(struct mg_connection *conn, long id) {
+bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
@@ -65,9 +65,13 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, long id) {
     return true;
 }
 
-bool WebApp::collStateHandler(struct mg_connection *conn, long id) {
+bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
+    if (!collector) {
+        LOG_S("Can not find the collector with ID : %d !!!", id);
+        return false;
+    }
 
     auto *job = collector->getJob();
     if (job == nullptr) {

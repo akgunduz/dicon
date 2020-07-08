@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LOGLEVEL logLevel[2] = {LEVEL_TRACE, LEVEL_TRACE};
+    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_INFO};
 
     int distCount = 0;
     int collInfo[2] = {0, 1};
@@ -129,6 +129,13 @@ int main(int argc, char** argv) {
         LOG_S("Parameter problem, exiting.....");
         return 0;
     }
+
+#if 0
+    Util::removePath("./Collector_1/Job_1/md5");
+    Util::removePath("./Collector_1/Job_1/output");
+    Util::removePath("./Node_1/Job_1");
+    Util::removePath("./Node_2/Job_1");
+#endif
 
     UserInterfaceApp *app = nullptr;
 

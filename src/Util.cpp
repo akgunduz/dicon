@@ -292,3 +292,12 @@ std::string Util::extractFile(const char *path) {
     pos = file.find_first_of('.');
     return file.substr(0, pos);
 }
+
+void Util::replaceStr(std::string& main, const std::string& search,
+                          const std::string& replace) {
+    size_t pos = 0;
+    while ((pos = main.find(search, pos)) != std::string::npos) {
+        main.replace(pos, search.length(), replace);
+        pos += replace.length();
+    }
+}

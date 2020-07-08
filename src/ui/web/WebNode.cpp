@@ -20,7 +20,7 @@ bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
 
         char *nextStr;
 
-        long nodeID = strtol(uri + 1, &nextStr, 10);
+        int nodeID = (int) strtol(uri + 1, &nextStr, 10);
 
         if (0 == strcmp(nextStr, "/state")) {
 
@@ -28,13 +28,12 @@ bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
         }
     }
 
-    return 0;
+    return false;
 }
 
-bool WebApp::nodeStateHandler(struct mg_connection *conn, long id) {
+bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto *node = componentController->getNode(id);
-
     if (!node) {
         LOG_S("Can not find the node with ID : %d !!!", id);
         return false;
@@ -54,9 +53,12 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, long id) {
     for (auto &process : node->getProcessList()) {
 
         auto* processItem = json_object_new_object();
+        json_object_object_add(processItem, "processID", json_object_new_int(process.getID()));
         json_object_object_add(processItem, "collectorID", json_object_new_int(process.getAssigned()));
         json_object_object_add(processItem, "jobID", json_object_new_string(process.getJobID().c_str()));
-        json_object_object_add(processItem, "processID", json_object_new_int(process.getID()));
+        std::string processCommand = process.get().getParsedExec();
+        Util::replaceStr(processCommand, ROOT_SIGN, "");
+        json_object_object_add(processItem, "process", json_object_new_string(processCommand.c_str()));
 
         json_object_array_add(processList, processItem);
     }

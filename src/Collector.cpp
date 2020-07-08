@@ -50,27 +50,17 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
     LOGS_I(getHost(), "%d assigned node information is came from Distributor", nodes.size());
 
     if (nodes.empty()) {
-
-        delete msg;
-        return false;
-    }
-
-    if (nodes.size() > job->getProcessCount(PROCESS_STATE_READY)) {
-
-        LOGS_I(getHost(), "%d assigned node is bigger than the request, ASSERTING!!!", nodes.size());
-        static_assert(true, "");
+        LOGS_I(getHost(), "No available node is came from Distributor", nodes.size());
         delete msg;
         return false;
     }
 
     for (auto &node : nodes) {
-        ProcessInfo &process = job->assignNode(node);
+        const ProcessInfo &process = job->assignNode(node);
         LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", node.getID(), process.getID());
         send2NodeJobMsg(node, job->getJobDir(), process.getID(),
                         process.get().getParsedExec(), process.get().getFileList());
     }
-
-    job->updateRequested();
 
     LOG_U(UI_UPDATE_COLL, job);
 
@@ -91,13 +81,11 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
 
     job->endProcess(msg->getData()->getExecutorID());
 
-    job->updateDependency();
+    int readyCount = job->updateDependency();
 
     LOG_U(UI_UPDATE_COLL, job);
 
     send2NodeReadyMsg(owner);
-
-    int readyCount = getJob()->getProcessCount(PROCESS_STATE_READY);
 
     if (readyCount) {
 
@@ -105,7 +93,9 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
 
     } else {
 
-        return send2DistributorReadyMsg(getDistributor());
+        return true;
+
+        //  return send2DistributorReadyMsg(getDistributor());
     }
 }
 
@@ -184,11 +174,7 @@ void Collector::setDistributor(const DistributorObject& _distributor) {
 
 bool Collector::processJob() {
 
-    //TODO Whole executors will be replaced with only independent executors
-    //TODO Also will add other jobs, after the prev. job is done.
-
-    job->updateDependency();
-    return send2DistributorNodeMsg(getDistributor(), job->getProcessCount(PROCESS_STATE_READY));
+    return send2DistributorNodeMsg(getDistributor(), job->updateDependency());
 }
 
 bool Collector::loadJob(const char* path) {

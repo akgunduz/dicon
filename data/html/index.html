@@ -220,8 +220,8 @@
             </colgroup>
             <thead>
               <tr>
-                <th>Process ID</th>
-                <th>Process Command</th>
+                <th>ID</th>
+                <th>Command</th>
                 <th>Assigned Node</th>
               </tr>
             </thead>
@@ -240,10 +240,17 @@
       <div class="standard-container">
         <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
         <table id="node-process-table" class="table-wide">
+          <colgroup>
+            <col span="1" style="width: 10%;" />
+            <col span="1" style="width: 10%;" />
+            <col span="1" style="width: 20%;" />
+            <col span="1" style="width: 60%;" />
+          </colgroup>
           <thead>
             <tr>
-              <th>Assigned Collector</th>
-              <th>Job Name</th>
+              <th>ID</th>
+              <th>Collector</th>
+              <th>Job</th>
               <th>Process</th>
             </tr>
           </thead>
@@ -277,9 +284,8 @@
 
       var PROCESS_STATE_DEPENDENT = 0;
       var PROCESS_STATE_READY = 1;
-      var PROCESS_STATE_REQUESTED = 2;
-      var PROCESS_STATE_STARTED = 3;
-      var PROCESS_STATE_ENDED = 4;
+      var PROCESS_STATE_STARTED = 2;
+      var PROCESS_STATE_ENDED = 3;
 
       var currentPage = {
         type: DISTRIBUTOR,
@@ -490,12 +496,12 @@
           newRow.insertCell().innerHTML = processitem.node != 0 ? processitem.node : "Not Assigned";
 
           switch (processitem.state) {
-            case PROCESS_STATE_NOTSTARTED:
+            case PROCESS_STATE_DEPENDENT:
               if (processitem.validity) {
                 newRow.style.backgroundColor = "#00C000";
               }
               break;
-            case PROCESS_STATE_PROVISION:
+            case PROCESS_STATE_READY:
               newcell.style.backgroundColor = "#000080";
               break;
             case PROCESS_STATE_STARTED:
@@ -538,9 +544,10 @@
 
         for (var processitem of data.processList) {
           let newRow = table.insertRow();
+          newRow.insertCell().innerHTML = processitem.processID;
           newRow.insertCell().innerHTML = processitem.collectorID;
           newRow.insertCell().innerHTML = processitem.jobID;
-          newRow.insertCell().innerHTML = processitem.processID;
+          newRow.insertCell().innerHTML = processitem.process;
         }
       }
 

@@ -13,11 +13,13 @@ ProcessInfo::ProcessInfo(int id) :
 }
 
 ProcessInfo::ProcessInfo(int id, ProcessItem& item) :
-    id(id), item(item), state(PROCESS_STATE_DEPENDENT), assigned(0) {
+    id(id), state(PROCESS_STATE_DEPENDENT), item(item),
+    assigned(0), jobDir("") {
 }
 
 ProcessInfo::ProcessInfo(const ProcessInfo &copy) :
-    id(copy.getID()), item(copy.get()), state(copy.getState()) {
+    id(copy.getID()), state(copy.getState()), item(copy.get()),
+    assigned(copy.getAssigned()), jobDir(copy.getJobID()) {
 }
 
 ProcessItem& ProcessInfo::get() const {
@@ -45,7 +47,7 @@ void ProcessInfo::setState(PROCESS_STATE _state) {
     state = _state;
 }
 
-std::string ProcessInfo::getJobID() {
+std::string ProcessInfo::getJobID() const {
 
     return jobDir;
 }

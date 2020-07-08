@@ -8,7 +8,8 @@
 #include "Common.h"
 #include "ComponentObject.h"
 
-typedef std::map<int, ComponentObject*> TypeComponentMapList;
+typedef std::map<int, ComponentObject*> TypeComponentMapIDList;
+typedef std::map<long, ComponentObject*> TypeComponentMapAddressList;
 typedef std::vector<ComponentObject*> TypeComponentVectorList;
 
 class ComponentManager {
@@ -17,7 +18,8 @@ class ComponentManager {
 
     std::mutex mutex;
 
-    TypeComponentMapList componentsMap;
+    TypeComponentMapIDList componentsMapID;
+    TypeComponentMapAddressList componentsMapAddress;
     TypeComponentVectorList componentsIndex;
 
 protected:

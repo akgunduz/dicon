@@ -4,7 +4,7 @@
 
 #include "Job.h"
 
-ProcessInfo& Job::getProcess(int index) {
+const ProcessInfo& Job::getProcess(int index) const {
 
     return processList[index];
 }
@@ -13,25 +13,6 @@ int Job::getProcessCount() const {
 
     return processList.size();
 }
-
-//bool Job::getAllProcesses(PROCESS_STATE state, std::vector<ProcessInfo>& processes) {
-//
-//    bool hasProcess = false;
-//
-//    mutex.lock();
-//
-//    for (auto &process : processList) {
-//        if (process.getState() == state) {
-//            hasProcess = true;
-//            processes.emplace_back(process);
-//        }
-//    }
-//
-//    mutex.unlock();
-//
-//    return hasProcess;
-//}
-
 
 int Job::getProcessCount(PROCESS_STATE state) {
 
@@ -50,9 +31,9 @@ int Job::getProcessCount(PROCESS_STATE state) {
     return count;
 }
 
-bool Job::updateDependency() {
+int Job::updateDependency() {
 
-    bool modified = false;
+    int readyCount = 0;
 
     mutex.lock();
 
@@ -60,16 +41,16 @@ bool Job::updateDependency() {
         if (process.getState() == PROCESS_STATE_DEPENDENT
                 && process.get().isValid()) {
             process.setState(PROCESS_STATE_READY);
-            modified = true;
+            readyCount++;
         }
     }
 
     mutex.unlock();
 
-    return modified;
+    return readyCount;
 }
 
-ProcessInfo& Job::assignNode(ComponentObject &node) {
+const ProcessInfo& Job::assignNode(ComponentObject &node) {
 
     mutex.lock();
 
@@ -87,28 +68,12 @@ ProcessInfo& Job::assignNode(ComponentObject &node) {
     return ProcessInfo::invalid;
 }
 
-bool Job::updateRequested() {
-
-    mutex.lock();
-
-    for (auto &process : processList) {
-        if (process.getState() == PROCESS_STATE_READY) {
-            process.setState(PROCESS_STATE_REQUESTED);
-        }
-    }
-
-    mutex.unlock();
-
-    return true;
-}
-
 void Job::endProcess(int id) {
 
     mutex.lock();
 
     for (auto &process : processList) {
         if (process.getID() == id) {
-            process.setAssigned(0);
             process.setState(PROCESS_STATE_ENDED);
             break;
         }

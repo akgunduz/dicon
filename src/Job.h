@@ -29,7 +29,7 @@ public:
     Job(ComponentObject host, const char* jobDir);
 
     void init();
-    ~Job();
+    ~Job() override;
 
     static bool parseNameNode(JsonItem*, json_object *node);
     static bool parseFileNode(JsonItem*, json_object *node);
@@ -47,14 +47,13 @@ public:
 
     int getProcessCount() const;
     int getProcessCount(PROCESS_STATE);
-    ProcessInfo& getProcess(int);
-    ProcessInfo& assignNode(ComponentObject &);
-    bool updateRequested();
+    const ProcessInfo& getProcess(int) const;
+    const ProcessInfo& assignNode(ComponentObject &);
     void endProcess(int id);
 
     ProcessItem* getByOutput(int);
     bool createDependencyMap();
-    bool updateDependency();
+    int updateDependency();
 };
 
 

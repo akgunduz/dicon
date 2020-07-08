@@ -75,14 +75,14 @@ public:
 
     void collInit();
     bool collHandler(struct mg_connection *conn, const char * uri);
-    bool collStateHandler(struct mg_connection *conn, long id);
-    bool collLoadJobHandler(struct mg_connection *conn, long id);
-    bool collProcessHandler(struct mg_connection *conn, long id);
+    bool collStateHandler(struct mg_connection *conn, int id);
+    bool collLoadJobHandler(struct mg_connection *conn, int id);
+    bool collProcessHandler(struct mg_connection *conn, int id);
     void collUpdate(WebEvent &event);
 
     void nodeInit();
     bool nodeHandler(struct mg_connection *conn, const char * uri);
-    bool nodeStateHandler(struct mg_connection *conn, long id);
+    bool nodeStateHandler(struct mg_connection *conn, int id);
     void nodeUpdate(WebEvent& event);
 
     int run() override;
