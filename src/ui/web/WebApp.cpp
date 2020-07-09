@@ -32,7 +32,8 @@ int mainHandlerWrapper(struct mg_connection *conn, void *cbData)
 
 int WebApp::mainHandler(struct mg_connection *conn)
 {
-    mg_send_mime_file(conn, MAIN_PAGE, nullptr);
+    sendHtml(conn);
+   // mg_send_mime_file(conn, MAIN_PAGE, nullptr);
     return 1;
 }
 

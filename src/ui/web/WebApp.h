@@ -69,4 +69,6 @@ public:
     int notifyHandler(int, int) override;
 };
 
+void sendHtml(struct mg_connection *conn);
+
 #endif //DICON_WEBAPP_H

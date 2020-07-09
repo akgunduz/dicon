@@ -61,3 +61,4 @@ GCCDebug
 .DS_Store
 build*/
 scratch/
+gen/

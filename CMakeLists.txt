@@ -12,6 +12,8 @@ set(UI_PATH "${SOURCE_PATH}/ui")
 
 set(EXTERNAL_PATH "${SOURCE_PATH}/external")
 
+set(GENERATED_PATH "${SOURCE_PATH}/gen")
+
 set(FRAMEWORK_FILES
         ${EXTERNAL_PATH}/md5/md5lib.cpp
         ${SOURCE_PATH}/ArchTypes.cpp
@@ -86,7 +88,13 @@ set(WEB_FILES
         ${UI_PATH}/web/WebDistributor.cpp
         ${UI_PATH}/web/WebCollector.cpp
         ${UI_PATH}/web/WebNode.cpp
+        ${GENERATED_PATH}/WebPage.cpp
         ${SOURCE_PATH}/Entry.cpp
+        )
+
+set(GENERATOR_FILES
+        ${SOURCE_PATH}/Util.cpp
+        ${SOURCE_PATH}/Generator.cpp
         )
 
 if (APPLE)
@@ -110,6 +118,8 @@ link_directories(${LIBRARY_DIR})
 
 add_library(dicon-framework ${FRAMEWORK_FILES})
 
+add_executable(dicon-generator ${GENERATOR_FILES})
+
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
 target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
@@ -117,3 +127,9 @@ target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)
 target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread dl rt)
+
+add_custom_command(
+        OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
+        COMMAND dicon-generator
+        DEPENDS dicon-generator
+)
