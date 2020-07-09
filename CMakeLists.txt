@@ -48,7 +48,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JsonItem.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
-        #${SOURCE_PATH}/ComponentTypes.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
         ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/MessageData.cpp
@@ -66,6 +65,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JobOrdered.cpp
         ${SOURCE_PATH}/ComponentInfo.cpp
         ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/ProcessState.cpp
         )
 
 set(WX_FILES
@@ -80,7 +80,6 @@ set(WX_FILES
         )
 
 set(CONSOLE_FILES
-        ${SOURCE_PATH}/ui/console/ConsoleEvent.cpp
         ${SOURCE_PATH}/ui/console/ConsoleApp.cpp
         ${SOURCE_PATH}/ui/console/ConsoleDistributor.cpp
         ${SOURCE_PATH}/ui/console/ConsoleCollector.cpp
@@ -90,7 +89,6 @@ set(CONSOLE_FILES
 
 set(WEB_FILES
         ${SOURCE_PATH}/ui/web/civetweb.c
-        ${SOURCE_PATH}/ui/web/WebEvent.cpp
         ${SOURCE_PATH}/ui/web/WebApp.cpp
         ${SOURCE_PATH}/ui/web/WebDistributor.cpp
         ${SOURCE_PATH}/ui/web/WebCollector.cpp
@@ -131,10 +129,10 @@ target_include_directories(dicon-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 #target_link_libraries(dicon-wx dicon-framework
 #        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 
-#add_executable(dicon-console ${CONSOLE_FILES})
-#target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
-#target_link_libraries(dicon-console dicon-framework
-#        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+add_executable(dicon-console ${CONSOLE_FILES})
+target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+target_link_libraries(dicon-console dicon-framework
+        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)

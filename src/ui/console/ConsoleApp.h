@@ -6,36 +6,26 @@
 #ifndef DICON_CONSOLEAPP_H
 #define DICON_CONSOLEAPP_H
 
-#include "Common.h"
-#include "ConsoleEvent.h"
-
-class ConsoleApp;
-
-typedef void (ConsoleApp::*fConsoleUpdater)(ConsoleEvent &event);
+#include "Application.h"
 
 class ConsoleApp : public App {
 
-	fConsoleUpdater uiUpdater[MAX_UI_CB];
-
 public:
     ConsoleApp(int argc, char** argv, int *interfaceID,
-                        LOGLEVEL* logLevel, int* distCount, int* collInfo, int* nodeInfo);
+                        LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
 
-    static void updateUICallback(void*, int, void*);
-    void updateUIEvent(int, void*);
-    void updateUI(ConsoleEvent& event);
+    bool distPollHandler();
+    bool distStateHandler();
 
-    void distInit();
-    void distAddtoCollectorList(ConsoleEvent &event);
-    void distUpdate(ConsoleEvent &event);
+    bool collStateHandler(int);
+    bool collLoadJobHandler(int);
+    bool collProcessHandler(int);
 
-    void collInit();
-    void collUpdate(ConsoleEvent &event);
-
-	void nodeInit();
-    void nodeUpdate(ConsoleEvent& event);
+    bool nodeStateHandler(int);
 
     int run() override;
+
+    int notifyHandler(int, int) override;
 };
 
 

@@ -38,13 +38,13 @@ protected:
 
 public:
 
-    static bool notifyCB(void *, int);
+    static bool notifyCB(void *, int, int);
 
     enum APPTYPE getAppType();
 
     virtual int run() = 0;
 
-    virtual int notifyHandler(int) = 0;
+    virtual int notifyHandler(int, int) = 0;
 
 };
 

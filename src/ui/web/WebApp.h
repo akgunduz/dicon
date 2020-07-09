@@ -6,9 +6,7 @@
 #ifndef DICON_WEBAPP_H
 #define DICON_WEBAPP_H
 
-#include "Common.h"
 #include "civetweb.h"
-#include "WebEvent.h"
 #include "Application.h"
 
 #define DOCUMENT_ROOT "../data/html/"
@@ -36,25 +34,15 @@ struct ws_client {
     enum WSSTATE state;
 };
 
-class WebApp;
-
-typedef void (WebApp::*fWebUpdater)(WebEvent &event);
-
 class WebApp : public App {
 
     struct mg_callbacks callbacks;
     struct mg_context *context;
     struct ws_client wsClients[MAX_UI_CB];
 
-    fWebUpdater uiUpdater[MAX_UI_CB];
-
 public:
     WebApp(int argc, char** argv, int *interfaceID,
                         LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
-
-    static void updateUICallback(void*, int, void*);
-	void updateUIEvent(int, void*);
-    void updateUI(WebEvent& event);
 
     int restHandler(struct mg_connection *conn);
     int mainHandler(struct mg_connection *conn);

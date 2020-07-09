@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 
 #elif defined(CONSOLE_UI)
 
-    app = new ConsoleApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
+    app = new ConsoleApp(argc, argv, interfaceID, logLevel, true, collInfo, nodeInfo);
 
 #elif defined(WEB_UI)
 

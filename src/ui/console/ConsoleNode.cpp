@@ -7,30 +7,33 @@
 #include <NodeState.h>
 #include "ConsoleApp.h"
 
-void ConsoleApp::nodeInit() {
+bool ConsoleApp::nodeStateHandler(int id) {
 
-    uiUpdater[UI_UPDATE_NODE] = &ConsoleApp::nodeUpdate;
+    auto *node = componentController->getNode(id);
+    if (!node) {
+        PRINT("Can not find the node with ID : %d !!!", id);
+        return false;
+    }
+
+    auto nodeObj = (NodeObject&) node->getHost();
+
+    PRINT("Node[%d] Status", id);
+
+    PRINT("State", nodeObj.getState());
+
+    PRINT("Processes");
+
+    for (auto &process : node->getProcessList()) {
+
+        std::string processCommand = process.get().getParsedExec();
+        Util::replaceStr(processCommand, ROOT_SIGN, "");
+
+        PRINT("ID : %d, Assigned Collector : %d, Job ID : %s, Process : %s",
+              process.getID(),
+              process.getAssigned(),
+              process.getJobID().c_str(),
+              processCommand.c_str());
+    }
+
+    return true;
 }
-
-void ConsoleApp::nodeUpdate(ConsoleEvent& event) {
-
-}
-
-//void ConsoleApp::nodeUpdateState(ConsoleEvent &event) {
-//
-//	auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    LOG_S("Console UI ------> Node State : %s", NodeState::getName((NODESTATES) data->getData(0)));
-//}
-//
-//void ConsoleApp::nodeUpdateClear(ConsoleEvent &event) {
-//
-//}
-//
-//void ConsoleApp::nodeUpdateProcessList(ConsoleEvent &event) {
-//
-//	auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    LOG_S("Console UI ------> Node Process Added : Collector[%d], Job : %s and Process : %d",
-//          data->getData(0), data->getString(0).c_str(), data->getData(1)) ;
-//}

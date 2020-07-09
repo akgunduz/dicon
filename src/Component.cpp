@@ -157,6 +157,6 @@ void Component::registerNotify(void* _notifyContext, TypeNotifyCB _notifyCB) {
 void Component::notifyUI() {
 
     if (notifyContext) {
-        Timer::set(getHost().getType(), 1000, notifyCB, notifyContext);
+        Timer::set(getHost().getType(), 1000, notifyCB, notifyContext, getHost().getID());
     }
 }

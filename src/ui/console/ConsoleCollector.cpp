@@ -3,83 +3,62 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <ui/UserInterfaceEvent.h>
-#include <Job.h>
 #include "ConsoleApp.h"
 
-void ConsoleApp::collInit() {
+bool ConsoleApp::collLoadJobHandler(int id) {
 
-    uiUpdater[UI_UPDATE_COLL] = &ConsoleApp::collUpdate;
+    auto *collector = componentController->getCollector(id);
+    if (collector != nullptr) {
+        collector->loadJob(nullptr);
+    }
 
+    return true;
 }
 
-void ConsoleApp::collUpdate(ConsoleEvent &event) {
+bool ConsoleApp::collProcessHandler(int id) {
 
+    auto *collector = componentController->getCollector(id);
+    if (collector != nullptr) {
+        collector->processJob();
+    }
+
+    return true;
 }
-//
-//void ConsoleApp::collUpdateFileList(ConsoleEvent &event) {
-//
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    auto *job = (Job*)data->getPointer(0);
-//
-//    for (int j = 0; j < job->getFileCount(); j++) {
-//
-//        auto *content = job->getFile(j);
-//
-//        LOG_S("Console UI ------> Collector File Added : %s, Validity : %s",
-//              content->getFileName(), content->isValid() ? "Valid" : "Invalid");
-//    }
-//}
-//
-//void ConsoleApp::collUpdateFileListItem(ConsoleEvent &event) {
-//
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    for (int i = 0; i < data->getDataSize(); i++) {
-//
-//        LOG_S("Console UI ------> Collector File Validated with index : %d", data->getData(i));
-//    }
-//}
-//
-//void ConsoleApp::collUpdateProcessList(ConsoleEvent &event) {
-//
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    auto *job = (Job *)data->getPointer(0);
-//
-////    for (int j = 0; j < job->getOrderedCount(); j++) {
-////
-////        LOG_S("Console UI ------> Collector Process[%d] : %s is going to triggered",
-////                j, job->getOrderedExecution(j)->getExec());
-////
-////    }
-//}
-//
-//void ConsoleApp::collUpdateProcessListItem(ConsoleEvent &event) {
-//
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    auto *job = (Job *)data->getPointer(0);
-//
-////    for (int j = 0; j < job->getOrderedCount(); j++) {
-////
-////        switch(job->getOrderedState(j)) {
-////
-////            case PROCESS_STATE_ENDED:
-////                LOG_S("Console UI ------> Collector Process[%d] is ended", j);
-////                break;
-////
-////            case PROCESS_STATE_STARTED:
-////                LOG_S("Console UI ------> Collector Process[%d] is started", j);
-////                break;
-////
-////            case PROCESS_STATE_DEPENDENT:
-////                LOG_S("Console UI ------> Collector Process[%d] is not started", j);
-////                break;
-////
-////            default:
-////                break;
-////        }
-////    }
-//}
+
+bool ConsoleApp::collStateHandler(int id) {
+
+    auto *collector = componentController->getCollector(id);
+    if (!collector) {
+        PRINT("Can not find the collector with ID : %d !!!", id);
+        return false;
+    }
+
+    auto *job = collector->getJob();
+    if (job == nullptr) {
+        return false;
+    }
+
+    PRINT("Collector[%d] Status", id);
+
+    PRINT("Files of Job : %s", job->getName());
+
+    for (int j = 0; j < job->getFileCount(); j++) {
+
+        auto *content = job->getFile(j);
+
+        PRINT("\tFile : %s, valid? : %s", content->getFileName(), content->isValid() ? "yes" : "no");
+    }
+
+    PRINT("Processes");
+
+    for (int j = 0; j < job->getProcessCount(); j++) {
+
+        PRINT("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
+                job->getProcess(j).getID(),
+                job->getProcess(j).get().getExec(),
+                ProcessState::getName(job->getProcess(j).getState()),
+                job->getProcess(j).getAssigned());
+    }
+
+    return true;
+}

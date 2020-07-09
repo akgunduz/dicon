@@ -6,39 +6,9 @@
 #include "ConsoleApp.h"
 
 ConsoleApp::ConsoleApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, int* distCount, int* collInfo, int* nodeInfo)
-    : UserInterfaceApp(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel,
-                       distCount, collInfo, nodeInfo) {
-
-    Log::registerUIController(this, updateUICallback);
-
-    distInit();
-    collInit();
-    nodeInit();
-}
-
-void ConsoleApp::updateUICallback(void *context, int id, void *data) {
-
-    ((ConsoleApp*) context)->updateUIEvent(id, data);
-}
-
-void ConsoleApp::updateUIEvent(int id, void *data) {
-
-	ConsoleEvent event;
-	event.SetId(id);
-    event.SetClientData(data);
-
-    //On real UI architectures this updateUI should be asynchronous like in WX
-    updateUI(event);
-}
-
-void ConsoleApp::updateUI(ConsoleEvent& event) {
-
-    int id = event.GetId();
-
-    if (uiUpdater[id] != nullptr) {
-        ((this)->*(uiUpdater[id]))(event);
-    }
+                       LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo)
+    : App(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel,
+          enableDistributor, collInfo, nodeInfo) {
 }
 
 int ConsoleApp::run() {
@@ -49,21 +19,38 @@ int ConsoleApp::run() {
         in = getchar();
         switch(in) {
             case 'p':
-                componentController->getDistributor()->sendWakeupMessagesAll(false);
+                distPollHandler();
                 break;
             case 'l':
-                componentController->getCollector(1)->loadJob(nullptr);
+                collLoadJobHandler(1);
                 break;
             case 'x':
-                componentController->getCollector(1)->processJob();
+                collProcessHandler(1);
                 break;
             case 'q':
-
                 return 0;
             default:
                 break;
         }
 
     } while(true);
-
 }
+
+
+int ConsoleApp::notifyHandler(int target, int id) {
+
+    switch(target) {
+        case COMP_DISTRIBUTOR:
+            distStateHandler();
+            break;
+        case COMP_COLLECTOR:
+            collStateHandler(id);
+            break;
+        case COMP_NODE:
+            nodeStateHandler(id);
+            break;
+    }
+
+    return 0;
+}
+

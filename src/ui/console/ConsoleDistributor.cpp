@@ -3,39 +3,37 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <ui/UserInterfaceEvent.h>
 #include <Log.h>
 #include <NodeState.h>
 #include "ConsoleApp.h"
 
-void ConsoleApp::distInit() {
 
-    uiUpdater[UI_UPDATE_DIST] = &ConsoleApp::distUpdate;
+bool ConsoleApp::distPollHandler() {
+
+    componentController->getDistributor()->sendWakeupMessagesAll(false);
+
+    return true;
 }
 
-//void ConsoleApp::distAddtoCollectorList(ConsoleEvent &event) {
-//
-//    long i = 0;
-//
-//    auto *data = (UserInterfaceEvent *)event.GetClientData();
-//
-//    if (data->getData(1) > 0) {
-//
-//        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], Assigned Node[%d]",
-//              data->getData(0), data->getData(1));
-//    } else {
-//
-//        LOG_S("Console UI ------> Distributor Collector Updated : Collector[%d], No Assigned Node",
-//              data->getData(0));
-//    }
-//}
+bool ConsoleApp::distStateHandler() {
 
-void ConsoleApp::distUpdate(ConsoleEvent &event) {
+    PRINT("Collector List : ");
 
-    long i = 0;
+    for (int i = 0 ; i < componentController->getDistributor()->getCollectors()->size(); i++) {
 
-    auto *data = (UserInterfaceEvent *)event.GetClientData();
+        auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
 
-    LOG_S("Console UI ------> Distributor Node Updated : Node[%d], State : %s",
-          data->getData(0), NodeState::getName((NODESTATES)data->getData(1)));
+        PRINT("\t ID : %d, Assigned Node : %d", collector->getID(), ((CollectorObject*)collector)->getAssigned().getID());
+    }
+
+    PRINT("Node List : ");
+
+    for (int i = 0 ; i < componentController->getDistributor()->getNodes()->size(); i++) {
+
+        auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
+
+        PRINT("\t ID : %d, State : %d", node->getID(), ((NodeObject*)node)->getState());
+    }
+
+    return true;
 }

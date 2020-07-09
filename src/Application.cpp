@@ -42,9 +42,9 @@ enum APPTYPE App::getAppType() {
     return type;
 }
 
-bool App::notifyCB(void *context, int target) {
+bool App::notifyCB(void *context, int target, int id) {
 
-    return ((App*) context)->notifyHandler(target);
+    return ((App*) context)->notifyHandler(target, id);
 }
 
 
