@@ -8,34 +8,34 @@
 
 TypeTimerList Timer::timerList;
 
-Timer::Timer(std::string name, long timeout, TypeTimerCB cb, void* cbData)
-    : name(name), timeout(timeout), cb(cb), cbData(cbData) {
+Timer::Timer(int id, long timeout, TypeNotifyCB cb, void* cbData)
+    : id(id), timeout(timeout), cb(cb), cbData(cbData) {
 
     thread = std::thread(run, this);
 }
 
 void *Timer::run(void *arg) {
 
-    Timer *timer = (Timer *) arg;
+    auto *timer = (Timer *) arg;
 
     do {
 
-        timer->retrigger = false;
+        timer->reTrigger = false;
 
         timer->curr = timer->timeout;
 
         while (timer->curr) {
 
-            usleep(TIMER_GRANUL * 1000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(TIMER_GRANUL));
 
             timer->curr -= TIMER_GRANUL;
         }
 
-        timer->cb(timer->cbData, timer->name.c_str());
+        timer->cb(timer->cbData, timer->id);
 
-    } while(timer->retrigger);
+    } while(timer->reTrigger);
 
-    timerList.erase(timer->name);
+    timerList.erase(timer->id);
 
     return nullptr;
 }
@@ -43,22 +43,16 @@ void *Timer::run(void *arg) {
 void Timer::reset(long ms) {
 
     timeout = ms;
-    retrigger = true;
+    reTrigger = true;
 }
 
-Timer *Timer::set(std::string name, long ms, TypeTimerCB cb, void *cbData) {
+Timer *Timer::set(int id, long ms, TypeNotifyCB cb, void *cbData) {
 
-    auto timer = Timer::timerList.find(name);
+    auto timer = Timer::timerList.find(id);
     if (timer == Timer::timerList.end()) {
-        timerList[name] = new Timer(name, ms, cb, cbData);
-        return timerList[name];
+        timerList[id] = new Timer(id, ms, cb, cbData);
+        return timerList[id];
     }
     timer->second->reset(ms);
     return timer->second;
 }
-
-//Timer *Timer::create(std::string name, long ms, TypeTimerCB cb, void *cbData) {
-//
-//    timerList[name] = new Timer(ms, cb, cbData);
-//    return timerList[name];
-//}

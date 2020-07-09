@@ -3,16 +3,10 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <ui/UserInterfaceEvent.h>
 #include <Log.h>
 #include <NodeState.h>
 #include <CollectorObject.h>
 #include "WebApp.h"
-
-void WebApp::distInit() {
-
-    uiUpdater[UI_UPDATE_DIST] = &WebApp::distUpdate;
-}
 
 bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
@@ -47,7 +41,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOG_S("Can not create json object!!!");
+        PRINT("Can not create json object!!!");
         return false;
     }
 
@@ -90,11 +84,6 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
     json_object_put(jsonObj);
 
     return true;
-}
-
-void WebApp::distUpdate(WebEvent &event) {
-
-    Timer::set("dist", 1000, WebApp::wsInform, this);
 }
 
 

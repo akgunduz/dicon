@@ -9,7 +9,7 @@
 #include "Common.h"
 #include "civetweb.h"
 #include "WebEvent.h"
-#include "UserInterfaceApp.h"
+#include "Application.h"
 
 #define DOCUMENT_ROOT "../data/html/"
 #define PORT "8081"
@@ -40,7 +40,7 @@ class WebApp;
 
 typedef void (WebApp::*fWebUpdater)(WebEvent &event);
 
-class WebApp : public UserInterfaceApp {
+class WebApp : public App {
 
     struct mg_callbacks callbacks;
     struct mg_context *context;
@@ -50,7 +50,7 @@ class WebApp : public UserInterfaceApp {
 
 public:
     WebApp(int argc, char** argv, int *interfaceID,
-                        LOGLEVEL* logLevel, int* distCount, int* collInfo, int* nodeInfo);
+                        LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
 
     static void updateUICallback(void*, int, void*);
 	void updateUIEvent(int, void*);
@@ -64,28 +64,21 @@ public:
     void wsReadyHandler(struct mg_connection *conn);
     int wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len);
     void wsCloseHandler(const struct mg_connection *conn);
-    static bool wsInform(void*, const char*);
 
-    void distInit();
     bool distHandler(struct mg_connection *conn, const char * uri);
     bool distPollHandler(struct mg_connection *conn);
     bool distStateHandler(struct mg_connection *conn);
-    void distUpdate(WebEvent &event);
 
-
-    void collInit();
     bool collHandler(struct mg_connection *conn, const char * uri);
     bool collStateHandler(struct mg_connection *conn, int id);
     bool collLoadJobHandler(struct mg_connection *conn, int id);
     bool collProcessHandler(struct mg_connection *conn, int id);
-    void collUpdate(WebEvent &event);
 
-    void nodeInit();
     bool nodeHandler(struct mg_connection *conn, const char * uri);
     bool nodeStateHandler(struct mg_connection *conn, int id);
-    void nodeUpdate(WebEvent& event);
 
     int run() override;
+    int notifyHandler(int) override;
 };
 
 #endif //DICON_WEBAPP_H

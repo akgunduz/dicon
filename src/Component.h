@@ -22,6 +22,9 @@ class Component {
 
     Interface *interfaces[COMP_MAX];
 
+    static void *notifyContext;
+    static TypeNotifyCB notifyCB;
+
 protected :
 
     ComponentObject *host;
@@ -34,6 +37,8 @@ protected :
     static ComponentObject getHostCB(void*);
 
     bool initInterfaces(COMPONENT type);
+
+    void notifyUI();
 
 public:
 
@@ -56,6 +61,8 @@ public:
 
     std::vector<long> getAddressList(const ComponentObject&);
     bool defaultProcessMsg(ComponentObject, Message *);
+
+    static void registerNotify(void*, TypeNotifyCB);
 
 };
 

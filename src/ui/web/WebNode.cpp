@@ -7,11 +7,6 @@
 #include <NodeState.h>
 #include "WebApp.h"
 
-void WebApp::nodeInit() {
-
-    uiUpdater[UI_UPDATE_NODE] = &WebApp::nodeUpdate;
-}
-
 bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
@@ -35,7 +30,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto *node = componentController->getNode(id);
     if (!node) {
-        LOG_S("Can not find the node with ID : %d !!!", id);
+        PRINT("Can not find the node with ID : %d !!!", id);
         return false;
     }
 
@@ -43,7 +38,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOG_S("Can not create json object!!!");
+        PRINT("Can not create json object!!!");
         return false;
     }
 
@@ -77,9 +72,4 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
     json_object_put(jsonObj);
 
     return true;
-}
-
-void WebApp::nodeUpdate(WebEvent& event) {
-
-    Timer::set("node", 1000, WebApp::wsInform, this);
 }

@@ -8,13 +8,12 @@
 
 #include "Common.h"
 #include "ConsoleEvent.h"
-#include "UserInterfaceApp.h"
 
 class ConsoleApp;
 
 typedef void (ConsoleApp::*fConsoleUpdater)(ConsoleEvent &event);
 
-class ConsoleApp : public UserInterfaceApp {
+class ConsoleApp : public App {
 
 	fConsoleUpdater uiUpdater[MAX_UI_CB];
 

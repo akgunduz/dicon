@@ -3,9 +3,9 @@
 //
 
 #include "Component.h"
-#include "DistributorObject.h"
-#include "CollectorObject.h"
-#include "NodeObject.h"
+
+void *Component::notifyContext = nullptr;
+TypeNotifyCB Component::notifyCB = nullptr;
 
 Component::Component(const char* rootPath) {
 
@@ -148,3 +148,15 @@ ComponentObject &Component::getHost() {
     return (*host);
 }
 
+void Component::registerNotify(void* _notifyContext, TypeNotifyCB _notifyCB) {
+
+    notifyContext = _notifyContext;
+    notifyCB = _notifyCB;
+}
+
+void Component::notifyUI() {
+
+    if (notifyContext) {
+        Timer::set(getHost().getType(), 1000, notifyCB, notifyContext);
+    }
+}

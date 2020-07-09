@@ -52,7 +52,7 @@ int ConsoleApp::run() {
                 componentController->getDistributor()->sendWakeupMessagesAll(false);
                 break;
             case 'l':
-                componentController->getCollector(1)->loadJob(NULL);
+                componentController->getCollector(1)->loadJob(nullptr);
                 break;
             case 'x':
                 componentController->getCollector(1)->processJob();

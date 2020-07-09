@@ -3,14 +3,8 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <ui/UserInterfaceEvent.h>
 #include <Job.h>
 #include "WebApp.h"
-
-void WebApp::collInit() {
-
-    uiUpdater[UI_UPDATE_COLL] = &WebApp::collUpdate;
-}
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
@@ -69,7 +63,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
     if (!collector) {
-        LOG_S("Can not find the collector with ID : %d !!!", id);
+        PRINT("Can not find the collector with ID : %d !!!", id);
         return false;
     }
 
@@ -80,7 +74,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOG_S("Can not create json object!!!");
+        PRINT("Can not create json object!!!");
         return false;
     }
 
@@ -124,9 +118,4 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
     json_object_put(jsonObj);
 
     return true;
-}
-
-void WebApp::collUpdate(WebEvent &event) {
-
-    Timer::set("coll", 1000, WebApp::wsInform, this);
 }

@@ -260,9 +260,9 @@
     </div>
 
     <script>
-      var DISTRIBUTOR = 0x1;
-      var COLLECTOR = 0x2;
-      var NODE = 0x3;
+      var DISTRIBUTOR = 0x0;
+      var COLLECTOR = 0x1;
+      var NODE = 0x2;
 
       var PORT = "8081";
       var HOSTING = "http://localhost:" + PORT;
@@ -555,14 +555,15 @@
         var wsConn = new WebSocket(WS_URI);
         currentPage.set(DISTRIBUTOR, this.id);
         wsConn.onmessage = function (info) {
-          switch (info.data) {
-            case "dist":
+          let component = parseInt(info.data, 10);
+          switch (component) {
+            case DISTRIBUTOR:
               onDistState();
               break;
-            case "coll":
+            case COLLECTOR:
               onCollState();
               break;
-            case "node":
+            case NODE:
               onNodeState();
               break;
           }

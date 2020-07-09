@@ -63,11 +63,9 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/DistributorObject.cpp
         ${SOURCE_PATH}/ProcessInfo.cpp
-        ${SOURCE_PATH}/ui/UserInterfaceController.cpp
-        ${SOURCE_PATH}/ui/UserInterfaceEvent.cpp
-        ${SOURCE_PATH}/ui/UserInterfaceApp.cpp
         ${SOURCE_PATH}/JobOrdered.cpp
         ${SOURCE_PATH}/ComponentInfo.cpp
+        ${SOURCE_PATH}/Application.cpp
         )
 
 set(WX_FILES
@@ -78,7 +76,7 @@ set(WX_FILES
         ${SOURCE_PATH}/ui/wx/WxNode.cpp
         ${SOURCE_PATH}/ui/wx/WxMain.cpp
         ${SOURCE_PATH}/ui/wx/WxApp.cpp
-        ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/Entry.cpp
         )
 
 set(CONSOLE_FILES
@@ -87,7 +85,7 @@ set(CONSOLE_FILES
         ${SOURCE_PATH}/ui/console/ConsoleDistributor.cpp
         ${SOURCE_PATH}/ui/console/ConsoleCollector.cpp
         ${SOURCE_PATH}/ui/console/ConsoleNode.cpp
-        ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/Entry.cpp
         )
 
 set(WEB_FILES
@@ -97,7 +95,7 @@ set(WEB_FILES
         ${SOURCE_PATH}/ui/web/WebDistributor.cpp
         ${SOURCE_PATH}/ui/web/WebCollector.cpp
         ${SOURCE_PATH}/ui/web/WebNode.cpp
-        ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/Entry.cpp
         )
 
 if (APPLE)
@@ -133,10 +131,10 @@ target_include_directories(dicon-framework PUBLIC ${OPENSSL_INCLUDE_DIR})
 #target_link_libraries(dicon-wx dicon-framework
 #        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${wxWidgets_LIBRARIES} )
 
-add_executable(dicon-console ${CONSOLE_FILES})
-target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
-target_link_libraries(dicon-console dicon-framework
-        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
+#add_executable(dicon-console ${CONSOLE_FILES})
+#target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+#target_link_libraries(dicon-console dicon-framework
+#        ${JSON-C_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} pthread)
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)

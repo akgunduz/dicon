@@ -3,7 +3,6 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Log.h>
 #include "WebApp.h"
 
 volatile int exitNow = 0;
@@ -25,19 +24,6 @@ const char *options[] = {
 };
 
 #define MAIN_PAGE DOCUMENT_ROOT "./index.html"
-
-
-
-//int postHandler(struct mg_connection *conn, ComponentController *controller) {
-//
-//    char buffer[1024];
-//    int len = mg_read(conn, buffer, sizeof(buffer) - 1);
-//    if ((len < 1) || (len >= sizeof(buffer))) {
-//        mg_send_http_error(conn, 400, "%s", "No request body data");
-//        return 400;
-//    }
-//    buffer[len] = 0;
-//}
 
 int mainHandlerWrapper(struct mg_connection *conn, void *cbData)
 {
@@ -72,7 +58,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     int restLen = strlen(REST_URI);
     if (0 != strncmp(ri->request_uri, REST_URI, restLen)) {
-        LOG_S("Wrong REST Call has came!!!");
+        PRINT("Wrong REST Call has came!!!");
         return 0;
     }
 
@@ -104,7 +90,7 @@ int wsHandlerWrapper(struct mg_connection *conn, void *cbData) {
 int WebApp::wsHandler(struct mg_connection *conn) {
 
     //Note to myself: if /ws is needed use this handler, seems not needed now;
-    LOG_S("WS Handler is executed....");
+    PRINT("WS Handler is executed....");
     return 1;
 }
 
@@ -131,7 +117,7 @@ int WebApp::wsConnectHandler(const struct mg_connection *conn)
     mg_unlock_context(ctx);
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
-    LOG_S("WS Client is %s from %s:%d", accepted ? "accepted" : "rejected", ri->remote_addr, ri->remote_port);
+    PRINT("WS Client is %s from %s:%d", accepted ? "accepted" : "rejected", ri->remote_addr, ri->remote_port);
 
     return !accepted;
 }
@@ -156,7 +142,7 @@ int WebApp::wsDataHandler(struct mg_connection *conn, int bits, char *data, size
 
     auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
 
-    LOG_S("WS Client send data : %s ", Util::hex2str((uint8_t*)data, len).c_str());
+    PRINT("WS Client send data : %s ", Util::hex2str((uint8_t*)data, len).c_str());
 
     return 1;
 }
@@ -182,41 +168,13 @@ void WebApp::wsCloseHandler(const struct mg_connection *conn)
     mg_unlock_context(ctx);
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
-    LOG_S("WS Client at %s:%d is disconnected", ri->remote_addr, ri->remote_port);
-}
-
-bool WebApp::wsInform(void *data, const char* data2)
-{
-    WebApp* webApp = (WebApp*) data;
-
-    for (auto & wsClient : webApp->wsClients) {
-
-        bool process = false;
-
-        mg_lock_context(webApp->context);
-        if (wsClient.state == WSSTATE_READY) {
-            wsClient.state = WSSTATE_PROCESS;
-            process = true;
-        }
-        mg_unlock_context(webApp->context);
-
-        if (process) {
-            mg_websocket_write(wsClient.conn, MG_WEBSOCKET_OPCODE_TEXT, data2, strlen(data2));
-            mg_lock_context(webApp->context);
-            wsClient.state = WSSTATE_READY;
-            mg_unlock_context(webApp->context);
-        }
-    }
-
-    return true;
+    PRINT("WS Client at %s:%d is disconnected", ri->remote_addr, ri->remote_port);
 }
 
 WebApp::WebApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, int* distCount, int* collInfo, int* nodeInfo)
-    : UserInterfaceApp(APPTYPE_WEB, argc, argv, interfaceID, logLevel,
-                       distCount, collInfo, nodeInfo) {
-
-    Log::registerUIController(this, updateUICallback);
+                       LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo)
+    : App(APPTYPE_WEB, argc, argv, interfaceID, logLevel,
+                       enableDistributor, collInfo, nodeInfo) {
 
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));
@@ -224,7 +182,7 @@ WebApp::WebApp(int argc, char** argv, int *interfaceID,
 
     context = mg_start(&callbacks, 0, options);
     if (!context) {
-        LOG_S("Can not start server....");
+        PRINT("Can not start server....");
         return;
     }
 
@@ -241,35 +199,7 @@ WebApp::WebApp(int argc, char** argv, int *interfaceID,
                              wsCloseHandlerWrapper,
                              this);
 
-    LOG_S("Link : %s", HOSTING);
-
-    distInit();
-    collInit();
-    nodeInit();
-}
-
-void WebApp::updateUICallback(void *context, int id, void *data) {
-
-    ((WebApp*) context)->updateUIEvent(id, data);
-}
-
-void WebApp::updateUIEvent(int id, void *data) {
-
-    WebEvent event;
-    event.SetId(id);
-    event.SetClientData(data);
-
-    //On real UI architectures this updateUI should be asynchronous like in WX
-    updateUI(event);
-}
-
-void WebApp::updateUI(WebEvent& event) {
-
-    int id = event.GetId();
-
-    if (uiUpdater[id] != nullptr) {
-        ((this)->*(uiUpdater[id]))(event);
-    }
+    PRINT("Link : %s", HOSTING);
 }
 
 int WebApp::run() {
@@ -280,7 +210,32 @@ int WebApp::run() {
 
     /* Stop the server */
     mg_stop(context);
-    LOG_S("Exiting....");
+    PRINT("Exiting....");
     return 1;
+}
+
+int WebApp::notifyHandler(int target) {
+
+    for (auto & wsClient : wsClients) {
+
+        bool process = false;
+
+        mg_lock_context(context);
+        if (wsClient.state == WSSTATE_READY) {
+            wsClient.state = WSSTATE_PROCESS;
+            process = true;
+        }
+        mg_unlock_context(context);
+
+        if (process) {
+            mg_websocket_write(wsClient.conn, MG_WEBSOCKET_OPCODE_TEXT,
+                    std::to_string(target).c_str(), 1);
+            mg_lock_context(context);
+            wsClient.state = WSSTATE_READY;
+            mg_unlock_context(context);
+        }
+    }
+
+    return true;
 }
 

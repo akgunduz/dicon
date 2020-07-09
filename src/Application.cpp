@@ -1,167 +1,53 @@
 //
-// Created by Haluk AKGUNDUZ on 03.05.2018.
-// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
+// Created by Haluk AKGUNDUZ on 24.06.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#ifdef WX_UI
-#include <ui/wx/WxApp.h>
-#endif
-#ifdef CONSOLE_UI
-#include <ui/console/ConsoleApp.h>
-#endif
-#ifdef WEB_UI
-#include <ui/web/WebApp.h>
-#endif
+#include "Application.h"
 
-int listDevices() {
+App::App(enum APPTYPE type, int argc, char** argv, int *interfaceID,
+                                   LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo) :
+        type(type), argc(argc), argv(argv) {
 
-    DeviceList *deviceList = DeviceList::getInstance();
+    Log::init(logLevel[0], logLevel[1]);
 
-    LOG_S("Listing Interfaces .....");
+    Component::registerNotify(this, notifyCB);
 
-    for (int j = 0; j < deviceList->getCount(); j++) {
-        LOG_S("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
-              deviceList->get(j)->getName());
+    deviceList = DeviceList::getInstance();
+
+    PRINT("Using network interfaces : %s and %s",
+          deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
+
+    componentController = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
+
+    if (enableDistributor) {
+        componentController->startDistributor();
     }
 
-    return 0;
-}
-
-bool parseParameters(int argc, char** argv, int *interfaceID,
-                     LOGLEVEL* logLevel, int* disCount, int* collInfo, int* nodeInfo) {
-
-    for (int i = 1; i < argc; i++) {
-
-        if (!strcmp(argv[i], "-l")) {
-
-            return listDevices();
-
-        } else if (!strcmp(argv[i], "-i")) {
-
-            if (argc > i + 1) {
-
-                if (isdigit(argv[++i][0])) {
-                    interfaceID[0] = atoi(argv[i]);
-
-                } else {
-                    return false;
-                }
-
-                if (isdigit(argv[++i][0])) {
-                    interfaceID[1] = atoi(argv[i]);
-
-                } else {
-                    return false;
-                }
-            }
-
-        } else if (!strcmp(argv[i], "-d")) {
-
-            *disCount = 1;
-
-        } else if (!strcmp(argv[i], "-c")) {
-
-            if (isdigit(argv[++i][0])) {
-                collInfo[0] =  atoi(argv[i]);
-
-            } else {
-
-                return false;
-            }
-
-            if (isdigit(argv[i + 1][0])) {
-                collInfo[1] =  atoi(argv[++i]);
-
-            }
-
-        } else if (!strcmp(argv[i], "-n")) {
-
-            if (isdigit(argv[++i][0])) {
-                nodeInfo[0] =  atoi(argv[i]);
-
-            } else {
-
-                return false;
-            }
-
-            if (isdigit(argv[i + 1][0])) {
-                nodeInfo[1] =  atoi(argv[++i]);
-
-            }
-        } else if (!strcmp(argv[i], "-g")) {
-
-            if (argc > i + 1) {
-
-                if (isdigit(argv[++i][0])) {
-                    logLevel[0] = (LOGLEVEL)atoi(argv[i]);
-
-                } else {
-                    return false;
-                }
-
-                if (isdigit(argv[++i][0])) {
-                    logLevel[1] = (LOGLEVEL)atoi(argv[i]);
-
-                } else {
-                    return false;
-                }
-            }
-        }
+    if (collInfo[0]) {
+        componentController->startCollector(collInfo[0], collInfo[1]);
     }
 
-    return true;
-}
-
-int main(int argc, char** argv) {
-
-    Util::cleanup();
-
-    int interfaceID[2] = {0, 0};
-
-    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_INFO};
-
-    int distCount = 0;
-    int collInfo[2] = {0, 1};
-    int nodeInfo[2] = {0, 1};
-
-    if (!parseParameters(argc, argv, interfaceID, logLevel,
-            &distCount, collInfo, nodeInfo)) {
-        LOG_S("Parameter problem, exiting.....");
-        return 0;
+    if (nodeInfo[0]) {
+        componentController->startNode(nodeInfo[0], nodeInfo[1]);
     }
 
-#if 0
-    Util::removePath("./Collector_1/Job_1/md5");
-    Util::removePath("./Collector_1/Job_1/output");
-    Util::removePath("./Node_1/Job_1");
-    Util::removePath("./Node_2/Job_1");
-#endif
-
-    UserInterfaceApp *app = nullptr;
-
-#if defined(WX_UI)
-
-    distCount = 1;
-    collInfo[0] = 1;
-    collInfo[1] = 1;
-    nodeInfo[0] = 1;
-    nodeInfo[1] = 1;
-
-    app = new WxApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
-
-#elif defined(CONSOLE_UI)
-
-    app = new ConsoleApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
-
-#elif defined(WEB_UI)
-
-    app = new WebApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
-
-#else
-
-#error "Application Default mode is not selected"
-
-#endif
-
-    return app->run();
+    PRINT("Running in %s Mode with %d Distributor, %d Collector and %d Node",
+          type == APPTYPE_WEB ? "Web" : type == APPTYPE_CONSOLE ? "Console" : "WxWidgets",
+          enableDistributor ? 1 : 0, collInfo[0], nodeInfo[0]);
 }
+
+enum APPTYPE App::getAppType() {
+
+    return type;
+}
+
+bool App::notifyCB(void *context, int target) {
+
+    return ((App*) context)->notifyHandler(target);
+}
+
+
+
+
+

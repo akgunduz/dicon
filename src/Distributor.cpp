@@ -132,7 +132,7 @@ bool Distributor::processCollectorIDMsg(const ComponentObject& owner, Message *m
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
-    LOG_U(UI_UPDATE_DIST, std::vector<long> {owner.getID(), 0});
+    notifyUI();
 
     LOGS_I(getHost(), "Collector[%d] is confirmed", owner.getID());
 
@@ -163,7 +163,7 @@ bool Distributor::processNodeIDMsg(const ComponentObject& owner, Message *msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
-    LOG_U(UI_UPDATE_DIST, std::vector<long> {owner.getID(), nodeManager->getState(owner.getID())});
+    notifyUI();
 
     LOGS_I(getHost(), "Node[%d] is confirmed", owner.getID());
 
@@ -185,7 +185,7 @@ bool Distributor::processNodeBusyMsg(const ComponentObject& owner, Message *msg)
 
     nodeManager->setAssigned(owner.getID(), collID, collectorManager->get(collID)->getAddress());
 
-    LOG_U(UI_UPDATE_DIST, std::vector<long> {1});
+    notifyUI();
 
     LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", owner.getID(), collID);
 

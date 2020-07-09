@@ -37,7 +37,7 @@ bool Collector::processDistributorIDMsg(const ComponentObject& owner, Message *m
 
     getHost().setID((int)msg->getHeader()->getVariant(0));
 
-    LOG_U(UI_UPDATE_COLL, std::vector<long>{getHost().getID()});
+    notifyUI();
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);
@@ -62,7 +62,7 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
                         process.get().getParsedExec(), process.get().getFileList());
     }
 
-    LOG_U(UI_UPDATE_COLL, job);
+    notifyUI();
 
     return true;
 }
@@ -83,7 +83,7 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
 
     int readyCount = job->updateDependency();
 
-    LOG_U(UI_UPDATE_COLL, job);
+    notifyUI();
 
     send2NodeReadyMsg(owner);
 
@@ -184,7 +184,7 @@ bool Collector::loadJob(const char* path) {
     job = new Job(getHost(), dirList[0].c_str());
 
     if (job->getFileCount() && job->getExecutorCount()) {
-        LOG_U(UI_UPDATE_COLL, job);
+        notifyUI();
         return true;
     }
     return false;

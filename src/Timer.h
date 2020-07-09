@@ -9,25 +9,25 @@
 
 class Timer;
 
-typedef bool (*TypeTimerCB)(void*, const char*);
-typedef std::map<std::string, Timer*, char_cmp> TypeTimerList;
+typedef bool (*TypeNotifyCB)(void*, int);
+typedef std::map<int, Timer*> TypeTimerList;
 
 class Timer {
 
     std::thread thread;
-    std::string name;
+    int id;
     long timeout;
     long curr;
-    bool retrigger;
+    bool reTrigger;
 
-    TypeTimerCB cb;
+    TypeNotifyCB cb;
     void* cbData;
     static TypeTimerList timerList;
     static void* run(void *);
-    Timer(std::string, long, TypeTimerCB, void*);
+    Timer(int, long, TypeNotifyCB, void*);
 
 public:
-    static Timer* set(std::string, long ms, TypeTimerCB cb, void *cbData);
+    static Timer* set(int, long ms, TypeNotifyCB cb, void *cbData);
 
     void reset(long);
 };
