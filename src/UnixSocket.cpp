@@ -151,7 +151,6 @@ void UnixSocket::runSender(long target, Message *msg) {
 
     LOGS_T(getHost(), "Socket sender %d is connected !!!", clientSocket);
 
-	//msg->getHeader()->setOwnerAddress(getAddress());
 	msg->writeToStream(clientSocket);
 
 	shutdown(clientSocket, SHUT_RDWR);
