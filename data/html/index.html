@@ -163,7 +163,7 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Node ID</th>
+                <th>State</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -195,6 +195,7 @@
           >
             Load Job
           </button>
+          <h3 id=coll-job-name style="text-align: left; margin-bottom: 1rem;">Job :</h3>
           <table id="coll-file-table" class="table-wide">
             <thead>
               <tr>
@@ -212,6 +213,7 @@
           >
             Process
           </button>
+          <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
           <table id="coll-process-table" class="table-wide">
             <colgroup>
               <col span="1" style="width: 10%;" />
@@ -280,6 +282,7 @@
 
       var WS_URI = "ws://localhost:" + PORT + "/ws";
 
+      var COLL_STATES = ["START", "IDLE", "BUSY"];
       var NODE_STATES = ["START", "IDLE", "PREBUSY", "BUSY"];
 
       var PROCESS_STATE_DEPENDENT = 0;
@@ -384,8 +387,7 @@
         for (var collitem of data.collList) {
           let newRow = table.insertRow();
           newRow.insertCell().innerHTML = collitem.collectorID;
-          newRow.insertCell().innerHTML =
-            collitem.assignedNode == 0 ? "Not assigned" : collitem.assignedNode;
+          newRow.insertCell().innerHTML = COLL_STATES[collitem.state];
 
           let component = document.createElement("a");
           component.onclick = onCollClick;
@@ -473,6 +475,9 @@
           .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
+        document.getElementById("coll-job-name").innerHTML =
+          "Job : " + data.jobName;
+
         for (var fileitem of data.fileList) {
           let newRow = table.insertRow();
           let newcell = newRow.insertCell();
@@ -493,7 +498,8 @@
           let newRow = table.insertRow();
           newRow.insertCell().innerHTML = processitem.id;
           newRow.insertCell().innerHTML = processitem.process;
-          newRow.insertCell().innerHTML = processitem.node != 0 ? processitem.node : "Not Assigned";
+          newRow.insertCell().innerHTML =
+            processitem.node != 0 ? processitem.node : "Not Assigned";
 
           switch (processitem.state) {
             case PROCESS_STATE_DEPENDENT:

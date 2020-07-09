@@ -25,6 +25,7 @@ Distributor::Distributor(const char *rootPath) :
     processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg);
+    processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorReadyMsg);
 
     processMsg[COMP_NODE][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeAliveMsg);
     processMsg[COMP_NODE][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg);
@@ -142,6 +143,15 @@ bool Distributor::processCollectorIDMsg(const ComponentObject& owner, Message *m
 bool Distributor::processCollectorNodeMsg(const ComponentObject& owner, Message *msg) {
 
     collectorManager->addRequest(owner.getID(), msg->getHeader()->getVariant(0));
+
+    collectorManager->setState(owner.getID(), COLLSTATE_BUSY);
+
+    return true;
+}
+
+bool Distributor::processCollectorReadyMsg(const ComponentObject& owner, Message *msg) {
+
+    collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
     return true;
 }

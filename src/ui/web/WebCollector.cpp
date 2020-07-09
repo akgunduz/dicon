@@ -78,6 +78,8 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
+    json_object_object_add(jsonObj, "jobName", json_object_new_string(job->getName()));
+
     auto* fileList = json_object_new_array();
     for (int j = 0; j < job->getFileCount(); j++) {
 

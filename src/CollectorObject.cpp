@@ -13,11 +13,19 @@ CollectorObject::CollectorObject(int id, long address) :
 }
 
 CollectorObject::CollectorObject(const char* rootPath) :
-        ComponentObject(COMP_COLLECTOR, rootPath)  {
+        state(COLLSTATE_START), ComponentObject(COMP_COLLECTOR, rootPath)  {
 }
 
 CollectorObject::CollectorObject() :
         CollectorObject(0, 0) {
+}
+
+CollectorObject::CollectorObject(const CollectorObject &copy) :
+        CollectorObject(copy.state, copy.getID(), copy.getAddress()) {
+}
+
+CollectorObject::CollectorObject(const ComponentObject &copy) :
+        CollectorObject(copy.getID(), copy.getAddress()) {
 }
 
 CollectorObject::~CollectorObject() {

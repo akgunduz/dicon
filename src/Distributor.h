@@ -35,6 +35,7 @@ private:
     bool processCollectorAliveMsg(const ComponentObject&, Message *);
     bool processCollectorIDMsg(const ComponentObject&, Message *);
     bool processCollectorNodeMsg(const ComponentObject&, Message *);
+    bool processCollectorReadyMsg(const ComponentObject&, Message *);
 
     bool processNodeAliveMsg(const ComponentObject&, Message *);
     bool processNodeIDMsg(const ComponentObject&, Message *);

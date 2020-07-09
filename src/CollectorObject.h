@@ -20,6 +20,8 @@ public:
     CollectorObject(int, long);
     CollectorObject(const char *);
     CollectorObject();
+    CollectorObject(const CollectorObject &);
+    CollectorObject(const ComponentObject &);
 
     ~CollectorObject();
 
