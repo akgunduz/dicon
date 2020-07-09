@@ -9,8 +9,7 @@
 
 #include "Md5.h"
 #include "Block.h"
-
-#define BUFFER_SIZE 512
+#include "ComponentObject.h"
 
 #define SIGNATURE 0x55AA
 #define SIGNATURE_SIZE 2

@@ -60,3 +60,4 @@ Objects/
 GCCDebug
 .DS_Store
 build*/
+scratch/

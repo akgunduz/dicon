@@ -6,7 +6,7 @@
 #ifndef DICON_WEBAPP_H
 #define DICON_WEBAPP_H
 
-#include "civetweb.h"
+#include "civetweb/civetweb.h"
 #include "Application.h"
 
 #define DOCUMENT_ROOT "../data/html/"

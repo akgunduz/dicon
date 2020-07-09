@@ -6,10 +6,10 @@
 #include "FileItem.h"
 #include "ArchTypes.h"
 
-FileItem::FileItem(ComponentObject host)
+FileItem::FileItem(const ComponentObject& host)
         : ContentItem (), host(host) {
 
-    set("", "", -1, NULL);
+    set("", "", -1, nullptr);
 }
 
 FileItem::FileItem(FileItem *item)
@@ -18,7 +18,7 @@ FileItem::FileItem(FileItem *item)
     set(item->getJobDir(), item->getFileName(), item->getID(), item->getMD5());
 }
 
-FileItem::FileItem(ComponentObject host, const char *jobDir, const char *fileName, int id, Md5 *md5)
+FileItem::FileItem(const ComponentObject& host, const char *jobDir, const char *fileName, int id, Md5 *md5)
         : ContentItem (), host(host) {
 
     set(jobDir, fileName, id, md5);
@@ -34,7 +34,7 @@ void FileItem::set(const char *_jobDir, const char *_fileName, const int _id, co
 
     strcpy(this->fileName, _fileName);
 
-    if (_md5 != NULL) {
+    if (_md5 != nullptr) {
 
         this->md5.set(_md5);
     }
@@ -70,14 +70,14 @@ bool FileItem::isValid() {
     return validate();
 }
 
-void FileItem::setMD5(Md5 *md5) {
+void FileItem::setMD5(Md5 *_md5) {
 
-    if (md5 == nullptr) {
+    if (_md5 == nullptr) {
         this->md5.reset();
         return;
     }
 
-    this->md5.set(md5);
+    this->md5.set(_md5);
 }
 
 int FileItem::getID() const {
@@ -88,21 +88,18 @@ int FileItem::getID() const {
 bool FileItem::validate() {
 
     if (is_exist) {
-        //TODO dont forget to reenable
-       // LOGS_T(getHost(), "FileContent %s is already validated", getFileName());
+        LOGS_T(getHost(), "FileContent %s is already validated", getFileName());
         return true;
     }
 
     if (strcmp(getJobDir(), "") == 0 || strcmp(getFileName(), "") == 0) {
-        //TODO dont forget to reenable
-     //   LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 
     FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str(), "r");
-    if (file == NULL) {
-        //TODO dont forget to reenable
-      //  LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+    if (file == nullptr) {
+        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 

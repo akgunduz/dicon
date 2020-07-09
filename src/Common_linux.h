@@ -7,9 +7,12 @@
 #ifndef __Common_LINUX_H_
 #define __Common_LINUX_H_
 
-#include <openssl/md5.h>
 #define ntohll(x) be64toh(x)
 #define htonll(x) htobe64(x)
+
+#ifndef MD5_DIGEST_LENGTH
+#define MD5_DIGEST_LENGTH 16
+#endif
 
 #define UNIXSOCKET_PATH "/var/tmp/"
 #define UNIXSOCKET_FILE_PREFIX "dicon_"

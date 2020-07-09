@@ -4,7 +4,7 @@
 //
 
 #include "BaseMessage.h"
-#include "AddressHelper.h"
+#include "Log.h"
 
 BaseMessage::BaseMessage(ComponentObject host)
 		: host(host) {

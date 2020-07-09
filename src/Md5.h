@@ -5,9 +5,8 @@
 #ifndef DICON_MD5_H
 #define DICON_MD5_H
 
-#include "Common.h"
 #include "Util.h"
-#include "ContentItem.h"
+#include "md5/md5lib.h"
 
 const static uint8_t emptyData[MD5_DIGEST_LENGTH] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

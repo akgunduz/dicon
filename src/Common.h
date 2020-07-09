@@ -7,45 +7,44 @@
 #ifndef __Common_H_
 #define __Common_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <limits.h>
-#include <iostream>
-#include <iosfwd>
-#include <fstream>
-#include <string>
-#include <assert.h>
+#include <cstdio>
+#include <cstdlib>
+#include <climits>
+#include <cassert>
 #include <cstdarg>
 #include <cstring>
+#include <cerrno>
+#include <csignal>
+#include <ctime>
+
+#include <iosfwd>
+#include <fstream>
+#include <iostream>
 #include <list>
 #include <vector>
 #include <queue>
 #include <map>
-#include <complex>
-#include <algorithm>
 #include <stdexcept>
 #include <condition_variable>
 #include <mutex>
+#include <thread>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#include <net/if.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/errno.h>
+
+#include <unistd.h>
 #include <ifaddrs.h>
 #include <fcntl.h>
-#include <sys/time.h>
 #include <dirent.h>
 #include <json.h>
-#include <signal.h>
-#include <time.h>
-#include <thread>
-#include <sys/ioctl.h>
-#include <net/if.h>
 
 #ifdef __APPLE__
 #include "Common_apple.h"

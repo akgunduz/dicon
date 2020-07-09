@@ -9,6 +9,7 @@
 #include "DeviceList.h"
 #include "MessageTypes.h"
 #include "ComponentObject.h"
+#include "Timer.h"
 
 class Component;
 

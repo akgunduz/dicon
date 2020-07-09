@@ -6,9 +6,9 @@
 #ifndef __Util_H_
 #define __Util_H_
 
-#include "Log.h"
-#include "Timer.h"
-#include "ComponentObject.h"
+#include "Common.h"
+
+#define BUFFER_SIZE 512
 
 #define ROOT_SIGN "@@@root@@@"
 

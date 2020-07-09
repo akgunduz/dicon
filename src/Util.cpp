@@ -4,7 +4,6 @@
 //
 
 #include "Util.h"
-#include "ArchTypes.h"
 
 std::string Util::hex2str(const uint8_t *in, int len) {
 	static const char* const lut = "0123456789ABCDEF";
