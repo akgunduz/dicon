@@ -66,7 +66,7 @@ public:
     bool nodeStateHandler(struct mg_connection *conn, int id);
 
     int run() override;
-    int notifyHandler(int) override;
+    int notifyHandler(int, int) override;
 };
 
 #endif //DICON_WEBAPP_H

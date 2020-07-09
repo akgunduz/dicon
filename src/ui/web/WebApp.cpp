@@ -214,7 +214,7 @@ int WebApp::run() {
     return 1;
 }
 
-int WebApp::notifyHandler(int target) {
+int WebApp::notifyHandler(int target, int id) {
 
     for (auto & wsClient : wsClients) {
 
