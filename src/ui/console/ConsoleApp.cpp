@@ -9,6 +9,12 @@ ConsoleApp::ConsoleApp(int argc, char** argv, int *interfaceID,
                        LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo)
     : App(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel,
           enableDistributor, collInfo, nodeInfo) {
+
+    PRINT("Commands : ");
+    PRINT("\tPoll     : 'p' ==> Execute polling command");
+    PRINT("\tLoad job : 'l' ==> Execute load job command");
+    PRINT("\tProcess  : 'x' ==> Execute process command");
+    PRINT("\tQuit     : 'q' ==> Exit program");
 }
 
 int ConsoleApp::run() {

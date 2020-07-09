@@ -23,7 +23,7 @@ bool ConsoleApp::distStateHandler() {
 
         auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
 
-        PRINT("\t ID : %d, Assigned Node : %d", collector->getID(), ((CollectorObject*)collector)->getAssigned().getID());
+        PRINT("\t ID : %d, State : %s", collector->getID(), CollState::getName(((CollectorObject*)collector)->getState()));
     }
 
     PRINT("Node List : ");
@@ -32,7 +32,7 @@ bool ConsoleApp::distStateHandler() {
 
         auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
 
-        PRINT("\t ID : %d, State : %d", node->getID(), ((NodeObject*)node)->getState());
+        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(((NodeObject*)node)->getState()));
     }
 
     return true;

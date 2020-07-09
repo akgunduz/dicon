@@ -3,7 +3,7 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#include "CollState.h"
+#include "CollectorState.h"
 
 const char* sCollStates[] = {
         "START",
