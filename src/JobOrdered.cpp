@@ -14,30 +14,22 @@ int Job::getProcessCount() const {
     return processList.size();
 }
 
-int Job::getProcessCount(PROCESS_STATE state) {
-
-    int count = 0;
-
-    mutex.lock();
-
-    for (auto &process : processList) {
-        if (process.getState() == state) {
-            count++;
-        }
-    }
-
-    mutex.unlock();
-
-    return count;
-}
-
-int Job::updateDependency() {
+int Job::updateDependency(int id, int &totalCount) {
 
     int readyCount = 0;
+    totalCount = 0;
 
     mutex.lock();
 
     for (auto &process : processList) {
+        if (process.getID() == id) {
+            process.setState(PROCESS_STATE_ENDED);
+        }
+
+        if (process.getState() != PROCESS_STATE_ENDED) {
+            totalCount++;
+        }
+
         if (process.getState() == PROCESS_STATE_DEPENDENT
                 && process.get().isValid()) {
             process.setState(PROCESS_STATE_READY);
@@ -66,20 +58,6 @@ const ProcessInfo& Job::assignNode(ComponentObject &node) {
     mutex.unlock();
 
     return ProcessInfo::invalid;
-}
-
-void Job::endProcess(int id) {
-
-    mutex.lock();
-
-    for (auto &process : processList) {
-        if (process.getID() == id) {
-            process.setState(PROCESS_STATE_ENDED);
-            break;
-        }
-    }
-
-    mutex.unlock();
 }
 
 ProcessItem* Job::getByOutput(int index) {

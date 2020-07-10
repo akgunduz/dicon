@@ -79,9 +79,8 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
 
     LOGS_T(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
-    job->endProcess(msg->getData()->getExecutorID());
-
-    int readyCount = job->updateDependency();
+    int totalCount = 0;
+    int readyCount = job->updateDependency(msg->getData()->getExecutorID(), totalCount);
 
     notifyUI();
 
@@ -90,13 +89,13 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
     if (readyCount) {
 
         return send2DistributorNodeMsg(getDistributor(), readyCount);
-
-    } else {
-
-        return true;
-
-        //  return send2DistributorReadyMsg(getDistributor());
     }
+
+    if (totalCount == 0) {
+        return send2DistributorReadyMsg(getDistributor());
+    }
+
+    return true;
 }
 
 bool Collector::send2DistributorAliveMsg(const ComponentObject& target) {
@@ -174,7 +173,8 @@ void Collector::setDistributor(const DistributorObject& _distributor) {
 
 bool Collector::processJob() {
 
-    return send2DistributorNodeMsg(getDistributor(), job->updateDependency());
+    int totalCount = 0;
+    return send2DistributorNodeMsg(getDistributor(), job->updateDependency(0, totalCount));
 }
 
 bool Collector::loadJob(const char* path) {

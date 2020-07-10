@@ -46,14 +46,12 @@ public:
     FileItem* getFile(int);
 
     int getProcessCount() const;
-    int getProcessCount(PROCESS_STATE);
     const ProcessInfo& getProcess(int) const;
     const ProcessInfo& assignNode(ComponentObject &);
-    void endProcess(int id);
 
     ProcessItem* getByOutput(int);
     bool createDependencyMap();
-    int updateDependency();
+    int updateDependency(int, int &);
 };
 
 
