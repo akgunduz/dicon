@@ -16,7 +16,7 @@
 
 #define TMP_BUFFER_SIZE 1000
 
-#define BUSY_SLEEP_TIME 200000
+#define BUSY_SLEEP_TIME 200
 
 class BaseMessage {
 
@@ -28,7 +28,7 @@ class BaseMessage {
 
 public:
 
-    BaseMessage(ComponentObject);
+    BaseMessage(ComponentObject&);
 
     void setDatagramAddress(sockaddr_in);
 

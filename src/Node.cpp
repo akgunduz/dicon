@@ -229,15 +229,14 @@ bool Node::processCommand(int processID, const char *cmd) {
 
     int status;
     char *args[100];
+    char fullCmd[PATH_MAX];
 
-    char fullcmd[PATH_MAX];
-
-    strcpy(fullcmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
+    strcpy(fullCmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
     LOGS_T(getHost(), "Process[%d] is started", processID);
-    LOGS_T(getHost(), "Command : %s", fullcmd);
+    LOGS_I(getHost(), "Command : %s", fullCmd);
 
-    parseCommand(fullcmd, args);
+    parseCommand(fullCmd, args);
 
     pid_t pid = fork();
 
@@ -250,6 +249,7 @@ bool Node::processCommand(int processID, const char *cmd) {
         int res;
         do {
             res = waitpid(pid, &status, 0);
+            LOGS_E(getHost(), "Child process return value : %d, status : %d !!!", res, status);
         } while ((res < 0) && (errno == EINTR));
 
     } else {

@@ -181,6 +181,10 @@ bool Collector::loadJob(const char* path) {
 
     std::vector<std::string> dirList = Util::getDirList(getHost().getRootPath(), JOB_DIR_PREFIX);
 
+    if (dirList.empty()) {
+        LOGS_I(getHost(), "There is no job is exists under %s folder", getHost().getRootPath());
+        return false;
+    }
     job = new Job(getHost(), dirList[0].c_str());
 
     if (job->getFileCount() && job->getExecutorCount()) {

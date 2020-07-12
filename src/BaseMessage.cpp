@@ -6,7 +6,7 @@
 #include "BaseMessage.h"
 #include "Log.h"
 
-BaseMessage::BaseMessage(ComponentObject host)
+BaseMessage::BaseMessage(ComponentObject &host)
 		: host(host) {
 
     memset(&datagramAddress, 0, sizeof(sockaddr_in));
@@ -69,7 +69,7 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
 
     } while(size > 0);
 
-    if (md5 != NULL) {
+    if (md5 != nullptr) {
 
         MD5_Final(md5->data, &ctx);
     }
@@ -103,7 +103,7 @@ bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOGS_E(getHost(), "Busy state, sleep and retry");
 				busy = true;
-                std::this_thread::sleep_for(std::chrono::microseconds (BUSY_SLEEP_TIME));
+                std::this_thread::sleep_for(std::chrono::milliseconds(BUSY_SLEEP_TIME));
 				continue;
 			}
 
@@ -330,7 +330,7 @@ bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
 			if (errno == EAGAIN && !busy) {
 				LOGS_W(getHost(), "Busy state, sleep and retry");
 				busy = true;
-                std::this_thread::sleep_for(std::chrono::microseconds (BUSY_SLEEP_TIME));
+                std::this_thread::sleep_for(std::chrono::milliseconds(BUSY_SLEEP_TIME));
 				continue;
 			}
 

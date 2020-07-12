@@ -8,18 +8,6 @@
 #define __Common_APPLE_H_
 
 #include <IOKit/IOKitKeys.h>
-#include <CommonCrypto/CommonDigest.h>
-
-#ifdef MD5_DIGEST_LENGTH
-#undef MD5_DIGEST_LENGTH
-#endif
-
-#define MD5_Init            CC_MD5_Init
-#define MD5_Update          CC_MD5_Update
-#define MD5_Final           CC_MD5_Final
-#define MD5_DIGEST_LENGTH   CC_MD5_DIGEST_LENGTH
-#define MD5_CTX             CC_MD5_CTX
-
 #define UNIXSOCKET_PATH "/var/tmp/"
 #define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"

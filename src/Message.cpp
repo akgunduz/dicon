@@ -60,7 +60,7 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
     }
 
     if (!readNumber(desc, state)) {
-        LOGS_E(getHost(), "readFile can not read id data");
+        LOGS_E(getHost(), "readFile can not read state data");
         return false;
     }
 
@@ -118,14 +118,14 @@ bool Message::readJobInfo(int desc, char *jobDir, Block *block) {
     return true;
 }
 
-bool Message::readExecutionInfo(int desc, long *executionID, char *execution, Block *block) {
+bool Message::readExecutionInfo(int desc, int *executionID, char *execution, Block *block) {
 
     if (block->getType() != BLOCK_EXECUTION_INFO) {
         LOGS_E(getHost(), "readExecutionInfo can not read other blocks");
         return false;
     }
 
-    if (!readNumber(desc, executionID)) {
+    if (!readNumber(desc, (long *)executionID)) {
         LOGS_E(getHost(), "readExecutionInfo can not read execution id");
         return false;
     }
@@ -185,7 +185,7 @@ bool Message::readMessageBlock(int in, Block *block) {
 
         case BLOCK_EXECUTION_INFO:
 
-            long executionID;
+            int executionID;
             if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), block)) {
                 return false;
             }
@@ -224,7 +224,7 @@ bool Message::writeComponentList(int desc, std::vector<ComponentObject>& compone
 
     std::vector<long> list;
 
-    for (auto component : componentList) {
+    for (auto &component : componentList) {
         list.emplace_back(component.getID());
         list.emplace_back(component.getAddress());
     }
@@ -266,7 +266,7 @@ bool Message::writeJobInfo(int desc, char *jobDir) {
     return true;
 }
 
-bool Message::writeExecutionInfo(int desc, long executorID, char *executor) {
+bool Message::writeExecutionInfo(int desc, int executorID, char *executor) {
 
     Block blockHeader(1, BLOCK_EXECUTION_INFO);
 
@@ -293,7 +293,7 @@ bool Message::writeExecutionInfo(int desc, long executorID, char *executor) {
 bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinary) {
 
     Block blockHeader;
-    std::string absPath = "";
+    std::string absPath;
     bool isBinaryTransfer = !isOutput && isBinary;
 
     if (!isBinaryTransfer) {
@@ -328,7 +328,7 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(desc, absPath.c_str(), NULL, blockHeader.getSize(1))) {
+        if (!writeBinary(desc, absPath.c_str(), nullptr, blockHeader.getSize(1))) {
             LOGS_E(getHost(), "writeFile can not write Binary data");
             return false;
         }

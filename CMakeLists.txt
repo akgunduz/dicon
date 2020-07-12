@@ -127,7 +127,7 @@ target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread dl rt)
+target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread dl)
 
 add_custom_command(
         OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp

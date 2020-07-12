@@ -34,14 +34,14 @@ private:
 
     bool readComponentList(int, std::vector<ComponentObject>&, Block*);
     bool readJobInfo(int, char*, Block*);
-    bool readExecutionInfo(int, long*, char*, Block*);
+    bool readExecutionInfo(int, int*, char*, Block*);
     bool readFile(int, FileItem *, const char*, long *, Block *);
     bool readFileMD5(int, Md5*, Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeComponentList(int, std::vector<ComponentObject>&);
     bool writeJobInfo(int, char*);
-    bool writeExecutionInfo(int, long, char*);
+    bool writeExecutionInfo(int, int, char*);
     bool writeFile(int, FileItem *, bool, bool);
     bool writeFileMD5(int, Md5*);
 

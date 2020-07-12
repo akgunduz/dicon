@@ -57,6 +57,9 @@
 #define nullptr NULL
 #endif
 
+#ifndef MD5_DIGEST_LENGTH
+#define MD5_DIGEST_LENGTH 16
+#endif
 #define SHUTDOWN_NOTIFIER 'Q'
 
 struct char_cmp {
