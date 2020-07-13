@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "CollectorObject.h"
 
+#define PROCESS_SLEEP_TIME 200
 
 Node *Node::newInstance(const char* path) {
 
@@ -76,8 +77,12 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
 
     notifyUI();
 
-    processCommand(((NodeObject&)getHost()).getProcessInfo().getID(),
+    int result = processCommand(((NodeObject&)getHost()).getProcessInfo().getID(),
                    ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec());
+
+    if (!result) {
+        return false;
+    }
 
     TypeFileInfoList outputList = FileInfo::getFileList(((NodeObject&)getHost()).getProcessInfo().get().getFileList(), true);
     FileInfo::setFileListState(outputList, false);
@@ -227,8 +232,6 @@ void Node::parseCommand(char *cmd, char **argv) {
 
 bool Node::processCommand(int processID, const char *cmd) {
 
-    int status;
-    char *args[100];
     char fullCmd[PATH_MAX];
 
     strcpy(fullCmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
@@ -236,34 +239,35 @@ bool Node::processCommand(int processID, const char *cmd) {
     LOGS_T(getHost(), "Process[%d] is started", processID);
     LOGS_I(getHost(), "Command : %s", fullCmd);
 
-    parseCommand(fullCmd, args);
+    char childOut[256];
+    int tryCount = 3;
+    while(--tryCount) {
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(BUSY_SLEEP_TIME));
+        FILE *fdProcess = popen(fullCmd, "r");
+        if (fdProcess == nullptr) {
+            LOGS_E(getHost(), "Can not execute command", fullCmd);
+            return false;
+        }
 
-    pid_t pid = fork();
+        while (fgets(childOut, 256, fdProcess)) {
+            LOGS_I(getHost(), "Child Output : %s", childOut);
+        }
 
-    if (pid == -1) {
-        LOGS_E(getHost(), "Job Process failed in fork!!!");
-        return false;
+        int res = pclose(fdProcess);
+        if (res == 0) {
+            LOGS_T(getHost(), "Process[%d] is ended successfully", processID);
+            return true;
+        }
 
-    } else if (pid > 0) {
-        //parent part
-        int res;
-        do {
-            res = waitpid(pid, &status, 0);
-            LOGS_E(getHost(), "Child process return status : %d !!!", status);
-        } while ((res < 0) && (errno == EINTR));
+        LOGS_E(getHost(), "Process[%d] has execution problem retrying", processID);
 
-    } else {
-        //child part
-        execv(*args, args);
-        LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, args[0]);
-        exit(EXIT_FAILURE);
+        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME));
+
     }
 
-    LOGS_T(getHost(), "Process[%d] is ended", processID);
+    LOGS_E(getHost(), "Process[%d] is ended with error", processID);
 
-    return true;
+    return false;
 }
 
 std::vector<ProcessInfo> &Node::getProcessList() {

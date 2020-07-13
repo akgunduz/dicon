@@ -46,6 +46,9 @@ void FileInfo::setFileListState(TypeFileInfoList &fileList, bool is_output) {
     for (auto & file : fileList) {
 
         file.setOutput(is_output);
+        if (!is_output) {
+            file.get()->validate();
+        }
     }
 }
 

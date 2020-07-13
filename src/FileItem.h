@@ -17,6 +17,7 @@ class FileItem : public ContentItem {
 
 	int id;
 	bool is_exist;
+	long size;
 
 	Md5 md5;
 
@@ -24,10 +25,10 @@ public:
 	FileItem(const ComponentObject&);
     FileItem(FileItem*);
     FileItem(const ComponentObject& host, const char*, const char*,
-             int id, Md5 *md5 = nullptr);
+             long, int id, Md5 *md5 = nullptr);
 	~FileItem(){};
 
-    void set(const char*, const char*,
+    void set(const char*, const char*, const long,
              const int id, const Md5* = nullptr);
 
 	Md5* getMD5();
@@ -37,6 +38,7 @@ public:
 
 	ComponentObject getHost() const;
     int getID() const;
+    long getSize() const;
 
     bool validate();
 

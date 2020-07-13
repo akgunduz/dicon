@@ -4,7 +4,7 @@
 
 #include "JsonItem.h"
 
-JsonItem::JsonItem(ComponentObject host)
+JsonItem::JsonItem(const ComponentObject& host)
     : FileItem(host) {
 
 }
@@ -14,8 +14,8 @@ JsonItem::JsonItem(FileItem *fileItem)
 
 }
 
-JsonItem::JsonItem(ComponentObject host, const char* jobDir, const char* fileName)
-        : FileItem(host, jobDir, fileName, -1) {
+JsonItem::JsonItem(const ComponentObject& host, const char* jobDir, const char* fileName)
+        : FileItem(host, jobDir, fileName, 0, -1) {
 
 }
 
@@ -53,12 +53,12 @@ void JsonItem::reset() {
 bool JsonItem::parse() {
 
     struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
-    if (node == NULL){
+    if (node == nullptr){
         LOGS_E(getHost(), "Invalid JSON File");
         return false;
     }
 
-    struct json_object* header = (struct json_object*)json_object_get_object(node)->head->v;
+    auto* header = (struct json_object*)json_object_get_object(node)->head->v;
 
     json_object_object_foreach(header, key, val) {
 

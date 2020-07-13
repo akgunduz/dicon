@@ -17,23 +17,7 @@ void BaseMessage::setDatagramAddress(sockaddr_in address) {
     datagramAddress = address;
 }
 
-int BaseMessage::getBinarySize(const char* path) {
-
-    FILE *fd = fopen(path, "rb");
-    if (!fd) {
-		LOGS_E(getHost(), "File %s could not found", path);
-        return 0;
-    }
-
-    fseek(fd, 0, SEEK_END);
-    int fileSize = (int)ftell(fd);
-
-    fclose(fd);
-
-    return fileSize;
-}
-
-bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
+bool BaseMessage::transferBinary(int in, int out, Md5 *md5, long size) {
 
     uint8_t buf[BUFFER_SIZE];
 
@@ -41,7 +25,7 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
     MD5_Init(&ctx);
 
     bool error = false;
-    int readSize;
+    long readSize;
 
     do {
 
@@ -78,9 +62,9 @@ bool BaseMessage::transferBinary(int in, int out, Md5 *md5, int size) {
 
 }
 
-bool BaseMessage::readBlock(int in, uint8_t *buf, int size) {
+bool BaseMessage::readBlock(int in, uint8_t *buf, long size) {
 
-	int offset = 0;
+	long offset = 0;
 	bool busy = false;
 
 	do {
@@ -257,7 +241,7 @@ bool BaseMessage::readMD5(int desc, Md5* md5) {
 	return true;
 }
 
-bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
+bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, long size) {
 
     LOGS_T(getHost(), "Read File is started at path : %s", path);
 
@@ -307,9 +291,9 @@ bool BaseMessage::readFromStream(int in) {
     } while(true);
 }
 
-bool BaseMessage::writeBlock(int out, const uint8_t *buf, int size) {
+bool BaseMessage::writeBlock(int out, const uint8_t *buf, long size) {
 
-	int offset = 0;
+	long offset = 0;
 	bool busy = false;
 
 	do {
@@ -460,7 +444,7 @@ bool BaseMessage::writeMD5(int desc, Md5* md5) {
 }
 
 
-bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
+bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, long size) {
 
     LOGS_T(getHost(), "Write File is started at path : %s", path);
 

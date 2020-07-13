@@ -70,15 +70,15 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 		return false;
 	}
 
-    content->set(jobDir, fileName, (int)id);
+    content->set(jobDir, fileName, block->getSize(1), (int)id);
 
     if (block->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
     }
 
     Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), content->getJobDir(),
-                                              fileName).c_str(), &calcMD5, block->getSize(1))) {
+	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobDir, fileName).c_str(),
+	            &calcMD5, content->getSize())) {
 		LOGS_E(getHost(), "readFile can not read Binary data");
 		return false;
 	}
@@ -297,13 +297,14 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
     bool isBinaryTransfer = !isOutput && isBinary;
 
     if (!isBinaryTransfer) {
-        blockHeader.set(1, BLOCK_FILE_INFO);
+        blockHeader.set(2, BLOCK_FILE_INFO);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
+        blockHeader.setSize(1, content->getSize());
     } else {
         blockHeader.set(2, BLOCK_FILE_BINARY);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
         absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName());
-        blockHeader.setSize(1, getBinarySize(absPath.c_str()));
+        blockHeader.setSize(1, content->getSize());
     }
 
 	if (!writeBlockHeader(desc, &blockHeader)) {
@@ -328,7 +329,7 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(desc, absPath.c_str(), nullptr, blockHeader.getSize(1))) {
+        if (!writeBinary(desc, absPath.c_str(), nullptr, content->getSize())) {
             LOGS_E(getHost(), "writeFile can not write Binary data");
             return false;
         }

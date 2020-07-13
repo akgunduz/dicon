@@ -197,9 +197,14 @@
           </button>
           <h3 id=coll-job-name style="text-align: left; margin-bottom: 1rem;">Job :</h3>
           <table id="coll-file-table" class="table-wide">
+            <colgroup>
+              <col span="1" style="width: 60%;" />
+              <col span="1" style="width: 40%;" />
+            </colgroup>
             <thead>
               <tr>
-                <th>Job Files</th>
+                <th>File</th>
+                <th>Size</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -476,14 +481,14 @@
         table.innerHTML = "";
 
         document.getElementById("coll-job-name").innerHTML =
-          "Job : " + data.jobName;
+          "Job : " + data._jobName;
 
-        for (var fileitem of data.fileList) {
+        for (var fileitem of data._fileList) {
           let newRow = table.insertRow();
-          let newcell = newRow.insertCell();
-          newcell.innerHTML = fileitem.file;
-          if (fileitem.validity) {
-            newcell.style.backgroundColor = "#00C000";
+          newRow.insertCell().innerHTML = fileitem._name;
+          newRow.insertCell().innerHTML = fileitem._size;
+          if (fileitem._validity) {
+            newRow.style.backgroundColor = "#00C000";
           }
         }
       }
@@ -494,16 +499,16 @@
           .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
-        for (var processitem of data.processList) {
+        for (var processitem of data._processList) {
           let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = processitem.id;
-          newRow.insertCell().innerHTML = processitem.process;
+          newRow.insertCell().innerHTML = processitem._id;
+          newRow.insertCell().innerHTML = processitem._process;
           newRow.insertCell().innerHTML =
-            processitem.node != 0 ? processitem.node : "Not Assigned";
+            processitem._node !== 0 ? processitem._node : "Not Assigned";
 
-          switch (processitem.state) {
+          switch (processitem._state) {
             case PROCESS_STATE_DEPENDENT:
-              if (processitem.validity) {
+              if (processitem._validity) {
                 newRow.style.backgroundColor = "#00C000";
               }
               break;
@@ -523,7 +528,7 @@
       function onNodeState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
+          if (this.readyState === 4 && this.status === 200) {
             var data = JSON.parse(this.responseText);
             onNodeUpdateState(data);
             onNodeUpdateProcessList(data);

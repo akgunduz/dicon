@@ -18,7 +18,7 @@
 
 class Job : public JsonItem {
 
-    char name[JOB_MAX_NAME];
+    char name[JOB_MAX_NAME]{};
 
     std::mutex mutex;
 
@@ -26,7 +26,7 @@ class Job : public JsonItem {
 
 public:
 
-    Job(ComponentObject host, const char* jobDir);
+    Job(const ComponentObject& host, const char* jobDir);
 
     void init();
     ~Job() override;

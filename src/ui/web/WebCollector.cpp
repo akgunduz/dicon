@@ -78,7 +78,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    json_object_object_add(jsonObj, "jobName", json_object_new_string(job->getName()));
+    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getName()));
 
     auto* fileList = json_object_new_array();
     for (int j = 0; j < job->getFileCount(); j++) {
@@ -86,28 +86,29 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         auto *content = job->getFile(j);
 
         auto* fileItem = json_object_new_object();
-        json_object_object_add(fileItem, "file", json_object_new_string(content->getFileName()));
-        json_object_object_add(fileItem, "validity", json_object_new_boolean(content->isValid()));
+        json_object_object_add(fileItem, "_name", json_object_new_string(content->getFileName()));
+        json_object_object_add(fileItem, "_validity", json_object_new_boolean(content->isValid()));
+        json_object_object_add(fileItem, "_size", json_object_new_int64(content->getSize()));
 
         json_object_array_add(fileList, fileItem);
     }
 
-    json_object_object_add(jsonObj, "fileList", fileList);
+    json_object_object_add(jsonObj, "_fileList", fileList);
 
     auto* processList = json_object_new_array();
     for (int j = 0; j < job->getProcessCount(); j++) {
 
         auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "id", json_object_new_int(job->getProcess(j).getID()));
-        json_object_object_add(processItem, "process", json_object_new_string(job->getProcess(j).get().getExec()));
-        json_object_object_add(processItem, "validity", json_object_new_boolean(job->getProcess(j).get().isValid()));
-        json_object_object_add(processItem, "state", json_object_new_int(job->getProcess(j).getState()));
-        json_object_object_add(processItem, "node", json_object_new_int(job->getProcess(j).getAssigned()));
+        json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j).getID()));
+        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j).get().getExec()));
+        json_object_object_add(processItem, "_validity", json_object_new_boolean(job->getProcess(j).get().isValid()));
+        json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j).getState()));
+        json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j).getAssigned()));
 
         json_object_array_add(processList, processItem);
     }
 
-    json_object_object_add(jsonObj, "processList", processList);
+    json_object_object_add(jsonObj, "_processList", processList);
 
     size_t json_str_len;
 

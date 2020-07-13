@@ -4,18 +4,15 @@
 
 #include "Job.h"
 #include "ParameterItem.h"
-#include "ProcessItem.h"
 
-Job::Job(ComponentObject host, const char* jobDir)
+Job::Job(const ComponentObject& host, const char* jobDir)
         : JsonItem(host, jobDir, JOB_FILE){
 
     init();
 
 }
 
-Job::~Job() {
-
-}
+Job::~Job() = default;
 
 void Job::init() {
 
@@ -62,7 +59,7 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
         return false;
     }
 
-    for (unsigned int i = 0; i < json_object_array_length(node); i++) {
+    for (int i = 0; i < json_object_array_length(node); i++) {
         json_object *child = json_object_array_get_idx(node, i);
 
         type = json_object_get_type(child);
@@ -74,7 +71,7 @@ bool Job::parseFileNode(JsonItem *parent, json_object *node) {
         const char* path = json_object_get_string(child);
 
         auto *content = new FileItem(((Job*)parent)->getHost(),
-                                     ((Job*)parent)->getJobDir(), path, i);
+                                     ((Job*)parent)->getJobDir(), path, 0, i);
 
         content->validate();
 
