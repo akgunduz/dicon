@@ -11,7 +11,7 @@
 
 class ComponentController {
 
-    Distributor *distributor = NULL;
+    Distributor *distributor = nullptr;
     std::vector<Collector*> collectors;
     std::vector<Node*> nodes;
 
@@ -31,8 +31,8 @@ public:
     Node* getNode(int);
 
     bool startDistributor();
-    bool startCollector(int, int = 1);
-    bool startNode(int, int = 1);
+    bool startCollector(int);
+    bool startNode(int);
 
     static bool setInterfaces(int, int);
 };

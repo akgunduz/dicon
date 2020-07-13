@@ -38,7 +38,7 @@ bool Node::processDistributorWakeupMsg(const ComponentObject& owner, Message *ms
 
 bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
-    getHost().setID((int)msg->getHeader()->getVariant(0));
+    setID((int)msg->getHeader()->getVariant(0));
 
     notifyUI();
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
@@ -249,13 +249,13 @@ bool Node::processCommand(int processID, const char *cmd) {
         int res;
         do {
             res = waitpid(pid, &status, 0);
-            LOGS_E(getHost(), "Child process return value : %d, status : %d !!!", res, status);
+            LOGS_E(getHost(), "Child process return status : %d !!!", status);
         } while ((res < 0) && (errno == EINTR));
 
     } else {
         //child part
         execv(*args, args);
-        LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, cmd);
+        LOGS_E(getHost(), "ExecV failed with error : %d for command %s", errno, args[0]);
         exit(EXIT_FAILURE);
     }
 

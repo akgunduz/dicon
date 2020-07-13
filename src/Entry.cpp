@@ -30,7 +30,7 @@ int listDevices() {
 }
 
 bool parseParameters(int argc, char** argv, int *interfaceID,
-                     LOGLEVEL* logLevel, int* disCount, int* collInfo, int* nodeInfo) {
+                     LOGLEVEL* logLevel, int* componentCount) {
 
     for (int i = 1; i < argc; i++) {
 
@@ -59,37 +59,28 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
 
         } else if (!strcmp(argv[i], "-d")) {
 
-            *disCount = 1;
+            componentCount[COMP_DISTRIBUTOR] = 1;
 
         } else if (!strcmp(argv[i], "-c")) {
 
             if (isdigit(argv[++i][0])) {
-                collInfo[0] =  atoi(argv[i]);
+                componentCount[COMP_COLLECTOR] =  atoi(argv[i]);
 
             } else {
 
                 return false;
-            }
-
-            if (isdigit(argv[i + 1][0])) {
-                collInfo[1] =  atoi(argv[++i]);
-
             }
 
         } else if (!strcmp(argv[i], "-n")) {
 
             if (isdigit(argv[++i][0])) {
-                nodeInfo[0] =  atoi(argv[i]);
+                componentCount[COMP_NODE] =  atoi(argv[i]);
 
             } else {
 
                 return false;
             }
 
-            if (isdigit(argv[i + 1][0])) {
-                nodeInfo[1] =  atoi(argv[++i]);
-
-            }
         } else if (!strcmp(argv[i], "-g")) {
 
             if (argc > i + 1) {
@@ -122,42 +113,29 @@ int main(int argc, char** argv) {
 
     LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
 
-    int distCount = 0;
-    int collInfo[2] = {0, 1};
-    int nodeInfo[2] = {0, 1};
+    int componentCount[3] = {0, 0, 0};
 
     if (!parseParameters(argc, argv, interfaceID, logLevel,
-                         &distCount, collInfo, nodeInfo)) {
+                         componentCount)) {
         PRINT("Parameter problem, exiting.....");
         return 0;
     }
 
 #if 0
-    Util::removePath("./Collector_1/Job_1/md5");
-    Util::removePath("./Collector_1/Job_1/output");
-    Util::removePath("./Node_1/Job_1");
-    Util::removePath("./Node_2/Job_1");
+    Util::removePath("./Collector/1/Job_1/md5");
+    Util::removePath("./Collector/1/Job_1/output");
+    Util::removePath("./Node");
 #endif
 
     App *app = nullptr;
 
-#if defined(WX_UI)
+#if defined(CONSOLE_UI)
 
-    distCount = 1;
-    collInfo[0] = 1;
-    collInfo[1] = 1;
-    nodeInfo[0] = 1;
-    nodeInfo[1] = 1;
-
-    app = new WxApp(argc, argv, interfaceID, logLevel, &distCount, collInfo, nodeInfo);
-
-#elif defined(CONSOLE_UI)
-
-    app = new ConsoleApp(argc, argv, interfaceID, logLevel, true, collInfo, nodeInfo);
+    app = new ConsoleApp(argc, argv, interfaceID, logLevel, componentCount);
 
 #elif defined(WEB_UI)
 
-    app = new WebApp(argc, argv, interfaceID, logLevel, true, collInfo, nodeInfo);
+    app = new WebApp(argc, argv, interfaceID, logLevel, componentCount);
 
 #else
 

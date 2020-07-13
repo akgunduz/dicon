@@ -173,9 +173,8 @@ void WebApp::wsCloseHandler(const struct mg_connection *conn)
 }
 
 WebApp::WebApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo)
-    : App(APPTYPE_WEB, argc, argv, interfaceID, logLevel,
-                       enableDistributor, collInfo, nodeInfo) {
+                       LOGLEVEL* logLevel, int* componentCount)
+    : App(APPTYPE_WEB, argc, argv, interfaceID, logLevel, componentCount) {
 
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));

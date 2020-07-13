@@ -41,8 +41,7 @@ class WebApp : public App {
     struct ws_client wsClients[MAX_UI_CB];
 
 public:
-    WebApp(int argc, char** argv, int *interfaceID,
-                        LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
+    WebApp(int, char**, int *, LOGLEVEL*, int*);
 
     int restHandler(struct mg_connection *conn);
     int mainHandler(struct mg_connection *conn);

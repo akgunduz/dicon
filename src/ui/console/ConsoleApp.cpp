@@ -6,9 +6,8 @@
 #include "ConsoleApp.h"
 
 ConsoleApp::ConsoleApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo)
-    : App(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel,
-          enableDistributor, collInfo, nodeInfo) {
+                       LOGLEVEL* logLevel, int* componentCount)
+    : App(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel, componentCount) {
 
     PRINT("Commands : ");
     PRINT("\tPoll     : 'p' ==> Execute polling command");

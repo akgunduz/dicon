@@ -6,7 +6,7 @@
 #include "Application.h"
 
 App::App(enum APPTYPE type, int argc, char** argv, int *interfaceID,
-                                   LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo) :
+                                   LOGLEVEL* logLevel, int* componentCount) :
         type(type), argc(argc), argv(argv) {
 
     Log::init(logLevel[0], logLevel[1]);
@@ -20,21 +20,21 @@ App::App(enum APPTYPE type, int argc, char** argv, int *interfaceID,
 
     componentController = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
 
-    if (enableDistributor) {
+    if (componentCount[COMP_DISTRIBUTOR]) {
         componentController->startDistributor();
     }
 
-    if (collInfo[0]) {
-        componentController->startCollector(collInfo[0], collInfo[1]);
+    if (componentCount[COMP_COLLECTOR]) {
+        componentController->startCollector(componentCount[COMP_COLLECTOR]);
     }
 
-    if (nodeInfo[0]) {
-        componentController->startNode(nodeInfo[0], nodeInfo[1]);
+    if (componentCount[COMP_NODE]) {
+        componentController->startNode(componentCount[COMP_NODE]);
     }
 
     PRINT("Running in %s Mode with %d Distributor, %d Collector and %d Node",
-          type == APPTYPE_WEB ? "Web" : type == APPTYPE_CONSOLE ? "Console" : "WxWidgets",
-          enableDistributor ? 1 : 0, collInfo[0], nodeInfo[0]);
+          type == APPTYPE_WEB ? "Web" : "Console",
+          componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
 
 enum APPTYPE App::getAppType() {

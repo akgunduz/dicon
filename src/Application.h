@@ -13,7 +13,6 @@
 enum APPTYPE {
 
     APPTYPE_CONSOLE,
-    APPTYPE_WXWIDGETS,
     APPTYPE_WEB,
     APPTYPE_MAX
 };
@@ -33,8 +32,8 @@ protected:
 
     ComponentController* componentController;
 
-    App(enum APPTYPE mode, int argc, char** argv, int *interfaceID,
-                     LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
+    App(enum APPTYPE, int, char**, int *,
+                     LOGLEVEL*, int*);
 
 public:
 

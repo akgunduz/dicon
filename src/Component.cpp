@@ -160,3 +160,23 @@ void Component::notifyUI() {
         Timer::set(getHost().getType(), 1000, notifyCB, notifyContext, getHost().getID());
     }
 }
+
+bool Component::isIDAssigned() {
+
+    return getHost().getID() != 0;
+}
+
+void Component::setID(int id) {
+
+    if (id == 0) {
+        LOGS_E(getHost(), "Can not assign ID with 0!!!");
+        return;
+    }
+
+    getHost().setID(id);
+
+    int pos = strlen(rootPath);
+    sprintf(&rootPath[pos], "/%d", id);
+
+    mkdir(rootPath, 0777);
+}

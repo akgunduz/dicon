@@ -43,7 +43,7 @@ protected :
 
 public:
 
-    Component(const char* rootPath);
+    explicit Component(const char* rootPath);
     virtual ~Component();
 
     ComponentObject& getHost();
@@ -64,6 +64,10 @@ public:
     bool defaultProcessMsg(ComponentObject, Message *);
 
     static void registerNotify(void*, TypeNotifyCB);
+
+    bool isIDAssigned();
+
+    void setID(int);
 
 };
 

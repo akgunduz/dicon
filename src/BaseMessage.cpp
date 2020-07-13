@@ -259,17 +259,23 @@ bool BaseMessage::readMD5(int desc, Md5* md5) {
 
 bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
+    LOGS_T(getHost(), "Read File is started at path : %s", path);
+
 	Util::mkPath(path);
 
 	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
-		LOGS_E(getHost(), "File %s could not created or opened", path);
+        LOGS_E(getHost(), "Read File could not created or opened at path : %s", path);
 		return false;
 	}
 
 	bool status = transferBinary(in, out, md5, size);
 
+	fsync(out);
+
 	close(out);
+
+    LOGS_T(getHost(), "Read File is ended at path : %s", path);
 
 	return status;
 
@@ -458,15 +464,19 @@ bool BaseMessage::writeMD5(int desc, Md5* md5) {
 
 bool BaseMessage::writeBinary(int out, const char* path, Md5 *md5, int size) {
 
+    LOGS_T(getHost(), "Write File is started at path : %s", path);
+
 	int in = open(path, O_RDONLY);
 	if (in == -1) {
-		LOGS_E(getHost(), "File %s could not created or opened", path);
+		LOGS_E(getHost(), "Write File could not created or opened at path : %s", path);
 		return false;
 	}
 
 	bool status = transferBinary(in, out, md5, size);
 
 	close(in);
+
+    LOGS_T(getHost(), "Write File is ended at path : %s", path);
 
 	return status;
 

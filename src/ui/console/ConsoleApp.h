@@ -11,8 +11,7 @@
 class ConsoleApp : public App {
 
 public:
-    ConsoleApp(int argc, char** argv, int *interfaceID,
-                        LOGLEVEL* logLevel, bool enableDistributor, int* collInfo, int* nodeInfo);
+    ConsoleApp(int, char**, int *, LOGLEVEL*, int*);
 
     bool distPollHandler();
     bool distStateHandler();

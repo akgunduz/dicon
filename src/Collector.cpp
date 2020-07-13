@@ -35,7 +35,7 @@ bool Collector::processDistributorWakeupMsg(const ComponentObject& owner, Messag
 
 bool Collector::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
-    getHost().setID((int)msg->getHeader()->getVariant(0));
+    setID((int)msg->getHeader()->getVariant(0));
 
     notifyUI();
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());

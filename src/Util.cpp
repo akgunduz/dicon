@@ -44,7 +44,7 @@ bool Util::str2hex(uint8_t *out, const char *in, uint32_t len) {
 
 void Util::mkPath(const char *path) {
     char tmp[PATH_MAX];
-    char *p = NULL;
+    char *p = nullptr;
 
     const char *pos = strrchr(path, '/');
 
