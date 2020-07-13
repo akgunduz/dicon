@@ -271,8 +271,6 @@ bool BaseMessage::readBinary(int in, const char* path, Md5 *md5, int size) {
 
 	bool status = transferBinary(in, out, md5, size);
 
-	fsync(out);
-
 	close(out);
 
     LOGS_T(getHost(), "Read File is ended at path : %s", path);

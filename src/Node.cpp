@@ -238,6 +238,8 @@ bool Node::processCommand(int processID, const char *cmd) {
 
     parseCommand(fullCmd, args);
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(BUSY_SLEEP_TIME));
+
     pid_t pid = fork();
 
     if (pid == -1) {
