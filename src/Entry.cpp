@@ -121,12 +121,6 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-#if 0
-    Util::removePath("./Collector/1/Job_1/md5");
-    Util::removePath("./Collector/1/Job_1/output");
-    Util::removePath("./Node");
-#endif
-
     App *app = nullptr;
 
 #if defined(CONSOLE_UI)

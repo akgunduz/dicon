@@ -16,6 +16,7 @@ set(GENERATED_PATH "${SOURCE_PATH}/gen")
 
 set(FRAMEWORK_FILES
         ${EXTERNAL_PATH}/md5/md5lib.cpp
+        ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/ArchTypes.cpp
         ${SOURCE_PATH}/Collector.cpp
         ${SOURCE_PATH}/Common.cpp
@@ -48,11 +49,10 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Timer.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/AddressHelper.cpp
-        ${SOURCE_PATH}/Job.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/JsonType.cpp
-        ${SOURCE_PATH}/JsonItem.cpp
+        ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/Block.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
@@ -94,6 +94,7 @@ set(WEB_FILES
         )
 
 set(GENERATOR_FILES
+        ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Generator.cpp
         )

@@ -13,7 +13,7 @@ class ProcessInfo {
     int id;
     PROCESS_STATE state;
     ProcessItem item;
-    std::string jobDir;
+    std::string jobName;
 
     int assigned;
 
@@ -33,8 +33,8 @@ public:
     PROCESS_STATE getState() const;
     void setState(PROCESS_STATE);
 
-    std::string getJobID() const;
-    void setJobID(std::string);
+    std::string getJobName() const;
+    void setJobName(std::string _jobName);
 
     int getAssigned() const;
     void setAssigned(int);

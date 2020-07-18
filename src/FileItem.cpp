@@ -15,16 +15,16 @@ FileItem::FileItem(const ComponentObject& host)
 FileItem::FileItem(FileItem *item)
         : ContentItem (), host(item->getHost()) {
 
-    set(item->getJobDir(), item->getFileName(), item->getSize(), item->getID(), item->getMD5());
+    set(item->getJobName(), item->getFileName(), item->getSize(), item->getID(), item->getMD5());
 }
 
-FileItem::FileItem(const ComponentObject& host, const char *jobDir, const char *fileName, long size, int id, Md5 *md5)
+FileItem::FileItem(const ComponentObject& host, const char *jobName, const char *fileName, long size, int id, Md5 *md5)
         : ContentItem (), host(host) {
 
-    set(jobDir, fileName, size, id, md5);
+    set(jobName, fileName, size, id, md5);
 };
 
-void FileItem::set(const char *_jobDir, const char *_fileName, const long _size, const int _id, const Md5 *_md5) {
+void FileItem::set(const char *_jobName, const char *_fileName, const long _size, const int _id, const Md5 *_md5) {
 
     this->is_exist = false;
 
@@ -32,7 +32,7 @@ void FileItem::set(const char *_jobDir, const char *_fileName, const long _size,
 
     this->size = _size;
 
-    strcpy(this->jobDir, _jobDir);
+    strcpy(this->jobName, _jobName);
 
     strcpy(this->fileName, _fileName);
 
@@ -52,9 +52,9 @@ ComponentObject FileItem::getHost() const {
     return host;
 }
 
-const char *FileItem::getJobDir() const {
+const char *FileItem::getJobName() const {
 
-    return jobDir;
+    return jobName;
 }
 
 const char* FileItem::getFileName() const {
@@ -99,12 +99,12 @@ bool FileItem::validate() {
         return true;
     }
 
-    if (strcmp(getJobDir(), "") == 0 || strcmp(getFileName(), "") == 0) {
+    if (strcmp(getJobName(), "") == 0 || strcmp(getFileName(), "") == 0) {
         LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
     }
 
-    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobDir(), getFileName()).c_str(), "r");
+    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobName(), getFileName()).c_str(), "r");
     if (file == nullptr) {
         LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
         return false;
@@ -117,7 +117,7 @@ bool FileItem::validate() {
         return false;
     }
 
-    bool status = getMD5()->get(Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
+    bool status = getMD5()->get(Util::getAbsMD5Path(getHost().getRootPath(), getJobName(), getFileName()).c_str());
     if (!status) {
 
         char buf[BUFFER_SIZE];
@@ -137,7 +137,7 @@ bool FileItem::validate() {
 
         MD5_Final(getMD5()->data, &ctx);
 
-        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobDir(), getFileName()).c_str());
+        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobName(), getFileName()).c_str());
     }
 
     fclose(file);

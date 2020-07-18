@@ -16,7 +16,7 @@ class MessageData {
     TypeFileInfoList fileList;
     char executor[PATH_MAX];
     int executorID;
-    char jobDir[PATH_MAX];
+    char jobName[PATH_MAX];
     std::vector<ComponentObject> componentList;
 
 public:
@@ -42,8 +42,8 @@ public:
     void setExecutorID(int);
     void setExecutor(int, const char*);
 
-    char* getJobDir();
-    void setJobDir(const char*);
+    char* getJobName();
+    void setJobName(const char*);
 
     std::vector<ComponentObject>& getComponentList();
     void setComponentList(std::vector<ComponentObject>&);

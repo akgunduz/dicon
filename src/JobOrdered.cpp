@@ -62,9 +62,9 @@ const ProcessInfo& Job::assignNode(ComponentObject &node) {
 
 ProcessItem* Job::getByOutput(int index) {
 
-    for (int i = 0; i < getExecutorCount(); i++) {
+    for (int i = 0; i < jobFile->getExecutorCount(); i++) {
 
-        auto *executor = getExecutor(i);
+        auto *executor = jobFile->getExecutor(i);
 
         TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), true);
         if (list.empty()) {
@@ -81,17 +81,17 @@ ProcessItem* Job::getByOutput(int index) {
 
 bool Job::createDependencyMap() {
 
-    int depth[getFileCount()];
-    std::vector<int> adj[getFileCount()];
+    int depth[jobFile->getFileCount()];
+    std::vector<int> adj[jobFile->getFileCount()];
     std::list<int> initial, final;
 
-    bzero(depth, (size_t)getFileCount() * sizeof(int));
+    bzero(depth, (size_t)jobFile->getFileCount() * sizeof(int));
 
-    for (int i = 0; i < getExecutorCount(); i++) {
+    for (int i = 0; i < jobFile->getExecutorCount(); i++) {
 
         TypeFileList outList, depList;
 
-        const TypeFileInfoList &fileList = getExecutor(i)->getFileList();
+        const TypeFileInfoList &fileList = jobFile->getExecutor(i)->getFileList();
 
         for (auto & j : fileList) {
 
@@ -112,7 +112,7 @@ bool Job::createDependencyMap() {
         }
     }
 
-    for (int i = 0; i < getFileCount(); i++) {
+    for (int i = 0; i < jobFile->getFileCount(); i++) {
 
         if (depth[i] == 0) {
             initial.push_back(i);
@@ -135,7 +135,7 @@ bool Job::createDependencyMap() {
         }
     }
 
-    for (int i = 0; i < getFileCount(); i++) {
+    for (int i = 0; i < jobFile->getFileCount(); i++) {
 
         if (depth[i] > 0) {
             return false;
@@ -153,4 +153,29 @@ bool Job::createDependencyMap() {
     }
 
     return true;
+}
+
+ComponentObject &Job::getHost() {
+
+    return host;
+}
+
+int Job::getFileCount() {
+
+    return jobFile->getFileCount();
+}
+
+int Job::getExecutorCount() {
+
+    return jobFile->getExecutorCount();
+}
+
+const char *Job::getName() {
+
+    return jobFile->getName();
+}
+
+FileItem *Job::getFile(int index) {
+
+    return jobFile->getFile(index);
 }

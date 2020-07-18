@@ -54,6 +54,8 @@ int ConsoleApp::notifyHandler(int target, int id) {
         case COMP_NODE:
             nodeStateHandler(id);
             break;
+        default:
+            break;
     }
 
     return 0;

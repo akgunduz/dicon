@@ -111,30 +111,30 @@ bool ProcessItem::parse(void *job) {
 	return true;
 }
 
-bool ProcessItem::parseCommand(void *job, int cmdType, int cmdIndex) {
+bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
     switch (cmdType) {
 
         case EXEC_FILE: {
-            auto *content = ((Job*)job)->getFile(cmdIndex);
+            auto *content = ((JobItem*)jobItem)->getFile(cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
-                        Util::getRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName()).c_str());
+                        Util::getRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName()).c_str());
                 fileList.push_back(FileInfo(content, false));
             }
         } break;
 
         case EXEC_OUTPUT: {
-            auto *content = (FileItem *) ((Job*)job)->getContent(CONTENT_FILE, cmdIndex);
+            auto *content = (FileItem *) ((JobItem*)jobItem)->getContent(CONTENT_FILE, cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedExec, "%s%s/%s", parsedExec, ROOT_SIGN,
-                        Util::getRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName()).c_str());
+                        Util::getRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName()).c_str());
                 fileList.push_back(FileInfo(content, true));
             }
         } break;
 
         case EXEC_PARAM: {
-            auto *content = (ParameterItem *) ((Job*)job)->getContent(CONTENT_PARAM, cmdIndex);
+            auto *content = (ParameterItem *) ((JobItem*)jobItem)->getContent(CONTENT_PARAM, cmdIndex);
             if (content != nullptr) {
                 strcat(parsedExec, content->getParam());
             }

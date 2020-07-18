@@ -4,43 +4,87 @@
 //
 
 #include <Job.h>
+#include <paths.h>
+#include <miniz/miniz.h>
 #include "WebApp.h"
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
 
+    char *nextStr;
+
+    int collID = (int) strtol(uri + 1, &nextStr, 10);
+
     if (0 == strcmp(ri->request_method, "GET")) {
-
-        char *nextStr;
-
-        int collID = (int) strtol(uri + 1, &nextStr, 10);
 
         if (0 == strcmp(nextStr, "/state")) {
 
             return collStateHandler(conn, collID);
         }
 
-        if (0 == strcmp(nextStr, "/load")) {
-
-            return collLoadJobHandler(conn, collID);
-        }
-
         if (0 == strcmp(nextStr, "/process")) {
 
             return collProcessHandler(conn, collID);
         }
+
+        return false;
+
+    } else if (0 == strcmp(ri->request_method, "POST")) {
+
+        if (0 == strcmp(nextStr, "/load")) {
+
+            const char* fileName = mg_get_header(conn, "FileName");
+
+            return collLoadJobHandler(conn, collID, fileName);
+        }
+
     }
 
-    return 0;
+    return false;
 }
 
-bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id) {
+bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* fileName) {
 
     auto *collector = componentController->getCollector(id);
-    if (collector != nullptr) {
-        collector->loadJob(nullptr);
+    if (!collector) {
+        PRINT("Can not find the collector with ID : %d !!!", id);
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        return false;
     }
+
+    if (!fileName) {
+        LOGS_I(collector->getHost(), "Invalid upload process!!!");
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        return false;
+    }
+
+    char buffer[TMP_BUFFER_SIZE];
+    int len = 0;
+
+    char tmpFile[PATH_MAX];
+    sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
+
+    FILE *uploadJobFile = fopen(tmpFile, "w");
+    do {
+
+        len = mg_read(conn, buffer, TMP_BUFFER_SIZE);
+        if (len < 0) {
+            mg_send_http_error(conn, 400, "%s", "No request body data");
+            fclose(uploadJobFile);
+            mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+            return false;
+        }
+
+        if (len > 0) {
+            fwrite(buffer, 1, len, uploadJobFile);
+        }
+
+    } while (len > 0);
+
+    fclose(uploadJobFile);
+
+    collector->loadJob(tmpFile);
 
     mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
 
@@ -64,17 +108,21 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
     auto *collector = componentController->getCollector(id);
     if (!collector) {
         PRINT("Can not find the collector with ID : %d !!!", id);
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
     auto *job = collector->getJob();
     if (job == nullptr) {
+        LOGS_I(collector->getHost(), "No Job is loaded yet!!!");
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        PRINT("Can not create json object!!!");
+        LOGS_I(collector->getHost(), "Can not create json object!!!");
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 

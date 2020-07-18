@@ -38,6 +38,7 @@ public:
 	static bool checkPath(const char*, const char*, const char*, bool);
     static bool isMulticast();
 	static void cleanup();
+	static bool extractZipFile(const char* file, const char* dest);
 
 };
 

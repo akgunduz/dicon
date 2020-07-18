@@ -58,7 +58,7 @@ public:
 
     bool collHandler(struct mg_connection *conn, const char * uri);
     bool collStateHandler(struct mg_connection *conn, int id);
-    bool collLoadJobHandler(struct mg_connection *conn, int id);
+    bool collLoadJobHandler(struct mg_connection *conn, int id, const char*);
     bool collProcessHandler(struct mg_connection *conn, int id);
 
     bool nodeHandler(struct mg_connection *conn, const char * uri);

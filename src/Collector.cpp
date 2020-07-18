@@ -3,6 +3,7 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include "miniz/miniz.h"
 #include "Collector.h"
 
 Collector *Collector::newInstance(const char* path) {
@@ -58,7 +59,7 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
     for (auto &node : nodes) {
         const ProcessInfo &process = job->assignNode(node);
         LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", node.getID(), process.getID());
-        send2NodeJobMsg(node, job->getJobDir(), process.getID(),
+        send2NodeJobMsg(node, job->getName(), process.getID(),
                         process.get().getParsedExec(), process.get().getFileList());
     }
 
@@ -71,7 +72,7 @@ bool Collector::processNodeInfoMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
-    return send2NodeBinaryMsg(owner, msg->getData()->getJobDir(), msg->getData()->getExecutorID(),
+    return send2NodeBinaryMsg(owner, msg->getData()->getJobName(), msg->getData()->getExecutorID(),
                               msg->getData()->getExecutor(), msg->getData()->getFileList());
 }
 
@@ -128,26 +129,26 @@ bool Collector::send2DistributorReadyMsg(const ComponentObject& target) {
     return send(target, msg);
 }
 
-bool Collector::send2NodeJobMsg(const ComponentObject& target, const char* jobDir, int processID,
+bool Collector::send2NodeJobMsg(const ComponentObject& target, const char* jobName, int processID,
                                 const char* processLine, const TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_JOB);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJobName(jobName);
     msg->getData()->setExecutor(processID, processLine);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
 }
 
-bool Collector::send2NodeBinaryMsg(const ComponentObject& target, const char* jobDir, int processID,
+bool Collector::send2NodeBinaryMsg(const ComponentObject& target, const char* jobName, int processID,
                                    const char* processLine, const TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJobName(jobName);
     msg->getData()->setExecutor(processID, processLine);
     msg->getData()->addFileList(fileList);
 
@@ -177,15 +178,9 @@ bool Collector::processJob() {
     return send2DistributorNodeMsg(getDistributor(), job->updateDependency(0, totalCount));
 }
 
-bool Collector::loadJob(const char* path) {
+bool Collector::loadJob(const char* zipFile) {
 
-    std::vector<std::string> dirList = Util::getDirList(getHost().getRootPath(), JOB_DIR_PREFIX);
-
-    if (dirList.empty()) {
-        LOGS_I(getHost(), "There is no job is exists under %s folder", getHost().getRootPath());
-        return false;
-    }
-    job = new Job(getHost(), dirList[0].c_str());
+    job = new Job(getHost(), zipFile, getRootPath());
 
     if (job->getFileCount() && job->getExecutorCount()) {
         notifyUI();

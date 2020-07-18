@@ -91,14 +91,14 @@ void MessageData::setExecutor(int id, const char *_executor) {
     strcpy(this->executor, _executor);
 }
 
-char *MessageData::getJobDir() {
+char *MessageData::getJobName() {
 
-    return jobDir;
+    return jobName;
 }
 
-void MessageData::setJobDir(const char *_jobDir) {
+void MessageData::setJobName(const char *_jobName) {
 
-    strcpy(this->jobDir, _jobDir);
+    strcpy(this->jobName, _jobName);
 }
 
 std::vector<ComponentObject> &MessageData::getComponentList() {

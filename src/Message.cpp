@@ -46,7 +46,7 @@ bool Message::readComponentList(int desc, std::vector<ComponentObject> &componen
     return true;
 }
 
-bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *state, Block *block) {
+bool Message::readFile(int desc, FileItem *content, const char* jobName, long *state, Block *block) {
 
     if (block->getType() != BLOCK_FILE_BINARY && block->getType() != BLOCK_FILE_INFO) {
         LOGS_E(getHost(), "readFile can not read other blocks");
@@ -70,14 +70,14 @@ bool Message::readFile(int desc, FileItem *content, const char* jobDir, long *st
 		return false;
 	}
 
-    content->set(jobDir, fileName, block->getSize(1), (int)id);
+    content->set(jobName, fileName, block->getSize(1), (int)id);
 
     if (block->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
         return true;
     }
 
     Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobDir, fileName).c_str(),
+	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobName, fileName).c_str(),
 	            &calcMD5, content->getSize())) {
 		LOGS_E(getHost(), "readFile can not read Binary data");
 		return false;
@@ -103,14 +103,14 @@ bool Message::readFileMD5(int desc, Md5 *content, Block* block) {
 	return true;
 }
 
-bool Message::readJobInfo(int desc, char *jobDir, Block *block) {
+bool Message::readJobInfo(int desc, char *jobName, Block *block) {
 
     if (block->getType() != BLOCK_JOB_INFO) {
         LOGS_E(getHost(), "readJobInfo can not read other blocks");
         return false;
     }
 
-    if (!readString(desc, jobDir, block->getSize(0))) {
+    if (!readString(desc, jobName, block->getSize(0))) {
         LOGS_E(getHost(), "readJobInfo can not read job dir");
         return false;
     }
@@ -148,13 +148,13 @@ bool Message::readMessageBlock(int in, Block *block) {
             auto *fileItem = new FileItem(getHost());
             long state;
 
-            if (!readFile(in, fileItem, getData()->getJobDir(), &state, block)) {
+            if (!readFile(in, fileItem, getData()->getJobName(), &state, block)) {
                 return false;
             }
 
             LOGS_T(getHost(), "New %s with path %s/%s received",
                    block->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
-                  fileItem->getJobDir(), fileItem->getFileName());
+                   fileItem->getJobName(), fileItem->getFileName());
 
             getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT));
         }
@@ -175,11 +175,11 @@ bool Message::readMessageBlock(int in, Block *block) {
 
         case BLOCK_JOB_INFO:
 
-            if (!readJobInfo(in, getData()->getJobDir(), block)) {
+            if (!readJobInfo(in, getData()->getJobName(), block)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New job info %s received", getData()->getJobDir());
+            LOGS_T(getHost(), "New job info %s received", getData()->getJobName());
 
             break;
 
@@ -247,18 +247,18 @@ bool Message::writeComponentList(int desc, std::vector<ComponentObject>& compone
     return true;
 }
 
-bool Message::writeJobInfo(int desc, char *jobDir) {
+bool Message::writeJobInfo(int desc, char *jobName) {
 
     Block blockHeader(1, BLOCK_JOB_INFO);
 
-    blockHeader.setSize(0, (int) strlen(jobDir));
+    blockHeader.setSize(0, (int) strlen(jobName));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
         LOGS_E(getHost(), "writeJobInfo can not write block header");
         return false;
     }
 
-    if (!writeString(desc, jobDir)) {
+    if (!writeString(desc, jobName)) {
         LOGS_E(getHost(), "writeJobInfo can not write job info");
         return false;
     }
@@ -303,7 +303,7 @@ bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinar
     } else {
         blockHeader.set(2, BLOCK_FILE_BINARY);
         blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
-        absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobDir(), content->getFileName());
+        absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName());
         blockHeader.setSize(1, content->getSize());
     }
 
@@ -365,7 +365,7 @@ bool Message::writeMessageStream(int out) {
         case STREAM_INFO:
         case STREAM_BINARY:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobName())) {
                 return false;
             }
 
@@ -387,7 +387,7 @@ bool Message::writeMessageStream(int out) {
 
         case STREAM_MD5:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobName())) {
                 return false;
             }
 
@@ -403,11 +403,11 @@ bool Message::writeMessageStream(int out) {
 
         case STREAM_JOB:
 
-            if (!writeJobInfo(out, getData()->getJobDir())) {
+            if (!writeJobInfo(out, getData()->getJobName())) {
                 return false;
             }
 
-            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
+            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobName());
             break;
 
         case STREAM_COMPONENT: {
@@ -416,7 +416,7 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobDir());
+            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobName());
             break;
         }
 

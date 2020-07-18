@@ -54,7 +54,7 @@ bool Node::processCollectorJobMsg(const ComponentObject& owner, Message *msg) {
 
     ((NodeObject&)getHost()).getProcessInfo().setAssigned(owner.getID());
     ((NodeObject&)getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
-    ((NodeObject&)getHost()).getProcessInfo().setJobID(msg->getData()->getJobDir());
+    ((NodeObject &) getHost()).getProcessInfo().setJobName(msg->getData()->getJobName());
     ((NodeObject&)getHost()).getProcessInfo().setID(msg->getData()->getExecutorID());
     ((NodeObject&)getHost()).getProcessInfo().get().setParsedExec(msg->getData()->getExecutor());
     ((NodeObject&)getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
@@ -95,7 +95,7 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
     //TODO will update with actual binary to collector including outputs
     return send2CollectorBinaryMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
                                                    ((NodeObject&)getHost()).getAssigned().getAddress()),
-                                   ((NodeObject&)getHost()).getProcessInfo().getJobID().c_str(),
+                                   ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
                                    ((NodeObject&)getHost()).getProcessInfo().getID(),
                                    ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
                                    outputList);
@@ -118,7 +118,7 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
 
         return send2CollectorInfoMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
                                                      ((NodeObject&)getHost()).getAssigned().getAddress()),
-                                     ((NodeObject&)getHost()).getProcessInfo().getJobID().c_str(),
+                                     ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
                                      ((NodeObject&)getHost()).getProcessInfo().getID(),
                                      ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
                                      requiredList);
@@ -177,26 +177,26 @@ bool Node::send2DistributorBusyMsg(const ComponentObject& target, int collID) {
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobDir, int executorID,
+bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobName, int executorID,
                                  const char* executor, TypeFileInfoList &fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJobName(jobName);
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobDir, int executorID,
+bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobName, int executorID,
                                    const char* executor, TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJobDir(jobDir);
+    msg->getData()->setJobName(jobName);
     msg->getData()->setExecutor(executorID, executor);
     msg->getData()->addFileList(fileList);
 
@@ -250,7 +250,7 @@ bool Node::processCommand(int processID, const char *cmd) {
         }
 
         while (fgets(childOut, 256, fdProcess)) {
-            LOGS_I(getHost(), "Child Output : %s", childOut);
+            LOGS_I(getHost(), "Process[%d] Output : %s",processID, childOut);
         }
 
         int res = pclose(fdProcess);
@@ -262,7 +262,6 @@ bool Node::processCommand(int processID, const char *cmd) {
         LOGS_E(getHost(), "Process[%d] has execution problem retrying", processID);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME));
-
     }
 
     LOGS_E(getHost(), "Process[%d] is ended with error", processID);

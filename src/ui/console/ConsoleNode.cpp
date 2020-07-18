@@ -31,7 +31,7 @@ bool ConsoleApp::nodeStateHandler(int id) {
         PRINT("ID : %d, Assigned Collector : %d, Job ID : %s, Process : %s",
               process.getID(),
               process.getAssigned(),
-              process.getJobID().c_str(),
+              process.getJobName().c_str(),
               processCommand.c_str());
     }
 

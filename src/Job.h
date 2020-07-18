@@ -5,20 +5,19 @@
 #ifndef DICON_JOB_H
 #define DICON_JOB_H
 
-#include "JsonItem.h"
+#include "JobItem.h"
 #include "Md5.h"
 #include "ProcessItem.h"
 #include "ProcessInfo.h"
+#include "miniz/miniz.h"
 
 #define MAX_JOB_COUNT 100
-#define JOB_ITEM 0
-#define JOB_FILE "Job.json"
-#define JOB_DIR_PREFIX "Job_"
-#define JOB_MAX_NAME 50
 
-class Job : public JsonItem {
+class Job {
 
-    char name[JOB_MAX_NAME]{};
+    ComponentObject host;
+
+    JobItem *jobFile;
 
     std::mutex mutex;
 
@@ -26,23 +25,17 @@ class Job : public JsonItem {
 
 public:
 
-    Job(const ComponentObject& host, const char* jobDir);
+    Job(const ComponentObject&, const char*, const char*);
 
-    void init();
-    ~Job() override;
+    ~Job();
 
-    static bool parseNameNode(JsonItem*, json_object *node);
-    static bool parseFileNode(JsonItem*, json_object *node);
-    static bool parseParamNode(JsonItem*, json_object *node);
-    static bool parseExecutorNode(JsonItem*, json_object *node);
+    bool extract(const char*, const char*, char*);
 
-    const char* getName();
-    void setName(const char*);
-
-    int getExecutorCount();
-    ProcessItem* getExecutor(int);
+    ComponentObject& getHost();
 
     int getFileCount();
+    int getExecutorCount();
+    const char* getName();
     FileItem* getFile(int);
 
     int getProcessCount() const;

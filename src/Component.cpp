@@ -178,5 +178,6 @@ void Component::setID(int id) {
     int pos = strlen(rootPath);
     sprintf(&rootPath[pos], "/%d", id);
 
+    Util::removePath(getRootPath());
     mkdir(rootPath, 0777);
 }

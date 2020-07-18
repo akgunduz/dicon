@@ -59,14 +59,14 @@ TypeFileInfoList FileInfo::getReqFileList(const ComponentObject& component, cons
     for (auto & file : list) {
 
         if (!Util::checkPath(component.getRootPath(),
-                             file.get()->getJobDir(), file.get()->getFileName(), false)) {
+                             file.get()->getJobName(), file.get()->getFileName(), false)) {
 
             reqList.push_back(file);
 
         } else {
 
             Md5 md5(Util::getAbsMD5Path(component.getRootPath(),
-                                        file.get()->getJobDir(), file.get()->getFileName()).c_str());
+                                        file.get()->getJobName(), file.get()->getFileName()).c_str());
             if (!md5.equal(file.get()->getMD5())) {
 
                 reqList.push_back(file);

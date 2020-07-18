@@ -36,17 +36,25 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
 
 bool WebApp::distStateHandler(struct mg_connection *conn) {
 
+    auto *distributor = componentController->getDistributor();
+    if (!distributor) {
+        PRINT("Can not find the distributor !!!");
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        return false;
+    }
+
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        PRINT("Can not create json object!!!");
+        LOGS_I(distributor->getHost(), "Can not create json object!!!");
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
     auto* collList = json_object_new_array();
 
-    for (int i = 0 ; i < componentController->getDistributor()->getCollectors()->size(); i++) {
+    for (int i = 0 ; i < distributor->getCollectors()->size(); i++) {
 
-        auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
+        auto *collector = distributor->getCollectors()->getByIndex(i);
         auto* collItem = json_object_new_object();
         json_object_object_add(collItem, "collectorID", json_object_new_int(collector->getID()));
         json_object_object_add(collItem, "state", json_object_new_int(((CollectorObject*)collector)->getState()));
@@ -58,9 +66,9 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* nodeList = json_object_new_array();
 
-    for (int i = 0 ; i < componentController->getDistributor()->getNodes()->size(); i++) {
+    for (int i = 0 ; i < distributor->getNodes()->size(); i++) {
 
-        auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
+        auto *node = distributor->getNodes()->getByIndex(i);
         auto* nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "nodeID", json_object_new_int(node->getID()));
         json_object_object_add(nodeItem, "state", json_object_new_int(((NodeObject*)node)->getState()));

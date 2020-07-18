@@ -13,7 +13,7 @@ class FileItem : public ContentItem {
 
 	ComponentObject host;
 	char fileName[PATH_MAX];
-	char jobDir[PATH_MAX];
+	char jobName[PATH_MAX];
 
 	int id;
 	bool is_exist;
@@ -34,7 +34,7 @@ public:
 	Md5* getMD5();
 	void setMD5(Md5* = nullptr);
     const char* getFileName() const;
-    const char* getJobDir() const;
+    const char* getJobName() const;
 
 	ComponentObject getHost() const;
     int getID() const;

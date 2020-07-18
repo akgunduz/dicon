@@ -118,13 +118,10 @@
         padding: 0.5rem;
       }
 
-      /* tr:nth-child(even) {
-        background-color: #dddddd;
-      } */
-
       .single-table-container {
         width: 49%;
       }
+
     </style>
   </head>
   <body onload="onLoad()">
@@ -188,14 +185,19 @@
       <h1 id="coll-header">Collector</h1>
       <div id="coll-area" class="dual-tables-container">
         <div id="coll-file" class="single-table-container">
-          <button
-            type="button"
-            class="button btn-full-width"
-            onclick="onCollLoadJob()"
-          >
+          <input
+            id="load-input"
+            type="file"
+            accept=".zip, .tar.gz, .tgz"
+            style="display: none;"
+            onchange="onCollLoadJob()"
+          />
+          <button id="load-btn" type="button" class="button btn-full-width">
             Load Job
           </button>
-          <h3 id=coll-job-name style="text-align: left; margin-bottom: 1rem;">Job :</h3>
+          <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;">
+            Job :
+          </h3>
           <table id="coll-file-table" class="table-wide">
             <colgroup>
               <col span="1" style="width: 60%;" />
@@ -360,7 +362,7 @@
       function onDistState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
+          if (this.readyState === 4 && this.status === 200) {
             var data = JSON.parse(this.responseText);
             onDistUpdateCollList(data);
             onDistUpdateNodeList(data);
@@ -373,7 +375,7 @@
       function onDistPoll() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
+          if (this.readyState === 4 && this.status === 200) {
             //response is async, will be get via WS
           }
         };
@@ -430,10 +432,12 @@
       function onCollState() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            var data = JSON.parse(this.responseText);
-            onCollUpdateFileList(data);
-            onCollUpdateProcessList(data);
+          if (this.readyState === 4 && this.status === 200) {
+            if (this.responseText !== "") {
+              var data = JSON.parse(this.responseText);
+              onCollUpdateFileList(data);
+              onCollUpdateProcessList(data);
+            }
           }
         };
         xhttp.open(
@@ -445,24 +449,23 @@
       }
 
       function onCollLoadJob() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            //response is async, will be get via WS
-          }
-        };
+        let uploadFile = document.getElementById("load-input").files[0];
+
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = state => { console.log(xhttp.status); }
         xhttp.open(
-          "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
+          "POST",
+           REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
           true
         );
-        xhttp.send();
+        xhttp.setRequestHeader("FileName", uploadFile.name);
+        xhttp.send(uploadFile);
       }
 
       function onCollProcess(collID) {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
+          if (this.readyState === 4 && this.status === 200) {
             testField.innerHTML = this.responseText;
           }
         };
@@ -579,6 +582,16 @@
               break;
           }
         };
+        const loadBtn = document.getElementById("load-btn");
+        const loadInput = document.getElementById("load-input");
+        loadBtn.addEventListener(
+          "click",
+          function (e) {
+            loadInput.click();
+          },
+          false
+        );
+
         wsConn.onerror = function (error) {
           //   alert("Websocket error");
           wsConn.close();
