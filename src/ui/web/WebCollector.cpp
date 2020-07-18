@@ -5,7 +5,6 @@
 
 #include <Job.h>
 #include <paths.h>
-#include <miniz/miniz.h>
 #include "WebApp.h"
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
