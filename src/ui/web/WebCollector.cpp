@@ -147,7 +147,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
         auto* processItem = json_object_new_object();
         json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j).getID()));
-        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j).get().getExec()));
+        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j).get().getProcess()));
         json_object_object_add(processItem, "_validity", json_object_new_boolean(job->getProcess(j).get().isValid()));
         json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j).getState()));
         json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j).getAssigned()));

@@ -4,17 +4,6 @@
 
 #include "JobItem.h"
 #include "ParameterItem.h"
-#include "ProcessItem.h"
-
-JobItem::JobItem(const ComponentObject& host)
-    : FileItem(host) {
-
-}
-
-JobItem::JobItem(FileItem *fileItem)
-    : FileItem(fileItem) {
-
-}
 
 JobItem::JobItem(const ComponentObject& host, const char* jobName, const char* fileName)
         : FileItem(host, jobName, fileName, 0, -1) {
@@ -22,7 +11,7 @@ JobItem::JobItem(const ComponentObject& host, const char* jobName, const char* f
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
     contentTypes[CONTENT_FILE] = new JsonType(CONTENT_FILE, "files", this, parseFileNode);
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
-    contentTypes[CONTENT_EXECUTOR] = new JsonType(CONTENT_EXECUTOR, "executors", this, parseExecutorNode);
+    contentTypes[CONTENT_PROCESS] = new JsonType(CONTENT_PROCESS, "processes", this, parseProcessNode);
 
     if (!validate()) {
         LOGS_E(getHost(), "Job file could not validated!!!");
@@ -34,8 +23,8 @@ JobItem::JobItem(const ComponentObject& host, const char* jobName, const char* f
         return;
     }
 
-    for (int i = 0; i < getExecutorCount(); i++) {
-        getExecutor(i)->parse(this);
+    for (int i = 0; i < getProcessCount(); i++) {
+        getProcess(i)->parse(this);
     }
 }
 
@@ -46,8 +35,7 @@ JobItem::~JobItem() {
     }
 
     for (auto & content : contentList) {
-        for (int j = 0; j < content.size(); j++) {
-            ContentItem *item = content[j];
+        for (auto item : content) {
             delete item;
         }
     }
@@ -91,13 +79,6 @@ bool JobItem::parse() {
             }
         }
     }
-
-    return true;
-}
-
-bool JobItem::init() {
-
-
 
     return true;
 }
@@ -174,11 +155,11 @@ bool JobItem::parseParamNode(JobItem *parent, json_object *node) {
     return true;
 }
 
-bool JobItem::parseExecutorNode(JobItem *parent, json_object *node) {
+bool JobItem::parseProcessNode(JobItem *parent, json_object *node) {
 
     enum json_type type = json_object_get_type(node);
     if (type != json_type_array) {
-        LOGS_E(parent->getHost(), "Invalid JSON Executor Node");
+        LOGS_E(parent->getHost(), "Invalid JSON Process Node");
         return false;
     }
 
@@ -187,15 +168,15 @@ bool JobItem::parseExecutorNode(JobItem *parent, json_object *node) {
 
         type = json_object_get_type(child);
         if (type != json_type_string) {
-            LOGS_E(parent->getHost(), "Invalid JSON Executor Node");
+            LOGS_E(parent->getHost(), "Invalid JSON Process Node");
             return false;
         }
 
-        const char *exec = json_object_get_string(child);
+        const char *process = json_object_get_string(child);
 
-        auto *content = new ProcessItem(exec);
+        auto *content = new ProcessItem(process);
 
-        parent->contentList[CONTENT_EXECUTOR].push_back(content);
+        parent->contentList[CONTENT_PROCESS].push_back(content);
     }
 
     return true;
@@ -208,17 +189,17 @@ const char *JobItem::getName() {
 
 void JobItem::setName(const char *_name) {
 
-    strncpy(this->name, _name, JOB_MAX_NAME);
+    strncpy(this->name, _name, NAME_MAX);
 }
 
-int JobItem::getExecutorCount() {
+int JobItem::getProcessCount() {
 
-    return getContentCount(CONTENT_EXECUTOR);
+    return getContentCount(CONTENT_PROCESS);
 }
 
-ProcessItem* JobItem::getExecutor(int index) {
+ProcessItem* JobItem::getProcess(int index) {
 
-    return (ProcessItem*)getContent(CONTENT_EXECUTOR, index);
+    return (ProcessItem*)getContent(CONTENT_PROCESS, index);
 }
 
 int JobItem::getFileCount() {

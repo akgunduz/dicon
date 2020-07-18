@@ -25,7 +25,7 @@ bool ConsoleApp::nodeStateHandler(int id) {
 
     for (auto &process : node->getProcessList()) {
 
-        std::string processCommand = process.get().getParsedExec();
+        std::string processCommand = process.get().getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
 
         PRINT("ID : %d, Assigned Collector : %d, Job ID : %s, Process : %s",

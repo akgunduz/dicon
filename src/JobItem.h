@@ -11,10 +11,7 @@
 #include "ProcessItem.h"
 
 #define MAX_CONTENT_TYPE 10
-#define JOB_ITEM 0
 #define JOB_FILE "Job.json"
-#define JOB_DIR_PREFIX "Job_"
-#define JOB_MAX_NAME 50
 
 class JobItem : public FileItem {
 
@@ -28,11 +25,8 @@ protected:
 
 public:
 
-    JobItem(const ComponentObject& host);
-    JobItem(FileItem *fileItem);
     JobItem(const ComponentObject&, const char*, const char*);
-    virtual ~JobItem();
-    bool init();
+    ~JobItem() override;
     ContentItem* getContent(int type, int index) const;
     int getContentCount(int type) const;
     void reset();
@@ -41,13 +35,13 @@ public:
     static bool parseNameNode(JobItem*, json_object *node);
     static bool parseFileNode(JobItem*, json_object *node);
     static bool parseParamNode(JobItem*, json_object *node);
-    static bool parseExecutorNode(JobItem*, json_object *node);
+    static bool parseProcessNode(JobItem *parent, json_object *node);
 
     const char* getName();
     void setName(const char*);
 
-    int getExecutorCount();
-    ProcessItem* getExecutor(int);
+    int getProcessCount();
+    ProcessItem* getProcess(int);
 
     int getFileCount();
     FileItem* getFile(int);

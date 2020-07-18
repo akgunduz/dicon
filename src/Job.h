@@ -34,7 +34,7 @@ public:
     ComponentObject& getHost();
 
     int getFileCount();
-    int getExecutorCount();
+    int getProcessCount();
     const char* getName();
     FileItem* getFile(int);
 

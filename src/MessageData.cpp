@@ -70,25 +70,25 @@ unsigned long MessageData::getFileCount() {
     return fileList.size();
 }
 
-char* MessageData::getExecutor() {
+char* MessageData::getProcess() {
 
-    return executor;
+    return process;
 }
 
-int MessageData::getExecutorID() {
+int MessageData::getProcessID() {
 
-    return executorID;
+    return processID;
 }
 
-void MessageData::setExecutorID(int id) {
+void MessageData::setProcessID(int _processID) {
 
-    this->executorID = id;
+    this->processID = _processID;
 }
 
-void MessageData::setExecutor(int id, const char *_executor) {
+void MessageData::setProcess(int _processID, const char *_process) {
 
-    this->executorID = id;
-    strcpy(this->executor, _executor);
+    this->processID = _processID;
+    strcpy(this->process, _process);
 }
 
 char *MessageData::getJobName() {

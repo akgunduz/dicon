@@ -55,12 +55,12 @@ bool Node::processCollectorJobMsg(const ComponentObject& owner, Message *msg) {
     ((NodeObject&)getHost()).getProcessInfo().setAssigned(owner.getID());
     ((NodeObject&)getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
     ((NodeObject &) getHost()).getProcessInfo().setJobName(msg->getData()->getJobName());
-    ((NodeObject&)getHost()).getProcessInfo().setID(msg->getData()->getExecutorID());
-    ((NodeObject&)getHost()).getProcessInfo().get().setParsedExec(msg->getData()->getExecutor());
+    ((NodeObject&)getHost()).getProcessInfo().setID(msg->getData()->getProcessID());
+    ((NodeObject &) getHost()).getProcessInfo().get().setParsedProcess(msg->getData()->getProcess());
     ((NodeObject&)getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
 
     LOGS_I(getHost(), "Process[%d] request is received from Collector[%d]",
-           msg->getData()->getExecutorID(), owner.getID());
+           msg->getData()->getProcessID(), owner.getID());
 
     return send2DistributorBusyMsg(getDistributor(), owner.getID());
 }
@@ -78,7 +78,7 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
     notifyUI();
 
     int result = processCommand(((NodeObject&)getHost()).getProcessInfo().getID(),
-                   ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec());
+                                ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess());
 
     if (!result) {
         return false;
@@ -97,7 +97,7 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
                                                    ((NodeObject&)getHost()).getAssigned().getAddress()),
                                    ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
                                    ((NodeObject&)getHost()).getProcessInfo().getID(),
-                                   ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
+                                   ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess(),
                                    outputList);
 }
 
@@ -120,7 +120,7 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
                                                      ((NodeObject&)getHost()).getAssigned().getAddress()),
                                      ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
                                      ((NodeObject&)getHost()).getProcessInfo().getID(),
-                                     ((NodeObject&)getHost()).getProcessInfo().get().getParsedExec(),
+                                     ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess(),
                                      requiredList);
 
     } else {
@@ -133,7 +133,7 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
 bool Node::processCollectorBinaryMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_I(getHost(), "Process[%d] binaries are received from Collector[%d]",
-           msg->getData()->getExecutorID(), owner.getID());
+           msg->getData()->getProcessID(), owner.getID());
 
     return processJob(owner, msg);
 }
@@ -177,27 +177,27 @@ bool Node::send2DistributorBusyMsg(const ComponentObject& target, int collID) {
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobName, int executorID,
-                                 const char* executor, TypeFileInfoList &fileList) {
+bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobName, int processID,
+                                 const char* process, TypeFileInfoList &fileList) {
 
 	auto *msg = new Message(getHost(), MSGTYPE_INFO);
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobName(jobName);
-    msg->getData()->setExecutor(executorID, executor);
+    msg->getData()->setProcess(processID, process);
     msg->getData()->addFileList(fileList);
 
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobName, int executorID,
-                                   const char* executor, TypeFileInfoList &fileList) {
+bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobName, int processID,
+                                   const char* process, TypeFileInfoList &fileList) {
 
     auto *msg = new Message(getHost(), MSGTYPE_BINARY);
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobName(jobName);
-    msg->getData()->setExecutor(executorID, executor);
+    msg->getData()->setProcess(processID, process);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);

@@ -118,20 +118,20 @@ bool Message::readJobInfo(int desc, char *jobName, Block *block) {
     return true;
 }
 
-bool Message::readExecutionInfo(int desc, int *executionID, char *execution, Block *block) {
+bool Message::readProcessInfo(int desc, int *processID, char *process, Block *block) {
 
-    if (block->getType() != BLOCK_EXECUTION_INFO) {
-        LOGS_E(getHost(), "readExecutionInfo can not read other blocks");
+    if (block->getType() != BLOCK_PROCESS_INFO) {
+        LOGS_E(getHost(), "readProcessInfo can not read other blocks");
         return false;
     }
 
-    if (!readNumber(desc, (long *)executionID)) {
-        LOGS_E(getHost(), "readExecutionInfo can not read execution id");
+    if (!readNumber(desc, (long *)processID)) {
+        LOGS_E(getHost(), "readProcessInfo can not read process id");
         return false;
     }
 
-    if (!readString(desc, execution, block->getSize(0))) {
-        LOGS_E(getHost(), "readExecutionInfo can not read execution info");
+    if (!readString(desc, process, block->getSize(0))) {
+        LOGS_E(getHost(), "readProcessInfo can not read process info");
         return false;
     }
 
@@ -183,16 +183,16 @@ bool Message::readMessageBlock(int in, Block *block) {
 
             break;
 
-        case BLOCK_EXECUTION_INFO:
+        case BLOCK_PROCESS_INFO:
 
-            int executionID;
-            if (!readExecutionInfo(in, &executionID, getData()->getExecutor(), block)) {
+            int processID;
+            if (!readProcessInfo(in, &processID, getData()->getProcess(), block)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New execution info %s received", getData()->getExecutor());
+            LOGS_T(getHost(), "New process info %s received", getData()->getProcess());
 
-            getData()->setExecutorID(executionID);
+            getData()->setProcessID(processID);
 
             break;
 
@@ -266,24 +266,24 @@ bool Message::writeJobInfo(int desc, char *jobName) {
     return true;
 }
 
-bool Message::writeExecutionInfo(int desc, int executorID, char *executor) {
+bool Message::writeProcessInfo(int desc, int processID, char *process) {
 
-    Block blockHeader(1, BLOCK_EXECUTION_INFO);
+    Block blockHeader(1, BLOCK_PROCESS_INFO);
 
-    blockHeader.setSize(0, (int) strlen(executor));
+    blockHeader.setSize(0, (int) strlen(process));
 
     if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write block header");
+        LOGS_E(getHost(), "writeProcessInfo can not write block header");
         return false;
     }
 
-    if (!writeNumber(desc, executorID)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write execution ID");
+    if (!writeNumber(desc, processID)) {
+        LOGS_E(getHost(), "writeProcessInfo can not write process ID");
         return false;
     }
 
-    if (!writeString(desc, executor)) {
-        LOGS_E(getHost(), "writeExecutionInfo can not write execution info");
+    if (!writeString(desc, process)) {
+        LOGS_E(getHost(), "writeProcessInfo can not write process info");
         return false;
     }
 
@@ -369,7 +369,7 @@ bool Message::writeMessageStream(int out) {
                 return false;
             }
 
-            if (!writeExecutionInfo(out, getData()->getExecutorID(), getData()->getExecutor())) {
+            if (!writeProcessInfo(out, getData()->getProcessID(), getData()->getProcess())) {
                 return false;
             }
 

@@ -20,7 +20,7 @@
 #define STREAM_COMPONENT 0x05
 
 #define BLOCK_JOB_INFO 0x01
-#define BLOCK_EXECUTION_INFO 0x02
+#define BLOCK_PROCESS_INFO 0x02
 #define BLOCK_FILE_BINARY 0x03
 #define BLOCK_FILE_MD5 0x04
 #define BLOCK_FILE_INFO 0x05
@@ -34,14 +34,14 @@ private:
 
     bool readComponentList(int, std::vector<ComponentObject>&, Block*);
     bool readJobInfo(int, char*, Block*);
-    bool readExecutionInfo(int, int*, char*, Block*);
+    bool readProcessInfo(int desc, int *, char *, Block *);
     bool readFile(int, FileItem *, const char*, long *, Block *);
     bool readFileMD5(int, Md5*, Block*);
     bool readMessageBlock(int in, Block*);
 
     bool writeComponentList(int, std::vector<ComponentObject>&);
     bool writeJobInfo(int, char*);
-    bool writeExecutionInfo(int, int, char*);
+    bool writeProcessInfo(int, int, char*);
     bool writeFile(int, FileItem *, bool, bool);
     bool writeFileMD5(int, Md5*);
 

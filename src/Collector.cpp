@@ -60,7 +60,7 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
         const ProcessInfo &process = job->assignNode(node);
         LOGS_I(getHost(), "Node[%d] is assigned by distributor, triggering Process[%d]", node.getID(), process.getID());
         send2NodeJobMsg(node, job->getName(), process.getID(),
-                        process.get().getParsedExec(), process.get().getFileList());
+                        process.get().getParsedProcess(), process.get().getFileList());
     }
 
     notifyUI();
@@ -72,8 +72,8 @@ bool Collector::processNodeInfoMsg(const ComponentObject& owner, Message *msg) {
 
     LOGS_T(getHost(), "%d File info is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
-    return send2NodeBinaryMsg(owner, msg->getData()->getJobName(), msg->getData()->getExecutorID(),
-                              msg->getData()->getExecutor(), msg->getData()->getFileList());
+    return send2NodeBinaryMsg(owner, msg->getData()->getJobName(), msg->getData()->getProcessID(),
+                              msg->getData()->getProcess(), msg->getData()->getFileList());
 }
 
 bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg) {
@@ -81,7 +81,7 @@ bool Collector::processNodeBinaryMsg(const ComponentObject& owner, Message *msg)
     LOGS_T(getHost(), "%d File output binary is received from Node[%d]", msg->getData()->getFileCount(), owner.getID());
 
     int totalCount = 0;
-    int readyCount = job->updateDependency(msg->getData()->getExecutorID(), totalCount);
+    int readyCount = job->updateDependency(msg->getData()->getProcessID(), totalCount);
 
     notifyUI();
 
@@ -136,7 +136,7 @@ bool Collector::send2NodeJobMsg(const ComponentObject& target, const char* jobNa
 
     msg->getData()->setStreamFlag(STREAM_INFO);
     msg->getData()->setJobName(jobName);
-    msg->getData()->setExecutor(processID, processLine);
+    msg->getData()->setProcess(processID, processLine);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
@@ -149,7 +149,7 @@ bool Collector::send2NodeBinaryMsg(const ComponentObject& target, const char* jo
 
     msg->getData()->setStreamFlag(STREAM_BINARY);
     msg->getData()->setJobName(jobName);
-    msg->getData()->setExecutor(processID, processLine);
+    msg->getData()->setProcess(processID, processLine);
     msg->getData()->addFileList(fileList);
 
     return send(target, msg);
@@ -182,7 +182,7 @@ bool Collector::loadJob(const char* zipFile) {
 
     job = new Job(getHost(), zipFile, getRootPath());
 
-    if (job->getFileCount() && job->getExecutorCount()) {
+    if (job->getFileCount() && job->getProcessCount()) {
         notifyUI();
         return true;
     }

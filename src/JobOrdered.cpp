@@ -62,17 +62,17 @@ const ProcessInfo& Job::assignNode(ComponentObject &node) {
 
 ProcessItem* Job::getByOutput(int index) {
 
-    for (int i = 0; i < jobFile->getExecutorCount(); i++) {
+    for (int i = 0; i < jobFile->getProcessCount(); i++) {
 
-        auto *executor = jobFile->getExecutor(i);
+        auto *process = jobFile->getProcess(i);
 
-        TypeFileInfoList list = FileInfo::getFileList(executor->getFileList(), true);
+        TypeFileInfoList list = FileInfo::getFileList(process->getFileList(), true);
         if (list.empty()) {
             continue;
         }
 
         if (list[0].get()->getID() == index) {
-            return executor;
+            return process;
         }
     }
 
@@ -87,11 +87,11 @@ bool Job::createDependencyMap() {
 
     bzero(depth, (size_t)jobFile->getFileCount() * sizeof(int));
 
-    for (int i = 0; i < jobFile->getExecutorCount(); i++) {
+    for (int i = 0; i < jobFile->getProcessCount(); i++) {
 
         TypeFileList outList, depList;
 
-        const TypeFileInfoList &fileList = jobFile->getExecutor(i)->getFileList();
+        const TypeFileInfoList &fileList = jobFile->getProcess(i)->getFileList();
 
         for (auto & j : fileList) {
 
@@ -165,9 +165,9 @@ int Job::getFileCount() {
     return jobFile->getFileCount();
 }
 
-int Job::getExecutorCount() {
+int Job::getProcessCount() {
 
-    return jobFile->getExecutorCount();
+    return jobFile->getProcessCount();
 }
 
 const char *Job::getName() {

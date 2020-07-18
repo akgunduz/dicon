@@ -55,7 +55,7 @@ bool ConsoleApp::collStateHandler(int id) {
 
         PRINT("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
                 job->getProcess(j).getID(),
-                job->getProcess(j).get().getExec(),
+              job->getProcess(j).get().getProcess(),
                 ProcessState::getName(job->getProcess(j).getState()),
                 job->getProcess(j).getAssigned());
     }

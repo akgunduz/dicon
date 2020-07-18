@@ -3,24 +3,24 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __ExecutorContent_H_
-#define __ExecutorContent_H_
+#ifndef DICON_PROCESSITEM_H
+#define DICON_PROCESSITEM_H
 
 #include "ContentItem.h"
 #include "FileItem.h"
 #include "FileInfo.h"
 
-enum EXEC_OPTIONS {
-	EXEC_FILE,
-	EXEC_PARAM,
-	EXEC_OUTPUT,
-	EXEC_MAX
+enum PROCESS_OPTIONS {
+	PROCESS_FILE,
+	PROCESS_PARAM,
+	PROCESS_OUTPUT,
+	PROCESS_MAX
 };
 
 class ProcessItem : public ContentItem {
 
-	char exec[PATH_MAX];
-	char parsedExec[PATH_MAX];
+	char process[PATH_MAX];
+	char parsedProcess[PATH_MAX];
 
 	TypeFileInfoList fileList;
 
@@ -29,23 +29,21 @@ class ProcessItem : public ContentItem {
 public:
 	ProcessItem();
 	ProcessItem(ProcessItem &);
-	explicit ProcessItem(const char *exec);
+	explicit ProcessItem(const char *);
 	~ProcessItem() override = default;
 
 
     bool parse(void *);
 
-    const char* getExec() const;
-    void setExec(const char*);
+    const char* getProcess() const;
+    void setProcess(const char*);
 
-    const char* getParsedExec() const;
-    void setParsedExec(const char*);
+    const char* getParsedProcess() const;
+    void setParsedProcess(const char*);
 
     const TypeFileInfoList& getFileList() const;
     void addFileList(const TypeFileInfoList &);
     void setFileList(TypeFileInfoList&);
-
-
 
 	CONTENT_TYPES getType() const override;
 
@@ -54,4 +52,4 @@ public:
 
 
 
-#endif //__Content_H_
+#endif //DICON_PROCESSITEM_H
