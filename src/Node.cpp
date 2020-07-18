@@ -6,7 +6,7 @@
 #include "Node.h"
 #include "CollectorObject.h"
 
-#define PROCESS_SLEEP_TIME 200
+#define PROCESS_SLEEP_TIME 2000
 
 Node *Node::newInstance(const char* path) {
 
@@ -236,8 +236,8 @@ bool Node::processCommand(int processID, const char *cmd) {
 
     strcpy(fullCmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
-    LOGS_T(getHost(), "Process[%d] is started", processID);
-    LOGS_I(getHost(), "Command : %s", fullCmd);
+    LOGS_I(getHost(), "Process[%d] is started", processID);
+    LOGS_I(getHost(), "Process[%d] Command : %s", processID, fullCmd);
 
     char childOut[256];
     int tryCount = 3;
@@ -245,7 +245,7 @@ bool Node::processCommand(int processID, const char *cmd) {
 
         FILE *fdProcess = popen(fullCmd, "r");
         if (fdProcess == nullptr) {
-            LOGS_E(getHost(), "Can not execute command", fullCmd);
+            LOGS_E(getHost(), "Process[%d] Can not execute command", processID, fullCmd);
             return false;
         }
 
