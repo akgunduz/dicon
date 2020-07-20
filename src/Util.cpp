@@ -302,6 +302,13 @@ void Util::replaceStr(std::string &main, const std::string &search,
     }
 }
 
+const char* Util::trimEndLine(char *str) {
+    while(*str == '\r' || *str == '\n') str++;
+    char *end = &str[strlen(str) - 1];
+    while(*end == '\r' || *end == '\n') *end-- = '\0';
+    return str;
+}
+
 bool Util::extractZipFile(const char *file, const char *dest) {
 
     mz_zip_archive zip_archive;

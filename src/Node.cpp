@@ -251,7 +251,10 @@ bool Node::processCommand(int collID, int processID, const char *cmd) {
         }
 
         while (fgets(childOut, 256, fdProcess)) {
-            LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s",collID, processID, childOut);
+            const char *p = Util::trimEndLine(childOut);
+            if (strcmp(p, "") != 0) {
+                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s", collID, processID, p);
+            }
         }
 
         int res = pclose(fdProcess);
