@@ -60,7 +60,8 @@ void JobItem::reset() {
 
 bool JobItem::parse() {
 
-    struct json_object* node = json_object_from_file(Util::getAbsRefPath(getHost().getRootPath(), getJobName(), getFileName()).c_str());
+    struct json_object* node = json_object_from_file(
+            Util::getAbsRefPath(getHost().getRootPath(), getJobName(), getFileName()).c_str());
     if (node == nullptr){
         LOGS_E(getHost(), "Invalid JSON File");
         return false;
@@ -192,22 +193,22 @@ void JobItem::setName(const char *_name) {
     strncpy(this->name, _name, NAME_MAX);
 }
 
-int JobItem::getProcessCount() {
+int JobItem::getProcessCount() const {
 
     return getContentCount(CONTENT_PROCESS);
 }
 
-ProcessItem* JobItem::getProcess(int index) {
+ProcessItem* JobItem::getProcess(int index) const {
 
     return (ProcessItem*)getContent(CONTENT_PROCESS, index);
 }
 
-int JobItem::getFileCount() {
+int JobItem::getFileCount() const {
 
     return getContentCount(CONTENT_FILE);
 }
 
-FileItem* JobItem::getFile(int index) {
+FileItem* JobItem::getFile(int index) const {
 
     return (FileItem*)getContent(CONTENT_FILE, index);
 }

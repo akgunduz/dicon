@@ -40,11 +40,11 @@ public:
     const char* getName();
     void setName(const char*);
 
-    int getProcessCount();
-    ProcessItem* getProcess(int);
+    int getProcessCount() const;
+    ProcessItem* getProcess(int) const;
 
-    int getFileCount();
-    FileItem* getFile(int);
+    int getFileCount() const;
+    FileItem* getFile(int) const;
 };
 
 

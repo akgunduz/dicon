@@ -240,7 +240,7 @@ bool Node::processCommand(int collID, int processID, const char *cmd) {
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s", collID, processID, fullCmd);
 
-    char childOut[256];
+    char childOut[PATH_MAX];
     int tryCount = 1;
     while(tryCount++ < 10) {
 
@@ -250,7 +250,7 @@ bool Node::processCommand(int collID, int processID, const char *cmd) {
             return false;
         }
 
-        while (fgets(childOut, 256, fdProcess)) {
+        while (fgets(childOut, PATH_MAX, fdProcess)) {
             const char *p = Util::trimEndLine(childOut);
             if (strcmp(p, "") != 0) {
                 LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s", collID, processID, p);

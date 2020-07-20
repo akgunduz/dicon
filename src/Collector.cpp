@@ -3,7 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "miniz/miniz.h"
 #include "Collector.h"
 
 Collector *Collector::newInstance(const char* path) {
