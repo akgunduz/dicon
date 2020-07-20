@@ -433,7 +433,7 @@
         }
       }
 
-      function onCollState() {
+      function onCollState(collID) {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState === 4 && this.status === 200) {
@@ -446,7 +446,7 @@
         };
         xhttp.open(
           "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_STATE,
+          REST_COLL_URI + "/" + collID + REST_STATE,
           true
         );
         xhttp.send();
@@ -469,11 +469,7 @@
 
       function onCollProcess(collID) {
         var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-            testField.innerHTML = this.responseText;
-          }
-        };
+        xhttp.onreadystatechange = state => { console.log(xhttp.status); }
         xhttp.open(
           "GET",
           REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
@@ -534,7 +530,7 @@
         }
       }
 
-      function onNodeState() {
+      function onNodeState(nodeID) {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
           if (this.readyState === 4 && this.status === 200) {
@@ -545,7 +541,7 @@
         };
         xhttp.open(
           "GET",
-          REST_NODE_URI + "/" + currentPage.id + REST_STATE,
+          REST_NODE_URI + "/" + nodeID + REST_STATE,
           true
         );
         xhttp.send();
@@ -581,10 +577,10 @@
               onDistState();
               break;
             case COLLECTOR:
-              onCollState();
+              onCollState(currentPage.id);
               break;
             case NODE:
-              onNodeState();
+              onNodeState(currentPage.id);
               break;
           }
         };
