@@ -180,6 +180,7 @@ bool Collector::processJob() {
 
 bool Collector::loadJob(const char* zipFile) {
 
+    delete job;
     job = new Job(getHost(), zipFile, getRootPath());
 
     if (job->getFileCount() && job->getProcessCount()) {

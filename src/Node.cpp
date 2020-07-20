@@ -6,7 +6,7 @@
 #include "Node.h"
 #include "CollectorObject.h"
 
-#define PROCESS_SLEEP_TIME 2000
+#define PROCESS_SLEEP_TIME 1000
 
 Node *Node::newInstance(const char* path) {
 
@@ -49,27 +49,27 @@ bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
 bool Node::processCollectorJobMsg(const ComponentObject& owner, Message *msg) {
 
-    ((NodeObject&)getHost()).setState(NODESTATE_BUSY);
-    ((NodeObject&)getHost()).setAssigned(owner.getID(), owner.getAddress());
+    ((NodeObject&) getHost()).setState(NODESTATE_BUSY);
+    ((NodeObject&) getHost()).setAssigned(owner.getID(), owner.getAddress());
 
-    ((NodeObject&)getHost()).getProcessInfo().setAssigned(owner.getID());
-    ((NodeObject&)getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
-    ((NodeObject &) getHost()).getProcessInfo().setJobName(msg->getData()->getJobName());
-    ((NodeObject&)getHost()).getProcessInfo().setID(msg->getData()->getProcessID());
-    ((NodeObject &) getHost()).getProcessInfo().get().setParsedProcess(msg->getData()->getProcess());
-    ((NodeObject&)getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
+    ((NodeObject&) getHost()).getProcessInfo().setAssigned(owner.getID());
+    ((NodeObject&) getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
+    ((NodeObject&) getHost()).getProcessInfo().setJobName(msg->getData()->getJobName());
+    ((NodeObject&) getHost()).getProcessInfo().setID(msg->getData()->getProcessID());
+    ((NodeObject&) getHost()).getProcessInfo().get().setParsedProcess(msg->getData()->getProcess());
+    ((NodeObject&) getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
 
-    LOGS_I(getHost(), "Process[%d] request is received from Collector[%d]",
-           msg->getData()->getProcessID(), owner.getID());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] request is received ",
+           owner.getID(), msg->getData()->getProcessID());
 
     return send2DistributorBusyMsg(getDistributor(), owner.getID());
 }
 
 bool Node::processJob(const ComponentObject& owner, Message *msg) {
 
-    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executing",
-           ((NodeObject&)getHost()).getProcessInfo().getID(),
-           ((NodeObject&)getHost()).getAssigned().getID());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
+           ((NodeObject&)getHost()).getAssigned().getID(),
+           ((NodeObject&)getHost()).getProcessInfo().getID());
 
     ProcessInfo &processInfo = ((NodeObject&)getHost()).getProcessInfo();
 
@@ -77,8 +77,9 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
 
     notifyUI();
 
-    int result = processCommand(((NodeObject&)getHost()).getProcessInfo().getID(),
-                                ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess());
+    int result = processCommand(((NodeObject&)getHost()).getAssigned().getID(),
+            ((NodeObject&)getHost()).getProcessInfo().getID(),
+            ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess());
 
     if (!result) {
         return false;
@@ -87,9 +88,9 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
     TypeFileInfoList outputList = FileInfo::getFileList(((NodeObject&)getHost()).getProcessInfo().get().getFileList(), true);
     FileInfo::setFileListState(outputList, false);
 
-    LOGS_I(getHost(), "Process[%d] from Collector[%d] is executed, sending back output data",
-           ((NodeObject&)getHost()).getProcessInfo().getID(),
-           ((NodeObject&)getHost()).getAssigned().getID());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] is successfully executed, sending back output data",
+           ((NodeObject&)getHost()).getAssigned().getID(),
+           ((NodeObject&)getHost()).getProcessInfo().getID());
 
     //TODO will update with md5s including outputs
     //TODO will update with actual binary to collector including outputs
@@ -103,7 +104,7 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
 
 bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *msg) {
 
-    LOGS_I(getHost(), "Execution order is received from distributor for Collector[%d]'s Process[%d]",
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] is approved by distributor",
            ((NodeObject&)getHost()).getAssigned().getID(),
            ((NodeObject&)getHost()).getProcessInfo().getID());
 
@@ -112,9 +113,10 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
 
     if (!requiredList.empty()) {
 
-        LOGS_I(getHost(), "Missing files for Process[%d] is requested from Collector[%d]",
+        LOGS_I(getHost(), "Collector[%d]:Process[%d]'s missing files are requested, total %d files",
+               ((NodeObject&)getHost()).getAssigned().getID(),
                ((NodeObject&)getHost()).getProcessInfo().getID(),
-               ((NodeObject&)getHost()).getAssigned().getID());
+               requiredList.size());
 
         return send2CollectorInfoMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
                                                      ((NodeObject&)getHost()).getAssigned().getAddress()),
@@ -132,8 +134,8 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
 
 bool Node::processCollectorBinaryMsg(const ComponentObject& owner, Message *msg) {
 
-    LOGS_I(getHost(), "Process[%d] binaries are received from Collector[%d]",
-           msg->getData()->getProcessID(), owner.getID());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] binaries are received",
+           owner.getID(), msg->getData()->getProcessID());
 
     return processJob(owner, msg);
 }
@@ -230,41 +232,39 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(int processID, const char *cmd) {
+bool Node::processCommand(int collID, int processID, const char *cmd) {
 
     char fullCmd[PATH_MAX];
 
     strcpy(fullCmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
 
-    LOGS_I(getHost(), "Process[%d] is started", processID);
-    LOGS_I(getHost(), "Process[%d] Command : %s", processID, fullCmd);
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s", collID, processID, fullCmd);
 
     char childOut[256];
-    int tryCount = 3;
-    while(--tryCount) {
+    int tryCount = 1;
+    while(tryCount++ < 10) {
 
         FILE *fdProcess = popen(fullCmd, "r");
         if (fdProcess == nullptr) {
-            LOGS_E(getHost(), "Process[%d] Can not execute command", processID, fullCmd);
+            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command", collID, processID, fullCmd);
             return false;
         }
 
         while (fgets(childOut, 256, fdProcess)) {
-            LOGS_I(getHost(), "Process[%d] Output : %s",processID, childOut);
+            LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s",collID, processID, childOut);
         }
 
         int res = pclose(fdProcess);
         if (res == 0) {
-            LOGS_T(getHost(), "Process[%d] is ended successfully", processID);
             return true;
         }
 
-        LOGS_E(getHost(), "Process[%d] has execution problem retrying", processID);
+        LOGS_E(getHost(), "Collector[%d]:Process[%d] has execution problem retrying", collID, processID);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME));
+        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
     }
 
-    LOGS_E(getHost(), "Process[%d] is ended with error", processID);
+    LOGS_E(getHost(), "Collector[%d]:Process[%d] is ended with error", collID, processID);
 
     return false;
 }

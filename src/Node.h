@@ -39,9 +39,9 @@ private:
     bool send2CollectorInfoMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
 	bool send2CollectorBinaryMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
 
-    bool processJob(const ComponentObject& owner, Message *msg);
+    bool processJob(const ComponentObject&, Message *);
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(int processID, const char *);
+    bool processCommand(int, int, const char *);
 
 public:
 

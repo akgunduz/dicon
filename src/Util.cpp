@@ -116,8 +116,7 @@ std::vector<std::string> Util::getDirList(const char *path, const char *filter) 
             continue;
         }
 
-        //     file = std::string(path) + "/" + ent->d_name;
-        fileList.push_back(ent->d_name);
+        fileList.emplace_back(ent->d_name);
     }
 
     return fileList;

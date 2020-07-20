@@ -188,9 +188,10 @@
           <input
             id="load-input"
             type="file"
+            required
             accept=".zip, .tar.gz, .tgz"
             style="display: none;"
-            onchange="onCollLoadJob()"
+            onchange="onCollLoadJob(currentPage.id)"
           />
           <button id="load-btn" type="button" class="button btn-full-width">
             Load Job
@@ -216,7 +217,7 @@
           <button
             type="button"
             class="button btn-full-width"
-            onclick="onCollProcess()"
+            onclick="onCollProcess(currentPage.id)"
           >
             Process
           </button>
@@ -451,18 +452,19 @@
         xhttp.send();
       }
 
-      function onCollLoadJob() {
-        let uploadFile = document.getElementById("load-input").files[0];
-
+      function onCollLoadJob(collID) {
+        let uploadFile = document.getElementById("load-input");
+        let file = uploadFile.files[0];
+        uploadFile.value = "";
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = state => { console.log(xhttp.status); }
         xhttp.open(
           "POST",
-           REST_COLL_URI + "/" + currentPage.id + REST_COLL_LOAD,
+           REST_COLL_URI + "/" + collID + REST_COLL_LOAD,
           true
         );
-        xhttp.setRequestHeader("FileName", uploadFile.name);
-        xhttp.send(uploadFile);
+        xhttp.setRequestHeader("FileName", file.name);
+        xhttp.send(file);
       }
 
       function onCollProcess(collID) {
@@ -474,7 +476,7 @@
         };
         xhttp.open(
           "GET",
-          REST_COLL_URI + "/" + currentPage.id + REST_COLL_PROCESS,
+          REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
           true
         );
         xhttp.send();

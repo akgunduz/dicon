@@ -53,7 +53,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     }
 
     if (!fileName) {
-        LOGS_I(collector->getHost(), "Invalid upload process!!!");
+        LOGS_E(collector->getHost(), "Invalid upload process!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
@@ -63,8 +63,12 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     char tmpFile[PATH_MAX];
     sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
-
     FILE *uploadJobFile = fopen(tmpFile, "w");
+    if (!uploadJobFile) {
+        LOGS_E(collector->getHost(), "Can not open tmp file : %s!!!", tmpFile);
+        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        return false;
+    }
     do {
 
         len = mg_read(conn, buffer, TMP_BUFFER_SIZE);
