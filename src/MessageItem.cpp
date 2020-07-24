@@ -8,7 +8,7 @@ MessageItem::MessageItem(MESSAGE_DIRECTION type, long address, Message *msg)
 : SchedulerItem(type), address(address), msg(msg) {
 
     if (msg != nullptr) {
-        this->priority = msg->getHeader()->getPriority();
+        priority = msg->getHeader().getPriority();
     }
 }
 

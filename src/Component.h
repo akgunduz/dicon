@@ -14,8 +14,10 @@
 class Component;
 
 typedef bool (Component::*TypeProcessComponentMsg)(const ComponentObject&, Message *);
+typedef bool (*TypeStaticProcessComponentMsg)(Component*, const ComponentObject&, Message *);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
+typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
 
 class Component {
 
@@ -31,11 +33,12 @@ protected :
     ComponentObject *host;
 
     TypeProcessMsgMap processMsg[COMP_MAX];
+    TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
 
     const InterfaceSchedulerCB *schedulerCB;
     const InterfaceHostCB *hostCB;
 
-    static ComponentObject getHostCB(void*);
+    static ComponentObject& getHostCB(void*);
 
     bool initInterfaces(COMPONENT type);
 
@@ -55,10 +58,10 @@ public:
     INTERFACE getInterfaceType(ComponentObject);
     bool isSupportMulticast(ComponentObject);
     static bool receiveCB(void *, SchedulerItem*);
-    bool onReceive(ComponentObject, MSG_TYPE, Message *);
+    bool onReceive(const ComponentObject&, MSG_TYPE, Message *);
 
     //bool send(ComponentObject, long, Message*);
-    bool send(ComponentObject, Message*);
+    bool send(const ComponentObject&, Message*);
 
     std::vector<long> getAddressList(const ComponentObject&);
     bool defaultProcessMsg(ComponentObject, Message *);
@@ -67,7 +70,10 @@ public:
 
     bool isIDAssigned();
 
-    void setID(int);
+    void setID(long);
+
+    bool addProcessHandler(COMPONENT, MSG_TYPE, TypeProcessComponentMsg);
+    bool addStaticProcessHandler(COMPONENT, MSG_TYPE, TypeStaticProcessComponentMsg);
 
 };
 

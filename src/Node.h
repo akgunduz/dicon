@@ -16,7 +16,7 @@ private:
 
 	DistributorObject distributor;
 
-    std::vector<ProcessInfo> processList;
+    std::vector<ProcessItem> processList;
 
 	explicit Node(const char *rootPath);
 
@@ -27,28 +27,28 @@ private:
     bool processDistributorIDMsg(const ComponentObject&, Message *);
     bool processDistributorProcessMsg(const ComponentObject&, Message *);
 
-    bool processCollectorJobMsg(const ComponentObject&, Message *);
+    bool processCollectorProcessMsg(const ComponentObject &owner, Message *msg);
     bool processCollectorBinaryMsg(const ComponentObject&, Message *);
     bool processCollectorReadyMsg(const ComponentObject&, Message *);
 
     bool send2DistributorReadyMsg(const ComponentObject&);
     bool send2DistributorAliveMsg(const ComponentObject&);
     bool send2DistributorIDMsg(const ComponentObject&);
-    bool send2DistributorBusyMsg(const ComponentObject&, int);
+    bool send2DistributorBusyMsg(const ComponentObject&, long);
 
-    bool send2CollectorInfoMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
-	bool send2CollectorBinaryMsg(const ComponentObject&, const char*, int, const char*, TypeFileInfoList&);
+    bool send2CollectorInfoMsg(const ComponentObject&, long, TypeProcessFileList&);
+	bool send2CollectorBinaryMsg(const ComponentObject&, long, TypeProcessFileList&);
 
     bool processJob(const ComponentObject&, Message *);
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(int, int, const char *);
+    bool processCommand(long, long, const char *);
 
 public:
 
 	~Node() override;
     static Node* newInstance(const char*);
 
-    std::vector<ProcessInfo>& getProcessList();
+    std::vector<ProcessItem>& getProcessList();
 };
 
 

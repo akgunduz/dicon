@@ -26,9 +26,9 @@ public:
 
     Distributor* getDistributor();
     long getCollectorCount();
-    Collector* getCollector(int);
+    Collector* getCollector(long);
     long getNodeCount();
-    Node* getNode(int);
+    Node* getNode(long);
 
     bool startDistributor();
     bool startCollector(int);

@@ -3,8 +3,8 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Job.h>
 #include <paths.h>
+#include "JobItem.h"
 #include "WebApp.h"
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
@@ -137,8 +137,8 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         auto *content = job->getFile(j);
 
         auto* fileItem = json_object_new_object();
-        json_object_object_add(fileItem, "_name", json_object_new_string(content->getFileName()));
-        json_object_object_add(fileItem, "_validity", json_object_new_boolean(content->isValid()));
+        json_object_object_add(fileItem, "_name", json_object_new_string(content->getName()));
+        json_object_object_add(fileItem, "_validity", json_object_new_boolean(content->check()));
         json_object_object_add(fileItem, "_size", json_object_new_int64(content->getSize()));
 
         json_object_array_add(fileList, fileItem);
@@ -150,11 +150,11 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
     for (int j = 0; j < job->getProcessCount(); j++) {
 
         auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j).getID()));
-        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j).get().getProcess()));
-        json_object_object_add(processItem, "_validity", json_object_new_boolean(job->getProcess(j).get().isValid()));
-        json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j).getState()));
-        json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j).getAssigned()));
+        json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j)->getID()));
+        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j)->getProcess()));
+        json_object_object_add(processItem, "_validity", json_object_new_boolean(job->getProcess(j)->check()));
+        json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j)->getState()));
+        json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j)->getAssigned()));
 
         json_object_array_add(processList, processItem);
     }

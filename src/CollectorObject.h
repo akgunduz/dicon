@@ -16,8 +16,8 @@ private:
 
 public:
 
-    CollectorObject(COLLSTATES, int, long);
-    CollectorObject(int, long);
+    CollectorObject(COLLSTATES, long, long);
+    CollectorObject(long, long);
     CollectorObject(const char *);
     CollectorObject();
     CollectorObject(const CollectorObject &);

@@ -4,42 +4,12 @@
 //
 
 #include "FileItem.h"
-#include "ArchTypes.h"
+#include "Util.h"
 
-FileItem::FileItem(const ComponentObject& host)
-        : ContentItem (), host(host) {
+FileItem::FileItem(const ComponentObject& host, long _id, long _assignedJob, const char* _name)
+        : ContentItem (host, _id, _assignedJob) {
 
-    set("", "", 0, -1, nullptr);
-}
-
-FileItem::FileItem(FileItem *item)
-        : ContentItem (), host(item->getHost()) {
-
-    set(item->getJobName(), item->getFileName(), item->getSize(), item->getID(), item->getMD5());
-}
-
-FileItem::FileItem(const ComponentObject& host, const char *jobName, const char *fileName, long size, int id, Md5 *md5)
-        : ContentItem (), host(host) {
-
-    set(jobName, fileName, size, id, md5);
-};
-
-void FileItem::set(const char *_jobName, const char *_fileName, const long _size, const int _id, const Md5 *_md5) {
-
-    this->is_exist = false;
-
-    this->id = _id;
-
-    this->size = _size;
-
-    strcpy(this->jobName, _jobName);
-
-    strcpy(this->fileName, _fileName);
-
-    if (_md5 != nullptr) {
-
-        this->md5.set(_md5);
-    }
+    strcpy(name, _name);
 }
 
 CONTENT_TYPES FileItem::getType() const {
@@ -47,44 +17,14 @@ CONTENT_TYPES FileItem::getType() const {
 	return CONTENT_FILE;
 }
 
-ComponentObject FileItem::getHost() const {
+const char *FileItem::getName() const {
 
-    return host;
+    return name;
 }
 
-const char *FileItem::getJobName() const {
+void FileItem::setName(const char *_name) {
 
-    return jobName;
-}
-
-const char* FileItem::getFileName() const {
-
-	return fileName;
-}
-
-Md5* FileItem::getMD5() {
-
-    return &md5;
-}
-
-bool FileItem::isValid() {
-
-    return validate();
-}
-
-void FileItem::setMD5(Md5 *_md5) {
-
-    if (_md5 == nullptr) {
-        this->md5.reset();
-        return;
-    }
-
-    this->md5.set(_md5);
-}
-
-int FileItem::getID() const {
-
-    return id;
+    strcpy(name, _name);
 }
 
 long FileItem::getSize() const {
@@ -92,52 +32,29 @@ long FileItem::getSize() const {
     return size;
 }
 
-bool FileItem::validate() {
+bool FileItem::check() {
 
     if (is_exist) {
-        LOGS_T(getHost(), "FileContent %s is already validated", getFileName());
+        LOGS_T(getHost(), "FileContent %s is already validated", name);
         return true;
     }
 
-    if (strcmp(getJobName(), "") == 0 || strcmp(getFileName(), "") == 0) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+    if (getAssignedJob() == 0 || strcmp(name, "") == 0) {
+        LOGS_T(getHost(), "FileContent %s could not opened", name);
         return false;
     }
 
-    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getJobName(), getFileName()).c_str(), "r");
+    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getAssignedJob(), name).c_str(), "r");
     if (file == nullptr) {
-        LOGS_T(getHost(), "FileContent %s could not opened", getFileName());
+        LOGS_T(getHost(), "FileContent %s could not opened", name);
         return false;
     }
 
     fseek(file, 0, SEEK_END);
     size = ftell(file);
     if (size == 0) {
-        LOGS_T(getHost(), "FileContent %s is empty", getFileName());
+        LOGS_T(getHost(), "FileContent %s is empty", name);
         return false;
-    }
-
-    bool status = getMD5()->get(Util::getAbsMD5Path(getHost().getRootPath(), getJobName(), getFileName()).c_str());
-    if (!status) {
-
-        char buf[BUFFER_SIZE];
-        fseek(file, 0, SEEK_SET);
-        //No md5 file create one
-        MD5_CTX ctx;
-        MD5_Init(&ctx);
-
-        while(true) {
-            int count = (int)fread(buf, 1, BUFFER_SIZE, file);
-            if (count != BUFFER_SIZE) {
-                MD5_Update(&ctx, buf, (unsigned)count);
-                break;
-            }
-            MD5_Update(&ctx, buf, (unsigned)BUFFER_SIZE);
-        }
-
-        MD5_Final(getMD5()->data, &ctx);
-
-        getMD5()->set(nullptr, Util::getAbsMD5Path(getHost().getRootPath(), getJobName(), getFileName()).c_str());
     }
 
     fclose(file);
@@ -146,5 +63,3 @@ bool FileItem::validate() {
 
     return true;
 }
-
-

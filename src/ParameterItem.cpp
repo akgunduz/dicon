@@ -5,13 +5,8 @@
 
 #include "ParameterItem.h"
 
-ParameterItem::ParameterItem()
-    : ContentItem () {
-
-};
-
-ParameterItem::ParameterItem(const char *param)
-        : ContentItem () {
+ParameterItem::ParameterItem(const ComponentObject& host, const char *param)
+        : ContentItem (host) {
 
 	strcpy(sPtr, param);
 };
@@ -24,7 +19,7 @@ void ParameterItem::setParam(const char *param) {
 	strcpy(sPtr, param);
 }
 
-bool ParameterItem::isValid() {
+bool ParameterItem::check() {
     return true;
 }
 

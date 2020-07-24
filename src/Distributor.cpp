@@ -5,15 +5,14 @@
 
 #include "Distributor.h"
 
-Distributor *Distributor::instance = NULL;
+Distributor *Distributor::instance = nullptr;
 
 Distributor *Distributor::newInstance(const char* path) {
 
-    if (instance) {
-        return instance;
+    if (!instance) {
+        instance = new Distributor(path);
     }
 
-    instance = new Distributor(path);
     return instance;
 }
 
@@ -21,7 +20,7 @@ Distributor::Distributor(const char *rootPath) :
         Component(rootPath) {
 
     host = new DistributorObject(getRootPath());
-
+    
     processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg);
@@ -40,6 +39,9 @@ Distributor::Distributor(const char *rootPath) :
     collThread = std::thread(collProcessCB, this);
 
     initInterfaces(COMP_DISTRIBUTOR);
+
+    host->setAddress(COMP_COLLECTOR, getInterfaceAddress(CollectorObject()));
+    host->setAddress(COMP_NODE, getInterfaceAddress(NodeObject()));
 };
 
 Distributor::~Distributor() {
@@ -85,12 +87,12 @@ void Distributor::collProcess() {
         }
 
         std::vector<ComponentObject> nodes;
-        int collID = request->collID;
+        long collID = request->collID;
 
         if (request->reqCount > nodeCount) {
 
             for (int i = 0; i < nodeCount; i++) {
-                nodes.emplace_back((ComponentObject)nodeManager->getIdle());
+                nodes.emplace_back(nodeManager->getIdle());
             }
 
             collectorManager->updateRequest(request->reqCount - nodeCount);
@@ -98,7 +100,7 @@ void Distributor::collProcess() {
         } else {
 
             for (int i = 0; i < request->reqCount; i++) {
-                nodes.emplace_back((ComponentObject)nodeManager->getIdle());
+                nodes.emplace_back(nodeManager->getIdle());
             }
 
             collectorManager->removeRequest();
@@ -118,7 +120,7 @@ NodeManager *Distributor::getNodes() const {
 
 bool Distributor::processCollectorAliveMsg(const ComponentObject& owner, Message *msg) {
 
-    int collID = collectorManager->add(owner.getAddress());
+    long collID = collectorManager->add(owner.getAddress());
     if (!collID) {
         return false;
     }
@@ -142,7 +144,7 @@ bool Distributor::processCollectorIDMsg(const ComponentObject& owner, Message *m
 
 bool Distributor::processCollectorNodeMsg(const ComponentObject& owner, Message *msg) {
 
-    collectorManager->addRequest(owner.getID(), msg->getHeader()->getVariant(0));
+    collectorManager->addRequest(owner.getID(), (int)msg->getHeader().getVariant(0));
 
     collectorManager->setState(owner.getID(), COLLSTATE_BUSY);
 
@@ -158,7 +160,7 @@ bool Distributor::processCollectorReadyMsg(const ComponentObject& owner, Message
 
 bool Distributor::processNodeAliveMsg(const ComponentObject& owner, Message *msg) {
 
-    int nodeID = nodeManager->add(owner.getAddress());
+    long nodeID = nodeManager->add(owner.getAddress());
     if (!nodeID) {
         return false;
     }
@@ -189,7 +191,7 @@ bool Distributor::processNodeBusyMsg(const ComponentObject& owner, Message *msg)
         return false;
     }
 
-    int collID = (int) msg->getHeader()->getVariant(0);
+    int collID = (int) msg->getHeader().getVariant(0);
 
     nodeManager->setState(owner.getID(), NODESTATE_BUSY);
 
@@ -221,72 +223,76 @@ bool Distributor::processNodeReadyMsg(const ComponentObject& owner, Message *msg
 
 bool Distributor::send2CollectorWakeupMsg(const ComponentObject& target) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
+    auto *msg = new Message(getHost(), COMP_COLLECTOR, MSGTYPE_WAKEUP);
 
     return send(target, msg);
 }
 
-bool Distributor::send2CollectorIDMsg(const ComponentObject& target, int id) {
+bool Distributor::send2CollectorIDMsg(const ComponentObject& target, long id) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_ID);
+    auto *msg = new Message(getHost(), COMP_COLLECTOR, MSGTYPE_ID);
 
-    msg->getHeader()->setVariant(0, id);
+    msg->getHeader().setVariant(0, id);
 
     return send(target, msg);
 }
 
 bool Distributor::send2CollectorNodeMsg(const ComponentObject& target, std::vector<ComponentObject>& nodes) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_NODE);
+    auto *msg = new Message(getHost(), COMP_COLLECTOR, MSGTYPE_NODE);
 
-    msg->getData()->setStreamFlag(STREAM_COMPONENT);
-    msg->getData()->setComponentList(nodes);
+    msg->getData().setStreamFlag(STREAM_COMPONENT);
+    msg->getData().setComponentList(nodes);
 
     return send(target, msg);
 }
 
 bool Distributor::send2NodeWakeupMsg(const ComponentObject& target) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
+    auto *msg = new Message(getHost(), COMP_NODE, MSGTYPE_WAKEUP);
 
     return send(target, msg);
 }
 
-bool Distributor::send2NodeIDMsg(const ComponentObject& target, int id) {
+bool Distributor::send2NodeIDMsg(const ComponentObject& target, long id) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_ID);
+    auto *msg = new Message(getHost(), COMP_NODE, MSGTYPE_ID);
 
-    msg->getHeader()->setVariant(0, id);
+    msg->getHeader().setVariant(0, id);
 
     return send(target, msg);
 }
 
 bool Distributor::send2NodeProcessMsg(const ComponentObject& target) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_PROCESS);
+    auto *msg = new Message(getHost(), COMP_NODE, MSGTYPE_PROCESS);
 
     return send(target, msg);
 }
 
-bool Distributor::sendWakeupMessage(ComponentObject component) {
+bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
-    if (isSupportMulticast(component)) {
+    auto target = ComponentObject(targetType);
 
-        auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
+    if (isSupportMulticast(target)) {
 
-        component.setAddress(getInterfaceMulticastAddress(component));
-        send(component, msg);
+        auto *msg = new Message(getHost(), target.getType(), MSGTYPE_WAKEUP);
+
+        //TODO think multiple interfaces again
+        target.setAddress(getInterfaceMulticastAddress(target));
+        send(target, msg);
 
     } else {
 
-        std::vector<long> list = getAddressList(component);
+        std::vector<long> list = getAddressList(target);
 
         for (auto &address : list) {
 
-            auto *msg = new Message(getHost(), MSGTYPE_WAKEUP);
+            auto *msg = new Message(getHost(), target.getType(), MSGTYPE_WAKEUP);
 
-            component.setAddress(address);
-            send(component, msg);
+            target.setAddress(address);
+
+            send(target, msg);
         }
     }
 

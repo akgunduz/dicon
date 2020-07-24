@@ -46,7 +46,7 @@ long ComponentController::getCollectorCount() {
     return collectors.size();
 }
 
-Collector *ComponentController::getCollector(int id) {
+Collector *ComponentController::getCollector(long id) {
 
     for (auto & collector : collectors) {
         if (collector->getHost().getID() == id) {
@@ -62,7 +62,7 @@ long ComponentController::getNodeCount() {
     return nodes.size();
 }
 
-Node *ComponentController::getNode(int id) {
+Node *ComponentController::getNode(long id) {
 
     for (auto & node : nodes) {
         if (node->getHost().getID() == id) {

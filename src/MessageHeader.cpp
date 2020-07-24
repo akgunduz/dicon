@@ -7,45 +7,33 @@
 #include "MessageHeader.h"
 #include "MessageTypes.h"
 
-MessageHeader::MessageHeader() {
+MessageHeader::MessageHeader() = default;
 
-}
-
-int MessageHeader::getSize() {
+long MessageHeader::getSize() {
 
     return sizeof(MessageHeader);
 }
 
-void MessageHeader::setType(MSG_TYPE type) {
+void MessageHeader::setType(MSG_TYPE _type) {
 
-    this->type = (int)type;
+    type = (int)_type;
 }
 
-MSG_TYPE MessageHeader::getType() {
+MSG_TYPE MessageHeader::getType() const {
 
     return (MSG_TYPE)type;
 }
 
-ComponentObject MessageHeader::getOwner() {
+ComponentObject MessageHeader::getOwner() const {
 
     return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF), ownerAddress);
 }
 
-void MessageHeader::setOwner(ComponentObject _owner) {
+void MessageHeader::setOwner(const ComponentObject& _owner, COMPONENT targetInterface) {
 
     this->owner = (((long)_owner.getType()) << 32) | _owner.getID();
-    this->ownerAddress = _owner.getAddress();
+    this->ownerAddress = _owner.getAddress(targetInterface);
 }
-
-//long MessageHeader::getOwnerAddress() {
-//
-//    return ownerAddress;
-//}
-//
-//void MessageHeader::setOwnerAddress(long ownerAddress) {
-//
-//    this->ownerAddress = ownerAddress;
-//}
 
 long MessageHeader::getVariant(int id) {
 
@@ -56,16 +44,16 @@ long MessageHeader::getVariant(int id) {
     return 0;
 }
 
-void MessageHeader::setVariant(int id, long variant) {
+void MessageHeader::setVariant(int id, long _variant) {
 
     if (id >= MAX_VARIANT) {
         return;
     }
 
-    this->variant[id] = variant;
+    this->variant[id] = _variant;
 }
 
-int MessageHeader::getPriority() {
+int MessageHeader::getPriority() const {
 
     return priority;
 }
@@ -79,9 +67,9 @@ int MessageHeader::iteratePriority() {
     return priority;
 }
 
-void MessageHeader::setPriority(int priority) {
+void MessageHeader::setPriority(int _priority) {
 
-    this->priority = priority;
+    priority = _priority;
 }
 
 void MessageHeader::normalizePriority() {

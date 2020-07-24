@@ -8,13 +8,13 @@
 #include "Common.h"
 #include "ComponentObject.h"
 
-typedef std::map<int, ComponentObject*> TypeComponentMapIDList;
+typedef std::map<long, ComponentObject*> TypeComponentMapIDList;
 typedef std::map<long, ComponentObject*> TypeComponentMapAddressList;
 typedef std::vector<ComponentObject*> TypeComponentVectorList;
 
 class ComponentManager {
 
-    int idCounter;
+    long idCounter;
 
     std::mutex mutex;
 
@@ -24,20 +24,20 @@ class ComponentManager {
 
 protected:
 
-    virtual ComponentObject* createObject(int, long) = 0;
+    virtual ComponentObject* createObject(long, long) = 0;
 
 public:
 
     ComponentManager();
     virtual ~ComponentManager();
 
-    ComponentObject* get(int);
+    ComponentObject* get(long);
     ComponentObject* getByIndex(int);
     size_t size();
     void clear();
-    bool isExist(int);
+    bool isExist(long);
 
-    int add(long);
+    long add(long);
 };
 
 

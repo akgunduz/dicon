@@ -11,9 +11,9 @@
 #include "CollectorObject.h"
 
 struct CollectorRequest {
-    int collID;
+    long collID;
     int reqCount;
-    CollectorRequest(int _collID, int _reqCount)
+    CollectorRequest(long _collID, int _reqCount)
     : collID(_collID), reqCount(_reqCount){};
 };
 
@@ -21,22 +21,22 @@ class CollectorManager : public ComponentManager {
 
     std::mutex collMutex;
 
-    std::map<int, CollectorObject> collList;
+    std::map<long, CollectorObject> collList;
     std::deque<struct CollectorRequest> collReqList;
 
 protected:
 
-    ComponentObject* createObject(int, long) final;
+    ComponentObject* createObject(long, long) final;
 
 public:
 
     CollectorManager();
-    ~CollectorManager();
+    ~CollectorManager() override;
 
-    COLLSTATES getState(int);
-    void setState(int, COLLSTATES);
+    COLLSTATES getState(long);
+    void setState(long, COLLSTATES);
 
-    bool addRequest(int, int);
+    bool addRequest(long, int);
     CollectorRequest* getRequest();
     void updateRequest(int);
     void removeRequest();

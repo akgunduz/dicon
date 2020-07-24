@@ -8,7 +8,7 @@
 
 TypeTimerList Timer::timerList;
 
-Timer::Timer(int id, long timeout, TypeNotifyCB cb, void* context, int cbData)
+Timer::Timer(long id, long timeout, TypeNotifyCB cb, void* context, long cbData)
     : id(id), timeout(timeout), cb(cb), context(context), cbData(cbData) {
 
     thread = std::thread(run, this);
@@ -46,7 +46,7 @@ void Timer::reset(long ms) {
     reTrigger = true;
 }
 
-Timer *Timer::set(int id, long ms, TypeNotifyCB cb, void* context, int cbData) {
+Timer *Timer::set(long id, long ms, TypeNotifyCB cb, void* context, long cbData) {
 
     auto timer = Timer::timerList.find(id);
     if (timer == Timer::timerList.end()) {

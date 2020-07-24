@@ -107,7 +107,7 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
 
 int main(int argc, char** argv) {
 
-    Util::cleanup();
+    Util::init();
 
     int interfaceID[2] = {0, 0};
 

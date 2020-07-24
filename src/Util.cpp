@@ -1,3 +1,4 @@
+#include <climits>
 //
 // Created by Haluk AKGUNDUZ on 02/07/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
@@ -189,9 +190,9 @@ bool Util::checkPath(const char *root, const char *path, bool dir) {
     return true;
 }
 
-bool Util::checkPath(const char *rootPath, const char *jobName, const char *fileName, bool dir) {
+bool Util::checkPath(const char *rootPath, long jobID, const char *fileName, bool dir) {
 
-    std::string final = std::string(rootPath) + "/" + jobName + "/" + fileName;
+    std::string final = std::string(rootPath) + "/" + std::to_string(jobID) + "/" + fileName;
     if (access(final.c_str(), F_OK) == -1) {
         if (dir) {
             mkPath(final.c_str());
@@ -229,43 +230,33 @@ std::string Util::getAbsPath(const char *rootPath, const char *path2) {
     return std::string(rootPath) + "/" + path2;
 }
 
-std::string Util::getAbsRefPath(const char *rootPath, const char *jobName, const char *fileName) {
+std::string Util::getAbsRefPath(const char *rootPath, long jobID, const char *fileName) {
 
-    return getAbsPath(rootPath, getRefPath(rootPath, jobName, fileName).c_str());
+    return getAbsPath(rootPath, getRefPath(rootPath, jobID, fileName).c_str());
 }
 
-std::string Util::getAbsMD5Path(const char *rootPath, const char *jobName, const char *fileName) {
+std::string Util::getRefPath(const char *rootPath, long jobID, const char *fileName) {
 
-    return getAbsPath(rootPath, getMD5Path(rootPath, jobName, fileName).c_str());
+    return getPath(rootPath, jobID, fileName, false);
 }
 
-std::string Util::getRefPath(const char *rootPath, const char *jobName, const char *fileName) {
-
-    return getPath(rootPath, jobName, fileName, false);
-}
-
-std::string Util::getMD5Path(const char *rootPath, const char *jobName, const char *fileName) {
-
-    return getPath(rootPath, jobName, fileName, true);
-}
-
-std::string Util::getPath(const char *rootPath, const char *jobName, const char *fileName, bool type) {
+std::string Util::getPath(const char *rootPath, long jobID, const char *fileName, bool type) {
 
     char format[PATH_MAX];
     char path[PATH_MAX];
 
-    !type ? strcpy(format, "%s/%s") : strcpy(format, "%s/md5/%s.md5");
-    sprintf(path, format, jobName, fileName);
+    !type ? strcpy(format, "%d/%s") : strcpy(format, "%s/md5/%s.md5");
+    sprintf(path, format, jobID, fileName);
 
     checkPath(rootPath, path, true);
 
     return std::string(path);
 }
 
-void Util::cleanup() {
+void Util::init() {
 
-    DIR *unixdir = opendir(UNIXSOCKET_PATH);
-    if (!unixdir) {
+    DIR *unixDir = opendir(UNIXSOCKET_PATH);
+    if (!unixDir) {
         printf("Can not open unix socket path!!!");
         return;
     }
@@ -273,7 +264,7 @@ void Util::cleanup() {
     dirent *entry;
     char path[300];
 
-    while ((entry = readdir(unixdir)) != NULL) {
+    while ((entry = readdir(unixDir)) != nullptr) {
 
         if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) == 0) {
             sprintf(path, "%s%s", UNIXSOCKET_PATH, entry->d_name);
@@ -281,7 +272,7 @@ void Util::cleanup() {
         }
     }
 
-    closedir(unixdir);
+    closedir(unixDir);
 }
 
 std::string Util::extractFile(const char *path) {

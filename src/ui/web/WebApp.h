@@ -65,7 +65,7 @@ public:
     bool nodeStateHandler(struct mg_connection *conn, int id);
 
     int run() override;
-    int notifyHandler(int, int) override;
+    int notifyHandler(long, long) override;
 };
 
 void sendHtml(struct mg_connection *conn);

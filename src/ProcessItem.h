@@ -8,10 +8,13 @@
 
 #include "ContentItem.h"
 #include "FileItem.h"
-#include "FileInfo.h"
+#include "ProcessState.h"
+#include "ProcessFile.h"
+
+typedef std::vector<ProcessFile> TypeProcessFileList;
 
 enum PROCESS_OPTIONS {
-	PROCESS_FILE,
+	PROCESS_INPUT,
 	PROCESS_PARAM,
 	PROCESS_OUTPUT,
 	PROCESS_MAX
@@ -19,19 +22,22 @@ enum PROCESS_OPTIONS {
 
 class ProcessItem : public ContentItem {
 
-	char process[PATH_MAX];
-	char parsedProcess[PATH_MAX];
+    PROCESS_STATE state{PROCESS_STATE_DEPENDENT};
 
-	TypeFileInfoList fileList;
+	char process[PATH_MAX]{};
+	char parsedProcess[PATH_MAX]{};
+
+    TypeProcessFileList fileList;
+
+    long assignedComponent{};
 
 	bool parseCommand(void*, int, int);
 
 public:
-	ProcessItem();
-	ProcessItem(ProcessItem &);
-	explicit ProcessItem(const char *);
-	~ProcessItem() override = default;
 
+	ProcessItem(const ProcessItem &);
+	explicit ProcessItem(const ComponentObject&, long = 0, long = 0, const char * = nullptr);
+	~ProcessItem() override = default;
 
     bool parse(void *);
 
@@ -41,15 +47,25 @@ public:
     const char* getParsedProcess() const;
     void setParsedProcess(const char*);
 
-    const TypeFileInfoList& getFileList() const;
-    void addFileList(const TypeFileInfoList &);
-    void setFileList(TypeFileInfoList&);
+    int getFileCount() const;
+    ProcessFile& getFile(ProcessFile&);
+    TypeProcessFileList& getFileList();
+    void addFile(FileItem*, long, bool);
+    void addFileList(TypeProcessFileList& fileList);
+
+    PROCESS_STATE getState() const;
+    void setState(PROCESS_STATE);
+
+    long getAssigned() const;
+    void setAssigned(long);
+
+    void setID(long);
 
 	CONTENT_TYPES getType() const override;
 
-    bool isValid() override;
+    bool check() override;
 };
 
-
+typedef std::vector<ProcessItem*> TypeProcessList;
 
 #endif //DICON_PROCESSITEM_H

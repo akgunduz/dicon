@@ -9,16 +9,15 @@
 #include "ContentItem.h"
 
 class ParameterItem : public ContentItem {
-	char sPtr[255];
+	char sPtr[NAME_MAX];
 public:
-	ParameterItem();
-	ParameterItem(const char *param);
+	ParameterItem(const ComponentObject&, const char *);
 	~ParameterItem(){};
 	const char* getParam();
 	void setParam(const char*);
 	virtual CONTENT_TYPES getType() const;
 
-    virtual bool isValid();
+    virtual bool check();
 };
 
 #endif //__Content_H_

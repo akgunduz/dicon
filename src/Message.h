@@ -7,61 +7,42 @@
 #ifndef __Message_H_
 #define __Message_H_
 
-#include "BaseMessage.h"
+#include "MessageBase.h"
 #include "MessageHeader.h"
 #include "MessageData.h"
 
-#define STREAM_NONE 0xFFFF
-
-#define STREAM_INFO 0x01
-#define STREAM_BINARY 0x02
-#define STREAM_MD5 0x03
-#define STREAM_JOB 0x04
-#define STREAM_COMPONENT 0x05
-
-#define BLOCK_JOB_INFO 0x01
-#define BLOCK_PROCESS_INFO 0x02
-#define BLOCK_FILE_BINARY 0x03
-#define BLOCK_FILE_MD5 0x04
-#define BLOCK_FILE_INFO 0x05
-#define BLOCK_COMPONENT_LIST 0x06
-
-class Message : public BaseMessage {
+class Message : public MessageBase {
 
 private:
-	MessageHeader header;
-    MessageData data;
+	MessageHeader header{};
+    MessageData data{};
 
-    bool readComponentList(int, std::vector<ComponentObject>&, Block*);
-    bool readJobInfo(int, char*, Block*);
-    bool readProcessInfo(int desc, int *, char *, Block *);
-    bool readFile(int, FileItem *, const char*, long *, Block *);
-    bool readFileMD5(int, Md5*, Block*);
-    bool readMessageBlock(int in, Block*);
+    bool readComponentList(int, std::vector<ComponentObject>&, MessageBlockHeader&, uint32_t&);
+    bool readJobName(int, char*, MessageBlockHeader&, uint32_t&);
+    bool readProcess(int, ProcessItem*, MessageBlockHeader&, uint32_t&);
+    bool readProcessID(int, long&, MessageBlockHeader&, uint32_t&);
+    bool readFile(int, ProcessFile&, MessageBlockHeader&, uint32_t&);
+    bool readMessageBlock(int in, MessageBlockHeader&, uint32_t&) override;
 
-    bool writeComponentList(int, std::vector<ComponentObject>&);
-    bool writeJobInfo(int, char*);
-    bool writeProcessInfo(int, int, char*);
-    bool writeFile(int, FileItem *, bool, bool);
-    bool writeFileMD5(int, Md5*);
+    bool writeComponentList(int, std::vector<ComponentObject>&, uint32_t&);
+    bool writeJobName(int, const char*, uint32_t&);
+    bool writeProcess(int, ProcessItem*, uint32_t&);
+    bool writeProcessID(int, long, uint32_t&);
+    bool writeFile(int, ProcessFile&, bool, uint32_t&);
 
-    bool writeMessageStream(int out);
+    bool writeMessageStream(int out, uint32_t&) override;
 
-    virtual bool readFinalize();
-
-    virtual bool writeFinalize();
-
-    bool deSerializeHeader(const uint8_t*);
-    bool serializeHeader(uint8_t *);
-    int getHeaderSize();
+    bool deSerializeHeader(const uint8_t*) override;
+    bool serializeHeader(uint8_t *) override;
+    long getHeaderSize() override;
 
 public:
 
-	Message(ComponentObject host);
-	Message(ComponentObject owner, MSG_TYPE type);
+	explicit Message(ComponentObject&);
+	Message(ComponentObject&, COMPONENT, MSG_TYPE);
 
-	MessageHeader *getHeader();
-	MessageData* getData();
+	MessageHeader& getHeader();
+	MessageData& getData();
 };
 
 #endif //__Message_H_

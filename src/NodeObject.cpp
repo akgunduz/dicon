@@ -3,17 +3,18 @@
 //
 
 #include "NodeObject.h"
+#include "ProcessItem.h"
 
-NodeObject::NodeObject(NODESTATES _state, int _usage, int id, long address) :
-        state(_state), usage(_usage), processInfo(0), ComponentObject(COMP_NODE, id, address) {
+NodeObject::NodeObject(NODESTATES _state, int _usage, long id, long address) :
+        state(_state), usage(_usage), ComponentObject(COMP_NODE, id, address) {
 }
 
-NodeObject::NodeObject(int id, long address) :
-        NodeObject(NODESTATE_START, 0, id, address) {
+NodeObject::NodeObject(long id, long address) :
+        ComponentObject(COMP_NODE, id, address) {
 }
 
 NodeObject::NodeObject(const char* rootPath) :
-        state(NODESTATE_START), usage(0), processInfo(0), ComponentObject(COMP_NODE, rootPath)  {
+        ComponentObject(COMP_NODE, rootPath)  {
 }
 
 NodeObject::NodeObject() :
@@ -21,7 +22,8 @@ NodeObject::NodeObject() :
 }
 
 NodeObject::NodeObject(const NodeObject &copy) :
-        NodeObject(copy.state, copy.usage, copy.getID(), copy.getAddress()) {
+        state(copy.state), usage(copy.usage), processItem(copy.processItem),
+        ComponentObject(COMP_NODE, copy.getID(), copy.getAddress()) {
 }
 
 NodeObject::NodeObject(const ComponentObject &copy) :
@@ -50,7 +52,7 @@ int NodeObject::iterateUsage(bool direction) {
     return direction ? ++usage : --usage;
 }
 
-ProcessInfo &NodeObject::getProcessInfo() {
+ProcessItem &NodeObject::getProcess() {
 
-    return processInfo;
+    return processItem;
 }

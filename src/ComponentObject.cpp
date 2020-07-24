@@ -10,36 +10,29 @@ const char* sComponentTypes[COMP_MAX] = {
         "Node",
 };
 
-ComponentObject::ComponentObject()
-        : ComponentObject(COMP_MAX, 0) {
+ComponentObject::ComponentObject(COMPONENT _type, long _id, long _address)
+        : ComponentInfo(_type, _id, _address)  {
 }
 
-ComponentObject::ComponentObject(COMPONENT type, int id)
-        : ComponentObject(type, id, 0) {
+ComponentObject::ComponentObject(COMPONENT _type, const char *_rootPath)
+        : ComponentInfo(_type), rootPath(_rootPath) {
 }
 
-ComponentObject::ComponentObject(COMPONENT type, int id, long address)
-        : ComponentObject(type, "", id, address) {
-}
-
-ComponentObject::ComponentObject(COMPONENT type, const char *rootPath)
-        : ComponentObject(type, rootPath, 0, 0) {
+ComponentObject::ComponentObject(COMPONENT _type, const char* _rootPath, long _id, long _address)
+        : ComponentInfo(_type, _id, _address), rootPath(_rootPath) {
 }
 
 ComponentObject::ComponentObject(const ComponentObject &copy)
-        : ComponentObject(copy.type, copy.rootPath, copy.getID(), copy.getAddress()) {
+        : ComponentInfo(copy), rootPath(copy.rootPath), assigned(copy.getAssigned()){
 }
 
-ComponentObject::ComponentObject(COMPONENT type, const char* rootPath, int id, long address)
-        : type(type), rootPath(rootPath), assigned(0, 0), ComponentInfo(id, address) {
+ComponentObject::ComponentObject(const ComponentObject &copy, COMPONENT target)
+        : ComponentInfo(copy.getType(), copy.getID(), copy.getAddress(target)),
+        rootPath(copy.rootPath), assigned(copy.getAssigned()) {
 }
+
 
 ComponentObject::~ComponentObject() = default;
-
-COMPONENT ComponentObject::getType() const {
-
-    return this->type;
-}
 
 const char* ComponentObject::getName() const {
 
@@ -61,8 +54,9 @@ const ComponentInfo &ComponentObject::getAssigned() const {
     return assigned;
 }
 
-void ComponentObject::setAssigned(int id, long address) {
+void ComponentObject::setAssigned(COMPONENT type, long id, long address) {
 
+    assigned.setType(type);
     assigned.setID(id);
     assigned.setAddress(address);
 }

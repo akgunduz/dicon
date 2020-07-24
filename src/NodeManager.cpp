@@ -70,7 +70,7 @@ int NodeManager::getIdleCount() {
     return count;
 }
 
-long NodeManager::getAddress(int id) {
+long NodeManager::getAddress(long id) {
 
     long address = 0;
 
@@ -86,7 +86,7 @@ long NodeManager::getAddress(int id) {
     return address;
 }
 
-NODESTATES NodeManager::getState(int id) {
+NODESTATES NodeManager::getState(long id) {
 
     NODESTATES state = NODESTATE_MAX;
 
@@ -102,7 +102,7 @@ NODESTATES NodeManager::getState(int id) {
     return state;
 }
 
-void NodeManager::setState(int id, NODESTATES state) {
+void NodeManager::setState(long id, NODESTATES state) {
 
     nodeMutex.lock();
 
@@ -114,7 +114,7 @@ void NodeManager::setState(int id, NODESTATES state) {
     nodeMutex.unlock();
 }
 
-ComponentInfo NodeManager::getAssigned(int id) {
+ComponentInfo NodeManager::getAssigned(long id) {
 
     ComponentInfo assigned;
 
@@ -130,32 +130,32 @@ ComponentInfo NodeManager::getAssigned(int id) {
     return assigned;
 }
 
-void NodeManager::setAssigned(int id, ComponentInfo& assigned) {
+void NodeManager::setAssigned(long id, ComponentInfo& assigned) {
 
     nodeMutex.lock();
 
     auto *node = (NodeObject*)get(id);
     if (node) {
-        node->setAssigned(assigned.getID(), assigned.getAddress());
+        node->setAssigned(assigned.getType(), assigned.getID(), assigned.getAddress());
     }
 
     nodeMutex.unlock();
 }
 
-void NodeManager::setAssigned(int id, int assignedID, long assignedAddress) {
+void NodeManager::setAssigned(long id, long assignedID, long assignedAddress) {
 
     nodeMutex.lock();
 
     auto *node = (NodeObject*)get(id);
     if (node) {
-        node->setAssigned(assignedID, assignedAddress);
+        node->setAssigned(COMP_COLLECTOR, assignedID, assignedAddress);
     }
 
     nodeMutex.unlock();
 }
 
 
-ComponentObject* NodeManager::createObject(int id, long address) {
+ComponentObject* NodeManager::createObject(long id, long address) {
 
     return new NodeObject(id, address);
 }

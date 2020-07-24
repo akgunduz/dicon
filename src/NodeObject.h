@@ -6,28 +6,27 @@
 #define DICON_NODEOBJECT_H
 
 #include "NodeState.h"
-#include "Md5.h"
 #include "ComponentObject.h"
-#include "ProcessInfo.h"
+#include "ProcessItem.h"
 
 class NodeObject : public ComponentObject {
 
 private:
 
-    NODESTATES state;
+    NODESTATES state{NODESTATE_START};
 
-    int usage;
+    int usage{};
 
-    ProcessInfo processInfo;
+    ProcessItem processItem{ComponentObject(COMP_NODE)};
 
 public:
 
-    NodeObject(NODESTATES, int, int, long);
-    NodeObject(int, long);
-    NodeObject(const char*);
+    NodeObject(NODESTATES, int, long, long);
+    NodeObject(long, long);
+    explicit NodeObject(const char*);
     NodeObject();
     NodeObject(const NodeObject &);
-    NodeObject(const ComponentObject &);
+    explicit NodeObject(const ComponentObject &);
 
     ~NodeObject() override;
 
@@ -37,7 +36,7 @@ public:
     NODESTATES getState();
     void setState(NODESTATES);
 
-    ProcessInfo& getProcessInfo();
+    ProcessItem& getProcess();
 
 };
 

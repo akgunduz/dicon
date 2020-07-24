@@ -53,7 +53,7 @@ public :
     virtual ~Interface();
 
 	bool push(MESSAGE_DIRECTION, long, Message *);
-	ComponentObject getHost();
+	ComponentObject& getHost();
 	Device* getDevice();
     long getAddress();
     long getMulticastAddress();

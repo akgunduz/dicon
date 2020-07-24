@@ -12,38 +12,29 @@ class MessageData {
 
     int streamFlag;
 
-    TypeMD5List md5List;
-    TypeFileInfoList fileList;
-
-    int processID;
-    char process[PATH_MAX];
-
     char jobName[PATH_MAX];
+
+    std::tuple<long, TypeProcessFileList> fileList;
+    TypeProcessList processList;
 
     std::vector<ComponentObject> componentList;
 
 public:
 
-    int getStreamFlag();
+    int getStreamFlag() const;
     void setStreamFlag(int);
 
-    Md5* getMD5(int);
-    TypeMD5List* getMD5List();
-    void addMD5(Md5);
-    void addMD5List(TypeMD5List*);
-    unsigned long getMD5Count();
+    ProcessFile& getFile(int);
+    long getFileProcess();
+    void setFileProcess(long);
+    TypeProcessFileList& getFileList();
+    void addFile(ProcessFile&);
+    void addFileList(long, TypeProcessFileList&);
+    long getFileCount();
 
-    FileItem* getFile(int);
-    bool isOutput(int);
-    TypeFileInfoList& getFileList();
-    void addFile(FileInfo);
-    void addFileList(const TypeFileInfoList&);
-    unsigned long getFileCount();
-
-    char* getProcess();
-    int getProcessID();
-    void setProcessID(int);
-    void setProcess(int, const char*);
+    ProcessItem* getProcess(int);
+    void addProcess(ProcessItem*);
+    long getProcessCount();
 
     char* getJobName();
     void setJobName(const char*);

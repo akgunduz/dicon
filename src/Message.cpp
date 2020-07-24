@@ -4,207 +4,245 @@
 //
 
 #include "Message.h"
+#include "Util.h"
 
-Message::Message(ComponentObject host)
-		: header(), BaseMessage(host) {
+Message::Message(ComponentObject& host)
+		: MessageBase(host) {
 
-    getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
+    header.setPriority(MESSAGE_DEFAULT_PRIORITY);
 
-    getData()->setStreamFlag(STREAM_NONE);
+    data.setStreamFlag(STREAM_NONE);
 
 }
 
-Message::Message(ComponentObject host, MSG_TYPE type)
-		: header(), BaseMessage(host) {
+Message::Message(ComponentObject& host, COMPONENT targetType, MSG_TYPE type)
+		: MessageBase(host) {
 
-    getHeader()->setType(type);
-    getHeader()->setOwner(host);
-    getHeader()->setPriority(MESSAGE_DEFAULT_PRIORITY);
+    header.setType(type);
+    header.setOwner(host, targetType);
+    header.setPriority(MESSAGE_DEFAULT_PRIORITY);
 
-    getData()->setStreamFlag(STREAM_NONE);
+    data.setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readComponentList(int desc, std::vector<ComponentObject> &componentList, Block* block) {
+bool Message::readComponentList(int desc, std::vector<ComponentObject> &componentList,
+        MessageBlockHeader& block, uint32_t& crc) {
 
-    if (block->getType() != BLOCK_COMPONENT_LIST) {
+    if (block.getType() != BLOCK_COMPONENT) {
         LOGS_E(getHost(), "readComponentList can not read other blocks");
         return false;
     }
 
     std::vector<long> list;
 
-    if (!readNumberList(desc, list, block->getSize(0))) {
+    if (!readNumberList(desc, list, block.get(1), crc)) {
         LOGS_E(getHost(), "readNumberList can not read number");
         return false;
     }
 
     for (int i = 0; i < list.size(); i=i+2) {
 
-        componentList.emplace_back(ComponentObject((COMPONENT)block->getSize(1), list[i], list[i+1]));
+        componentList.emplace_back(ComponentObject((COMPONENT)block.get(0), list[i], list[i+1]));
     }
+
+    LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
+    for (int i = 0; i < componentList.size(); i++) {
+        LOGS_D(getHost(), "Component[%d] : %d", i, componentList[0].getID());
+    }
+
 
     return true;
 }
 
-bool Message::readFile(int desc, FileItem *content, const char* jobName, long *state, Block *block) {
+bool Message::readJobName(int desc, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
 
-    if (block->getType() != BLOCK_FILE_BINARY && block->getType() != BLOCK_FILE_INFO) {
-        LOGS_E(getHost(), "readFile can not read other blocks");
+    if (block.getType() != BLOCK_JOB) {
+        LOGS_E(getHost(), "readJobName can not read other blocks");
         return false;
     }
 
-	long id;
-    if (!readNumber(desc, &id)) {
-        LOGS_E(getHost(), "readFile can not read id data");
+    if (!readString(desc, jobName, block.get(0), crc)) {
+        LOGS_E(getHost(), "readJobName can not read job name");
         return false;
     }
 
-    if (!readNumber(desc, state)) {
-        LOGS_E(getHost(), "readFile can not read state data");
-        return false;
-    }
-
-	char fileName[PATH_MAX];
-	if (!readString(desc, fileName, block->getSize(0))) {
-		LOGS_E(getHost(), "readFile can not read path data");
-		return false;
-	}
-
-    content->set(jobName, fileName, block->getSize(1), (int)id);
-
-    if (block->getType() != BLOCK_FILE_BINARY || (*state == FILEINFO_OUTPUT)) {
-        return true;
-    }
-
-    Md5 calcMD5;
-	if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobName, fileName).c_str(),
-	            &calcMD5, content->getSize())) {
-		LOGS_E(getHost(), "readFile can not read Binary data");
-		return false;
-	}
-
-    content->setMD5(&calcMD5);
-
-	return true;
-}
-
-bool Message::readFileMD5(int desc, Md5 *content, Block* block) {
-
-    if (block->getType() != BLOCK_FILE_MD5) {
-        LOGS_E(getHost(), "readFileMD5 can not read other blocks");
-        return false;
-    }
-
-	if (!readMD5(desc, content)) {
-		LOGS_E(getHost(), "readFileMD5 Can not read md5");
-		return false;
-	}
-
-	return true;
-}
-
-bool Message::readJobInfo(int desc, char *jobName, Block *block) {
-
-    if (block->getType() != BLOCK_JOB_INFO) {
-        LOGS_E(getHost(), "readJobInfo can not read other blocks");
-        return false;
-    }
-
-    if (!readString(desc, jobName, block->getSize(0))) {
-        LOGS_E(getHost(), "readJobInfo can not read job dir");
-        return false;
-    }
+    LOGS_D(getHost(), "Job Name is read successfully => Name : %s", jobName);
 
     return true;
 }
 
-bool Message::readProcessInfo(int desc, int *processID, char *process, Block *block) {
+bool Message::readProcessID(int desc, long& processID, MessageBlockHeader& block, uint32_t& crc) {
 
-    if (block->getType() != BLOCK_PROCESS_INFO) {
+    if (block.getType() != BLOCK_PROCESSID) {
+        LOGS_E(getHost(), "readJobName can not read other blocks");
+        return false;
+    }
+
+    if (!readNumber(desc, processID, crc)) {
+        LOGS_E(getHost(), "readFile can not read jobID data");
+        return false;
+    }
+
+    LOGS_D(getHost(), "Process ID is read successfully => ID : %ld", processID);
+
+    return true;
+}
+
+bool Message::readProcess(int desc, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
+
+    if (block.getType() != BLOCK_PROCESSINFO) {
         LOGS_E(getHost(), "readProcessInfo can not read other blocks");
         return false;
     }
 
-    if (!readNumber(desc, (long *)processID)) {
+    long id;
+    if (!readNumber(desc, id, crc)) {
         LOGS_E(getHost(), "readProcessInfo can not read process id");
         return false;
     }
+    content->setID(id);
 
-    if (!readString(desc, process, block->getSize(0))) {
+    long jobID;
+    if (!readNumber(desc, jobID, crc)) {
+        LOGS_E(getHost(), "readFile can not read jobID data");
+        return false;
+    }
+    content->setAssignedJob(jobID);
+
+    char process[PATH_MAX];
+    if (!readString(desc, process, block.get(0), crc)) {
         LOGS_E(getHost(), "readProcessInfo can not read process info");
         return false;
     }
+    content->setParsedProcess(process);
+
+    LOGS_D(getHost(), "Process is read successfully => ID : %ld, jobID : %ld, Process : %s",
+            id, jobID, process);
 
     return true;
 }
 
-bool Message::readMessageBlock(int in, Block *block) {
+bool Message::readFile(int desc, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
 
-    switch(block->getType()) {
+    if (block.getType() != BLOCK_FILEBINARY && block.getType() != BLOCK_FILEINFO) {
+        LOGS_E(getHost(), "readFile can not read other blocks");
+        return false;
+    }
 
-        case BLOCK_FILE_INFO:
-        case BLOCK_FILE_BINARY: {
+    long id;
+    if (!readNumber(desc, id, crc)) {
+        LOGS_E(getHost(), "readFile can not read id data");
+        return false;
+    }
+    content.get()->setID(id);
 
-            auto *fileItem = new FileItem(getHost());
-            long state;
+    long state;
+    if (!readNumber(desc, state, crc)) {
+        LOGS_E(getHost(), "readFile can not read state data");
+        return false;
+    }
+    content.setOutputState((bool)state);
 
-            if (!readFile(in, fileItem, getData()->getJobName(), &state, block)) {
+    long jobID;
+    if (!readNumber(desc, jobID, crc)) {
+        LOGS_E(getHost(), "readFile can not read jobID data");
+        return false;
+    }
+    content.get()->setAssignedJob(jobID);
+
+    long processID;
+    if (!readNumber(desc, processID, crc)) {
+        LOGS_E(getHost(), "readFile can not read jobID data");
+        return false;
+    }
+    content.setAssignedProcess(processID);
+
+    char fileName[PATH_MAX];
+    if (!readString(desc, fileName, block.get(0), crc)) {
+        LOGS_E(getHost(), "readFile can not read path data");
+        return false;
+    }
+    content.get()->setName(fileName);
+
+    if (block.getType() == BLOCK_FILEINFO || content.isOutput()) {
+
+        LOGS_D(getHost(), "File Info is read successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+               id, state? "output" : "input", jobID, processID, fileName);
+
+        return true;
+    }
+
+    if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobID, fileName).c_str(),
+                    block.get(1), crc)) {
+        LOGS_E(getHost(), "readFile can not read Binary data");
+        return false;
+    }
+
+    LOGS_D(getHost(), "File Binary is read successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+           id, state? "output" : "input", jobID, processID, fileName);
+
+    return true;
+}
+
+bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc) {
+
+    switch(block.getType()) {
+
+        case BLOCK_PROCESSID: {
+
+            long processID;
+            if (!readProcessID(in, processID, block, crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New %s with path %s/%s received",
-                   block->getType() == BLOCK_FILE_INFO ? "File Info" : "File Binary",
-                   fileItem->getJobName(), fileItem->getFileName());
-
-            getData()->addFile(FileInfo(fileItem, state == FILEINFO_OUTPUT));
+            data.setFileProcess(processID);
         }
             break;
 
-        case BLOCK_FILE_MD5: {
+        case BLOCK_FILEINFO:
+        case BLOCK_FILEBINARY: {
 
-            Md5 md5;
-            if (!readFileMD5(in, &md5, block)) {
+            ProcessFile processFile(new FileItem(getHost()));
+
+            if (!readFile(in, processFile, block, crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New md5 info %s received", md5.getStr().c_str());
-
-            getData()->addMD5(md5);
+            data.addFile(processFile);
         }
             break;
 
-        case BLOCK_JOB_INFO:
+        case BLOCK_JOB: {
 
-            if (!readJobInfo(in, getData()->getJobName(), block)) {
+            char jobName[NAME_MAX];
+            if (!readJobName(in, jobName, block, crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New job info %s received", getData()->getJobName());
+            data.setJobName(jobName);
+        }
 
             break;
 
-        case BLOCK_PROCESS_INFO:
+        case BLOCK_PROCESSINFO: {
 
-            int processID;
-            if (!readProcessInfo(in, &processID, getData()->getProcess(), block)) {
+            auto *processItem = new ProcessItem(getHost());
+
+            if (!readProcess(in, processItem, block, crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New process info %s received", getData()->getProcess());
-
-            getData()->setProcessID(processID);
+            data.addProcess(processItem);
+        }
 
             break;
 
-        case BLOCK_COMPONENT_LIST:{
+        case BLOCK_COMPONENT: {
 
-            std::vector<ComponentObject> &list = getData()->getComponentList();
-
-            if (!readComponentList(in, list, block)) {
+            if (!readComponentList(in, data.getComponentList(), block, crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "New component list is received");
             break;
         }
 
@@ -215,12 +253,7 @@ bool Message::readMessageBlock(int in, Block *block) {
     return true;
 }
 
-bool Message::readFinalize() {
-
-    return true;
-}
-
-bool Message::writeComponentList(int desc, std::vector<ComponentObject>& componentList) {
+bool Message::writeComponentList(int desc, std::vector<ComponentObject>& componentList, uint32_t& crc) {
 
     std::vector<long> list;
 
@@ -229,194 +262,219 @@ bool Message::writeComponentList(int desc, std::vector<ComponentObject>& compone
         list.emplace_back(component.getAddress());
     }
 
-    Block blockHeader(2, BLOCK_COMPONENT_LIST);
+    MessageBlockHeader blockHeader(BLOCK_COMPONENT);
 
-    blockHeader.setSize(0, (int) list.size());
-    blockHeader.setSize(1, (int) componentList[0].getType());
+    blockHeader.add(componentList[0].getType());
+    blockHeader.add(list.size());
 
-    if (!writeBlockHeader(desc, &blockHeader)) {
+    if (!writeBlockHeader(desc, blockHeader, crc)) {
         LOGS_E(getHost(), "writeComponentList can not write block header");
         return false;
     }
 
-    if (!writeNumberList(desc, list)) {
+    if (!writeNumberList(desc, list, crc)) {
         LOGS_E(getHost(), "writeNumberList can not write component list");
         return false;
     }
 
-    return true;
-}
-
-bool Message::writeJobInfo(int desc, char *jobName) {
-
-    Block blockHeader(1, BLOCK_JOB_INFO);
-
-    blockHeader.setSize(0, (int) strlen(jobName));
-
-    if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeJobInfo can not write block header");
-        return false;
-    }
-
-    if (!writeString(desc, jobName)) {
-        LOGS_E(getHost(), "writeJobInfo can not write job info");
-        return false;
+    LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
+    for (int i = 0; i < componentList.size(); i++) {
+        LOGS_D(getHost(), "Component[%d] : %d", i, componentList[0].getID());
     }
 
     return true;
 }
 
-bool Message::writeProcessInfo(int desc, int processID, char *process) {
+bool Message::writeJobName(int desc, const char *jobName, uint32_t& crc) {
 
-    Block blockHeader(1, BLOCK_PROCESS_INFO);
+    MessageBlockHeader blockHeader(BLOCK_JOB);
 
-    blockHeader.setSize(0, (int) strlen(process));
+    blockHeader.add(strlen(jobName));
 
-    if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeProcessInfo can not write block header");
+    if (!writeBlockHeader(desc, blockHeader, crc)) {
+        LOGS_E(getHost(), "writeJobName can not write block header");
         return false;
     }
 
-    if (!writeNumber(desc, processID)) {
-        LOGS_E(getHost(), "writeProcessInfo can not write process ID");
+    if (!writeString(desc, jobName, crc)) {
+        LOGS_E(getHost(), "writeJobName can not write job info");
         return false;
     }
 
-    if (!writeString(desc, process)) {
-        LOGS_E(getHost(), "writeProcessInfo can not write process info");
-        return false;
-    }
+    LOGS_D(getHost(), "Job Name is written successfully => Name : %s", jobName);
 
     return true;
 }
 
-bool Message::writeFile(int desc, FileItem *content, bool isOutput, bool isBinary) {
+bool Message::writeProcessID(int desc, long processID, uint32_t& crc) {
 
-    Block blockHeader;
-    std::string absPath;
-    bool isBinaryTransfer = !isOutput && isBinary;
+    MessageBlockHeader blockHeader(BLOCK_PROCESSID);
 
-    if (!isBinaryTransfer) {
-        blockHeader.set(2, BLOCK_FILE_INFO);
-        blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
-        blockHeader.setSize(1, content->getSize());
-    } else {
-        blockHeader.set(2, BLOCK_FILE_BINARY);
-        blockHeader.setSize(0, (uint32_t)strlen(content->getFileName()));
-        absPath = Util::getAbsRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName());
-        blockHeader.setSize(1, content->getSize());
+    if (!writeBlockHeader(desc, blockHeader, crc)) {
+        LOGS_E(getHost(), "writeProcessID can not write block header");
+        return false;
     }
 
-	if (!writeBlockHeader(desc, &blockHeader)) {
+    if (!writeNumber(desc, processID, crc)) {
+        LOGS_E(getHost(), "writeProcess can not write process ID");
+        return false;
+    }
+
+    LOGS_D(getHost(), "Process ID is written successfully => ID : %ld", processID);
+
+    return true;
+}
+
+bool Message::writeProcess(int desc, ProcessItem* processItem, uint32_t& crc) {
+
+    MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
+
+    blockHeader.add(strlen(processItem->getParsedProcess()));
+
+    if (!writeBlockHeader(desc, blockHeader, crc)) {
+        LOGS_E(getHost(), "writeProcess can not write block header");
+        return false;
+    }
+
+    if (!writeNumber(desc, processItem->getID(), crc)) {
+        LOGS_E(getHost(), "writeProcess can not write process ID");
+        return false;
+    }
+
+    if (!writeNumber(desc, processItem->getAssignedJob(), crc)) {
+        LOGS_E(getHost(), "writeProcess can not write job ID");
+        return false;
+    }
+
+    if (!writeString(desc, processItem->getParsedProcess(), crc)) {
+        LOGS_E(getHost(), "writeProcess can not write process info");
+        return false;
+    }
+
+    LOGS_D(getHost(), "Process is written successfully => ID : %ld, jobID : %ld, Process : %s",
+           processItem->getID(), processItem->getAssignedJob(), processItem->getParsedProcess());
+
+    return true;
+}
+
+bool Message::writeFile(int desc, ProcessFile &content, bool isBinary, uint32_t& crc) {
+
+    std::string absPath = Util::getAbsRefPath(content.get()->getHost().getRootPath(),
+            content.get()->getAssignedJob(), content.get()->getName());
+
+    bool isBinaryTransfer = !content.isOutput() && isBinary;
+
+    MessageBlockHeader blockHeader(!isBinaryTransfer ? BLOCK_FILEINFO : BLOCK_FILEBINARY);
+
+    blockHeader.add(strlen(content.get()->getName()));
+    blockHeader.add(content.get()->getSize());
+
+	if (!writeBlockHeader(desc, blockHeader, crc)) {
         LOGS_E(getHost(), "writeFile can not write block header");
 		return false;
 	}
 
-    if (!writeNumber(desc, content->getID())) {
+    if (!writeNumber(desc, content.get()->getID(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file ID");
         return false;
     }
 
-    if (!writeNumber(desc, (long)isOutput)) {
+    if (!writeNumber(desc, content.isOutput(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file state");
         return false;
     }
 
-	if (!writeString(desc, content->getFileName())) {
+    if (!writeNumber(desc, content.get()->getAssignedJob(), crc)) {
+        LOGS_E(getHost(), "writeFile can not write assigned job");
+        return false;
+    }
+
+    if (!writeNumber(desc, content.getAssignedProcess(), crc)) {
+        LOGS_E(getHost(), "writeFile can not write assigned job");
+        return false;
+    }
+
+	if (!writeString(desc, content.get()->getName(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file name");
         return false;
     }
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(desc, absPath.c_str(), nullptr, content->getSize())) {
+        if (!writeBinary(desc, absPath.c_str(), content.get()->getSize(), crc)) {
             LOGS_E(getHost(), "writeFile can not write Binary data");
             return false;
         }
+
+        LOGS_D(getHost(), "File Binary is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+               content.get()->getID(), content.isOutput()? "output" : "input",
+               content.get()->getAssignedJob(), content.getAssignedProcess(), content.get()->getName());
+
+        return true;
     }
+
+    LOGS_D(getHost(), "File Info is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+           content.get()->getID(), content.isOutput()? "output" : "input",
+           content.get()->getAssignedJob(), content.getAssignedProcess(), content.get()->getName());
 
 	return true;
 
 }
 
-bool Message::writeFileMD5(int desc, Md5 *md5) {
+bool Message::writeMessageStream(int out, uint32_t& crc) {
 
-    Block blockHeader(0, BLOCK_FILE_MD5);
+    switch(data.getStreamFlag()) {
 
-    if (!writeBlockHeader(desc, &blockHeader)) {
-        LOGS_E(getHost(), "writeFileMD5 can not write block header");
-        return false;
-    }
+        case STREAM_PROCESS:
 
-    if (!writeMD5(desc, md5)) {
-        LOGS_E(getHost(), "writeFileMD5 can not write md5 data");
-        return false;
-    }
+            for (int i = 0; i < data.getProcessCount(); i++) {
 
-    return true;
-}
+                ProcessItem* processItem = data.getProcess(i);
 
-bool Message::writeMessageStream(int out) {
-
-    int i = 0;
-
-    switch(getData()->getStreamFlag()) {
-
-        case STREAM_INFO:
-        case STREAM_BINARY:
-
-            if (!writeJobInfo(out, getData()->getJobName())) {
-                return false;
-            }
-
-            if (!writeProcessInfo(out, getData()->getProcessID(), getData()->getProcess())) {
-                return false;
-            }
-
-            for (i = 0; i < getData()->getFileCount(); i++) {
-
-                if (!writeFile(out, getData()->getFile(i), getData()->isOutput(i),
-                               getData()->getStreamFlag() == STREAM_BINARY)) {
+                if (!writeProcess(out, processItem, crc)) {
                     return false;
+                }
+
+                for (auto processFile : processItem->getFileList()) {
+
+                    if (!writeFile(out, processFile, false, crc)) {
+                        return false;
+                    }
                 }
             }
 
-            LOGS_T(getHost(), "%d %s's sent to network", i,
-                  getData()->getStreamFlag() == STREAM_INFO ? "File Info" : "File Binary");
             break;
 
-        case STREAM_MD5:
+        case STREAM_FILEINFO:
+        case STREAM_FILEBINARY:
 
-            if (!writeJobInfo(out, getData()->getJobName())) {
+            if (!writeProcessID(out, data.getFileProcess(), crc)) {
                 return false;
             }
 
-            for (i = 0; i < getData()->getMD5Count(); i++) {
+            for (int i = 0; i < data.getFileCount(); i++) {
 
-                if (!writeFileMD5(out, getData()->getMD5(i))) {
+                if (!writeFile(out, data.getFile(i), data.getStreamFlag() == STREAM_FILEBINARY, crc)) {
                     return false;
                 }
             }
 
-            LOGS_T(getHost(), "%d file md5 content sent to network", i);
             break;
 
         case STREAM_JOB:
 
-            if (!writeJobInfo(out, getData()->getJobName())) {
+            if (!writeJobName(out, data.getJobName(), crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobName());
             break;
 
         case STREAM_COMPONENT: {
 
-            if (!writeComponentList(out, getData()->getComponentList())) {
+            if (!writeComponentList(out, data.getComponentList(), crc)) {
                 return false;
             }
 
-            LOGS_T(getHost(), "Job : %s sent to network", getData()->getJobName());
             break;
         }
 
@@ -429,26 +487,22 @@ bool Message::writeMessageStream(int out) {
 
 }
 
-bool Message::writeFinalize() {
-    return true;
-}
-
-MessageHeader *Message::getHeader() {
-    return &header;
+MessageHeader& Message::getHeader() {
+    return header;
 }
 
 bool Message::deSerializeHeader(const uint8_t *buffer) {
-    return getHeader()->deSerialize(buffer);
+    return header.deSerialize(buffer);
 }
 
 bool Message::serializeHeader(uint8_t *buffer) {
-    return getHeader()->serialize(buffer);
+    return header.serialize(buffer);
 }
 
-int Message::getHeaderSize() {
-    return getHeader()->getSize();
+long Message::getHeaderSize() {
+    return header.getSize();
 }
 
-MessageData *Message::getData() {
-    return &data;
+MessageData& Message::getData() {
+    return data;
 }

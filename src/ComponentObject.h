@@ -8,38 +8,25 @@
 #include "Common.h"
 #include "ComponentInfo.h"
 
-enum COMPONENT {
-
-    COMP_DISTRIBUTOR,
-    COMP_COLLECTOR,
-    COMP_NODE,
-    COMP_MAX
-};
-
 class ComponentObject : public ComponentInfo {
 
 private:
 
-    COMPONENT type;
+    const char *rootPath{};
 
-    const char *rootPath;
-
-    ComponentInfo assigned;
+    ComponentInfo assigned{};
 
 protected:
 
 public:
 
-    ComponentObject();
-    ComponentObject(COMPONENT, int = 0);
-    ComponentObject(COMPONENT, int, long);
+    explicit ComponentObject(COMPONENT = COMP_DISTRIBUTOR, long = 0, long = 0);
     ComponentObject(COMPONENT, const char*);
-    ComponentObject(COMPONENT, const char*, int, long);
+    ComponentObject(COMPONENT, const char*, long, long);
     ComponentObject(const ComponentObject&);
+    ComponentObject(const ComponentObject&, COMPONENT);
 
     virtual ~ComponentObject();
-
-    COMPONENT getType() const;
 
     const char* getName() const;
 
@@ -47,9 +34,7 @@ public:
     void setRootPath(const char*);
 
     const ComponentInfo& getAssigned() const;
-    void setAssigned(int, long);
-
+    void setAssigned(COMPONENT, long, long);
 };
-
 
 #endif //DICON_COMPONENTOBJECT_H

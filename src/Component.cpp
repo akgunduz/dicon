@@ -3,6 +3,7 @@
 //
 
 #include "Component.h"
+#include "Util.h"
 
 void *Component::notifyContext = nullptr;
 TypeNotifyCB Component::notifyCB = nullptr;
@@ -46,7 +47,7 @@ const char* Component::getRootPath() {
     return rootPath;
 }
 
-ComponentObject Component::getHostCB(void *arg) {
+ComponentObject& Component::getHostCB(void *arg) {
 
     return ((Component*) arg)->getHost();
 }
@@ -56,23 +57,29 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
     auto *component = (Component *) arg;
     auto *messageItem = (MessageItem*) item;
 
-    return component->onReceive(messageItem->getMessage()->getHeader()->getOwner(),
-                                messageItem->getMessage()->getHeader()->getType(),
+    return component->onReceive(messageItem->getMessage()->getHeader().getOwner(),
+                                messageItem->getMessage()->getHeader().getType(),
                                 messageItem->getMessage());
 }
 
-bool Component::onReceive(ComponentObject owner, MSG_TYPE msgType, Message *msg) {
+bool Component::onReceive(const ComponentObject& owner, MSG_TYPE msgType, Message *msg) {
 
     LOGC_I(getHost(),
            owner,
           false,
           "\"%s\" is received",
-          MessageTypes::getName(msgType));
+          MessageTypes::getMsgName(msgType));
 
     auto processCB = processMsg[owner.getType()].find(msgType);
     if (processCB == processMsg[owner.getType()].end()) {
 
-        return defaultProcessMsg(owner, msg);
+        auto processStaticCB = processStaticMsg[owner.getType()].find(msgType);
+        if (processStaticCB == processStaticMsg[owner.getType()].end()) {
+
+            return defaultProcessMsg(owner, msg);
+        }
+
+        return (processStaticMsg[owner.getType()][msgType])(this, owner, msg);
     }
 
     return (this->*processMsg[owner.getType()][msgType])(owner, msg);
@@ -88,7 +95,7 @@ bool Component::defaultProcessMsg(ComponentObject owner, Message *msg) {
 
 long Component::getInterfaceAddress(ComponentObject target) {
 
-    if (interfaces[target.getType()] != NULL) {
+    if (interfaces[target.getType()] != nullptr) {
         return interfaces[target.getType()]->getAddress();
     }
 
@@ -123,20 +130,22 @@ bool Component::isSupportMulticast(ComponentObject target) {
     return false;
 }
 
-bool Component::send(ComponentObject target, Message *msg) {
+bool Component::send(const ComponentObject& target, Message *msg) {
 
     LOGC_I(getHost(),
            target,
            true,
            "\"%s\" is sent",
-           MessageTypes::getName(msg->getHeader()->getType()));
+           MessageTypes::getMsgName(msg->getHeader().getType()));
 
-    ComponentObject object(getHost().getType(), getHost().getRootPath(),
-                           getHost().getID(), interfaces[target.getType()]->getAddress());
+//    ComponentObject object(getHost().getType(), getHost().getRootPath(),
+//                           getHost().getID(), interfaces[target.getType()]->getAddress());
 
-    msg->getHeader()->setOwner(object);
+  //  msg->getHeader().setOwner(getHost(), target.getType());
 
-    return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(), msg);
+    long targetAddress = target.getAddress(getHost().getType());
+
+    return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(target.getType()), msg);
 }
 
 std::vector<long> Component::getAddressList(const ComponentObject& target) {
@@ -166,7 +175,7 @@ bool Component::isIDAssigned() {
     return getHost().getID() != 0;
 }
 
-void Component::setID(int id) {
+void Component::setID(long id) {
 
     if (id == 0) {
         LOGS_E(getHost(), "Can not assign ID with 0!!!");
@@ -176,8 +185,24 @@ void Component::setID(int id) {
     getHost().setID(id);
 
     int pos = strlen(rootPath);
-    sprintf(&rootPath[pos], "/%d", id);
+    sprintf(&rootPath[pos], "/%ld", id);
 
     Util::removePath(getRootPath());
     mkdir(rootPath, 0777);
+}
+
+bool Component::addProcessHandler(COMPONENT component, MSG_TYPE msgType,
+        TypeProcessComponentMsg handler) {
+
+    processMsg[component][msgType] = handler;
+
+    return true;
+}
+
+bool Component::addStaticProcessHandler(COMPONENT component, MSG_TYPE msgType,
+        TypeStaticProcessComponentMsg handler) {
+
+    processStaticMsg[component][msgType] = handler;
+
+    return true;
 }

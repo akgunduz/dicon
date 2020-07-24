@@ -5,36 +5,25 @@
 
 #include "ProcessItem.h"
 #include "ParameterItem.h"
-#include "Job.h"
+#include "JobItem.h"
+#include "Util.h"
 
-ProcessItem::ProcessItem()
-        : ProcessItem("") {
-};
-
-ProcessItem::ProcessItem(ProcessItem &copy) {
+ProcessItem::ProcessItem(const ProcessItem &copy) :
+	ContentItem(copy),
+	assignedComponent(copy.assignedComponent),
+	state(copy.state) {
 
     strcpy(process, copy.getProcess());
     strcpy(parsedProcess, copy.getParsedProcess());
     fileList = copy.fileList;
 };
 
-ProcessItem::ProcessItem(const char *line)
-        : ContentItem () {
+ProcessItem::ProcessItem(const ComponentObject& host, long id, long jobID, const char *_process) :
+	ContentItem(host, id, jobID) {
 
-	strcpy(process, line);
-    strcpy(parsedProcess, "");
-}
-
-CONTENT_TYPES ProcessItem::getType() const {
-	return CONTENT_PROCESS;
-}
-
-const char* ProcessItem::getProcess() const {
-	return process;
-}
-
-const char *ProcessItem::getParsedProcess() const {
-    return parsedProcess;
+	if (_process) {
+		strcpy(process, _process);
+	}
 }
 
 bool ProcessItem::parse(void *job) {
@@ -57,7 +46,7 @@ bool ProcessItem::parse(void *job) {
 			case 'F':
 			case 'f':
 				if (cmdMode) {
-					cmdType = PROCESS_FILE;
+					cmdType = PROCESS_INPUT;
 					break;
 				}
 				//no break
@@ -115,26 +104,18 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
     switch (cmdType) {
 
-        case PROCESS_FILE: {
+        case PROCESS_INPUT:
+		case PROCESS_OUTPUT: {
             auto *content = ((JobItem*)jobItem)->getFile(cmdIndex);
             if (content != nullptr) {
                 sprintf(parsedProcess, "%s%s/%s", parsedProcess, ROOT_SIGN,
-                        Util::getRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName()).c_str());
-                fileList.push_back(FileInfo(content, false));
-            }
-        } break;
-
-        case PROCESS_OUTPUT: {
-            auto *content = (FileItem *) ((JobItem*)jobItem)->getContent(CONTENT_FILE, cmdIndex);
-            if (content != nullptr) {
-                sprintf(parsedProcess, "%s%s/%s", parsedProcess, ROOT_SIGN,
-                        Util::getRefPath(content->getHost().getRootPath(), content->getJobName(), content->getFileName()).c_str());
-                fileList.push_back(FileInfo(content, true));
+                        Util::getRefPath(content->getHost().getRootPath(), content->getAssignedJob(), content->getName()).c_str());
+				addFile(content, getID(), cmdType == PROCESS_OUTPUT);
             }
         } break;
 
         case PROCESS_PARAM: {
-            auto *content = (ParameterItem *) ((JobItem*)jobItem)->getContent(CONTENT_PARAM, cmdIndex);
+            auto *content = ((JobItem*)jobItem)->getParameter(cmdIndex);
             if (content != nullptr) {
                 strcat(parsedProcess, content->getParam());
             }
@@ -147,7 +128,7 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 	return true;
 }
 
-bool ProcessItem::isValid() {
+bool ProcessItem::check() {
 
 	for (auto & file : fileList) {
 
@@ -155,7 +136,7 @@ bool ProcessItem::isValid() {
 	        continue;
 	    }
 
-	    if (!file.get()->isValid()) {
+	    if (!file.get()->check()) {
 	        return false;
 	    }
 	}
@@ -163,29 +144,84 @@ bool ProcessItem::isValid() {
     return true;
 }
 
-const TypeFileInfoList& ProcessItem::getFileList() const {
+CONTENT_TYPES ProcessItem::getType() const {
+	return CONTENT_PROCESS;
+}
 
-    return fileList;
+const char* ProcessItem::getProcess() const {
+	return process;
 }
 
 void ProcessItem::setProcess(const char *_process) {
 
-    strcpy(this->process, _process);
+	strcpy(this->process, _process);
+}
+
+const char *ProcessItem::getParsedProcess() const {
+	return parsedProcess;
 }
 
 void ProcessItem::setParsedProcess(const char *_parsedProcess) {
 
-    strcpy(this->parsedProcess, _parsedProcess);
+	strcpy(this->parsedProcess, _parsedProcess);
 }
 
-void ProcessItem::addFileList(const TypeFileInfoList &_fileList) {
+int ProcessItem::getFileCount() const {
+
+    return fileList.size();
+}
+
+ProcessFile& ProcessItem::getFile(ProcessFile& ref) {
+
+    for (auto& file : fileList) {
+        if (file.get()->getID() == ref.get()->getID()) {
+            return file;
+        }
+    }
+    return *fileList.end();
+}
+
+TypeProcessFileList& ProcessItem::getFileList() {
+
+	return fileList;
+}
+
+void ProcessItem::addFile(FileItem *file, long processID, bool isOutput) {
+
+    fileList.emplace_back(ProcessFile(file, processID, isOutput));
+}
+
+void ProcessItem::addFileList(TypeProcessFileList& _fileList) {
 
     fileList.insert(fileList.end(), _fileList.begin(), _fileList.end());
 }
 
-void ProcessItem::setFileList(TypeFileInfoList &_fileList) {
+PROCESS_STATE ProcessItem::getState() const {
 
-    fileList.clear();
-    addFileList(_fileList);
+	return state;
+}
+
+void ProcessItem::setState(PROCESS_STATE _state) {
+
+	state = _state;
+}
+
+long ProcessItem::getAssigned() const {
+
+	return assignedComponent;
+}
+
+void ProcessItem::setAssigned(long _assignedComponent) {
+
+	assignedComponent = _assignedComponent;
+}
+
+void ProcessItem::setID(long _id) {
+
+    ContentItem::setID(_id);
+
+    for (auto& file : getFileList()) {
+        file.setAssignedProcess(_id);
+    }
 }
 

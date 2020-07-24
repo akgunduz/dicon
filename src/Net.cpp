@@ -4,6 +4,7 @@
 //
 
 #include "Net.h"
+#include "Util.h"
 
 Net::Net(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
 		: Interface(device, scb, hcb) {
@@ -173,11 +174,11 @@ void Net::runReceiver() {
         if (FD_ISSET(multicastSocket, &readfs)) {
 
             auto *msg = new Message(getHost());
-            sockaddr_in address;
+            sockaddr_in address{};
             address.sin_addr.s_addr = 1;
             msg->setDatagramAddress(address);
             if (msg->readFromStream(multicastSocket)) {
-                push(MESSAGE_RECEIVE, msg->getHeader()->getOwner().getAddress(), msg);
+                push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
             }
 
         }
@@ -203,7 +204,7 @@ void Net::runAccepter(Interface *interface, int acceptSocket) {
 
 	if (msg->readFromStream(acceptSocket)) {
 
-		interface->push(MESSAGE_RECEIVE, msg->getHeader()->getOwner().getAddress(), msg);
+		interface->push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
 	}
 }
 
@@ -216,7 +217,7 @@ void Net::runSender(long target, Message *msg) {
 	}
 
 	LOGS_T(getHost(), "Sender is opened for target : %s and message : %s !!!",
-          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getName(msg->getHeader()->getType()));
+          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getMsgName(msg->getHeader().getType()));
 
     sockaddr_in clientAddress = getInetAddressByAddress(target);
 
@@ -227,7 +228,7 @@ void Net::runSender(long target, Message *msg) {
 	}
 
     LOGS_T(getHost(), "Sender is connected for target : %s and message : %s !!!",
-          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getName(msg->getHeader()->getType()));
+          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getMsgName(msg->getHeader().getType()));
 
 	msg->writeToStream(clientSocket);
 
@@ -279,7 +280,7 @@ std::string Net::getAddressString(long address) {
 
 std::string Net::getIPString(long address) {
 
-    struct in_addr addr;
+    struct in_addr addr{};
     addr.s_addr = htonl(AddressHelper::getBase(address));
     char cIP[INET_ADDRSTRLEN];
 
@@ -291,9 +292,9 @@ std::string Net::getIPString(long address) {
     return std::string(cIP);
 }
 
-long Net::parseIPAddress(std::string address) {
+long Net::parseIPAddress(const std::string& address) {
 
-    struct in_addr addr;
+    struct in_addr addr{};
 
     int res = inet_pton(AF_INET, address.c_str(), &addr);
     if (res <= 0) {

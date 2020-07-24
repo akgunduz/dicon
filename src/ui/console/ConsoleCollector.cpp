@@ -5,7 +5,7 @@
 
 #include "ConsoleApp.h"
 
-bool ConsoleApp::collLoadJobHandler(int id) {
+bool ConsoleApp::collLoadJobHandler(long id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
@@ -15,7 +15,7 @@ bool ConsoleApp::collLoadJobHandler(int id) {
     return true;
 }
 
-bool ConsoleApp::collProcessHandler(int id) {
+bool ConsoleApp::collProcessHandler(long id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
@@ -25,7 +25,7 @@ bool ConsoleApp::collProcessHandler(int id) {
     return true;
 }
 
-bool ConsoleApp::collStateHandler(int id) {
+bool ConsoleApp::collStateHandler(long id) {
 
     auto *collector = componentController->getCollector(id);
     if (!collector) {
@@ -46,7 +46,7 @@ bool ConsoleApp::collStateHandler(int id) {
 
         auto *content = job->getFile(j);
 
-        PRINT("\tFile : %s, valid? : %s", content->getFileName(), content->isValid() ? "yes" : "no");
+        PRINT("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
     }
 
     PRINT("Processes");
@@ -54,10 +54,10 @@ bool ConsoleApp::collStateHandler(int id) {
     for (int j = 0; j < job->getProcessCount(); j++) {
 
         PRINT("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
-                job->getProcess(j).getID(),
-              job->getProcess(j).get().getProcess(),
-                ProcessState::getName(job->getProcess(j).getState()),
-                job->getProcess(j).getAssigned());
+                job->getProcess(j)->getID(),
+                job->getProcess(j)->getProcess(),
+                ProcessState::getName(job->getProcess(j)->getState()),
+                job->getProcess(j)->getAssigned());
     }
 
     return true;

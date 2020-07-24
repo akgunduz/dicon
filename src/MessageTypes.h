@@ -7,11 +7,37 @@
 #ifndef DICON_MESSAGETYPES_H
 #define DICON_MESSAGETYPES_H
 
+#include <Common.h>
+
+enum STREAM_TYPE {
+
+    STREAM_JOB,
+    STREAM_COMPONENT,
+    STREAM_FILEINFO,
+    STREAM_FILEBINARY,
+    STREAM_PROCESSINFO,
+    STREAM_PROCESS,
+
+    STREAM_NONE = 0xFFFF
+};
+
+enum BLOCK_TYPE {
+
+    BLOCK_JOB,
+    BLOCK_COMPONENT,
+    BLOCK_FILEINFO,
+    BLOCK_FILEBINARY,
+    BLOCK_PROCESSINFO,
+    BLOCK_PROCESSID,
+    BLOCK_PROCESS,
+
+    BLOCK_NONE = 0xFFFF
+};
+
 enum MSG_TYPE {
     MSGTYPE_NODE,
     MSGTYPE_JOB,
     MSGTYPE_BINARY,
-    MSGTYPE_MD5,
     MSGTYPE_INFO,
     MSGTYPE_WAKEUP,
     MSGTYPE_READY,
@@ -27,7 +53,12 @@ enum MSG_TYPE {
 class MessageTypes {
 
 public:
-    static const char* getName(MSG_TYPE);
+    static const char* getMsgName(int);
+    static void addMsg(int, std::string);
+    static const char* getStreamName(int);
+    static void addStream(int, std::string);
+    static const char* getBlockName(int);
+    static void addBlock(int, std::string);
 };
 
 

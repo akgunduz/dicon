@@ -4,11 +4,11 @@
 
 #include "CollectorObject.h"
 
-CollectorObject::CollectorObject(COLLSTATES _state, int id, long address) :
+CollectorObject::CollectorObject(COLLSTATES _state, long id, long address) :
         state(_state), ComponentObject(COMP_COLLECTOR, id, address) {
 }
 
-CollectorObject::CollectorObject(int id, long address) :
+CollectorObject::CollectorObject(long id, long address) :
         CollectorObject(COLLSTATE_START, id, address) {
 }
 

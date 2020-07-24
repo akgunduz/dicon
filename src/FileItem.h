@@ -7,44 +7,26 @@
 #define __FileContent_H_
 
 #include "ContentItem.h"
-#include "Md5.h"
 
 class FileItem : public ContentItem {
 
-	ComponentObject host;
-	char fileName[PATH_MAX];
-	char jobName[PATH_MAX];
+	char name[PATH_MAX]{};
 
-	int id;
-	bool is_exist;
-	long size;
-
-	Md5 md5;
+	bool is_exist{};
+	long size{};
 
 public:
-	FileItem(const ComponentObject&);
-    FileItem(FileItem*);
-    FileItem(const ComponentObject& host, const char*, const char*,
-             long, int id, Md5 *md5 = nullptr);
-	~FileItem(){};
+	explicit FileItem(const ComponentObject&, long = 0, long = 0, const char* = "");
+	~FileItem() override = default;
 
-    void set(const char*, const char*, const long,
-             const int id, const Md5* = nullptr);
+    const char* getName() const;
+    void setName(const char*);
 
-	Md5* getMD5();
-	void setMD5(Md5* = nullptr);
-    const char* getFileName() const;
-    const char* getJobName() const;
-
-	ComponentObject getHost() const;
-    int getID() const;
     long getSize() const;
 
-    bool validate();
+	CONTENT_TYPES getType() const override;
 
-	virtual CONTENT_TYPES getType() const;
-
-    virtual bool isValid();
+    bool check() override;
 };
 
 typedef std::vector<FileItem*> TypeFileList;

@@ -43,11 +43,11 @@ private:
     bool processNodeReadyMsg(const ComponentObject&, Message *);
 
 	bool send2CollectorWakeupMsg(const ComponentObject&);
-	bool send2CollectorIDMsg(const ComponentObject&, int);
+	bool send2CollectorIDMsg(const ComponentObject&, long);
 	bool send2CollectorNodeMsg(const ComponentObject&, std::vector<ComponentObject>&);
 
     bool send2NodeWakeupMsg(const ComponentObject&);
-    bool send2NodeIDMsg(const ComponentObject&, int);
+    bool send2NodeIDMsg(const ComponentObject&, long);
 	bool send2NodeProcessMsg(const ComponentObject&);
 
 public:
@@ -56,7 +56,7 @@ public:
 	~Distributor() override;
     static Distributor* newInstance(const char* path);
 
-    bool sendWakeupMessage(ComponentObject);
+    bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll(bool);
 
     bool clear();

@@ -85,7 +85,7 @@ SchedulerItem* Scheduler::pull() {
 
 void *Scheduler::run(void *arg) {
 
-	Scheduler *scheduler = (Scheduler *) arg;
+	auto *scheduler = (Scheduler *) arg;
 
 	while(true) {
 

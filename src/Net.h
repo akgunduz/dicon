@@ -34,7 +34,7 @@ private :
 	void runMulticastSender(Message *);
 
     static std::string getIPString(long);
-    static long parseIPAddress(std::string);
+    static long parseIPAddress(const std::string&);
 
 	static sockaddr_in getInetAddressByAddress(long);
 	static sockaddr_in getInetAddressByPort(int);

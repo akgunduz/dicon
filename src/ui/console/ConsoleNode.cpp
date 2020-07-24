@@ -7,7 +7,7 @@
 #include <NodeState.h>
 #include "ConsoleApp.h"
 
-bool ConsoleApp::nodeStateHandler(int id) {
+bool ConsoleApp::nodeStateHandler(long id) {
 
     auto *node = componentController->getNode(id);
     if (!node) {
@@ -25,13 +25,13 @@ bool ConsoleApp::nodeStateHandler(int id) {
 
     for (auto &process : node->getProcessList()) {
 
-        std::string processCommand = process.get().getParsedProcess();
+        std::string processCommand = process.getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
 
-        PRINT("ID : %d, Assigned Collector : %d, Job ID : %s, Process : %s",
+        PRINT("ID : %d, Assigned Collector : %d, Job ID : %ld, Process : %s",
               process.getID(),
               process.getAssigned(),
-              process.getJobName().c_str(),
+              process.getAssignedJob(),
               processCommand.c_str());
     }
 

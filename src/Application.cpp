@@ -42,7 +42,7 @@ enum APPTYPE App::getAppType() {
     return type;
 }
 
-bool App::notifyCB(void *context, int target, int id) {
+bool App::notifyCB(void *context, long target, long id) {
 
     return ((App*) context)->notifyHandler(target, id);
 }

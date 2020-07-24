@@ -18,31 +18,28 @@
 
 class MessageHeader {
 
-    int type;
-    int priority;
+    int type{};
+    int priority{};
 
-    long owner;
-    long ownerAddress;
-    long variant[MAX_VARIANT];
+    long owner{};
+    long ownerAddress{};
+    long variant[MAX_VARIANT]{};
 
 public:
     MessageHeader();
 
-    int getSize();
+    long getSize();
 
     void setType(MSG_TYPE);
-    MSG_TYPE getType();
+    MSG_TYPE getType() const;
 
-    ComponentObject getOwner();
-    void setOwner(ComponentObject);
-
-//    long getOwnerAddress();
-//    void setOwnerAddress(long);
+    ComponentObject getOwner() const;
+    void setOwner(const ComponentObject&, COMPONENT = COMP_DISTRIBUTOR);
 
     long getVariant(int id);
-    void setVariant(int id, long variant);
+    void setVariant(int id, long _variant);
 
-    int getPriority();
+    int getPriority() const;
     void setPriority(int);
     void normalizePriority();
     int iteratePriority();

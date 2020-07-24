@@ -34,8 +34,6 @@ public:
     static long getBase(long);
     static int getPort(long);
     static int getHelper(long);
-//    static int getID(long);
-//    static long setID(long, int);
     static int address2prefix(long);
 
     static long createAddress(INTERFACE, long, int, int, int = 0);

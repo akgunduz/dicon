@@ -14,6 +14,7 @@ static const char* sLogLevels[LEVEL_MAX] = {
 		"ERROR ",
 		"WARN  ",
 		"INFO  ",
+		"DEBUG ",
 		"TRACE ",
 		"ASSERT",
 };
@@ -45,7 +46,7 @@ void Log::show(const char *format, ...) {
 }
 
 void Log::logs(LOGLEVEL level, const char *file, int line,
-               const ComponentObject& host, ...) {
+               const ComponentObject host, ...) {
 
     if (logLevel[0] < level) {
         return;
@@ -68,7 +69,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%11s[%d] : %s \n",
+    sprintf(logout, "%11s[%ld] : %s \n",
             host.getName(),
             host.getID(),
             buf);
@@ -79,7 +80,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 }
 
 void Log::logc(LOGLEVEL level, const char *file, int line,
-               const ComponentObject& host, const ComponentObject& target, int direction, ...) {
+               const ComponentObject host, const ComponentObject& target, int direction, ...) {
 
     if (logLevel[1] < level) {
         return;
@@ -103,7 +104,7 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%11s[%d] %s %11s[%d] : %s \n",
+    sprintf(logout, "%11s[%ld] %s %11s[%ld] : %s \n",
             host.getName(),
             host.getID(),
             direction ? "==>" : "<==",

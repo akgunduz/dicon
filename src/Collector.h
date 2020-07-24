@@ -9,40 +9,39 @@
 #include "Component.h"
 #include "Connector.h"
 #include "Message.h"
-#include "Job.h"
+#include "JobItem.h"
 #include "DistributorObject.h"
 #include "CollectorObject.h"
 
 class Collector : public Component {
 
-	Job *job;
+	JobItem *job;
 	DistributorObject distributor;
 
     explicit Collector(const char *rootPath);
 
-	ComponentObject& getDistributor();
 	void setDistributor(const DistributorObject&);
 
 	bool processDistributorWakeupMsg(const ComponentObject&, Message *);
 	bool processDistributorIDMsg(const ComponentObject&, Message *);
 	bool processDistributorNodeMsg(const ComponentObject&, Message *);
-	bool processNodeInfoMsg(const ComponentObject&, Message *);
-	bool processNodeBinaryMsg(const ComponentObject&, Message *);
+	bool processNodeFileInfoMsg(const ComponentObject &owner, Message *msg);
+	bool processNodeFileBinaryMsg(const ComponentObject &owner, Message *msg);
 
 	bool send2DistributorAliveMsg(const ComponentObject&);
 	bool send2DistributorIDMsg(const ComponentObject&);
 	bool send2DistributorNodeMsg(const ComponentObject&, long);
     bool send2DistributorReadyMsg(const ComponentObject&);
-    bool send2NodeJobMsg(const ComponentObject&, const char*, int, const char*, const TypeFileInfoList&);
-	bool send2NodeBinaryMsg(const ComponentObject&, const char*, int, const char*, const TypeFileInfoList&);
+    bool send2NodeProcessMsg(const ComponentObject&, ProcessItem *);
+	bool send2NodeBinaryMsg(const ComponentObject&, long, TypeProcessFileList&);
 	bool send2NodeReadyMsg(const ComponentObject&);
 
 public:
 
-    ~Collector();
+    ~Collector() override;
     static Collector* newInstance(const char*);
 
-    Job* getJob();
+    JobItem* getJob();
     bool processJob();
     bool loadJob(const char*);
 };

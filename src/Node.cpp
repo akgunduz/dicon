@@ -5,6 +5,7 @@
 
 #include "Node.h"
 #include "CollectorObject.h"
+#include "Util.h"
 
 #define PROCESS_SLEEP_TIME 1000
 
@@ -21,11 +22,14 @@ Node::Node(const char *rootPath) :
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_WAKEUP] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg);
     processMsg[COMP_DISTRIBUTOR][MSGTYPE_PROCESS] = static_cast<TypeProcessComponentMsg>(&Node::processDistributorProcessMsg);
-    processMsg[COMP_COLLECTOR][MSGTYPE_JOB] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorJobMsg);
+    processMsg[COMP_COLLECTOR][MSGTYPE_PROCESS] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorProcessMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_BINARY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg);
     processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg);
 
     initInterfaces(COMP_NODE);
+
+    host->setAddress(COMP_DISTRIBUTOR, getInterfaceAddress(DistributorObject()));
+    host->setAddress(COMP_COLLECTOR, getInterfaceAddress(CollectorObject()));
 }
 
 Node::~Node() = default;
@@ -39,7 +43,7 @@ bool Node::processDistributorWakeupMsg(const ComponentObject& owner, Message *ms
 
 bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
-    setID((int)msg->getHeader()->getVariant(0));
+    setID((int)msg->getHeader().getVariant(0));
 
     notifyUI();
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
@@ -47,82 +51,35 @@ bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
     return send2DistributorIDMsg(owner);
 }
 
-bool Node::processCollectorJobMsg(const ComponentObject& owner, Message *msg) {
-
-    ((NodeObject&) getHost()).setState(NODESTATE_BUSY);
-    ((NodeObject&) getHost()).setAssigned(owner.getID(), owner.getAddress());
-
-    ((NodeObject&) getHost()).getProcessInfo().setAssigned(owner.getID());
-    ((NodeObject&) getHost()).getProcessInfo().setState(PROCESS_STATE_STARTED);
-    ((NodeObject&) getHost()).getProcessInfo().setJobName(msg->getData()->getJobName());
-    ((NodeObject&) getHost()).getProcessInfo().setID(msg->getData()->getProcessID());
-    ((NodeObject&) getHost()).getProcessInfo().get().setParsedProcess(msg->getData()->getProcess());
-    ((NodeObject&) getHost()).getProcessInfo().get().setFileList(msg->getData()->getFileList());
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] request is received ",
-           owner.getID(), msg->getData()->getProcessID());
-
-    return send2DistributorBusyMsg(getDistributor(), owner.getID());
-}
-
-bool Node::processJob(const ComponentObject& owner, Message *msg) {
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
-           ((NodeObject&)getHost()).getAssigned().getID(),
-           ((NodeObject&)getHost()).getProcessInfo().getID());
-
-    ProcessInfo &processInfo = ((NodeObject&)getHost()).getProcessInfo();
-
-    processList.emplace_back(processInfo);
-
-    notifyUI();
-
-    int result = processCommand(((NodeObject&)getHost()).getAssigned().getID(),
-            ((NodeObject&)getHost()).getProcessInfo().getID(),
-            ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess());
-
-    if (!result) {
-        return false;
-    }
-
-    TypeFileInfoList outputList = FileInfo::getFileList(((NodeObject&)getHost()).getProcessInfo().get().getFileList(), true);
-    FileInfo::setFileListState(outputList, false);
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] is successfully executed, sending back output data",
-           ((NodeObject&)getHost()).getAssigned().getID(),
-           ((NodeObject&)getHost()).getProcessInfo().getID());
-
-    //TODO will update with md5s including outputs
-    //TODO will update with actual binary to collector including outputs
-    return send2CollectorBinaryMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
-                                                   ((NodeObject&)getHost()).getAssigned().getAddress()),
-                                   ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
-                                   ((NodeObject&)getHost()).getProcessInfo().getID(),
-                                   ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess(),
-                                   outputList);
-}
-
 bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *msg) {
 
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] is approved by distributor",
-           ((NodeObject&)getHost()).getAssigned().getID(),
-           ((NodeObject&)getHost()).getProcessInfo().getID());
+    auto& nodeHost = (NodeObject&) getHost();
 
-    TypeFileInfoList requiredList = FileInfo::getReqFileList(getHost(),
-            ((NodeObject&)getHost()).getProcessInfo().get().getFileList());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] is approved by distributor",
+           nodeHost.getAssigned().getID(),
+           nodeHost.getProcess().getID());
+
+    TypeProcessFileList requiredList;
+
+    for (auto processFile : nodeHost.getProcess().getFileList()) {
+        if (!processFile.isOutput() &&
+            !Util::checkPath(nodeHost.getRootPath(),
+                             processFile.get()->getAssignedJob(),
+                             processFile.get()->getName(), false)) {
+            requiredList.emplace_back(processFile);
+        }
+    }
 
     if (!requiredList.empty()) {
 
         LOGS_I(getHost(), "Collector[%d]:Process[%d]'s missing files are requested, total %d files",
-               ((NodeObject&)getHost()).getAssigned().getID(),
-               ((NodeObject&)getHost()).getProcessInfo().getID(),
+               nodeHost.getAssigned().getID(),
+               nodeHost.getProcess().getID(),
                requiredList.size());
 
-        return send2CollectorInfoMsg(CollectorObject(((NodeObject&)getHost()).getAssigned().getID(),
-                                                     ((NodeObject&)getHost()).getAssigned().getAddress()),
-                                     ((NodeObject &) getHost()).getProcessInfo().getJobName().c_str(),
-                                     ((NodeObject&)getHost()).getProcessInfo().getID(),
-                                     ((NodeObject &) getHost()).getProcessInfo().get().getParsedProcess(),
+        return send2CollectorInfoMsg(CollectorObject(nodeHost.getAssigned().getID(),
+                                                     nodeHost.getAssigned().getAddress()),
+                                     nodeHost.getProcess().getID(),
                                      requiredList);
 
     } else {
@@ -131,11 +88,30 @@ bool Node::processDistributorProcessMsg(const ComponentObject& owner, Message *m
     }
 }
 
+bool Node::processCollectorProcessMsg(const ComponentObject& owner, Message *msg) {
+
+    auto& nodeHost = (NodeObject&) getHost();
+
+    nodeHost.setState(NODESTATE_BUSY);
+    nodeHost.setAssigned(owner.getType(), owner.getID(), owner.getAddress());
+
+    nodeHost.getProcess() = *msg->getData().getProcess(0);
+    nodeHost.getProcess().setAssigned(owner.getID());
+    nodeHost.getProcess().setState(PROCESS_STATE_STARTED);
+    nodeHost.getProcess().addFileList(msg->getData().getFileList());
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] request is received ",
+           owner.getID(), nodeHost.getProcess().getID());
+
+    return send2DistributorBusyMsg(getDistributor(), owner.getID());
+}
 
 bool Node::processCollectorBinaryMsg(const ComponentObject& owner, Message *msg) {
 
+    auto& nodeHost = (NodeObject&) getHost();
+
     LOGS_I(getHost(), "Collector[%d]:Process[%d] binaries are received",
-           owner.getID(), msg->getData()->getProcessID());
+           owner.getID(), nodeHost.getProcess().getID());
 
     return processJob(owner, msg);
 }
@@ -149,58 +125,94 @@ bool Node::processCollectorReadyMsg(const ComponentObject& owner, Message *msg) 
     return send2DistributorReadyMsg(getDistributor());
 }
 
+
+bool Node::processJob(const ComponentObject& owner, Message *msg) {
+
+    auto& nodeHost = (NodeObject&) getHost();
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
+           nodeHost.getAssigned().getID(),
+           nodeHost.getProcess().getID());
+
+    processList.emplace_back(nodeHost.getProcess());
+
+    notifyUI();
+
+    int result = processCommand(nodeHost.getAssigned().getID(),
+                                nodeHost.getProcess().getID(),
+                                nodeHost.getProcess().getParsedProcess());
+
+    if (!result) {
+        return false;
+    }
+
+    TypeProcessFileList outputList;
+
+    for (auto processFile : nodeHost.getProcess().getFileList()) {
+        if (processFile.isOutput()) {
+            if (processFile.get()->check()) {
+                processFile.setOutputState(false);
+                outputList.emplace_back(processFile);
+            }
+        }
+    }
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] is successfully executed, sending back output data",
+           nodeHost.getAssigned().getID(),
+           nodeHost.getProcess().getID());
+
+    return send2CollectorBinaryMsg(CollectorObject(nodeHost.getAssigned().getID(),
+                                                   nodeHost.getAssigned().getAddress()),
+                                   nodeHost.getProcess().getID(),
+                                   outputList);
+}
+
 bool Node::send2DistributorReadyMsg(const ComponentObject& target) {
 
-	auto *msg = new Message(getHost(), MSGTYPE_READY);
+	auto *msg = new Message(getHost(), COMP_DISTRIBUTOR, MSGTYPE_READY);
 
 	return send(target, msg);
 }
 
 bool Node::send2DistributorAliveMsg(const ComponentObject& target) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_ALIVE);
+    auto *msg = new Message(getHost(), COMP_DISTRIBUTOR, MSGTYPE_ALIVE);
 
     return send(target, msg);
 }
 
 bool Node::send2DistributorIDMsg(const ComponentObject& target) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_ID);
+    auto *msg = new Message(getHost(), COMP_DISTRIBUTOR, MSGTYPE_ID);
 
     return send(target, msg);
 }
 
-bool Node::send2DistributorBusyMsg(const ComponentObject& target, int collID) {
+bool Node::send2DistributorBusyMsg(const ComponentObject& target, long collID) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_BUSY);
+    auto *msg = new Message(getHost(), COMP_DISTRIBUTOR, MSGTYPE_BUSY);
 
-    msg->getHeader()->setVariant(0, collID);
+    msg->getHeader().setVariant(0, collID);
 
     return send(target, msg);
 }
 
-bool Node::send2CollectorInfoMsg(const ComponentObject& target, const char* jobName, int processID,
-                                 const char* process, TypeFileInfoList &fileList) {
+bool Node::send2CollectorInfoMsg(const ComponentObject& target, long processID, TypeProcessFileList &fileList) {
 
-	auto *msg = new Message(getHost(), MSGTYPE_INFO);
+	auto *msg = new Message(getHost(), COMP_COLLECTOR, MSGTYPE_INFO);
 
-    msg->getData()->setStreamFlag(STREAM_INFO);
-    msg->getData()->setJobName(jobName);
-    msg->getData()->setProcess(processID, process);
-    msg->getData()->addFileList(fileList);
+    msg->getData().setStreamFlag(STREAM_FILEINFO);
+    msg->getData().addFileList(processID, fileList);
 
 	return send(target, msg);
 }
 
-bool Node::send2CollectorBinaryMsg(const ComponentObject& target, const char* jobName, int processID,
-                                   const char* process, TypeFileInfoList &fileList) {
+bool Node::send2CollectorBinaryMsg(const ComponentObject& target, long processID, TypeProcessFileList &fileList) {
 
-    auto *msg = new Message(getHost(), MSGTYPE_BINARY);
+    auto *msg = new Message(getHost(), COMP_COLLECTOR, MSGTYPE_BINARY);
 
-    msg->getData()->setStreamFlag(STREAM_BINARY);
-    msg->getData()->setJobName(jobName);
-    msg->getData()->setProcess(processID, process);
-    msg->getData()->addFileList(fileList);
+    msg->getData().setStreamFlag(STREAM_FILEBINARY);
+    msg->getData().addFileList(processID, fileList);
 
     return send(target, msg);
 }
@@ -232,7 +244,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(int collID, int processID, const char *cmd) {
+bool Node::processCommand(long collID, long processID, const char *cmd) {
 
     char fullCmd[PATH_MAX];
 
@@ -272,7 +284,7 @@ bool Node::processCommand(int collID, int processID, const char *cmd) {
     return false;
 }
 
-std::vector<ProcessInfo> &Node::getProcessList() {
+std::vector<ProcessItem> &Node::getProcessList() {
 
     return processList;
 }

@@ -12,7 +12,7 @@ CollectorManager::CollectorManager() = default;
 
 CollectorManager::~CollectorManager() = default;
 
-COLLSTATES CollectorManager::getState(int id) {
+COLLSTATES CollectorManager::getState(long id) {
 
     COLLSTATES state = COLLSTATE_MAX;
 
@@ -28,7 +28,7 @@ COLLSTATES CollectorManager::getState(int id) {
     return state;
 }
 
-void CollectorManager::setState(int id, COLLSTATES state) {
+void CollectorManager::setState(long id, COLLSTATES state) {
 
     collMutex.lock();
 
@@ -40,12 +40,12 @@ void CollectorManager::setState(int id, COLLSTATES state) {
     collMutex.unlock();
 }
 
-ComponentObject *CollectorManager::createObject(int id, long address) {
+ComponentObject *CollectorManager::createObject(long id, long address) {
 
     return new CollectorObject(id, address);
 }
 
-bool CollectorManager::addRequest(int collID, int reqNodeCount) {
+bool CollectorManager::addRequest(long collID, int reqNodeCount) {
 
     collMutex.lock();
 

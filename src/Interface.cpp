@@ -108,7 +108,7 @@ void Interface::setMulticastAddress(long _multicastAddress) {
     this->multicastAddress = _multicastAddress;
 }
 
-ComponentObject Interface::getHost() {
+ComponentObject& Interface::getHost() {
 
     return hostCB->hcb(hostCB->arg);
 }

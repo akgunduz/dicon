@@ -5,90 +5,65 @@
 
 #include "MessageData.h"
 
-int MessageData::getStreamFlag() {
+int MessageData::getStreamFlag() const {
 
     return streamFlag;
 }
 
 void MessageData::setStreamFlag(int _streamFlag) {
 
-    this->streamFlag = _streamFlag;
+    streamFlag = _streamFlag;
 }
 
-Md5* MessageData::getMD5(int index) {
+long MessageData::getFileProcess() {
 
-    return &md5List[index];
+    return std::get<0>(fileList);
 }
 
-TypeMD5List *MessageData::getMD5List() {
+void MessageData::setFileProcess(long processID) {
 
-    return &md5List;
+    std::get<0>(fileList) = processID;
 }
 
-void MessageData::addMD5(Md5 md5) {
+long MessageData::getFileCount() {
 
-    md5List.push_back(md5);
+    return std::get<1>(fileList).size();
 }
 
-void MessageData::addMD5List(TypeMD5List *list) {
+ProcessFile& MessageData::getFile(int index) {
 
-    md5List.insert(md5List.end(), list->begin(), list->end());
+    return std::get<1>(fileList)[index];
 }
 
-unsigned long MessageData::getMD5Count() {
+TypeProcessFileList& MessageData::getFileList() {
 
-    return md5List.size();
+    return std::get<1>(fileList);
 }
 
-FileItem* MessageData::getFile(int index) {
+void MessageData::addFile(ProcessFile& fileItem) {
 
-    return fileList[index].get();
+    std::get<1>(fileList).emplace_back(fileItem);
 }
 
-bool MessageData::isOutput(int index) {
+void MessageData::addFileList(long assignedProcess, TypeProcessFileList& _fileList) {
 
-    return fileList[index].isOutput();
+    std::get<0>(fileList) = assignedProcess;
+    std::get<1>(fileList).insert(std::get<1>(fileList).end(), _fileList.begin(), _fileList.end());
 }
 
-TypeFileInfoList& MessageData::getFileList() {
+long MessageData::getProcessCount() {
 
-    return fileList;
+    return processList.size();;
 }
 
-void MessageData::addFile(FileInfo file) {
+ProcessItem* MessageData::getProcess(int index) {
 
-    fileList.push_back(file);
+    return processList[index];
 }
 
-void MessageData::addFileList(const TypeFileInfoList &list) {
+void MessageData::addProcess(ProcessItem *processItem) {
 
-    fileList.insert(fileList.end(), list.begin(), list.end());
-}
-
-unsigned long MessageData::getFileCount() {
-
-    return fileList.size();
-}
-
-char* MessageData::getProcess() {
-
-    return process;
-}
-
-int MessageData::getProcessID() {
-
-    return processID;
-}
-
-void MessageData::setProcessID(int _processID) {
-
-    this->processID = _processID;
-}
-
-void MessageData::setProcess(int _processID, const char *_process) {
-
-    this->processID = _processID;
-    strcpy(this->process, _process);
+    processList.emplace_back(processItem);
 }
 
 char *MessageData::getJobName() {
@@ -110,3 +85,5 @@ void MessageData::setComponentList(std::vector<ComponentObject> &list) {
 
     componentList = list;
 }
+
+

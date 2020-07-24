@@ -52,8 +52,8 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         auto* processItem = json_object_new_object();
         json_object_object_add(processItem, "processID", json_object_new_int(process.getID()));
         json_object_object_add(processItem, "collectorID", json_object_new_int(process.getAssigned()));
-        json_object_object_add(processItem, "jobID", json_object_new_string(process.getJobName().c_str()));
-        std::string processCommand = process.get().getParsedProcess();
+        json_object_object_add(processItem, "jobID", json_object_new_int(process.getAssignedJob()));
+        std::string processCommand = process.getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
         json_object_object_add(processItem, "process", json_object_new_string(processCommand.c_str()));
 

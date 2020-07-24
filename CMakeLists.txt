@@ -14,8 +14,9 @@ set(EXTERNAL_PATH "${SOURCE_PATH}/external")
 
 set(GENERATED_PATH "${SOURCE_PATH}/gen")
 
+set(TEST_PATH "${SOURCE_PATH}/test")
+
 set(FRAMEWORK_FILES
-        ${EXTERNAL_PATH}/md5/md5lib.cpp
         ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/ArchTypes.cpp
         ${SOURCE_PATH}/Collector.cpp
@@ -31,9 +32,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/Log.cpp
-        ${SOURCE_PATH}/Job.cpp
-        ${SOURCE_PATH}/BaseMessage.cpp
-        ${SOURCE_PATH}/Md5.cpp
+        ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageDirection.cpp
@@ -54,25 +53,22 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
-        ${SOURCE_PATH}/Block.cpp
+        ${SOURCE_PATH}/MessageBlockHeader.cpp
         ${SOURCE_PATH}/InterfaceTypes.cpp
         ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/MessageData.cpp
         ${SOURCE_PATH}/CollectorState.cpp
         ${SOURCE_PATH}/NodeState.cpp
-        ${SOURCE_PATH}/History.cpp
-        ${SOURCE_PATH}/FileInfo.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/ComponentObject.cpp
         ${SOURCE_PATH}/ComponentController.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/DistributorObject.cpp
-        ${SOURCE_PATH}/ProcessInfo.cpp
-        ${SOURCE_PATH}/JobOrdered.cpp
         ${SOURCE_PATH}/ComponentInfo.cpp
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/ProcessState.cpp
+        ${SOURCE_PATH}/ProcessFile.cpp
         )
 
 set(CONSOLE_FILES
@@ -97,6 +93,16 @@ set(GENERATOR_FILES
         ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Generator.cpp
+        )
+
+set(TEST_FILES
+        ${TEST_PATH}/Test.cpp
+        ${TEST_PATH}/TestPing.cpp
+        ${TEST_PATH}/TestComponentList.cpp
+        ${TEST_PATH}/TestProcess.cpp
+        ${TEST_PATH}/TestFileInfo.cpp
+        ${TEST_PATH}/TestFileBinary.cpp
+        ${TEST_PATH}/TestJobName.cpp
         )
 
 if (APPLE)
@@ -129,6 +135,9 @@ target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)
 target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread dl)
+
+add_executable(dicon-test ${TEST_FILES})
+target_link_libraries(dicon-test dicon-framework ${JSON-C_LIBRARIES} pthread)
 
 add_custom_command(
         OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp

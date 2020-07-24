@@ -16,15 +16,15 @@ public:
     bool distPollHandler();
     bool distStateHandler();
 
-    bool collStateHandler(int);
-    bool collLoadJobHandler(int);
-    bool collProcessHandler(int);
+    bool collStateHandler(long);
+    bool collLoadJobHandler(long);
+    bool collProcessHandler(long);
 
-    bool nodeStateHandler(int);
+    bool nodeStateHandler(long);
 
     int run() override;
 
-    int notifyHandler(int, int) override;
+    int notifyHandler(long, long) override;
 };
 
 

@@ -9,6 +9,7 @@
 #include "FileItem.h"
 #include "JsonType.h"
 #include "ProcessItem.h"
+#include "ParameterItem.h"
 
 #define MAX_CONTENT_TYPE 10
 #define JOB_FILE "Job.json"
@@ -17,7 +18,9 @@ class JobItem : public FileItem {
 
 protected:
 
-    char name[NAME_MAX]{};
+    char jobName[NAME_MAX]{};
+
+    std::mutex mutex;
 
     std::vector<ContentItem *> contentList[MAX_CONTENT_TYPE];
 
@@ -25,7 +28,9 @@ protected:
 
 public:
 
-    JobItem(const ComponentObject&, const char*, const char*);
+    static long jobID;
+
+    JobItem(const ComponentObject&, const char*, long);
     ~JobItem() override;
     ContentItem* getContent(int type, int index) const;
     int getContentCount(int type) const;
@@ -37,14 +42,29 @@ public:
     static bool parseParamNode(JobItem*, json_object *node);
     static bool parseProcessNode(JobItem *parent, json_object *node);
 
-    const char* getName();
-    void setName(const char*);
+    const char* getJobName() const;
+    void setJobName(const char*);
 
     int getProcessCount() const;
     ProcessItem* getProcess(int) const;
+    ProcessItem* getProcessByID(long) const;
 
     int getFileCount() const;
     FileItem* getFile(int) const;
+    FileItem* getFileByID(long) const;
+
+    int getParameterCount() const;
+    ParameterItem* getParameter(int) const;
+
+    ProcessItem* assignNode(ComponentObject &);
+
+    int getByOutput(int) const;
+    bool createDependencyMap();
+    int updateDependency(long, int &);
+
+    bool extract(const char*, long&);
+
+    bool check() override;
 };
 
 

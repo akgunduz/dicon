@@ -15,9 +15,10 @@
 class Util {
 
 private:
-	static std::string getPath(const char *, const char*, const char*, bool);
+	static std::string getPath(const char *, long, const char*, bool);
 
 public:
+
 	static std::string hex2str(const uint8_t *, int);
 	static bool str2hex(uint8_t *, const char *, uint32_t);
     static void replaceStr(std::string&, const std::string&, const std::string&);
@@ -30,15 +31,13 @@ public:
 	static std::string mixPath(const char*, const char*);
 	static std::string parsePath(const char *, const char *);
 	static std::string getAbsPath(const char *, const char *);
-	static std::string getAbsRefPath(const char *, const char*, const char*);
-	static std::string getAbsMD5Path(const char *, const char*, const char*);
-	static std::string getRefPath(const char *, const char*, const char*);
-	static std::string getMD5Path(const char *, const char*, const char*);
+	static std::string getAbsRefPath(const char *, long, const char*);
+	static std::string getRefPath(const char *, long, const char*);
 	static bool checkPath(const char*, bool);
 	static bool checkPath(const char*, const char*, bool);
-	static bool checkPath(const char*, const char*, const char*, bool);
+	static bool checkPath(const char*, long, const char*, bool);
     static bool isMulticast();
-	static void cleanup();
+	static void init();
 	static bool extractZipFile(const char*, const char*);
 
 };

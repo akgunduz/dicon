@@ -18,20 +18,20 @@ private:
 public:
 
 	NodeManager();
-	~NodeManager();
+	~NodeManager() override;
 
-    NODESTATES getState(int);
-	void setState(int, NODESTATES);
+    NODESTATES getState(long);
+	void setState(long, NODESTATES);
 
-	long getAddress(int);
+	long getAddress(long);
     NodeObject getIdle();
 	int getIdleCount();
 
-    ComponentInfo getAssigned(int);
-	void setAssigned(int, ComponentInfo &);
-	void setAssigned(int, int, long);
+    ComponentInfo getAssigned(long);
+	void setAssigned(long, ComponentInfo &);
+	void setAssigned(long, long, long);
 
-    ComponentObject* createObject(int, long) final;
+    ComponentObject* createObject(long, long) final;
 };
 
 #endif	/* DISTRIBUTOR_H */

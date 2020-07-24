@@ -24,7 +24,7 @@ size_t ComponentManager::size() {
     return size;
 }
 
-ComponentObject* ComponentManager::get(int id) {
+ComponentObject* ComponentManager::get(long id) {
 
     ComponentObject *object = nullptr;
 
@@ -57,9 +57,9 @@ ComponentObject *ComponentManager::getByIndex(int index) {
     return object;
 }
 
-int ComponentManager::add(long address) {
+long ComponentManager::add(long address) {
 
-    int newID = 0;
+    long newID = 0;
 
     mutex.lock();
 
@@ -96,7 +96,7 @@ void ComponentManager::clear() {
 
 }
 
-bool ComponentManager::isExist(int id) {
+bool ComponentManager::isExist(long id) {
 
     return get(id) != nullptr;
 }

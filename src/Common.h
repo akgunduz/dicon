@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Common_H_
-#define __Common_H_
+#ifndef DICON_COMMON_H
+#define DICON_COMMON_H
 
 #include <cstdio>
 #include <cstdlib>
@@ -57,9 +57,8 @@
 #define nullptr NULL
 #endif
 
-#ifndef MD5_DIGEST_LENGTH
-#define MD5_DIGEST_LENGTH 16
-#endif
+#define BUFFER_SIZE 512
+
 #define SHUTDOWN_NOTIFIER 'Q'
 
 struct char_cmp {
@@ -69,4 +68,4 @@ struct char_cmp {
 	}
 };
 
-#endif
+#endif //DICON_COMMON_H
