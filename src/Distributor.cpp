@@ -20,17 +20,16 @@ Distributor::Distributor(const char *rootPath) :
         Component(rootPath) {
 
     host = new DistributorObject(getRootPath());
-    
-    processMsg[COMP_COLLECTOR][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg);
-    processMsg[COMP_COLLECTOR][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg);
-    processMsg[COMP_COLLECTOR][MSGTYPE_NODE] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg);
-    processMsg[COMP_COLLECTOR][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorReadyMsg);
 
-    processMsg[COMP_NODE][MSGTYPE_ALIVE] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeAliveMsg);
-    processMsg[COMP_NODE][MSGTYPE_ID] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg);
-    processMsg[COMP_NODE][MSGTYPE_BUSY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg);
-    processMsg[COMP_NODE][MSGTYPE_READY] = static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg);
+    addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
+    addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
+    addProcessHandler(COMP_COLLECTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorNodeMsg));
+    addProcessHandler(COMP_COLLECTOR, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorReadyMsg));
 
+    addProcessHandler(COMP_NODE, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeAliveMsg));
+    addProcessHandler(COMP_NODE, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg));
+    addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
+    addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
 
     nodeManager = new NodeManager();
 
@@ -39,9 +38,6 @@ Distributor::Distributor(const char *rootPath) :
     collThread = std::thread(collProcessCB, this);
 
     initInterfaces(COMP_DISTRIBUTOR);
-
-    host->setAddress(COMP_COLLECTOR, getInterfaceAddress(CollectorObject()));
-    host->setAddress(COMP_NODE, getInterfaceAddress(NodeObject()));
 };
 
 Distributor::~Distributor() {
@@ -274,12 +270,12 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
     auto target = ComponentObject(targetType);
 
-    if (isSupportMulticast(target)) {
+    if (isSupportMulticast(targetType)) {
 
         auto *msg = new Message(getHost(), target.getType(), MSGTYPE_WAKEUP);
 
         //TODO think multiple interfaces again
-        target.setAddress(getInterfaceMulticastAddress(target));
+        target.setAddress(getInterfaceMulticastAddress(targetType));
         send(target, msg);
 
     } else {

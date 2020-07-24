@@ -53,10 +53,10 @@ public:
 
     const char* getRootPath();
 
-    long getInterfaceAddress(ComponentObject);
-    long getInterfaceMulticastAddress(ComponentObject);
-    INTERFACE getInterfaceType(ComponentObject);
-    bool isSupportMulticast(ComponentObject);
+    long getInterfaceAddress(COMPONENT);
+    long getInterfaceMulticastAddress(COMPONENT);
+    INTERFACE getInterfaceType(COMPONENT);
+    bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(const ComponentObject&, MSG_TYPE, Message *);
 
@@ -64,7 +64,7 @@ public:
     bool send(const ComponentObject&, Message*);
 
     std::vector<long> getAddressList(const ComponentObject&);
-    bool defaultProcessMsg(ComponentObject, Message *);
+    bool defaultProcessMsg(const ComponentObject&, Message *);
 
     static void registerNotify(void*, TypeNotifyCB);
 

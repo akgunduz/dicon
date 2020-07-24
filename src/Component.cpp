@@ -26,6 +26,9 @@ bool Component::initInterfaces(COMPONENT type) {
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
+    host->setAddress(ComponentInfo::next(type), getInterfaceAddress(ComponentInfo::next(type)));
+    host->setAddress(ComponentInfo::prev(type), getInterfaceAddress(ComponentInfo::prev(type)));
+
     return true;
 }
 
@@ -86,45 +89,45 @@ bool Component::onReceive(const ComponentObject& owner, MSG_TYPE msgType, Messag
 }
 
 
-bool Component::defaultProcessMsg(ComponentObject owner, Message *msg) {
+bool Component::defaultProcessMsg(const ComponentObject& owner, Message *msg) {
 
     delete msg;
     return true;
 }
 
 
-long Component::getInterfaceAddress(ComponentObject target) {
+long Component::getInterfaceAddress(COMPONENT target) {
 
-    if (interfaces[target.getType()] != nullptr) {
-        return interfaces[target.getType()]->getAddress();
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->getAddress();
     }
 
     return 0;
 }
 
-long Component::getInterfaceMulticastAddress(ComponentObject target) {
+long Component::getInterfaceMulticastAddress(COMPONENT target) {
 
-    if (interfaces[target.getType()] != nullptr) {
-        return interfaces[target.getType()]->getMulticastAddress();
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->getMulticastAddress();
     }
 
     return 0;
 }
 
-INTERFACE Component::getInterfaceType(ComponentObject target) {
+INTERFACE Component::getInterfaceType(COMPONENT target) {
 
-    if (interfaces[target.getType()] != nullptr) {
-        return interfaces[target.getType()]->getType();
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->getType();
     }
 
     return INTERFACE_MAX;
 }
 
 
-bool Component::isSupportMulticast(ComponentObject target) {
+bool Component::isSupportMulticast(COMPONENT target) {
 
-    if (interfaces[target.getType()] != nullptr) {
-        return interfaces[target.getType()]->isSupportMulticast();
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->isSupportMulticast();
     }
 
     return false;
@@ -137,13 +140,6 @@ bool Component::send(const ComponentObject& target, Message *msg) {
            true,
            "\"%s\" is sent",
            MessageTypes::getMsgName(msg->getHeader().getType()));
-
-//    ComponentObject object(getHost().getType(), getHost().getRootPath(),
-//                           getHost().getID(), interfaces[target.getType()]->getAddress());
-
-  //  msg->getHeader().setOwner(getHost(), target.getType());
-
-    long targetAddress = target.getAddress(getHost().getType());
 
     return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(target.getType()), msg);
 }
