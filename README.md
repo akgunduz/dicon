@@ -2,30 +2,19 @@
 
 The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability and efficiency.
 
-Typically the architecture is somewhat a variant of cluster systems, however it has additional features;
-
-- **Platform flexibility** Nodes can be addressed with their processor architecture, this way subtasks can be addressed to specific nodes depends on their architecture specific work type.
-
-- **Reliability** All nodes are kept in a pool with a predefined backup ratio, in which some nodes are preoccupied for backup purposes in case of failures.
-
-- **Efficiency** System efficiency is increased by 
-	- optimizing file transfers by avoiding redundant transfers via MD5 based controls, 
-	- using a scoring algorithm designed as part of this work to prioritize the nodes providing a mechanism to assign priority scores to 	subtasks to be executed at nodes, 
-	- homogenizing use among all nodes to equalize weathering rates and delay the first breakdown.
-
 The architecture is designed as part of a master thesis for academical purposes, however it is considered appreciate for any kind of distributed projects using low cost embedded devices.
 
 Development cycle has still open points and needs substantial improvements to cover all corner cases, So all contributions and suggestions in architectural design and help in development are welcome :)
 
 ### Quick Overview
 
-Architecture's main operation is based on collecting a target large-scale applications subtasks and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into subtasks. At this point a kind of rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsable for defining the rules and decompose the target application to subtasks. 
+Architecture's main operation is based on collecting a target large-scale applications subtasks and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into subtasks. At this point a kind of rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsable for defining the rules and decompose the target application to subtasks. Analyze process includes dependency tracking functionality based on **Kahn's** algorithm and it creates dependency map of the rules that depends each other.
 
 The architecture consist of three main modules; **Distributor, Collector(s), Node(s)**
 
 - **Distributor** Keeps track of the collectors and nodes lifecycles and their availability. However it does not involve in any act related to the process going between collectors and nodes.
 
-- **Collectors** Analyse the applications and their subtasks based on their predefined rule files which defines the subtask process details. Then it transfers the subtasks to available nodes to be executed.
+- **Collectors** Analyze the applications and their subtasks based on their predefined rule files which defines the subtask process details. Then it transfers the subtasks to available nodes to be executed.
 
 - **Nodes** Runs the application subtasks that comes from collectors as defined in their rule files.
 
@@ -33,9 +22,9 @@ The architecture consist of three main modules; **Distributor, Collector(s), Nod
 
 ### Requirements
 
-Platform independent development cycle is strongly selected as one of the main achievements of this system, so all Windows, Linux and macOS operating systems and **gcc**, **clang** vs toolchains can be selected to produce architecture executables. CMake and GNU make is used as compile platform which have wide range of usage.
+Platform independent development cycle is strongly selected as one of the main achievements of this system, so Linux and macOS operating systems and **gcc**, **clang** vs toolchains can be selected to produce architecture executables. CMake and GNU make is used as compile platform which have wide range of usage.
 
-[WxWidgets](https://www.wxwidgets.org/) library is selected for demo application's UI. Its main advantage is to provide cross-platform support and written in C++ to have high response and wide range support.
+[Civetweb](https://github.com/civetweb/civetweb) library is selected for demo application's UI. Its main advantage is to serve the UI in a web page, which allows to access the UI even from embedded devices. It provide cross-platform support and written in C++ to have high response and wide range support.
 
 ### Getting Started 
 
@@ -63,11 +52,7 @@ Install build utilities
 Install dependencies
 
 ```
-	brew install wxmac
 	brew install json-c
-	brew install openssl
-	ln -s /usr/local/opt/openssl/lib/libssl.a /usr/local/lib/
-	ln -s /usr/local/opt/openssl/lib/libcrypto.a /usr/local/lib/
 ```
 
 To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
@@ -101,40 +86,29 @@ Build process
 	cmake --build . --target dicon
 ```
 
-
 #### Locating Target Files
 
-Demo Application is in alpha stage therefore most of the target application file locations are prefixed (will be changed in the future :)) Currently all target files are located in directories based on their components; ie Collectors read the target files from ***Collector/Job_X*** directories and Nodes creates the files to be processed under the Node directory.
+Application gets the target job files as a single compressed zip file through Web UI and extracts on the server. As soon as operator triggers the process command via any Collector, system parse the job file and starts the distributed execution process across the node devices.
 
 ### Workflow
 
 The workflow of the whole process starts at computers running collectors and finishes at the nodes depicted as follows;
 
 1. Distributor sends **Wakeup** broadcast to the network, and keeps it on with specific intervals to dynamically add and remove nodes from the system.
-
 2. All the nodes and collectors get wakeup message, response to distributor with **Alive** messages.
-
 3. Distributor marks the all nodes that get response as **Available**. If it does not get a response from a previously marked node for a specific amount of time, it is removed from the system.
-
 4. Users define the applications/subtasks to the system with the user interface provided by collectors and trig the whole process.
-
-5. Collector sends a **Time** message to the distributor to keep track of time for statistical purposes.
-
-6. Collector picks a rule from the rule set to be processed and  sends a **Node** message to distributor to request a available node.
-
-7. Distributor gets the node message from the collector and search for a available node in the node list. If found, it marks the node with **pre-busy** and sends the address of the node to the collector with **Node** message. At the same time it starts a timer, waits for **Busy** message from the node. If not found, it sends a **Node** message to collector with no available node info.
-
-8. Collector gets the node message from distributor, if there is no available node then it waits in message waiting state. If there is, then it analyzes the rule and sends it to the node  with **Rule** message
-
-9. Node gets the rule message and immediately sends a **Busy** message to distributor to inform the distributor about its state. Then it parse the rule information and extracts all dependencies. If dependencies includes files then it searches for this files in its file system. It evaluates the founded files' MD5 values and send them to the collector with **MD5** message.
-
-10. Distributor gets the busy message, increase the usage count of that node by one, marks the node as busy, cancels the busy node timer and re-sorts the node list by their usage counts. If it not gets the busy message for a specific amount of time, it removes the node from the list, decrease the backup node count by one, repeats the step **7**.
-
-11. Collector gets the MD5 message and compares the MD5 list comes with the message with the ones in the rule file. If matches found they are marked as **not send** and at the end it sends a **file** message to the node with file blobs marked as **send** and repeats the process from step **6** until any rule does not remain in the rule set.
-
-12. Node gets the file message, and place the files to the appropriate directories as depicted in the rule file. Then runs the executables listed in the rule file one by one via shell of the host OS and wait their finish. At last it sends a **Ready** message to the distributor.
-
-13. Distributor gets the ready message and marks the node as available and updates the backup count if necessary.
+5. Collector picks a rule from the rule set to be processed and  sends a **Node** message to distributor to request a available node.
+6. Distributor gets the node message from the collector and search for available nodes in the node list. If found, it marks the nodes with **pre-busy** and sends the address of the nodes to the collector with **Node** message. Then it, waits for **Busy** message from the node. If not found, it sends a **Node** message to collector with no available node info.
+7. Collector gets the node message from distributor, if there is no available node then it waits in message waiting state. If there is, then it analyzes the rule and sends it to the nodes  with **Process** message
+8. Node gets the **Process** message and immediately sends a **Busy** message to distributor to inform the distributor about its state. 
+9. Distributor sends **Process** message to Node to start the process.
+10. Node parse the rule information and extracts all dependencies. If dependencies includes files then it searches for this files in its file system. If any of them is not found, it sends a **Info** message to Collector to request these missing files.
+11. Collector gets the **Info** message and checks the file informations with the ones in the rule file. If found, it sends them back to Node with **Binary** message.
+12. Node gets the **Binary** message, and place the files to the appropriate directories as depicted in the rule file. Then runs the process executable listed in the rule file via shell of the host OS and wait its finish. Then it sends the generated output files to Collector with **Binary** message.
+13. Collector gets the **Binary**  message and sends back **Ready** message to Node.
+14. Node sends **Ready** message to Distributor and makes its state back to IDLE.
+15. Meanwhile, Collector updates the job dependencies and retrigger the whole cycle with the remaining processes.
 
 ![alt text](docs/workflow.png)
 
@@ -201,7 +175,7 @@ There are four types of contents that can be defined in job files;
 
 
 	The definition of the macro items are;
-
+	
 	- **"$"** : Start of the macro
 	- **"F"** : Reference to the file list in the rule file
 	- **"P"** : Reference to the parameter list in the rule file
@@ -211,25 +185,25 @@ There are four types of contents that can be defined in job files;
 Sample  Job.json file is as follows;
 
         "Job": {
-
-	        "name": "Test",
-
-	        "files": [
-	            ["benchpar", "c"],
-	            ["matrix/MatrixInput_1", "c"],
-	            ["matrix/MatrixInput_2", "c"],
-	            ["matrix/MatrixInput_3", "c"],
-	            ["matrix/MatrixInput_512_512", "c"],
-	        ],
-
-	        "parameters": [
-	            "10"
-	        ],
-
-	        "executors": [
-	            "$F0 -a m -m 2 -r $P0 $F4",
-	            "$F0 -a m -m 4 -r $P0 $F1",
-	        ]
+    
+            "name": "Test",
+    
+            "files": [
+                ["benchpar", "c"],
+                ["matrix/MatrixInput_1", "c"],
+                ["matrix/MatrixInput_2", "c"],
+                ["matrix/MatrixInput_3", "c"],
+                ["matrix/MatrixInput_512_512", "c"],
+            ],
+    
+            "parameters": [
+                "10"
+            ],
+    
+            "executors": [
+                "$F0 -a m -m 2 -r $P0 $F4",
+                "$F0 -a m -m 4 -r $P0 $F1",
+            ]
     	}
 
 In this sample the subtask runs following commands sequentially;
