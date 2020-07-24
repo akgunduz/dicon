@@ -21,16 +21,16 @@ typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProces
 
 class Component {
 
-    char rootPath[PATH_MAX];
+    char rootPath[PATH_MAX]{};
 
-    Interface *interfaces[COMP_MAX];
+    Interface *interfaces[COMP_MAX]{};
 
     static void *notifyContext;
     static TypeNotifyCB notifyCB;
 
 protected :
 
-    ComponentObject *host;
+    ComponentObject *host{};
 
     TypeProcessMsgMap processMsg[COMP_MAX];
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
@@ -60,15 +60,12 @@ public:
     static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(const ComponentObject&, MSG_TYPE, Message *);
 
-    //bool send(ComponentObject, long, Message*);
     bool send(const ComponentObject&, Message*);
 
     std::vector<long> getAddressList(const ComponentObject&);
     bool defaultProcessMsg(const ComponentObject&, Message *);
 
     static void registerNotify(void*, TypeNotifyCB);
-
-    bool isIDAssigned();
 
     void setID(long);
 

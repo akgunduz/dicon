@@ -166,11 +166,6 @@ void Component::notifyUI() {
     }
 }
 
-bool Component::isIDAssigned() {
-
-    return getHost().getID() != 0;
-}
-
 void Component::setID(long id) {
 
     if (id == 0) {
