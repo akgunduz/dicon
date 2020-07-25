@@ -34,7 +34,8 @@ public:
     const ComponentObject& getHost() const;
 
     long getID() const;
-    void setID(long);
+
+    virtual void setID(long);
 
     long getAssignedJob() const;
     void setAssignedJob(long);

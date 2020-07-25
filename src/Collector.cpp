@@ -36,9 +36,11 @@ bool Collector::processDistributorWakeupMsg(const ComponentObject& owner, Messag
 
 bool Collector::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
+    auto& collectorHost = (CollectorObject&) getHost();
+
     setID(msg->getHeader().getVariant(0));
 
-    LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
+    LOGS_I(collectorHost, "New ID : %d is assigned by Distributor", collectorHost.getID());
 
     return send2DistributorIDMsg(owner);
 }
@@ -47,7 +49,9 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
 
     std::vector<ComponentObject>& nodes = msg->getData().getComponentList();
 
-    LOGS_I(getHost(), "Distributor assigned %d node", nodes.size());
+    auto& collectorHost = (CollectorObject&) getHost();
+
+    LOGS_I(collectorHost, "Distributor assigned %d node", nodes.size());
 
     if (nodes.empty()) {
         LOGS_I(getHost(), "No available node is came from Distributor", nodes.size());
@@ -61,22 +65,20 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
         send2NodeProcessMsg(node, process);
     }
 
-    ((CollectorObject&)getHost()).setState(COLLSTATE_BUSY);
-
-    notifyUI();
-
     return true;
 }
 
 bool Collector::processNodeFileInfoMsg(const ComponentObject& owner, Message *msg) {
 
-    LOGS_T(getHost(), "Node[%d]:Process[%d] requested %d missing files",
+    auto& collectorHost = (CollectorObject&) getHost();
+
+    LOGS_T(collectorHost, "Node[%d]:Process[%d] requested %d missing files",
             owner.getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
 
     auto *processItem = job->getProcessByID(msg->getData().getFileProcess());
     if (!processItem) {
 
-        LOGS_E(getHost(), "Process[%d] could not find in the Job!", msg->getData().getFileProcess());
+        LOGS_E(collectorHost, "Process[%d] could not find in the Job!", msg->getData().getFileProcess());
         return false;
     }
 
@@ -92,7 +94,9 @@ bool Collector::processNodeFileInfoMsg(const ComponentObject& owner, Message *ms
 
 bool Collector::processNodeFileBinaryMsg(const ComponentObject& owner, Message *msg) {
 
-    LOGS_T(getHost(), "Node[%d] sent %d File output binaries", owner.getID(), msg->getData().getFileCount());
+    auto& collectorHost = (CollectorObject&) getHost();
+
+    LOGS_T(collectorHost, "Node[%d] sent %d File output binaries", owner.getID(), msg->getData().getFileCount());
 
     int totalCount = 0;
     int readyCount = job->updateDependency(msg->getData().getFileProcess(), totalCount);
@@ -108,7 +112,9 @@ bool Collector::processNodeFileBinaryMsg(const ComponentObject& owner, Message *
 
     if (totalCount == 0) {
 
-        ((CollectorObject&)getHost()).setState(COLLSTATE_IDLE);
+        collectorHost.setState(COLLSTATE_IDLE);
+
+        job->setDuration(componentWatch.stop());
 
         return send2DistributorReadyMsg(distributor);
     }
@@ -179,6 +185,12 @@ void Collector::setDistributor(const DistributorObject& _distributor) {
 }
 
 bool Collector::processJob() {
+
+    auto& collectorHost = (CollectorObject&) getHost();
+
+    componentWatch.start();
+
+    collectorHost.setState(COLLSTATE_BUSY);
 
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }

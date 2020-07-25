@@ -56,6 +56,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         std::string processCommand = process.getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
         json_object_object_add(processItem, "process", json_object_new_string(processCommand.c_str()));
+        json_object_object_add(processItem, "duration", json_object_new_int64(process.getDuration()));
 
         json_object_array_add(processList, processItem);
     }

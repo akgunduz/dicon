@@ -26,6 +26,8 @@ protected:
 
     std::map<int, JsonType *> contentTypes;
 
+    long duration{};
+
 public:
 
     static long jobID;
@@ -44,6 +46,9 @@ public:
 
     const char* getJobName() const;
     void setJobName(const char*);
+
+    long getDuration() const;
+    void setDuration(long duration);
 
     int getProcessCount() const;
     int getProcessCount(PROCESS_STATE) const;

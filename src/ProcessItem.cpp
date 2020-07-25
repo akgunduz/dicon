@@ -9,9 +9,10 @@
 #include "Util.h"
 
 ProcessItem::ProcessItem(const ProcessItem &copy) :
-	ContentItem(copy),
-	assignedComponent(copy.assignedComponent),
-	state(copy.state) {
+        ContentItem(copy),
+        assignedComponent(copy.assignedComponent),
+        state(copy.state),
+        duration(copy.duration) {
 
     strcpy(process, copy.getProcess());
     strcpy(parsedProcess, copy.getParsedProcess());
@@ -223,5 +224,13 @@ void ProcessItem::setID(long _id) {
     for (auto& file : getFileList()) {
         file.setAssignedProcess(_id);
     }
+}
+
+long ProcessItem::getDuration() const {
+    return duration;
+}
+
+void ProcessItem::setDuration(long _duration) {
+    duration = _duration;
 }
 

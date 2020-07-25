@@ -31,7 +31,11 @@ class ProcessItem : public ContentItem {
 
     long assignedComponent{};
 
-	bool parseCommand(void*, int, int);
+    long duration{};
+
+private:
+
+    bool parseCommand(void*, int, int);
 
 public:
 
@@ -59,7 +63,10 @@ public:
     long getAssigned() const;
     void setAssigned(long);
 
-    void setID(long);
+    void setID(long) override;
+
+    long getDuration() const;
+    void setDuration(long duration);
 
 	CONTENT_TYPES getType() const override;
 

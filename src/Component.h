@@ -9,6 +9,7 @@
 #include "DeviceList.h"
 #include "MessageTypes.h"
 #include "ComponentObject.h"
+#include "StopWatch.h"
 
 class Component;
 
@@ -38,6 +39,8 @@ protected :
 
     const InterfaceSchedulerCB *schedulerCB;
     const InterfaceHostCB *hostCB;
+
+    StopWatch componentWatch;
 
     static ComponentObject& getHostCB(void*);
 

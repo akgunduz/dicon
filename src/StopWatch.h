@@ -10,8 +10,8 @@
 class StopWatch {
 
     bool initiated;
-    double tStart{};
-    double tStop{};
+    long tStart{};
+    long tStop{};
 
 public:
 
@@ -19,7 +19,7 @@ public:
         initiated = false;
     };
     void start();
-    double stop();
+    long stop();
     void reset();
     bool isInitiated();
 };

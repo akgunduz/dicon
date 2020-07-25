@@ -22,10 +22,12 @@ const ComponentObject& ContentItem::getHost() const {
 }
 
 long ContentItem::getID() const {
+
     return id;
 }
 
 void ContentItem::setID(long _id) {
+
     id = _id;
 }
 

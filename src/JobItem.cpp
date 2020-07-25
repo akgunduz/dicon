@@ -496,3 +496,13 @@ bool JobItem::check() {
 
     return true;
 }
+
+long JobItem::getDuration() const {
+
+    return duration;
+}
+
+void JobItem::setDuration(long _duration) {
+
+    duration = _duration;
+}

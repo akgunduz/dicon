@@ -135,7 +135,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName()));
     json_object_object_add(jsonObj, "_state", json_object_new_int(host.getState()));
-    json_object_object_add(jsonObj, "_duration", json_object_new_int(0));
+    json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
     json_object_object_add(jsonObj, "_processCount",
             json_object_new_int(job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED)));
 

@@ -89,6 +89,8 @@ bool Node::processCollectorProcessMsg(const ComponentObject& owner, Message *msg
 
     auto& nodeHost = (NodeObject&) getHost();
 
+    componentWatch.start();
+
     nodeHost.setState(NODESTATE_BUSY);
     nodeHost.setAssigned(owner.getType(), owner.getID(), owner.getAddress());
 
@@ -115,7 +117,15 @@ bool Node::processCollectorBinaryMsg(const ComponentObject& owner, Message *msg)
 
 bool Node::processCollectorReadyMsg(const ComponentObject& owner, Message *msg) {
 
-    ((NodeObject&)getHost()).setState(NODESTATE_IDLE);
+    auto& nodeHost = (NodeObject&) getHost();
+
+    nodeHost.setState(NODESTATE_IDLE);
+
+    nodeHost.getProcess().setState(PROCESS_STATE_ENDED);
+
+    nodeHost.getProcess().setDuration(componentWatch.stop());
+
+    processList.emplace_back(nodeHost.getProcess());
 
     notifyUI();
 
@@ -130,10 +140,6 @@ bool Node::processJob(const ComponentObject& owner, Message *msg) {
     LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
            nodeHost.getAssigned().getID(),
            nodeHost.getProcess().getID());
-
-    processList.emplace_back(nodeHost.getProcess());
-
-    notifyUI();
 
     int result = processCommand(nodeHost.getAssigned().getID(),
                                 nodeHost.getProcess().getID(),

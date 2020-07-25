@@ -185,16 +185,13 @@
           <h3 style="text-align: left; margin-bottom: 1rem;">
             State :
           </h3>
-          <h3 id="coll-state" style="text-align: left; margin-bottom: 1rem;">
-            IDLE
-          </h3>
+          <h3 id="coll-state" style="text-align: left; margin-bottom: 1rem;"> </h3>
         </div>
         <div class="dual-tables-container">
           <h3 style="text-align: left; margin-bottom: 1rem;">
             Job :
           </h3>
-          <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;">
-          </h3>
+          <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;"> </h3>
         </div>
         <table id="coll-file-table" class="table-wide">
           <colgroup>
@@ -215,12 +212,8 @@
           Process
         </button>
         <div class="dual-tables-container">
-          <h3 style="text-align: left; margin-bottom: 1rem;">
-            Duration :
-          </h3>
-          <h3 id="coll-duration" style="text-align: left; margin-bottom: 1rem;">
-            not started
-          </h3>
+          <h3 style="text-align: left; margin-bottom: 1rem;"> Duration : </h3>
+          <h3 id="coll-duration" style="text-align: left; margin-bottom: 1rem;"></h3>
         </div>
         <div class="dual-tables-container">
           <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
@@ -259,8 +252,9 @@
         <colgroup>
           <col span="1" style="width: 10%;" />
           <col span="1" style="width: 10%;" />
-          <col span="1" style="width: 20%;" />
-          <col span="1" style="width: 60%;" />
+          <col span="1" style="width: 10%;" />
+          <col span="1" style="width: 55%;" />
+          <col span="1" style="width: 15%;" />
         </colgroup>
         <thead>
           <tr>
@@ -268,6 +262,7 @@
             <th>Collector</th>
             <th>Job</th>
             <th>Process</th>
+            <th>Duration</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -456,11 +451,11 @@
             document.getElementById("coll-state").innerHTML =
               COLL_STATES[data._state];
             document.getElementById("coll-job-name").innerHTML =
-                    data._jobName;
+              data._jobName;
             document.getElementById("coll-duration").innerHTML =
-                    data._duration;
+              data._duration + " sn";
             document.getElementById("coll-process-count").innerHTML =
-                    data._processCount;
+              data._processCount;
             onCollUpdateFileList(data);
             onCollUpdateProcessList(data);
           }
@@ -581,6 +576,7 @@
         newRow.insertCell().innerHTML = processItem.collectorID;
         newRow.insertCell().innerHTML = processItem.jobID;
         newRow.insertCell().innerHTML = processItem.process;
+        newRow.insertCell().innerHTML = processItem.duration + " sn";
       }
     }
 
