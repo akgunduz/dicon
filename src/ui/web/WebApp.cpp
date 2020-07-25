@@ -48,6 +48,8 @@ int WebApp::eventHandler(struct mg_connection *conn)
 {
     uint32_t mask = 0;
 
+    notifyMutex.lock();
+
     if (notifyFlag[COMP_DISTRIBUTOR]) {
         notifyFlag[COMP_DISTRIBUTOR] = false;
         mask |= (uint32_t)1 << COMP_DISTRIBUTOR;
@@ -62,6 +64,8 @@ int WebApp::eventHandler(struct mg_connection *conn)
         notifyFlag[COMP_NODE] = false;
         mask |= (uint32_t)1 << COMP_NODE;
     }
+
+    notifyMutex.unlock();
 
     if (mask) {
         sendServerEvent(conn, mask);
@@ -152,7 +156,11 @@ int WebApp::run() {
 
 int WebApp::notifyHandler(COMPONENT target, long id) {
 
+    notifyMutex.lock();
+
     notifyFlag[target] = true;
+
+    notifyMutex.unlock();
 
     return true;
 }

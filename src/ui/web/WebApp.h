@@ -25,6 +25,7 @@ class WebApp : public App {
     struct mg_callbacks callbacks{};
     struct mg_context *context;
     bool notifyFlag[COMP_MAX]{};
+    std::mutex notifyMutex;
 
 public:
 
