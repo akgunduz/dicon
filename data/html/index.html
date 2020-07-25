@@ -455,6 +455,12 @@
             let data = JSON.parse(this.responseText);
             document.getElementById("coll-state").innerHTML =
               COLL_STATES[data._state];
+            document.getElementById("coll-job-name").innerHTML =
+                    data._jobName;
+            document.getElementById("coll-duration").innerHTML =
+                    data._duration;
+            document.getElementById("coll-process-count").innerHTML =
+                    data._processCount;
             onCollUpdateFileList(data);
             onCollUpdateProcessList(data);
           }
@@ -499,9 +505,6 @@
         .getElementById("coll-file-table")
         .getElementsByTagName("tbody")[0];
       table.innerHTML = "";
-
-      document.getElementById("coll-job-name").innerHTML =
-        data._jobName;
 
       for (let fileitem of data._fileList) {
         let newRow = table.insertRow();
