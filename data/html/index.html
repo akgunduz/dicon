@@ -1,615 +1,599 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-    />
-    <style>
-      body {
-        background-color: #bababa;
-        font-family: "Lato", sans-serif;
-      }
 
-      /* Fixed sidenav, full height */
-      .sidenav {
-        height: 100%;
-        width: 12rem;
-        position: fixed;
-        z-index: auto;
-        top: 0;
-        left: 0;
-        background-color: #222;
-        overflow-x: hidden;
-        padding-top: 2rem;
-      }
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" />
+  <style>
+    body {
+      background-color: #bababa;
+      font-family: "Lato", sans-serif;
+    }
 
-      /* Style the sidenav links and the dropdown button */
-      .sidenav a,
-      .dropdown-btn {
-        padding: 0.5rem 1rem 0.5rem 1rem;
-        text-decoration: none;
-        font-size: 1.4rem;
-        color: #818181;
-        display: block;
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-        outline: none;
-      }
+    /* Fixed sidenav, full height */
+    .sidenav {
+      height: 100%;
+      width: 12rem;
+      position: fixed;
+      z-index: auto;
+      top: 0;
+      left: 0;
+      background-color: #222;
+      overflow-x: hidden;
+      padding-top: 2rem;
+    }
 
-      /* On mouse-over */
-      .sidenav a:hover,
-      .dropdown-btn:hover {
-        color: #f1f1f1;
-      }
+    /* Style the sidenav links and the dropdown button */
+    .sidenav a,
+    .dropdown-btn {
+      padding: 0.5rem 1rem 0.5rem 1rem;
+      text-decoration: none;
+      font-size: 1.4rem;
+      color: #818181;
+      display: block;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+    }
 
-      /* Add an active class to the active dropdown button */
-      .sidebar_btn_active {
-        background-color: green;
-        color: white;
-      }
+    /* On mouse-over */
+    .sidenav a:hover,
+    .dropdown-btn:hover {
+      color: #f1f1f1;
+    }
 
-      .item-valid {
-        background-color: #00c000;
-      }
+    /* Add an active class to the active dropdown button */
+    .sidebar_btn_active {
+      background-color: green;
+      color: white;
+    }
 
-      /* Optional: Style the caret down icon */
-      .fa-caret-down {
-        padding-top: 0.2rem;
-        float: right;
-        padding-right: 0.5rem;
-      }
+    .item-valid {
+      background-color: #00c000;
+    }
 
-      /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
-      .dropdown-container {
-        display: none;
-        background-color: #262626;
-        padding-left: 8px;
-      }
+    /* Optional: Style the caret down icon */
+    .fa-caret-down {
+      padding-top: 0.2rem;
+      float: right;
+      padding-right: 0.5rem;
+    }
 
-      /* Main content */
-      .component-block {
-        margin-left: 12rem;
-        text-align: center;
-        font-size: 1rem;
-        padding: 1rem;
-        background-color: #bababa;
-      }
+    /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+    .dropdown-container {
+      display: none;
+      background-color: #262626;
+      padding-left: 8px;
+    }
 
-      .standard-container {
-        width: 100%;
-        padding: 1rem;
-      }
+    /* Main content */
+    .component-block {
+      margin-left: 12rem;
+      text-align: center;
+      font-size: 1rem;
+      padding: 1rem;
+      background-color: #bababa;
+    }
 
-      .btn-full-width {
-        width: 100%;
-        height: 6rem;
-        font-size: 2rem;
-        background-color: #90e3ff;
-        margin-bottom: 2rem;
-      }
+    .standard-container {
+      width: 100%;
+      padding: 1rem;
+    }
 
-      .dual-tables-container {
-        width: 100%;
-        padding: 1rem;
-        display: flex;
-        justify-content: space-between;
-      }
+    .btn-full-width {
+      width: 100%;
+      height: 6rem;
+      font-size: 2rem;
+      background-color: #90e3ff;
+      margin-bottom: 2rem;
+    }
 
-      .table-wide {
-        font-family: arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-        table-layout: fixed;
-      }
+    .dual-tables-container {
+      width: 100%;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+    }
 
-      td,
-      th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 0.5rem;
-      }
+    .table-wide {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
 
-      .single-table-container {
-        width: 49%;
-      }
+    td,
+    th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 0.5rem;
+    }
 
-    </style>
-  </head>
-  <body onload="onLoad()">
-    <div class="sidenav">
-      <a onclick="onDistClick()"> Distributor</a>
-      <button class="dropdown-btn">
-        Collectors
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div id="sidebar-coll-list" class="dropdown-container"></div>
-      <button class="dropdown-btn">
-        Nodes
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div id="sidebar-node-list" class="dropdown-container"></div>
-    </div>
+    .single-table-container {
+      width: 49%;
+    }
+  </style>
+</head>
 
-    <div class="component-block" hidden>
-      <h1>Debug</h1>
-      <p id="testField">Test</p>
-    </div>
+<body onload="onLoad()">
+  <div class="sidenav">
+    <a onclick="onDistClick()"> Distributor</a>
+    <button class="dropdown-btn">
+      Collectors
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div id="sidebar-coll-list" class="dropdown-container"></div>
+    <button class="dropdown-btn">
+      Nodes
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div id="sidebar-node-list" class="dropdown-container"></div>
+  </div>
 
-    <div id="distributor-block" class="component-block" style="display: block;">
-      <h1>Distributor</h1>
-      <button
-        type="button"
-        class="button btn-full-width"
-        onclick="onDistPoll()"
-      >
-        Poll
-      </button>
-      <div class="dual-tables-container">
-        <div class="single-table-container">
-          <h3>Collectors</h3>
-          <table id="dist-colls-table" class="table-wide">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>State</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="single-table-container">
-          <h3>Nodes</h3>
-          <table id="dist-nodes-table" class="table-wide">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>State</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <div class="component-block" hidden>
+    <h1>Debug</h1>
+    <p id="testField">Test</p>
+  </div>
 
-    <div id="collector-block" class="component-block" style="display: none;">
-      <h1 id="coll-header">Collector</h1>
-      <div id="coll-area" class="dual-tables-container">
-        <div id="coll-file" class="single-table-container">
-          <input
-            id="load-input"
-            type="file"
-            required
-            accept=".zip, .tar.gz, .tgz"
-            style="display: none;"
-            onchange="onCollLoadJob(currentPage.id)"
-          />
-          <button id="load-btn" type="button" class="button btn-full-width">
-            Load Job
-          </button>
-          <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;">
-            Job :
-          </h3>
-          <table id="coll-file-table" class="table-wide">
-            <colgroup>
-              <col span="1" style="width: 60%;" />
-              <col span="1" style="width: 40%;" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>File</th>
-                <th>Size</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="coll-process" class="single-table-container">
-          <button
-            type="button"
-            class="button btn-full-width"
-            onclick="onCollProcess(currentPage.id)"
-          >
-            Process
-          </button>
-          <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
-          <table id="coll-process-table" class="table-wide">
-            <colgroup>
-              <col span="1" style="width: 10%;" />
-              <col span="1" style="width: 50%;" />
-              <col span="1" style="width: 20%;" />
-              <col span="1" style="width: 20%;" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Command</th>
-                <th>Assigned Node</th>
-                <th>State</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div id="node-block" class="component-block" style="display: none;">
-      <h1 id="node-header">Node</h1>
-      <div id="node-area" class="dual-tables-container">
-        <h3>State :</h3>
-        <h3 id="node-state">IDLE</h3>
-      </div>
-      <div class="standard-container">
-        <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
-        <table id="node-process-table" class="table-wide">
-          <colgroup>
-            <col span="1" style="width: 10%;" />
-            <col span="1" style="width: 10%;" />
-            <col span="1" style="width: 20%;" />
-            <col span="1" style="width: 60%;" />
-          </colgroup>
+  <div id="distributor-block" class="component-block" style="display: block;">
+    <h1>Distributor</h1>
+    <button type="button" class="button btn-full-width" onclick="onDistPoll()">
+      Poll
+    </button>
+    <div class="dual-tables-container">
+      <div class="single-table-container">
+        <h3>Collectors</h3>
+        <table id="dist-colls-table" class="table-wide">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Collector</th>
-              <th>Job</th>
-              <th>Process</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="single-table-container">
+        <h3>Nodes</h3>
+        <table id="dist-nodes-table" class="table-wide">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>State</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <script>
-      let DISTRIBUTOR = 0x0;
-      let COLLECTOR = 0x1;
-      let NODE = 0x2;
+  <div id="collector-block" class="component-block" style="display: none;">
+    <h1 id="coll-header">Collector</h1>
+    <div id="coll-area" class="dual-tables-container">
+      <div id="coll-file" class="single-table-container">
+        <input id="load-input" type="file" required accept=".zip, .tar.gz, .tgz" style="display: none;"
+          onchange="onCollLoadJob(currentPage.id)" />
+        <button id="load-btn" type="button" class="button btn-full-width">
+          Load Job
+        </button>
+        <div class="dual-tables-container">
+          <h3 style="text-align: left; margin-bottom: 1rem;">
+            State :
+          </h3>
+          <h3 id="coll-state" style="text-align: left; margin-bottom: 1rem;">
+            IDLE
+          </h3>
+        </div>
+        <div class="dual-tables-container">
+          <h3 style="text-align: left; margin-bottom: 1rem;">
+            Job :
+          </h3>
+          <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;">
+          </h3>
+        </div>
+        <table id="coll-file-table" class="table-wide">
+          <colgroup>
+            <col span="1" style="width: 60%;" />
+            <col span="1" style="width: 40%;" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Size</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="coll-process" class="single-table-container">
+        <button type="button" class="button btn-full-width" onclick="onCollProcess(currentPage.id)">
+          Process
+        </button>
+        <div class="dual-tables-container">
+          <h3 style="text-align: left; margin-bottom: 1rem;">
+            Duration :
+          </h3>
+          <h3 id="coll-duration" style="text-align: left; margin-bottom: 1rem;">
+            not started
+          </h3>
+        </div>
+        <div class="dual-tables-container">
+          <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
+          <h3 id="coll-process-count" style="text-align: left; margin-bottom: 1rem;"></h3>
+        </div>
+        <table id="coll-process-table" class="table-wide">
+          <colgroup>
+            <col span="1" style="width: 10%;" />
+            <col span="1" style="width: 50%;" />
+            <col span="1" style="width: 20%;" />
+            <col span="1" style="width: 20%;" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Command</th>
+              <th>Assigned Node</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-      let PORT = "8081";
-      let HOSTING = "http://localhost:" + PORT;
-      let REST_URI = HOSTING + "/rest";
-      let REST_STATE = "/state";
+  <div id="node-block" class="component-block" style="display: none;">
+    <h1 id="node-header">Node</h1>
+    <div id="node-area" class="dual-tables-container">
+      <h3>State :</h3>
+      <h3 id="node-state">IDLE</h3>
+    </div>
+    <div class="standard-container">
+      <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
+      <table id="node-process-table" class="table-wide">
+        <colgroup>
+          <col span="1" style="width: 10%;" />
+          <col span="1" style="width: 10%;" />
+          <col span="1" style="width: 20%;" />
+          <col span="1" style="width: 60%;" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Collector</th>
+            <th>Job</th>
+            <th>Process</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-      let REST_DIST_URI = REST_URI + "/dist";
-      let REST_DIST_POLL = "/poll";
+  <script>
+    let DISTRIBUTOR = 0x0;
+    let COLLECTOR = 0x1;
+    let NODE = 0x2;
 
-      let REST_COLL_URI = REST_URI + "/coll";
-      let REST_COLL_LOAD = "/load";
-      let REST_COLL_PROCESS = "/process";
+    let PORT = "8081";
+    let HOSTING = "http://localhost:" + PORT;
+    let REST_URI = HOSTING + "/rest";
+    let REST_STATE = "/state";
 
-      let REST_NODE_URI = REST_URI + "/node";
+    let REST_DIST_URI = REST_URI + "/dist";
+    let REST_DIST_POLL = "/poll";
 
-      let WS_URI = "ws://localhost:" + PORT + "/ws";
+    let REST_COLL_URI = REST_URI + "/coll";
+    let REST_COLL_LOAD = "/load";
+    let REST_COLL_PROCESS = "/process";
 
-      let COLL_STATES = ["START", "IDLE", "BUSY"];
-      let NODE_STATES = ["START", "IDLE", "PREBUSY", "BUSY"];
-      let PROCESS_STATES = ["DEPENDENT", "READY", "STARTED", "ENDED"];
+    let REST_NODE_URI = REST_URI + "/node";
 
-      let PROCESS_STATE_DEPENDENT = 0;
-      let PROCESS_STATE_READY = 1;
-      let PROCESS_STATE_STARTED = 2;
-      let PROCESS_STATE_ENDED = 3;
+    let WS_URI = "ws://localhost:" + PORT + "/ws";
 
-      let currentPage = {
-        type: DISTRIBUTOR,
-        id: 0,
-        set(_type, _id) {
-          this.type = _type;
-          this.id = _id;
-          let distPage = document.getElementById("distributor-block");
-          let collPage = document.getElementById("collector-block");
-          let nodePage = document.getElementById("node-block");
+    let COLL_STATES = ["IDLE", "BUSY"];
+    let NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
+    let PROCESS_STATES = ["DEPENDENT", "READY", "STARTED", "ENDED"];
 
-          switch (this.type) {
-            case DISTRIBUTOR:
-              distPage.style.display = "block";
-              collPage.style.display = "none";
-              nodePage.style.display = "none";
-              onDistState();
-              break;
-            case COLLECTOR:
-              distPage.style.display = "none";
-              collPage.style.display = "block";
-              nodePage.style.display = "none";
-              document.getElementById("coll-header").innerHTML =
-                "Collector [" + this.id + "]";
-              onCollState(this.id);
-              break;
-            case NODE:
-              distPage.style.display = "none";
-              collPage.style.display = "none";
-              nodePage.style.display = "block";
-              document.getElementById("node-header").innerHTML =
-                "Node [" + this.id + "]";
-              onNodeState(this.id);
-              break;
-          }
-        },
-      };
+    let PROCESS_STATE_DEPENDENT = 0;
+    let PROCESS_STATE_READY = 1;
+    let PROCESS_STATE_STARTED = 2;
+    let PROCESS_STATE_ENDED = 3;
 
-      if(typeof(EventSource) !== "undefined") {
-        let source = new EventSource("/event");
-        source.onmessage = function(event) {
-          if (event.data & 0x01 && currentPage.type === DISTRIBUTOR) {
+    let currentPage = {
+      type: DISTRIBUTOR,
+      id: 0,
+      set(_type, _id) {
+        this.type = _type;
+        this.id = _id;
+        let distPage = document.getElementById("distributor-block");
+        let collPage = document.getElementById("collector-block");
+        let nodePage = document.getElementById("node-block");
+
+        switch (this.type) {
+          case DISTRIBUTOR:
+            distPage.style.display = "block";
+            collPage.style.display = "none";
+            nodePage.style.display = "none";
             onDistState();
-          } else if (event.data & 0x02 && currentPage.type === COLLECTOR) {
-            onCollState(currentPage.id);
-          } else if (event.data & 0x04 && currentPage.type === NODE) {
-            onNodeState(currentPage.id);
-          }
-        };
-      } else {
-        document.getElementById("testField").innerHTML = "Your browser does not support server-sent events...";
-      }
+            break;
+          case COLLECTOR:
+            distPage.style.display = "none";
+            collPage.style.display = "block";
+            nodePage.style.display = "none";
+            document.getElementById("coll-header").innerHTML =
+              "Collector [" + this.id + "]";
+            onCollState(this.id);
+            break;
+          case NODE:
+            distPage.style.display = "none";
+            collPage.style.display = "none";
+            nodePage.style.display = "block";
+            document.getElementById("node-header").innerHTML =
+              "Node [" + this.id + "]";
+            onNodeState(this.id);
+            break;
+        }
+      },
+    };
 
-      let dropdown = document.getElementsByClassName("dropdown-btn");
-      for (let i = 0; i < dropdown.length; i++) {
-        dropdown[i].addEventListener("click", function () {
-          this.classList.toggle("sidebar_btn_active");
-          let dropdownContent = this.nextElementSibling;
-          if (dropdownContent.style.display === "block") {
-            dropdownContent.style.display = "none";
-          } else {
-            dropdownContent.style.display = "block";
-          }
-        });
-      }
+    if (typeof (EventSource) !== "undefined") {
+      let source = new EventSource("/event");
+      source.onmessage = function (event) {
+        if (event.data & 0x01 && currentPage.type === DISTRIBUTOR) {
+          onDistState();
+        } else if (event.data & 0x02 && currentPage.type === COLLECTOR) {
+          onCollState(currentPage.id);
+        } else if (event.data & 0x04 && currentPage.type === NODE) {
+          onNodeState(currentPage.id);
+        }
+      };
+    } else {
+      document.getElementById("testField").innerHTML = "Your browser does not support server-sent events...";
+    }
 
-      function onDistClick() {
-        currentPage.set(DISTRIBUTOR, this.id);
-      }
+    let dropdown = document.getElementsByClassName("dropdown-btn");
+    for (let i = 0; i < dropdown.length; i++) {
+      dropdown[i].addEventListener("click", function () {
+        this.classList.toggle("sidebar_btn_active");
+        let dropdownContent = this.nextElementSibling;
+        if (dropdownContent.style.display === "block") {
+          dropdownContent.style.display = "none";
+        } else {
+          dropdownContent.style.display = "block";
+        }
+      });
+    }
 
-      function onCollClick() {
-        currentPage.set(COLLECTOR, this.id);
-      }
+    function onDistClick() {
+      currentPage.set(DISTRIBUTOR, this.id);
+    }
 
-      function onNodeClick() {
-        currentPage.set(NODE, this.id);
-      }
+    function onCollClick() {
+      currentPage.set(COLLECTOR, this.id);
+    }
 
-      function onDistState() {
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
+    function onNodeClick() {
+      currentPage.set(NODE, this.id);
+    }
+
+    function onDistState() {
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+          let data = JSON.parse(this.responseText);
+          onDistUpdateCollList(data);
+          onDistUpdateNodeList(data);
+        }
+      };
+      xHTTP.open("GET", REST_DIST_URI + REST_STATE, true);
+      xHTTP.send();
+    }
+
+    function onDistPoll() {
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
+      xHTTP.send();
+    }
+
+    function onDistUpdateCollList(data) {
+      let table = document
+        .getElementById("dist-colls-table")
+        .getElementsByTagName("tbody")[0];
+      table.innerHTML = "";
+      let side = document.getElementById("sidebar-coll-list");
+      side.innerHTML = "";
+
+      for (let collItem of data.collList) {
+        let newRow = table.insertRow();
+        newRow.insertCell().innerHTML = collItem.collectorID;
+        newRow.insertCell().innerHTML = COLL_STATES[collItem.state];
+
+        let component = document.createElement("a");
+        component.onclick = onCollClick;
+        component.id = collItem.collectorID;
+        component.appendChild(
+          document.createTextNode("Collector " + component.id)
+        );
+        side.appendChild(component);
+      }
+    }
+
+    function onDistUpdateNodeList(data) {
+      let table = document
+        .getElementById("dist-nodes-table")
+        .getElementsByTagName("tbody")[0];
+      table.innerHTML = "";
+      let side = document.getElementById("sidebar-node-list");
+      side.innerHTML = "";
+
+      for (let nodeItem of data.nodeList) {
+        let newRow = table.insertRow();
+        newRow.insertCell().innerHTML = nodeItem.nodeID;
+        newRow.insertCell().innerHTML = NODE_STATES[nodeItem.state];
+
+        let component = document.createElement("a");
+        component.onclick = onNodeClick;
+        component.id = nodeItem.nodeID;
+        component.appendChild(
+          document.createTextNode("Node " + component.id)
+        );
+        side.appendChild(component);
+      }
+    }
+
+    function onCollState(collID) {
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+          if (this.responseText !== "") {
             let data = JSON.parse(this.responseText);
-            onDistUpdateCollList(data);
-            onDistUpdateNodeList(data);
-          }
-        };
-        xHTTP.open("GET", REST_DIST_URI + REST_STATE, true);
-        xHTTP.send();
-      }
-
-      function onDistPoll() {
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
-        xHTTP.send();
-      }
-
-      function onDistUpdateCollList(data) {
-        let table = document
-          .getElementById("dist-colls-table")
-          .getElementsByTagName("tbody")[0];
-        table.innerHTML = "";
-        let side = document.getElementById("sidebar-coll-list");
-        side.innerHTML = "";
-
-        for (let collItem of data.collList) {
-          let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = collItem.collectorID;
-          newRow.insertCell().innerHTML = COLL_STATES[collItem.state];
-
-          let component = document.createElement("a");
-          component.onclick = onCollClick;
-          component.id = collItem.collectorID;
-          component.appendChild(
-            document.createTextNode("Collector " + component.id)
-          );
-          side.appendChild(component);
-        }
-      }
-
-      function onDistUpdateNodeList(data) {
-        let table = document
-          .getElementById("dist-nodes-table")
-          .getElementsByTagName("tbody")[0];
-        table.innerHTML = "";
-        let side = document.getElementById("sidebar-node-list");
-        side.innerHTML = "";
-
-        for (let nodeItem of data.nodeList) {
-          let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = nodeItem.nodeID;
-          newRow.insertCell().innerHTML = NODE_STATES[nodeItem.state];
-
-          let component = document.createElement("a");
-          component.onclick = onNodeClick;
-          component.id = nodeItem.nodeID;
-          component.appendChild(
-            document.createTextNode("Node " + component.id)
-          );
-          side.appendChild(component);
-        }
-      }
-
-      function onCollState(collID) {
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-            if (this.responseText !== "") {
-              let data = JSON.parse(this.responseText);
-              onCollUpdateFileList(data);
-              onCollUpdateProcessList(data);
-            }
-          }
-        };
-        xHTTP.open(
-          "GET",
-          REST_COLL_URI + "/" + collID + REST_STATE,
-          true
-        );
-        xHTTP.send();
-      }
-
-      function onCollLoadJob(collID) {
-        let uploadFile = document.getElementById("load-input");
-        let file = uploadFile.files[0];
-        uploadFile.value = "";
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
-        xHTTP.open(
-          "POST",
-           REST_COLL_URI + "/" + collID + REST_COLL_LOAD,
-          true
-        );
-        xHTTP.setRequestHeader("FileName", file.name);
-        xHTTP.send(file);
-      }
-
-      function onCollProcess(collID) {
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
-        xHTTP.open(
-          "GET",
-          REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
-          true
-        );
-        xHTTP.send();
-      }
-
-      function onCollUpdateFileList(data) {
-        let table = document
-          .getElementById("coll-file-table")
-          .getElementsByTagName("tbody")[0];
-        table.innerHTML = "";
-
-        document.getElementById("coll-job-name").innerHTML =
-          "Job : " + data._jobName;
-
-        for (let fileitem of data._fileList) {
-          let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = fileitem._name;
-          newRow.insertCell().innerHTML = fileitem._size;
-          if (fileitem._validity) {
-            newRow.style.backgroundColor = "#00C000";
+            document.getElementById("coll-state").innerHTML =
+              COLL_STATES[data._state];
+            onCollUpdateFileList(data);
+            onCollUpdateProcessList(data);
           }
         }
-      }
+      };
+      xHTTP.open(
+        "GET",
+        REST_COLL_URI + "/" + collID + REST_STATE,
+        true
+      );
+      xHTTP.send();
+    }
 
-      function onCollUpdateProcessList(data) {
-        let table = document
-          .getElementById("coll-process-table")
-          .getElementsByTagName("tbody")[0];
-        table.innerHTML = "";
+    function onCollLoadJob(collID) {
+      let uploadFile = document.getElementById("load-input");
+      let file = uploadFile.files[0];
+      uploadFile.value = "";
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
+      xHTTP.open(
+        "POST",
+        REST_COLL_URI + "/" + collID + REST_COLL_LOAD,
+        true
+      );
+      xHTTP.setRequestHeader("FileName", file.name);
+      xHTTP.send(file);
+    }
 
-        for (let processItem of data._processList) {
-          let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = processItem._id;
-          newRow.insertCell().innerHTML = processItem._process;
-          newRow.insertCell().innerHTML =
-                  processItem._node !== 0 ? processItem._node : "Not Assigned";
-          newRow.insertCell().innerHTML = PROCESS_STATES[processItem._state];
+    function onCollProcess(collID) {
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
+      xHTTP.open(
+        "GET",
+        REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
+        true
+      );
+      xHTTP.send();
+    }
 
-          switch (processItem._state) {
-            case PROCESS_STATE_DEPENDENT:
-              if (processItem._validity) {
-                newRow.style.backgroundColor = "#00C000";
-              }
-              break;
-            case PROCESS_STATE_READY:
-              newRow.style.backgroundColor = "#8080C0";
-              break;
-            case PROCESS_STATE_STARTED:
-              newRow.style.backgroundColor = "#E000E0";
-              break;
-            case PROCESS_STATE_ENDED:
-              newRow.style.backgroundColor = "#606060";
-              break;
-          }
+    function onCollUpdateFileList(data) {
+      let table = document
+        .getElementById("coll-file-table")
+        .getElementsByTagName("tbody")[0];
+      table.innerHTML = "";
+
+      document.getElementById("coll-job-name").innerHTML =
+        data._jobName;
+
+      for (let fileitem of data._fileList) {
+        let newRow = table.insertRow();
+        newRow.insertCell().innerHTML = fileitem._name;
+        newRow.insertCell().innerHTML = fileitem._size;
+        if (fileitem._validity) {
+          newRow.style.backgroundColor = "#00C000";
         }
       }
+    }
 
-      function onNodeState(nodeID) {
-        let xHTTP = new XMLHttpRequest();
-        xHTTP.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-            let data = JSON.parse(this.responseText);
-            onNodeUpdateState(data);
-            onNodeUpdateProcessList(data);
-          }
-        };
-        xHTTP.open(
-          "GET",
-          REST_NODE_URI + "/" + nodeID + REST_STATE,
-          true
-        );
-        xHTTP.send();
-      }
+    function onCollUpdateProcessList(data) {
+      let table = document
+        .getElementById("coll-process-table")
+        .getElementsByTagName("tbody")[0];
+      table.innerHTML = "";
 
-      function onNodeUpdateState(data) {
-        document.getElementById("node-state").innerHTML =
-          NODE_STATES[data.state];
-      }
+      for (let processItem of data._processList) {
+        let newRow = table.insertRow();
+        newRow.insertCell().innerHTML = processItem._id;
+        newRow.insertCell().innerHTML = processItem._process;
+        newRow.insertCell().innerHTML =
+          processItem._node !== 0 ? processItem._node : "Not Assigned";
+        newRow.insertCell().innerHTML = PROCESS_STATES[processItem._state];
 
-      function onNodeUpdateProcessList(data) {
-        let table = document
-          .getElementById("node-process-table")
-          .getElementsByTagName("tbody")[0];
-        table.innerHTML = "";
-
-        for (let processItem of data.processList) {
-          let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = processItem.processID;
-          newRow.insertCell().innerHTML = processItem.collectorID;
-          newRow.insertCell().innerHTML = processItem.jobID;
-          newRow.insertCell().innerHTML = processItem.process;
+        switch (processItem._state) {
+          case PROCESS_STATE_DEPENDENT:
+            newRow.style.backgroundColor = "#C0C080";
+            break;
+          case PROCESS_STATE_READY:
+            newRow.style.backgroundColor = "#8080C0";
+            break;
+          case PROCESS_STATE_STARTED:
+            newRow.style.backgroundColor = "#E000E0";
+            break;
+          case PROCESS_STATE_ENDED:
+            newRow.style.backgroundColor = "#606060";
+            break;
         }
       }
+    }
 
-      function onLoad() {
-        let wsConn = new WebSocket(WS_URI);
-        currentPage.set(DISTRIBUTOR, this.id);
-        wsConn.onmessage = function (info) {
-          let component = parseInt(info.data, 10);
-          switch (component) {
-            case DISTRIBUTOR:
-              onDistState();
-              break;
-            case COLLECTOR:
-              onCollState(currentPage.id);
-              break;
-            case NODE:
-              onNodeState(currentPage.id);
-              break;
-          }
-        };
-        const loadBtn = document.getElementById("load-btn");
-        const loadInput = document.getElementById("load-input");
-        loadBtn.addEventListener(
-          "click",
-          function (e) {
-            loadInput.click();
-          },
-          false
-        );
+    function onNodeState(nodeID) {
+      let xHTTP = new XMLHttpRequest();
+      xHTTP.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+          let data = JSON.parse(this.responseText);
+          onNodeUpdateState(data);
+          onNodeUpdateProcessList(data);
+        }
+      };
+      xHTTP.open(
+        "GET",
+        REST_NODE_URI + "/" + nodeID + REST_STATE,
+        true
+      );
+      xHTTP.send();
+    }
 
-        wsConn.onerror = function (error) {
-          //   alert("Websocket error");
-          wsConn.close();
-        };
-        console.log(wsConn);
+    function onNodeUpdateState(data) {
+      document.getElementById("node-state").innerHTML =
+        NODE_STATES[data.state];
+    }
+
+    function onNodeUpdateProcessList(data) {
+      let table = document
+        .getElementById("node-process-table")
+        .getElementsByTagName("tbody")[0];
+      table.innerHTML = "";
+
+      for (let processItem of data.processList) {
+        let newRow = table.insertRow();
+        newRow.insertCell().innerHTML = processItem.processID;
+        newRow.insertCell().innerHTML = processItem.collectorID;
+        newRow.insertCell().innerHTML = processItem.jobID;
+        newRow.insertCell().innerHTML = processItem.process;
       }
-    </script>
-  </body>
+    }
+
+    function onLoad() {
+      currentPage.set(DISTRIBUTOR, this.id);
+      const loadBtn = document.getElementById("load-btn");
+      const loadInput = document.getElementById("load-input");
+      loadBtn.addEventListener(
+        "click",
+        function (e) {
+          loadInput.click();
+        },
+        false
+      );
+    }
+  </script>
+</body>
+
 </html>

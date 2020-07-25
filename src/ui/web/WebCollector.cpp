@@ -52,8 +52,10 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
         return false;
     }
 
+    auto host = (CollectorObject&) collector->getHost();
+
     if (!fileName) {
-        LOGS_E(collector->getHost(), "Invalid upload process!!!");
+        LOGS_E(host, "Invalid upload process!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
@@ -65,7 +67,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
     FILE *uploadJobFile = fopen(tmpFile, "w");
     if (!uploadJobFile) {
-        LOGS_E(collector->getHost(), "Can not open tmp file : %s!!!", tmpFile);
+        LOGS_E(host, "Can not open tmp file : %s!!!", tmpFile);
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
@@ -115,21 +117,25 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
+    auto host = (CollectorObject&) collector->getHost();
+
     auto *job = collector->getJob();
     if (job == nullptr) {
-        LOGS_I(collector->getHost(), "No Job is loaded yet!!!");
+        LOGS_I(host, "No Job is loaded yet!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOGS_I(collector->getHost(), "Can not create json object!!!");
+        LOGS_I(host, "Can not create json object!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
-    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getName()));
+    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(host.getState()));
+    json_object_object_add(jsonObj, "_duration", json_object_new_int(0));
 
     auto* fileList = json_object_new_array();
     for (int j = 0; j < job->getFileCount(); j++) {
@@ -152,7 +158,6 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         auto* processItem = json_object_new_object();
         json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j)->getID()));
         json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j)->getProcess()));
-        json_object_object_add(processItem, "_validity", json_object_new_boolean(job->getProcess(j)->check()));
         json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j)->getState()));
         json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j)->getAssigned()));
 

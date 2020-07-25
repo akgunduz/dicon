@@ -46,6 +46,7 @@ public:
     void setJobName(const char*);
 
     int getProcessCount() const;
+    int getProcessCount(PROCESS_STATE) const;
     ProcessItem* getProcess(int) const;
     ProcessItem* getProcessByID(long) const;
 

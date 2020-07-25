@@ -6,7 +6,6 @@
 #include "CollectorState.h"
 
 const char* sCollStates[] = {
-        "START",
         "IDLE",
         "BUSY",
 };

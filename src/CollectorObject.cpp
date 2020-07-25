@@ -9,11 +9,11 @@ CollectorObject::CollectorObject(COLLSTATES _state, long id, long address) :
 }
 
 CollectorObject::CollectorObject(long id, long address) :
-        CollectorObject(COLLSTATE_START, id, address) {
+        CollectorObject(COLLSTATE_IDLE, id, address) {
 }
 
 CollectorObject::CollectorObject(const char* rootPath) :
-        state(COLLSTATE_START), ComponentObject(COMP_COLLECTOR, rootPath)  {
+        state(COLLSTATE_IDLE), ComponentObject(COMP_COLLECTOR, rootPath)  {
 }
 
 CollectorObject::CollectorObject() :

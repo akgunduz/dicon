@@ -61,6 +61,8 @@ bool Collector::processDistributorNodeMsg(const ComponentObject& owner, Message 
         send2NodeProcessMsg(node, process);
     }
 
+    ((CollectorObject&)getHost()).setState(COLLSTATE_BUSY);
+
     notifyUI();
 
     return true;
@@ -105,6 +107,8 @@ bool Collector::processNodeFileBinaryMsg(const ComponentObject& owner, Message *
     }
 
     if (totalCount == 0) {
+
+        ((CollectorObject&)getHost()).setState(COLLSTATE_IDLE);
 
         return send2DistributorReadyMsg(distributor);
     }
@@ -176,8 +180,7 @@ void Collector::setDistributor(const DistributorObject& _distributor) {
 
 bool Collector::processJob() {
 
-    int totalCount = 0;
-    return send2DistributorNodeMsg(distributor, job->updateDependency(0, totalCount));
+    return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }
 
 bool Collector::loadJob(const char* zipFile) {

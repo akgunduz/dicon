@@ -35,16 +35,16 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto nodeObj = (NodeObject&) node->getHost();
+    auto host = (NodeObject&) node->getHost();
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOGS_I(node->getHost(), "Can not create json object!!!");
+        LOGS_I(host, "Can not create json object!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }
 
-    json_object_object_add(jsonObj, "state", json_object_new_int(nodeObj.getState()));
+    json_object_object_add(jsonObj, "state", json_object_new_int(host.getState()));
 
     auto* processList = json_object_new_array();
     for (auto &process : node->getProcessList()) {

@@ -10,11 +10,11 @@ NodeObject::NodeObject(NODESTATES _state, int _usage, long id, long address) :
 }
 
 NodeObject::NodeObject(long id, long address) :
-        ComponentObject(COMP_NODE, id, address) {
+        NodeObject(NODESTATE_IDLE, 0, id, address) {
 }
 
 NodeObject::NodeObject(const char* rootPath) :
-        ComponentObject(COMP_NODE, rootPath)  {
+        state(NODESTATE_IDLE), usage(0), ComponentObject(COMP_NODE, rootPath)  {
 }
 
 NodeObject::NodeObject() :
@@ -22,8 +22,9 @@ NodeObject::NodeObject() :
 }
 
 NodeObject::NodeObject(const NodeObject &copy) :
-        state(copy.state), usage(copy.usage), processItem(copy.processItem),
-        ComponentObject(COMP_NODE, copy.getID(), copy.getAddress()) {
+        NodeObject(copy.state, copy.usage, copy.getID(), copy.getAddress()) {
+
+    processItem = copy.processItem;
 }
 
 NodeObject::NodeObject(const ComponentObject &copy) :

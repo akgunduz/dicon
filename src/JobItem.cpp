@@ -35,6 +35,12 @@ JobItem::JobItem(const ComponentObject& host, const char* jobZipFile, long _jobI
         LOGS_E(getHost(), "Dependency Loop Detected in the Job!!!");
         return;
     }
+
+    for (int i = 0; i < getProcessCount(); i++) {
+        if (getProcess(i)->getState() == PROCESS_STATE_DEPENDENT && getProcess(i)->check()) {
+            getProcess(i)->setState(PROCESS_STATE_READY);
+        }
+    }
 }
 
 JobItem::~JobItem() {
@@ -202,6 +208,20 @@ void JobItem::setJobName(const char *_jobName) {
 int JobItem::getProcessCount() const {
 
     return getContentCount(CONTENT_PROCESS);
+}
+
+int JobItem::getProcessCount(PROCESS_STATE state) const {
+
+    int count = 0;
+
+    for (int i = 0; i < getProcessCount(); i++) {
+
+        if (getProcess(i)->getState() == state) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 ProcessItem* JobItem::getProcess(int index) const {

@@ -13,7 +13,7 @@ class NodeObject : public ComponentObject {
 
 private:
 
-    NODESTATES state{NODESTATE_START};
+    NODESTATES state{};
 
     int usage{};
 
