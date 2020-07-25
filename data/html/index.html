@@ -272,36 +272,36 @@
     </div>
 
     <script>
-      var DISTRIBUTOR = 0x0;
-      var COLLECTOR = 0x1;
-      var NODE = 0x2;
+      let DISTRIBUTOR = 0x0;
+      let COLLECTOR = 0x1;
+      let NODE = 0x2;
 
-      var PORT = "8081";
-      var HOSTING = "http://localhost:" + PORT;
-      var REST_URI = HOSTING + "/rest";
-      var REST_STATE = "/state";
+      let PORT = "8081";
+      let HOSTING = "http://localhost:" + PORT;
+      let REST_URI = HOSTING + "/rest";
+      let REST_STATE = "/state";
 
-      var REST_DIST_URI = REST_URI + "/dist";
-      var REST_DIST_POLL = "/poll";
+      let REST_DIST_URI = REST_URI + "/dist";
+      let REST_DIST_POLL = "/poll";
 
-      var REST_COLL_URI = REST_URI + "/coll";
-      var REST_COLL_LOAD = "/load";
-      var REST_COLL_PROCESS = "/process";
+      let REST_COLL_URI = REST_URI + "/coll";
+      let REST_COLL_LOAD = "/load";
+      let REST_COLL_PROCESS = "/process";
 
-      var REST_NODE_URI = REST_URI + "/node";
+      let REST_NODE_URI = REST_URI + "/node";
 
-      var WS_URI = "ws://localhost:" + PORT + "/ws";
+      let WS_URI = "ws://localhost:" + PORT + "/ws";
 
-      var COLL_STATES = ["START", "IDLE", "BUSY"];
-      var NODE_STATES = ["START", "IDLE", "PREBUSY", "BUSY"];
-      var PROCESS_STATES = ["DEPENDENT", "READY", "STARTED", "ENDED"];
+      let COLL_STATES = ["START", "IDLE", "BUSY"];
+      let NODE_STATES = ["START", "IDLE", "PREBUSY", "BUSY"];
+      let PROCESS_STATES = ["DEPENDENT", "READY", "STARTED", "ENDED"];
 
-      var PROCESS_STATE_DEPENDENT = 0;
-      var PROCESS_STATE_READY = 1;
-      var PROCESS_STATE_STARTED = 2;
-      var PROCESS_STATE_ENDED = 3;
+      let PROCESS_STATE_DEPENDENT = 0;
+      let PROCESS_STATE_READY = 1;
+      let PROCESS_STATE_STARTED = 2;
+      let PROCESS_STATE_ENDED = 3;
 
-      var currentPage = {
+      let currentPage = {
         type: DISTRIBUTOR,
         id: 0,
         set(_type, _id) {
@@ -338,11 +338,26 @@
         },
       };
 
-      var dropdown = document.getElementsByClassName("dropdown-btn");
-      for (var i = 0; i < dropdown.length; i++) {
+      if(typeof(EventSource) !== "undefined") {
+        let source = new EventSource("/event");
+        source.onmessage = function(event) {
+          if (event.data & 0x01 && currentPage.type === DISTRIBUTOR) {
+            onDistState();
+          } else if (event.data & 0x02 && currentPage.type === COLLECTOR) {
+            onCollState(currentPage.id);
+          } else if (event.data & 0x04 && currentPage.type === NODE) {
+            onNodeState(currentPage.id);
+          }
+        };
+      } else {
+        document.getElementById("testField").innerHTML = "Your browser does not support server-sent events...";
+      }
+
+      let dropdown = document.getElementsByClassName("dropdown-btn");
+      for (let i = 0; i < dropdown.length; i++) {
         dropdown[i].addEventListener("click", function () {
           this.classList.toggle("sidebar_btn_active");
-          var dropdownContent = this.nextElementSibling;
+          let dropdownContent = this.nextElementSibling;
           if (dropdownContent.style.display === "block") {
             dropdownContent.style.display = "none";
           } else {
@@ -364,27 +379,22 @@
       }
 
       function onDistState() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = function () {
           if (this.readyState === 4 && this.status === 200) {
-            var data = JSON.parse(this.responseText);
+            let data = JSON.parse(this.responseText);
             onDistUpdateCollList(data);
             onDistUpdateNodeList(data);
           }
         };
-        xhttp.open("GET", REST_DIST_URI + REST_STATE, true);
-        xhttp.send();
+        xHTTP.open("GET", REST_DIST_URI + REST_STATE, true);
+        xHTTP.send();
       }
 
       function onDistPoll() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-            //response is async, will be get via WS
-          }
-        };
-        xhttp.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
-        xhttp.send();
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
+        xHTTP.send();
       }
 
       function onDistUpdateCollList(data) {
@@ -395,14 +405,14 @@
         let side = document.getElementById("sidebar-coll-list");
         side.innerHTML = "";
 
-        for (var collitem of data.collList) {
+        for (let collItem of data.collList) {
           let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = collitem.collectorID;
-          newRow.insertCell().innerHTML = COLL_STATES[collitem.state];
+          newRow.insertCell().innerHTML = collItem.collectorID;
+          newRow.insertCell().innerHTML = COLL_STATES[collItem.state];
 
           let component = document.createElement("a");
           component.onclick = onCollClick;
-          component.id = collitem.collectorID;
+          component.id = collItem.collectorID;
           component.appendChild(
             document.createTextNode("Collector " + component.id)
           );
@@ -418,14 +428,14 @@
         let side = document.getElementById("sidebar-node-list");
         side.innerHTML = "";
 
-        for (var nodeitem of data.nodeList) {
+        for (let nodeItem of data.nodeList) {
           let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = nodeitem.nodeID;
-          newRow.insertCell().innerHTML = NODE_STATES[nodeitem.state];
+          newRow.insertCell().innerHTML = nodeItem.nodeID;
+          newRow.insertCell().innerHTML = NODE_STATES[nodeItem.state];
 
           let component = document.createElement("a");
           component.onclick = onNodeClick;
-          component.id = nodeitem.nodeID;
+          component.id = nodeItem.nodeID;
           component.appendChild(
             document.createTextNode("Node " + component.id)
           );
@@ -434,48 +444,48 @@
       }
 
       function onCollState(collID) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = function () {
           if (this.readyState === 4 && this.status === 200) {
             if (this.responseText !== "") {
-              var data = JSON.parse(this.responseText);
+              let data = JSON.parse(this.responseText);
               onCollUpdateFileList(data);
               onCollUpdateProcessList(data);
             }
           }
         };
-        xhttp.open(
+        xHTTP.open(
           "GET",
           REST_COLL_URI + "/" + collID + REST_STATE,
           true
         );
-        xhttp.send();
+        xHTTP.send();
       }
 
       function onCollLoadJob(collID) {
         let uploadFile = document.getElementById("load-input");
         let file = uploadFile.files[0];
         uploadFile.value = "";
-        let xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = state => { console.log(xhttp.status); }
-        xhttp.open(
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
+        xHTTP.open(
           "POST",
            REST_COLL_URI + "/" + collID + REST_COLL_LOAD,
           true
         );
-        xhttp.setRequestHeader("FileName", file.name);
-        xhttp.send(file);
+        xHTTP.setRequestHeader("FileName", file.name);
+        xHTTP.send(file);
       }
 
       function onCollProcess(collID) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = state => { console.log(xhttp.status); }
-        xhttp.open(
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
+        xHTTP.open(
           "GET",
           REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
           true
         );
-        xhttp.send();
+        xHTTP.send();
       }
 
       function onCollUpdateFileList(data) {
@@ -487,7 +497,7 @@
         document.getElementById("coll-job-name").innerHTML =
           "Job : " + data._jobName;
 
-        for (var fileitem of data._fileList) {
+        for (let fileitem of data._fileList) {
           let newRow = table.insertRow();
           newRow.insertCell().innerHTML = fileitem._name;
           newRow.insertCell().innerHTML = fileitem._size;
@@ -503,17 +513,17 @@
           .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
-        for (var processitem of data._processList) {
+        for (let processItem of data._processList) {
           let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = processitem._id;
-          newRow.insertCell().innerHTML = processitem._process;
+          newRow.insertCell().innerHTML = processItem._id;
+          newRow.insertCell().innerHTML = processItem._process;
           newRow.insertCell().innerHTML =
-            processitem._node !== 0 ? processitem._node : "Not Assigned";
-          newRow.insertCell().innerHTML = PROCESS_STATES[processitem._state];
+                  processItem._node !== 0 ? processItem._node : "Not Assigned";
+          newRow.insertCell().innerHTML = PROCESS_STATES[processItem._state];
 
-          switch (processitem._state) {
+          switch (processItem._state) {
             case PROCESS_STATE_DEPENDENT:
-              if (processitem._validity) {
+              if (processItem._validity) {
                 newRow.style.backgroundColor = "#00C000";
               }
               break;
@@ -531,20 +541,20 @@
       }
 
       function onNodeState(nodeID) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = function () {
           if (this.readyState === 4 && this.status === 200) {
-            var data = JSON.parse(this.responseText);
+            let data = JSON.parse(this.responseText);
             onNodeUpdateState(data);
             onNodeUpdateProcessList(data);
           }
         };
-        xhttp.open(
+        xHTTP.open(
           "GET",
           REST_NODE_URI + "/" + nodeID + REST_STATE,
           true
         );
-        xhttp.send();
+        xHTTP.send();
       }
 
       function onNodeUpdateState(data) {
@@ -558,17 +568,17 @@
           .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
-        for (var processitem of data.processList) {
+        for (let processItem of data.processList) {
           let newRow = table.insertRow();
-          newRow.insertCell().innerHTML = processitem.processID;
-          newRow.insertCell().innerHTML = processitem.collectorID;
-          newRow.insertCell().innerHTML = processitem.jobID;
-          newRow.insertCell().innerHTML = processitem.process;
+          newRow.insertCell().innerHTML = processItem.processID;
+          newRow.insertCell().innerHTML = processItem.collectorID;
+          newRow.insertCell().innerHTML = processItem.jobID;
+          newRow.insertCell().innerHTML = processItem.process;
         }
       }
 
       function onLoad() {
-        var wsConn = new WebSocket(WS_URI);
+        let wsConn = new WebSocket(WS_URI);
         currentPage.set(DISTRIBUTOR, this.id);
         wsConn.onmessage = function (info) {
           let component = parseInt(info.data, 10);

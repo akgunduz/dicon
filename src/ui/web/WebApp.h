@@ -12,45 +12,27 @@
 #define DOCUMENT_ROOT "../data/html/"
 #define PORT "8081"
 #define MAIN_URI "/"
-#define EXIT_URI "/exit"
 #define HOSTING "http://localhost:" PORT "/"
 #define REST_URI "/rest"
-#define WS_URI "/ws"
+#define EVENT_URI "/event"
 
 #define DIST_URI "/dist"
 #define COLL_URI "/coll"
 #define NODE_URI "/node"
 
-enum WSSTATE {
-    WSSTATE_NOTCONNECTED,
-    WSSTATE_CONNECTED,
-    WSSTATE_READY,
-    WSSTATE_PROCESS,
-    WSSTATE_MAX
-};
-
-struct ws_client {
-    struct mg_connection *conn;
-    enum WSSTATE state;
-};
-
 class WebApp : public App {
 
-    struct mg_callbacks callbacks;
+    struct mg_callbacks callbacks{};
     struct mg_context *context;
-    struct ws_client wsClients[MAX_UI_CB];
+    bool notifyFlag[COMP_MAX]{};
 
 public:
-    WebApp(int, char**, int *, LOGLEVEL*, int*);
+
+    WebApp(int *, LOGLEVEL*, int*);
 
     int restHandler(struct mg_connection *conn);
     int mainHandler(struct mg_connection *conn);
-    int exitHandler(struct mg_connection *conn);
-    int wsHandler(struct mg_connection *conn);
-    int wsConnectHandler(const struct mg_connection *conn);
-    void wsReadyHandler(struct mg_connection *conn);
-    int wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len);
-    void wsCloseHandler(const struct mg_connection *conn);
+    int eventHandler(struct mg_connection *conn);
 
     bool distHandler(struct mg_connection *conn, const char * uri);
     bool distPollHandler(struct mg_connection *conn);
@@ -65,7 +47,8 @@ public:
     bool nodeStateHandler(struct mg_connection *conn, int id);
 
     int run() override;
-    int notifyHandler(long, long) override;
+    int notifyHandler(COMPONENT, long) override;
+    bool sendServerEvent(struct mg_connection *conn, int id);
 };
 
 void sendHtml(struct mg_connection *conn);

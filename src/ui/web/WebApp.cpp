@@ -14,6 +14,8 @@ const char *options[] = {
 #endif
         "listening_ports",
         PORT,
+        "enable_keep_alive",
+        "yes",
         "request_timeout_ms",
         "10000",
         "error_log_file",
@@ -37,15 +39,49 @@ int WebApp::mainHandler(struct mg_connection *conn)
     return 1;
 }
 
-int exitHandlerWrapper(struct mg_connection *conn, void *cbData)
+int eventHandlerWrapper(struct mg_connection *conn, void *cbData)
 {
-    return ((WebApp*) cbData)->exitHandler(conn);
+    return ((WebApp*) cbData)->eventHandler(conn);
 }
 
-int WebApp::exitHandler(struct mg_connection *conn)
+int WebApp::eventHandler(struct mg_connection *conn)
 {
-    exitNow = 1;
+    uint32_t mask = 0;
+
+    if (notifyFlag[COMP_DISTRIBUTOR]) {
+        notifyFlag[COMP_DISTRIBUTOR] = false;
+        mask |= (uint32_t)1 << COMP_DISTRIBUTOR;
+    }
+
+    if (notifyFlag[COMP_COLLECTOR]) {
+        notifyFlag[COMP_COLLECTOR] = false;
+        mask |= (uint32_t)1 << COMP_COLLECTOR;
+    }
+
+    if (notifyFlag[COMP_NODE]) {
+        notifyFlag[COMP_NODE] = false;
+        mask |= (uint32_t)1 << COMP_NODE;
+    }
+
+    if (mask) {
+        sendServerEvent(conn, mask);
+    }
+
     return 1;
+}
+
+bool WebApp::sendServerEvent(struct mg_connection *conn, int id) {
+
+    mg_printf(conn,
+              "HTTP/1.1 200 OK\r\n"
+              "Cache-Control: no-cache\r\n"
+              "Content-Type: text/event-stream\r\n"
+              "Connection: Keep-Alive\r\n\r\n"
+    );
+
+    mg_printf(conn,"data: %d\r\n\r\n", id);
+
+    return true;
 }
 
 int restHandlerWrapper(struct mg_connection *conn, void *cbData) {
@@ -83,102 +119,11 @@ int WebApp::restHandler(struct mg_connection *conn) {
     return 0;
 }
 
-int wsHandlerWrapper(struct mg_connection *conn, void *cbData) {
-
-    return ((WebApp*) cbData)->wsHandler(conn);
-}
-
-int WebApp::wsHandler(struct mg_connection *conn) {
-
-    //Note to myself: if /ws is needed use this handler, seems not needed now;
-    PRINT("WS Handler is executed....");
-    return 1;
-}
-
-int wsConnectHandlerWrapper(const struct mg_connection *conn, void *cbData) {
-
-    return ((WebApp*) cbData)->wsConnectHandler(conn);
-}
-
-int WebApp::wsConnectHandler(const struct mg_connection *conn)
-{
-    struct mg_context *ctx = mg_get_context(conn);
-    int accepted = 0;
-
-    mg_lock_context(ctx);
-    for (int i = 0; i < MAX_UI_CB; i++) {
-        if (wsClients[i].conn == nullptr) {
-            wsClients[i].conn = (struct mg_connection *)conn;
-            wsClients[i].state = WSSTATE_CONNECTED;
-            mg_set_user_connection_data(wsClients[i].conn,(void *)(wsClients + i));
-            accepted = 1;
-            break;
-        }
-    }
-    mg_unlock_context(ctx);
-
-    const struct mg_request_info *ri = mg_get_request_info(conn);
-    PRINT("WS Client is %s from %s:%d", accepted ? "accepted" : "rejected", ri->remote_addr, ri->remote_port);
-
-    return !accepted;
-}
-
-void wsReadyHandlerWrapper(struct mg_connection *conn, void *cbData)
-{
-    ((WebApp*) cbData)->wsReadyHandler(conn);
-}
-
-void WebApp::wsReadyHandler(struct mg_connection *conn)
-{
-    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
-    client->state = WSSTATE_READY;
-}
-
-int wsDataHandlerWrapper(struct mg_connection *conn, int bits, char *data, size_t len, void *cbData)
-{
-    return ((WebApp*) cbData)->wsDataHandler(conn, bits, data, len);
-}
-
-int WebApp::wsDataHandler(struct mg_connection *conn, int bits, char *data, size_t len) {
-
-    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
-
-    PRINT("WS Client send data : %s ", Util::hex2str((uint8_t*)data, len).c_str());
-
-    return 1;
-}
-
-void wsCloseHandlerWrapper(const struct mg_connection *conn, void *cbData)
-{
-    ((WebApp*) cbData)->wsCloseHandler(conn);
-}
-
-void WebApp::wsCloseHandler(const struct mg_connection *conn)
-{
-    struct mg_context *ctx = mg_get_context(conn);
-    auto *client = (struct ws_client *) mg_get_user_connection_data(conn);
-
-    mg_lock_context(ctx);
-    while (client->state == WSSTATE_PROCESS) {
-        mg_unlock_context(ctx);
-        usleep(1000);
-        mg_lock_context(ctx);
-    }
-    client->state = WSSTATE_NOTCONNECTED;
-    client->conn = nullptr;
-    mg_unlock_context(ctx);
-
-    const struct mg_request_info *ri = mg_get_request_info(conn);
-    PRINT("WS Client at %s:%d is disconnected", ri->remote_addr, ri->remote_port);
-}
-
-WebApp::WebApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, int* componentCount)
-    : App(APPTYPE_WEB, argc, argv, interfaceID, logLevel, componentCount) {
+WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, int* componentCount)
+    : App(APPTYPE_WEB, interfaceID, logLevel, componentCount) {
 
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));
-    memset(&wsClients, 0, sizeof(wsClients));
 
     context = mg_start(&callbacks, 0, options);
     if (!context) {
@@ -188,16 +133,7 @@ WebApp::WebApp(int argc, char** argv, int *interfaceID,
 
     mg_set_request_handler(context, MAIN_URI, mainHandlerWrapper, this);
     mg_set_request_handler(context, REST_URI, restHandlerWrapper, this);
-    mg_set_request_handler(context, EXIT_URI, exitHandlerWrapper, this);
-    mg_set_request_handler(context, WS_URI, wsHandlerWrapper, this);
-
-    mg_set_websocket_handler(context,
-                             WS_URI,
-                             wsConnectHandlerWrapper,
-                             wsReadyHandlerWrapper,
-                             wsDataHandlerWrapper,
-                             wsCloseHandlerWrapper,
-                             this);
+    mg_set_request_handler(context, EVENT_URI, eventHandlerWrapper, this);
 
     PRINT("Link : %s", HOSTING);
 }
@@ -214,27 +150,9 @@ int WebApp::run() {
     return 1;
 }
 
-int WebApp::notifyHandler(long target, long id) {
+int WebApp::notifyHandler(COMPONENT target, long id) {
 
-    for (auto & wsClient : wsClients) {
-
-        bool process = false;
-
-        mg_lock_context(context);
-        if (wsClient.state == WSSTATE_READY) {
-            wsClient.state = WSSTATE_PROCESS;
-            process = true;
-        }
-        mg_unlock_context(context);
-
-        if (process) {
-            mg_websocket_write(wsClient.conn, MG_WEBSOCKET_OPCODE_TEXT,
-                    std::to_string(target).c_str(), 1);
-            mg_lock_context(context);
-            wsClient.state = WSSTATE_READY;
-            mg_unlock_context(context);
-        }
-    }
+    notifyFlag[target] = true;
 
     return true;
 }

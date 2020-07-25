@@ -43,7 +43,6 @@ bool Node::processDistributorIDMsg(const ComponentObject& owner, Message *msg) {
 
     setID((int)msg->getHeader().getVariant(0));
 
-    notifyUI();
     LOGS_I(getHost(), "New ID : %d is assigned by Distributor", getHost().getID());
 
     return send2DistributorIDMsg(owner);

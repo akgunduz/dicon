@@ -11,7 +11,7 @@
 class ConsoleApp : public App {
 
 public:
-    ConsoleApp(int, char**, int *, LOGLEVEL*, int*);
+    ConsoleApp(int *, LOGLEVEL*, int*);
 
     bool distPollHandler();
     bool distStateHandler();
@@ -24,7 +24,7 @@ public:
 
     int run() override;
 
-    int notifyHandler(long, long) override;
+    int notifyHandler(COMPONENT, long) override;
 };
 
 

@@ -18,7 +18,7 @@ The architecture consist of three main modules; **Distributor, Collector(s), Nod
 
 - **Nodes** Runs the application subtasks that comes from collectors as defined in their rule files.
 
-![alt text](docs/centralsw.png)
+![alt text](docs/DomainModel.png)
 
 ### Requirements
 

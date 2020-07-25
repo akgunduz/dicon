@@ -5,9 +5,8 @@
 
 #include "ConsoleApp.h"
 
-ConsoleApp::ConsoleApp(int argc, char** argv, int *interfaceID,
-                       LOGLEVEL* logLevel, int* componentCount)
-    : App(APPTYPE_CONSOLE, argc, argv, interfaceID, logLevel, componentCount) {
+ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL* logLevel, int* componentCount)
+    : App(APPTYPE_CONSOLE, interfaceID, logLevel, componentCount) {
 
     PRINT("Commands : ");
     PRINT("\tPoll     : 'p' ==> Execute polling command");
@@ -42,7 +41,7 @@ int ConsoleApp::run() {
 }
 
 
-int ConsoleApp::notifyHandler(long target, long id) {
+int ConsoleApp::notifyHandler(COMPONENT target, long id) {
 
     switch(target) {
         case COMP_DISTRIBUTOR:

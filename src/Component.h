@@ -9,7 +9,6 @@
 #include "DeviceList.h"
 #include "MessageTypes.h"
 #include "ComponentObject.h"
-#include "Timer.h"
 
 class Component;
 
@@ -18,6 +17,8 @@ typedef bool (*TypeStaticProcessComponentMsg)(Component*, const ComponentObject&
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
+
+typedef bool (*TypeNotifyCB)(void*, COMPONENT, long);
 
 class Component {
 

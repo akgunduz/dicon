@@ -5,9 +5,8 @@
 
 #include "Application.h"
 
-App::App(enum APPTYPE type, int argc, char** argv, int *interfaceID,
-                                   LOGLEVEL* logLevel, int* componentCount) :
-        type(type), argc(argc), argv(argv) {
+App::App(enum APPTYPE type, int *interfaceID, LOGLEVEL* logLevel, int* componentCount) :
+        type(type) {
 
     Log::init(logLevel[0], logLevel[1]);
 
@@ -37,12 +36,7 @@ App::App(enum APPTYPE type, int argc, char** argv, int *interfaceID,
           componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
 
-enum APPTYPE App::getAppType() {
-
-    return type;
-}
-
-bool App::notifyCB(void *context, long target, long id) {
+bool App::notifyCB(void *context, COMPONENT target, long id) {
 
     return ((App*) context)->notifyHandler(target, id);
 }

@@ -125,11 +125,11 @@ int main(int argc, char** argv) {
 
 #if defined(CONSOLE_UI)
 
-    app = new ConsoleApp(argc, argv, interfaceID, logLevel, componentCount);
+    app = new ConsoleApp(interfaceID, logLevel, componentCount);
 
 #elif defined(WEB_UI)
 
-    app = new WebApp(argc, argv, interfaceID, logLevel, componentCount);
+    app = new WebApp(interfaceID, logLevel, componentCount);
 
 #else
 

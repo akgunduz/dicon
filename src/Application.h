@@ -19,32 +19,26 @@ enum APPTYPE {
 
 class App {
 
-    static App* instance;
-
     DeviceList *deviceList;
 
     enum APPTYPE type;
 
 protected:
 
-    int argc;
-    char** argv;
-
     ComponentController* componentController;
 
-    App(enum APPTYPE, int, char**, int *,
-                     LOGLEVEL*, int*);
+    App(enum APPTYPE, int *, LOGLEVEL*, int*);
 
 public:
 
-    static bool notifyCB(void *, long, long);
-
-    enum APPTYPE getAppType();
+    static bool notifyCB(void *, COMPONENT, long);
 
     virtual int run() = 0;
 
-    virtual int notifyHandler(long, long) = 0;
+    virtual int notifyHandler(COMPONENT, long) = 0;
 
 };
+
+
 
 #endif //DICON_APPLICATION_H
