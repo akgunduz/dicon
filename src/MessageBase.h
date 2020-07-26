@@ -19,13 +19,14 @@
 
 #define BUSY_SLEEP_TIME 200
 
+typedef size_t (*TypeReadCB) (long, uint8_t*, size_t);
+typedef size_t (*TypeWriteCB) (long, const uint8_t*, size_t);
+
 class MessageBase {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
 	ComponentObject host;
-
-	sockaddr_in datagramAddress{};
 
     static CRC::Table<std::uint32_t, 32> crcTable;
 
@@ -33,41 +34,42 @@ public:
 
     explicit MessageBase(ComponentObject&);
 
-    void setDatagramAddress(sockaddr_in);
+    TypeReadCB getReadCB(long source);
+    TypeWriteCB getWriteCB(long source);
 
-    bool transferBinary(int, int, long, uint32_t&);
+    bool transferBinary(long, long, long, uint32_t&);
 
-	bool readBlock(int, uint8_t*, long, uint32_t&);
+	bool readBlock(long, uint8_t*, long, uint32_t&);
 
-	bool readSignature(int, uint32_t&);
-	bool readHeader(int, uint32_t&);
-	bool readBlockHeader(int, MessageBlockHeader&, uint32_t&);
-	bool readString(int, char*, long, uint32_t&);
-	bool readNumber(int, long&, uint32_t&);
-    bool readNumberList(int, std::vector<long> &, long, uint32_t&);
-    bool readBinary(int, const char*, long, uint32_t&);
-    bool readCRC(int, uint32_t&);
-	bool readFromStream(int);
+	bool readSignature(long, uint32_t&);
+	bool readHeader(long, uint32_t&);
+	bool readBlockHeader(long, MessageBlockHeader&, uint32_t&);
+	bool readString(long, char*, long, uint32_t&);
+	bool readNumber(long, long&, uint32_t&);
+    bool readNumberList(long, std::vector<long> &, long, uint32_t&);
+    bool readBinary(long, const char*, long, uint32_t&);
+    bool readCRC(long, uint32_t&);
+	bool readFromStream(long);
 
-    virtual bool readMessageBlock(int, MessageBlockHeader&, uint32_t&) = 0;
+    virtual bool readMessageBlock(long, MessageBlockHeader&, uint32_t&) = 0;
 
 
-	bool writeBlock(int, const uint8_t *, long, uint32_t&);
+	bool writeBlock(long, const uint8_t *, long, uint32_t&);
 
-	bool writeSignature(int, uint32_t&);
-	bool writeHeader(int, uint32_t&);
-	bool writeBlockHeader(int, MessageBlockHeader&, uint32_t&);
-	bool writeString(int, const char*, uint32_t&);
-	bool writeNumber(int, long, uint32_t&);
-    bool writeNumberList(int, std::vector<long>&, uint32_t&);
-	bool writeBinary(int, const char*, long, uint32_t&);
-    bool writeCRC(int, uint32_t&);
+	bool writeSignature(long, uint32_t&);
+	bool writeHeader(long, uint32_t&);
+	bool writeBlockHeader(long, MessageBlockHeader&, uint32_t&);
+	bool writeString(long, const char*, uint32_t&);
+	bool writeNumber(long, long, uint32_t&);
+    bool writeNumberList(long, std::vector<long>&, uint32_t&);
+	bool writeBinary(long, const char*, long, uint32_t&);
+    bool writeCRC(long, uint32_t&);
 
-	bool writeToStream(int);
+	bool writeToStream(long);
 
-    bool writeEndStream(int, uint32_t&);
+    bool writeEndStream(long, uint32_t&);
 
-    virtual bool writeMessageStream(int, uint32_t&) = 0;
+    virtual bool writeMessageStream(long, uint32_t&) = 0;
 
 
     virtual bool deSerializeHeader(const uint8_t*) = 0;

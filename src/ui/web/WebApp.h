@@ -29,7 +29,7 @@ class WebApp : public App {
 
 public:
 
-    WebApp(int *, LOGLEVEL*, int*);
+    WebApp(int *, LOGLEVEL*, std::vector<int>&);
 
     int restHandler(struct mg_connection *conn);
     int mainHandler(struct mg_connection *conn);

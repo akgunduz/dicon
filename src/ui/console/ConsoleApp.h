@@ -11,7 +11,7 @@
 class ConsoleApp : public App {
 
 public:
-    ConsoleApp(int *, LOGLEVEL*, int*);
+    ConsoleApp(int *, LOGLEVEL*, std::vector<int>&);
 
     bool distPollHandler();
     bool distStateHandler();

@@ -2,7 +2,7 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include "Test.h"
+#include "TestApp.h"
 
 void sendPing(Component *owner, const ComponentObject& target) {
 
@@ -20,7 +20,7 @@ bool processPingMsg(Component* component, const ComponentObject& owner, Message 
     return true;
 }
 
-void testPing(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testPing(Distributor* distributor, Collector* collector, Node* node) {
 
     MessageTypes::addMsg(MSG_TYPE_TEST_PING, "TEST_PING");
 

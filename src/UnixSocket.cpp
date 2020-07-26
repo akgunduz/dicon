@@ -161,6 +161,26 @@ void UnixSocket::runMulticastSender(Message *message) {
 
 }
 
+size_t UnixSocket::readCB(long source, uint8_t * buf, size_t size) {
+
+    return read(Address::getSocket(source), buf, size);
+}
+
+TypeReadCB UnixSocket::getReadCB(long source) {
+
+        return readCB;
+}
+
+size_t UnixSocket::writeCB(long target, const uint8_t * buf, size_t size) {
+
+    return write(Address::getSocket(target), buf, size);
+}
+
+TypeWriteCB UnixSocket::getWriteCB(long source) {
+
+        return writeCB;
+}
+
 UnixSocket::~UnixSocket() {
 	end();
 	close(unixSocket);

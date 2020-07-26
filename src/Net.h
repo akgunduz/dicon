@@ -29,17 +29,21 @@ private :
 	bool initTCP();
 	bool initMulticast();
 	void runReceiver();
-	static void runAccepter(Interface *, int);
+	static void runAccepter(Interface *, long);
 	void runSender(long, Message *);
 	void runMulticastSender(Message *);
 
     static std::string getIPString(long);
     static long parseIPAddress(const std::string&);
 
-	static sockaddr_in getInetAddressByAddress(long);
-	static sockaddr_in getInetAddressByPort(int);
+    static sockaddr_in getInetAddressByAddress(long);
+    static sockaddr_in getInetAddressByPort(int);
     static ip_mreq getInetMulticastAddress(long);
 
+    static size_t readCB(long, uint8_t*, size_t);
+    static size_t readMulticastCB(long, uint8_t*, size_t);
+    static size_t writeCB(long, const uint8_t*, size_t);
+    static size_t writeMulticastCB(long, const uint8_t*, size_t);
 public :
 
 	Net(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
@@ -53,6 +57,8 @@ public :
 
 	static long parseAddress(std::string);
 
+    static TypeReadCB getReadCB(long);
+    static TypeWriteCB getWriteCB(long);
 };
 
 #endif //__Server_H_

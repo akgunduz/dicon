@@ -95,13 +95,14 @@ set(GENERATOR_FILES
         )
 
 set(TEST_FILES
-        ${TEST_PATH}/Test.cpp
+        ${TEST_PATH}/TestApp.cpp
         ${TEST_PATH}/TestPing.cpp
         ${TEST_PATH}/TestComponentList.cpp
         ${TEST_PATH}/TestProcess.cpp
         ${TEST_PATH}/TestFileInfo.cpp
         ${TEST_PATH}/TestFileBinary.cpp
         ${TEST_PATH}/TestJobName.cpp
+        ${SOURCE_PATH}/Entry.cpp
         )
 
 if (APPLE)
@@ -128,14 +129,15 @@ add_library(dicon-framework ${FRAMEWORK_FILES})
 add_executable(dicon-generator ${GENERATOR_FILES})
 
 add_executable(dicon-console ${CONSOLE_FILES})
-target_compile_definitions(dicon-console PUBLIC -DCONSOLE_UI)
+target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
 target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
 
 add_executable(dicon-web ${WEB_FILES})
-target_compile_definitions(dicon-web PUBLIC -DWEB_UI -DUSE_WEBSOCKET -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread dl)
+target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
+target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread)
 
 add_executable(dicon-test ${TEST_FILES})
+target_compile_definitions(dicon-test PUBLIC -DTEST)
 target_link_libraries(dicon-test dicon-framework ${JSON-C_LIBRARIES} pthread)
 
 add_custom_command(

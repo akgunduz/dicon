@@ -2,7 +2,7 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include "Test.h"
+#include "TestApp.h"
 
 void sendFileBinary(Component *owner, const ComponentObject& target) {
 
@@ -35,7 +35,7 @@ bool processFileBinaryMsg(Component* component, const ComponentObject& owner, Me
     return true;
 }
 
-void testFileBinary(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testFileBinary(Distributor* distributor, Collector* collector, Node* node) {
 
     MessageTypes::addMsg(MSG_TYPE_TEST_FILEBINARY, "TEST_FILEBINARY");
 

@@ -25,7 +25,7 @@ Message::Message(ComponentObject& host, COMPONENT targetType, MSG_TYPE type)
     data.setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readComponentList(int desc, std::vector<ComponentObject> &componentList,
+bool Message::readComponentList(long source, std::vector<ComponentObject> &componentList,
         MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_COMPONENT) {
@@ -35,7 +35,7 @@ bool Message::readComponentList(int desc, std::vector<ComponentObject> &componen
 
     std::vector<long> list;
 
-    if (!readNumberList(desc, list, block.get(1), crc)) {
+    if (!readNumberList(source, list, block.get(1), crc)) {
         LOGS_E(getHost(), "readNumberList can not read number");
         return false;
     }
@@ -54,14 +54,14 @@ bool Message::readComponentList(int desc, std::vector<ComponentObject> &componen
     return true;
 }
 
-bool Message::readJobName(int desc, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readJobName(long source, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_JOB) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
         return false;
     }
 
-    if (!readString(desc, jobName, block.get(0), crc)) {
+    if (!readString(source, jobName, block.get(0), crc)) {
         LOGS_E(getHost(), "readJobName can not read job name");
         return false;
     }
@@ -71,14 +71,14 @@ bool Message::readJobName(int desc, char *jobName, MessageBlockHeader& block, ui
     return true;
 }
 
-bool Message::readProcessID(int desc, long& processID, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcessID(long source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSID) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
         return false;
     }
 
-    if (!readNumber(desc, processID, crc)) {
+    if (!readNumber(source, processID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
@@ -88,7 +88,7 @@ bool Message::readProcessID(int desc, long& processID, MessageBlockHeader& block
     return true;
 }
 
-bool Message::readProcess(int desc, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcess(long source, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSINFO) {
         LOGS_E(getHost(), "readProcessInfo can not read other blocks");
@@ -96,21 +96,21 @@ bool Message::readProcess(int desc, ProcessItem *content, MessageBlockHeader& bl
     }
 
     long id;
-    if (!readNumber(desc, id, crc)) {
+    if (!readNumber(source, id, crc)) {
         LOGS_E(getHost(), "readProcessInfo can not read process id");
         return false;
     }
     content->setID(id);
 
     long jobID;
-    if (!readNumber(desc, jobID, crc)) {
+    if (!readNumber(source, jobID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
     content->setAssignedJob(jobID);
 
     char process[PATH_MAX];
-    if (!readString(desc, process, block.get(0), crc)) {
+    if (!readString(source, process, block.get(0), crc)) {
         LOGS_E(getHost(), "readProcessInfo can not read process info");
         return false;
     }
@@ -122,7 +122,7 @@ bool Message::readProcess(int desc, ProcessItem *content, MessageBlockHeader& bl
     return true;
 }
 
-bool Message::readFile(int desc, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readFile(long source, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_FILEBINARY && block.getType() != BLOCK_FILEINFO) {
         LOGS_E(getHost(), "readFile can not read other blocks");
@@ -130,35 +130,35 @@ bool Message::readFile(int desc, ProcessFile& content, MessageBlockHeader &block
     }
 
     long id;
-    if (!readNumber(desc, id, crc)) {
+    if (!readNumber(source, id, crc)) {
         LOGS_E(getHost(), "readFile can not read id data");
         return false;
     }
     content.get()->setID(id);
 
     long state;
-    if (!readNumber(desc, state, crc)) {
+    if (!readNumber(source, state, crc)) {
         LOGS_E(getHost(), "readFile can not read state data");
         return false;
     }
     content.setOutputState((bool)state);
 
     long jobID;
-    if (!readNumber(desc, jobID, crc)) {
+    if (!readNumber(source, jobID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
     content.get()->setAssignedJob(jobID);
 
     long processID;
-    if (!readNumber(desc, processID, crc)) {
+    if (!readNumber(source, processID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
     content.setAssignedProcess(processID);
 
     char fileName[PATH_MAX];
-    if (!readString(desc, fileName, block.get(0), crc)) {
+    if (!readString(source, fileName, block.get(0), crc)) {
         LOGS_E(getHost(), "readFile can not read path data");
         return false;
     }
@@ -172,7 +172,7 @@ bool Message::readFile(int desc, ProcessFile& content, MessageBlockHeader &block
         return true;
     }
 
-    if (!readBinary(desc, Util::getAbsRefPath(getHost().getRootPath(), jobID, fileName).c_str(),
+    if (!readBinary(source, Util::getAbsRefPath(getHost().getRootPath(), jobID, fileName).c_str(),
                     block.get(1), crc)) {
         LOGS_E(getHost(), "readFile can not read Binary data");
         return false;
@@ -184,14 +184,14 @@ bool Message::readFile(int desc, ProcessFile& content, MessageBlockHeader &block
     return true;
 }
 
-bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readMessageBlock(long source, MessageBlockHeader &block, uint32_t& crc) {
 
     switch(block.getType()) {
 
         case BLOCK_PROCESSID: {
 
             long processID;
-            if (!readProcessID(in, processID, block, crc)) {
+            if (!readProcessID(source, processID, block, crc)) {
                 return false;
             }
 
@@ -204,7 +204,7 @@ bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc)
 
             ProcessFile processFile(new FileItem(getHost()));
 
-            if (!readFile(in, processFile, block, crc)) {
+            if (!readFile(source, processFile, block, crc)) {
                 return false;
             }
 
@@ -215,7 +215,7 @@ bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc)
         case BLOCK_JOB: {
 
             char jobName[NAME_MAX];
-            if (!readJobName(in, jobName, block, crc)) {
+            if (!readJobName(source, jobName, block, crc)) {
                 return false;
             }
 
@@ -228,7 +228,7 @@ bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc)
 
             auto *processItem = new ProcessItem(getHost());
 
-            if (!readProcess(in, processItem, block, crc)) {
+            if (!readProcess(source, processItem, block, crc)) {
                 return false;
             }
 
@@ -239,7 +239,7 @@ bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc)
 
         case BLOCK_COMPONENT: {
 
-            if (!readComponentList(in, data.getComponentList(), block, crc)) {
+            if (!readComponentList(source, data.getComponentList(), block, crc)) {
                 return false;
             }
 
@@ -253,7 +253,7 @@ bool Message::readMessageBlock(int in, MessageBlockHeader &block, uint32_t& crc)
     return true;
 }
 
-bool Message::writeComponentList(int desc, std::vector<ComponentObject>& componentList, uint32_t& crc) {
+bool Message::writeComponentList(long target, std::vector<ComponentObject>& componentList, uint32_t& crc) {
 
     std::vector<long> list;
 
@@ -267,12 +267,12 @@ bool Message::writeComponentList(int desc, std::vector<ComponentObject>& compone
     blockHeader.add(componentList[0].getType());
     blockHeader.add(list.size());
 
-    if (!writeBlockHeader(desc, blockHeader, crc)) {
+    if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeComponentList can not write block header");
         return false;
     }
 
-    if (!writeNumberList(desc, list, crc)) {
+    if (!writeNumberList(target, list, crc)) {
         LOGS_E(getHost(), "writeNumberList can not write component list");
         return false;
     }
@@ -285,18 +285,18 @@ bool Message::writeComponentList(int desc, std::vector<ComponentObject>& compone
     return true;
 }
 
-bool Message::writeJobName(int desc, const char *jobName, uint32_t& crc) {
+bool Message::writeJobName(long target, const char *jobName, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_JOB);
 
     blockHeader.add(strlen(jobName));
 
-    if (!writeBlockHeader(desc, blockHeader, crc)) {
+    if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeJobName can not write block header");
         return false;
     }
 
-    if (!writeString(desc, jobName, crc)) {
+    if (!writeString(target, jobName, crc)) {
         LOGS_E(getHost(), "writeJobName can not write job info");
         return false;
     }
@@ -306,16 +306,16 @@ bool Message::writeJobName(int desc, const char *jobName, uint32_t& crc) {
     return true;
 }
 
-bool Message::writeProcessID(int desc, long processID, uint32_t& crc) {
+bool Message::writeProcessID(long target, long processID, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSID);
 
-    if (!writeBlockHeader(desc, blockHeader, crc)) {
+    if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeProcessID can not write block header");
         return false;
     }
 
-    if (!writeNumber(desc, processID, crc)) {
+    if (!writeNumber(target, processID, crc)) {
         LOGS_E(getHost(), "writeProcess can not write process ID");
         return false;
     }
@@ -325,28 +325,28 @@ bool Message::writeProcessID(int desc, long processID, uint32_t& crc) {
     return true;
 }
 
-bool Message::writeProcess(int desc, ProcessItem* processItem, uint32_t& crc) {
+bool Message::writeProcess(long target, ProcessItem* processItem, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
 
     blockHeader.add(strlen(processItem->getParsedProcess()));
 
-    if (!writeBlockHeader(desc, blockHeader, crc)) {
+    if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeProcess can not write block header");
         return false;
     }
 
-    if (!writeNumber(desc, processItem->getID(), crc)) {
+    if (!writeNumber(target, processItem->getID(), crc)) {
         LOGS_E(getHost(), "writeProcess can not write process ID");
         return false;
     }
 
-    if (!writeNumber(desc, processItem->getAssignedJob(), crc)) {
+    if (!writeNumber(target, processItem->getAssignedJob(), crc)) {
         LOGS_E(getHost(), "writeProcess can not write job ID");
         return false;
     }
 
-    if (!writeString(desc, processItem->getParsedProcess(), crc)) {
+    if (!writeString(target, processItem->getParsedProcess(), crc)) {
         LOGS_E(getHost(), "writeProcess can not write process info");
         return false;
     }
@@ -357,7 +357,7 @@ bool Message::writeProcess(int desc, ProcessItem* processItem, uint32_t& crc) {
     return true;
 }
 
-bool Message::writeFile(int desc, ProcessFile &content, bool isBinary, uint32_t& crc) {
+bool Message::writeFile(long target, ProcessFile &content, bool isBinary, uint32_t& crc) {
 
     std::string absPath = Util::getAbsRefPath(content.get()->getHost().getRootPath(),
             content.get()->getAssignedJob(), content.get()->getName());
@@ -369,39 +369,39 @@ bool Message::writeFile(int desc, ProcessFile &content, bool isBinary, uint32_t&
     blockHeader.add(strlen(content.get()->getName()));
     blockHeader.add(content.get()->getSize());
 
-	if (!writeBlockHeader(desc, blockHeader, crc)) {
+	if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeFile can not write block header");
 		return false;
 	}
 
-    if (!writeNumber(desc, content.get()->getID(), crc)) {
+    if (!writeNumber(target, content.get()->getID(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file ID");
         return false;
     }
 
-    if (!writeNumber(desc, content.isOutput(), crc)) {
+    if (!writeNumber(target, content.isOutput(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file state");
         return false;
     }
 
-    if (!writeNumber(desc, content.get()->getAssignedJob(), crc)) {
+    if (!writeNumber(target, content.get()->getAssignedJob(), crc)) {
         LOGS_E(getHost(), "writeFile can not write assigned job");
         return false;
     }
 
-    if (!writeNumber(desc, content.getAssignedProcess(), crc)) {
+    if (!writeNumber(target, content.getAssignedProcess(), crc)) {
         LOGS_E(getHost(), "writeFile can not write assigned job");
         return false;
     }
 
-	if (!writeString(desc, content.get()->getName(), crc)) {
+	if (!writeString(target, content.get()->getName(), crc)) {
         LOGS_E(getHost(), "writeFile can not write file name");
         return false;
     }
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(desc, absPath.c_str(), content.get()->getSize(), crc)) {
+        if (!writeBinary(target, absPath.c_str(), content.get()->getSize(), crc)) {
             LOGS_E(getHost(), "writeFile can not write Binary data");
             return false;
         }
@@ -421,7 +421,7 @@ bool Message::writeFile(int desc, ProcessFile &content, bool isBinary, uint32_t&
 
 }
 
-bool Message::writeMessageStream(int out, uint32_t& crc) {
+bool Message::writeMessageStream(long target, uint32_t& crc) {
 
     switch(data.getStreamFlag()) {
 
@@ -431,13 +431,13 @@ bool Message::writeMessageStream(int out, uint32_t& crc) {
 
                 ProcessItem* processItem = data.getProcess(i);
 
-                if (!writeProcess(out, processItem, crc)) {
+                if (!writeProcess(target, processItem, crc)) {
                     return false;
                 }
 
                 for (auto processFile : processItem->getFileList()) {
 
-                    if (!writeFile(out, processFile, false, crc)) {
+                    if (!writeFile(target, processFile, false, crc)) {
                         return false;
                     }
                 }
@@ -448,13 +448,13 @@ bool Message::writeMessageStream(int out, uint32_t& crc) {
         case STREAM_FILEINFO:
         case STREAM_FILEBINARY:
 
-            if (!writeProcessID(out, data.getFileProcess(), crc)) {
+            if (!writeProcessID(target, data.getFileProcess(), crc)) {
                 return false;
             }
 
             for (int i = 0; i < data.getFileCount(); i++) {
 
-                if (!writeFile(out, data.getFile(i), data.getStreamFlag() == STREAM_FILEBINARY, crc)) {
+                if (!writeFile(target, data.getFile(i), data.getStreamFlag() == STREAM_FILEBINARY, crc)) {
                     return false;
                 }
             }
@@ -463,7 +463,7 @@ bool Message::writeMessageStream(int out, uint32_t& crc) {
 
         case STREAM_JOB:
 
-            if (!writeJobName(out, data.getJobName(), crc)) {
+            if (!writeJobName(target, data.getJobName(), crc)) {
                 return false;
             }
 
@@ -471,7 +471,7 @@ bool Message::writeMessageStream(int out, uint32_t& crc) {
 
         case STREAM_COMPONENT: {
 
-            if (!writeComponentList(out, data.getComponentList(), crc)) {
+            if (!writeComponentList(target, data.getComponentList(), crc)) {
                 return false;
             }
 

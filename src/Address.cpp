@@ -4,9 +4,10 @@
 
 #include "Address.h"
 
-long Address::create(INTERFACE interface, long base, int port, int socket) {
+long Address::create(INTERFACE interface, long base, int port, int socket, bool multicast) {
 
     return SET(interface, INTERFACE_POS, INTERFACE_MASK) |
+           SET((int)multicast, MULTICAST_POS, MULTICAST_MASK) |
            SET(socket, SOCKET_POS, SOCKET_MASK) |
            SET(port, PORT_POS, PORT_MASK) |
            SET(base, BASE_POS, BASE_MASK) ;
@@ -35,4 +36,14 @@ int Address::getPort(long& address) {
 long Address::getBase(long& address) {
 
     return (long) GET(address, BASE_POS, BASE_MASK);
+}
+
+bool Address::isMulticast(long &address) {
+
+    return (bool) GET(address, MULTICAST_POS, MULTICAST_MASK);
+}
+
+void Address::setMulticast(long &address, bool multicast) {
+
+    address = CLEAR_AND_SET(address, (int)multicast, MULTICAST_POS, MULTICAST_MASK);
 }

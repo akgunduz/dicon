@@ -2,7 +2,7 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include "Test.h"
+#include "TestApp.h"
 
 void sendFileInfo(Component *owner, const ComponentObject& target) {
 
@@ -31,7 +31,7 @@ bool processFileInfoMsg(Component* component, const ComponentObject& owner, Mess
     return true;
 }
 
-void testFileInfo(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testFileInfo(Distributor* distributor, Collector* collector, Node* node) {
 
     MessageTypes::addMsg(MSG_TYPE_TEST_FILEINFO, "TEST_FILEINFO");
 

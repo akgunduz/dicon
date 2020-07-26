@@ -14,6 +14,7 @@ enum APPTYPE {
 
     APPTYPE_CONSOLE,
     APPTYPE_WEB,
+    APPTYPE_TEST,
     APPTYPE_MAX
 };
 
@@ -27,7 +28,7 @@ protected:
 
     ComponentController* componentController;
 
-    App(enum APPTYPE, int *, LOGLEVEL*, int*);
+    App(enum APPTYPE, int *, LOGLEVEL*, std::vector<int>);
 
 public:
 

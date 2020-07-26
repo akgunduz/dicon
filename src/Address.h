@@ -8,11 +8,13 @@
 #include "InterfaceTypes.h"
 
 #define INTERFACE_MASK 0x8000000000000000 //1bit
-#define SOCKET_MASK 0x7FFF000000000000 //15bit
+#define MULTICAST_MASK 0x4000000000000000 //1bit
+#define SOCKET_MASK 0x3FFF000000000000 //14bit
 #define PORT_MASK 0xFFFF00000000 //16bit
 #define BASE_MASK 0xFFFFFFFF //32bit
 
 #define INTERFACE_POS 63
+#define MULTICAST_POS 62
 #define SOCKET_POS 48
 #define PORT_POS 32
 #define BASE_POS 0
@@ -32,9 +34,11 @@ public:
     static long getBase(long&);
     static int getPort(long&);
     static int getSocket(long&);
-    void setSocket(long&, int);
+    static void setSocket(long&, int);
+    static bool isMulticast(long&);
+    static void setMulticast(long&, bool);
 
-    static long create(INTERFACE, long, int, int = 0);
+    static long create(INTERFACE, long, int, int = 0, bool = 0);
 };
 
 #endif //DICON_ADDRESS_H

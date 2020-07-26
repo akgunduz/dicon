@@ -2,19 +2,13 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include "Test.h"
+#include "TestApp.h"
 
 void sendProcess(Component *owner, const ComponentObject& target) {
 
     auto *msg = new Message(owner->getHost(), target.getType(), (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
 
     auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
-
-//    TypeProcessFileList list = job->getProcess(0)->getFileList();
-//    for (auto processFile : list) {
-//        processFile.get()->check();
-//    }
-//
 
     job->getProcess(0)->check();
 
@@ -33,7 +27,7 @@ bool processProcessMsg(Component* component, const ComponentObject& owner, Messa
     return true;
 }
 
-void testProcess(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testProcess(Distributor* distributor, Collector* collector, Node* node) {
 
     MessageTypes::addMsg(MSG_TYPE_TEST_PROCESS, "TEST_PROCESS");
 

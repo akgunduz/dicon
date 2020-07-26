@@ -128,6 +128,49 @@ bool Net::initMulticast() {
     return true;
 }
 
+size_t Net::readCB(long source, uint8_t * buf, size_t size) {
+
+    return read(Address::getSocket(source), buf, size);
+}
+
+size_t Net::readMulticastCB(long source, uint8_t* buf, size_t size) {
+
+    return recvfrom(Address::getSocket(source), buf, size, 0, nullptr, nullptr);
+}
+
+TypeReadCB Net::getReadCB(long source) {
+
+    if (!Address::isMulticast(source)) {
+
+        return readCB;
+    }
+
+    return readMulticastCB;
+}
+
+size_t Net::writeCB(long target, const uint8_t * buf, size_t size) {
+
+    return write(Address::getSocket(target), buf, size);
+}
+
+size_t Net::writeMulticastCB(long target, const uint8_t* buf, size_t size) {
+
+    struct sockaddr_in datagramAddress = getInetAddressByAddress(target);
+
+    return sendto(Address::getSocket(target), buf, size, 0,
+                  (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
+}
+
+TypeWriteCB Net::getWriteCB(long source) {
+
+    if (!Address::isMulticast(source)) {
+
+        return writeCB;
+    }
+
+    return writeMulticastCB;
+}
+
 void Net::runReceiver() {
 
     bool thread_started = true;
@@ -165,21 +208,19 @@ void Net::runReceiver() {
 				return;
 			}
 
-            threadAccept = std::thread(runAccepter, this, acceptSocket);
-            threadAccept.detach();
+			long source = Address::create(INTERFACE_NET, ntohl(cli_addr.sin_addr.s_addr),
+			        ntohl(cli_addr.sin_port), acceptSocket, false);
 
+            threadAccept = std::thread(runAccepter, this, source);
+            threadAccept.detach();
 		}
 
         if (FD_ISSET(multicastSocket, &readfs)) {
 
-            auto *msg = new Message(getHost());
-            sockaddr_in address{};
-            address.sin_addr.s_addr = 1;
-            msg->setDatagramAddress(address);
-            if (msg->readFromStream(multicastSocket)) {
-                push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
-            }
+            long source = Address::create(INTERFACE_NET, 0, 0, multicastSocket, true);
 
+            threadAccept = std::thread(runAccepter, this, source);
+            threadAccept.detach();
         }
 
 		if (FD_ISSET(notifierPipe[0], &readfs)) {
@@ -197,11 +238,11 @@ void Net::runReceiver() {
 	}
 }
 
-void Net::runAccepter(Interface *interface, int acceptSocket) {
+void Net::runAccepter(Interface *interface, long source) {
 
 	auto *msg = new Message(interface->getHost());
 
-	if (msg->readFromStream(acceptSocket)) {
+	if (msg->readFromStream(source)) {
 
 		interface->push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
 	}
@@ -226,10 +267,12 @@ void Net::runSender(long target, Message *msg) {
 		return;
 	}
 
+	Address::setSocket(target, clientSocket);
+
     LOGS_T(getHost(), "Sender is connected for target : %s and message : %s !!!",
           InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getMsgName(msg->getHeader().getType()));
 
-	msg->writeToStream(clientSocket);
+	msg->writeToStream(target);
 
 	shutdown(clientSocket, SHUT_RDWR);
 	close(clientSocket);
@@ -246,8 +289,10 @@ void Net::runMulticastSender(Message *msg) {
     struct in_addr interface_addr = getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    msg->setDatagramAddress(getInetAddressByAddress(getMulticastAddress()));
-    msg->writeToStream(clientSocket);
+    Address::setSocket(getMulticastAddress(), clientSocket);
+    Address::setMulticast(getMulticastAddress(), true);
+
+    msg->writeToStream(getMulticastAddress());
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);

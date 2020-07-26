@@ -123,7 +123,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
     return 0;
 }
 
-WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, int* componentCount)
+WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
     : App(APPTYPE_WEB, interfaceID, logLevel, componentCount) {
 
     /* Start CivetWeb web server */

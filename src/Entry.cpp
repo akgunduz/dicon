@@ -3,14 +3,12 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifdef WX_UI
-#include <ui/wx/WxApp.h>
-#endif
-#ifdef CONSOLE_UI
+#if defined(CONSOLE)
 #include <ui/console/ConsoleApp.h>
-#endif
-#ifdef WEB_UI
+#elif defined(WEB)
 #include <ui/web/WebApp.h>
+#elif defined(TEST)
+#include <test/TestApp.h>
 #endif
 
 #include "Application.h"
@@ -34,7 +32,7 @@ void listDevices() {
 }
 
 APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
-                     LOGLEVEL* logLevel, int* componentCount) {
+                     LOGLEVEL* logLevel, std::vector<int>& componentCount) {
 
     for (int i = 1; i < argc; i++) {
 
@@ -119,7 +117,7 @@ int main(int argc, char** argv) {
 
     LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_ERROR};
 
-    int componentCount[3] = {0, 0, 0};
+    std::vector<int> componentCount = {0, 0, 0};
 
     APPPARAM res = parseParameters(argc, argv, interfaceID, logLevel, componentCount);
 
@@ -134,13 +132,17 @@ int main(int argc, char** argv) {
 
     App *app = nullptr;
 
-#if defined(CONSOLE_UI)
+#if defined(CONSOLE)
 
     app = new ConsoleApp(interfaceID, logLevel, componentCount);
 
-#elif defined(WEB_UI)
+#elif defined(WEB)
 
     app = new WebApp(interfaceID, logLevel, componentCount);
+
+#elif defined(TEST)
+
+    app = new TestApp(interfaceID, logLevel, componentCount);
 
 #else
 

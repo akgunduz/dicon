@@ -5,7 +5,7 @@
 
 #include "ConsoleApp.h"
 
-ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL* logLevel, int* componentCount)
+ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
     : App(APPTYPE_CONSOLE, interfaceID, logLevel, componentCount) {
 
     PRINT("Commands : ");

@@ -27,6 +27,9 @@ private :
 
     static sockaddr_un getUnixAddress(long);
 
+    static size_t readCB(long, uint8_t*, size_t);
+    static size_t writeCB(long, const uint8_t*, size_t);
+
 public :
 
 	UnixSocket(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
@@ -37,6 +40,9 @@ public :
 
     static std::string getAddressString(long);
 	static std::vector<long> getAddressList(Device*);
+
+    static TypeReadCB getReadCB(long);
+    static TypeWriteCB getWriteCB(long);
 };
 
 #endif //__UnixSocket_H_

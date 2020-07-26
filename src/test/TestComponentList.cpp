@@ -2,7 +2,7 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include "Test.h"
+#include "TestApp.h"
 
 void sendComponentList(Component *owner, const ComponentObject& target) {
 
@@ -30,7 +30,7 @@ bool processComponentListMsg(Component* component, const ComponentObject& owner,
     return true;
 }
 
-void testComponentList(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testComponentList(Distributor* distributor, Collector* collector, Node* node) {
 
     MessageTypes::addMsg(MSG_TYPE_TEST_COMPLIST, "TEST_COMPLIST");
 

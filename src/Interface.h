@@ -53,8 +53,8 @@ public :
 	bool push(MESSAGE_DIRECTION, long, Message *);
 	ComponentObject& getHost();
 	Device* getDevice();
-    long getAddress();
-    long getMulticastAddress();
+    long& getAddress();
+    long& getMulticastAddress();
 
     void setAddress(long);
     void setMulticastAddress(long);

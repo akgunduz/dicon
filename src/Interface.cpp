@@ -83,24 +83,24 @@ bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 	return false;
 }
 
-long Interface::getAddress() {
+long& Interface::getAddress() {
 
 	return address;
 }
 
-long Interface::getMulticastAddress() {
+long& Interface::getMulticastAddress() {
 
     return multicastAddress;
 }
 
 void Interface::setAddress(long _address) {
 
-    this->address = _address;
+    address = _address;
 }
 
 void Interface::setMulticastAddress(long _multicastAddress) {
 
-    this->multicastAddress = _multicastAddress;
+    multicastAddress = _multicastAddress;
 }
 
 ComponentObject& Interface::getHost() {
