@@ -6,13 +6,13 @@
 
 ComponentController *ComponentController::instance = nullptr;
 
-ComponentController *ComponentController::newInstance(int ind1, int ind2) {
+ComponentController *ComponentController::newInstance(int *interfaces) {
 
     if (instance) {
         return instance;
     }
 
-    instance = new ComponentController(ind1, ind2);
+    instance = new ComponentController(interfaces);
     return instance;
 }
 
@@ -31,9 +31,10 @@ ComponentController::~ComponentController() {
     instance = nullptr;
 }
 
-ComponentController::ComponentController(int ind1, int ind2) {
+ComponentController::ComponentController(int *_interfaces) {
 
-    setInterfaces(ind1, ind2);
+    interface[0] = _interfaces[0];
+    interface[1] = _interfaces[1];
 }
 
 Distributor *ComponentController::getDistributor() {
@@ -76,10 +77,10 @@ Node *ComponentController::getNode(long id) {
 bool ComponentController::startDistributor() {
 
     char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(NULL, 0), DISTRIBUTOR_PATH);
+    sprintf(path, "%s/%s", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
     mkdir(path, 0777);
 
-    distributor = Distributor::newInstance(path);
+    distributor = Distributor::newInstance(path, interface[0], interface[1]);
 
     return true;
 }
@@ -89,10 +90,10 @@ bool ComponentController::startCollector(int count) {
     for (int i = 0; i < count; i++) {
 
         char path[PATH_MAX];
-        sprintf(path, "%s/%s", getcwd(NULL, 0), COLLECTOR_PATH);
+        sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
         mkdir(path, 0777);
 
-        collectors.push_back(Collector::newInstance(path));
+        collectors.push_back(Collector::newInstance(path, interface[0], interface[1]));
     }
 
     return true;
@@ -106,16 +107,8 @@ bool ComponentController::startNode(int count) {
         sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
         mkdir(path, 0777);
 
-        nodes.push_back(Node::newInstance(path));
+        nodes.push_back(Node::newInstance(path, interface[1]));
     }
-
-    return true;
-}
-
-bool ComponentController::setInterfaces(int ind1, int ind2) {
-
-    DeviceList *deviceList = DeviceList::getInstance();
-    deviceList->setActive(ind1, ind2);
 
     return true;
 }

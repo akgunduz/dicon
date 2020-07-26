@@ -16,13 +16,16 @@ Component::Component(const char* rootPath) {
     hostCB = new InterfaceHostCB(getHostCB, this);
 }
 
-bool Component::initInterfaces(COMPONENT type) {
+bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interfaceNode) {
 
     DeviceList *deviceList = DeviceList::getInstance();
 
-    interfaces[COMP_NODE] = Connector::createInterface(deviceList->getActive(1), schedulerCB, hostCB);
-    interfaces[COMP_DISTRIBUTOR] = deviceList->isActiveDifferent() && type != COMP_NODE ?
-                                   Connector::createInterface(deviceList->getActive(0), schedulerCB, hostCB) :
+    Device *nodeDevice = deviceList->get(interfaceNode);
+    Device *otherDevice = deviceList->get(interfaceOther);
+
+    interfaces[COMP_NODE] = Connector::createInterface(nodeDevice, schedulerCB, hostCB);
+    interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
+                                   Connector::createInterface(otherDevice, schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
@@ -95,6 +98,14 @@ bool Component::defaultProcessMsg(const ComponentObject& owner, Message *msg) {
     return true;
 }
 
+Device *Component::getDevice(COMPONENT target) {
+
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->getDevice();
+    }
+
+    return nullptr;
+}
 
 long Component::getInterfaceAddress(COMPONENT target) {
 
@@ -142,11 +153,6 @@ bool Component::send(const ComponentObject& target, Message *msg) {
            MessageTypes::getMsgName(msg->getHeader().getType()));
 
     return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(target.getType()), msg);
-}
-
-std::vector<long> Component::getAddressList(const ComponentObject& target) {
-
-    return interfaces[target.getType()]->getDevice()->getAddressList();
 }
 
 ComponentObject &Component::getHost() {
@@ -197,3 +203,4 @@ bool Component::addStaticProcessHandler(COMPONENT component, MSG_TYPE msgType,
 
     return true;
 }
+

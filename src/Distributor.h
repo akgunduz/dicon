@@ -27,7 +27,7 @@ private:
 
     std::thread collThread;
 
-    explicit Distributor(const char *);
+    explicit Distributor(const char *, int, int);
 
     static void collProcessCB(Distributor *);
     void collProcess();
@@ -54,7 +54,7 @@ public:
 
 
 	~Distributor() override;
-    static Distributor* newInstance(const char* path);
+    static Distributor* newInstance(const char*, int, int);
 
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll(bool);

@@ -5,7 +5,7 @@
 
 #include "Application.h"
 
-App::App(enum APPTYPE type, int *interfaceID, LOGLEVEL* logLevel, int* componentCount) :
+App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, int* componentCount) :
         type(type) {
 
     Log::init(logLevel[0], logLevel[1]);
@@ -15,9 +15,9 @@ App::App(enum APPTYPE type, int *interfaceID, LOGLEVEL* logLevel, int* component
     deviceList = DeviceList::getInstance();
 
     PRINT("Using network interfaces : %s and %s",
-          deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
+          deviceList->get(interfaces[0])->getName(), deviceList->get(interfaces[1])->getName());
 
-    componentController = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
+    componentController = ComponentController::newInstance(interfaces);
 
     if (componentCount[COMP_DISTRIBUTOR]) {
         componentController->startDistributor();

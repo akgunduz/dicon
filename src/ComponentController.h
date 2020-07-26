@@ -8,6 +8,7 @@
 
 #include "Distributor.h"
 #include "Collector.h"
+#include "Node.h"
 
 class ComponentController {
 
@@ -15,13 +16,15 @@ class ComponentController {
     std::vector<Collector*> collectors;
     std::vector<Node*> nodes;
 
+    int interface[2]{};
+
     static ComponentController *instance;
 
-    ComponentController(int, int);
+    ComponentController(int*);
 
 public:
 
-    static ComponentController* newInstance(int, int);
+    static ComponentController* newInstance(int*);
     ~ComponentController();
 
     Distributor* getDistributor();
@@ -33,8 +36,6 @@ public:
     bool startDistributor();
     bool startCollector(int);
     bool startNode(int);
-
-    static bool setInterfaces(int, int);
 };
 
 

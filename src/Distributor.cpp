@@ -7,16 +7,16 @@
 
 Distributor *Distributor::instance = nullptr;
 
-Distributor *Distributor::newInstance(const char* path) {
+Distributor *Distributor::newInstance(const char* path, int interfaceOther, int interfaceNode) {
 
     if (!instance) {
-        instance = new Distributor(path);
+        instance = new Distributor(path, interfaceOther, interfaceNode);
     }
 
     return instance;
 }
 
-Distributor::Distributor(const char *rootPath) :
+Distributor::Distributor(const char *rootPath, int interfaceOther, int interfaceNode) :
         Component(rootPath) {
 
     host = new DistributorObject(getRootPath());
@@ -37,7 +37,7 @@ Distributor::Distributor(const char *rootPath) :
 
     collThread = std::thread(collProcessCB, this);
 
-    initInterfaces(COMP_DISTRIBUTOR);
+    initInterfaces(COMP_DISTRIBUTOR, interfaceOther, interfaceNode);
 };
 
 Distributor::~Distributor() {
@@ -272,7 +272,7 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
     if (isSupportMulticast(targetType)) {
 
-        auto *msg = new Message(getHost(), target.getType(), MSGTYPE_WAKEUP);
+        auto *msg = new Message(getHost(), targetType, MSGTYPE_WAKEUP);
 
         //TODO think multiple interfaces again
         target.setAddress(getInterfaceMulticastAddress(targetType));
@@ -280,11 +280,11 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
     } else {
 
-        std::vector<long> list = getAddressList(target);
+        std::vector<long> list = getDevice(targetType)->getAddressList();
 
         for (auto &address : list) {
 
-            auto *msg = new Message(getHost(), target.getType(), MSGTYPE_WAKEUP);
+            auto *msg = new Message(getHost(), targetType, MSGTYPE_WAKEUP);
 
             target.setAddress(address);
 
@@ -303,7 +303,7 @@ bool Distributor::sendWakeupMessagesAll(bool clear) {
 
     sendWakeupMessage(COMP_NODE);
 
-    if (DeviceList::getInstance()->isActiveDifferent()) {
+    if (getDevice(COMP_NODE) != getDevice(COMP_COLLECTOR)) {
         sendWakeupMessage(COMP_COLLECTOR);
     }
 

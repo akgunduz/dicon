@@ -9,12 +9,12 @@
 
 #define PROCESS_SLEEP_TIME 1000
 
-Node *Node::newInstance(const char* path) {
+Node *Node::newInstance(const char* path, int interface) {
 
-    return new Node(path);
+    return new Node(path, interface);
 }
 
-Node::Node(const char *rootPath) :
+Node::Node(const char *rootPath, int interface) :
         Component(rootPath), distributor(getRootPath()){
 
     host = new NodeObject(getRootPath());
@@ -27,7 +27,7 @@ Node::Node(const char *rootPath) :
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg));
 
-    initInterfaces(COMP_NODE);
+    initInterfaces(COMP_NODE, interface, interface);
 }
 
 Node::~Node() = default;

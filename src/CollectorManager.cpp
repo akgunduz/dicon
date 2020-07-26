@@ -4,7 +4,7 @@
 //
 
 #include "CollectorManager.h"
-#include "AddressHelper.h"
+#include "Address.h"
 #include "ComponentManager.h"
 #include "CollectorObject.h"
 

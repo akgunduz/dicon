@@ -4,36 +4,39 @@
 
 #include "Device.h"
 
-Device::Device(const char *_name, INTERFACE type, long base, int helper, bool loopback) {
+Device::Device(const char *_name, INTERFACE _type, uint32_t _base, uint8_t _mask, bool _loopback)
+    : type(_type), base(_base), mask(_mask), loopback(_loopback) {
 
     strcpy(this->name, _name);
-    this->type = type;
-    this->base = base;
-    this->helper = helper;
-    this->loopback = loopback;
 }
 
-const char* Device::getName() {
+const char* Device::getName() const {
+
     return name;
 }
 
-INTERFACE Device::getType() {
+INTERFACE Device::getType() const {
+
     return type;
 }
 
-long Device::getBase() {
+uint32_t Device::getBase() const {
+
     return base;
 }
 
-int Device::getHelper() {
-    return helper;
+uint8_t Device::getMask() const {
+
+    return mask;
 }
 
-bool Device::isLoopback() {
+bool Device::isLoopback() const {
+
     return loopback;
 }
 
 std::vector<long> Device::getAddressList() {
+
     return InterfaceTypes::getAddressList(getType())(this);
 }
 

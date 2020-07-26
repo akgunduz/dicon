@@ -3,14 +3,14 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __Connector_H_
-#define __Connector_H_
+#ifndef DICON_CONNECTOR_H
+#define DICON_CONNECTOR_H
 
 #include "Log.h"
 #include "Scheduler.h"
 #include "Interface.h"
 #include "Message.h"
-#include "AddressHelper.h"
+#include "Address.h"
 
 class Connector {
 
@@ -26,4 +26,4 @@ public:
 };
 
 
-#endif //__Connector_H_
+#endif //DICON_CONNECTOR_H

@@ -15,7 +15,13 @@
 
 #include "Application.h"
 
-int listDevices() {
+enum APPPARAM {
+    APPPARAM_OK,
+    APPPARAM_ERROR,
+    APPPARAM_LIST,
+};
+
+void listDevices() {
 
     DeviceList *deviceList = DeviceList::getInstance();
 
@@ -25,18 +31,18 @@ int listDevices() {
         PRINT("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
               deviceList->get(j)->getName());
     }
-
-    return 0;
 }
 
-bool parseParameters(int argc, char** argv, int *interfaceID,
+APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
                      LOGLEVEL* logLevel, int* componentCount) {
 
     for (int i = 1; i < argc; i++) {
 
         if (!strcmp(argv[i], "-l")) {
 
-            return listDevices();
+            listDevices();
+
+            return APPPARAM_LIST;
 
         } else if (!strcmp(argv[i], "-i")) {
 
@@ -46,14 +52,14 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
                     interfaceID[0] = atoi(argv[i]);
 
                 } else {
-                    return false;
+                    return APPPARAM_ERROR;
                 }
 
                 if (isdigit(argv[++i][0])) {
                     interfaceID[1] = atoi(argv[i]);
 
                 } else {
-                    return false;
+                    return APPPARAM_ERROR;
                 }
             }
 
@@ -68,7 +74,7 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
 
             } else {
 
-                return false;
+                return APPPARAM_ERROR;
             }
 
         } else if (!strcmp(argv[i], "-n")) {
@@ -78,7 +84,7 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
 
             } else {
 
-                return false;
+                return APPPARAM_ERROR;
             }
 
         } else if (!strcmp(argv[i], "-g")) {
@@ -89,20 +95,20 @@ bool parseParameters(int argc, char** argv, int *interfaceID,
                     logLevel[0] = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
-                    return false;
+                    return APPPARAM_ERROR;
                 }
 
                 if (isdigit(argv[++i][0])) {
                     logLevel[1] = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
-                    return false;
+                    return APPPARAM_ERROR;
                 }
             }
         }
     }
 
-    return true;
+    return APPPARAM_OK;
 }
 
 int main(int argc, char** argv) {
@@ -115,9 +121,14 @@ int main(int argc, char** argv) {
 
     int componentCount[3] = {0, 0, 0};
 
-    if (!parseParameters(argc, argv, interfaceID, logLevel,
-                         componentCount)) {
-        PRINT("Parameter problem, exiting.....");
+    APPPARAM res = parseParameters(argc, argv, interfaceID, logLevel, componentCount);
+
+    if (res != APPPARAM_OK) {
+
+        if (res == APPPARAM_ERROR) {
+            PRINT("Parameter problem, exiting.....");
+        }
+
         return 0;
     }
 

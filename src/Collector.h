@@ -18,7 +18,7 @@ class Collector : public Component {
 	JobItem *job;
 	DistributorObject distributor;
 
-    explicit Collector(const char *rootPath);
+    explicit Collector(const char *, int, int);
 
 	void setDistributor(const DistributorObject&);
 
@@ -39,7 +39,7 @@ class Collector : public Component {
 public:
 
     ~Collector() override;
-    static Collector* newInstance(const char*);
+    static Collector* newInstance(const char*, int, int);
 
     JobItem* getJob();
     bool processJob();

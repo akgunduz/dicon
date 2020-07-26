@@ -5,12 +5,12 @@
 
 #include "Collector.h"
 
-Collector *Collector::newInstance(const char* path) {
+Collector *Collector::newInstance(const char* path, int interfaceOther, int interfaceNode) {
 
-    return new Collector(path);
+    return new Collector(path, interfaceOther, interfaceNode);
 }
 
-Collector::Collector(const char *rootPath) :
+Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode) :
         Component(rootPath), job(nullptr), distributor(getRootPath()) {
 
     host = new CollectorObject(getRootPath());
@@ -22,7 +22,7 @@ Collector::Collector(const char *rootPath) :
     addProcessHandler(COMP_NODE, MSGTYPE_INFO, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileInfoMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileBinaryMsg));
 
-    initInterfaces(COMP_COLLECTOR);
+    initInterfaces(COMP_COLLECTOR, interfaceOther, interfaceNode);
 }
 
 Collector::~Collector() = default;

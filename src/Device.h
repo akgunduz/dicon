@@ -9,22 +9,23 @@
 
 class Device {
 
-    char name[50];
+    char name[NAME_MAX]{};
+
     INTERFACE type;
 
     long base;
-    int helper;
+    int mask;
     bool loopback;
 
 public:
 
-    Device(const char*, INTERFACE, long, int, bool = false);
+    Device(const char*, INTERFACE, uint32_t , uint8_t = 0, bool = false);
 
-    const char* getName();
-    INTERFACE getType();
-    long getBase();
-    int getHelper();
-    bool isLoopback();
+    const char* getName() const;
+    INTERFACE getType() const;
+    uint32_t getBase() const;
+    uint8_t getMask() const;
+    bool isLoopback() const;
 
     std::vector<long> getAddressList();
 };

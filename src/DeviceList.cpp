@@ -4,11 +4,23 @@
 //
 
 
+#include <random>
 #include "DeviceList.h"
-#include "AddressHelper.h"
-#include "Log.h"
+#include "Address.h"
 
-DeviceList* DeviceList::instance = NULL;
+DeviceList* DeviceList::instance = nullptr;
+
+int createMask(long address) {
+
+    int i = 0;
+    auto ip = (uint32_t) Address::getBase(address);
+    while(ip > 0) {
+        ip = ip >> 1;
+        i++;
+    }
+
+    return i;
+}
 
 DeviceList::DeviceList() {
 
@@ -21,17 +33,17 @@ DeviceList::DeviceList() {
         return;
     }
 
-    for (loop = ifAddrStruct; loop != NULL; loop = loop->ifa_next) {
+    for (loop = ifAddrStruct; loop != nullptr; loop = loop->ifa_next) {
 
-        if (loop->ifa_addr->sa_family == AF_INET) { // check it is IP4
+        if (loop->ifa_addr->sa_family == AF_INET) { // check if it is IP
 
             if (!((loop->ifa_flags & IFF_UP) && (loop->ifa_flags & IFF_RUNNING))) {
                 continue;
             }
 
             device = new Device(loop->ifa_name, INTERFACE_NET,
-                                               ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                               AddressHelper::address2prefix(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                                ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                                (loop->ifa_flags & IFF_LOOPBACK) > 0);
 
             add(device);
@@ -40,15 +52,18 @@ DeviceList::DeviceList() {
 
     freeifaddrs(ifAddrStruct);
 
-    srand(time(NULL));
-    device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), rand());
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::uniform_int_distribution<int> distribution(1, time(nullptr));
+
+    device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator));
 
     add(device);
 }
 
 DeviceList *DeviceList::getInstance() {
 
-    if (instance == NULL) {
+    if (instance == nullptr) {
         instance = new DeviceList();
     }
     return instance;
@@ -56,32 +71,16 @@ DeviceList *DeviceList::getInstance() {
 
 bool DeviceList::add(Device *device) {
 
-    devices.push_back(device);
+    list.push_back(device);
     return false;
 }
 
 Device* DeviceList::get(int index) {
 
-    return devices[index];
-}
-
-Device *DeviceList::getActive(int index) {
-
-    return devices[active[index]];
-}
-
-void DeviceList::setActive(int index0, int index1) {
-
-    active[0] = index0;
-    active[1] = index1;
-}
-
-bool DeviceList::isActiveDifferent() {
-
-    return getActive(0) != getActive(1);
+    return list[index];
 }
 
 long DeviceList::getCount() {
 
-    return devices.size();
+    return list.size();
 }

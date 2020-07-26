@@ -99,13 +99,13 @@ int main(int argc, char** argv) {
 
     Util::init();
 
-    int interfaceID[2] = {0, 0};
+    int interfaces[2] = {0, 0};
 
     LOGLEVEL logLevel[2] = {LEVEL_TRACE, LEVEL_ERROR};
 
     int componentCount[3] = {1, 1, 1};
 
-    if (!parseParameters(argc, argv, interfaceID, logLevel,
+    if (!parseParameters(argc, argv, interfaces, logLevel,
                          componentCount)) {
         PRINT("Parameter problem, exiting.....");
         return 0;
@@ -116,9 +116,9 @@ int main(int argc, char** argv) {
     DeviceList *deviceList = DeviceList::getInstance();
 
     PRINT("Using network interfaces : %s and %s",
-          deviceList->get(interfaceID[0])->getName(), deviceList->get(interfaceID[1])->getName());
+          deviceList->get(interfaces[0])->getName(), deviceList->get(interfaces[1])->getName());
 
-    ComponentController* componentController = ComponentController::newInstance(interfaceID[0], interfaceID[1]);
+    ComponentController* componentController = ComponentController::newInstance(interfaces);
 
     if (componentCount[COMP_DISTRIBUTOR]) {
         componentController->startDistributor();

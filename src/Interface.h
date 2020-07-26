@@ -2,12 +2,12 @@
 // Created by Haluk Akgunduz on 24/06/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
-#ifndef __Interface_H_
-#define __Interface_H_
+#ifndef DICON_INTERFACE_H
+#define DICON_INTERFACE_H
 
 #include "Scheduler.h"
 #include "Message.h"
-#include "AddressHelper.h"
+#include "Address.h"
 #include "Device.h"
 #include "MessageItem.h"
 
@@ -22,15 +22,13 @@ private :
 	static void runReceiverCB(Interface *);
 	static bool runSenderCB(void *, SchedulerItem *);
 
-	Device *device;
+	Device *device{};
 
-    long address;
-    long multicastAddress;
+    long address{};
+    long multicastAddress{};
 
-    const InterfaceSchedulerCB *schedulerCB;
-    const InterfaceHostCB *hostCB;
-
-    void setDevice(Device*);
+    const InterfaceSchedulerCB *schedulerCB{};
+    const InterfaceHostCB *hostCB{};
 
 protected :
 
@@ -66,4 +64,4 @@ public :
 };
 
 
-#endif //__Connector_H_
+#endif //DICON_INTERFACE_H

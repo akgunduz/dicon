@@ -44,7 +44,7 @@ protected :
 
     static ComponentObject& getHostCB(void*);
 
-    bool initInterfaces(COMPONENT type);
+    bool initInterfaces(COMPONENT type, int, int);
 
     void notifyUI();
 
@@ -57,6 +57,7 @@ public:
 
     const char* getRootPath();
 
+    Device* getDevice(COMPONENT);
     long getInterfaceAddress(COMPONENT);
     long getInterfaceMulticastAddress(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
@@ -66,7 +67,6 @@ public:
 
     bool send(const ComponentObject&, Message*);
 
-    std::vector<long> getAddressList(const ComponentObject&);
     bool defaultProcessMsg(const ComponentObject&, Message *);
 
     static void registerNotify(void*, TypeNotifyCB);

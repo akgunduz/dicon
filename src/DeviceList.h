@@ -9,27 +9,25 @@
 
 #include "Device.h"
 
-#define MAX_ACTIVE 2
+typedef std::vector<Device*> TypeDeviceList;
 
 class DeviceList {
 
 private:
 
-    std::vector<Device*> devices;
-    int active[MAX_ACTIVE];
-
     static DeviceList *instance;
+
     DeviceList();
+
+    TypeDeviceList list;
 
 public:
 
     static DeviceList* getInstance();
     bool add(Device*);
     Device* get(int);
-    Device* getActive(int);
     long getCount();
-    void setActive(int, int);
-    bool isActiveDifferent();
+
 };
 
 

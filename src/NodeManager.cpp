@@ -4,7 +4,7 @@
 //
 
 #include "NodeManager.h"
-#include "AddressHelper.h"
+#include "Address.h"
 
 NodeManager::NodeManager() = default;
 

@@ -5,15 +5,10 @@
 
 #include "Interface.h"
 
-Interface::Interface(Device *device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
-                    : hostCB(hostCB){
+Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
+    : device(_device), hostCB(hostCB) {
 
     scheduler = new Scheduler();
-
-    this->address = 0;
-    this->multicastAddress = 0;
-
-    setDevice(device);
 
     schedulerCB = new InterfaceSchedulerCB(runSenderCB, this);
 
@@ -78,7 +73,7 @@ Interface::~Interface() {
 
 bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
 
-	if (AddressHelper::getInterface(target) == getType()) {
+	if (Address::getInterface(target) == getType()) {
 
 		scheduler->push(new MessageItem(type, target, msg));
 		return true;
@@ -116,9 +111,4 @@ ComponentObject& Interface::getHost() {
 Device *Interface::getDevice() {
 
     return device;
-}
-
-void Interface::setDevice(Device *_device) {
-
-    this->device = _device;
 }

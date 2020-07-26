@@ -18,7 +18,7 @@ private:
 
     std::vector<ProcessItem> processList;
 
-	explicit Node(const char *rootPath);
+	explicit Node(const char *, int);
 
 	ComponentObject getDistributor();
 	void setDistributor(const DistributorObject&);
@@ -46,7 +46,7 @@ private:
 public:
 
 	~Node() override;
-    static Node* newInstance(const char*);
+    static Node* newInstance(const char*, int);
 
     std::vector<ProcessItem>& getProcessList();
 };
