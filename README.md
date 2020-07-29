@@ -145,7 +145,7 @@ The communication interface is structured based on sockets and it includes messa
 
 #### Message Transfer Flow
 
-![alt text](docs/messageflow.png)
+![alt text](docs/MessageTransferFlow.png)
 
 ### Jobs
 
@@ -250,7 +250,7 @@ On Collector side, if it connects to a distributor, it allows users to run their
 
 Finally on Node side, after the initialization is done, node get interacts with Collectors requests to run the processes through shell and lists them on the UI.
 
-![alt text](docs/NOde.png)
+![alt text](docs/Node.png)
 
 ### Open Issues
 
