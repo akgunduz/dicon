@@ -37,7 +37,7 @@ public:
     void clear();
     bool isExist(long);
 
-    long add(long);
+    long add(long, bool&);
 };
 
 

@@ -57,11 +57,13 @@ ComponentObject *ComponentManager::getByIndex(int index) {
     return object;
 }
 
-long ComponentManager::add(long address) {
+long ComponentManager::add(long address, bool& isAlreadyAdded) {
 
     long newID = 0;
 
     mutex.lock();
+
+    isAlreadyAdded = false;
 
     auto search = componentsMapAddress.find(address);
     if (search == componentsMapAddress.end()) {
@@ -71,6 +73,11 @@ long ComponentManager::add(long address) {
         componentsMapAddress[address] = object;
         componentsMapID[newID] = object;
         componentsIndex.emplace_back(object);
+
+    } else {
+
+        isAlreadyAdded = true;
+        newID = search->second->getID();
     }
 
     mutex.unlock();
