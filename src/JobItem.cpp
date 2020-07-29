@@ -9,7 +9,7 @@
 
 long JobItem::jobID = 1;
 
-JobItem::JobItem(const ComponentObject& host, const char* jobZipFile, long _jobID)
+JobItem::JobItem(const ComponentObject& host, const char* jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
@@ -17,9 +17,24 @@ JobItem::JobItem(const ComponentObject& host, const char* jobZipFile, long _jobI
     contentTypes[CONTENT_PARAM] = new JsonType(CONTENT_PARAM, "parameters", this, parseParamNode);
     contentTypes[CONTENT_PROCESS] = new JsonType(CONTENT_PROCESS, "processes", this, parseProcessNode);
 
-    if (!extract(jobZipFile, _jobID)) {
-        LOGS_E(getHost(), "Job can not extracted from Zip file!!!");
+    JOB_PATH pathType = checkPath(jobPath);
+
+    if (pathType == JOBPATH_INVALID) {
         return;
+    }
+
+    if (pathType == JOBPATH_ZIP) {
+        if (!extract(jobPath, _jobID)) {
+            LOGS_E(getHost(), "Job can not extracted from Zip file!!!");
+            return;
+        }
+
+    } else {
+        char absPath[PATH_MAX];
+        sprintf(absPath, "%s/%ld", getHost().getRootPath(), _jobID);
+        std::filesystem::copy(jobPath, absPath,
+                std::filesystem::copy_options::recursive |
+                std::filesystem::copy_options::update_existing);
     }
 
     if (!parse()) {
@@ -133,7 +148,7 @@ bool JobItem::parseFileNode(JobItem *parent, json_object *node) {
 
         const char* path = json_object_get_string(child);
 
-        auto *content = new FileItem(parent->getHost(), i, parent->getID(), path);
+        auto *content = new FileItem(parent->getHost(), i + 1, parent->getID(), path);
 
         parent->contentList[CONTENT_FILE].emplace_back(content);
 
@@ -160,7 +175,7 @@ bool JobItem::parseParamNode(JobItem *parent, json_object *node) {
 
         const char *param = json_object_get_string(child);
 
-        auto *content = new ParameterItem(parent->getHost(), param);
+        auto *content = new ParameterItem(parent->getHost(), i + 1, parent->getID(), param);
 
         parent->contentList[CONTENT_PARAM].emplace_back(content);
     }
@@ -314,41 +329,65 @@ int JobItem::getByOutput(int index) const {
     return -1;
 }
 
-bool JobItem::createDependencyMap() {
-
-    int depth[getFileCount()];
-    std::vector<int> adj[getFileCount()];
-    std::list<int> initial, final;
-
-    bzero(depth, (size_t)getFileCount() * sizeof(int));
+bool JobItem::setProcessIDByOutput(long outputID, long processID) {
 
     for (int i = 0; i < getProcessCount(); i++) {
 
-        TypeFileList outList, depList;
+        auto *process = getProcess(i);
+
+        for (auto processFile : process->getFileList()) {
+
+            if (processFile.isOutput()
+                    && processFile.get()->getID() == outputID
+                    && process->getID() == 0) {
+
+                process->setID(processID);
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool JobItem::createDependencyMap() {
+
+    std::map<long, int> depth;
+    std::map<long, std::vector<long>> adj;
+    std::list<long> initial, final;
+
+    for (int i = 0; i < getProcessCount(); i++) {
+
+        std::vector<long> outList, depList;
 
         for (auto processFile : getProcess(i)->getFileList()) {
 
             processFile.isOutput() ?
-                outList.emplace_back(processFile.get())
-                : depList.emplace_back(processFile.get());
+                outList.emplace_back(processFile.get()->getID())
+                : depList.emplace_back(processFile.get()->getID());
         }
 
-        long id = outList[0]->getID();
+        for (auto &outID : outList) {
 
-        for (auto & j : depList) {
+            for (auto &depID : depList) {
 
-            //TODO will be updated with multi output files
+                adj[depID].emplace_back(outID);
 
-            adj[j->getID()].emplace_back(id);
-
-            depth[id]++;
+                depth[outID]++;
+            }
         }
+
+        getProcess(i)->setID(0);
     }
 
     for (int i = 0; i < getFileCount(); i++) {
 
-        if (depth[i] == 0) {
-            initial.emplace_back(i);
+        auto *file = getFile(i);
+
+        if (depth[file->getID()] == 0) {
+            initial.emplace_back(file->getID());
         }
     }
 
@@ -359,38 +398,36 @@ bool JobItem::createDependencyMap() {
 
         final.emplace_back(current);
 
-        for (int & i : adj[current]) {
+        for (long & outID : adj[current]) {
 
-            depth[i] -= 1;
-            if (depth[i] == 0) {
-                initial.emplace_back(i);
+            depth[outID] -= 1;
+            if (depth[outID] == 0) {
+                initial.emplace_back(outID);
             }
         }
     }
 
     for (int i = 0; i < getFileCount(); i++) {
 
-        if (depth[i] > 0) {
+        auto *file = getFile(i);
+
+        if (depth[file->getID()] > 0) {
             return false;
         }
     }
 
-    int orderedProcessIndex = 0;
+    long processID = 1;
 
-    for (auto outputIndex : final) {
+    for (auto outputID : final) {
 
-        int processIndex = getByOutput(outputIndex);
-        if (processIndex == -1) {
-            continue;
+        bool res = setProcessIDByOutput(outputID, processID);
+
+        if (res) {
+            processID++;
         }
-
-        getProcess(processIndex)->setID(orderedProcessIndex + 1);
-
-        std::swap(contentList[CONTENT_PROCESS][orderedProcessIndex],
-                contentList[CONTENT_PROCESS][processIndex]);
-
-        orderedProcessIndex++;
     }
+
+    std::sort(contentList[CONTENT_PROCESS].begin(), contentList[CONTENT_PROCESS].end(), compareContentID);
 
     return true;
 }
@@ -424,6 +461,30 @@ int JobItem::updateDependency(long id, int &totalCount) {
 
     return readyCount;
 }
+
+JOB_PATH JobItem::checkPath(const char *zipPath) {
+
+    struct stat status{};
+
+    if (stat(zipPath, &status) == -1) {
+        LOGS_E(getHost(), "Invalid Path");
+        return JOBPATH_INVALID;
+    }
+
+    if ((status.st_mode & S_IFMT) == S_IFDIR) {
+
+        return JOBPATH_DIR;
+    }
+
+    const char* p = strrchr(zipPath, '.');
+    if (strcmp(p + 1, "zip") == 0) {
+
+        return JOBPATH_ZIP;
+    }
+
+    return JOBPATH_INVALID;
+}
+
 
 bool JobItem::extract(const char *zipFile, long& _jobID) {
 
@@ -506,3 +567,4 @@ void JobItem::setDuration(long _duration) {
 
     duration = _duration;
 }
+

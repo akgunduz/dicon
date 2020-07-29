@@ -195,7 +195,7 @@ bool Collector::processJob() {
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }
 
-bool Collector::loadJob(const char* zipFile) {
+JobItem* Collector::loadJob(const char* zipFile) {
 
     delete job;
 
@@ -203,7 +203,7 @@ bool Collector::loadJob(const char* zipFile) {
 
     notifyUI();
 
-    return true;
+    return job;
 }
 
 JobItem *Collector::getJob() {

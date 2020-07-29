@@ -41,4 +41,6 @@ public:
     void setAssignedJob(long);
 };
 
+bool compareContentID(ContentItem * ci1, ContentItem * ci2);
+
 #endif //DICON_CONTENTITEM_H

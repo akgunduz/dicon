@@ -35,6 +35,7 @@ public:
     void testFileInfo(Distributor*, Collector*, Node*);
     void testFileBinary(Distributor*, Collector*, Node*);
     void testJobName(Distributor*, Collector*, Node*);
+    void testLoadJob(Distributor*, Collector*, Node*);
 
     int run() override;
 

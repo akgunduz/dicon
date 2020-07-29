@@ -28,6 +28,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <filesystem>
 
 #include <sys/types.h>
 #include <sys/stat.h>

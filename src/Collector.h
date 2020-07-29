@@ -43,7 +43,7 @@ public:
 
     JobItem* getJob();
     bool processJob();
-    bool loadJob(const char*);
+    JobItem* loadJob(const char*);
 };
 
 #endif	/* COLLECTOR_H */

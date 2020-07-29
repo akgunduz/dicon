@@ -40,3 +40,9 @@ void ContentItem::setAssignedJob(long _assignedJob) {
 
     assignedJob = _assignedJob;
 }
+
+bool compareContentID(ContentItem * ci1, ContentItem * ci2)
+{
+    return (ci1->getID() < ci2->getID());
+}
+

@@ -14,6 +14,13 @@
 #define MAX_CONTENT_TYPE 10
 #define JOB_FILE "Job.json"
 
+enum JOB_PATH {
+    JOBPATH_ZIP,
+    JOBPATH_DIR,
+    JOBPATH_INVALID,
+    JOBPATH_MAX,
+};
+
 class JobItem : public FileItem {
 
 protected:
@@ -65,9 +72,11 @@ public:
     ProcessItem* assignNode(ComponentObject &);
 
     int getByOutput(int) const;
+    bool setProcessIDByOutput(long, long);
     bool createDependencyMap();
     int updateDependency(long, int &);
 
+    JOB_PATH checkPath(const  char*);
     bool extract(const char*, long&);
 
     bool check() override;

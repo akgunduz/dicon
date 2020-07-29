@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(Dicon)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
@@ -102,6 +102,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestFileInfo.cpp
         ${TEST_PATH}/TestFileBinary.cpp
         ${TEST_PATH}/TestJobName.cpp
+        ${TEST_PATH}/TestLoadJob.cpp
         ${SOURCE_PATH}/Entry.cpp
         )
 

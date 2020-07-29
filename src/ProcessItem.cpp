@@ -46,6 +46,8 @@ bool ProcessItem::parse(void *job) {
 				//no break
 			case 'F':
 			case 'f':
+            case 'I':
+            case 'i':
 				if (cmdMode) {
 					cmdType = PROCESS_INPUT;
 					break;
@@ -107,7 +109,7 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
         case PROCESS_INPUT:
 		case PROCESS_OUTPUT: {
-            auto *content = ((JobItem*)jobItem)->getFile(cmdIndex);
+            auto *content = ((JobItem*)jobItem)->getFile(cmdIndex - 1);
             if (content != nullptr) {
                 sprintf(parsedProcess, "%s%s/%s", parsedProcess, ROOT_SIGN,
                         Util::getRefPath(content->getHost().getRootPath(), content->getAssignedJob(), content->getName()).c_str());
@@ -116,7 +118,7 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
         } break;
 
         case PROCESS_PARAM: {
-            auto *content = ((JobItem*)jobItem)->getParameter(cmdIndex);
+            auto *content = ((JobItem*)jobItem)->getParameter(cmdIndex - 1);
             if (content != nullptr) {
                 strcat(parsedProcess, content->getParam());
             }
@@ -233,4 +235,3 @@ long ProcessItem::getDuration() const {
 void ProcessItem::setDuration(long _duration) {
     duration = _duration;
 }
-
