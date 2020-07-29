@@ -20,6 +20,7 @@ void TestApp::help() {
     PRINT("\tTest File Binary    : 'b'");
     PRINT("\tTest Job Name       : 'x'");
     PRINT("\tTest Load Job       : 'l'");
+    PRINT("\tTest WakeUp         : 'w'");
     PRINT("\tHelp                : 'h'");
     PRINT("\tQuit                : 'q'");
 }
@@ -55,6 +56,9 @@ int TestApp::run() {
                 break;
             case 'l':
                 testLoadJob(d, c, n);
+                break;
+            case 'w':
+                testWakeUp(d, c, n);
                 break;
             case 'h':
                 help();

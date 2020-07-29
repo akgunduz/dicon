@@ -17,6 +17,7 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_FILEINFO,
     MSG_TYPE_TEST_FILEBINARY,
     MSG_TYPE_TEST_JOBNAME,
+    MSG_TYPE_TEST_WAKEUP,
 
 };
 
@@ -36,6 +37,7 @@ public:
     void testFileBinary(Distributor*, Collector*, Node*);
     void testJobName(Distributor*, Collector*, Node*);
     void testLoadJob(Distributor*, Collector*, Node*);
+    void testWakeUp(Distributor*, Collector*, Node*);
 
     int run() override;
 

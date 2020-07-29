@@ -103,6 +103,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestFileBinary.cpp
         ${TEST_PATH}/TestJobName.cpp
         ${TEST_PATH}/TestLoadJob.cpp
+        ${TEST_PATH}/TestWakeUp.cpp
         ${SOURCE_PATH}/Entry.cpp
         )
 

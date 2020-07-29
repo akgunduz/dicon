@@ -219,8 +219,11 @@ void Net::runReceiver() {
 
             long source = Address::create(INTERFACE_NET, 0, 0, multicastSocket, true);
 
-            threadAccept = std::thread(runAccepter, this, source);
-            threadAccept.detach();
+            auto *msg = new Message(getHost());
+
+            if (msg->readFromStream(source)) {
+                push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
+            }
         }
 
 		if (FD_ISSET(notifierPipe[0], &readfs)) {
