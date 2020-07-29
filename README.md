@@ -151,7 +151,7 @@ The communication interface is structured based on sockets and it includes messa
 
 The tasks of the applications that are going to execute in nodes are defined in job files.  In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplied as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface.
 
-Job files includes all of the dependencies and process details of the subtasks in order to execute properly.
+Job files includes all of the dependencies and process details of the tasks in order to execute properly.
 
 There are four types of contents that can be defined in job files;
 
@@ -170,8 +170,11 @@ There are four types of contents that can be defined in job files;
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
 
+In order to demonstrate the application running properly, sample job is created based on matrix operations; multiply, scan and convolution. Hypothetical dependencies are created between tasks to show the application is sorts the processes and warns if any dependency loop is exists between tasks. Sample dependency map is as follows;
 
-Sample  Job.json file provided with the project is as follows;
+![alt text](docs/Dependency_Graph.png)
+
+Corresponding job description file provided with the project is as follows;
 
     "Job": {
     
@@ -225,6 +228,10 @@ Sample  Job.json file provided with the project is as follows;
         "$F3 $P2 $I13 $I19 $O23"
         ]
      }
+
+
+
+
 
 In this sample the node executes the following processes at one of their assignment. 
 
