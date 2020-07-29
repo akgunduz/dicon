@@ -130,14 +130,14 @@ bool MessageBase::readSignature(long source, uint32_t& crc) {
     LOGS_T(getHost(), "Signature read process is started");
 
 	if (!readBlock(source, tmpBuf, SIGNATURE_SIZE, crc)) {
-		LOGS_E(getHost(), "Can not read correct signature from stream");
+		LOGS_E(getHost(), "Can not read signature from stream");
 		return false;
 	}
 
 	short signature = ntohs(*((short *) tmpBuf));
 
     if (signature != SIGNATURE) {
-		LOGS_E(getHost(), "Can not read correct signature from stream");
+		LOGS_E(getHost(), "Signature Mismatch!!!, read : %x, expected : %x", signature, SIGNATURE);
         return false;
     }
 
