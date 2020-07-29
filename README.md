@@ -1,14 +1,14 @@
 # Dicon - An HPC architecture for embedded systems
 
-The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability and efficiency.
+The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability, performance and efficiency.
 
-The architecture is designed as part of a master thesis for academical purposes, however it is considered appreciate for any kind of distributed projects using low cost embedded devices.
+The architecture is designed as part of a master thesis for academical purposes, however it is applicable for any kind of distributed task driven projects using low cost embedded devices.
 
 Development cycle has still open points and needs substantial improvements to cover all corner cases, So all contributions and suggestions in architectural design and help in development are welcome :)
 
 ### Quick Overview
 
-Architecture's main operation is based on collecting a target large-scale applications subtasks and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into subtasks. At this point a kind of rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsable for defining the rules and decompose the target application to subtasks. Analyze process includes dependency tracking functionality based on **Kahn's** algorithm and it creates dependency map of the rules that depends each other.
+Architecture's main operation is based on collecting a target large-scale applications subtasks (processes) and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into processes. At this point a rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsable for defining the rules and decompose the target application to subtasks. Analyze process step includes dependency tracking functionality based on **Kahn's** algorithm and it creates dependency map of the rules that depends each other.
 
 The architecture consist of three main modules; **Distributor, Collector(s), Node(s)**
 
@@ -22,9 +22,11 @@ The architecture consist of three main modules; **Distributor, Collector(s), Nod
 
 ### Requirements
 
-Platform independent development cycle is strongly selected as one of the main achievements of this system, so Linux and macOS operating systems and **gcc**, **clang** vs toolchains can be selected to produce architecture executables. CMake and GNU make is used as compile platform which have wide range of usage.
+System can build on **Linux**, **macOS** and **Windows (via WSL 2)** operating systems using **gcc**, **clang** vs toolchains to produce application executables. CMake and GNU make is used as compile platform which have wide range of usage.
 
-[Civetweb](https://github.com/civetweb/civetweb) library is selected for demo application's UI. Its main advantage is to serve the UI in a web page, which allows to access the UI even from embedded devices. It provide cross-platform support and written in C++ to have high response and wide range support.
+[**Civetweb**](https://github.com/civetweb/civetweb) library is selected for  application's UI. Its main advantage is to serve the UI in a web page, which allows to access the UI even from embedded devices. It provide cross-platform support and written in C++ to have high response and wide range support.
+
+[**Json-c**](https://github.com/json-c/json-c) library is selected for json-parsing, used as job description interface.
 
 ### Getting Started 
 
@@ -57,6 +59,13 @@ Install dependencies
 
 To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
 
+On **Linux** and **Windows (WSL 2)** Platform;
+
+```
+	apt install json-c
+```
+
+
 Create build directory
 
 ```
@@ -65,7 +74,7 @@ Create build directory
 ```
 Build process
 
-- for target ==> MacOS
+- for target ==> MacOS, Linux, Windows
 
 ```
 	cmake ..
@@ -88,7 +97,7 @@ Build process
 
 #### Locating Target Files
 
-Application gets the target job files as a single compressed zip file through Web UI and extracts on the server. As soon as operator triggers the process command via any Collector, system parse the job file and starts the distributed execution process across the node devices.
+Application gets the target job files as a single compressed zip file through Web UI and extracts on the server. As soon as operator triggers the process command via Collector, system parse the job file and starts the distributed execution process across the node devices.
 
 ### Workflow
 
