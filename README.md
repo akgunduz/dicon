@@ -170,7 +170,7 @@ There are four types of contents that can be defined in job files;
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
 
-In order to demonstrate the application running properly, sample job is created based on matrix operations; multiply, scan and convolution. Hypothetical dependencies are created between tasks to show the application is sorts the processes and warns if any dependency loop is exists between tasks. Sample dependency map is as follows;
+In order to demonstrate the application running properly, sample job is created based on matrix operations; **multiply**, **scan** and **convolution**. Hypothetical dependencies are created between tasks to show the application is sorts the processes by dependecies and warns if any dependency loop is exists between tasks. Sample dependency map is as follows;
 
 ![alt text](docs/Dependency_Graph.png)
 
@@ -228,10 +228,6 @@ Corresponding job description file provided with the project is as follows;
         "$F3 $P2 $I13 $I19 $O23"
         ]
      }
-
-
-
-
 
 In this sample the node executes the following processes at one of their assignment. 
 
