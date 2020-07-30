@@ -41,7 +41,7 @@ int ConsoleApp::run() {
 }
 
 
-int ConsoleApp::notifyHandler(COMPONENT target, long id) {
+int ConsoleApp::notifyHandler(COMPONENT target, NOTIFYSTATE id) {
 
     switch(target) {
         case COMP_DISTRIBUTOR:

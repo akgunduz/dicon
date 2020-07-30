@@ -165,10 +165,10 @@ void Component::registerNotify(void* _notifyContext, TypeNotifyCB _notifyCB) {
     notifyCB = _notifyCB;
 }
 
-void Component::notifyUI() {
+void Component::notifyUI(NOTIFYSTATE state) {
 
     if (notifyContext) {
-        notifyCB(notifyContext, getHost().getType(), getHost().getID());
+        notifyCB(notifyContext, getHost().getType(), state);
     }
 }
 

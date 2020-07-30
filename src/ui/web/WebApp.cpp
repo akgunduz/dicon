@@ -46,35 +46,42 @@ int eventHandlerWrapper(struct mg_connection *conn, void *cbData)
 
 int WebApp::eventHandler(struct mg_connection *conn)
 {
-    uint32_t mask = 0;
+    mg_printf(conn,
+              "HTTP/1.1 200 OK\r\n"
+              "Cache-Control: no-cache\r\n"
+              "Content-Type: text/event-stream\r\n"
+              "Connection: Keep-Alive\r\n\r\n"
+    );
 
-    notifyMutex.lock();
+    int loopCount = 5;
 
-    if (notifyFlag[COMP_DISTRIBUTOR]) {
-        notifyFlag[COMP_DISTRIBUTOR] = false;
-        mask |= (uint32_t)1 << COMP_DISTRIBUTOR;
-    }
+    NOTIFYSTATE notifystate = NOTIFYSTATE_PASSIVE;
 
-    if (notifyFlag[COMP_COLLECTOR]) {
-        notifyFlag[COMP_COLLECTOR] = false;
-        mask |= (uint32_t)1 << COMP_COLLECTOR;
-    }
+    do {
 
-    if (notifyFlag[COMP_NODE]) {
-        notifyFlag[COMP_NODE] = false;
-        mask |= (uint32_t)1 << COMP_NODE;
-    }
+        notifyMutex.lock();
 
-    notifyMutex.unlock();
+        if (notifyData == NOTIFYSTATE_ACTIVE) {
+            notifystate = NOTIFYSTATE_ACTIVE;
+            loopCount = 5;
 
-    if (mask) {
-        sendServerEvent(conn, mask);
-    }
+        } else if (notifyData == NOTIFYSTATE_LOAD) {
+            notifystate = NOTIFYSTATE_LOAD;
+            notifyData = NOTIFYSTATE_PASSIVE;
+        }
+
+        notifyMutex.unlock();
+
+        mg_printf(conn, "data: %d\r\n\r\n", notifystate);
+
+        sleep(1);
+
+    } while(loopCount--);
 
     return 1;
 }
 
-bool WebApp::sendServerEvent(struct mg_connection *conn, int id) {
+bool WebApp::sendServerEvent(struct mg_connection *conn, int source) {
 
     mg_printf(conn,
               "HTTP/1.1 200 OK\r\n"
@@ -83,7 +90,7 @@ bool WebApp::sendServerEvent(struct mg_connection *conn, int id) {
               "Connection: Keep-Alive\r\n\r\n"
     );
 
-    mg_printf(conn,"data: %d\r\n\r\n", id);
+    mg_printf(conn,"data: %d\r\n\r\n", source);
 
     return true;
 }
@@ -129,7 +136,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));
 
-    context = mg_start(&callbacks, 0, options);
+    context = mg_start(&callbacks, this, options);
     if (!context) {
         PRINT("Can not start server....");
         return;
@@ -154,11 +161,14 @@ int WebApp::run() {
     return 1;
 }
 
-int WebApp::notifyHandler(COMPONENT target, long id) {
+int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {
 
     notifyMutex.lock();
 
-    notifyFlag[target] = true;
+    if (state != NOTIFYSTATE_TRANSPARENT) {
+
+        notifyData = state;
+    }
 
     notifyMutex.unlock();
 

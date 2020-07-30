@@ -73,7 +73,7 @@ int TestApp::run() {
 }
 
 
-int TestApp::notifyHandler(COMPONENT target, long id) {
+int TestApp::notifyHandler(COMPONENT target, NOTIFYSTATE id) {
 
     return 0;
 }

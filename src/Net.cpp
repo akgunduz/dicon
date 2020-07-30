@@ -10,20 +10,16 @@ Net::Net(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB 
 		: Interface(device, scb, hcb) {
 
     if (!initTCP()) {
-        LOGS_E(getHost(), "initTCP failed!!!");
         throw std::runtime_error("Net : initTCP failed!!!");
     }
 
     if (!initMulticast()) {
-        LOGS_E(getHost(), "initMulticast failed!!!");
         throw std::runtime_error("Net : initMulticast failed!!!");
     }
 
     if (!initThread()) {
-        LOGS_E(getHost(), "initThread failed!!!");
         throw std::runtime_error("Net : initThread failed!!!");
     }
-
 }
 
 bool Net::initTCP() {

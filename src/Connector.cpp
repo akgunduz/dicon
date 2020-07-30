@@ -13,18 +13,24 @@ Interface* Connector::createInterface(Device *device,
 
     Interface *interface = nullptr;
 
-    switch(device->getType()) {
+    try {
 
-        case INTERFACE_NET:
-            interface = new Net(device, scb, hcb);
-            break;
+        switch (device->getType()) {
 
-        case INTERFACE_UNIXSOCKET:
-            interface = new UnixSocket(device, scb, hcb);
-            break;
+            case INTERFACE_NET:
+                interface = new Net(device, scb, hcb);
+                break;
 
-        default:
-            break;
+            case INTERFACE_UNIXSOCKET:
+                interface = new UnixSocket(device, scb, hcb);
+                break;
+
+            default:
+                break;
+        }
+    } catch (std::exception &e) {
+
+        LOGS_E(hcb->hcb(hcb->arg), "%s", e.what());
     }
 
     return interface;

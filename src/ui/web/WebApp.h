@@ -24,7 +24,7 @@ class WebApp : public App {
 
     struct mg_callbacks callbacks{};
     struct mg_context *context;
-    bool notifyFlag[COMP_MAX]{};
+    NOTIFYSTATE notifyData{};
     std::mutex notifyMutex;
 
 public:
@@ -48,7 +48,7 @@ public:
     bool nodeStateHandler(struct mg_connection *conn, int id);
 
     int run() override;
-    int notifyHandler(COMPONENT, long) override;
+    int notifyHandler(COMPONENT, NOTIFYSTATE) override;
     bool sendServerEvent(struct mg_connection *conn, int id);
 };
 

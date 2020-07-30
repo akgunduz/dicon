@@ -119,7 +119,7 @@
   </style>
 </head>
 
-<body onload="onLoad()">
+<body onload="onLoad()" onbeforeunload="onBeforeUnload()">
   <div class="sidenav">
     <a onclick="onDistClick()"> Distributor</a>
     <button class="dropdown-btn">
@@ -136,7 +136,8 @@
 
   <div class="component-block" hidden>
     <h1>Debug</h1>
-    <p id="testField">Test</p>
+    <p id="test-field">Test</p>
+    <button id="test-button" type="button" class="button btn-full-width" onclick="onTestClick()">Test</button>
   </div>
 
   <div id="distributor-block" class="component-block" style="display: block;">
@@ -300,6 +301,8 @@
     let PROCESS_STATE_STARTED = 2;
     let PROCESS_STATE_ENDED = 3;
 
+    let eventSource;
+
     let currentPage = {
       type: DISTRIBUTOR,
       id: 0,
@@ -338,16 +341,31 @@
     };
 
     if (typeof (EventSource) !== "undefined") {
-      let source = new EventSource("/event");
-      source.onmessage = function (event) {
-        if (event.data & 0x01 && currentPage.type === DISTRIBUTOR) {
+      eventSource = new EventSource("/event");
+
+      eventSource.onmessage = function (event) {
+        if (currentPage.type === DISTRIBUTOR) {
           onDistState();
-        } else if (event.data & 0x02 && currentPage.type === COLLECTOR) {
+        } else if (event.data > 0 && currentPage.type === COLLECTOR) {
           onCollState(currentPage.id);
-        } else if (event.data & 0x04 && currentPage.type === NODE) {
+        } else if (event.data === 1 && currentPage.type === NODE) {
           onNodeState(currentPage.id);
         }
       };
+
+      eventSource.onerror = function (event) {
+        switch( event.target.readyState ){
+          case EventSource.CONNECTING:
+            console.log("SSE error " + "reconnecting");
+            break;
+          case EventSource.CLOSED:
+            console.log("SSE error " + "connection closed");
+            break;
+        }
+      }
+      eventSource.onopen = function (event) {
+        console.log("SSE connection opened");
+      }
     } else {
       document.getElementById("testField").innerHTML = "Your browser does not support server-sent events...";
     }
@@ -592,6 +610,15 @@
         false
       );
     }
+
+    function onBeforeUnload() {
+      eventSource.close();
+    }
+
+    function onTestClick() {
+      eventSource.close();
+    }
+
   </script>
 </body>
 

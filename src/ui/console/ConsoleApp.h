@@ -24,7 +24,7 @@ public:
 
     int run() override;
 
-    int notifyHandler(COMPONENT, long) override;
+    int notifyHandler(COMPONENT, NOTIFYSTATE) override;
 };
 
 

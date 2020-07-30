@@ -20,13 +20,12 @@ JobItem::JobItem(const ComponentObject& host, const char* jobPath, long _jobID)
     JOB_PATH pathType = checkPath(jobPath);
 
     if (pathType == JOBPATH_INVALID) {
-        return;
+        throw std::runtime_error("Job path is invalid");
     }
 
     if (pathType == JOBPATH_ZIP) {
         if (!extract(jobPath, _jobID)) {
-            LOGS_E(getHost(), "Job can not extracted from Zip file!!!");
-            return;
+            throw std::runtime_error("Job can not extracted from Zip file!!!");
         }
 
     } else {
@@ -38,8 +37,7 @@ JobItem::JobItem(const ComponentObject& host, const char* jobPath, long _jobID)
     }
 
     if (!parse()) {
-        LOGS_E(getHost(), "Job file could not parsed!!!");
-        return;
+        throw std::runtime_error("Job file could not parsed!!!");
     }
 
     for (int i = 0; i < getProcessCount(); i++) {
@@ -47,8 +45,7 @@ JobItem::JobItem(const ComponentObject& host, const char* jobPath, long _jobID)
     }
 
     if (!createDependencyMap()){
-        LOGS_E(getHost(), "Dependency Loop Detected in the Job!!!");
-        return;
+        throw std::runtime_error("Dependency Loop is detected in the Job!!!");
     }
 
     for (int i = 0; i < getProcessCount(); i++) {

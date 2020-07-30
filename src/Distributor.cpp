@@ -120,7 +120,7 @@ bool Distributor::processCollectorAliveMsg(const ComponentObject& owner, Message
     long collID = collectorManager->add(owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGS_I(getHost(), "Collector[%d] is already added", collID);
-        notifyUI();
+        notifyUI(NOTIFYSTATE_TRANSPARENT);
         return true;
     }
 
@@ -134,7 +134,7 @@ bool Distributor::processCollectorIDMsg(const ComponentObject& owner, Message *m
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
-    notifyUI();
+    notifyUI(NOTIFYSTATE_TRANSPARENT);
 
     LOGS_I(getHost(), "Collector[%d] is confirmed", owner.getID());
 
@@ -163,7 +163,7 @@ bool Distributor::processNodeAliveMsg(const ComponentObject& owner, Message *msg
     long nodeID = nodeManager->add(owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGS_I(getHost(), "Node[%d] is already added", nodeID);
-        notifyUI();
+        notifyUI(NOTIFYSTATE_TRANSPARENT);
         return true;
     }
 
@@ -177,7 +177,7 @@ bool Distributor::processNodeIDMsg(const ComponentObject& owner, Message *msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
-    notifyUI();
+    notifyUI(NOTIFYSTATE_TRANSPARENT);
 
     LOGS_I(getHost(), "Node[%d] is confirmed", owner.getID());
 
@@ -199,7 +199,7 @@ bool Distributor::processNodeBusyMsg(const ComponentObject& owner, Message *msg)
 
     nodeManager->setAssigned(owner.getID(), collID, collectorManager->get(collID)->getAddress());
 
-    notifyUI();
+    notifyUI(NOTIFYSTATE_TRANSPARENT);
 
     LOGS_I(getHost(), "Node[%d] is Busy with Collector[%d]\'s process", owner.getID(), collID);
 

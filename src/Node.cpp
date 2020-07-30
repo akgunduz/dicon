@@ -127,7 +127,7 @@ bool Node::processCollectorReadyMsg(const ComponentObject& owner, Message *msg) 
 
     processList.emplace_back(nodeHost.getProcess());
 
-    notifyUI();
+    notifyUI(NOTIFYSTATE_TRANSPARENT);
 
     return send2DistributorReadyMsg(getDistributor());
 }

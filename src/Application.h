@@ -8,8 +8,6 @@
 
 #include <ComponentController.h>
 
-#define MAX_UI_CB 100
-
 enum APPTYPE {
 
     APPTYPE_CONSOLE,
@@ -32,11 +30,11 @@ protected:
 
 public:
 
-    static bool notifyCB(void *, COMPONENT, long);
+    static bool notifyCB(void *, COMPONENT, NOTIFYSTATE);
 
     virtual int run() = 0;
 
-    virtual int notifyHandler(COMPONENT, long) = 0;
+    virtual int notifyHandler(COMPONENT, NOTIFYSTATE) = 0;
 
 };
 

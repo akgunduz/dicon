@@ -11,6 +11,14 @@
 #include "ComponentObject.h"
 #include "StopWatch.h"
 
+enum NOTIFYSTATE {
+    NOTIFYSTATE_PASSIVE,
+    NOTIFYSTATE_ACTIVE,
+    NOTIFYSTATE_LOAD,
+    NOTIFYSTATE_TRANSPARENT,
+    NOTIFYSTATE_MAX,
+};
+
 class Component;
 
 typedef bool (Component::*TypeProcessComponentMsg)(const ComponentObject&, Message *);
@@ -19,7 +27,7 @@ typedef bool (*TypeStaticProcessComponentMsg)(Component*, const ComponentObject&
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
 
-typedef bool (*TypeNotifyCB)(void*, COMPONENT, long);
+typedef bool (*TypeNotifyCB)(void*, COMPONENT, NOTIFYSTATE);
 
 class Component {
 
@@ -46,7 +54,7 @@ protected :
 
     bool initInterfaces(COMPONENT type, int, int);
 
-    void notifyUI();
+    void notifyUI(NOTIFYSTATE);
 
 public:
 

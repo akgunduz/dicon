@@ -43,7 +43,7 @@ public:
 
     void help();
 
-    int notifyHandler(COMPONENT, long) override;
+    int notifyHandler(COMPONENT, NOTIFYSTATE) override;
 };
 
 #endif //DICON_TESTAPP_H

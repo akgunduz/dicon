@@ -36,9 +36,9 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
           componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
 
-bool App::notifyCB(void *context, COMPONENT target, long id) {
+bool App::notifyCB(void *context, COMPONENT target, NOTIFYSTATE state) {
 
-    return ((App*) context)->notifyHandler(target, id);
+    return ((App*) context)->notifyHandler(target, state);
 }
 
 

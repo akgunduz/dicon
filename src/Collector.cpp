@@ -101,8 +101,6 @@ bool Collector::processNodeFileBinaryMsg(const ComponentObject& owner, Message *
     int totalCount = 0;
     int readyCount = job->updateDependency(msg->getData().getFileProcess(), totalCount);
 
-    notifyUI();
-
     send2NodeReadyMsg(owner);
 
     if (readyCount) {
@@ -115,6 +113,8 @@ bool Collector::processNodeFileBinaryMsg(const ComponentObject& owner, Message *
         collectorHost.setState(COLLSTATE_IDLE);
 
         job->setDuration(componentWatch.stop());
+
+        notifyUI(NOTIFYSTATE_PASSIVE);
 
         return send2DistributorReadyMsg(distributor);
     }
@@ -190,6 +190,8 @@ bool Collector::processJob() {
 
     componentWatch.start();
 
+    notifyUI(NOTIFYSTATE_ACTIVE);
+
     collectorHost.setState(COLLSTATE_BUSY);
 
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
@@ -199,9 +201,16 @@ JobItem* Collector::loadJob(const char* zipFile) {
 
     delete job;
 
-    job = new JobItem(getHost(), zipFile, JobItem::jobID++);
+    try {
 
-    notifyUI();
+        job = new JobItem(getHost(), zipFile, JobItem::jobID++);
+
+    } catch (std::exception &e) {
+
+        LOGS_E(getHost(), "%s", e.what());
+    }
+
+    notifyUI(NOTIFYSTATE_LOAD);
 
     return job;
 }
