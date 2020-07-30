@@ -24,7 +24,7 @@ class WebApp : public App {
 
     struct mg_callbacks callbacks{};
     struct mg_context *context;
-    NOTIFYSTATE notifyData{};
+    NOTIFYSTATE notifyData[COMP_MAX]{};
     std::mutex notifyMutex;
 
 public:

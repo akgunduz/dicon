@@ -34,8 +34,11 @@ int mainHandlerWrapper(struct mg_connection *conn, void *cbData)
 
 int WebApp::mainHandler(struct mg_connection *conn)
 {
+#ifdef NDEBUG
     sendHtml(conn);
-    //mg_send_mime_file(conn, MAIN_PAGE, nullptr);
+#else
+    mg_send_mime_file(conn, MAIN_PAGE, nullptr);
+#endif
     return 1;
 }
 
@@ -55,24 +58,31 @@ int WebApp::eventHandler(struct mg_connection *conn)
 
     int loopCount = 5;
 
-    NOTIFYSTATE notifystate = NOTIFYSTATE_PASSIVE;
+    NOTIFYSTATE notifyState[COMP_MAX] = {NOTIFYSTATE_PASSIVE, NOTIFYSTATE_PASSIVE, NOTIFYSTATE_PASSIVE};
 
     do {
 
         notifyMutex.lock();
 
-        if (notifyData == NOTIFYSTATE_ACTIVE) {
-            notifystate = NOTIFYSTATE_ACTIVE;
+        if (notifyData[COMP_DISTRIBUTOR] == NOTIFYSTATE_ONCE) {
+            notifyState[COMP_DISTRIBUTOR] = NOTIFYSTATE_ONCE;
+            notifyData[COMP_DISTRIBUTOR] = NOTIFYSTATE_PASSIVE;
+        }
+
+        if (notifyData[COMP_COLLECTOR] == NOTIFYSTATE_ACTIVE) {
+            notifyState[COMP_COLLECTOR] = NOTIFYSTATE_ACTIVE;
+            notifyState[COMP_NODE] = NOTIFYSTATE_ACTIVE;
             loopCount = 5;
 
-        } else if (notifyData == NOTIFYSTATE_LOAD) {
-            notifystate = NOTIFYSTATE_LOAD;
-            notifyData = NOTIFYSTATE_PASSIVE;
+        } else if (notifyData[COMP_COLLECTOR] == NOTIFYSTATE_ONCE) {
+            notifyState[COMP_COLLECTOR] = NOTIFYSTATE_ONCE;
+            notifyData[COMP_COLLECTOR] = NOTIFYSTATE_PASSIVE;
         }
 
         notifyMutex.unlock();
 
-        mg_printf(conn, "data: %d\r\n\r\n", notifystate);
+        mg_printf(conn, "data: {\"dist\" : %d, \"coll\" : %d, \"node\" : %d}\r\n\r\n",
+                  notifyState[COMP_DISTRIBUTOR], notifyState[COMP_COLLECTOR], notifyState[COMP_NODE]);
 
         sleep(1);
 
@@ -167,7 +177,7 @@ int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {
 
     if (state != NOTIFYSTATE_TRANSPARENT) {
 
-        notifyData = state;
+        notifyData[target] = state;
     }
 
     notifyMutex.unlock();

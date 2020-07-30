@@ -210,7 +210,7 @@ JobItem* Collector::loadJob(const char* zipFile) {
         LOGS_E(getHost(), "%s", e.what());
     }
 
-    notifyUI(NOTIFYSTATE_LOAD);
+    notifyUI(NOTIFYSTATE_ONCE);
 
     return job;
 }

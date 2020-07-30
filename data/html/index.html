@@ -344,11 +344,12 @@
       eventSource = new EventSource("/event");
 
       eventSource.onmessage = function (event) {
-        if (currentPage.type === DISTRIBUTOR) {
+        var state = JSON.parse(event.data);
+        if (state.dist > 0 && currentPage.type === DISTRIBUTOR) {
           onDistState();
-        } else if (event.data > 0 && currentPage.type === COLLECTOR) {
+        } else if (state.coll > 0 && currentPage.type === COLLECTOR) {
           onCollState(currentPage.id);
-        } else if (event.data === 1 && currentPage.type === NODE) {
+        } else if (state.node > 0 && currentPage.type === NODE) {
           onNodeState(currentPage.id);
         }
       };
