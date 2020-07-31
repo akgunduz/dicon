@@ -37,12 +37,18 @@ Distributor::Distributor(const char *rootPath, int interfaceOther, int interface
 
     collThread = std::thread(collProcessCB, this);
 
+    pollThread = std::thread(pollProcessCB, this);
+
     initInterfaces(COMP_DISTRIBUTOR, interfaceOther, interfaceNode);
 };
 
 Distributor::~Distributor() {
 
+    runPollThread = false;
+
     runCollThread = false;
+
+    pollThread.join();
 
     collThread.join();
 
@@ -59,6 +65,31 @@ bool Distributor::clear() {
     collectorManager->clear();
 
     return true;
+}
+
+void Distributor::pollProcessCB(Distributor *distributor) {
+
+    distributor->pollProcess();
+}
+
+void Distributor::pollProcess() {
+
+    int loop = 0;
+
+    while(runPollThread) {
+
+        std::this_thread::sleep_for(std::chrono::milliseconds (1000));
+
+        if (!runPollThread) {
+            break;
+        }
+
+        if (loop++ == 5) {
+
+            loop = 0;
+            sendWakeupMessagesAll(false);
+        }
+    }
 }
 
 void Distributor::collProcessCB(Distributor *distributor) {

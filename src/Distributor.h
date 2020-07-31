@@ -21,13 +21,19 @@ private:
 
     volatile bool runCollThread = true;
 
+    volatile bool runPollThread = true;
+
 	NodeManager *nodeManager;
 
 	CollectorManager *collectorManager;
 
     std::thread collThread;
+    std::thread pollThread;
 
     explicit Distributor(const char *, int, int);
+
+    static void pollProcessCB(Distributor *);
+	void pollProcess();
 
     static void collProcessCB(Distributor *);
     void collProcess();
