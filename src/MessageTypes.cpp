@@ -19,6 +19,11 @@ std::map<int, std::string> msgNameList = {
         {MSGTYPE_PROCESS, "PROCESS"},
 };
 
+std::map<int, std::string> msgDirNameList = {
+        {MSGDIR_RECEIVE, "<=="},
+        {MSGDIR_SEND, "==>"},
+};
+
 std::map<int, std::string> streamNameList = {
         {STREAM_JOB, "STREAM_JOB"},
         {STREAM_COMPONENT, "STREAM_COMPONENT"},
@@ -36,12 +41,18 @@ std::map<int, std::string> blockNameList = {
         {BLOCK_FILEBINARY, "BLOCK_FILEBINARY"},
         {BLOCK_PROCESSINFO, "BLOCK_PROCESSINFO"},
         {BLOCK_PROCESS, "BLOCK_PROCESS"},
+        {BLOCK_END_STREAM, "BLOCK_END_STREAM"},
         {BLOCK_NONE, "BLOCK_NONE"},
 };
 
 const char* MessageTypes::getMsgName(int type) {
 
     return msgNameList[type].c_str();
+}
+
+const char* MessageTypes::getMsgDirName(int type) {
+
+    return msgDirNameList[type].c_str();
 }
 
 void MessageTypes::addMsg(int type, std::string str) {

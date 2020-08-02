@@ -9,7 +9,7 @@
 #include "SchedulerItem.h"
 
 typedef bool (*TypeSchedulerCB)(void*, SchedulerItem*);
-typedef ComponentObject& (*TypeGetHostCB)(void*);
+typedef HostUnit& (*TypeGetHostCB)(void*);
 typedef int (*TypeGetIDCB)(void*);
 
 class InterfaceSchedulerCB {

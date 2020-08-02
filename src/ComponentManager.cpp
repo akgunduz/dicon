@@ -24,9 +24,9 @@ size_t ComponentManager::size() {
     return size;
 }
 
-ComponentObject* ComponentManager::get(long id) {
+ComponentUnit* ComponentManager::get(long id) {
 
-    ComponentObject *object = nullptr;
+    ComponentUnit *object = nullptr;
 
     mutex.lock();
 
@@ -41,9 +41,9 @@ ComponentObject* ComponentManager::get(long id) {
     return object;
 }
 
-ComponentObject *ComponentManager::getByIndex(int index) {
+ComponentUnit *ComponentManager::getByIndex(int index) {
 
-    ComponentObject *object = nullptr;
+    ComponentUnit *object = nullptr;
 
     mutex.lock();
 
@@ -57,7 +57,7 @@ ComponentObject *ComponentManager::getByIndex(int index) {
     return object;
 }
 
-long ComponentManager::add(long address, bool& isAlreadyAdded) {
+long ComponentManager::add(Address& address, bool& isAlreadyAdded) {
 
     long newID = 0;
 
@@ -69,7 +69,7 @@ long ComponentManager::add(long address, bool& isAlreadyAdded) {
     if (search == componentsMapAddress.end()) {
 
         newID = idCounter++;
-        ComponentObject *object = createObject(newID, address);
+        ComponentUnit *object = createUnit(newID, address);
         componentsMapAddress[address] = object;
         componentsMapID[newID] = object;
         componentsIndex.emplace_back(object);

@@ -8,7 +8,7 @@
 #define DICON_MESSAGEHEADER_H
 
 #include "MessageTypes.h"
-#include "ComponentObject.h"
+#include "HostUnit.h"
 
 #define MAX_VARIANT 2
 
@@ -18,12 +18,12 @@
 
 class MessageHeader {
 
-    int type{};
-    int priority{};
+    uint16_t type{};
+    uint16_t priority{};
 
-    long owner{};
-    long ownerAddress{};
-    long variant[MAX_VARIANT]{};
+    ComponentUnit owner;
+
+    uint64_t variant[MAX_VARIANT]{};
 
 public:
     MessageHeader();
@@ -33,19 +33,22 @@ public:
     void setType(MSG_TYPE);
     MSG_TYPE getType() const;
 
-    ComponentObject getOwner() const;
-    void setOwner(const ComponentObject&, COMPONENT = COMP_DISTRIBUTOR);
+    ComponentUnit& getOwner();
+    void setOwner(ComponentUnit);
+    void grabOwner(ComponentUnit&);
 
-    long getVariant(int id);
-    void setVariant(int id, long _variant);
+    uint64_t getVariant(int id);
+    void setVariant(int id, uint64_t _variant);
 
     int getPriority() const;
     void setPriority(int);
     void normalizePriority();
     int iteratePriority();
 
-    bool deSerialize(const uint8_t*);
-    bool serialize(uint8_t*);
+    void deSerialize(const uint8_t*);
+    void serialize(uint8_t*);
+
+
 
 };
 

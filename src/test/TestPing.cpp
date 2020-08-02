@@ -4,16 +4,16 @@
 
 #include "TestApp.h"
 
-void sendPing(Component *owner, const ComponentObject& target) {
+void sendPing(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target.getType(), (MSG_TYPE)MSG_TYPE_TEST_PING);
+    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PING);
 
     owner->send(target, msg);
 }
 
-bool processPingMsg(Component* component, const ComponentObject& owner, Message *msg) {
+bool processPingMsg(Component* component, ComponentUnit& owner, Message *msg) {
 
-    LOGS_I(component->getHost(), "Message Ping has came from : %s, replying back", owner.getName());
+    LOGS_I(component->getHost(), "Message Ping has came from : %s, replying back", ComponentType::getName(owner.getType()));
 
     sendPing(component, owner);
 
@@ -27,6 +27,6 @@ void TestApp::testPing(Distributor* distributor, Collector* collector, Node* nod
     distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
 
-    ComponentObject target(node->getHost(), COMP_DISTRIBUTOR);
+    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_DISTRIBUTOR));
     sendPing(distributor, target);
 }

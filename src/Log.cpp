@@ -4,19 +4,31 @@
 //
 
 #include "Log.h"
-#include "ComponentObject.h"
+#include "HostUnit.h"
 #include "Util.h"
 
 LOGLEVEL Log::logLevel[] = {LEVEL_ERROR, LEVEL_ERROR};
 
-static const char* sLogLevels[LEVEL_MAX] = {
-		"NONE  ",
-		"ERROR ",
-		"WARN  ",
-		"INFO  ",
-		"DEBUG ",
-		"TRACE ",
-		"ASSERT",
+static const char* sColorCodes[COLOR_MAX] = {
+        "[0m",
+        "[0;30m",
+        "[0;31m",
+        "[0;32m",
+        "[0;33m",
+        "[0;34m",
+        "[0;35m",
+        "[0;36m",
+        "[0;37m",
+};
+
+static LogLevel sLogLevels[LEVEL_MAX] = {
+        {"NONE  ", sColorCodes[COLOR_RESET]},
+        {"ERROR ", sColorCodes[COLOR_RED]},
+        {"WARN  ", sColorCodes[COLOR_BLUE]},
+        {"INFO  ", sColorCodes[COLOR_GREEN]},
+        {"DEBUG  ", sColorCodes[COLOR_RESET]},
+        {"TRACE  ", sColorCodes[COLOR_RESET]},
+        {"ASSERT  ", sColorCodes[COLOR_RESET]},
 };
 
 void Log::init(LOGLEVEL stdLevel, LOGLEVEL commLevel) {
@@ -31,7 +43,7 @@ void Log::setLogLevel(LOGLEVEL stdLevel, LOGLEVEL commLevel) {
 
 	setbuf(stdout, nullptr);
 
-	printf("Log Level Set to Std : %s, Comm : %s\n", sLogLevels[stdLevel], sLogLevels[commLevel]);
+	printf("Log Level Set to Std : %s, Comm : %s\n", sLogLevels[stdLevel].name, sLogLevels[commLevel].name);
 }
 
 void Log::show(const char *format, ...) {
@@ -46,7 +58,7 @@ void Log::show(const char *format, ...) {
 }
 
 void Log::logs(LOGLEVEL level, const char *file, int line,
-               const ComponentObject host, ...) {
+               const HostUnit host, ...) {
 
     if (logLevel[0] < level) {
         return;
@@ -69,18 +81,17 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
-    sprintf(logout, "%11s[%ld] : %s \n",
-            host.getName(),
+    sprintf(logout, "%11s[%ld]                    : %s \n",
+            ComponentType::getName(host.getType()),
             host.getID(),
             buf);
 
     va_end(ap);
-
-    printf("%s", logout);
+    printf("\033%s%s\033%s", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
 }
 
 void Log::logc(LOGLEVEL level, const char *file, int line,
-               const ComponentObject host, const ComponentObject& target, int direction, ...) {
+               const HostUnit host, const ComponentUnit& target, MSG_DIR direction, ...) {
 
     if (logLevel[1] < level) {
         return;
@@ -105,15 +116,14 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
     sprintf(logout, "%11s[%ld] %s %11s[%ld] : %s \n",
-            host.getName(),
+            ComponentType::getName(host.getType()),
             host.getID(),
-            direction ? "==>" : "<==",
-            target.getName(),
+            MessageTypes::getMsgDirName(direction),
+            ComponentType::getName(target.getType()),
             target.getID(),
             buf);
 
     va_end(ap);
 
-    printf("%s", logout);
-
+    printf("\033%s%s\033%s", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
 }

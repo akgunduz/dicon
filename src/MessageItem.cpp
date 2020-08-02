@@ -4,17 +4,21 @@
 
 #include "MessageItem.h"
 
-MessageItem::MessageItem(MESSAGE_DIRECTION type, long address, Message *msg)
-: SchedulerItem(type), address(address), msg(msg) {
+MessageItem::MessageItem(MSG_DIR _type)
+        : SchedulerItem(_type) {
+}
+
+MessageItem::MessageItem(MSG_DIR _type, ComponentUnit& _unit, Message *_msg)
+        : SchedulerItem(_type), unit(_unit), msg(_msg) {
 
     if (msg != nullptr) {
         priority = msg->getHeader().getPriority();
     }
 }
 
-long MessageItem::getAddress() {
+ComponentUnit& MessageItem::getUnit() {
 
-    return address;
+    return unit;
 }
 
 Message *MessageItem::getMessage() {

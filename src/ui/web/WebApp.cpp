@@ -141,7 +141,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 }
 
 WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
-    : App(APPTYPE_WEB, interfaceID, logLevel, componentCount) {
+    : App(APPTYPE_WEB, interfaceID, logLevel, componentCount, true) {
 
     /* Start CivetWeb web server */
     memset(&callbacks, 0, sizeof(callbacks));
@@ -152,9 +152,12 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
         return;
     }
 
-    mg_set_request_handler(context, MAIN_URI, mainHandlerWrapper, this);
     mg_set_request_handler(context, REST_URI, restHandlerWrapper, this);
-    mg_set_request_handler(context, EVENT_URI, eventHandlerWrapper, this);
+
+    if (componentCount[COMP_DISTRIBUTOR]) {
+        mg_set_request_handler(context, MAIN_URI, mainHandlerWrapper, this);
+        mg_set_request_handler(context, EVENT_URI, eventHandlerWrapper, this);
+    }
 
     PRINT("Link : %s", HOSTING);
 }

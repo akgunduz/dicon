@@ -32,7 +32,7 @@ bool ConsoleApp::distStateHandler() {
 
         auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
 
-        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(((NodeObject*)node)->getState()));
+        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(((NodeHost*)node)->getState()));
     }
 
     return true;

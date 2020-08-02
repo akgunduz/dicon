@@ -6,7 +6,7 @@
 #ifndef NODEMANAGER_H
 #define	NODEMANAGER_H
 
-#include "NodeObject.h"
+#include "NodeUnit.h"
 #include "ComponentManager.h"
 
 class NodeManager : public ComponentManager {
@@ -23,15 +23,16 @@ public:
     NODESTATES getState(long);
 	void setState(long, NODESTATES);
 
-	long getAddress(long);
-    NodeObject getIdle();
+    Address& getAddress(long);
+    NodeUnit getIdle();
 	int getIdleCount();
 
-    ComponentInfo getAssigned(long);
-	void setAssigned(long, ComponentInfo &);
-	void setAssigned(long, long, long);
+    ComponentUnit getAssigned(long);
+	void setAssigned(long, ComponentUnit &);
+	void setAssigned(long, long, Address&);
+	void releaseAssigned(long);
 
-    ComponentObject* createObject(long, long) final;
+    ComponentUnit* createUnit(long, Address&) final;
 };
 
 #endif	/* DISTRIBUTOR_H */

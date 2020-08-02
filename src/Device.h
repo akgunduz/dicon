@@ -27,7 +27,7 @@ public:
     uint8_t getMask() const;
     bool isLoopback() const;
 
-    std::vector<long> getAddressList();
+//    std::vector<long> getAddressList();
 };
 
 

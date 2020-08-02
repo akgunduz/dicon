@@ -33,7 +33,7 @@ public:
     long getNodeCount();
     Node* getNode(long);
 
-    bool startDistributor();
+    bool startDistributor(bool);
     bool startCollector(int);
     bool startNode(int);
 };

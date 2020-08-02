@@ -18,7 +18,7 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_FILEBINARY,
     MSG_TYPE_TEST_JOBNAME,
     MSG_TYPE_TEST_WAKEUP,
-
+    MSG_TYPE_TEST_ALIVE,
 };
 
 #include "Application.h"

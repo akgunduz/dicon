@@ -74,13 +74,13 @@ Node *ComponentController::getNode(long id) {
     return nullptr;
 }
 
-bool ComponentController::startDistributor() {
+bool ComponentController::startDistributor(bool autoWake) {
 
     char path[PATH_MAX];
     sprintf(path, "%s/%s", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
     mkdir(path, 0777);
 
-    distributor = Distributor::newInstance(path, interface[0], interface[1]);
+    distributor = Distributor::newInstance(path, interface[0], interface[1], autoWake);
 
     return true;
 }

@@ -5,28 +5,23 @@
 #ifndef DICON_COLLECTOROBJECT_H
 #define DICON_COLLECTOROBJECT_H
 
-#include "NodeObject.h"
+#include "NodeHost.h"
 #include "CollectorState.h"
 
 class CollectorObject : public ComponentObject {
 
 private:
 
-    COLLSTATES state;
+    COLLSTATES state{COLLSTATE_IDLE};
 
 public:
 
-    CollectorObject(COLLSTATES, long, long);
-    CollectorObject(long, long);
-    CollectorObject(const char *);
-    CollectorObject();
-    CollectorObject(const CollectorObject &);
-    CollectorObject(const ComponentObject &);
-
-    ~CollectorObject();
+    CollectorObject() = default;
+    explicit CollectorObject(COLLSTATES);
 
     COLLSTATES getState();
     void setState(COLLSTATES);
+
 };
 
 

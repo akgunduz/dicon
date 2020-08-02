@@ -16,7 +16,7 @@ long MessageHeader::getSize() {
 
 void MessageHeader::setType(MSG_TYPE _type) {
 
-    type = (int)_type;
+    type = (uint16_t)_type;
 }
 
 MSG_TYPE MessageHeader::getType() const {
@@ -24,18 +24,22 @@ MSG_TYPE MessageHeader::getType() const {
     return (MSG_TYPE)type;
 }
 
-ComponentObject MessageHeader::getOwner() const {
+ComponentUnit& MessageHeader::getOwner() {
 
-    return ComponentObject((COMPONENT)(owner >> 32), (int)(owner & 0xFFFFFFFF), ownerAddress);
+    return owner;
 }
 
-void MessageHeader::setOwner(const ComponentObject& _owner, COMPONENT targetInterface) {
+void MessageHeader::setOwner(ComponentUnit _owner) {
 
-    this->owner = (((long)_owner.getType()) << 32) | _owner.getID();
-    this->ownerAddress = _owner.getAddress(targetInterface);
+    owner = _owner;
 }
 
-long MessageHeader::getVariant(int id) {
+void MessageHeader::grabOwner(ComponentUnit &unit) {
+
+    unit.grab(owner);
+}
+
+uint64_t MessageHeader::getVariant(int id) {
 
     if (id < MAX_VARIANT) {
         return variant[id];
@@ -44,7 +48,7 @@ long MessageHeader::getVariant(int id) {
     return 0;
 }
 
-void MessageHeader::setVariant(int id, long _variant) {
+void MessageHeader::setVariant(int id, uint64_t _variant) {
 
     if (id >= MAX_VARIANT) {
         return;
@@ -77,28 +81,36 @@ void MessageHeader::normalizePriority() {
     priority *= PRIORITY_COEFFICIENT;
 }
 
-bool MessageHeader::deSerialize(const uint8_t* buffer) {
+void MessageHeader::deSerialize(const uint8_t* buffer) {
 
-    type = ntohl(*((int *) buffer)); buffer += 4;
-    priority = ntohl(*((int *) buffer)); buffer += 4;
-    owner = ntohll(*((long *) buffer)); buffer += 8;
-    ownerAddress = ntohll(*((long *) buffer)); buffer += 8;
+    type = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    priority = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.type = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.id = ntohl(*((uint32_t *) buffer)); buffer += 4;
+    owner.address.flag = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.address.socket = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.address.get().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.address.get().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
+    owner.address.getUI().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    owner.address.getUI().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
     for (int i = 0; i < MAX_VARIANT; i++) {
-        variant[i] = ntohll(*((long *) buffer)); buffer += 8;
+        variant[i] = ntohll(*((uint64_t *) buffer)); buffer += 8;
     }
-
-    return true;
 }
 
-bool MessageHeader::serialize(uint8_t *buffer) {
+void MessageHeader::serialize(uint8_t *buffer) {
 
-    *((int *) buffer) = htonl(type); buffer += 4;
-    *((int *) buffer) = htonl(priority); buffer += 4;
-    *((long *) buffer) = htonll(owner); buffer += 8;
-    *((long *) buffer) = htonll(ownerAddress); buffer += 8;
+    *((uint16_t *) buffer) = htons(type); buffer += 2;
+    *((uint16_t *) buffer) = htons(priority); buffer += 2;
+    *((uint16_t *) buffer) = htons(owner.type); buffer += 2;
+    *((uint32_t *) buffer) = htonl(owner.id); buffer += 4;
+    *((uint16_t *) buffer) = htons(owner.address.flag); buffer += 2;
+    *((uint16_t *) buffer) = htons(owner.address.socket); buffer += 2;
+    *((uint16_t *) buffer) = htons(owner.address.get().port); buffer += 2;
+    *((uint32_t *) buffer) = htonl(owner.address.get().base); buffer += 4;
+    *((uint16_t *) buffer) = htons(owner.address.getUI().port); buffer += 2;
+    *((uint32_t *) buffer) = htonl(owner.address.getUI().base); buffer += 4;
     for (int i = 0; i < MAX_VARIANT; i++) {
-        *((long *) buffer) = htonll(variant[i]); buffer += 8;
+        *((uint64_t *) buffer) = htonll(variant[i]); buffer += 8;
     }
-
-    return true;
 }

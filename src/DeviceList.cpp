@@ -10,10 +10,10 @@
 
 DeviceList* DeviceList::instance = nullptr;
 
-int createMask(long address) {
+int createMask(uint32_t baseAddress) {
 
     int i = 0;
-    auto ip = (uint32_t) Address::getBase(address);
+    auto ip = baseAddress;
     while(ip > 0) {
         ip = ip >> 1;
         i++;

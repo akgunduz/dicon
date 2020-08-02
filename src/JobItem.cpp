@@ -9,7 +9,7 @@
 
 long JobItem::jobID = 1;
 
-JobItem::JobItem(const ComponentObject& host, const char* jobPath, long _jobID)
+JobItem::JobItem(const HostUnit& host, const char* jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
     contentTypes[CONTENT_NAME] = new JsonType(CONTENT_NAME, "name", this, parseNameNode);
@@ -289,7 +289,7 @@ ParameterItem* JobItem::getParameter(int index) const {
     return (ParameterItem*)getContent(CONTENT_PARAM, index);
 }
 
-ProcessItem* JobItem::assignNode(ComponentObject &node) {
+ProcessItem* JobItem::assignNode(ComponentUnit &node) {
 
     mutex.lock();
 

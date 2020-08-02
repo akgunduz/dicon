@@ -76,12 +76,12 @@ void MessageData::setJobName(const char *_jobName) {
     strcpy(this->jobName, _jobName);
 }
 
-std::vector<ComponentObject> &MessageData::getComponentList() {
+TypeComponentList &MessageData::getComponentList() {
 
     return componentList;
 }
 
-void MessageData::setComponentList(std::vector<ComponentObject> &list) {
+void MessageData::setComponentList(TypeComponentList &list) {
 
     componentList = list;
 }

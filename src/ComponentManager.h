@@ -6,11 +6,11 @@
 #define DICON_COMPONENTMANAGER_H
 
 #include "Common.h"
-#include "ComponentObject.h"
+#include "HostUnit.h"
 
-typedef std::map<long, ComponentObject*> TypeComponentMapIDList;
-typedef std::map<long, ComponentObject*> TypeComponentMapAddressList;
-typedef std::vector<ComponentObject*> TypeComponentVectorList;
+typedef std::map<long, ComponentUnit*> TypeComponentMapIDList;
+typedef std::map<Address, ComponentUnit*> TypeComponentMapAddressList;
+typedef std::vector<ComponentUnit*> TypeComponentVectorList;
 
 class ComponentManager {
 
@@ -24,20 +24,20 @@ class ComponentManager {
 
 protected:
 
-    virtual ComponentObject* createObject(long, long) = 0;
+    virtual ComponentUnit* createUnit(long, Address&) = 0;
 
 public:
 
     ComponentManager();
     virtual ~ComponentManager();
 
-    ComponentObject* get(long);
-    ComponentObject* getByIndex(int);
+    ComponentUnit* get(long);
+    ComponentUnit* getByIndex(int);
     size_t size();
     void clear();
     bool isExist(long);
 
-    long add(long, bool&);
+    long add(Address&, bool&);
 };
 
 

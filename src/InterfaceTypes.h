@@ -14,14 +14,13 @@ enum INTERFACE {
     INTERFACE_MAX
 };
 
-class Device;
+//class Device;
 
-typedef std::vector<long> (*fGetAddressList)(Device*);
+//typedef std::vector<long> (*fGetAddressList)(Device*);
 
 class InterfaceTypes {
 public:
-    static fGetAddressList getAddressList(INTERFACE);
-    static std::string getAddressString(long);
+//    static fGetAddressList getAddressList(INTERFACE);
     static const char* getName(INTERFACE);
 };
 

@@ -16,7 +16,7 @@ class FileItem : public ContentItem {
 	long size{};
 
 public:
-	explicit FileItem(const ComponentObject&, long = 0, long = 0, const char* = "");
+	explicit FileItem(const HostUnit&, long = 0, long = 0, const char* = "");
 	~FileItem() override = default;
 
     const char* getName() const;

@@ -15,26 +15,26 @@
 
 class Collector : public Component {
 
-	JobItem *job;
-	DistributorObject distributor;
+	JobItem *job{};
+    ComponentUnit distributor{};
 
     explicit Collector(const char *, int, int);
 
-	void setDistributor(const DistributorObject&);
+	void setDistributor(const ComponentUnit&);
 
-	bool processDistributorWakeupMsg(const ComponentObject&, Message *);
-	bool processDistributorIDMsg(const ComponentObject&, Message *);
-	bool processDistributorNodeMsg(const ComponentObject&, Message *);
-	bool processNodeFileInfoMsg(const ComponentObject &owner, Message *msg);
-	bool processNodeFileBinaryMsg(const ComponentObject &owner, Message *msg);
+	bool processDistributorWakeupMsg(ComponentUnit&, Message *);
+	bool processDistributorIDMsg(ComponentUnit&, Message *);
+	bool processDistributorNodeMsg(ComponentUnit&, Message *);
+	bool processNodeFileInfoMsg(ComponentUnit &owner, Message *msg);
+	bool processNodeFileBinaryMsg(ComponentUnit &owner, Message *msg);
 
-	bool send2DistributorAliveMsg(const ComponentObject&);
-	bool send2DistributorIDMsg(const ComponentObject&);
-	bool send2DistributorNodeMsg(const ComponentObject&, long);
-    bool send2DistributorReadyMsg(const ComponentObject&);
-    bool send2NodeProcessMsg(const ComponentObject&, ProcessItem *);
-	bool send2NodeBinaryMsg(const ComponentObject&, long, TypeProcessFileList&);
-	bool send2NodeReadyMsg(const ComponentObject&);
+	bool send2DistributorAliveMsg(ComponentUnit&);
+	bool send2DistributorIDMsg(ComponentUnit&);
+	bool send2DistributorNodeMsg(ComponentUnit&, long);
+    bool send2DistributorReadyMsg(ComponentUnit&);
+    bool send2NodeProcessMsg(ComponentUnit&, ProcessItem *);
+	bool send2NodeBinaryMsg(ComponentUnit&, long, TypeProcessFileList&);
+	bool send2NodeReadyMsg(ComponentUnit&);
 
 public:
 

@@ -5,7 +5,7 @@
 
 #include "Application.h"
 
-App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int> componentCount) :
+App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int> componentCount, bool autoWake) :
         type(type) {
 
     Log::init(logLevel[0], logLevel[1]);
@@ -20,7 +20,7 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
     componentController = ComponentController::newInstance(interfaces);
 
     if (componentCount[COMP_DISTRIBUTOR]) {
-        componentController->startDistributor();
+        componentController->startDistributor(autoWake);
     }
 
     if (componentCount[COMP_COLLECTOR]) {

@@ -40,7 +40,7 @@ private:
 public:
 
 	ProcessItem(const ProcessItem &);
-	explicit ProcessItem(const ComponentObject&, long = 0, long = 0, const char * = nullptr);
+	explicit ProcessItem(const HostUnit&, long = 0, long = 0, const char * = nullptr);
 	~ProcessItem() override = default;
 
     bool parse(void *);

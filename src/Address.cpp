@@ -4,46 +4,83 @@
 
 #include "Address.h"
 
-long Address::create(INTERFACE interface, long base, int port, int socket, bool multicast) {
+Address Address::invalid{};
 
-    return SET(interface, INTERFACE_POS, INTERFACE_MASK) |
-           SET((int)multicast, MULTICAST_POS, MULTICAST_MASK) |
-           SET(socket, SOCKET_POS, SOCKET_MASK) |
-           SET(port, PORT_POS, PORT_MASK) |
-           SET(base, BASE_POS, BASE_MASK) ;
+Address::Address(INTERFACE _interface) {
+
+    flag = SET(flag, _interface, INTERFACE_POS, INTERFACE_MASK);
 }
 
-INTERFACE Address::getInterface(long& address) {
+Address::Address(uint32_t _base, uint16_t _port, INTERFACE _interface)
+    : self(_base, _port) {
 
-    return (INTERFACE) GET(address, INTERFACE_POS, INTERFACE_MASK);
+    flag = SET(flag, _interface, INTERFACE_POS, INTERFACE_MASK);
 }
 
-int Address::getSocket(long& address) {
-
-    return (int) GET(address, SOCKET_POS, SOCKET_MASK);
+Address::Address(BaseAddress _self)
+    : self(_self) {
 }
 
-void Address::setSocket(long& address, int socket) {
-
-    address = CLEAR_AND_SET(address, socket, SOCKET_POS, SOCKET_MASK);
+Address::Address(BaseAddress _self, BaseAddress _ui)
+    : self(_self), ui(_ui) {
 }
 
-int Address::getPort(long& address) {
-
-    return (int) GET(address, PORT_POS, PORT_MASK);
+BaseAddress& Address::get() {
+    return self;
 }
 
-long Address::getBase(long& address) {
-
-    return (long) GET(address, BASE_POS, BASE_MASK);
+BaseAddress& Address::getUI() {
+    return ui;
 }
 
-bool Address::isMulticast(long &address) {
+void Address::set(uint32_t _base, uint16_t _port) {
 
-    return (bool) GET(address, MULTICAST_POS, MULTICAST_MASK);
+    self.base = _base;
+    self.port = _port;
 }
 
-void Address::setMulticast(long &address, bool multicast) {
+void Address::setUI(uint32_t _base, uint16_t _port) {
 
-    address = CLEAR_AND_SET(address, (int)multicast, MULTICAST_POS, MULTICAST_MASK);
+    ui.base = _base;
+    ui.port = _port;
+}
+
+void Address::set(BaseAddress &ref) {
+
+    self = ref;
+}
+
+void Address::setUI(BaseAddress &ref) {
+
+    ui = ref;
+}
+
+
+uint16_t Address::getSocket() {
+    return socket;
+}
+
+bool Address::isMulticast() {
+
+    return (bool) GET(flag, MULTICAST_POS, MULTICAST_MASK);
+}
+
+INTERFACE Address::getInterface() const {
+
+    return (INTERFACE)GET(flag, INTERFACE_POS, INTERFACE_MASK);
+}
+
+void Address::setSocket(uint16_t _socket) {
+
+    socket = _socket;
+}
+
+void Address::setMulticast(bool _multicast) {
+
+    flag = SET(flag, _multicast, MULTICAST_POS, MULTICAST_MASK);
+}
+
+void Address::setInterface(INTERFACE _interface) {
+
+    flag = SET(flag, _interface, INTERFACE_POS, INTERFACE_MASK);
 }

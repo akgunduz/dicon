@@ -6,7 +6,7 @@
 #include "FileItem.h"
 #include "Util.h"
 
-FileItem::FileItem(const ComponentObject& host, long _id, long _assignedJob, const char* _name)
+FileItem::FileItem(const HostUnit& host, long _id, long _assignedJob, const char* _name)
         : ContentItem (host, _id, _assignedJob) {
 
     strcpy(name, _name);

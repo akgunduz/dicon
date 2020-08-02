@@ -6,7 +6,7 @@
 #include "CollectorManager.h"
 #include "Address.h"
 #include "ComponentManager.h"
-#include "CollectorObject.h"
+#include "CollectorUnit.h"
 
 CollectorManager::CollectorManager() = default;
 
@@ -40,9 +40,9 @@ void CollectorManager::setState(long id, COLLSTATES state) {
     collMutex.unlock();
 }
 
-ComponentObject *CollectorManager::createObject(long id, long address) {
+ComponentUnit *CollectorManager::createUnit(long id, Address& address) {
 
-    return new CollectorObject(id, address);
+    return new CollectorUnit(id, address);
 }
 
 bool CollectorManager::addRequest(long collID, int reqNodeCount) {

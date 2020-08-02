@@ -39,7 +39,7 @@ public:
 
     static long jobID;
 
-    JobItem(const ComponentObject&, const char*, long);
+    JobItem(const HostUnit&, const char*, long);
     ~JobItem() override;
     ContentItem* getContent(int type, int index) const;
     int getContentCount(int type) const;
@@ -69,7 +69,7 @@ public:
     int getParameterCount() const;
     ParameterItem* getParameter(int) const;
 
-    ProcessItem* assignNode(ComponentObject &);
+    ProcessItem* assignNode(ComponentUnit &);
 
     int getByOutput(int) const;
     bool setProcessIDByOutput(long, long);

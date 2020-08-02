@@ -276,9 +276,7 @@
     let COLLECTOR = 0x1;
     let NODE = 0x2;
 
-    let PORT = "8081";
-    let HOSTING = "http://localhost:" + PORT;
-    let REST_URI = HOSTING + "/rest";
+    let REST_URI = location.origin + "/rest";
     let REST_STATE = "/state";
 
     let REST_DIST_URI = REST_URI + "/dist";
@@ -289,8 +287,6 @@
     let REST_COLL_PROCESS = "/process";
 
     let REST_NODE_URI = REST_URI + "/node";
-
-    let WS_URI = "ws://localhost:" + PORT + "/ws";
 
     let COLL_STATES = ["IDLE", "BUSY"];
     let NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
@@ -303,7 +299,7 @@
 
     let eventSource;
 
-    let currentPage = {
+    const currentPage = {
       type: DISTRIBUTOR,
       id: 0,
       set(_type, _id) {
@@ -344,7 +340,7 @@
       eventSource = new EventSource("/event");
 
       eventSource.onmessage = function (event) {
-        var state = JSON.parse(event.data);
+        let state = JSON.parse(event.data);
         if (state.dist > 0 && currentPage.type === DISTRIBUTOR) {
           onDistState();
         } else if (state.coll > 0 && currentPage.type === COLLECTOR) {

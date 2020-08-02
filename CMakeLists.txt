@@ -35,7 +35,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageItem.cpp
-        ${SOURCE_PATH}/MessageDirection.cpp
         ${SOURCE_PATH}/MessageTypes.cpp
         ${SOURCE_PATH}/Net.cpp
         ${SOURCE_PATH}/Node.cpp
@@ -59,15 +58,23 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorState.cpp
         ${SOURCE_PATH}/NodeState.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
-        ${SOURCE_PATH}/ComponentObject.cpp
+        ${SOURCE_PATH}/HostUnit.cpp
+        ${SOURCE_PATH}/NodeHost.cpp
         ${SOURCE_PATH}/ComponentController.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/DistributorObject.cpp
-        ${SOURCE_PATH}/ComponentInfo.cpp
+        ${SOURCE_PATH}/ComponentUnit.cpp
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/ProcessState.cpp
         ${SOURCE_PATH}/ProcessFile.cpp
+        ${SOURCE_PATH}/ComponentType.cpp
+        ${SOURCE_PATH}/NodeObject.cpp
+        ${SOURCE_PATH}/NodeUnit.cpp
+        ${SOURCE_PATH}/ComponentObject.cpp
+        ${SOURCE_PATH}/CollectorUnit.cpp
+        ${SOURCE_PATH}/CollectorHost.cpp
+        ${SOURCE_PATH}/DistributorHost.cpp
         )
 
 set(CONSOLE_FILES

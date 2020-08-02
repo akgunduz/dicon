@@ -17,29 +17,30 @@ private:
 	MessageHeader header{};
     MessageData data{};
 
-    bool readComponentList(long, std::vector<ComponentObject>&, MessageBlockHeader&, uint32_t&);
-    bool readJobName(long, char*, MessageBlockHeader&, uint32_t&);
-    bool readProcess(long, ProcessItem*, MessageBlockHeader&, uint32_t&);
-    bool readProcessID(long, long&, MessageBlockHeader&, uint32_t&);
-    bool readFile(long, ProcessFile&, MessageBlockHeader&, uint32_t&);
-    bool readMessageBlock(long in, MessageBlockHeader&, uint32_t&) override;
+    bool readComponentList(ComponentUnit&, TypeComponentList&, MessageBlockHeader&, uint32_t&);
+    bool readJobName(ComponentUnit&, char*, MessageBlockHeader&, uint32_t&);
+    bool readProcess(ComponentUnit&, ProcessItem*, MessageBlockHeader&, uint32_t&);
+    bool readProcessID(ComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
+    bool readFile(ComponentUnit&, ProcessFile&, MessageBlockHeader&, uint32_t&);
+    bool readMessageBlock(ComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
-    bool writeComponentList(long, std::vector<ComponentObject>&, uint32_t&);
-    bool writeJobName(long, const char*, uint32_t&);
-    bool writeProcess(long, ProcessItem*, uint32_t&);
-    bool writeProcessID(long, long, uint32_t&);
-    bool writeFile(long, ProcessFile&, bool, uint32_t&);
+    bool writeComponentList(ComponentUnit&, TypeComponentList&, uint32_t&);
+    bool writeJobName(ComponentUnit&, const char*, uint32_t&);
+    bool writeProcess(ComponentUnit&, ProcessItem*, uint32_t&);
+    bool writeProcessID(ComponentUnit&, long, uint32_t&);
+    bool writeFile(ComponentUnit&, ProcessFile&, bool, uint32_t&);
 
-    bool writeMessageStream(long out, uint32_t&) override;
+    bool writeMessageStream(ComponentUnit& out, uint32_t&) override;
 
-    bool deSerializeHeader(const uint8_t*) override;
-    bool serializeHeader(uint8_t *) override;
+    void deSerializeHeader(const uint8_t*) override;
+    void serializeHeader(uint8_t *) override;
+    void grabOwner(ComponentUnit&) override;
     long getHeaderSize() override;
 
 public:
 
-	explicit Message(ComponentObject&);
-	Message(ComponentObject&, COMPONENT, MSG_TYPE);
+	explicit Message(HostUnit&);
+	Message(HostUnit&, ComponentUnit&, MSG_TYPE);
 
 	MessageHeader& getHeader();
 	MessageData& getData();

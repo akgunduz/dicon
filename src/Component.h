@@ -8,7 +8,7 @@
 #include "Connector.h"
 #include "DeviceList.h"
 #include "MessageTypes.h"
-#include "ComponentObject.h"
+#include "HostUnit.h"
 #include "StopWatch.h"
 
 enum NOTIFYSTATE {
@@ -21,8 +21,8 @@ enum NOTIFYSTATE {
 
 class Component;
 
-typedef bool (Component::*TypeProcessComponentMsg)(const ComponentObject&, Message *);
-typedef bool (*TypeStaticProcessComponentMsg)(Component*, const ComponentObject&, Message *);
+typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, Message *);
+typedef bool (*TypeStaticProcessComponentMsg)(Component*, ComponentUnit&, Message *);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
@@ -40,7 +40,7 @@ class Component {
 
 protected :
 
-    ComponentObject *host{};
+    HostUnit *host{};
 
     TypeProcessMsgMap processMsg[COMP_MAX];
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
@@ -50,7 +50,7 @@ protected :
 
     StopWatch componentWatch;
 
-    static ComponentObject& getHostCB(void*);
+    static HostUnit& getHostCB(void*);
 
     bool initInterfaces(COMPONENT type, int, int);
 
@@ -61,21 +61,22 @@ public:
     explicit Component(const char* rootPath);
     virtual ~Component();
 
-    ComponentObject& getHost();
+    HostUnit& getHost();
 
     const char* getRootPath();
 
     Device* getDevice(COMPONENT);
-    long getInterfaceAddress(COMPONENT);
-    long getInterfaceMulticastAddress(COMPONENT);
+    Address& getInterfaceAddress(COMPONENT);
+    Address& getInterfaceMulticastAddress(COMPONENT);
+    TypeAddressList getInterfaceAddressList(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
     static bool receiveCB(void *, SchedulerItem*);
-    bool onReceive(const ComponentObject&, MSG_TYPE, Message *);
+    bool onReceive(ComponentUnit&, MSG_TYPE, Message *);
 
-    bool send(const ComponentObject&, Message*);
+    bool send(ComponentUnit&, Message*);
 
-    bool defaultProcessMsg(const ComponentObject&, Message *);
+    bool defaultProcessMsg(ComponentUnit&, Message *);
 
     static void registerNotify(void*, TypeNotifyCB);
 

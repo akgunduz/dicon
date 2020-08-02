@@ -4,6 +4,7 @@
 //
 
 #include <paths.h>
+#include <CollectorHost.h>
 #include "JobItem.h"
 #include "WebApp.h"
 
@@ -52,7 +53,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
         return false;
     }
 
-    auto host = (CollectorObject&) collector->getHost();
+    auto host = (CollectorHost&) collector->getHost();
 
     if (!fileName) {
         LOGS_E(host, "Invalid upload process!!!");
@@ -117,11 +118,11 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto host = (CollectorObject&) collector->getHost();
+    auto host = (CollectorHost&) collector->getHost();
 
     auto *job = collector->getJob();
     if (job == nullptr) {
-        LOGS_I(host, "No Job is loaded yet!!!");
+        LOGS_W(host, "No Job is loaded yet!!!");
         mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
         return false;
     }

@@ -6,7 +6,7 @@
 #include "ConsoleApp.h"
 
 ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
-    : App(APPTYPE_CONSOLE, interfaceID, logLevel, componentCount) {
+    : App(APPTYPE_CONSOLE, interfaceID, logLevel, componentCount, true) {
 
     PRINT("Commands : ");
     PRINT("\tPoll     : 'p' ==> Execute polling command");

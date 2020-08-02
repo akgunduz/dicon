@@ -4,9 +4,9 @@
 
 #include "TestApp.h"
 
-void sendFileInfo(Component *owner, const ComponentObject& target) {
+void sendFileInfo(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target.getType(), (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
+    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
 
     auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
 
@@ -18,11 +18,11 @@ void sendFileInfo(Component *owner, const ComponentObject& target) {
     owner->send(target, msg);
 }
 
-bool processFileInfoMsg(Component* component, const ComponentObject& owner, Message *msg) {
+bool processFileInfoMsg(Component* component, ComponentUnit& owner, Message *msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
-    LOGS_I(component->getHost(), "Message File Info has came from : %s", owner.getName());
+    LOGS_I(component->getHost(), "Message File Info has came from : %s", ComponentType::getName(owner.getType()));
     LOGS_I(component->getHost(), "File 1 : %d, %s", list[0].get()->getID(), list[0].get()->getName());
     LOGS_I(component->getHost(), "File 2 : %d, %s", list[1].get()->getID(), list[1].get()->getName());
     LOGS_I(component->getHost(), "File 3 : %d, %s", list[2].get()->getID(), list[2].get()->getName());
@@ -37,6 +37,6 @@ void TestApp::testFileInfo(Distributor* distributor, Collector* collector, Node*
 
     collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, processFileInfoMsg);
 
-    ComponentObject target(collector->getHost(), COMP_NODE);
+    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getID(), collector->getHost().getAddress(COMP_NODE));
     sendFileInfo(node, target);
 }

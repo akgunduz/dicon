@@ -26,7 +26,7 @@ protected:
 
     ComponentController* componentController;
 
-    App(enum APPTYPE, int *, LOGLEVEL*, std::vector<int>);
+    App(enum APPTYPE, int *, LOGLEVEL*, std::vector<int>, bool);
 
 public:
 

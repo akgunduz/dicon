@@ -7,7 +7,8 @@
 #ifndef DICON_LOG_H
 #define DICON_LOG_H
 
-#include "ComponentObject.h"
+#include "HostUnit.h"
+#include "MessageTypes.h"
 
 enum LOGLEVEL {
 
@@ -27,6 +28,25 @@ enum LOGTYPE {
     LOG_STD,
     LOG_COMM,
     LOG_MAX
+};
+
+enum PRINT_COLOR {
+    COLOR_RESET,
+    COLOR_BLACK,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_BLUE,
+    COLOR_MAGENTA,
+    COLOR_CYAN,
+    COLOR_WHITE,
+    COLOR_MAX
+};
+
+struct LogLevel {
+
+    const char* name;
+    const char* color;
 };
 
 #define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, ##__VA_ARGS__);\
@@ -53,8 +73,8 @@ public:
 
     static void init(LOGLEVEL, LOGLEVEL);
 	static void setLogLevel(LOGLEVEL, LOGLEVEL);
-    static void logs(LOGLEVEL level, const char *, int, const ComponentObject, ...);
-    static void logc(LOGLEVEL level, const char *, int, const ComponentObject, const ComponentObject&, int, ...);
+    static void logs(LOGLEVEL level, const char *, int, const HostUnit, ...);
+    static void logc(LOGLEVEL level, const char *, int, const HostUnit, const ComponentUnit&, MSG_DIR, ...);
 	static void show(const char *format, ...);
 };
 

@@ -29,8 +29,8 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
-    host->setAddress(ComponentInfo::next(type), getInterfaceAddress(ComponentInfo::next(type)));
-    host->setAddress(ComponentInfo::prev(type), getInterfaceAddress(ComponentInfo::prev(type)));
+    host->setAddress(ComponentUnit::next(type), getInterfaceAddress(ComponentUnit::next(type)));
+    host->setAddress(ComponentUnit::prev(type), getInterfaceAddress(ComponentUnit::prev(type)));
 
     return true;
 }
@@ -53,7 +53,7 @@ const char* Component::getRootPath() {
     return rootPath;
 }
 
-ComponentObject& Component::getHostCB(void *arg) {
+HostUnit& Component::getHostCB(void *arg) {
 
     return ((Component*) arg)->getHost();
 }
@@ -63,16 +63,15 @@ bool Component::receiveCB(void *arg, SchedulerItem* item) {
     auto *component = (Component *) arg;
     auto *messageItem = (MessageItem*) item;
 
-    return component->onReceive(messageItem->getMessage()->getHeader().getOwner(),
-                                messageItem->getMessage()->getHeader().getType(),
+    ComponentUnit obj(messageItem->getMessage()->getHeader().getOwner());
+
+    return component->onReceive(obj, messageItem->getMessage()->getHeader().getType(),
                                 messageItem->getMessage());
 }
 
-bool Component::onReceive(const ComponentObject& owner, MSG_TYPE msgType, Message *msg) {
+bool Component::onReceive(ComponentUnit& owner, MSG_TYPE msgType, Message *msg) {
 
-    LOGC_I(getHost(),
-           owner,
-          false,
+    LOGC_D(getHost(), owner, MSGDIR_RECEIVE,
           "\"%s\" is received",
           MessageTypes::getMsgName(msgType));
 
@@ -92,8 +91,13 @@ bool Component::onReceive(const ComponentObject& owner, MSG_TYPE msgType, Messag
 }
 
 
-bool Component::defaultProcessMsg(const ComponentObject& owner, Message *msg) {
+bool Component::defaultProcessMsg(ComponentUnit& owner, Message *msg) {
 
+    if (getHost().getType() != owner.getType()) {
+        LOGC_W(getHost(), owner, MSGDIR_RECEIVE,
+               "No Handler is found for message : \"%s\"",
+               MessageTypes::getMsgName(msg->getHeader().getType()));
+    }
     delete msg;
     return true;
 }
@@ -107,22 +111,31 @@ Device *Component::getDevice(COMPONENT target) {
     return nullptr;
 }
 
-long Component::getInterfaceAddress(COMPONENT target) {
+Address& Component::getInterfaceAddress(COMPONENT target) {
 
     if (interfaces[target] != nullptr) {
         return interfaces[target]->getAddress();
     }
 
-    return 0;
+    return Address::invalid;
 }
 
-long Component::getInterfaceMulticastAddress(COMPONENT target) {
+Address& Component::getInterfaceMulticastAddress(COMPONENT target) {
 
     if (interfaces[target] != nullptr) {
         return interfaces[target]->getMulticastAddress();
     }
 
-    return 0;
+    return Address::invalid;
+}
+
+TypeAddressList Component::getInterfaceAddressList(COMPONENT target) {
+
+    if (interfaces[target] != nullptr) {
+        return interfaces[target]->getAddressList();
+    }
+
+    return TypeAddressList();
 }
 
 INTERFACE Component::getInterfaceType(COMPONENT target) {
@@ -144,18 +157,12 @@ bool Component::isSupportMulticast(COMPONENT target) {
     return false;
 }
 
-bool Component::send(const ComponentObject& target, Message *msg) {
+bool Component::send(ComponentUnit& target, Message *msg) {
 
-    LOGC_I(getHost(),
-           target,
-           true,
-           "\"%s\" is sent",
-           MessageTypes::getMsgName(msg->getHeader().getType()));
-
-    return interfaces[target.getType()]->push(MESSAGE_SEND, target.getAddress(target.getType()), msg);
+    return interfaces[target.getType()]->push(MSGDIR_SEND, target, msg);
 }
 
-ComponentObject &Component::getHost() {
+HostUnit &Component::getHost() {
     return (*host);
 }
 
@@ -203,4 +210,5 @@ bool Component::addStaticProcessHandler(COMPONENT component, MSG_TYPE msgType,
 
     return true;
 }
+
 

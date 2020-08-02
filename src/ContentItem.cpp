@@ -5,7 +5,7 @@
 
 #include "ContentItem.h"
 
-ContentItem::ContentItem(const ComponentObject& _host, long _id, long _assignedJob) :
+ContentItem::ContentItem(const HostUnit& _host, long _id, long _assignedJob) :
         host(_host), id(_id), assignedJob(_assignedJob) {
 }
 
@@ -16,7 +16,7 @@ ContentItem::ContentItem(const ContentItem &copy) :
         assignedJob(copy.getAssignedJob()){
 }
 
-const ComponentObject& ContentItem::getHost() const {
+const HostUnit& ContentItem::getHost() const {
 
     return host;
 }

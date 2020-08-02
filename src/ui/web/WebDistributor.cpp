@@ -71,7 +71,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         auto *node = distributor->getNodes()->getByIndex(i);
         auto* nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "nodeID", json_object_new_int(node->getID()));
-        json_object_object_add(nodeItem, "state", json_object_new_int(((NodeObject*)node)->getState()));
+        json_object_object_add(nodeItem, "state", json_object_new_int(((NodeHost*)node)->getState()));
 
         json_object_array_add(nodeList, nodeItem);
     }

@@ -30,6 +30,7 @@ enum BLOCK_TYPE {
     BLOCK_PROCESSINFO,
     BLOCK_PROCESSID,
     BLOCK_PROCESS,
+    BLOCK_END_STREAM,
 
     BLOCK_NONE = 0xFFFF
 };
@@ -50,10 +51,16 @@ enum MSG_TYPE {
 
 };
 
+enum MSG_DIR {
+    MSGDIR_RECEIVE,
+    MSGDIR_SEND
+};
+
 class MessageTypes {
 
 public:
     static const char* getMsgName(int);
+    static const char* getMsgDirName(int);
     static void addMsg(int, std::string);
     static const char* getStreamName(int);
     static void addStream(int, std::string);

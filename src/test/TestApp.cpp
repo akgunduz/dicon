@@ -5,7 +5,7 @@
 #include "TestApp.h"
 
 TestApp::TestApp(int *_interfaces, LOGLEVEL* _logLevel, std::vector<int>& _componentCount)
-        : App(APPTYPE_TEST, _interfaces, _logLevel, {1, 1, 1}) {
+        : App(APPTYPE_TEST, _interfaces, _logLevel, {1, 1, 1}, false) {
 
     help();
 }
@@ -18,7 +18,7 @@ void TestApp::help() {
     PRINT("\tTest Process        : 's'");
     PRINT("\tTest File Info      : 'i'");
     PRINT("\tTest File Binary    : 'b'");
-    PRINT("\tTest Job Name       : 'x'");
+    PRINT("\tTest Job Name       : 'j'");
     PRINT("\tTest Load Job       : 'l'");
     PRINT("\tTest WakeUp         : 'w'");
     PRINT("\tHelp                : 'h'");
@@ -30,6 +30,8 @@ int TestApp::run() {
     Distributor *d = componentController->getDistributor();
     Collector *c = componentController->getCollector(0);
     Node *n = componentController->getNode(0);
+
+    testWakeUp(d,c,n);
 
     int in;
     do {

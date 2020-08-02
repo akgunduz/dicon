@@ -24,8 +24,8 @@ private :
 
 	Device *device{};
 
-    long address{};
-    long multicastAddress{};
+    Address address{};
+    Address multicastAddress{};
 
     const InterfaceSchedulerCB *schedulerCB{};
     const InterfaceHostCB *hostCB{};
@@ -37,8 +37,8 @@ protected :
 	int notifierPipe[2];
 
 	virtual void runReceiver() = 0;
-	virtual void runSender(long, Message *) = 0;
-	virtual void runMulticastSender(Message *) = 0;
+	virtual void runSender(ComponentUnit&, Message *) = 0;
+	virtual void runMulticastSender(ComponentUnit&, Message *) = 0;
 
 	bool initThread();
 	void end();
@@ -50,17 +50,18 @@ public :
 
     virtual ~Interface();
 
-	bool push(MESSAGE_DIRECTION, long, Message *);
-	ComponentObject& getHost();
+	bool push(MSG_DIR, ComponentUnit&, Message *);
+	HostUnit& getHost();
 	Device* getDevice();
-    long& getAddress();
-    long& getMulticastAddress();
+    Address& getAddress();
+    Address& getMulticastAddress();
 
-    void setAddress(long);
-    void setMulticastAddress(long);
+    void setAddress(Address&);
+    void setMulticastAddress(Address&);
 
     virtual INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
+    virtual TypeAddressList getAddressList() = 0;
 };
 
 

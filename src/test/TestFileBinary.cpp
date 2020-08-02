@@ -4,9 +4,9 @@
 
 #include "TestApp.h"
 
-void sendFileBinary(Component *owner, const ComponentObject& target) {
+void sendFileBinary(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target.getType(), (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
+    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
 
     auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
 
@@ -21,12 +21,12 @@ void sendFileBinary(Component *owner, const ComponentObject& target) {
     owner->send(target, msg);
 }
 
-bool processFileBinaryMsg(Component* component, const ComponentObject& owner, Message *msg) {
+bool processFileBinaryMsg(Component* component, ComponentUnit& owner, Message *msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
     LOGS_I(component->getHost(), "Message File Binary has came from : %s with assigned Process : %d",
-            owner.getName(), msg->getData().getFileProcess());
+           ComponentType::getName(owner.getType()), msg->getData().getFileProcess());
     LOGS_I(component->getHost(), "File 1 : %d, %s, %d", list[0].get()->getID(), list[0].get()->getName(), list[0].get()->getSize());
     LOGS_I(component->getHost(), "File 2 : %d, %s, %d", list[1].get()->getID(), list[1].get()->getName(), list[1].get()->getSize());
     LOGS_I(component->getHost(), "File 3 : %d, %s, %d", list[2].get()->getID(), list[2].get()->getName(), list[2].get()->getSize());
@@ -41,6 +41,6 @@ void TestApp::testFileBinary(Distributor* distributor, Collector* collector, Nod
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY, processFileBinaryMsg);
 
-    ComponentObject target(node->getHost(), COMP_COLLECTOR);
+    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
     sendFileBinary(collector, target);
 }

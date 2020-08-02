@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Net_H_
-#define __Net_H_
+#ifndef DICON_NET_H
+#define DICON_NET_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -23,42 +23,42 @@
 class Net : public Interface {
 
 private :
-	int netSocket;
-	int multicastSocket;
+	int netSocket{};
+	int multicastSocket{};
 
 	bool initTCP();
 	bool initMulticast();
-	void runReceiver();
-	static void runAccepter(Interface *, long);
-	void runSender(long, Message *);
-	void runMulticastSender(Message *);
+	void runReceiver() override;
+	static void runAcceptor(Interface*, int);
+	void runSender(ComponentUnit&, Message *) override;
+	void runMulticastSender(ComponentUnit& target, Message *) override;
 
-    static std::string getIPString(long);
+    static std::string getIPString(Address&);
     static long parseIPAddress(const std::string&);
 
-    static sockaddr_in getInetAddressByAddress(long);
+    static sockaddr_in getInetAddressByAddress(Address&);
     static sockaddr_in getInetAddressByPort(int);
-    static ip_mreq getInetMulticastAddress(long);
+    static ip_mreq getInetMulticastAddress(Address&);
+    static std::string getAddressString(Address&);
 
-    static size_t readCB(long, uint8_t*, size_t);
-    static size_t readMulticastCB(long, uint8_t*, size_t);
-    static size_t writeCB(long, const uint8_t*, size_t);
-    static size_t writeMulticastCB(long, const uint8_t*, size_t);
+    static size_t readCB(ComponentUnit&, uint8_t*, size_t);
+    static size_t readMulticastCB(ComponentUnit&, uint8_t*, size_t);
+    static size_t writeCB(ComponentUnit&, const uint8_t*, size_t);
+    static size_t writeMulticastCB(ComponentUnit&, const uint8_t*, size_t);
 public :
 
 	Net(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
-	~Net();
+	~Net() override;
 
-    INTERFACE getType();
-	bool isSupportMulticast();
+    INTERFACE getType() override;
+	bool isSupportMulticast() override;
 
-    static std::string getAddressString(long);
-	static std::vector<long> getAddressList(Device*);
+    TypeAddressList getAddressList() override;
 
-	static long parseAddress(std::string);
+    static Address parseAddress(std::string);
 
-    static TypeReadCB getReadCB(long);
-    static TypeWriteCB getWriteCB(long);
+    static TypeReadCB getReadCB(ComponentUnit&);
+    static TypeWriteCB getWriteCB(ComponentUnit&);
 };
 
-#endif //__Server_H_
+#endif //DICON_NET_H

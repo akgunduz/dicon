@@ -12,8 +12,8 @@ Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, con
 
     schedulerCB = new InterfaceSchedulerCB(runSenderCB, this);
 
-	scheduler->setCB(MESSAGE_RECEIVE, receiveCB);
-	scheduler->setCB(MESSAGE_SEND, schedulerCB);
+	scheduler->setCB(MSGDIR_RECEIVE, receiveCB);
+	scheduler->setCB(MSGDIR_SEND, schedulerCB);
 }
 
 void Interface::end() {
@@ -43,7 +43,6 @@ bool Interface::initThread() {
 void Interface::runReceiverCB(Interface *interface) {
 
     interface->runReceiver();
-
 }
 
 bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
@@ -51,14 +50,22 @@ bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
 	auto *interface = (Interface *) arg;
     auto *msgItem = (MessageItem*) item;
 
-	if (msgItem->address != interface->getMulticastAddress()) {
+    LOGC_T(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
+           "\"%s\" is sending",
+           MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
 
-		interface->runSender(msgItem->address, msgItem->msg);
+	if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
+
+		interface->runSender(msgItem->getUnit(), msgItem->getMessage());
 
 	} else {
 
-		interface->runMulticastSender(msgItem->msg);
+		interface->runMulticastSender(msgItem->getUnit(), msgItem->getMessage());
 	}
+
+    LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
+           "\"%s\" is sent",
+           MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
 
 	return true;
 }
@@ -71,39 +78,39 @@ Interface::~Interface() {
 	close(notifierPipe[0]);
 }
 
-bool Interface::push(MESSAGE_DIRECTION type, long target, Message *msg) {
+bool Interface::push(MSG_DIR type, ComponentUnit& target, Message *msg) {
 
-	if (Address::getInterface(target) == getType()) {
+	if (target.getAddress().getInterface() == getType()) {
 
 		scheduler->push(new MessageItem(type, target, msg));
 		return true;
 	}
 
-	LOGS_E(getHost(), "Interface is not suitable for target : %d", target);
+	LOGS_E(getHost(), "Interface is not suitable for target : %d", target.getAddress().get().base);
 	return false;
 }
 
-long& Interface::getAddress() {
+Address& Interface::getAddress() {
 
 	return address;
 }
 
-long& Interface::getMulticastAddress() {
+Address& Interface::getMulticastAddress() {
 
     return multicastAddress;
 }
 
-void Interface::setAddress(long _address) {
+void Interface::setAddress(Address& _address) {
 
     address = _address;
 }
 
-void Interface::setMulticastAddress(long _multicastAddress) {
+void Interface::setMulticastAddress(Address& _multicastAddress) {
 
     multicastAddress = _multicastAddress;
 }
 
-ComponentObject& Interface::getHost() {
+HostUnit& Interface::getHost() {
 
     return hostCB->hcb(hostCB->arg);
 }

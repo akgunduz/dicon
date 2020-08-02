@@ -19,7 +19,7 @@ ProcessItem::ProcessItem(const ProcessItem &copy) :
     fileList = copy.fileList;
 };
 
-ProcessItem::ProcessItem(const ComponentObject& host, long id, long jobID, const char *_process) :
+ProcessItem::ProcessItem(const HostUnit& host, long id, long jobID, const char *_process) :
 	ContentItem(host, id, jobID) {
 
 	if (_process) {

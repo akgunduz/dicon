@@ -19,19 +19,19 @@ enum CONTENT_TYPES {
 
 class ContentItem : public SchedulerItem {
 
-    ComponentObject host;
+    HostUnit host;
     long id{};
     long assignedJob{};
 
 public:
-    explicit ContentItem(const ComponentObject&, long = 0, long = 0);
+    explicit ContentItem(const HostUnit&, long = 0, long = 0);
     ContentItem(const ContentItem&);
 
     virtual CONTENT_TYPES getType() const = 0;
     virtual bool check() = 0;
 	virtual ~ContentItem() = default;
 
-    const ComponentObject& getHost() const;
+    const HostUnit& getHost() const;
 
     long getID() const;
 

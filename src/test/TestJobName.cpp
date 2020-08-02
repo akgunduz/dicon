@@ -4,9 +4,9 @@
 
 #include "TestApp.h"
 
-void sendJobName(Component *owner, const ComponentObject& target) {
+void sendJobName(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target.getType(), (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
+    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
 
     auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
 
@@ -16,11 +16,11 @@ void sendJobName(Component *owner, const ComponentObject& target) {
     owner->send(target, msg);
 }
 
-bool processJobNameMsg(Component* component, const ComponentObject& owner, Message *msg) {
+bool processJobNameMsg(Component* component, ComponentUnit& owner, Message *msg) {
 
     const char* jobName = msg->getData().getJobName();
 
-    LOGS_I(component->getHost(), "Message JobName has came from : %s => JobName : %s", owner.getName(), jobName);
+    LOGS_I(component->getHost(), "Message JobName has came from : %s => JobName : %s", ComponentType::getName(owner.getType()), jobName);
 
     return true;
 }
@@ -31,6 +31,6 @@ void TestApp::testJobName(Distributor* distributor, Collector* collector, Node* 
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, processJobNameMsg);
 
-    ComponentObject target(node->getHost(), COMP_COLLECTOR);
+    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
     sendJobName(collector, target);
 }

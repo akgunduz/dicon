@@ -17,7 +17,7 @@ class MessageData {
     std::tuple<long, TypeProcessFileList> fileList;
     TypeProcessList processList;
 
-    std::vector<ComponentObject> componentList;
+    TypeComponentList componentList;
 
 public:
 
@@ -39,8 +39,8 @@ public:
     char* getJobName();
     void setJobName(const char*);
 
-    std::vector<ComponentObject>& getComponentList();
-    void setComponentList(std::vector<ComponentObject>&);
+    TypeComponentList& getComponentList();
+    void setComponentList(TypeComponentList&);
 };
 
 

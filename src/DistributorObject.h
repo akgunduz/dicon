@@ -13,12 +13,8 @@ private:
 
 
 public:
-    DistributorObject();
-    DistributorObject(DistributorObject &);
-    DistributorObject(ComponentObject &);
-    DistributorObject(const char*);
-    DistributorObject(int, long);
-    ~DistributorObject();
+    DistributorObject() = default;
+
 };
 
 

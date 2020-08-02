@@ -15,7 +15,7 @@ bool ConsoleApp::nodeStateHandler(long id) {
         return false;
     }
 
-    auto nodeObj = (NodeObject&) node->getHost();
+    auto nodeObj = (NodeHost&) node->getHost();
 
     PRINT("Node[%d] Status", id);
 

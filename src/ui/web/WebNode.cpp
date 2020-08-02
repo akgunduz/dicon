@@ -35,7 +35,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto host = (NodeObject&) node->getHost();
+    auto host = (NodeHost&) node->getHost();
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {

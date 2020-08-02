@@ -30,7 +30,7 @@ private:
     std::thread collThread;
     std::thread pollThread;
 
-    explicit Distributor(const char *, int, int);
+    explicit Distributor(const char *, int, int, bool);
 
     static void pollProcessCB(Distributor *);
 	void pollProcess();
@@ -38,29 +38,29 @@ private:
     static void collProcessCB(Distributor *);
     void collProcess();
 
-    bool processCollectorAliveMsg(const ComponentObject&, Message *);
-    bool processCollectorIDMsg(const ComponentObject&, Message *);
-    bool processCollectorNodeMsg(const ComponentObject&, Message *);
-    bool processCollectorReadyMsg(const ComponentObject&, Message *);
+    bool processCollectorAliveMsg(ComponentUnit&, Message *);
+    bool processCollectorIDMsg(ComponentUnit&, Message *);
+    bool processCollectorNodeMsg(ComponentUnit&, Message *);
+    bool processCollectorReadyMsg(ComponentUnit&, Message *);
 
-    bool processNodeAliveMsg(const ComponentObject&, Message *);
-    bool processNodeIDMsg(const ComponentObject&, Message *);
-    bool processNodeBusyMsg(const ComponentObject&, Message *);
-    bool processNodeReadyMsg(const ComponentObject&, Message *);
+    bool processNodeAliveMsg(ComponentUnit&, Message *);
+    bool processNodeIDMsg(ComponentUnit&, Message *);
+    bool processNodeBusyMsg(ComponentUnit&, Message *);
+    bool processNodeReadyMsg(ComponentUnit&, Message *);
 
-	bool send2CollectorWakeupMsg(const ComponentObject&);
-	bool send2CollectorIDMsg(const ComponentObject&, long);
-	bool send2CollectorNodeMsg(const ComponentObject&, std::vector<ComponentObject>&);
+	bool send2CollectorWakeupMsg(ComponentUnit&);
+	bool send2CollectorIDMsg(ComponentUnit&, long);
+	bool send2CollectorNodeMsg(ComponentUnit&, TypeComponentList&);
 
-    bool send2NodeWakeupMsg(const ComponentObject&);
-    bool send2NodeIDMsg(const ComponentObject&, long);
-	bool send2NodeProcessMsg(const ComponentObject&);
+    bool send2NodeWakeupMsg(ComponentUnit&);
+    bool send2NodeIDMsg(ComponentUnit&, long);
+	bool send2NodeProcessMsg(ComponentUnit&);
 
 public:
 
 
 	~Distributor() override;
-    static Distributor* newInstance(const char*, int, int);
+    static Distributor* newInstance(const char*, int, int, bool);
 
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll(bool);

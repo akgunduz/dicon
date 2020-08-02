@@ -7,7 +7,7 @@
 #define DICON_COLLECTORMANAGER_H
 
 #include "ComponentManager.h"
-#include "NodeObject.h"
+#include "NodeHost.h"
 #include "CollectorObject.h"
 
 struct CollectorRequest {
@@ -26,7 +26,7 @@ class CollectorManager : public ComponentManager {
 
 protected:
 
-    ComponentObject* createObject(long, long) final;
+    ComponentUnit* createUnit(long, Address&) final;
 
 public:
 

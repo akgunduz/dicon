@@ -42,7 +42,7 @@ bool Net::initTCP() {
 
     for (int j = tryCount; j > 0; j--) {
 
-        long new_address = Address::create(getDevice()->getType(), getDevice()->getBase(), lastFreePort);
+        Address new_address(getDevice()->getBase(), lastFreePort);
 
         struct sockaddr_in serverAddress = getInetAddressByAddress(new_address);
 
@@ -66,7 +66,7 @@ bool Net::initTCP() {
 
         setAddress(new_address);
 
-        LOGS_T(getHost(), "Using address : %s", InterfaceTypes::getAddressString(new_address).c_str());
+        LOGS_T(getHost(), "Using address : %s", getAddressString(new_address).c_str());
 
         return true;
     }
@@ -81,7 +81,7 @@ bool Net::initTCP() {
 
 bool Net::initMulticast() {
 
-    long multicastAddress = Address::create(getDevice()->getType(), MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT);
+    Address multicastAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT);
 
     multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (multicastSocket < 0) {
@@ -117,26 +117,27 @@ bool Net::initMulticast() {
         return false;
     }
 
+    multicastAddress.setMulticast(true);
     setMulticastAddress(multicastAddress);
 
-    LOGS_T(getHost(), "Using multicast address : %s", InterfaceTypes::getAddressString(multicastAddress).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", getAddressString(multicastAddress).c_str());
 
     return true;
 }
 
-size_t Net::readCB(long source, uint8_t * buf, size_t size) {
+size_t Net::readCB(ComponentUnit& source, uint8_t * buf, size_t size) {
 
-    return read(Address::getSocket(source), buf, size);
+    return read(source.getAddress().getSocket(), buf, size);
 }
 
-size_t Net::readMulticastCB(long source, uint8_t* buf, size_t size) {
+size_t Net::readMulticastCB(ComponentUnit& source, uint8_t* buf, size_t size) {
 
-    return recvfrom(Address::getSocket(source), buf, size, 0, nullptr, nullptr);
+    return recvfrom(source.getAddress().getSocket(), buf, size, 0, nullptr, nullptr);
 }
 
-TypeReadCB Net::getReadCB(long source) {
+TypeReadCB Net::getReadCB(ComponentUnit& source) {
 
-    if (!Address::isMulticast(source)) {
+    if (!source.getAddress().isMulticast()) {
 
         return readCB;
     }
@@ -144,22 +145,22 @@ TypeReadCB Net::getReadCB(long source) {
     return readMulticastCB;
 }
 
-size_t Net::writeCB(long target, const uint8_t * buf, size_t size) {
+size_t Net::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
 
-    return write(Address::getSocket(target), buf, size);
+    return write(target.getAddress().getSocket(), buf, size);
 }
 
-size_t Net::writeMulticastCB(long target, const uint8_t* buf, size_t size) {
+size_t Net::writeMulticastCB(ComponentUnit& target, const uint8_t* buf, size_t size) {
 
-    struct sockaddr_in datagramAddress = getInetAddressByAddress(target);
+    struct sockaddr_in datagramAddress = getInetAddressByAddress(target.getAddress());
 
-    return sendto(Address::getSocket(target), buf, size, 0,
+    return sendto(target.getAddress().getSocket(), buf, size, 0,
                   (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
 }
 
-TypeWriteCB Net::getWriteCB(long source) {
+TypeWriteCB Net::getWriteCB(ComponentUnit& target) {
 
-    if (!Address::isMulticast(source)) {
+    if (!target.getAddress().isMulticast()) {
 
         return writeCB;
     }
@@ -172,7 +173,7 @@ void Net::runReceiver() {
     bool thread_started = true;
     std::thread threadAccept;
 
-    struct sockaddr_in cli_addr;
+    struct sockaddr_in cli_addr{};
     socklen_t clilen = sizeof(cli_addr);
 
     fd_set readfs, orjreadfs;
@@ -204,21 +205,19 @@ void Net::runReceiver() {
 				return;
 			}
 
-			long source = Address::create(INTERFACE_NET, ntohl(cli_addr.sin_addr.s_addr),
-			        ntohl(cli_addr.sin_port), acceptSocket, false);
-
-            threadAccept = std::thread(runAccepter, this, source);
+            threadAccept = std::thread(runAcceptor, this, acceptSocket);
             threadAccept.detach();
 		}
 
         if (FD_ISSET(multicastSocket, &readfs)) {
 
-            long source = Address::create(INTERFACE_NET, 0, 0, multicastSocket, true);
+            ComponentUnit source;
+            source.getAddress().setSocket(multicastSocket);
+            source.getAddress().setMulticast(true);
 
             auto *msg = new Message(getHost());
-
             if (msg->readFromStream(source)) {
-                push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
+                push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
             }
         }
 
@@ -237,17 +236,20 @@ void Net::runReceiver() {
 	}
 }
 
-void Net::runAccepter(Interface *interface, long source) {
+void Net::runAcceptor(Interface *interface, int acceptSocket) {
+
+    ComponentUnit source;
+    source.getAddress().setSocket(acceptSocket);
 
 	auto *msg = new Message(interface->getHost());
 
 	if (msg->readFromStream(source)) {
 
-		interface->push(MESSAGE_RECEIVE, msg->getHeader().getOwner().getAddress(), msg);
+		interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
 	}
 }
 
-void Net::runSender(long target, Message *msg) {
+void Net::runSender(ComponentUnit& target, Message *msg) {
 
 	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket < 0) {
@@ -255,10 +257,7 @@ void Net::runSender(long target, Message *msg) {
 		return;
 	}
 
-	LOGS_T(getHost(), "Sender is opened for target : %s and message : %s !!!",
-          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getMsgName(msg->getHeader().getType()));
-
-    sockaddr_in clientAddress = getInetAddressByAddress(target);
+    sockaddr_in clientAddress = getInetAddressByAddress(target.getAddress());
 
 	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
         LOGS_E(getHost(), "Socket can not connect!!!");
@@ -266,10 +265,7 @@ void Net::runSender(long target, Message *msg) {
 		return;
 	}
 
-	Address::setSocket(target, clientSocket);
-
-    LOGS_T(getHost(), "Sender is connected for target : %s and message : %s !!!",
-          InterfaceTypes::getAddressString(target).c_str(), MessageTypes::getMsgName(msg->getHeader().getType()));
+	target.getAddress().setSocket(clientSocket);
 
 	msg->writeToStream(target);
 
@@ -277,7 +273,7 @@ void Net::runSender(long target, Message *msg) {
 	close(clientSocket);
 }
 
-void Net::runMulticastSender(Message *msg) {
+void Net::runMulticastSender(ComponentUnit& target, Message *msg) {
 
     int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
@@ -288,10 +284,9 @@ void Net::runMulticastSender(Message *msg) {
     struct in_addr interface_addr = getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    Address::setSocket(getMulticastAddress(), clientSocket);
-    Address::setMulticast(getMulticastAddress(), true);
+    target.getAddress().setSocket(clientSocket);
 
-    msg->writeToStream(getMulticastAddress());
+    msg->writeToStream(target);
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);
@@ -303,7 +298,6 @@ Net::~Net() {
 	close(netSocket);
 }
 
-
 INTERFACE Net::getType() {
 
 	return INTERFACE_NET;
@@ -314,17 +308,17 @@ bool Net::isSupportMulticast() {
     return Util::isMulticast();
 }
 
-std::string Net::getAddressString(long address) {
+std::string Net::getAddressString(Address& address) {
 
     char sAddress[50];
-    sprintf(sAddress, "%s:%d", getIPString(address).c_str(), Address::getPort(address));
+    sprintf(sAddress, "%s:%u", getIPString(address).c_str(), address.get().port);
     return std::string(sAddress);
 }
 
-std::string Net::getIPString(long address) {
+std::string Net::getIPString(Address& address) {
 
     struct in_addr addr{};
-    addr.s_addr = htonl(Address::getBase(address));
+    addr.s_addr = htonl(address.get().base);
     char cIP[INET_ADDRSTRLEN];
 
     const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
@@ -347,7 +341,7 @@ long Net::parseIPAddress(const std::string& address) {
     return ntohl(addr.s_addr);
 }
 
-long Net::parseAddress(std::string address) {
+Address Net::parseAddress(std::string address) {
 
     long pos = address.find(':');
 
@@ -358,17 +352,17 @@ long Net::parseAddress(std::string address) {
     long ip = parseIPAddress(sIP);
     int port = atoi(sPort.c_str());
 
-    return Address::create(INTERFACE_NET, ip, port);
+    return Address(ip, port);
 }
 
 
-sockaddr_in Net::getInetAddressByAddress(long address) {
+sockaddr_in Net::getInetAddressByAddress(Address& address) {
 
     sockaddr_in inet_addr;
     memset((char *) &inet_addr, 0, sizeof(inet_addr));
     inet_addr.sin_family = AF_INET;
-    inet_addr.sin_port = htons((uint16_t)Address::getPort(address));
-    inet_addr.sin_addr.s_addr = htonl((uint32_t)Address::getBase(address));
+    inet_addr.sin_port = htons(address.get().port);
+    inet_addr.sin_addr.s_addr = htonl(address.get().base);
     return inet_addr;
 }
 
@@ -382,28 +376,28 @@ sockaddr_in Net::getInetAddressByPort(int port) {
     return inet_addr;
 }
 
-ip_mreq Net::getInetMulticastAddress(long address) {
+ip_mreq Net::getInetMulticastAddress(Address& address) {
 
     ip_mreq imreq;
     memset((char *) &imreq, 0, sizeof(imreq));
 
     imreq.imr_multiaddr.s_addr = htonl(MULTICAST_ADDRESS);
-    imreq.imr_interface.s_addr = htonl((uint32_t)Address::getBase(address));
+    imreq.imr_interface.s_addr = htonl(address.get().base);
     return imreq;
 
 }
 
-std::vector<long> Net::getAddressList(Device* device) {
+TypeAddressList Net::getAddressList() {
 
-    std::vector<long> list;
+    TypeAddressList list;
 
-    if (device->isLoopback()) {
+    if (getDevice()->isLoopback()) {
 
         for (int i = 0; i < LOOPBACK_RANGE; i++) {
 
-            long destAddress = Address::create(device->getType(), device->getBase(), DEFAULT_PORT + i);
+            Address destAddress(getDevice()->getBase(), DEFAULT_PORT + i);
 
-            if (destAddress != device->getBase()) {
+            if (destAddress != getAddress()) {
 
                 list.push_back(destAddress);
 
@@ -413,19 +407,19 @@ std::vector<long> Net::getAddressList(Device* device) {
 
     } else {
 
-        long range = (1 << (32 - device->getMask())) - 2;
+        uint32_t range = (1 << (32 - getDevice()->getMask())) - 2;
 
-        int mask = ((int)0x80000000) >> (device->getMask() - 1);
+        uint32_t mask = ((int)0x80000000) >> (getDevice()->getMask() - 1);
 
-        long net = mask & device->getBase();
+        uint32_t net = mask & getDevice()->getBase();
 
-        long startIP = net + 1;
+        uint32_t startIP = net + 1;
 
-        for (int i = 0; i < range; i++) {
+        for (uint32_t i = 0; i < range; i++) {
 
-            if (startIP != device->getBase()) {
+            if (startIP != getAddress().get().base) {
 
-                long destAddress = Address::create(device->getType(), startIP, DEFAULT_PORT);
+                Address destAddress(startIP, DEFAULT_PORT);
 
                 list.push_back(destAddress);
 

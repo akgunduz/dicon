@@ -7,6 +7,10 @@
 void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* node) {
 
     auto* job = collector->loadJob("../sample/Job2_macos");
+    if (!job) {
+        PRINT("Job file is not exist");
+        return;
+    }
 
     PRINT("Files of Job : %s", job->getName());
 

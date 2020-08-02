@@ -20,29 +20,29 @@ private :
 	int unixSocket;
 
 	bool initUnixSocket();
-	void runReceiver();
-	static void runAccepter(Interface *, int);
-	void runSender(long, Message *);
-    void runMulticastSender(Message *);
+	void runReceiver() override;
+	static void runAcceptor(Interface*, int);
+	void runSender(ComponentUnit& , Message *) override;
+    void runMulticastSender(ComponentUnit&, Message *) override;
 
-    static sockaddr_un getUnixAddress(long);
+    static sockaddr_un getUnixAddress(Address&);
 
-    static size_t readCB(long, uint8_t*, size_t);
-    static size_t writeCB(long, const uint8_t*, size_t);
+    static size_t readCB(ComponentUnit&, uint8_t*, size_t);
+    static size_t writeCB(ComponentUnit&, const uint8_t*, size_t);
 
 public :
 
 	UnixSocket(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
-	~UnixSocket();
+	~UnixSocket() override;
 
-    INTERFACE getType();
-	bool isSupportMulticast();
+    INTERFACE getType() override;
+	bool isSupportMulticast() override;
+    TypeAddressList getAddressList() override;
 
-    static std::string getAddressString(long);
-	static std::vector<long> getAddressList(Device*);
+ //   static std::string getAddressString(Address&);
 
-    static TypeReadCB getReadCB(long);
-    static TypeWriteCB getWriteCB(long);
+    static TypeReadCB getReadCB(ComponentUnit&);
+    static TypeWriteCB getWriteCB(ComponentUnit&);
 };
 
 #endif //__UnixSocket_H_

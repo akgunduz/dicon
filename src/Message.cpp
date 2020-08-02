@@ -6,7 +6,7 @@
 #include "Message.h"
 #include "Util.h"
 
-Message::Message(ComponentObject& host)
+Message::Message(HostUnit& host)
 		: MessageBase(host) {
 
     header.setPriority(MESSAGE_DEFAULT_PRIORITY);
@@ -15,17 +15,17 @@ Message::Message(ComponentObject& host)
 
 }
 
-Message::Message(ComponentObject& host, COMPONENT targetType, MSG_TYPE type)
+Message::Message(HostUnit& host, ComponentUnit& target, MSG_TYPE type)
 		: MessageBase(host) {
 
     header.setType(type);
-    header.setOwner(host, targetType);
+    header.setOwner(host.getUnit(target.getType()));
     header.setPriority(MESSAGE_DEFAULT_PRIORITY);
 
     data.setStreamFlag(STREAM_NONE);
 }
 
-bool Message::readComponentList(long source, std::vector<ComponentObject> &componentList,
+bool Message::readComponentList(ComponentUnit& source, TypeComponentList &componentList,
         MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_COMPONENT) {
@@ -40,9 +40,13 @@ bool Message::readComponentList(long source, std::vector<ComponentObject> &compo
         return false;
     }
 
-    for (int i = 0; i < list.size(); i=i+2) {
+    for (int i = 0; i < list.size(); i=i+5) {
+        ComponentUnit item((COMPONENT)block.get(0));
+        item.setID(list[i]);
+        item.getAddress().set(list[i + 1], list[i + 2]);
+        item.getAddress().setUI(list[i + 3], list[i + 4]);
 
-        componentList.emplace_back(ComponentObject((COMPONENT)block.get(0), list[i], list[i+1]));
+        componentList.emplace_back(item);
     }
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
@@ -54,7 +58,7 @@ bool Message::readComponentList(long source, std::vector<ComponentObject> &compo
     return true;
 }
 
-bool Message::readJobName(long source, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readJobName(ComponentUnit& source, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_JOB) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
@@ -71,7 +75,7 @@ bool Message::readJobName(long source, char *jobName, MessageBlockHeader& block,
     return true;
 }
 
-bool Message::readProcessID(long source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcessID(ComponentUnit& source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSID) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
@@ -88,7 +92,7 @@ bool Message::readProcessID(long source, long& processID, MessageBlockHeader& bl
     return true;
 }
 
-bool Message::readProcess(long source, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcess(ComponentUnit& source, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSINFO) {
         LOGS_E(getHost(), "readProcessInfo can not read other blocks");
@@ -122,7 +126,7 @@ bool Message::readProcess(long source, ProcessItem *content, MessageBlockHeader&
     return true;
 }
 
-bool Message::readFile(long source, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readFile(ComponentUnit& source, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_FILEBINARY && block.getType() != BLOCK_FILEINFO) {
         LOGS_E(getHost(), "readFile can not read other blocks");
@@ -184,7 +188,7 @@ bool Message::readFile(long source, ProcessFile& content, MessageBlockHeader &bl
     return true;
 }
 
-bool Message::readMessageBlock(long source, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block, uint32_t& crc) {
 
     switch(block.getType()) {
 
@@ -253,13 +257,17 @@ bool Message::readMessageBlock(long source, MessageBlockHeader &block, uint32_t&
     return true;
 }
 
-bool Message::writeComponentList(long target, std::vector<ComponentObject>& componentList, uint32_t& crc) {
+bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& componentList, uint32_t& crc) {
 
     std::vector<long> list;
 
     for (auto &component : componentList) {
+
         list.emplace_back(component.getID());
-        list.emplace_back(component.getAddress());
+        list.emplace_back(component.getAddress().get().base);
+        list.emplace_back(component.getAddress().get().port);
+        list.emplace_back(component.getAddress().getUI().base);
+        list.emplace_back(component.getAddress().getUI().port);
     }
 
     MessageBlockHeader blockHeader(BLOCK_COMPONENT);
@@ -285,7 +293,7 @@ bool Message::writeComponentList(long target, std::vector<ComponentObject>& comp
     return true;
 }
 
-bool Message::writeJobName(long target, const char *jobName, uint32_t& crc) {
+bool Message::writeJobName(ComponentUnit& target, const char *jobName, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_JOB);
 
@@ -306,7 +314,7 @@ bool Message::writeJobName(long target, const char *jobName, uint32_t& crc) {
     return true;
 }
 
-bool Message::writeProcessID(long target, long processID, uint32_t& crc) {
+bool Message::writeProcessID(ComponentUnit& target, long processID, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSID);
 
@@ -325,7 +333,7 @@ bool Message::writeProcessID(long target, long processID, uint32_t& crc) {
     return true;
 }
 
-bool Message::writeProcess(long target, ProcessItem* processItem, uint32_t& crc) {
+bool Message::writeProcess(ComponentUnit& target, ProcessItem* processItem, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
 
@@ -357,7 +365,7 @@ bool Message::writeProcess(long target, ProcessItem* processItem, uint32_t& crc)
     return true;
 }
 
-bool Message::writeFile(long target, ProcessFile &content, bool isBinary, uint32_t& crc) {
+bool Message::writeFile(ComponentUnit& target, ProcessFile &content, bool isBinary, uint32_t& crc) {
 
     std::string absPath = Util::getAbsRefPath(content.get()->getHost().getRootPath(),
             content.get()->getAssignedJob(), content.get()->getName());
@@ -421,7 +429,7 @@ bool Message::writeFile(long target, ProcessFile &content, bool isBinary, uint32
 
 }
 
-bool Message::writeMessageStream(long target, uint32_t& crc) {
+bool Message::writeMessageStream(ComponentUnit& target, uint32_t& crc) {
 
     switch(data.getStreamFlag()) {
 
@@ -491,12 +499,16 @@ MessageHeader& Message::getHeader() {
     return header;
 }
 
-bool Message::deSerializeHeader(const uint8_t *buffer) {
-    return header.deSerialize(buffer);
+void Message::deSerializeHeader(const uint8_t *buffer) {
+    header.deSerialize(buffer);
 }
 
-bool Message::serializeHeader(uint8_t *buffer) {
-    return header.serialize(buffer);
+void Message::grabOwner(ComponentUnit& unit) {
+    header.grabOwner(unit);
+}
+
+void Message::serializeHeader(uint8_t *buffer) {
+    header.serialize(buffer);
 }
 
 long Message::getHeaderSize() {

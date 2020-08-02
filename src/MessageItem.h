@@ -5,23 +5,22 @@
 #ifndef DICON_MESSAGEITEM_H
 #define DICON_MESSAGEITEM_H
 
-
+#include "Address.h"
 #include "Message.h"
-#include "MessageDirection.h"
+#include "MessageTypes.h"
 #include "SchedulerItem.h"
 
 class MessageItem : public SchedulerItem {
 
-public:
-
-    long address;
-    Message *msg;
+    ComponentUnit unit{};
+    Message *msg{};
 
 public:
 
-    MessageItem(MESSAGE_DIRECTION, long = 0, Message * = nullptr);
+    MessageItem(MSG_DIR, ComponentUnit&, Message * = nullptr);
+    MessageItem(MSG_DIR);
 
-    long getAddress();
+    ComponentUnit& getUnit();
     Message* getMessage();
 };
 

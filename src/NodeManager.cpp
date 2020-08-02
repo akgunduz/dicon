@@ -10,17 +10,17 @@ NodeManager::NodeManager() = default;
 
 NodeManager::~NodeManager() = default;
 
-NodeObject NodeManager::getIdle() {
+NodeUnit NodeManager::getIdle() {
 
-    NodeObject nodeObject;
+    NodeUnit nodeUnit{};
 
-    NodeObject* leastUsedNode = nullptr;
+    NodeUnit* leastUsedNode = nullptr;
 
     nodeMutex.lock();
 
     for (int i = 0; i < size(); i++) {
 
-        auto *node = (NodeObject*) getByIndex(i);
+        auto *node = (NodeUnit*) getByIndex(i);
 
         if (node->getState() != NODESTATE_IDLE) {
             continue;
@@ -41,13 +41,13 @@ NodeObject NodeManager::getIdle() {
         leastUsedNode->iterateUsage(true);
         leastUsedNode->setState(NODESTATE_PREBUSY);
 
-        nodeObject = *leastUsedNode;
+        nodeUnit = *leastUsedNode;
 
     }
 
     nodeMutex.unlock();
 
-    return nodeObject;
+    return nodeUnit;
 }
 
 int NodeManager::getIdleCount() {
@@ -58,7 +58,7 @@ int NodeManager::getIdleCount() {
 
     for (int i = 0; i < size(); i++) {
 
-        auto *node = (NodeObject*) getByIndex(i);
+        auto *node = (NodeUnit*) getByIndex(i);
 
         if (node->getState() == NODESTATE_IDLE) {
             count++;
@@ -70,20 +70,21 @@ int NodeManager::getIdleCount() {
     return count;
 }
 
-long NodeManager::getAddress(long id) {
-
-    long address = 0;
+Address& NodeManager::getAddress(long id) {
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
-        address = node->getAddress();
+
+        Address &address = node->getAddress();
+        nodeMutex.unlock();
+        return address;
     }
 
     nodeMutex.unlock();
 
-    return address;
+    return Address::invalid;
 }
 
 NODESTATES NodeManager::getState(long id) {
@@ -92,7 +93,7 @@ NODESTATES NodeManager::getState(long id) {
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
         state = node->getState();
     }
@@ -106,7 +107,7 @@ void NodeManager::setState(long id, NODESTATES state) {
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
         node->setState(state);
     }
@@ -114,13 +115,13 @@ void NodeManager::setState(long id, NODESTATES state) {
     nodeMutex.unlock();
 }
 
-ComponentInfo NodeManager::getAssigned(long id) {
+ComponentUnit NodeManager::getAssigned(long id) {
 
-    ComponentInfo assigned;
+    ComponentUnit assigned;
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
         assigned = node->getAssigned();
     }
@@ -130,11 +131,11 @@ ComponentInfo NodeManager::getAssigned(long id) {
     return assigned;
 }
 
-void NodeManager::setAssigned(long id, ComponentInfo& assigned) {
+void NodeManager::setAssigned(long id, ComponentUnit& assigned) {
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
         node->setAssigned(assigned.getType(), assigned.getID(), assigned.getAddress());
     }
@@ -142,11 +143,11 @@ void NodeManager::setAssigned(long id, ComponentInfo& assigned) {
     nodeMutex.unlock();
 }
 
-void NodeManager::setAssigned(long id, long assignedID, long assignedAddress) {
+void NodeManager::setAssigned(long id, long assignedID, Address& assignedAddress) {
 
     nodeMutex.lock();
 
-    auto *node = (NodeObject*)get(id);
+    auto *node = (NodeUnit*)get(id);
     if (node) {
         node->setAssigned(COMP_COLLECTOR, assignedID, assignedAddress);
     }
@@ -154,8 +155,20 @@ void NodeManager::setAssigned(long id, long assignedID, long assignedAddress) {
     nodeMutex.unlock();
 }
 
+void NodeManager::releaseAssigned(long id) {
 
-ComponentObject* NodeManager::createObject(long id, long address) {
+    nodeMutex.lock();
 
-    return new NodeObject(id, address);
+    auto *node = (NodeUnit*)get(id);
+    if (node) {
+        node->setAssigned(COMP_COLLECTOR, 0, Address());
+    }
+
+    nodeMutex.unlock();
+}
+
+
+ComponentUnit* NodeManager::createUnit(long id, Address& address) {
+
+    return new NodeUnit(id, address);
 }
