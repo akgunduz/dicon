@@ -5,18 +5,11 @@
 #ifndef DICON_COMPONENTUNIT_H
 #define DICON_COMPONENTUNIT_H
 
-#include "Address.h"
-#include "ComponentType.h"
+#include "CommUnit.h"
 
-class ComponentUnit {
+class ComponentUnit : public CommUnit {
 
-    uint32_t id{};
-
-    uint16_t type{COMP_MAX};
-
-    Address address{};
-
-    friend class MessageHeader;
+    int socket{};
 
 public:
 
@@ -24,23 +17,12 @@ public:
     explicit ComponentUnit(COMPONENT);
     ComponentUnit(COMPONENT, long, Address);
     ComponentUnit(const ComponentUnit&);
+    ComponentUnit(const CommUnit&);
 
-    long getID() const;
-    void setID(long);
-
-    COMPONENT getType() const;
-    void setType(COMPONENT);
-
-    Address& getAddress();
-    void setAddress(Address, bool = false);
-
-    void grab(ComponentUnit&);
-
-    static COMPONENT next(COMPONENT);
-    static COMPONENT prev(COMPONENT);
+    int getSocket();
+    void setSocket(int);
 };
 
 typedef std::vector<ComponentUnit> TypeComponentList;
-
 
 #endif //DICON_COMPONENTUNIT_H

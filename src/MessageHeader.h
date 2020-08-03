@@ -21,7 +21,7 @@ class MessageHeader {
     uint16_t type{};
     uint16_t priority{};
 
-    ComponentUnit owner;
+    CommUnit owner;
 
     uint64_t variant[MAX_VARIANT]{};
 
@@ -33,9 +33,9 @@ public:
     void setType(MSG_TYPE);
     MSG_TYPE getType() const;
 
-    ComponentUnit& getOwner();
-    void setOwner(ComponentUnit);
-    void grabOwner(ComponentUnit&);
+    CommUnit& getOwner();
+    void setOwner(CommUnit);
+    void grabOwner(CommUnit&);
 
     uint64_t getVariant(int id);
     void setVariant(int id, uint64_t _variant);

@@ -58,7 +58,7 @@ bool UnixSocket::initUnixSocket() {
 
 		setAddress(newAddress);
 
-        //LOGS_I(getHost(), "Using address : %s", InterfaceTypes::getAddressString(address).c_str());
+        LOGS_I(getHost(), "Using address : %s", getAddressString(newAddress).c_str());
 
 		return true;
 	}
@@ -123,7 +123,7 @@ void UnixSocket::runReceiver() {
 void UnixSocket::runAcceptor(Interface *interface, int acceptSocket) {
 
     ComponentUnit source;
-    source.getAddress().setSocket(acceptSocket);
+    source.setSocket(acceptSocket);
 
 	auto *msg = new Message(interface->getHost());
 
@@ -132,7 +132,7 @@ void UnixSocket::runAcceptor(Interface *interface, int acceptSocket) {
 	}
 }
 
-void UnixSocket::runSender(ComponentUnit& target, Message *msg) {
+void UnixSocket::runSender(ComponentUnit target, Message *msg) {
 
 	int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (clientSocket < 0) {
@@ -150,9 +150,7 @@ void UnixSocket::runSender(ComponentUnit& target, Message *msg) {
 		return;
 	}
 
-    target.getAddress().setSocket(clientSocket);
-
-//    LOGS_T(getHost(), "Socket sender %d is connected !!!", clientSocket);
+    target.setSocket(clientSocket);
 
 	msg->writeToStream(target);
 
@@ -160,13 +158,13 @@ void UnixSocket::runSender(ComponentUnit& target, Message *msg) {
 	close(clientSocket);
 }
 
-void UnixSocket::runMulticastSender(ComponentUnit& target, Message *message) {
+void UnixSocket::runMulticastSender(ComponentUnit target, Message *message) {
 
 }
 
 size_t UnixSocket::readCB(ComponentUnit& source, uint8_t * buf, size_t size) {
 
-    return read(source.getAddress().getSocket(), buf, size);
+    return read(source.getSocket(), buf, size);
 }
 
 TypeReadCB UnixSocket::getReadCB(ComponentUnit& source) {
@@ -176,7 +174,7 @@ TypeReadCB UnixSocket::getReadCB(ComponentUnit& source) {
 
 size_t UnixSocket::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
 
-    return write(target.getAddress().getSocket(), buf, size);
+    return write(target.getSocket(), buf, size);
 }
 
 TypeWriteCB UnixSocket::getWriteCB(ComponentUnit& source) {
@@ -201,12 +199,12 @@ bool UnixSocket::isSupportMulticast() {
     return false;
 }
 
-//std::string UnixSocket::getAddressString(Address& address) {
-//
-//    char sAddress[50];
-//    sprintf(sAddress, "%ld", address);
-//    return std::string(sAddress);
-//}
+std::string UnixSocket::getAddressString(Address& address) {
+
+    char sAddress[50];
+    sprintf(sAddress, "%u", address.get().base);
+    return std::string(sAddress);
+}
 
 sockaddr_un UnixSocket::getUnixAddress(Address& address) {
 

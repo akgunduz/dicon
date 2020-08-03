@@ -17,7 +17,7 @@ private:
 
     long id{};
 
-    COMPONENT type{COMP_DISTRIBUTOR};
+    COMPONENT type{COMP_MAX};
 
     Address address[COMP_MAX]{};
 

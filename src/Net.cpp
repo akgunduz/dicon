@@ -127,12 +127,12 @@ bool Net::initMulticast() {
 
 size_t Net::readCB(ComponentUnit& source, uint8_t * buf, size_t size) {
 
-    return read(source.getAddress().getSocket(), buf, size);
+    return read(source.getSocket(), buf, size);
 }
 
 size_t Net::readMulticastCB(ComponentUnit& source, uint8_t* buf, size_t size) {
 
-    return recvfrom(source.getAddress().getSocket(), buf, size, 0, nullptr, nullptr);
+    return recvfrom(source.getSocket(), buf, size, 0, nullptr, nullptr);
 }
 
 TypeReadCB Net::getReadCB(ComponentUnit& source) {
@@ -147,14 +147,14 @@ TypeReadCB Net::getReadCB(ComponentUnit& source) {
 
 size_t Net::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
 
-    return write(target.getAddress().getSocket(), buf, size);
+    return write(target.getSocket(), buf, size);
 }
 
 size_t Net::writeMulticastCB(ComponentUnit& target, const uint8_t* buf, size_t size) {
 
     struct sockaddr_in datagramAddress = getInetAddressByAddress(target.getAddress());
 
-    return sendto(target.getAddress().getSocket(), buf, size, 0,
+    return sendto(target.getSocket(), buf, size, 0,
                   (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
 }
 
@@ -212,7 +212,7 @@ void Net::runReceiver() {
         if (FD_ISSET(multicastSocket, &readfs)) {
 
             ComponentUnit source;
-            source.getAddress().setSocket(multicastSocket);
+            source.setSocket(multicastSocket);
             source.getAddress().setMulticast(true);
 
             auto *msg = new Message(getHost());
@@ -239,7 +239,7 @@ void Net::runReceiver() {
 void Net::runAcceptor(Interface *interface, int acceptSocket) {
 
     ComponentUnit source;
-    source.getAddress().setSocket(acceptSocket);
+    source.setSocket(acceptSocket);
 
 	auto *msg = new Message(interface->getHost());
 
@@ -249,7 +249,7 @@ void Net::runAcceptor(Interface *interface, int acceptSocket) {
 	}
 }
 
-void Net::runSender(ComponentUnit& target, Message *msg) {
+void Net::runSender(ComponentUnit target, Message *msg) {
 
 	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket < 0) {
@@ -265,7 +265,7 @@ void Net::runSender(ComponentUnit& target, Message *msg) {
 		return;
 	}
 
-	target.getAddress().setSocket(clientSocket);
+	target.setSocket(clientSocket);
 
 	msg->writeToStream(target);
 
@@ -273,7 +273,7 @@ void Net::runSender(ComponentUnit& target, Message *msg) {
 	close(clientSocket);
 }
 
-void Net::runMulticastSender(ComponentUnit& target, Message *msg) {
+void Net::runMulticastSender(ComponentUnit target, Message *msg) {
 
     int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
@@ -284,7 +284,7 @@ void Net::runMulticastSender(ComponentUnit& target, Message *msg) {
     struct in_addr interface_addr = getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
-    target.getAddress().setSocket(clientSocket);
+    target.setSocket(clientSocket);
 
     msg->writeToStream(target);
 

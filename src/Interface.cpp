@@ -78,7 +78,7 @@ Interface::~Interface() {
 	close(notifierPipe[0]);
 }
 
-bool Interface::push(MSG_DIR type, ComponentUnit& target, Message *msg) {
+bool Interface::push(MSG_DIR type, CommUnit& target, Message *msg) {
 
 	if (target.getAddress().getInterface() == getType()) {
 

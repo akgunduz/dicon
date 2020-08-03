@@ -30,8 +30,8 @@ private :
 	bool initMulticast();
 	void runReceiver() override;
 	static void runAcceptor(Interface*, int);
-	void runSender(ComponentUnit&, Message *) override;
-	void runMulticastSender(ComponentUnit& target, Message *) override;
+	void runSender(ComponentUnit, Message *) override;
+	void runMulticastSender(ComponentUnit target, Message *) override;
 
     static std::string getIPString(Address&);
     static long parseIPAddress(const std::string&);

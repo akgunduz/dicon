@@ -30,7 +30,6 @@ class Address {
 protected:
 
     uint16_t flag{};
-    uint16_t socket{};
     BaseAddress ui{};
     BaseAddress self{};
 
@@ -55,11 +54,9 @@ public:
     void set(BaseAddress&);
     void setUI(BaseAddress&);
 
-    uint16_t getSocket();
     bool isMulticast();
     INTERFACE getInterface() const;
 
-    void setSocket(uint16_t);
     void setMulticast(bool);
     void setInterface(INTERFACE);
 

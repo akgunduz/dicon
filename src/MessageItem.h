@@ -12,15 +12,15 @@
 
 class MessageItem : public SchedulerItem {
 
-    ComponentUnit unit{};
+    CommUnit unit{};
     Message *msg{};
 
 public:
 
-    MessageItem(MSG_DIR, ComponentUnit&, Message * = nullptr);
+    MessageItem(MSG_DIR, CommUnit&, Message * = nullptr);
     MessageItem(MSG_DIR);
 
-    ComponentUnit& getUnit();
+    CommUnit& getUnit();
     Message* getMessage();
 };
 

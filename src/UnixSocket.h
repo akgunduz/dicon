@@ -22,8 +22,8 @@ private :
 	bool initUnixSocket();
 	void runReceiver() override;
 	static void runAcceptor(Interface*, int);
-	void runSender(ComponentUnit& , Message *) override;
-    void runMulticastSender(ComponentUnit&, Message *) override;
+	void runSender(ComponentUnit , Message *) override;
+    void runMulticastSender(ComponentUnit, Message *) override;
 
     static sockaddr_un getUnixAddress(Address&);
 
@@ -39,7 +39,7 @@ public :
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
 
- //   static std::string getAddressString(Address&);
+    static std::string getAddressString(Address&);
 
     static TypeReadCB getReadCB(ComponentUnit&);
     static TypeWriteCB getWriteCB(ComponentUnit&);

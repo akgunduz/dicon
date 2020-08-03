@@ -37,8 +37,8 @@ protected :
 	int notifierPipe[2];
 
 	virtual void runReceiver() = 0;
-	virtual void runSender(ComponentUnit&, Message *) = 0;
-	virtual void runMulticastSender(ComponentUnit&, Message *) = 0;
+	virtual void runSender(ComponentUnit, Message *) = 0;
+	virtual void runMulticastSender(ComponentUnit, Message *) = 0;
 
 	bool initThread();
 	void end();
@@ -50,7 +50,7 @@ public :
 
     virtual ~Interface();
 
-	bool push(MSG_DIR, ComponentUnit&, Message *);
+	bool push(MSG_DIR, CommUnit&, Message *);
 	HostUnit& getHost();
 	Device* getDevice();
     Address& getAddress();

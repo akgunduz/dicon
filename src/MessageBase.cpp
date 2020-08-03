@@ -278,7 +278,7 @@ bool MessageBase::readBinary(ComponentUnit& source, const char* path, size_t siz
 	}
 
     ComponentUnit target;
-	target.getAddress().setSocket(out);
+	target.setSocket(out);
 
 	bool status = transferBinary(source, target, size, crc);
 
@@ -518,7 +518,7 @@ bool MessageBase::writeBinary(ComponentUnit& target, const char* path, size_t si
 	}
 
     ComponentUnit source;
-	source.getAddress().setSocket(in);
+	source.setSocket(in);
 
 	bool status = transferBinary(source, target, size, crc);
 

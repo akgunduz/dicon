@@ -55,11 +55,6 @@ void Address::setUI(BaseAddress &ref) {
     ui = ref;
 }
 
-
-uint16_t Address::getSocket() {
-    return socket;
-}
-
 bool Address::isMulticast() {
 
     return (bool) GET(flag, MULTICAST_POS, MULTICAST_MASK);
@@ -68,11 +63,6 @@ bool Address::isMulticast() {
 INTERFACE Address::getInterface() const {
 
     return (INTERFACE)GET(flag, INTERFACE_POS, INTERFACE_MASK);
-}
-
-void Address::setSocket(uint16_t _socket) {
-
-    socket = _socket;
 }
 
 void Address::setMulticast(bool _multicast) {

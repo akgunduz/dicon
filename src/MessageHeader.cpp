@@ -24,17 +24,17 @@ MSG_TYPE MessageHeader::getType() const {
     return (MSG_TYPE)type;
 }
 
-ComponentUnit& MessageHeader::getOwner() {
+CommUnit& MessageHeader::getOwner() {
 
     return owner;
 }
 
-void MessageHeader::setOwner(ComponentUnit _owner) {
+void MessageHeader::setOwner(CommUnit _owner) {
 
     owner = _owner;
 }
 
-void MessageHeader::grabOwner(ComponentUnit &unit) {
+void MessageHeader::grabOwner(CommUnit &unit) {
 
     unit.grab(owner);
 }
@@ -88,7 +88,6 @@ void MessageHeader::deSerialize(const uint8_t* buffer) {
     owner.type = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.id = ntohl(*((uint32_t *) buffer)); buffer += 4;
     owner.address.flag = ntohs(*((uint16_t *) buffer)); buffer += 2;
-    owner.address.socket = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.get().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.get().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
     owner.address.getUI().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
@@ -105,7 +104,6 @@ void MessageHeader::serialize(uint8_t *buffer) {
     *((uint16_t *) buffer) = htons(owner.type); buffer += 2;
     *((uint32_t *) buffer) = htonl(owner.id); buffer += 4;
     *((uint16_t *) buffer) = htons(owner.address.flag); buffer += 2;
-    *((uint16_t *) buffer) = htons(owner.address.socket); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.address.get().port); buffer += 2;
     *((uint32_t *) buffer) = htonl(owner.address.get().base); buffer += 4;
     *((uint16_t *) buffer) = htons(owner.address.getUI().port); buffer += 2;

@@ -8,7 +8,7 @@ MessageItem::MessageItem(MSG_DIR _type)
         : SchedulerItem(_type) {
 }
 
-MessageItem::MessageItem(MSG_DIR _type, ComponentUnit& _unit, Message *_msg)
+MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, Message *_msg)
         : SchedulerItem(_type), unit(_unit), msg(_msg) {
 
     if (msg != nullptr) {
@@ -16,7 +16,7 @@ MessageItem::MessageItem(MSG_DIR _type, ComponentUnit& _unit, Message *_msg)
     }
 }
 
-ComponentUnit& MessageItem::getUnit() {
+CommUnit& MessageItem::getUnit() {
 
     return unit;
 }
