@@ -12,7 +12,6 @@
 #include "Interface.h"
 #include "Message.h"
 
-#define MAX_SIMUL_CLIENTS 10
 #define UNIXSOCKETADDRESS_MASK 0xFFFFFFFFFFFFFF
 
 class UnixSocket : public Interface {

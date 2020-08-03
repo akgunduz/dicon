@@ -8,20 +8,12 @@
 volatile int exitNow = 0;
 
 const char *options[] = {
-#if !defined(NO_FILES)
-        "document_root",
-        DOCUMENT_ROOT,
-#endif
         "listening_ports",
         PORT,
         "enable_keep_alive",
         "yes",
         "request_timeout_ms",
         "10000",
-        "error_log_file",
-        "error.log",
-        "enable_auth_domain_check",
-        "no",
         nullptr
 };
 

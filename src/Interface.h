@@ -11,6 +11,9 @@
 #include "Device.h"
 #include "MessageItem.h"
 
+#define MAX_SIMUL_CLIENTS 100
+#define DEFAULT_WEB_PORT 8081
+
 enum NOTIFIER_TYPE {
 	NOTIFIER_READ,
 	NOTIFIER_WRITE

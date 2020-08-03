@@ -14,7 +14,6 @@
 #include "Component.h"
 #include "InterfaceTypes.h"
 
-#define MAX_SIMUL_CLIENTS 10
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101
 #define DEFAULT_PORT 61001

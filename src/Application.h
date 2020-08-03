@@ -6,7 +6,7 @@
 #ifndef DICON_APPLICATION_H
 #define DICON_APPLICATION_H
 
-#include <ComponentController.h>
+#include "ComponentController.h"
 
 enum APPTYPE {
 
