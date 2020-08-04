@@ -52,7 +52,7 @@ protected :
 
     bool initInterfaces(COMPONENT type, int, int);
 
-    void notifyUI(NOTIFYSTATE);
+    bool notifyUI(NOTIFYSTATE);
 
 public:
 
@@ -77,12 +77,11 @@ public:
 
     static void registerNotify(void*, TypeNotifyCB);
 
-    void setID(long);
+    bool setID(long);
 
     bool addProcessHandler(COMPONENT, MSG_TYPE, TypeProcessComponentMsg);
     bool addStaticProcessHandler(COMPONENT, MSG_TYPE, TypeStaticProcessComponentMsg);
 
 };
-
 
 #endif //DICON_COMPONENT_H

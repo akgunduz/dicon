@@ -12,7 +12,7 @@ Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, con
 
     schedulerCB = new InterfaceSchedulerCB([](void *arg, SchedulerItem *item) -> bool {
 
-        bool status = false;
+        bool status;
         auto *interface = (Interface *) arg;
         auto *msgItem = (MessageItem *) item;
 

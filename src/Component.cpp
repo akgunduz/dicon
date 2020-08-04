@@ -33,10 +33,10 @@ Component::Component(const char *rootPath) {
 
 bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interfaceNode) {
 
-    DeviceList *deviceList = DeviceList::getInstance();
+    auto *deviceList = DeviceList::getInstance();
 
-    Device *nodeDevice = deviceList->get(interfaceNode);
-    Device *otherDevice = deviceList->get(interfaceOther);
+    auto *nodeDevice = deviceList->get(interfaceNode);
+    auto *otherDevice = deviceList->get(interfaceOther);
 
     interfaces[COMP_NODE] = Connector::createInterface(nodeDevice, schedulerCB, hostCB);
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
@@ -97,7 +97,9 @@ bool Component::defaultProcessMsg(ComponentUnit &owner, Message *msg) {
                "No Handler is found for message : \"%s\"",
                MessageTypes::getMsgName(msg->getHeader().getType()));
     }
+
     delete msg;
+
     return true;
 }
 
@@ -162,6 +164,7 @@ bool Component::send(ComponentUnit &target, Message *msg) {
 }
 
 HostUnit &Component::getHost() {
+
     return (*host);
 }
 
@@ -171,18 +174,21 @@ void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
     notifyCB = _notifyCB;
 }
 
-void Component::notifyUI(NOTIFYSTATE state) {
+bool Component::notifyUI(NOTIFYSTATE state) {
 
     if (notifyContext) {
-        notifyCB(notifyContext, getHost().getType(), state);
+
+        return notifyCB(notifyContext, getHost().getType(), state);
     }
+
+    return false;
 }
 
-void Component::setID(long id) {
+bool Component::setID(long id) {
 
     if (id == 0) {
         LOGS_E(getHost(), "Can not assign ID with 0!!!");
-        return;
+        return false;
     }
 
     getHost().setID(id);
@@ -192,6 +198,8 @@ void Component::setID(long id) {
 
     Util::removePath(getRootPath());
     mkdir(rootPath, 0777);
+
+    return true;
 }
 
 bool Component::addProcessHandler(COMPONENT component, MSG_TYPE msgType,

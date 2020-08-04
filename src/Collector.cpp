@@ -37,7 +37,10 @@ bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, Message *msg) 
 
 bool Collector::processDistributorIDMsg(ComponentUnit& owner, Message *msg) {
 
-    setID(msg->getHeader().getVariant(0));
+    if (!setID(msg->getHeader().getVariant(0))) {
+
+        return false;
+    }
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New ID : %d is assigned by Distributor", getHost().getID());
 

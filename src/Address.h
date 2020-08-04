@@ -42,7 +42,7 @@ public:
 
     Address(INTERFACE = INTERFACE_NET);
     Address(uint32_t, uint16_t, INTERFACE = INTERFACE_NET);
-    Address(BaseAddress);
+    explicit Address(BaseAddress);
     Address(BaseAddress, BaseAddress);
 
     BaseAddress& get();
@@ -72,25 +72,16 @@ public:
 
     bool operator<(const Address& ref) const
     {
-        return ((uint64_t)self.port << 32 | self.base) < ((uint64_t)ref.self.port << 32 | ref.self.base);
+        return ((uint64_t)self.port << 32UL | self.base) < ((uint64_t)ref.self.port << 32UL | ref.self.base);
     }
 
-//    static INTERFACE getInterface(long&);
-//    static long getBase(long&);
-//    static int getPort(long&);
-//    static int getSocket(long&);
-//    static void setSocket(long&, int);
-//    static bool isMulticast(long&);
-//    static void setMulticast(long&, bool);
-//
-//    static long create(INTERFACE, long, int, int = 0, bool = 0);
 };
 
 template<> struct std::less<Address>
 {
     bool operator() (const Address& lhs, const Address& rhs) const
     {
-        return ((uint64_t)lhs.self.port << 32 | lhs.self.base) < ((uint64_t)rhs.self.port << 32 | rhs.self.base);
+        return ((uint64_t)lhs.self.port << 32UL | lhs.self.base) < ((uint64_t)rhs.self.port << 32UL | rhs.self.base);
     }
 };
 
