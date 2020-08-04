@@ -10,7 +10,10 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
 
     Log::init(logLevel[0], logLevel[1]);
 
-    Component::registerNotify(this, notifyCB);
+    Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYSTATE state) -> bool {
+
+        return ((App*) context)->notifyHandler(target, state);
+    });
 
     deviceList = DeviceList::getInstance();
 
@@ -35,13 +38,3 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
           type == APPTYPE_WEB ? "Web" : "Console",
           componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
-
-bool App::notifyCB(void *context, COMPONENT target, NOTIFYSTATE state) {
-
-    return ((App*) context)->notifyHandler(target, state);
-}
-
-
-
-
-

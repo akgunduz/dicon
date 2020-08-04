@@ -50,8 +50,6 @@ protected :
 
     StopWatch componentWatch;
 
-    static HostUnit& getHostCB(void*);
-
     bool initInterfaces(COMPONENT type, int, int);
 
     void notifyUI(NOTIFYSTATE);
@@ -71,7 +69,6 @@ public:
     TypeAddressList getInterfaceAddressList(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
-    static bool receiveCB(void *, SchedulerItem*);
     bool onReceive(ComponentUnit&, MSG_TYPE, Message *);
 
     bool send(ComponentUnit&, Message*);

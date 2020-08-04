@@ -3,9 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
-#ifndef __UnixSocket_H_
-#define __UnixSocket_H_
+#ifndef DICON_UNIXSOCKET_H
+#define DICON_UNIXSOCKET_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -15,17 +14,13 @@
 #define UNIXSOCKETADDRESS_MASK 0xFFFFFFFFFFFFFF
 
 class UnixSocket : public Interface {
-private :
+
 	int unixSocket;
 
 	bool initUnixSocket();
-	void runReceiver() override;
-	static void runAcceptor(Interface*, int);
-	void runSender(ComponentUnit , Message *) override;
-    void runMulticastSender(ComponentUnit, Message *) override;
-
-    static size_t readCB(ComponentUnit&, uint8_t*, size_t);
-    static size_t writeCB(ComponentUnit&, const uint8_t*, size_t);
+    bool runReceiver() override;
+    bool runSender(ComponentUnit , Message *) override;
+    bool runMulticastSender(ComponentUnit, Message *) override;
 
 public :
 
@@ -40,4 +35,4 @@ public :
     static TypeWriteCB getWriteCB(ComponentUnit&);
 };
 
-#endif //__UnixSocket_H_
+#endif //DICON_UNIXSOCKET_H

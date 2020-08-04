@@ -30,8 +30,6 @@ protected:
 
 public:
 
-    static bool notifyCB(void *, COMPONENT, NOTIFYSTATE);
-
     virtual int run() = 0;
 
     virtual int notifyHandler(COMPONENT, NOTIFYSTATE) = 0;

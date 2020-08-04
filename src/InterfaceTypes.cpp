@@ -11,38 +11,6 @@ const char* sInterfaceNames[INTERFACE_MAX] = {
         "TCP",
         "UnixSocket",
 };
-//
-//fGetAddressList InterfaceTypes::getAddressList(INTERFACE type) {
-//
-//    switch (type) {
-//
-//        case INTERFACE_NET:
-//            return Net::getAddressList;
-//
-//        case INTERFACE_UNIXSOCKET:
-//            return UnixSocket::getAddressList;
-//
-//        default:
-//            break;
-//    }
-//
-//    return NULL;
-//}
-//
-//std::string InterfaceTypes::getAddressString(Address& address) {
-//
-//    switch (address.getInterface()) {
-//
-//        case INTERFACE_NET:
-//            return Net::getAddressString(address);
-//
-//        case INTERFACE_UNIXSOCKET:
-//            return UnixSocket::getAddressString(address);
-//
-//        default:
-//            return "Invalid Address";
-//    }
-//}
 
 const char* InterfaceTypes::getName(INTERFACE type) {
 

@@ -8,8 +8,8 @@
 #include "UnixSocket.h"
 
 Interface* Connector::createInterface(Device *device,
-                                      const InterfaceSchedulerCB *scb,
-                                      const InterfaceHostCB *hcb) {
+                                      const InterfaceSchedulerCB *schedulerCB,
+                                      const InterfaceHostCB *hostCB) {
 
     Interface *interface = nullptr;
 
@@ -18,11 +18,11 @@ Interface* Connector::createInterface(Device *device,
         switch (device->getType()) {
 
             case INTERFACE_NET:
-                interface = new Net(device, scb, hcb);
+                interface = new Net(device, schedulerCB, hostCB);
                 break;
 
             case INTERFACE_UNIXSOCKET:
-                interface = new UnixSocket(device, scb, hcb);
+                interface = new UnixSocket(device, schedulerCB, hostCB);
                 break;
 
             default:
@@ -30,7 +30,7 @@ Interface* Connector::createInterface(Device *device,
         }
     } catch (std::exception &e) {
 
-        LOGS_E(hcb->hcb(hcb->arg), "%s", e.what());
+        LOGS_E(hostCB->hostCB(hostCB->arg), "%s", e.what());
     }
 
     return interface;

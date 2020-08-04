@@ -8,7 +8,7 @@
 #include "NetUtil.h"
 
 Net::Net(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
-		: Interface(device, scb, hcb) {
+        : Interface(device, scb, hcb) {
 
     if (!initTCP()) {
         throw std::runtime_error("Net : initTCP failed!!!");
@@ -32,7 +32,7 @@ bool Net::initTCP() {
     }
 
     int on = 1;
-    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+    if (setsockopt(netSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
         LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
         close(netSocket);
         return false;
@@ -59,7 +59,7 @@ bool Net::initTCP() {
             return false;
         }
 
-        if(fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+        if (fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
             LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
             close(netSocket);
             return false;
@@ -91,13 +91,13 @@ bool Net::initMulticast() {
     }
 
     int on = 1;
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&on, sizeof(int)) < 0) {
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
         LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
         close(multicastSocket);
         return false;
     }
 
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char*)&on, sizeof(int)) < 0) {
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char *) &on, sizeof(int)) < 0) {
         LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
         close(multicastSocket);
         return false;
@@ -126,50 +126,42 @@ bool Net::initMulticast() {
     return true;
 }
 
-size_t Net::readCB(ComponentUnit& source, uint8_t * buf, size_t size) {
-
-    return read(source.getSocket(), buf, size);
-}
-
-size_t Net::readMulticastCB(ComponentUnit& source, uint8_t* buf, size_t size) {
-
-    return recvfrom(source.getSocket(), buf, size, 0, nullptr, nullptr);
-}
-
-TypeReadCB Net::getReadCB(ComponentUnit& source) {
+TypeReadCB Net::getReadCB(ComponentUnit &source) {
 
     if (!source.getAddress().isMulticast()) {
 
-        return readCB;
+        return [] (ComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
+
+            return read(source.getSocket(), buf, size);
+        };
     }
 
-    return readMulticastCB;
+    return [] (ComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
+
+        return recvfrom(source.getSocket(), buf, size, 0, nullptr, nullptr);
+    };
 }
 
-size_t Net::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
-
-    return write(target.getSocket(), buf, size);
-}
-
-size_t Net::writeMulticastCB(ComponentUnit& target, const uint8_t* buf, size_t size) {
-
-    struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target.getAddress());
-
-    return sendto(target.getSocket(), buf, size, 0,
-                  (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
-}
-
-TypeWriteCB Net::getWriteCB(ComponentUnit& target) {
+TypeWriteCB Net::getWriteCB(ComponentUnit &target) {
 
     if (!target.getAddress().isMulticast()) {
 
-        return writeCB;
+        return [] (ComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
+
+            return write(target.getSocket(), buf, size);
+        };
     }
 
-    return writeMulticastCB;
+    return [] (ComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
+
+        struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target.getAddress());
+
+        return sendto(target.getSocket(), buf, size, 0,
+                      (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
+    };
 }
 
-void Net::runReceiver() {
+bool Net::runReceiver() {
 
     bool thread_started = true;
     std::thread threadAccept;
@@ -185,30 +177,41 @@ void Net::runReceiver() {
     maxfd++;
 
     FD_SET(multicastSocket, &orjreadfs);
-	FD_SET(netSocket, &orjreadfs);
-	FD_SET(notifierPipe[0], &orjreadfs);
+    FD_SET(netSocket, &orjreadfs);
+    FD_SET(notifierPipe[0], &orjreadfs);
 
-	while(thread_started) {
+    while (thread_started) {
 
-		readfs = orjreadfs;
+        readfs = orjreadfs;
 
-		int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
-		if (nready == -1) {
-			LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
-			return;
-		}
+        int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
+        if (nready == -1) {
+            LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
+            return false;
+        }
 
-		if (FD_ISSET(netSocket, &readfs)) {
+        if (FD_ISSET(netSocket, &readfs)) {
 
-			int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
-			if (acceptSocket < 0) {
-				LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
-				return;
-			}
+            int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
+            if (acceptSocket < 0) {
+                LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
+                return false;
+            }
 
-            threadAccept = std::thread(runAcceptor, this, acceptSocket);
+            threadAccept = std::thread([](Interface *interface, int acceptSocket) {
+                ComponentUnit source;
+                source.setSocket(acceptSocket);
+
+                auto *msg = new Message(interface->getHost());
+
+                if (msg->readFromStream(source)) {
+
+                    interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
+                }
+            }, this, acceptSocket);
+
             threadAccept.detach();
-		}
+        }
 
         if (FD_ISSET(multicastSocket, &readfs)) {
 
@@ -222,68 +225,59 @@ void Net::runReceiver() {
             }
         }
 
-		if (FD_ISSET(notifierPipe[0], &readfs)) {
+        if (FD_ISSET(notifierPipe[0], &readfs)) {
 
-			char data;
-			read(notifierPipe[0], &data, 1);
-			switch(data) {
-				case SHUTDOWN_NOTIFIER:
-					thread_started = false;
-					break;
-				default:
-					break;
-			}
-		}
-	}
+            char data;
+            read(notifierPipe[0], &data, 1);
+            switch (data) {
+                case SHUTDOWN_NOTIFIER:
+                    thread_started = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    return true;
 }
 
-void Net::runAcceptor(Interface *interface, int acceptSocket) {
+bool Net::runSender(ComponentUnit target, Message *msg) {
 
-    ComponentUnit source;
-    source.setSocket(acceptSocket);
-
-	auto *msg = new Message(interface->getHost());
-
-	if (msg->readFromStream(source)) {
-
-		interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
-	}
-}
-
-void Net::runSender(ComponentUnit target, Message *msg) {
-
-	int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (clientSocket < 0) {
+    int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (clientSocket < 0) {
         LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
-		return;
-	}
+        return false;
+    }
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target.getAddress());
 
-	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
+    if (connect(clientSocket, (struct sockaddr *) &clientAddress, sizeof(sockaddr_in)) == -1) {
         LOGS_E(getHost(), "Socket can not connect!!!");
-		close(clientSocket);
-		return;
-	}
+        close(clientSocket);
+        return false;
+    }
 
-	target.setSocket(clientSocket);
+    target.setSocket(clientSocket);
 
-	msg->writeToStream(target);
+    msg->writeToStream(target);
 
-	shutdown(clientSocket, SHUT_RDWR);
-	close(clientSocket);
+    shutdown(clientSocket, SHUT_RDWR);
+    close(clientSocket);
+
+    return true;
 }
 
-void Net::runMulticastSender(ComponentUnit target, Message *msg) {
+bool Net::runMulticastSender(ComponentUnit target, Message *msg) {
 
     int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
         LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
-        return;
+        return false;
     }
 
     struct in_addr interface_addr = NetUtil::
-            getInetAddressByAddress(getAddress()).sin_addr;
+    getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
     target.setSocket(clientSocket);
@@ -292,17 +286,19 @@ void Net::runMulticastSender(ComponentUnit target, Message *msg) {
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);
+
+    return true;
 }
 
 Net::~Net() {
-	end();
+    end();
     close(multicastSocket);
-	close(netSocket);
+    close(netSocket);
 }
 
 INTERFACE Net::getType() {
 
-	return INTERFACE_NET;
+    return INTERFACE_NET;
 }
 
 bool Net::isSupportMulticast() {
@@ -333,7 +329,7 @@ TypeAddressList Net::getAddressList() {
 
         uint32_t range = (1 << (32 - getDevice()->getMask())) - 2;
 
-        uint32_t mask = ((int)0x80000000) >> (getDevice()->getMask() - 1);
+        uint32_t mask = ((int) 0x80000000) >> (getDevice()->getMask() - 1);
 
         uint32_t net = mask & getDevice()->getBase();
 

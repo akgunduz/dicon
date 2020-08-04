@@ -99,7 +99,7 @@ void *Scheduler::run(void *arg) {
 
         const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
         if (iCB != nullptr) {
-            iCB->cb(iCB->arg, item);
+            iCB->schedulerCB(iCB->arg, item);
         }
 
         delete item;

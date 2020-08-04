@@ -8,12 +8,27 @@
 void *Component::notifyContext = nullptr;
 TypeNotifyCB Component::notifyCB = nullptr;
 
-Component::Component(const char* rootPath) {
+Component::Component(const char *rootPath) {
 
     strcpy(this->rootPath, rootPath);
 
-    schedulerCB = new InterfaceSchedulerCB(receiveCB, this);
-    hostCB = new InterfaceHostCB(getHostCB, this);
+    schedulerCB = new InterfaceSchedulerCB([](void *arg, SchedulerItem *item) -> bool {
+
+        auto *component = (Component *) arg;
+        auto *messageItem = (MessageItem *) item;
+
+        ComponentUnit obj(messageItem->getMessage()->getHeader().getOwner());
+
+        return component->onReceive(obj, messageItem->getMessage()->getHeader().getType(),
+                                    messageItem->getMessage());
+
+    }, this);
+
+    hostCB = new InterfaceHostCB([](void *arg) -> HostUnit & {
+
+        return ((Component *) arg)->getHost();
+
+    }, this);
 }
 
 bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interfaceNode) {
@@ -48,32 +63,16 @@ Component::~Component() {
     delete hostCB;
 }
 
-const char* Component::getRootPath() {
+const char *Component::getRootPath() {
 
     return rootPath;
 }
 
-HostUnit& Component::getHostCB(void *arg) {
-
-    return ((Component*) arg)->getHost();
-}
-
-bool Component::receiveCB(void *arg, SchedulerItem* item) {
-
-    auto *component = (Component *) arg;
-    auto *messageItem = (MessageItem*) item;
-
-    ComponentUnit obj(messageItem->getMessage()->getHeader().getOwner());
-
-    return component->onReceive(obj, messageItem->getMessage()->getHeader().getType(),
-                                messageItem->getMessage());
-}
-
-bool Component::onReceive(ComponentUnit& owner, MSG_TYPE msgType, Message *msg) {
+bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, Message *msg) {
 
     LOGC_D(getHost(), owner, MSGDIR_RECEIVE,
-          "\"%s\" is received",
-          MessageTypes::getMsgName(msgType));
+           "\"%s\" is received",
+           MessageTypes::getMsgName(msgType));
 
     auto processCB = processMsg[owner.getType()].find(msgType);
     if (processCB == processMsg[owner.getType()].end()) {
@@ -91,7 +90,7 @@ bool Component::onReceive(ComponentUnit& owner, MSG_TYPE msgType, Message *msg) 
 }
 
 
-bool Component::defaultProcessMsg(ComponentUnit& owner, Message *msg) {
+bool Component::defaultProcessMsg(ComponentUnit &owner, Message *msg) {
 
     if (getHost().getType() != owner.getType()) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE,
@@ -111,7 +110,7 @@ Device *Component::getDevice(COMPONENT target) {
     return nullptr;
 }
 
-Address& Component::getInterfaceAddress(COMPONENT target) {
+Address &Component::getInterfaceAddress(COMPONENT target) {
 
     if (interfaces[target] != nullptr) {
         return interfaces[target]->getAddress();
@@ -120,7 +119,7 @@ Address& Component::getInterfaceAddress(COMPONENT target) {
     return Address::invalid;
 }
 
-Address& Component::getInterfaceMulticastAddress(COMPONENT target) {
+Address &Component::getInterfaceMulticastAddress(COMPONENT target) {
 
     if (interfaces[target] != nullptr) {
         return interfaces[target]->getMulticastAddress();
@@ -157,7 +156,7 @@ bool Component::isSupportMulticast(COMPONENT target) {
     return false;
 }
 
-bool Component::send(ComponentUnit& target, Message *msg) {
+bool Component::send(ComponentUnit &target, Message *msg) {
 
     return interfaces[target.getType()]->push(MSGDIR_SEND, target, msg);
 }
@@ -166,7 +165,7 @@ HostUnit &Component::getHost() {
     return (*host);
 }
 
-void Component::registerNotify(void* _notifyContext, TypeNotifyCB _notifyCB) {
+void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
 
     notifyContext = _notifyContext;
     notifyCB = _notifyCB;
@@ -196,7 +195,7 @@ void Component::setID(long id) {
 }
 
 bool Component::addProcessHandler(COMPONENT component, MSG_TYPE msgType,
-        TypeProcessComponentMsg handler) {
+                                  TypeProcessComponentMsg handler) {
 
     processMsg[component][msgType] = handler;
 
@@ -204,7 +203,7 @@ bool Component::addProcessHandler(COMPONENT component, MSG_TYPE msgType,
 }
 
 bool Component::addStaticProcessHandler(COMPONENT component, MSG_TYPE msgType,
-        TypeStaticProcessComponentMsg handler) {
+                                        TypeStaticProcessComponentMsg handler) {
 
     processStaticMsg[component][msgType] = handler;
 

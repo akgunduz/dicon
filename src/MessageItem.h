@@ -18,7 +18,6 @@ class MessageItem : public SchedulerItem {
 public:
 
     MessageItem(MSG_DIR, CommUnit&, Message * = nullptr);
-    MessageItem(MSG_DIR);
 
     CommUnit& getUnit();
     Message* getMessage();

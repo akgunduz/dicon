@@ -6,113 +6,114 @@
 #include "Interface.h"
 
 Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
-    : device(_device), hostCB(hostCB) {
+        : device(_device), hostCB(hostCB) {
 
     scheduler = new Scheduler();
 
-    schedulerCB = new InterfaceSchedulerCB(runSenderCB, this);
+    schedulerCB = new InterfaceSchedulerCB([](void *arg, SchedulerItem *item) -> bool {
 
-	scheduler->setCB(MSGDIR_RECEIVE, receiveCB);
-	scheduler->setCB(MSGDIR_SEND, schedulerCB);
+        bool status = false;
+        auto *interface = (Interface *) arg;
+        auto *msgItem = (MessageItem *) item;
+
+        LOGC_T(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
+               "\"%s\" is sending",
+               MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
+
+        if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
+
+            status = interface->runSender(msgItem->getUnit(), msgItem->getMessage());
+
+        } else {
+
+            status = interface->runMulticastSender(msgItem->getUnit(), msgItem->getMessage());
+        }
+
+        LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
+               "\"%s\" is sent",
+               MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
+
+        return status;
+
+    }, this);
+
+    scheduler->setCB(MSGDIR_RECEIVE, receiveCB);
+    scheduler->setCB(MSGDIR_SEND, schedulerCB);
 }
 
 void Interface::end() {
 
-	char buf[1] = {SHUTDOWN_NOTIFIER};
+    char buf[1] = {SHUTDOWN_NOTIFIER};
 
-	write(notifierPipe[1], buf, 1);
+    write(notifierPipe[1], buf, 1);
 
-	threadRcv.join();
+    threadRcv.join();
 
 }
 
 bool Interface::initThread() {
 
-	if (pipe(notifierPipe) < 0) {
-		LOGS_E(getHost(), "Notifier Pipe Init failed with err : %d!!!", errno);
-		return false;
-	}
+    if (pipe(notifierPipe) < 0) {
+        LOGS_E(getHost(), "Notifier Pipe Init failed with err : %d!!!", errno);
+        return false;
+    }
 
-	LOGS_T(getHost(), "Init Notifier PIPE OK!!!");
+    LOGS_T(getHost(), "Init Notifier PIPE OK!!!");
 
-	threadRcv = std::thread(runReceiverCB, this);
+    threadRcv = std::thread([](Interface *interface) {
 
-	return true;
-}
+        interface->runReceiver();
 
-void Interface::runReceiverCB(Interface *interface) {
+    }, this);
 
-    interface->runReceiver();
-}
-
-bool Interface::runSenderCB(void *arg, SchedulerItem *item) {
-
-	auto *interface = (Interface *) arg;
-    auto *msgItem = (MessageItem*) item;
-
-    LOGC_T(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
-           "\"%s\" is sending",
-           MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
-
-	if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
-
-		interface->runSender(msgItem->getUnit(), msgItem->getMessage());
-
-	} else {
-
-		interface->runMulticastSender(msgItem->getUnit(), msgItem->getMessage());
-	}
-
-    LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
-           "\"%s\" is sent",
-           MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
-
-	return true;
+    return true;
 }
 
 Interface::~Interface() {
 
     delete schedulerCB;
 
-	close(notifierPipe[1]);
-	close(notifierPipe[0]);
+    close(notifierPipe[1]);
+    close(notifierPipe[0]);
 }
 
-bool Interface::push(MSG_DIR type, CommUnit& target, Message *msg) {
+bool Interface::push(MSG_DIR type, CommUnit &target, Message *msg) {
 
-	if (target.getAddress().getInterface() == getType()) {
+    if (target.getAddress().getInterface() == getType()) {
 
-		scheduler->push(new MessageItem(type, target, msg));
-		return true;
-	}
+        scheduler->push(new MessageItem(type, target, msg));
 
-	LOGS_E(getHost(), "Interface is not suitable for target : %d", target.getAddress().get().base);
-	return false;
+        return true;
+    }
+
+    LOGS_E(getHost(), "Interface is not suitable for target : %d", target.getAddress().get().base);
+
+    return false;
 }
 
-Address& Interface::getAddress() {
+Address &Interface::getAddress() {
 
-	return address;
+    return address;
 }
 
-Address& Interface::getMulticastAddress() {
+Address &Interface::getMulticastAddress() {
 
     return multicastAddress;
 }
 
-void Interface::setAddress(Address& _address) {
+void Interface::setAddress(Address &_address) {
 
     address = _address;
 }
 
-void Interface::setMulticastAddress(Address& _multicastAddress) {
+void Interface::setMulticastAddress(Address &_multicastAddress) {
 
     multicastAddress = _multicastAddress;
 }
 
-HostUnit& Interface::getHost() {
+HostUnit &Interface::getHost() {
 
-    return hostCB->hcb(hostCB->arg);
+    return hostCB->hostCB(hostCB->arg);
 }
 
 Device *Interface::getDevice() {

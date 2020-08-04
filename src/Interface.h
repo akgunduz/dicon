@@ -22,8 +22,6 @@ enum NOTIFIER_TYPE {
 class Interface {
 
 private :
-	static void runReceiverCB(Interface *);
-	static bool runSenderCB(void *, SchedulerItem *);
 
 	Device *device{};
 
@@ -37,11 +35,11 @@ protected :
 
 	Scheduler *scheduler;
 	std::thread threadRcv;
-	int notifierPipe[2];
+	int notifierPipe[2]{};
 
-	virtual void runReceiver() = 0;
-	virtual void runSender(ComponentUnit, Message *) = 0;
-	virtual void runMulticastSender(ComponentUnit, Message *) = 0;
+	virtual bool runReceiver() = 0;
+	virtual bool runSender(ComponentUnit, Message *) = 0;
+	virtual bool runMulticastSender(ComponentUnit, Message *) = 0;
 
 	bool initThread();
 	void end();

@@ -4,10 +4,6 @@
 
 #include "MessageItem.h"
 
-MessageItem::MessageItem(MSG_DIR _type)
-        : SchedulerItem(_type) {
-}
-
 MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, Message *_msg)
         : SchedulerItem(_type), unit(_unit), msg(_msg) {
 

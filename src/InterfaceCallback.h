@@ -14,18 +14,18 @@ typedef int (*TypeGetIDCB)(void*);
 
 class InterfaceSchedulerCB {
 public:
-    TypeSchedulerCB cb;
+    TypeSchedulerCB schedulerCB;
     void *arg;
-    InterfaceSchedulerCB(TypeSchedulerCB cb, void *arg) :
-            cb(cb), arg(arg) {}
+    InterfaceSchedulerCB(TypeSchedulerCB _schedulerCB, void *_arg) :
+            schedulerCB(_schedulerCB), arg(_arg) {}
 };
 
 class InterfaceHostCB {
 public:
-    TypeGetHostCB hcb;
+    TypeGetHostCB hostCB;
     void *arg;
-    InterfaceHostCB(TypeGetHostCB hcb, void *arg) :
-            hcb(hcb), arg(arg) {}
+    InterfaceHostCB(TypeGetHostCB _hostCB, void *_arg) :
+            hostCB(_hostCB), arg(_arg) {}
 };
 
 

@@ -7,16 +7,16 @@
 #include "NetUtil.h"
 
 UnixSocket::UnixSocket(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
-		: Interface(device, scb, hcb) {
+        : Interface(device, scb, hcb) {
 
-	if (!initUnixSocket()) {
-		LOGS_E(getHost(), "initUnixSocket failed!!!");
-		throw std::runtime_error("UnixSocket : initUnixSocket failed!!!");
-	}
+    if (!initUnixSocket()) {
+        LOGS_E(getHost(), "initUnixSocket failed!!!");
+        throw std::runtime_error("UnixSocket : initUnixSocket failed!!!");
+    }
 
     if (!initThread()) {
-		LOGS_E(getHost(), "initThread failed!!!");
-		throw std::runtime_error("UnixSocket : initThread failed!!!");
+        LOGS_E(getHost(), "initThread failed!!!");
+        throw std::runtime_error("UnixSocket : initThread failed!!!");
     }
 }
 
@@ -28,41 +28,41 @@ bool UnixSocket::initUnixSocket() {
         return false;
     }
 
-	int tryCount = 10;
+    int tryCount = 10;
     int lastFreePort = 0;
 
-	for (int j = tryCount; j > 0; j--) {
+    for (int j = tryCount; j > 0; j--) {
 
         Address newAddress(getDevice()->getBase(), lastFreePort, getDevice()->getType());
 
-		sockaddr_un serverAddress = NetUtil::getUnixAddress(newAddress);
+        sockaddr_un serverAddress = NetUtil::getUnixAddress(newAddress);
 
-		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
+        socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
-		if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
+        if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
 
-			lastFreePort++;
-			continue;
-		}
+            lastFreePort++;
+            continue;
+        }
 
-		if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
+        if (listen(unixSocket, MAX_SIMUL_CLIENTS) < 0) {
             LOGS_E(getHost(), "Socket listen with err : %d!!!", errno);
-			close(unixSocket);
-			return false;
-		}
+            close(unixSocket);
+            return false;
+        }
 
-		if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
+        if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
             LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
-			close(unixSocket);
-			return false;
-		}
+            close(unixSocket);
+            return false;
+        }
 
-		setAddress(newAddress);
+        setAddress(newAddress);
 
         LOGS_I(getHost(), "Using address : %s", NetUtil::getUnixString(newAddress.get()).c_str());
 
-		return true;
-	}
+        return true;
+    }
 
     LOGS_E(getHost(), "Could not set create unix socket!!!");
 
@@ -71,127 +71,124 @@ bool UnixSocket::initUnixSocket() {
     return false;
 }
 
-void UnixSocket::runReceiver() {
+bool UnixSocket::runReceiver() {
 
-	bool thread_started = true;
-	std::thread threadAccept;
+    bool thread_started = true;
+    std::thread threadAccept;
 
-	int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
+    int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
 
-	fd_set readfs, orjreadfs;
+    fd_set readfs, orjreadfs;
 
-	FD_ZERO(&orjreadfs);
-	FD_SET(unixSocket, &orjreadfs);
-	FD_SET(notifierPipe[0], &orjreadfs);
+    FD_ZERO(&orjreadfs);
+    FD_SET(unixSocket, &orjreadfs);
+    FD_SET(notifierPipe[0], &orjreadfs);
 
-	while(thread_started) {
+    while (thread_started) {
 
-		readfs = orjreadfs;
+        readfs = orjreadfs;
 
-		int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
-		if (nready == -1) {
-			LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
-			return;
-		}
+        int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
+        if (nready == -1) {
+            LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
+            return false;
+        }
 
-		if (FD_ISSET(unixSocket, &readfs)) {
+        if (FD_ISSET(unixSocket, &readfs)) {
 
-			int acceptSocket = accept(unixSocket, nullptr, nullptr);
-			if (acceptSocket < 0) {
-				LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
-				return;
-			}
+            int acceptSocket = accept(unixSocket, nullptr, nullptr);
+            if (acceptSocket < 0) {
+                LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
+                return false;
+            }
 
-			threadAccept = std::thread(runAcceptor, this, acceptSocket);
-			threadAccept.detach();
-		}
+            threadAccept = std::thread([](Interface *interface, int acceptSocket) {
+                ComponentUnit source;
+                source.setSocket(acceptSocket);
 
-		if (FD_ISSET(notifierPipe[0], &readfs)) {
+                auto *msg = new Message(interface->getHost());
 
-			char data;
-			read(notifierPipe[0], &data, 1);
-			switch(data) {
-				case SHUTDOWN_NOTIFIER:
-					thread_started = false;
-					break;
-				default:
-					break;
-			}
-		}
-	}
+                if (msg->readFromStream(source)) {
+                    interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
+                }
+            }, this, acceptSocket);
+            threadAccept.detach();
+        }
+
+        if (FD_ISSET(notifierPipe[0], &readfs)) {
+
+            char data;
+            read(notifierPipe[0], &data, 1);
+            switch (data) {
+                case SHUTDOWN_NOTIFIER:
+                    thread_started = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    return true;
 }
 
-void UnixSocket::runAcceptor(Interface *interface, int acceptSocket) {
+bool UnixSocket::runSender(ComponentUnit target, Message *msg) {
 
-    ComponentUnit source;
-    source.setSocket(acceptSocket);
-
-	auto *msg = new Message(interface->getHost());
-
-	if (msg->readFromStream(source)) {
-		interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
-	}
-}
-
-void UnixSocket::runSender(ComponentUnit target, Message *msg) {
-
-	int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (clientSocket < 0) {
+    int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (clientSocket < 0) {
         LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
-		return;
-	}
+        return false;
+    }
 
     sockaddr_un clientAddress = NetUtil::getUnixAddress(target.getAddress());
 
-	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
+    socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(clientAddress.sun_path);
 
-	if (connect(clientSocket, (struct sockaddr *)&clientAddress, len) == -1) {
+    if (connect(clientSocket, (struct sockaddr *) &clientAddress, len) == -1) {
         LOGS_E(getHost(), "Socket can not connect!!!");
-		close(clientSocket);
-		return;
-	}
+        close(clientSocket);
+        return false;
+    }
 
     target.setSocket(clientSocket);
 
-	msg->writeToStream(target);
+    msg->writeToStream(target);
 
-	shutdown(clientSocket, SHUT_RDWR);
-	close(clientSocket);
+    shutdown(clientSocket, SHUT_RDWR);
+    close(clientSocket);
+
+    return true;
 }
 
-void UnixSocket::runMulticastSender(ComponentUnit target, Message *message) {
+bool UnixSocket::runMulticastSender(ComponentUnit target, Message *message) {
 
+    return false;
 }
 
-size_t UnixSocket::readCB(ComponentUnit& source, uint8_t * buf, size_t size) {
+TypeReadCB UnixSocket::getReadCB(ComponentUnit &source) {
 
-    return read(source.getSocket(), buf, size);
+    return [] (ComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
+
+        return read(source.getSocket(), buf, size);
+    };
 }
 
-TypeReadCB UnixSocket::getReadCB(ComponentUnit& source) {
+TypeWriteCB UnixSocket::getWriteCB(ComponentUnit &source) {
 
-        return readCB;
-}
+    return [] (ComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
 
-size_t UnixSocket::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
-
-    return write(target.getSocket(), buf, size);
-}
-
-TypeWriteCB UnixSocket::getWriteCB(ComponentUnit& source) {
-
-        return writeCB;
+        return write(target.getSocket(), buf, size);
+    };
 }
 
 UnixSocket::~UnixSocket() {
-	end();
-	close(unixSocket);
+    end();
+    close(unixSocket);
 }
-
 
 INTERFACE UnixSocket::getType() {
 
-	return INTERFACE_UNIXSOCKET;
+    return INTERFACE_UNIXSOCKET;
 
 }
 
@@ -206,7 +203,6 @@ TypeAddressList UnixSocket::getAddressList() {
 
     DIR *unixdir = opendir(UNIXSOCKET_PATH);
     if (!unixdir) {
-        //LOG_E("Can not open unix socket path!!!");
         return list;
     }
 
@@ -220,7 +216,7 @@ TypeAddressList UnixSocket::getAddressList() {
 
         std::string path = entry->d_name;
 
-        uint32_t start = (uint32_t)path.find('_') + 1;
+        uint32_t start = (uint32_t) path.find('_') + 1;
         std::string saddress = path.substr(start, path.find('.') - start);
         Address address(atol(saddress.c_str()), 0);
 
