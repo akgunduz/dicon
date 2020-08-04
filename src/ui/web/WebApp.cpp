@@ -3,26 +3,13 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
+#include <Net.h>
 #include "WebApp.h"
+#include "WebOption.h"
 
 volatile int exitNow = 0;
 
-const char *options[] = {
-        "listening_ports",
-        PORT,
-        "enable_keep_alive",
-        "yes",
-        "request_timeout_ms",
-        "10000",
-        nullptr
-};
-
 #define MAIN_PAGE DOCUMENT_ROOT "./index.html"
-
-int mainHandlerWrapper(struct mg_connection *conn, void *cbData)
-{
-    return ((WebApp*) cbData)->mainHandler(conn);
-}
 
 int WebApp::mainHandler(struct mg_connection *conn)
 {
@@ -32,11 +19,6 @@ int WebApp::mainHandler(struct mg_connection *conn)
     mg_send_mime_file(conn, MAIN_PAGE, nullptr);
 #endif
     return 1;
-}
-
-int eventHandlerWrapper(struct mg_connection *conn, void *cbData)
-{
-    return ((WebApp*) cbData)->eventHandler(conn);
 }
 
 int WebApp::eventHandler(struct mg_connection *conn)
@@ -97,11 +79,6 @@ bool WebApp::sendServerEvent(struct mg_connection *conn, int source) {
     return true;
 }
 
-int restHandlerWrapper(struct mg_connection *conn, void *cbData) {
-
-    return ((WebApp*) cbData)->restHandler(conn);
-}
-
 int WebApp::restHandler(struct mg_connection *conn) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
@@ -135,23 +112,98 @@ int WebApp::restHandler(struct mg_connection *conn) {
 WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
     : App(APPTYPE_WEB, interfaceID, logLevel, componentCount, true) {
 
-    /* Start CivetWeb web server */
+
+    WebOption options;
+    options.setOption("enable_keep_alive", "yes");
+    options.setOption("request_timeout_ms", 10000);
+
     memset(&callbacks, 0, sizeof(callbacks));
 
-    context = mg_start(&callbacks, this, options);
+    int tryCount = 10;
+    int lastFreePort = DEFAULT_WEB_PORT;
+
+    for (int j = tryCount; j > 0; j--) {
+
+        options.setOption("listening_ports", lastFreePort);
+
+        context = mg_start(&callbacks, this, options.getOptions());
+        if (context) {
+            break;
+        }
+
+        lastFreePort++;
+    }
+
     if (!context) {
-        PRINT("Can not start server....");
+        PRINT("Can not start web server....");
         return;
     }
 
-    mg_set_request_handler(context, REST_URI, restHandlerWrapper, this);
+    mg_set_request_handler(context, REST_URI, [](struct mg_connection *conn, void *cbData) -> int {
+        return ((WebApp*) cbData)->restHandler(conn);
+    }, this);
 
     if (componentCount[COMP_DISTRIBUTOR]) {
-        mg_set_request_handler(context, MAIN_URI, mainHandlerWrapper, this);
-        mg_set_request_handler(context, EVENT_URI, eventHandlerWrapper, this);
+
+        mg_set_request_handler(context, MAIN_URI, [](struct mg_connection *conn, void *cbData) -> int {
+            return ((WebApp *) cbData)->mainHandler(conn);
+        }, this);
+
+        mg_set_request_handler(context, EVENT_URI, [](struct mg_connection *conn, void *cbData) -> int {
+            return ((WebApp *) cbData)->eventHandler(conn);
+        }, this);
+
+        auto &distHost = componentController->getDistributor()->getHost();
+        if (distHost.getAddress(COMP_NODE).getInterface() == INTERFACE_NET) {
+            Address& address = distHost.getAddress(COMP_NODE);
+            address.getUI().base = address.get().base;
+            address.getUI().port = lastFreePort;
+            PRINT("Link : On Node Side : http://%s", Net::getAddressString(address.getUI()).c_str());
+        }
+
+        if (distHost.getAddress(COMP_COLLECTOR).getInterface() == INTERFACE_NET) {
+            Address& address = distHost.getAddress(COMP_COLLECTOR);
+            address.getUI().base = address.get().base;
+            address.getUI().port = lastFreePort;
+            PRINT("Link : On Collector Side : http://%s", Net::getAddressString(address.getUI()).c_str());
+        }
     }
 
-    PRINT("Link : %s", HOSTING);
+    if (componentController->getCollectorCount()) {
+
+        for (auto *coll : componentController->getCollectors()) {
+
+            auto &collHost = coll->getHost();
+            if (collHost.getAddress(COMP_NODE).getInterface() == INTERFACE_NET) {
+                Address& address = collHost.getAddress(COMP_NODE);
+                address.getUI().base = address.get().base;
+                address.getUI().port = lastFreePort;
+            }
+            if (collHost.getAddress(COMP_DISTRIBUTOR).getInterface() == INTERFACE_NET) {
+                Address& address = collHost.getAddress(COMP_DISTRIBUTOR);
+                address.getUI().base = address.get().base;
+                address.getUI().port = lastFreePort;
+            }
+        }
+    }
+
+    if (componentController->getNodeCount()) {
+
+        for (auto *node : componentController->getNodes()) {
+
+            auto &nodeHost = node->getHost();
+            if (nodeHost.getAddress(COMP_DISTRIBUTOR).getInterface() == INTERFACE_NET) {
+                Address& address = nodeHost.getAddress(COMP_DISTRIBUTOR);
+                address.getUI().base = address.get().base;
+                address.getUI().port = lastFreePort;
+            }
+            if (nodeHost.getAddress(COMP_COLLECTOR).getInterface() == INTERFACE_NET) {
+                Address& address = nodeHost.getAddress(COMP_COLLECTOR);
+                address.getUI().base = address.get().base;
+                address.getUI().port = lastFreePort;
+            }
+        }
+    }
 }
 
 int WebApp::run() {

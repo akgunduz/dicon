@@ -58,6 +58,11 @@ Collector *ComponentController::getCollector(long id) {
     return nullptr;
 }
 
+std::vector<Collector *> &ComponentController::getCollectors() {
+
+    return collectors;
+}
+
 long ComponentController::getNodeCount() {
 
     return nodes.size();
@@ -72,6 +77,11 @@ Node *ComponentController::getNode(long id) {
     }
 
     return nullptr;
+}
+
+std::vector<Node *> &ComponentController::getNodes() {
+
+    return nodes;
 }
 
 bool ComponentController::startDistributor(bool autoWake) {

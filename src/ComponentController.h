@@ -30,8 +30,10 @@ public:
     Distributor* getDistributor();
     long getCollectorCount();
     Collector* getCollector(long);
+    std::vector<Collector*>& getCollectors();
     long getNodeCount();
     Node* getNode(long);
+    std::vector<Node*>& getNodes();
 
     bool startDistributor(bool);
     bool startCollector(int);

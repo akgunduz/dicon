@@ -89,6 +89,7 @@ set(CONSOLE_FILES
 set(WEB_FILES
         ${EXTERNAL_PATH}/civetweb/civetweb.c
         ${UI_PATH}/web/WebApp.cpp
+        ${UI_PATH}/web/WebOption.cpp
         ${UI_PATH}/web/WebDistributor.cpp
         ${UI_PATH}/web/WebCollector.cpp
         ${UI_PATH}/web/WebNode.cpp

@@ -66,7 +66,7 @@ bool Net::initTCP() {
 
         setAddress(new_address);
 
-        LOGS_T(getHost(), "Using address : %s", getAddressString(new_address).c_str());
+        LOGS_T(getHost(), "Using address : %s", getAddressString(new_address.get()).c_str());
 
         return true;
     }
@@ -120,7 +120,7 @@ bool Net::initMulticast() {
     multicastAddress.setMulticast(true);
     setMulticastAddress(multicastAddress);
 
-    LOGS_T(getHost(), "Using multicast address : %s", getAddressString(multicastAddress).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", getAddressString(multicastAddress.get()).c_str());
 
     return true;
 }
@@ -308,17 +308,17 @@ bool Net::isSupportMulticast() {
     return Util::isMulticast();
 }
 
-std::string Net::getAddressString(Address& address) {
+std::string Net::getAddressString(BaseAddress& address) {
 
     char sAddress[50];
-    sprintf(sAddress, "%s:%u", getIPString(address).c_str(), address.get().port);
+    sprintf(sAddress, "%s:%u", getIPString(address).c_str(), address.port);
     return std::string(sAddress);
 }
 
-std::string Net::getIPString(Address& address) {
+std::string Net::getIPString(BaseAddress& address) {
 
     struct in_addr addr{};
-    addr.s_addr = htonl(address.get().base);
+    addr.s_addr = htonl(address.base);
     char cIP[INET_ADDRSTRLEN];
 
     const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);

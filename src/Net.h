@@ -32,13 +32,12 @@ private :
 	void runSender(ComponentUnit, Message *) override;
 	void runMulticastSender(ComponentUnit target, Message *) override;
 
-    static std::string getIPString(Address&);
+    static std::string getIPString(BaseAddress&);
     static long parseIPAddress(const std::string&);
 
     static sockaddr_in getInetAddressByAddress(Address&);
     static sockaddr_in getInetAddressByPort(int);
     static ip_mreq getInetMulticastAddress(Address&);
-    static std::string getAddressString(Address&);
 
     static size_t readCB(ComponentUnit&, uint8_t*, size_t);
     static size_t readMulticastCB(ComponentUnit&, uint8_t*, size_t);
@@ -55,6 +54,7 @@ public :
     TypeAddressList getAddressList() override;
 
     static Address parseAddress(std::string);
+    static std::string getAddressString(BaseAddress&);
 
     static TypeReadCB getReadCB(ComponentUnit&);
     static TypeWriteCB getWriteCB(ComponentUnit&);

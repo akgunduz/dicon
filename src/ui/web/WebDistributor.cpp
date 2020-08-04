@@ -3,7 +3,10 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
+#include <CollectorUnit.h>
+#include <NodeUnit.h>
 #include "WebApp.h"
+#include "WebOption.h"
 
 bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
@@ -54,10 +57,10 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     for (int i = 0 ; i < distributor->getCollectors()->size(); i++) {
 
-        auto *collector = distributor->getCollectors()->getByIndex(i);
+        auto *collector = (CollectorUnit*) distributor->getCollectors()->getByIndex(i);
         auto* collItem = json_object_new_object();
         json_object_object_add(collItem, "collectorID", json_object_new_int(collector->getID()));
-        json_object_object_add(collItem, "state", json_object_new_int(((CollectorObject*)collector)->getState()));
+        json_object_object_add(collItem, "state", json_object_new_int(((CollectorUnit*)collector)->getState()));
 
         json_object_array_add(collList, collItem);
     }
@@ -68,10 +71,10 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     for (int i = 0 ; i < distributor->getNodes()->size(); i++) {
 
-        auto *node = distributor->getNodes()->getByIndex(i);
+        auto *node = (NodeUnit*) distributor->getNodes()->getByIndex(i);
         auto* nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "nodeID", json_object_new_int(node->getID()));
-        json_object_object_add(nodeItem, "state", json_object_new_int(((NodeHost*)node)->getState()));
+        json_object_object_add(nodeItem, "state", json_object_new_int(((NodeUnit*)node)->getState()));
 
         json_object_array_add(nodeList, nodeItem);
     }
