@@ -76,6 +76,7 @@ SchedulerItem* Scheduler::pull() {
     }
 
     SchedulerItem *item = *(ref);
+    assert(item != nullptr);
     items.erase(ref);
 
     lock.unlock();

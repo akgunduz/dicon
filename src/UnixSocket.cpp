@@ -4,6 +4,7 @@
 //
 
 #include "UnixSocket.h"
+#include "NetUtil.h"
 
 UnixSocket::UnixSocket(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
 		: Interface(device, scb, hcb) {
@@ -34,7 +35,7 @@ bool UnixSocket::initUnixSocket() {
 
         Address newAddress(getDevice()->getBase(), lastFreePort, getDevice()->getType());
 
-		sockaddr_un serverAddress = getUnixAddress(newAddress);
+		sockaddr_un serverAddress = NetUtil::getUnixAddress(newAddress);
 
 		socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
@@ -58,7 +59,7 @@ bool UnixSocket::initUnixSocket() {
 
 		setAddress(newAddress);
 
-        LOGS_I(getHost(), "Using address : %s", getAddressString(newAddress).c_str());
+        LOGS_I(getHost(), "Using address : %s", NetUtil::getUnixString(newAddress.get()).c_str());
 
 		return true;
 	}
@@ -140,7 +141,7 @@ void UnixSocket::runSender(ComponentUnit target, Message *msg) {
 		return;
 	}
 
-    sockaddr_un clientAddress = getUnixAddress(target.getAddress());
+    sockaddr_un clientAddress = NetUtil::getUnixAddress(target.getAddress());
 
 	socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t)strlen(clientAddress.sun_path);
 
@@ -197,23 +198,6 @@ INTERFACE UnixSocket::getType() {
 bool UnixSocket::isSupportMulticast() {
 
     return false;
-}
-
-std::string UnixSocket::getAddressString(Address& address) {
-
-    char sAddress[50];
-    sprintf(sAddress, "%u", address.get().base);
-    return std::string(sAddress);
-}
-
-sockaddr_un UnixSocket::getUnixAddress(Address& address) {
-
-    sockaddr_un unix_addr;
-    bzero((char *) &unix_addr, sizeof(unix_addr));
-    unix_addr.sun_family = AF_UNIX;
-    sprintf(unix_addr.sun_path, "%s%s%u%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
-            address.get().base, UNIXSOCKET_FILE_SUFFIX);
-    return unix_addr;
 }
 
 TypeAddressList UnixSocket::getAddressList() {

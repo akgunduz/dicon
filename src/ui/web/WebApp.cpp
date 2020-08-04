@@ -3,7 +3,7 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Net.h>
+#include <NetUtil.h>
 #include "WebApp.h"
 #include "WebOption.h"
 
@@ -116,6 +116,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
     WebOption options;
     options.setOption("enable_keep_alive", "yes");
     options.setOption("request_timeout_ms", 10000);
+    options.setOption("additional_header", "Access-Control-Allow-Origin: *");
 
     memset(&callbacks, 0, sizeof(callbacks));
 
@@ -158,14 +159,14 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
             Address& address = distHost.getAddress(COMP_NODE);
             address.getUI().base = address.get().base;
             address.getUI().port = lastFreePort;
-            PRINT("Link : On Node Side : http://%s", Net::getAddressString(address.getUI()).c_str());
+            PRINT("Link : On Node Side : http://%s", NetUtil::getIPPortString(address.getUI()).c_str());
         }
 
         if (distHost.getAddress(COMP_COLLECTOR).getInterface() == INTERFACE_NET) {
             Address& address = distHost.getAddress(COMP_COLLECTOR);
             address.getUI().base = address.get().base;
             address.getUI().port = lastFreePort;
-            PRINT("Link : On Collector Side : http://%s", Net::getAddressString(address.getUI()).c_str());
+            PRINT("Link : On Collector Side : http://%s", NetUtil::getIPPortString(address.getUI()).c_str());
         }
     }
 

@@ -5,6 +5,7 @@
 
 #include "Net.h"
 #include "Util.h"
+#include "NetUtil.h"
 
 Net::Net(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
 		: Interface(device, scb, hcb) {
@@ -44,7 +45,7 @@ bool Net::initTCP() {
 
         Address new_address(getDevice()->getBase(), lastFreePort);
 
-        struct sockaddr_in serverAddress = getInetAddressByAddress(new_address);
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(new_address);
 
         if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
@@ -66,7 +67,7 @@ bool Net::initTCP() {
 
         setAddress(new_address);
 
-        LOGS_T(getHost(), "Using address : %s", getAddressString(new_address.get()).c_str());
+        LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(new_address.get()).c_str());
 
         return true;
     }
@@ -102,14 +103,14 @@ bool Net::initMulticast() {
         return false;
     }
 
-    struct sockaddr_in serverAddress = getInetAddressByPort(DEFAULT_MULTICAST_PORT);
+    struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
     if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
         LOGS_E(getHost(), "Socket bind with err : %d!!!", errno);
         close(multicastSocket);
         return false;
     }
 
-    ip_mreq imreq = getInetMulticastAddress(getAddress());
+    ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), MULTICAST_ADDRESS);
 
     if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
         LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
@@ -120,7 +121,7 @@ bool Net::initMulticast() {
     multicastAddress.setMulticast(true);
     setMulticastAddress(multicastAddress);
 
-    LOGS_T(getHost(), "Using multicast address : %s", getAddressString(multicastAddress.get()).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress.get()).c_str());
 
     return true;
 }
@@ -152,7 +153,7 @@ size_t Net::writeCB(ComponentUnit& target, const uint8_t * buf, size_t size) {
 
 size_t Net::writeMulticastCB(ComponentUnit& target, const uint8_t* buf, size_t size) {
 
-    struct sockaddr_in datagramAddress = getInetAddressByAddress(target.getAddress());
+    struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target.getAddress());
 
     return sendto(target.getSocket(), buf, size, 0,
                   (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
@@ -257,7 +258,7 @@ void Net::runSender(ComponentUnit target, Message *msg) {
 		return;
 	}
 
-    sockaddr_in clientAddress = getInetAddressByAddress(target.getAddress());
+    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target.getAddress());
 
 	if (connect(clientSocket, (struct sockaddr *)&clientAddress, sizeof(sockaddr_in)) == -1) {
         LOGS_E(getHost(), "Socket can not connect!!!");
@@ -281,7 +282,8 @@ void Net::runMulticastSender(ComponentUnit target, Message *msg) {
         return;
     }
 
-    struct in_addr interface_addr = getInetAddressByAddress(getAddress()).sin_addr;
+    struct in_addr interface_addr = NetUtil::
+            getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
 
     target.setSocket(clientSocket);
@@ -308,84 +310,6 @@ bool Net::isSupportMulticast() {
     return Util::isMulticast();
 }
 
-std::string Net::getAddressString(BaseAddress& address) {
-
-    char sAddress[50];
-    sprintf(sAddress, "%s:%u", getIPString(address).c_str(), address.port);
-    return std::string(sAddress);
-}
-
-std::string Net::getIPString(BaseAddress& address) {
-
-    struct in_addr addr{};
-    addr.s_addr = htonl(address.base);
-    char cIP[INET_ADDRSTRLEN];
-
-    const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
-    if (!dst) {
-        return "";
-    }
-
-    return std::string(cIP);
-}
-
-long Net::parseIPAddress(const std::string& address) {
-
-    struct in_addr addr{};
-
-    int res = inet_pton(AF_INET, address.c_str(), &addr);
-    if (res <= 0) {
-        return 0;
-    }
-
-    return ntohl(addr.s_addr);
-}
-
-Address Net::parseAddress(std::string address) {
-
-    long pos = address.find(':');
-
-    std::string sIP = address.substr(0, pos);
-
-    std::string sPort = address.substr(pos + 1, std::string::npos);
-
-    long ip = parseIPAddress(sIP);
-    int port = atoi(sPort.c_str());
-
-    return Address(ip, port);
-}
-
-
-sockaddr_in Net::getInetAddressByAddress(Address& address) {
-
-    sockaddr_in inet_addr;
-    memset((char *) &inet_addr, 0, sizeof(inet_addr));
-    inet_addr.sin_family = AF_INET;
-    inet_addr.sin_port = htons(address.get().port);
-    inet_addr.sin_addr.s_addr = htonl(address.get().base);
-    return inet_addr;
-}
-
-sockaddr_in Net::getInetAddressByPort(int port) {
-
-    sockaddr_in inet_addr;
-    memset((char *) &inet_addr, 0, sizeof(inet_addr));
-    inet_addr.sin_family = AF_INET;
-    inet_addr.sin_port = htons(port);
-    inet_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    return inet_addr;
-}
-
-ip_mreq Net::getInetMulticastAddress(Address& address) {
-
-    ip_mreq imreq;
-    memset((char *) &imreq, 0, sizeof(imreq));
-
-    imreq.imr_multiaddr.s_addr = htonl(MULTICAST_ADDRESS);
-    imreq.imr_interface.s_addr = htonl(address.get().base);
-    return imreq;
-
-}
 
 TypeAddressList Net::getAddressList() {
 

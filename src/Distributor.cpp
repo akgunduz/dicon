@@ -5,6 +5,7 @@
 
 #include "Distributor.h"
 #include "DistributorHost.h"
+#include "NetUtil.h"
 
 Distributor *Distributor::instance = nullptr;
 
@@ -160,7 +161,8 @@ bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, Message *msg) {
         return true;
     }
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Collector is added to network with ID : %d", collID);
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Collector at address : %s with web : %s is added to network with ID : %d",
+           NetUtil::getIPPortString(owner.getAddress().get()).c_str(), NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), collID);
 
     return send2CollectorIDMsg(owner, collID);
 }
@@ -206,7 +208,8 @@ bool Distributor::processNodeAliveMsg(ComponentUnit& owner, Message *msg) {
         return true;
     }
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Node is added to network with ID : %d", nodeID);
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Node at address : %s with web : %s is added to network with ID : %d",
+           NetUtil::getIPPortString(owner.getAddress().get()).c_str(), NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), nodeID);
 
     return send2NodeIDMsg(owner, nodeID);
 }

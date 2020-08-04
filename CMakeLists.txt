@@ -76,6 +76,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorHost.cpp
         ${SOURCE_PATH}/DistributorHost.cpp
         ${SOURCE_PATH}/CommUnit.cpp
+        ${SOURCE_PATH}/NetUtil.cpp
         )
 
 set(CONSOLE_FILES

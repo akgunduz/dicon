@@ -24,8 +24,6 @@ private :
 	void runSender(ComponentUnit , Message *) override;
     void runMulticastSender(ComponentUnit, Message *) override;
 
-    static sockaddr_un getUnixAddress(Address&);
-
     static size_t readCB(ComponentUnit&, uint8_t*, size_t);
     static size_t writeCB(ComponentUnit&, const uint8_t*, size_t);
 
@@ -37,8 +35,6 @@ public :
     INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
-
-    static std::string getAddressString(Address&);
 
     static TypeReadCB getReadCB(ComponentUnit&);
     static TypeWriteCB getWriteCB(ComponentUnit&);

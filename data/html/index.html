@@ -178,7 +178,7 @@
     <div id="coll-area" class="dual-tables-container">
       <div id="coll-file" class="single-table-container">
         <input id="load-input" type="file" required accept=".zip, .tar.gz, .tgz" style="display: none;"
-          onchange="onCollLoadJob(currentPage.id)" />
+          onchange="onCollLoadJob(currentPage.id, currentPage.address)" />
         <button id="load-btn" type="button" class="button btn-full-width">
           Load Job
         </button>
@@ -209,7 +209,7 @@
         </table>
       </div>
       <div id="coll-process" class="single-table-container">
-        <button type="button" class="button btn-full-width" onclick="onCollProcess(currentPage.id)">
+        <button type="button" class="button btn-full-width" onclick="onCollProcess(currentPage.id, currentPage.address)">
           Process
         </button>
         <div class="dual-tables-container">
@@ -276,7 +276,7 @@
     let COLLECTOR = 0x1;
     let NODE = 0x2;
 
-    let REST_URI = location.origin + "/rest";
+    let REST_URI = "/rest";
     let REST_STATE = "/state";
 
     let REST_DIST_URI = REST_URI + "/dist";
@@ -299,12 +299,21 @@
 
     let eventSource;
 
+    class Component {
+      constructor(_id, _address) {
+        this.id = _id;
+        this.address = _address;
+      }
+    }
+
     const currentPage = {
       type: DISTRIBUTOR,
       id: 0,
-      set(_type, _id) {
+      address: location.host,
+      set(_type, _id = 0, _address = location.host) {
         this.type = _type;
         this.id = _id;
+        this.address = _address;
         let distPage = document.getElementById("distributor-block");
         let collPage = document.getElementById("collector-block");
         let nodePage = document.getElementById("node-block");
@@ -322,7 +331,7 @@
             nodePage.style.display = "none";
             document.getElementById("coll-header").innerHTML =
               "Collector [" + this.id + "]";
-            onCollState(this.id);
+            onCollState(this.id, this.address);
             break;
           case NODE:
             distPage.style.display = "none";
@@ -330,7 +339,7 @@
             nodePage.style.display = "block";
             document.getElementById("node-header").innerHTML =
               "Node [" + this.id + "]";
-            onNodeState(this.id);
+            onNodeState(this.id, this.address);
             break;
         }
       },
@@ -344,9 +353,9 @@
         if (state.dist > 0 && currentPage.type === DISTRIBUTOR) {
           onDistState();
         } else if (state.coll > 0 && currentPage.type === COLLECTOR) {
-          onCollState(currentPage.id);
+          onCollState(currentPage.id, currentPage.address);
         } else if (state.node > 0 && currentPage.type === NODE) {
-          onNodeState(currentPage.id);
+          onNodeState(currentPage.id, currentPage.address);
         }
       };
 
@@ -381,33 +390,36 @@
     }
 
     function onDistClick() {
-      currentPage.set(DISTRIBUTOR, this.id);
+      currentPage.set(DISTRIBUTOR);
     }
 
     function onCollClick() {
-      currentPage.set(COLLECTOR, this.id);
+      currentPage.set(COLLECTOR, this.id, this.title);
     }
 
     function onNodeClick() {
-      currentPage.set(NODE, this.id);
+      currentPage.set(NODE, this.id, this.title);
     }
 
     function onDistState() {
       let xHTTP = new XMLHttpRequest();
       xHTTP.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
+          if (this.responseText === "") {
+            return;
+          }
           let data = JSON.parse(this.responseText);
           onDistUpdateCollList(data);
           onDistUpdateNodeList(data);
         }
       };
-      xHTTP.open("GET", REST_DIST_URI + REST_STATE, true);
+      xHTTP.open("GET", "http://" + location.host + REST_DIST_URI + REST_STATE, true);
       xHTTP.send();
     }
 
     function onDistPoll() {
       let xHTTP = new XMLHttpRequest();
-      xHTTP.open("GET", REST_DIST_URI + REST_DIST_POLL, true);
+      xHTTP.open("GET", "http://" + location.host + REST_DIST_URI + REST_DIST_POLL, true);
       xHTTP.send();
     }
 
@@ -419,14 +431,15 @@
       let side = document.getElementById("sidebar-coll-list");
       side.innerHTML = "";
 
-      for (let collItem of data.collList) {
+      for (let collItem of data._collList) {
         let newRow = table.insertRow();
-        newRow.insertCell().innerHTML = collItem.collectorID;
-        newRow.insertCell().innerHTML = COLL_STATES[collItem.state];
+        newRow.insertCell().innerHTML = collItem._id;
+        newRow.insertCell().innerHTML = COLL_STATES[collItem._state];
 
         let component = document.createElement("a");
         component.onclick = onCollClick;
-        component.id = collItem.collectorID;
+        component.id = collItem._id;
+        component.title = collItem._address;
         component.appendChild(
           document.createTextNode("Collector " + component.id)
         );
@@ -442,14 +455,15 @@
       let side = document.getElementById("sidebar-node-list");
       side.innerHTML = "";
 
-      for (let nodeItem of data.nodeList) {
+      for (let nodeItem of data._nodeList) {
         let newRow = table.insertRow();
-        newRow.insertCell().innerHTML = nodeItem.nodeID;
-        newRow.insertCell().innerHTML = NODE_STATES[nodeItem.state];
+        newRow.insertCell().innerHTML = nodeItem._id;
+        newRow.insertCell().innerHTML = NODE_STATES[nodeItem._state];
 
         let component = document.createElement("a");
         component.onclick = onNodeClick;
-        component.id = nodeItem.nodeID;
+        component.id = nodeItem._id;
+        component.title = nodeItem._address;
         component.appendChild(
           document.createTextNode("Node " + component.id)
         );
@@ -457,54 +471,54 @@
       }
     }
 
-    function onCollState(collID) {
+    function onCollState(id, address) {
       let xHTTP = new XMLHttpRequest();
       xHTTP.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-          if (this.responseText !== "") {
-            let data = JSON.parse(this.responseText);
-            document.getElementById("coll-state").innerHTML =
-              COLL_STATES[data._state];
-            document.getElementById("coll-job-name").innerHTML =
-              data._jobName;
-            document.getElementById("coll-duration").innerHTML =
-              data._duration + " sn";
-            document.getElementById("coll-process-count").innerHTML =
-              data._processCount;
-            onCollUpdateFileList(data);
-            onCollUpdateProcessList(data);
+          if (this.responseText === "") {
+            return;
           }
+
+          let data = JSON.parse(this.responseText);
+          document.getElementById("coll-state").innerHTML =
+            COLL_STATES[data._state];
+          document.getElementById("coll-job-name").innerHTML =
+            data._jobName;
+          document.getElementById("coll-duration").innerHTML =
+            data._duration + " sn";
+          document.getElementById("coll-process-count").innerHTML =
+            data._processCount;
+          onCollUpdateFileList(data);
+          onCollUpdateProcessList(data);
         }
       };
       xHTTP.open(
         "GET",
-        REST_COLL_URI + "/" + collID + REST_STATE,
+        "http://" + address + REST_COLL_URI + "/" + id + REST_STATE,
         true
       );
       xHTTP.send();
     }
 
-    function onCollLoadJob(collID) {
+    function onCollLoadJob(id, address) {
       let uploadFile = document.getElementById("load-input");
       let file = uploadFile.files[0];
       uploadFile.value = "";
       let xHTTP = new XMLHttpRequest();
       xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
       xHTTP.open(
-        "POST",
-        REST_COLL_URI + "/" + collID + REST_COLL_LOAD,
+        "POST", "http://" + address + REST_COLL_URI + "/" + id + REST_COLL_LOAD,
         true
       );
       xHTTP.setRequestHeader("FileName", file.name);
       xHTTP.send(file);
     }
 
-    function onCollProcess(collID) {
+    function onCollProcess(id, address) {
       let xHTTP = new XMLHttpRequest();
       xHTTP.onreadystatechange = state => { console.log(xHTTP.status); }
       xHTTP.open(
-        "GET",
-        REST_COLL_URI + "/" + collID + REST_COLL_PROCESS,
+        "GET", "http://" + address + REST_COLL_URI + "/" + id + REST_COLL_PROCESS,
         true
       );
       xHTTP.send();
@@ -557,18 +571,21 @@
       }
     }
 
-    function onNodeState(nodeID) {
+    function onNodeState(id, address) {
       let xHTTP = new XMLHttpRequest();
       xHTTP.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
+          if (this.responseText === "") {
+            return;
+          }
+
           let data = JSON.parse(this.responseText);
           onNodeUpdateState(data);
           onNodeUpdateProcessList(data);
         }
       };
       xHTTP.open(
-        "GET",
-        REST_NODE_URI + "/" + nodeID + REST_STATE,
+        "GET", "http://" + address + REST_NODE_URI + "/" + id + REST_STATE,
         true
       );
       xHTTP.send();
@@ -596,7 +613,7 @@
     }
 
     function onLoad() {
-      currentPage.set(DISTRIBUTOR, this.id);
+      currentPage.set(DISTRIBUTOR);
       const loadBtn = document.getElementById("load-btn");
       const loadInput = document.getElementById("load-input");
       loadBtn.addEventListener(
