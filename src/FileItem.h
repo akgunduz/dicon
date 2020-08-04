@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __FileContent_H_
-#define __FileContent_H_
+#ifndef DICON_FILEITEM_H
+#define DICON_FILEITEM_H
 
 #include "ContentItem.h"
 
@@ -31,4 +31,4 @@ public:
 
 typedef std::vector<FileItem*> TypeFileList;
 
-#endif //__Content_H_
+#endif //DICON_FILEITEM_H

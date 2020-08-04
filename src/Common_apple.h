@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Common_APPLE_H_
-#define __Common_APPLE_H_
+#ifndef DICON_COMMONAPPLE_H
+#define DICON_COMMONAPPLE_H
 
 #include <IOKit/IOKitKeys.h>
 #define UNIXSOCKET_PATH "/var/tmp/"
@@ -16,4 +16,4 @@
 #define COLLECTOR_PATH "Collector"
 #define NODE_PATH "Node"
 
-#endif
+#endif //DICON_COMMONAPPLE_H

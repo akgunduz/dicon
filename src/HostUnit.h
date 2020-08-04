@@ -11,8 +11,6 @@
 
 class HostUnit {
 
-private:
-
     const char *rootPath{};
 
     long id{};
@@ -20,8 +18,6 @@ private:
     COMPONENT type{COMP_MAX};
 
     Address address[COMP_MAX]{};
-
-protected:
 
 public:
 

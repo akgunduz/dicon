@@ -21,8 +21,6 @@ enum NOTIFIER_TYPE {
 
 class Interface {
 
-private :
-
 	Device *device{};
 
     Address address{};
@@ -64,6 +62,5 @@ public :
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;
 };
-
 
 #endif //DICON_INTERFACE_H

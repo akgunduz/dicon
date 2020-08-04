@@ -9,13 +9,9 @@
 
 class DistributorObject : public ComponentObject {
 
-private:
-
-
 public:
     DistributorObject() = default;
 
 };
-
 
 #endif //DICON_DISTRIBUTOROBJECT_H

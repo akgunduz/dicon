@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef COLLECTOR_H
-#define	COLLECTOR_H
+#ifndef DICON_COLLECTOR_H
+#define	DICON_COLLECTOR_H
 
 #include "Component.h"
 #include "Connector.h"
@@ -46,5 +46,5 @@ public:
     JobItem* loadJob(const char*);
 };
 
-#endif	/* COLLECTOR_H */
+#endif //DICON_COLLECTOR_H
 

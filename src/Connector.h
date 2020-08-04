@@ -14,9 +14,7 @@
 
 class Connector {
 
-private:
-
-    Connector(){};
+    Connector()= default;
 
 public:
 
@@ -24,6 +22,5 @@ public:
                                       const InterfaceSchedulerCB*,
                                       const InterfaceHostCB*);
 };
-
 
 #endif //DICON_CONNECTOR_H

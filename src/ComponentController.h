@@ -5,7 +5,6 @@
 #ifndef DICON_COMPONENTCONTROLLER_H
 #define DICON_COMPONENTCONTROLLER_H
 
-
 #include "Distributor.h"
 #include "Collector.h"
 #include "Node.h"
@@ -39,6 +38,5 @@ public:
     bool startCollector(int);
     bool startNode(int);
 };
-
 
 #endif //DICON_COMPONENTCONTROLLER_H

@@ -10,8 +10,6 @@
 
 class CollectorObject : public ComponentObject {
 
-private:
-
     COLLSTATES state{COLLSTATE_IDLE};
 
 public:
@@ -23,6 +21,5 @@ public:
     void setState(COLLSTATES);
 
 };
-
 
 #endif //DICON_COLLECTOROBJECT_H

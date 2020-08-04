@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/12/15.
 //
 
-#ifndef DICON_CONNECTINTERFACE_H
-#define DICON_CONNECTINTERFACE_H
+#ifndef DICON_DEVICE_H
+#define DICON_DEVICE_H
 
 #include "InterfaceTypes.h"
 
@@ -27,8 +27,6 @@ public:
     uint8_t getMask() const;
     bool isLoopback() const;
 
-//    std::vector<long> getAddressList();
 };
 
-
-#endif //DICON_CONNECTINTERFACE_H
+#endif //DICON_DEVICE_H

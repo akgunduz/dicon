@@ -4,8 +4,8 @@
 //
 
 
-#ifndef __Message_H_
-#define __Message_H_
+#ifndef DICON_MESSAGE_H
+#define DICON_MESSAGE_H
 
 #include "MessageBase.h"
 #include "MessageHeader.h"
@@ -13,7 +13,6 @@
 
 class Message : public MessageBase {
 
-private:
 	MessageHeader header{};
     MessageData data{};
 
@@ -46,4 +45,4 @@ public:
 	MessageData& getData();
 };
 
-#endif //__Message_H_
+#endif //DICON_MESSAGE_H

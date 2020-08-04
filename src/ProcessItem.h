@@ -33,8 +33,6 @@ class ProcessItem : public ContentItem {
 
     long duration{};
 
-private:
-
     bool parseCommand(void*, int, int);
 
 public:

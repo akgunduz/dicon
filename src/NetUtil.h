@@ -23,5 +23,4 @@ public:
     static std::string getUnixString(BaseAddress&);
 };
 
-
 #endif //DICON_NETUTIL_H

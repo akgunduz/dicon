@@ -3,7 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_NET_H
 #define DICON_NET_H
 

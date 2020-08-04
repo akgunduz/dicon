@@ -28,5 +28,4 @@ public:
             hostCB(_hostCB), arg(_arg) {}
 };
 
-
 #endif //DICON_INTERFACECALLBACK_H

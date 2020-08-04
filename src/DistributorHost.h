@@ -18,5 +18,4 @@ public:
     ~DistributorHost() override;
 };
 
-
 #endif //DICON_DISTRIBUTORHOST_H

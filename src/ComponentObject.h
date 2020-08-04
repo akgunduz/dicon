@@ -5,7 +5,6 @@
 #ifndef DICON_COMPONENTOBJECT_H
 #define DICON_COMPONENTOBJECT_H
 
-
 #include "ComponentUnit.h"
 
 class ComponentObject {
@@ -18,6 +17,5 @@ public:
     void setAssigned(COMPONENT, long, Address);
 
 };
-
 
 #endif //DICON_COMPONENTOBJECT_H

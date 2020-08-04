@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef SCHEDULER_H
-#define	SCHEDULER_H
+#ifndef DICON_SCHEDULER_H
+#define	DICON_SCHEDULER_H
 
 #include "Common.h"
 #include "Message.h"
@@ -16,25 +16,39 @@
 #define MAX_SCHEDULER_CAPACITY 10000
 
 class Scheduler {
-private:
+
     bool ownThread;
+
     std::mutex mutex;
+
     std::condition_variable cond;
+
     std::thread thread;
+
 	std::list<SchedulerItem*> items;
+
 	std::map<int, const InterfaceSchedulerCB*> callbacks;
+
 	int capacity;
+
 	bool initialized;
+
 	static void* run(void *);
+
 public:
+
 	Scheduler(bool seperateThread = true);
+
     void setCB(int, const InterfaceSchedulerCB*);
+
 	bool push(SchedulerItem *item);
+
     SchedulerItem* pull();
+
 	void end();
+
     virtual ~Scheduler();
-private:
 
 };
 
-#endif	/* SCHEDULER_H */
+#endif //DICON_SCHEDULER_H

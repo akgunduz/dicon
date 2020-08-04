@@ -3,9 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
-#ifndef __Common_LINUX_H_
-#define __Common_LINUX_H_
+#ifndef DICON_COMMONLINUX_H
+#define DICON_COMMONLINUX_H
 
 #define ntohll(x) be64toh(x)
 #define htonll(x) htobe64(x)
@@ -21,4 +20,5 @@
 #define DISTRIBUTOR_PATH "Distributor"
 #define COLLECTOR_PATH "Collector"
 #define NODE_PATH "Node"
-#endif
+
+#endif //DICON_COMMONLINUX_H

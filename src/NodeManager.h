@@ -3,15 +3,13 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef NODEMANAGER_H
-#define	NODEMANAGER_H
+#ifndef DICON_NODEMANAGER_H
+#define	DICON_NODEMANAGER_H
 
 #include "NodeUnit.h"
 #include "ComponentManager.h"
 
 class NodeManager : public ComponentManager {
-
-private:
 
     std::mutex nodeMutex;
 
@@ -35,4 +33,4 @@ public:
     ComponentUnit* createUnit(long, Address&) final;
 };
 
-#endif	/* DISTRIBUTOR_H */
+#endif //DICON_NODEMANAGER_H

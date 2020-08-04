@@ -2,8 +2,8 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#ifndef DICON_JSONFILE_H
-#define DICON_JSONFILE_H
+#ifndef DICON_JOBITEM_H
+#define DICON_JOBITEM_H
 
 #include "SchedulerItem.h"
 #include "FileItem.h"
@@ -83,4 +83,4 @@ public:
 };
 
 
-#endif //DICON_JSONFILE_H
+#endif //DICON_JOBITEM_H

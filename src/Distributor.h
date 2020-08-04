@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DISTRIBUTOR_H
-#define	DISTRIBUTOR_H
+#ifndef DICON_DISTRIBUTOR_H
+#define	DICON_DISTRIBUTOR_H
 
 #include "Component.h"
 #include "Node.h"
@@ -15,7 +15,6 @@
 #include "DistributorObject.h"
 
 class Distributor : public Component {
-private:
 
     static Distributor *instance;
 
@@ -70,4 +69,4 @@ public:
     NodeManager* getNodes() const;
 };
 
-#endif	/* DISTRIBUTOR_H */
+#endif //DICON_DISTRIBUTOR_H

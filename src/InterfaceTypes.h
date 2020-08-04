@@ -20,5 +20,4 @@ public:
     static const char* getName(INTERFACE);
 };
 
-
 #endif //DICON_INTERFACETYPES_H

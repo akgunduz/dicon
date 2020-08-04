@@ -23,5 +23,4 @@ public:
 
 typedef std::vector<NodeUnit> TypeNodeList;
 
-
 #endif //DICON_NODEUNIT_H

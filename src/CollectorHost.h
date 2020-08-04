@@ -21,5 +21,4 @@ public:
 
 };
 
-
 #endif //DICON_COLLECTORHOST_H

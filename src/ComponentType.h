@@ -20,5 +20,4 @@ public:
 
 };
 
-
 #endif //DICON_COMPONENTTYPE_H

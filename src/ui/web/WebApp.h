@@ -12,7 +12,6 @@
 #define DOCUMENT_ROOT "../data/html/"
 #define PORT "8081"
 #define MAIN_URI "/"
-#define HOSTING "http://localhost:" PORT "/"
 #define REST_URI "/rest"
 #define EVENT_URI "/event"
 

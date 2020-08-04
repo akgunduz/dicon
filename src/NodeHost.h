@@ -12,8 +12,6 @@
 
 class NodeHost : public HostUnit, public NodeObject {
 
-private:
-
     ProcessItem processItem{HostUnit(COMP_NODE)};
 
 public:
@@ -29,6 +27,5 @@ public:
     ProcessItem& getProcess();
 
 };
-
 
 #endif //DICON_NODEHOST_H

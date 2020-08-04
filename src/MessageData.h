@@ -43,5 +43,4 @@ public:
     void setComponentList(TypeComponentList&);
 };
 
-
 #endif //DICON_MESSAGEDATA_H

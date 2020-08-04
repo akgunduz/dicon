@@ -27,5 +27,4 @@ public:
     }
 };
 
-
 #endif //DICON_JSONTYPE_H

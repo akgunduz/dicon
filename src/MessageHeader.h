@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_MESSAGEHEADER_H
 #define DICON_MESSAGEHEADER_H
 
@@ -48,9 +47,6 @@ public:
     void deSerialize(const uint8_t*);
     void serialize(uint8_t*);
 
-
-
 };
-
 
 #endif //DICON_MESSAGEHEADER_H

@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_MESSAGETYPES_H
 #define DICON_MESSAGETYPES_H
 
@@ -67,6 +66,5 @@ public:
     static const char* getBlockName(int);
     static void addBlock(int, std::string);
 };
-
 
 #endif //DICON_MESSAGETYPES_H

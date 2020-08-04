@@ -23,5 +23,4 @@ public:
     Message* getMessage();
 };
 
-
 #endif //DICON_MESSAGEITEM_H

@@ -4,15 +4,14 @@
 //
 
 
-#ifndef NODE_H
-#define NODE_H
+#ifndef DICON_NODE_H
+#define DICON_NODE_H
 
 #include "Component.h"
 #include "NodeHost.h"
 #include "DistributorObject.h"
 
 class Node : public Component {
-private:
 
     ComponentUnit distributor;
 
@@ -50,5 +49,4 @@ public:
     std::vector<ProcessItem>& getProcessList();
 };
 
-
-#endif //NODE_H
+#endif //DICON_NODE_H

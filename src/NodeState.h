@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_NODESTATE_H
 #define DICON_NODESTATE_H
 
@@ -19,6 +18,5 @@ class NodeState {
 public:
     static const char* getName(NODESTATES);
 };
-
 
 #endif //DICON_NODESTATE_H

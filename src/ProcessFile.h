@@ -5,7 +5,6 @@
 #ifndef DICON_PROCESSFILE_H
 #define DICON_PROCESSFILE_H
 
-
 #include "FileItem.h"
 
 class ProcessFile {
@@ -23,6 +22,5 @@ public:
     void setAssignedProcess(long _processID);
     void setOutputState(bool);
 };
-
 
 #endif //DICON_PROCESSFILE_H

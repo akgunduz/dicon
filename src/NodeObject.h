@@ -26,8 +26,6 @@ public:
 
     NODESTATES getState();
     void setState(NODESTATES);
-
 };
-
 
 #endif //DICON_NODEOBJECT_H

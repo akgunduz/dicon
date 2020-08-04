@@ -21,5 +21,4 @@ public:
     static ARCH getNative();
 };
 
-
 #endif //DICON_ARCHTYPES_H

@@ -27,5 +27,4 @@ public:
     int notifyHandler(COMPONENT, NOTIFYSTATE) override;
 };
 
-
 #endif //DICON_CONSOLEAPP_H

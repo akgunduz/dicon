@@ -13,8 +13,6 @@ typedef std::vector<Device*> TypeDeviceList;
 
 class DeviceList {
 
-private:
-
     static DeviceList *instance;
 
     DeviceList();
@@ -29,6 +27,5 @@ public:
     long getCount();
 
 };
-
 
 #endif //DICON_DEVICELIST_H

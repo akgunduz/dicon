@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef __Util_H_
-#define __Util_H_
+#ifndef DICON_UTIL_H
+#define DICON_UTIL_H
 
 #include "Common.h"
 
@@ -14,7 +14,6 @@
 
 class Util {
 
-private:
 	static std::string getPath(const char *, long, const char*, bool);
 
 public:
@@ -42,5 +41,4 @@ public:
 
 };
 
-
-#endif //__Tools_H_
+#endif //DICON_UTIL_H

@@ -40,5 +40,4 @@ public:
     long add(Address&, bool&);
 };
 
-
 #endif //DICON_COMPONENTMANAGER_H

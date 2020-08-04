@@ -42,5 +42,4 @@ public:
     void removeRequest();
 };
 
-
 #endif //DICON_COLLECTORMANAGER_H
