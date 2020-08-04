@@ -34,10 +34,3 @@ bool Device::isLoopback() const {
 
     return loopback;
 }
-
-//std::vector<long> Device::getAddressList() {
-//
-//    return InterfaceTypes::getAddressList(getType())(this);
-//}
-
-
