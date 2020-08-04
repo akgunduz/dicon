@@ -46,6 +46,20 @@ public:
     Address& getAddress(COMPONENT);
     void setAddress(COMPONENT, Address);
 
+    template <class T>
+    void setUIAddress(COMPONENT _out, T _address) {
+
+        assert(_out != type);
+        address[_out].setUI(_address);
+    }
+
+    template <class T>
+    void setAllUIAddress(T _address) {
+
+        address[ComponentUnit::next(type)].setUI(_address);
+        address[ComponentUnit::prev(type)].setUI(_address);
+    }
+
     void set(COMPONENT, long, COMPONENT, Address);
 };
 

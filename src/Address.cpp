@@ -41,8 +41,18 @@ void Address::set(uint32_t _base, uint16_t _port) {
 
 void Address::setUI(uint32_t _base, uint16_t _port) {
 
-    ui.base = _base;
-    ui.port = _port;
+    if (getInterface() == INTERFACE_NET) {
+        ui.base = _base;
+        ui.port = _port;
+    }
+}
+
+void Address::setUI(uint16_t _port) {
+
+    if (getInterface() == INTERFACE_NET) {
+        ui.base = self.base;
+        ui.port = _port;
+    }
 }
 
 void Address::set(BaseAddress &ref) {
@@ -52,7 +62,9 @@ void Address::set(BaseAddress &ref) {
 
 void Address::setUI(BaseAddress &ref) {
 
-    ui = ref;
+    if (getInterface() == INTERFACE_NET) {
+        ui = ref;
+    }
 }
 
 bool Address::isMulticast() {

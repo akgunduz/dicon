@@ -62,7 +62,6 @@ void HostUnit::setAddress(COMPONENT _out, Address _address) {
     address[_out] = _address;
 }
 
-
 void HostUnit::set(COMPONENT _type, long _id, COMPONENT _out, Address _address) {
 
     assert(_out != _type);
@@ -75,4 +74,3 @@ ComponentUnit HostUnit::getUnit(COMPONENT targetType) {
 
     return ComponentUnit(type, id, address[targetType]);
 }
-

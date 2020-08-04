@@ -154,37 +154,17 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
             return ((WebApp *) cbData)->eventHandler(conn);
         }, this);
 
-        auto &distHost = componentController->getDistributor()->getHost();
-        if (distHost.getAddress(COMP_NODE).getInterface() == INTERFACE_NET) {
-            Address& address = distHost.getAddress(COMP_NODE);
-            address.getUI().base = address.get().base;
-            address.getUI().port = lastFreePort;
-            PRINT("Link : On Node Side : http://%s", NetUtil::getIPPortString(address.getUI()).c_str());
-        }
 
-        if (distHost.getAddress(COMP_COLLECTOR).getInterface() == INTERFACE_NET) {
-            Address& address = distHost.getAddress(COMP_COLLECTOR);
-            address.getUI().base = address.get().base;
-            address.getUI().port = lastFreePort;
-            PRINT("Link : On Collector Side : http://%s", NetUtil::getIPPortString(address.getUI()).c_str());
-        }
+        componentController->getDistributor()->getHost().setAllUIAddress(lastFreePort);
+
+        PRINT("Link : http://localhost:%d", lastFreePort);
     }
 
     if (componentController->getCollectorCount()) {
 
         for (auto *coll : componentController->getCollectors()) {
 
-            auto &collHost = coll->getHost();
-            if (collHost.getAddress(COMP_NODE).getInterface() == INTERFACE_NET) {
-                Address& address = collHost.getAddress(COMP_NODE);
-                address.getUI().base = address.get().base;
-                address.getUI().port = lastFreePort;
-            }
-            if (collHost.getAddress(COMP_DISTRIBUTOR).getInterface() == INTERFACE_NET) {
-                Address& address = collHost.getAddress(COMP_DISTRIBUTOR);
-                address.getUI().base = address.get().base;
-                address.getUI().port = lastFreePort;
-            }
+            coll->getHost().setAllUIAddress(lastFreePort);
         }
     }
 
@@ -192,17 +172,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
         for (auto *node : componentController->getNodes()) {
 
-            auto &nodeHost = node->getHost();
-            if (nodeHost.getAddress(COMP_DISTRIBUTOR).getInterface() == INTERFACE_NET) {
-                Address& address = nodeHost.getAddress(COMP_DISTRIBUTOR);
-                address.getUI().base = address.get().base;
-                address.getUI().port = lastFreePort;
-            }
-            if (nodeHost.getAddress(COMP_COLLECTOR).getInterface() == INTERFACE_NET) {
-                Address& address = nodeHost.getAddress(COMP_COLLECTOR);
-                address.getUI().base = address.get().base;
-                address.getUI().port = lastFreePort;
-            }
+            node->getHost().setAllUIAddress(lastFreePort);
         }
     }
 }
