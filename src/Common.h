@@ -29,6 +29,7 @@
 #include <mutex>
 #include <thread>
 #include <filesystem>
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/stat.h>
