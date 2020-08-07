@@ -196,13 +196,15 @@
         </div>
         <table id="coll-file-table" class="table-wide">
           <colgroup>
-            <col span="1" style="width: 60%;" />
-            <col span="1" style="width: 40%;" />
+            <col span="1" style="width: 55%;" />
+            <col span="1" style="width: 30%;" />
+            <col span="1" style="width: 15%;" />
           </colgroup>
           <thead>
             <tr>
               <th>File</th>
               <th>Size</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -290,6 +292,7 @@
 
     let COLL_STATES = ["IDLE", "BUSY"];
     let NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
+    let FILE_STATES = ["EXIST", "REQUIRED", "OUTPUT"];
     let PROCESS_STATES = ["INVALID", "DEPENDENT", "READY", "STARTED", "ENDED"];
 
     let PROCESS_STATE_INVALID = 0;
@@ -535,9 +538,10 @@
         let newRow = table.insertRow();
         newRow.insertCell().innerHTML = fileitem._name;
         newRow.insertCell().innerHTML = fileitem._size;
-        if (fileitem._validity === 1) {
+        newRow.insertCell().innerHTML = FILE_STATES[fileitem._state];
+        if (fileitem._state === 1) {
           newRow.style.backgroundColor = "#C00000";
-        } else if (fileitem._validity === 0) {
+        } else if (fileitem._state === 0) {
           newRow.style.backgroundColor = "#00C000";
         }
       }
