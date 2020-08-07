@@ -290,12 +290,13 @@
 
     let COLL_STATES = ["IDLE", "BUSY"];
     let NODE_STATES = ["IDLE", "PREBUSY", "BUSY"];
-    let PROCESS_STATES = ["DEPENDENT", "READY", "STARTED", "ENDED"];
+    let PROCESS_STATES = ["INVALID", "DEPENDENT", "READY", "STARTED", "ENDED"];
 
-    let PROCESS_STATE_DEPENDENT = 0;
-    let PROCESS_STATE_READY = 1;
-    let PROCESS_STATE_STARTED = 2;
-    let PROCESS_STATE_ENDED = 3;
+    let PROCESS_STATE_INVALID = 0;
+    let PROCESS_STATE_DEPENDENT = 1;
+    let PROCESS_STATE_READY = 2;
+    let PROCESS_STATE_STARTED = 3;
+    let PROCESS_STATE_ENDED = 4;
 
     let eventSource;
 
@@ -534,7 +535,9 @@
         let newRow = table.insertRow();
         newRow.insertCell().innerHTML = fileitem._name;
         newRow.insertCell().innerHTML = fileitem._size;
-        if (fileitem._validity) {
+        if (fileitem._validity === 1) {
+          newRow.style.backgroundColor = "#C00000";
+        } else if (fileitem._validity === 0) {
           newRow.style.backgroundColor = "#00C000";
         }
       }
@@ -555,6 +558,9 @@
         newRow.insertCell().innerHTML = PROCESS_STATES[processItem._state];
 
         switch (processItem._state) {
+          case PROCESS_STATE_INVALID:
+            newRow.style.backgroundColor = "#C00000";
+            break;
           case PROCESS_STATE_DEPENDENT:
             newRow.style.backgroundColor = "#C0C080";
             break;

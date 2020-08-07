@@ -5,6 +5,7 @@
 #include "ProcessState.h"
 
 const char* sProcessStates[] = {
+        "INVALID",
         "DEPENDENT",
         "READY",
         "STARTED",

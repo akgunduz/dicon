@@ -6,11 +6,13 @@
 
 void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* node) {
 
-    auto* job = collector->loadJob("../sample/Job2_macos");
+    auto* job = collector->loadJob("../sample/Job1_x86_linux");
     if (!job) {
-        PRINT("Job file is not exist");
+        PRINT("Job could not initialized");
         return;
     }
+
+    PRINT("Job status : %d", job->getStatus());
 
     PRINT("Files of Job : %s", job->getName());
 
@@ -18,7 +20,8 @@ void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* 
 
         auto *content = job->getFile(j);
 
-        PRINT("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
+        PRINT("\tFile : %s, State : %s", content->getName(), content->required() ? "required"
+            : content->check() ? "exists" : "output");
     }
 
     PRINT("Processes");
@@ -31,6 +34,7 @@ void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* 
               process->getProcess(),
               ProcessState::getName(process->getState()),
               process->getAssigned());
+
         for (auto file : process->getFileList()) {
 
             PRINT("\tFile => ID : %d, Name : %s, State : %s",

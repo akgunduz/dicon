@@ -63,3 +63,13 @@ bool FileItem::check() {
 
     return true;
 }
+
+bool FileItem::required() {
+
+    return is_required;
+}
+
+void FileItem::setRequired(bool _is_required) {
+
+    is_required = _is_required;
+}

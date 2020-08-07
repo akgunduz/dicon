@@ -20,12 +20,14 @@ JobItem::JobItem(const HostUnit& host, const char* jobPath, long _jobID)
     JOB_PATH pathType = checkPath(jobPath);
 
     if (pathType == JOBPATH_INVALID) {
-        throw std::runtime_error("Job path is invalid");
+        status = JOBSTATUS_PATH_INVALID;
+        return;
     }
 
     if (pathType == JOBPATH_ZIP) {
         if (!extract(jobPath, _jobID)) {
-            throw std::runtime_error("Job can not extracted from Zip file!!!");
+         status = JOBSTATUS_ZIP_INVALID;
+         return;
         }
 
     } else {
@@ -37,22 +39,17 @@ JobItem::JobItem(const HostUnit& host, const char* jobPath, long _jobID)
     }
 
     if (!parse()) {
-        throw std::runtime_error("Job file could not parsed!!!");
+        status = JOBSTATUS_ZIP_INVALID;
+        return;
     }
 
     for (int i = 0; i < getProcessCount(); i++) {
         getProcess(i)->parse(this);
     }
 
-    if (!createDependencyMap()){
-        throw std::runtime_error("Dependency Loop is detected in the Job!!!");
-    }
+    status = createDependencyMap(errorFileIDList);
 
-    for (int i = 0; i < getProcessCount(); i++) {
-        if (getProcess(i)->getState() == PROCESS_STATE_DEPENDENT && getProcess(i)->check()) {
-            getProcess(i)->setState(PROCESS_STATE_READY);
-        }
-    }
+    setProcessStateByFile(errorFileIDList);
 }
 
 JobItem::~JobItem() {
@@ -348,8 +345,53 @@ bool JobItem::setProcessIDByOutput(long outputID, long processID) {
     return false;
 }
 
+bool JobItem::setProcessStateByFile(std::vector<long> &errorList) {
 
-bool JobItem::createDependencyMap() {
+    for (int i = 0; i < getProcessCount(); i++) {
+
+        auto *process = getProcess(i);
+
+        bool ready = true;
+
+        bool errFound = false;
+
+        for (auto processFile : process->getFileList()) {
+
+            for (auto fileID : errorList) {
+
+                if (processFile.get()->getID() == fileID) {
+
+                    processFile.get()->setRequired(true);
+
+                    errFound = true;
+                }
+            }
+
+            if (processFile.isOutput()) {
+                continue;
+            }
+
+            if (!processFile.get()->check()) {
+
+                ready = false;
+            }
+        }
+
+        if (errFound) {
+
+            process->setState(PROCESS_STATE_INVALID);
+
+        } else if (ready) {
+
+            process->setState(PROCESS_STATE_READY);
+
+        }
+    }
+
+    return true;
+}
+
+JOB_STATUS JobItem::createDependencyMap(std::vector<long>& reqList) {
 
     std::map<long, int> depth;
     std::map<long, std::vector<long>> adj;
@@ -385,7 +427,14 @@ bool JobItem::createDependencyMap() {
 
         if (depth[file->getID()] == 0) {
             initial.emplace_back(file->getID());
+            if (!file->check()) {
+                reqList.emplace_back(file->getID());
+            }
         }
+    }
+
+    if (!reqList.empty()) {
+        return JOBSTATUS_MISSING_FILES;
     }
 
     while(!initial.empty()) {
@@ -409,8 +458,12 @@ bool JobItem::createDependencyMap() {
         auto *file = getFile(i);
 
         if (depth[file->getID()] > 0) {
-            return false;
+            reqList.emplace_back(file->getID());
         }
+    }
+
+    if (!reqList.empty()) {
+        return JOBSTATUS_DEPENDENCY_LOOP;
     }
 
     long processID = 1;
@@ -426,7 +479,7 @@ bool JobItem::createDependencyMap() {
 
     std::sort(contentList[CONTENT_PROCESS].begin(), contentList[CONTENT_PROCESS].end(), compareContentID);
 
-    return true;
+    return JOBSTATUS_OK;
 }
 
 int JobItem::updateDependency(long id, int &totalCount) {
@@ -565,3 +618,7 @@ void JobItem::setDuration(long _duration) {
     duration = _duration;
 }
 
+JOB_STATUS JobItem::getStatus() {
+
+    return status;
+}

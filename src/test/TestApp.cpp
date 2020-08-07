@@ -31,8 +31,6 @@ int TestApp::run() {
     Collector *c = componentController->getCollector(0);
     Node *n = componentController->getNode(0);
 
-    testWakeUp(d,c,n);
-
     int in;
     do {
 

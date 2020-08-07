@@ -13,6 +13,7 @@ class FileItem : public ContentItem {
 	char name[PATH_MAX]{};
 
 	bool is_exist{};
+	bool is_required{};
 	long size{};
 
 public:
@@ -27,6 +28,9 @@ public:
 	CONTENT_TYPES getType() const override;
 
     bool check() override;
+
+    bool required();
+    void setRequired(bool);
 };
 
 typedef std::vector<FileItem*> TypeFileList;

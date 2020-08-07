@@ -147,7 +147,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
         auto* fileItem = json_object_new_object();
         json_object_object_add(fileItem, "_name", json_object_new_string(content->getName()));
-        json_object_object_add(fileItem, "_validity", json_object_new_boolean(content->check()));
+        json_object_object_add(fileItem, "_validity", json_object_new_int(content->required() ? 1 : content->check() ? 0 : 2));
         json_object_object_add(fileItem, "_size", json_object_new_int64(content->getSize()));
 
         json_object_array_add(fileList, fileItem);

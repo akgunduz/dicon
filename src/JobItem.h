@@ -21,6 +21,16 @@ enum JOB_PATH {
     JOBPATH_MAX,
 };
 
+enum JOB_STATUS {
+    JOBSTATUS_OK,
+    JOBSTATUS_PATH_INVALID,
+    JOBSTATUS_ZIP_INVALID,
+    JOBSTATUS_RULES_INVALID,
+    JOBSTATUS_DEPENDENCY_LOOP,
+    JOBSTATUS_MISSING_FILES,
+    JOBSTATUS_MAX,
+};
+
 class JobItem : public FileItem {
 
 protected:
@@ -34,6 +44,10 @@ protected:
     std::map<int, JsonType *> contentTypes;
 
     long duration{};
+
+    JOB_STATUS status{JOBSTATUS_OK};
+
+    std::vector<long> errorFileIDList{};
 
 public:
 
@@ -73,13 +87,16 @@ public:
 
     int getByOutput(int) const;
     bool setProcessIDByOutput(long, long);
-    bool createDependencyMap();
+    bool setProcessStateByFile(std::vector<long>&);
+    JOB_STATUS createDependencyMap(std::vector<long>&);
     int updateDependency(long, int &);
 
     JOB_PATH checkPath(const  char*);
     bool extract(const char*, long&);
 
     bool check() override;
+
+    JOB_STATUS getStatus();
 };
 
 

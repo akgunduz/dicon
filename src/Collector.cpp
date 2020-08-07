@@ -187,6 +187,12 @@ bool Collector::processJob() {
 
     auto& collectorHost = (CollectorHost&) getHost();
 
+    if (job->getStatus() != JOBSTATUS_OK) {
+
+        LOGS_E(getHost(), "Job : %s is not a valid job!!!", job->getJobName());
+        return false;
+    }
+
     componentWatch.start();
 
     notifyUI(NOTIFYSTATE_ACTIVE);
@@ -207,6 +213,7 @@ JobItem* Collector::loadJob(const char* zipFile) {
     } catch (std::exception &e) {
 
         LOGS_E(getHost(), "%s", e.what());
+
     }
 
     notifyUI(NOTIFYSTATE_ONCE);
