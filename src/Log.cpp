@@ -64,7 +64,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
         return;
     }
 
-    char buf[PATH_MAX - 20];
+    char buf[PATH_MAX - NAME_MAX];
     char logout[PATH_MAX];
 
     strcpy(logout, "");
@@ -97,7 +97,7 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
         return;
     }
 
-    char buf[PATH_MAX - 40];
+    char buf[PATH_MAX - NAME_MAX];
     char logout[PATH_MAX];
 
     strcpy(logout, "");
