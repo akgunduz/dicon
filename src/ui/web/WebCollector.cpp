@@ -86,9 +86,16 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     fclose(uploadJobFile);
 
-    collector->loadJob(tmpFile);
+    JobItem* job = collector->loadJob(tmpFile);
 
-    sendOK(&collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
+    if (job->getStatus() != JOBSTATUS_OK) {
+
+        sendError(&collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
+                  tmpFile, JobStatus::getDesc(job->getStatus()));
+    } else {
+
+        sendOK(&collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
+    }
 
     return true;
 }

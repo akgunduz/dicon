@@ -205,15 +205,7 @@ JobItem* Collector::loadJob(const char* zipFile) {
 
     delete job;
 
-    try {
-
-        job = new JobItem(getHost(), zipFile, JobItem::jobID++);
-
-    } catch (std::exception &e) {
-
-        LOGS_E(getHost(), "%s", e.what());
-
-    }
+    job = new JobItem(getHost(), zipFile, JobItem::jobID++);
 
     notifyUI(NOTIFYSTATE_ONCE);
 
