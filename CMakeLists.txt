@@ -77,6 +77,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/DistributorHost.cpp
         ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/NetUtil.cpp
+        ${SOURCE_PATH}/JobStatus.cpp
         )
 
 set(CONSOLE_FILES

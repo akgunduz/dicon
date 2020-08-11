@@ -203,3 +203,60 @@ int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {
     return true;
 }
 
+bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_connection *conn, va_list args) {
+
+    char buf[PATH_MAX - NAME_MAX];
+    char webOut[PATH_MAX];
+
+    char * fmt = va_arg(args, char *);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+
+    if (host != nullptr) {
+
+        LOGS_I(*host, buf);
+
+        sprintf(webOut, "%s : %s(%ld) => %s \n",
+                type,
+                ComponentType::getName(host->getType()),
+                host->getID(),
+                buf);
+    } else {
+
+        PRINT(buf);
+
+        sprintf(webOut, "%s : %s \n", type, buf);
+    }
+
+    size_t len = strlen(webOut);
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", len);
+
+    mg_write(conn, webOut, len);
+
+    return true;
+}
+
+bool WebApp::sendOK(const HostUnit* host, struct mg_connection *conn, ...) {
+
+    va_list ap;
+    va_start(ap, conn);
+
+    sendResponse("OK", host, conn, ap);
+
+    va_end(ap);
+
+    return true;
+}
+
+bool WebApp::sendError(const HostUnit* host, struct mg_connection *conn, ...) {
+
+    va_list ap;
+    va_start(ap, conn);
+
+    sendResponse("ERROR", host, conn, ap);
+
+    va_end(ap);
+
+    return true;
+}
+

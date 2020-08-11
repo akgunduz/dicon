@@ -208,6 +208,9 @@ bool Net::runReceiver() {
 
                     interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
                 }
+
+                close(acceptSocket);
+
             }, this, acceptSocket);
 
             threadAccept.detach();

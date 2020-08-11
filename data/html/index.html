@@ -120,6 +120,7 @@
 </head>
 
 <body onload="onLoad()" onbeforeunload="onBeforeUnload()">
+
 <div class="sidenav">
     <a onclick="onDistClick()"> Distributor</a>
     <button class="dropdown-btn">
@@ -211,8 +212,8 @@
             </table>
         </div>
         <div id="coll-process" class="single-table-container">
-            <button type="button" class="button btn-full-width"
-                    onclick="onCollProcess(currentPage.id, currentPage.address)">
+            <button id="coll-process-btn" type="button" class="button btn-full-width"
+                    onclick="onCollProcess(currentPage.id, currentPage.address)" disabled>
                 Process
             </button>
             <div class="dual-tables-container">
@@ -302,6 +303,13 @@
     let PROCESS_STATE_READY = 2;
     let PROCESS_STATE_STARTED = 3;
     let PROCESS_STATE_ENDED = 4;
+
+    let JOBSTATUS_OK = 0;
+    let JOBSTATUS_PATH_INVALID = 1;
+    let JOBSTATUS_ZIP_INVALID = 2;
+    let JOBSTATUS_RULES_INVALID = 3;
+    let JOBSTATUS_DEPENDENCY_LOOP = 4;
+    let JOBSTATUS_MISSING_FILES = 5;
 
     let eventSource;
 
@@ -503,6 +511,8 @@
                     data._duration + " sn";
                 document.getElementById("coll-process-count").innerHTML =
                     data._processCount;
+                document.getElementById("coll-process-btn").disabled = data._jobStatus !== JOBSTATUS_OK;
+
                 onCollUpdateFileList(data);
                 onCollUpdateProcessList(data);
             }

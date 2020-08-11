@@ -189,7 +189,6 @@ bool Collector::processJob() {
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
-        LOGS_E(getHost(), "Job : %s is not a valid job!!!", job->getJobName());
         return false;
     }
 

@@ -5,17 +5,12 @@
 
 #include "Scheduler.h"
 
-Scheduler::Scheduler(bool ownThread) {
+Scheduler::Scheduler() {
 
     this->initialized = false;
-    this->ownThread = ownThread;
 	this->capacity = MAX_SCHEDULER_CAPACITY;
 
-    if (ownThread) {
-
-        thread = std::thread(run, this);
-
-    }
+	thread = std::thread(run, this);
 
 	initialized = true;
 }
@@ -28,19 +23,18 @@ Scheduler::~Scheduler() {
 
 bool Scheduler::push(SchedulerItem *item) {
 
+    assert(item != nullptr);
+
     std::unique_lock<std::mutex> lock(mutex);
 
 	if (items.size() < capacity) {
 
 		items.push_back(item);
-        lock.unlock();
-        if (ownThread) {
-            cond.notify_one();
-        }
+
+        cond.notify_one();
+
 		return true;
 	}
-
-    lock.unlock();
 
 	return false;
 }
@@ -49,16 +43,11 @@ SchedulerItem* Scheduler::pull() {
 
     std::unique_lock<std::mutex> lock(mutex);
 
-    if (items.empty()) {
+    cond.wait(lock, [this] {
+        return !items.empty();
+    });
 
-        if (ownThread) {
-            cond.wait(lock);
-
-        } else {
-            lock.unlock();
-            return nullptr;
-        }
-    }
+    assert(!items.empty());
 
     std::list<SchedulerItem*>::iterator itr, ref = items.begin();
 
@@ -76,10 +65,8 @@ SchedulerItem* Scheduler::pull() {
     }
 
     SchedulerItem *item = *(ref);
-    assert(item != nullptr);
-    items.erase(ref);
 
-    lock.unlock();
+    items.erase(ref);
 
     return item;
 }
@@ -114,10 +101,8 @@ void Scheduler::end() {
         return;
     }
 
-    if (ownThread) {
-        push(new SchedulerItem());
-        thread.join();
-    }
+    push(new SchedulerItem());
+    thread.join();
 
     items.clear();
 }

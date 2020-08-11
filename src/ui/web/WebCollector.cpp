@@ -48,16 +48,14 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     auto *collector = componentController->getCollector(id);
     if (!collector) {
-        PRINT("Can not find the collector with ID : %d !!!", id);
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
         return false;
     }
 
     auto host = (CollectorHost&) collector->getHost();
 
     if (!fileName) {
-        LOGS_E(host, "Invalid upload process!!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(&collector->getHost(), conn, "Invalid upload process!!!");
         return false;
     }
 
@@ -68,17 +66,15 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
     FILE *uploadJobFile = fopen(tmpFile, "w");
     if (!uploadJobFile) {
-        LOGS_E(host, "Can not open tmp file : %s!!!", tmpFile);
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(&collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile);
         return false;
     }
     do {
 
         len = mg_read(conn, buffer, TMP_BUFFER_SIZE);
         if (len < 0) {
-            mg_send_http_error(conn, 400, "%s", "No request body data");
+            mg_send_http_error(conn, 404, "%s", "No request body data");
             fclose(uploadJobFile);
-            mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
             return false;
         }
 
@@ -92,7 +88,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     collector->loadJob(tmpFile);
 
-    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+    sendOK(&collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
 
     return true;
 }
@@ -101,20 +97,37 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
     if (collector != nullptr) {
-        collector->processJob();
+
+        if (!collector->getJob()) {
+
+            sendError(&collector->getHost(), conn, "No Job is loaded yet!!!");
+
+            return false;
+        }
+
+        if (!collector->processJob()) {
+
+            sendError(&collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
+                      collector->getJob()->getJobName(), JobStatus::getDesc(collector->getJob()->getStatus()));
+
+            return false;
+        }
+
+        sendOK(&collector->getHost(), conn, "Job : %s 's execution is started...", collector->getJob()->getJobName());
+
+        return true;
     }
 
-    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+    sendError(nullptr, conn, "No collector with ID : %d is found!!!", id);
 
-    return true;
+    return false;
 }
 
 bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto *collector = componentController->getCollector(id);
     if (!collector) {
-        PRINT("Can not find the collector with ID : %d !!!", id);
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
         return false;
     }
 
@@ -122,15 +135,13 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto *job = collector->getJob();
     if (job == nullptr) {
-        LOGS_W(host, "No Job is loaded yet!!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(&collector->getHost(), conn, "No Job is loaded yet!!!");
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOGS_I(host, "Can not create json object!!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(&collector->getHost(), conn, "Can not create json object!!!");
         return false;
     }
 
@@ -139,6 +150,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
     json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
     json_object_object_add(jsonObj, "_processCount",
             json_object_new_int(job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED)));
+    json_object_object_add(jsonObj, "_jobStatus", json_object_new_int(job->getStatus()));
 
     auto* fileList = json_object_new_array();
     for (int j = 0; j < job->getFileCount(); j++) {

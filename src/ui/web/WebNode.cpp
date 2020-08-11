@@ -30,8 +30,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto *node = componentController->getNode(id);
     if (!node) {
-        PRINT("Can not find the node with ID : %d !!!", id);
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(nullptr, conn, "Can not find the node with ID : %d !!!", id);
         return false;
     }
 
@@ -39,8 +38,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        LOGS_I(host, "Can not create json object!!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+        sendError(&node->getHost(), conn, "Can not create json object!!!");
         return false;
     }
 

@@ -31,9 +31,11 @@ bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
 bool WebApp::distPollHandler(struct mg_connection *conn) {
 
-    componentController->getDistributor()->sendWakeupMessagesAll(false);
+    auto *distributor = componentController->getDistributor();
 
-    mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+    distributor->sendWakeupMessagesAll(false);
+
+    sendOK(&distributor->getHost(), conn, "Polling is Executed");
 
     return true;
 }
@@ -42,15 +44,21 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto *distributor = componentController->getDistributor();
     if (!distributor) {
+
         PRINT("Can not find the distributor !!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+
+        sendError(&distributor->getHost(), conn, "Can not find the distributor !!!");
+
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
+
         LOGS_I(distributor->getHost(), "Can not create json object!!!");
-        mg_send_http_ok(conn, "application/json; charset=utf-8", 0);
+
+        sendError(&distributor->getHost(), conn, "Can not create json object!!!");
+
         return false;
     }
 

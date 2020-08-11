@@ -10,6 +10,7 @@
 #include "JsonType.h"
 #include "ProcessItem.h"
 #include "ParameterItem.h"
+#include "JobStatus.h"
 
 #define MAX_CONTENT_TYPE 10
 #define JOB_FILE "Job.json"
@@ -19,16 +20,6 @@ enum JOB_PATH {
     JOBPATH_DIR,
     JOBPATH_INVALID,
     JOBPATH_MAX,
-};
-
-enum JOB_STATUS {
-    JOBSTATUS_OK,
-    JOBSTATUS_PATH_INVALID,
-    JOBSTATUS_ZIP_INVALID,
-    JOBSTATUS_RULES_INVALID,
-    JOBSTATUS_DEPENDENCY_LOOP,
-    JOBSTATUS_MISSING_FILES,
-    JOBSTATUS_MAX,
 };
 
 class JobItem : public FileItem {

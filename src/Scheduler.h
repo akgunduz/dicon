@@ -17,8 +17,6 @@
 
 class Scheduler {
 
-    bool ownThread;
-
     std::mutex mutex;
 
     std::condition_variable cond;
@@ -37,7 +35,7 @@ class Scheduler {
 
 public:
 
-	Scheduler(bool seperateThread = true);
+	Scheduler();
 
     void setCB(int, const InterfaceSchedulerCB*);
 
