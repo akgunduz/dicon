@@ -50,6 +50,7 @@ public:
     int notifyHandler(COMPONENT, NOTIFYSTATE) override;
     bool sendServerEvent(struct mg_connection *conn, int id);
 
+    bool sendStr(struct mg_connection *, const char*);
     bool sendResponse(const char*, const HostUnit*, struct mg_connection *, va_list);
     bool sendOK(const HostUnit*, struct mg_connection *, ...);
     bool sendError(const HostUnit*, struct mg_connection *, ...);

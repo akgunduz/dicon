@@ -203,6 +203,18 @@ int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {
     return true;
 }
 
+
+bool WebApp::sendStr(struct mg_connection *conn, const char *str) {
+
+    size_t len = strlen(str);
+
+    mg_send_http_ok(conn, "application/json; charset=utf-8", len);
+
+    mg_write(conn, str, len);
+
+    return true;
+}
+
 bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_connection *conn, va_list args) {
 
     char buf[PATH_MAX - NAME_MAX];
@@ -227,11 +239,7 @@ bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_conn
         sprintf(webOut, "%s : %s \n", type, buf);
     }
 
-    size_t len = strlen(webOut);
-
-    mg_send_http_ok(conn, "application/json; charset=utf-8", len);
-
-    mg_write(conn, webOut, len);
+    sendStr(conn, webOut);
 
     return true;
 }

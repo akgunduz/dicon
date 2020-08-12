@@ -188,13 +188,9 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     json_object_object_add(jsonObj, "_processList", processList);
 
-    size_t json_str_len;
+    const char *json_str = json_object_to_json_string(jsonObj);
 
-    const char *json_str = json_object_to_json_string_length(jsonObj, JSON_C_TO_STRING_SPACED, &json_str_len);
-
-    mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
-
-    mg_write(conn, json_str, json_str_len);
+    sendStr(conn, json_str);
 
     json_object_put(jsonObj);
 

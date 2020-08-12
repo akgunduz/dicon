@@ -42,33 +42,28 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    json_object_object_add(jsonObj, "state", json_object_new_int(host.getState()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(host.getState()));
 
     auto* processList = json_object_new_array();
     for (auto &process : node->getProcessList()) {
 
         auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "processID", json_object_new_int(process.getID()));
-        json_object_object_add(processItem, "collectorID", json_object_new_int(process.getAssigned()));
-        json_object_object_add(processItem, "jobID", json_object_new_int(process.getAssignedJob()));
+        json_object_object_add(processItem, "_processID", json_object_new_int(process.getID()));
+        json_object_object_add(processItem, "_collectorID", json_object_new_int(process.getAssigned()));
+        json_object_object_add(processItem, "_jobID", json_object_new_int(process.getAssignedJob()));
         std::string processCommand = process.getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
-        json_object_object_add(processItem, "process", json_object_new_string(processCommand.c_str()));
-        json_object_object_add(processItem, "duration", json_object_new_int64(process.getDuration()));
+        json_object_object_add(processItem, "_process", json_object_new_string(processCommand.c_str()));
+        json_object_object_add(processItem, "_duration", json_object_new_int64(process.getDuration()));
 
         json_object_array_add(processList, processItem);
     }
 
-    json_object_object_add(jsonObj, "processList", processList);
+    json_object_object_add(jsonObj, "_processList", processList);
 
+    const char *json_str = json_object_to_json_string(jsonObj);
 
-    size_t json_str_len;
-
-    const char *json_str = json_object_to_json_string_length(jsonObj, JSON_C_TO_STRING_SPACED, &json_str_len);
-
-    mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
-
-    mg_write(conn, json_str, json_str_len);
+    sendStr(conn, json_str);
 
     json_object_put(jsonObj);
 

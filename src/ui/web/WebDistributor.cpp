@@ -44,21 +44,13 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto *distributor = componentController->getDistributor();
     if (!distributor) {
-
-        PRINT("Can not find the distributor !!!");
-
-        sendError(&distributor->getHost(), conn, "Can not find the distributor !!!");
-
+        sendError(nullptr, conn, "Can not find the distributor !!!");
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-
-        LOGS_I(distributor->getHost(), "Can not create json object!!!");
-
         sendError(&distributor->getHost(), conn, "Can not create json object!!!");
-
         return false;
     }
 
@@ -94,13 +86,9 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     json_object_object_add(jsonObj, "_nodeList", nodeList);
 
-    size_t json_str_len;
+    const char *json_str = json_object_to_json_string(jsonObj);
 
-    const char *json_str = json_object_to_json_string_length(jsonObj, JSON_C_TO_STRING_SPACED, &json_str_len);
-
-    mg_send_http_ok(conn, "application/json; charset=utf-8", json_str_len);
-
-    mg_write(conn, json_str, json_str_len);
+    sendStr(conn, json_str);
 
     json_object_put(jsonObj);
 

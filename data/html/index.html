@@ -628,7 +628,7 @@
 
     function onNodeUpdateState(data) {
         document.getElementById("node-state").innerHTML =
-            NODE_STATES[data.state];
+            NODE_STATES[data._state];
     }
 
     function onNodeUpdateProcessList(data) {
@@ -637,13 +637,13 @@
             .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
-        for (let processItem of data.processList) {
+        for (let processItem of data._processList) {
             let newRow = table.insertRow();
-            newRow.insertCell().innerHTML = processItem.processID;
-            newRow.insertCell().innerHTML = processItem.collectorID;
-            newRow.insertCell().innerHTML = processItem.jobID;
-            newRow.insertCell().innerHTML = processItem.process;
-            newRow.insertCell().innerHTML = processItem.duration + " sn";
+            newRow.insertCell().innerHTML = processItem._processID;
+            newRow.insertCell().innerHTML = processItem._collectorID;
+            newRow.insertCell().innerHTML = processItem._jobID;
+            newRow.insertCell().innerHTML = processItem._process;
+            newRow.insertCell().innerHTML = processItem._duration + " sn";
         }
     }
 
