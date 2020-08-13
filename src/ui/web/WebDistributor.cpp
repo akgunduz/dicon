@@ -56,9 +56,10 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* collList = json_object_new_array();
 
-    for (int i = 0 ; i < distributor->getCollectors()->size(); i++) {
+    for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
 
-        auto *collector = (CollectorUnit*) distributor->getCollectors()->getByIndex(i);
+        auto *collector = (CollectorUnit*) collectorPair.second;
+
         auto *collItem = json_object_new_object();
         json_object_object_add(collItem, "_id", json_object_new_int(collector->getID()));
         json_object_object_add(collItem, "_state", json_object_new_int(collector->getState()));
@@ -72,9 +73,10 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* nodeList = json_object_new_array();
 
-    for (int i = 0 ; i < distributor->getNodes()->size(); i++) {
+    for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
 
-        auto *node = (NodeUnit*) distributor->getNodes()->getByIndex(i);
+        auto *node = (NodeUnit*) nodePair.second;
+
         auto *nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "_id", json_object_new_int(node->getID()));
         json_object_object_add(nodeItem, "_state", json_object_new_int(node->getState()));

@@ -14,6 +14,8 @@
 #include "CollectorManager.h"
 #include "DistributorObject.h"
 
+#define WAKEUP_INTERVAL 5
+
 class Distributor : public Component {
 
     static Distributor *instance;
@@ -31,10 +33,7 @@ class Distributor : public Component {
 
     explicit Distributor(const char *, int, int, bool);
 
-    static void pollProcessCB(Distributor *);
 	void pollProcess();
-
-    static void collProcessCB(Distributor *);
     void collProcess();
 
     bool processCollectorAliveMsg(ComponentUnit&, Message *);

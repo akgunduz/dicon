@@ -10,6 +10,7 @@
 class ComponentUnit : public CommUnit {
 
     int socket{};
+    long checkTime{};
 
 public:
 
@@ -19,8 +20,11 @@ public:
     ComponentUnit(const ComponentUnit&);
     ComponentUnit(const CommUnit&);
 
-    int getSocket();
+    int getSocket() const;
     void setSocket(int);
+
+    long getCheckTime() const;
+    void setCheckTime(long checkTime);
 };
 
 typedef std::vector<ComponentUnit> TypeComponentList;

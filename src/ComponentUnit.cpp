@@ -18,7 +18,7 @@ ComponentUnit::ComponentUnit(const CommUnit &copy)
     : CommUnit(copy) {
 }
 
-int ComponentUnit::getSocket() {
+int ComponentUnit::getSocket() const {
 
     return socket;
 }
@@ -26,4 +26,14 @@ int ComponentUnit::getSocket() {
 void ComponentUnit::setSocket(int _socket) {
 
     socket = _socket;
+}
+
+long ComponentUnit::getCheckTime() const {
+
+    return checkTime;
+}
+
+void ComponentUnit::setCheckTime(long _checkTime) {
+
+    checkTime = _checkTime;
 }

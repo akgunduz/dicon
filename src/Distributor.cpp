@@ -33,17 +33,21 @@ Distributor::Distributor(const char *rootPath, int interfaceOther, int interface
     addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
 
-    nodeManager = new NodeManager();
+    nodeManager = new NodeManager(host);
 
-    collectorManager = new CollectorManager();
+    collectorManager = new CollectorManager(host);
 
-    collThread = std::thread(collProcessCB, this);
+    collThread = std::thread([](Distributor *distributor){
+        distributor->collProcess();
+    }, this);
 
     if (!autoWake) {
         runPollThread = false;
     }
 
-    pollThread = std::thread(pollProcessCB, this);
+    pollThread = std::thread([](Distributor *distributor){
+            distributor->pollProcess();
+        }, this);
 
     initInterfaces(COMP_DISTRIBUTOR, interfaceOther, interfaceNode);
 };
@@ -73,34 +77,25 @@ bool Distributor::clear() {
     return true;
 }
 
-void Distributor::pollProcessCB(Distributor *distributor) {
-
-    distributor->pollProcess();
-}
-
 void Distributor::pollProcess() {
 
     int loop = 0;
 
     while(runPollThread) {
 
-        std::this_thread::sleep_for(std::chrono::milliseconds (1000));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         if (!runPollThread) {
             break;
         }
 
-        if (loop++ == 5) {
-
-            loop = 0;
-            sendWakeupMessagesAll(false);
+        if (loop++ < WAKEUP_INTERVAL) {
+            continue;
         }
+
+        loop = 0;
+        sendWakeupMessagesAll(false);
     }
-}
-
-void Distributor::collProcessCB(Distributor *distributor) {
-
-    distributor->collProcess();
 }
 
 void Distributor::collProcess() {
@@ -161,8 +156,10 @@ bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, Message *msg) {
         return true;
     }
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Collector at address : %s with web : %s is added to network with ID : %d",
-           NetUtil::getIPPortString(owner.getAddress().get()).c_str(), NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), collID);
+    LOGC_T(getHost(), owner, MSGDIR_RECEIVE,
+           "New Collector at address : %s with web : %s is added to network with ID : %d",
+           NetUtil::getIPPortString(owner.getAddress().get()).c_str(),
+           NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), collID);
 
     return send2CollectorIDMsg(owner, collID);
 }
@@ -208,8 +205,10 @@ bool Distributor::processNodeAliveMsg(ComponentUnit& owner, Message *msg) {
         return true;
     }
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New Node at address : %s with web : %s is added to network with ID : %d",
-           NetUtil::getIPPortString(owner.getAddress().get()).c_str(), NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), nodeID);
+    LOGC_T(getHost(), owner, MSGDIR_RECEIVE,
+           "New Node at address : %s with web : %s is added to network with ID : %d",
+           NetUtil::getIPPortString(owner.getAddress().get()).c_str(),
+           NetUtil::getIPPortString(owner.getAddress().getUI()).c_str(), nodeID);
 
     return send2NodeIDMsg(owner, nodeID);
 }

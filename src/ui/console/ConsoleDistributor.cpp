@@ -19,18 +19,18 @@ bool ConsoleApp::distStateHandler() {
 
     PRINT("Collector List : ");
 
-    for (int i = 0 ; i < componentController->getDistributor()->getCollectors()->size(); i++) {
+    for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
 
-        auto *collector = componentController->getDistributor()->getCollectors()->getByIndex(i);
+        auto *collector = collectorPair.second;
 
         PRINT("\t ID : %d, State : %s", collector->getID(), CollState::getName(((CollectorObject*)collector)->getState()));
     }
 
     PRINT("Node List : ");
 
-    for (int i = 0 ; i < componentController->getDistributor()->getNodes()->size(); i++) {
+    for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
 
-        auto *node = componentController->getDistributor()->getNodes()->getByIndex(i);
+        auto *node = nodePair.second;
 
         PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(((NodeHost*)node)->getState()));
     }

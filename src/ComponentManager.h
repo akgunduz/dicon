@@ -8,19 +8,25 @@
 #include "Common.h"
 #include "HostUnit.h"
 
+#define ALIVE_INTERVAL 8
+#define CHECK_INTERVAL ALIVE_INTERVAL + 2
+
 typedef std::map<long, ComponentUnit*> TypeComponentMapIDList;
 typedef std::map<Address, ComponentUnit*> TypeComponentMapAddressList;
-typedef std::vector<ComponentUnit*> TypeComponentVectorList;
 
 class ComponentManager {
 
+    HostUnit *host;
+
     long idCounter;
 
+    volatile bool threadRun = true;
+
     std::mutex mutex;
+    std::thread thread;
 
     TypeComponentMapIDList componentsMapID;
     TypeComponentMapAddressList componentsMapAddress;
-    TypeComponentVectorList componentsIndex;
 
 protected:
 
@@ -28,15 +34,16 @@ protected:
 
 public:
 
-    ComponentManager();
+    ComponentManager(HostUnit *);
     virtual ~ComponentManager();
 
+    TypeComponentMapIDList& get();
     ComponentUnit* get(long);
-    ComponentUnit* getByIndex(int);
     size_t size();
     void clear();
     bool isExist(long);
 
+    void process();
     long add(Address&, bool&);
 };
 

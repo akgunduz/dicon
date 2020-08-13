@@ -15,7 +15,7 @@ class NodeManager : public ComponentManager {
 
 public:
 
-	NodeManager();
+	NodeManager(HostUnit *);
 	~NodeManager() override;
 
     NODESTATES getState(long);

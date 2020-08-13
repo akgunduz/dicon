@@ -6,7 +6,9 @@
 #include "NodeManager.h"
 #include "Address.h"
 
-NodeManager::NodeManager() = default;
+NodeManager::NodeManager(HostUnit *_host)
+    : ComponentManager(_host) {
+};
 
 NodeManager::~NodeManager() = default;
 
@@ -18,9 +20,9 @@ NodeUnit NodeManager::getIdle() {
 
     nodeMutex.lock();
 
-    for (int i = 0; i < size(); i++) {
+    for (auto &nodePair : get()) {
 
-        auto *node = (NodeUnit*) getByIndex(i);
+        auto *node = (NodeUnit*)nodePair.second;
 
         if (node->getState() != NODESTATE_IDLE) {
             continue;
@@ -56,9 +58,9 @@ int NodeManager::getIdleCount() {
 
     nodeMutex.lock();
 
-    for (int i = 0; i < size(); i++) {
+    for (auto &nodePair : get()) {
 
-        auto *node = (NodeUnit*) getByIndex(i);
+        auto *node = (NodeUnit*) nodePair.second;
 
         if (node->getState() == NODESTATE_IDLE) {
             count++;

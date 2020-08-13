@@ -3,14 +3,66 @@
 //
 
 #include "ComponentManager.h"
+#include "Log.h"
 
-ComponentManager::ComponentManager()
-        : idCounter(1) {
+ComponentManager::ComponentManager(HostUnit *_host)
+        : idCounter(1), host(_host) {
+
+    thread = std::thread([](ComponentManager *manager){
+        manager->process();
+    }, this);
 }
 
 ComponentManager::~ComponentManager() {
 
+    threadRun = false;
+    thread.join();
     clear();
+}
+
+void ComponentManager::process() {
+
+    int loop = 0;
+
+    while(threadRun) {
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        if (!threadRun) {
+            break;
+        }
+
+        if (loop++ < CHECK_INTERVAL) {
+            continue;
+        }
+
+        loop = 0;
+
+        long curTime = time(nullptr);
+
+        mutex.lock();
+
+        for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
+
+            if (curTime - iterator->second->getCheckTime() > ALIVE_INTERVAL) {
+
+                ComponentUnit *object = iterator->second;
+                componentsMapAddress.erase(object->getAddress());
+                iterator = componentsMapID.erase(iterator);
+
+                LOGS_I(*host, "%s[%d] is removed from network",
+                      ComponentType::getName(object->getType()), object->getID());
+
+                delete object;
+
+            } else {
+
+                ++iterator;
+            }
+        }
+
+        mutex.unlock();
+    }
 }
 
 size_t ComponentManager::size() {
@@ -22,6 +74,11 @@ size_t ComponentManager::size() {
     mutex.unlock();
 
     return size;
+}
+
+TypeComponentMapIDList &ComponentManager::get() {
+
+    return componentsMapID;
 }
 
 ComponentUnit* ComponentManager::get(long id) {
@@ -41,22 +98,6 @@ ComponentUnit* ComponentManager::get(long id) {
     return object;
 }
 
-ComponentUnit *ComponentManager::getByIndex(int index) {
-
-    ComponentUnit *object = nullptr;
-
-    mutex.lock();
-
-    if (index < componentsMapID.size()) {
-
-        object = componentsIndex[index];
-    }
-
-    mutex.unlock();
-
-    return object;
-}
-
 long ComponentManager::add(Address& address, bool& isAlreadyAdded) {
 
     long newID = 0;
@@ -69,14 +110,23 @@ long ComponentManager::add(Address& address, bool& isAlreadyAdded) {
     if (search == componentsMapAddress.end()) {
 
         newID = idCounter++;
+
         ComponentUnit *object = createUnit(newID, address);
+
+        object->setCheckTime(time(nullptr));
+
         componentsMapAddress[address] = object;
         componentsMapID[newID] = object;
-        componentsIndex.emplace_back(object);
+
+        LOGS_I(*host, "%s[%d] is added to network",
+               ComponentType::getName(object->getType()), object->getID());
 
     } else {
 
         isAlreadyAdded = true;
+
+        search->second->setCheckTime(time(nullptr));
+
         newID = search->second->getID();
     }
 
@@ -97,7 +147,6 @@ void ComponentManager::clear() {
 
     componentsMapID.clear();
     componentsMapAddress.clear();
-    componentsIndex.clear();
 
     mutex.unlock();
 
@@ -107,5 +156,6 @@ bool ComponentManager::isExist(long id) {
 
     return get(id) != nullptr;
 }
+
 
 

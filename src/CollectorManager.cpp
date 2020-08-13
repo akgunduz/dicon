@@ -8,7 +8,9 @@
 #include "ComponentManager.h"
 #include "CollectorUnit.h"
 
-CollectorManager::CollectorManager() = default;
+CollectorManager::CollectorManager(HostUnit *_host)
+    : ComponentManager(_host) {
+};
 
 CollectorManager::~CollectorManager() = default;
 
