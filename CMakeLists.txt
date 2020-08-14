@@ -78,6 +78,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/NetUtil.cpp
         ${SOURCE_PATH}/JobStatus.cpp
+        ${SOURCE_PATH}/ComponentUnitFactory.cpp
         )
 
 set(CONSOLE_FILES

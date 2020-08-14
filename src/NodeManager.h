@@ -15,15 +15,17 @@ class NodeManager : public ComponentManager {
 
 public:
 
-	NodeManager(HostUnit *);
+	NodeManager(HostUnit *, bool);
 	~NodeManager() override;
 
     NODESTATES getState(long);
 	void setState(long, NODESTATES);
 
     Address& getAddress(long);
-    NodeUnit getIdle();
-	int getIdleCount();
+    NodeUnit* getIdle();
+    size_t getIdleCount();
+    NodeUnit* getBusyDead();
+    size_t getBusyDeadCount();
 
     ComponentUnit getAssigned(long);
 	void setAssigned(long, ComponentUnit &);

@@ -6,15 +6,13 @@
 #include "NodeManager.h"
 #include "Address.h"
 
-NodeManager::NodeManager(HostUnit *_host)
-    : ComponentManager(_host) {
+NodeManager::NodeManager(HostUnit *_host, bool autoWake)
+    : ComponentManager(_host, autoWake) {
 };
 
 NodeManager::~NodeManager() = default;
 
-NodeUnit NodeManager::getIdle() {
-
-    NodeUnit nodeUnit{};
+NodeUnit* NodeManager::getIdle() {
 
     NodeUnit* leastUsedNode = nullptr;
 
@@ -43,24 +41,70 @@ NodeUnit NodeManager::getIdle() {
         leastUsedNode->iterateUsage(true);
         leastUsedNode->setState(NODESTATE_PREBUSY);
 
-        nodeUnit = *leastUsedNode;
-
     }
 
     nodeMutex.unlock();
 
-    return nodeUnit;
+    assert(leastUsedNode != nullptr);
+
+    return leastUsedNode;
 }
 
-int NodeManager::getIdleCount() {
+size_t NodeManager::getIdleCount() {
 
-    int count = 0;
+    size_t count = 0;
 
     nodeMutex.lock();
 
     for (auto &nodePair : get()) {
 
         auto *node = (NodeUnit*) nodePair.second;
+
+        if (node->getState() == NODESTATE_IDLE) {
+            count++;
+        }
+    }
+
+    nodeMutex.unlock();
+
+    return count;
+}
+
+NodeUnit* NodeManager::getBusyDead() {
+
+    NodeUnit *busyDeadNode = nullptr;
+
+    nodeMutex.lock();
+
+    for (auto *component : getDead()) {
+
+        auto *node = (NodeUnit*)component;
+
+        if (node->getState() == NODESTATE_IDLE) {
+            continue;
+        }
+
+        node->setState(NODESTATE_IDLE);
+
+        busyDeadNode = node;
+    }
+
+    nodeMutex.unlock();
+
+    assert(busyDeadNode != nullptr);
+
+    return busyDeadNode;
+}
+
+size_t NodeManager::getBusyDeadCount() {
+
+    size_t count = 0;
+
+    nodeMutex.lock();
+
+    for (auto *component : getDead()) {
+
+        auto *node = (NodeUnit*)component;
 
         if (node->getState() == NODESTATE_IDLE) {
             count++;

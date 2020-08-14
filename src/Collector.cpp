@@ -59,9 +59,9 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, Message *msg) {
         return false;
     }
 
-    for (auto &node : nodes) {
+    for (auto *node : nodes) {
         ProcessItem *process = job->assignNode(node);
-        send2NodeProcessMsg(node, process);
+        send2NodeProcessMsg(*node, process);
     }
 
     return true;

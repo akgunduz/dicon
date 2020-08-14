@@ -27,6 +27,6 @@ public:
     void setCheckTime(long checkTime);
 };
 
-typedef std::vector<ComponentUnit> TypeComponentList;
+typedef std::vector<ComponentUnit*> TypeComponentList;
 
 #endif //DICON_COMPONENTUNIT_H

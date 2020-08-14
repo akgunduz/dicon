@@ -2,17 +2,18 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
+#include <ComponentUnitFactory.h>
 #include "TestApp.h"
 
 void sendComponentList(Component *owner, ComponentUnit& target) {
 
     auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST);
 
-    std::vector<ComponentUnit> nodes;
+    TypeComponentList nodes;
     Address address({999, 1}, {1999, 2});
-    nodes.emplace_back(NodeUnit(1, address));
+    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, 1, address));
     Address address2({9999, 3}, {19999, 4});
-    nodes.emplace_back(NodeUnit(2, address2));
+    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, 2, address2));
 
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
@@ -22,12 +23,12 @@ void sendComponentList(Component *owner, ComponentUnit& target) {
 
 bool processComponentListMsg(Component* component, ComponentUnit& owner, Message *msg) {
 
-    std::vector<ComponentUnit> nodes = msg->getData().getComponentList();
+    TypeComponentList nodes = msg->getData().getComponentList();
 
     LOGS_I(component->getHost(), "Message Component List has came from : %s, data amount: %d",
            ComponentType::getName(owner.getType()), nodes.size());
-    LOGS_I(component->getHost(), "Node 1 : %d, %u", nodes[0].getID(), nodes[0].getAddress().get().base);
-    LOGS_I(component->getHost(), "Node 2 : %d, %u", nodes[1].getID(), nodes[1].getAddress().get().base);
+    LOGS_I(component->getHost(), "Node 1 : %d, %u", nodes[0]->getID(), nodes[0]->getAddress().get().base);
+    LOGS_I(component->getHost(), "Node 2 : %d, %u", nodes[1]->getID(), nodes[1]->getAddress().get().base);
 
     return true;
 }

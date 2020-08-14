@@ -5,6 +5,7 @@
 
 #include "Message.h"
 #include "Util.h"
+#include "ComponentUnitFactory.h"
 
 Message::Message(HostUnit& host)
 		: MessageBase(host) {
@@ -40,20 +41,17 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentList &compon
         return false;
     }
 
-    for (int i = 0; i < list.size(); i=i+5) {
-        ComponentUnit item((COMPONENT)block.get(0));
-        item.setID(list[i]);
-        item.getAddress().set(list[i + 1], list[i + 2]);
-        item.getAddress().setUI(list[i + 3], list[i + 4]);
-
+    for (int i = 0; i < list.size(); i = i + 5) {
+        Address address(BaseAddress(list[i + 1], list[i + 2]),
+                        BaseAddress(list[i + 3], list[i + 4]));
+        ComponentUnit *item = ComponentUnitFactory::create((COMPONENT)block.get(0), list[i], address);
         componentList.emplace_back(item);
     }
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
-    for (int i = 0; i < componentList.size(); i++) {
-        LOGS_D(getHost(), "Component[%d] : %d", i, componentList[0].getID());
+    for (auto* item : componentList) {
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
-
 
     return true;
 }
@@ -263,16 +261,16 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& compo
 
     for (auto &component : componentList) {
 
-        list.emplace_back(component.getID());
-        list.emplace_back(component.getAddress().get().base);
-        list.emplace_back(component.getAddress().get().port);
-        list.emplace_back(component.getAddress().getUI().base);
-        list.emplace_back(component.getAddress().getUI().port);
+        list.emplace_back(component->getID());
+        list.emplace_back(component->getAddress().get().base);
+        list.emplace_back(component->getAddress().get().port);
+        list.emplace_back(component->getAddress().getUI().base);
+        list.emplace_back(component->getAddress().getUI().port);
     }
 
     MessageBlockHeader blockHeader(BLOCK_COMPONENT);
 
-    blockHeader.add(componentList[0].getType());
+    blockHeader.add(componentList[0]->getType());
     blockHeader.add(list.size());
 
     if (!writeBlockHeader(target, blockHeader, crc)) {
@@ -286,8 +284,8 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& compo
     }
 
     LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
-    for (int i = 0; i < componentList.size(); i++) {
-        LOGS_D(getHost(), "Component[%d] : %d", i, componentList[0].getID());
+    for (auto* item : componentList) {
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
 
     return true;

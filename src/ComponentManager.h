@@ -26,6 +26,7 @@ class ComponentManager {
     std::thread thread;
 
     TypeComponentMapIDList componentsMapID;
+    TypeComponentList componentsMapDead;
     TypeComponentMapAddressList componentsMapAddress;
 
 protected:
@@ -34,11 +35,13 @@ protected:
 
 public:
 
-    ComponentManager(HostUnit *);
+    ComponentManager(HostUnit *, bool);
     virtual ~ComponentManager();
 
     TypeComponentMapIDList& get();
+    TypeComponentList& getDead();
     ComponentUnit* get(long);
+    ComponentUnit* getDead(long index);
     size_t size();
     void clear();
     bool isExist(long);

@@ -16,6 +16,8 @@
 
 #define WAKEUP_INTERVAL 5
 
+typedef std::map<long, TypeComponentList> TypeComponentReplaceIDList;
+
 class Distributor : public Component {
 
     static Distributor *instance;

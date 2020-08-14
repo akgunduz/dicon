@@ -12,8 +12,8 @@
 
 struct CollectorRequest {
     long collID;
-    int reqCount;
-    CollectorRequest(long _collID, int _reqCount)
+    size_t reqCount;
+    CollectorRequest(long _collID, size_t _reqCount)
     : collID(_collID), reqCount(_reqCount){};
 };
 
@@ -30,15 +30,15 @@ protected:
 
 public:
 
-    CollectorManager(HostUnit *);
+    CollectorManager(HostUnit *, bool);
     ~CollectorManager() override;
 
     COLLSTATES getState(long);
     void setState(long, COLLSTATES);
 
-    bool addRequest(long, int);
+    bool addRequest(long, size_t);
     CollectorRequest* getRequest();
-    void updateRequest(int);
+    void updateRequest(size_t);
     void removeRequest();
 };
 

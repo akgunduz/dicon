@@ -33,9 +33,9 @@ Distributor::Distributor(const char *rootPath, int interfaceOther, int interface
     addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
 
-    nodeManager = new NodeManager(host);
+    nodeManager = new NodeManager(host, autoWake);
 
-    collectorManager = new CollectorManager(host);
+    collectorManager = new CollectorManager(host, autoWake);
 
     collThread = std::thread([](Distributor *distributor){
         distributor->collProcess();
@@ -102,11 +102,37 @@ void Distributor::collProcess() {
 
     while(runCollThread) {
 
-        std::this_thread::sleep_for(std::chrono::milliseconds (500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-        int nodeCount = nodeManager->getIdleCount();
+        auto nodeCount = nodeManager->getIdleCount();
         if (nodeCount == 0) {
             continue;
+        }
+
+        size_t busyDeadCount = nodeManager->getBusyDeadCount();
+
+        if (busyDeadCount) {
+
+            TypeComponentReplaceIDList replaceIdList;
+
+            size_t processDeadCount = std::min(nodeCount, busyDeadCount);
+
+            for (size_t i = 0; i < processDeadCount; i ++) {
+
+                auto *nodeBusy = nodeManager->getBusyDead();
+                auto *nodeIdle = nodeManager->getIdle();
+                replaceIdList[nodeBusy->getAssigned().getID()].emplace_back(nodeBusy);
+                replaceIdList[nodeBusy->getAssigned().getID()].emplace_back(nodeIdle);
+            }
+
+            //Put sendreplace here in loop
+
+            if (processDeadCount >= nodeCount) {
+                continue;
+            }
+
+            nodeCount -= processDeadCount;
+
         }
 
         CollectorRequest *request = collectorManager->getRequest();

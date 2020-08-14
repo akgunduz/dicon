@@ -286,7 +286,7 @@ ParameterItem* JobItem::getParameter(int index) const {
     return (ParameterItem*)getContent(CONTENT_PARAM, index);
 }
 
-ProcessItem* JobItem::assignNode(ComponentUnit &node) {
+ProcessItem* JobItem::assignNode(ComponentUnit* node) {
 
     mutex.lock();
 
@@ -294,7 +294,7 @@ ProcessItem* JobItem::assignNode(ComponentUnit &node) {
 
         ProcessItem* process = getProcess(i);
         if (process->getState() == PROCESS_STATE_READY) {
-            process->setAssigned(node.getID());
+            process->setAssigned(node->getID());
             process->setState(PROCESS_STATE_STARTED);
             mutex.unlock();
             return process;

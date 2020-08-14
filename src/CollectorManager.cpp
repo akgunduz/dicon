@@ -8,8 +8,8 @@
 #include "ComponentManager.h"
 #include "CollectorUnit.h"
 
-CollectorManager::CollectorManager(HostUnit *_host)
-    : ComponentManager(_host) {
+CollectorManager::CollectorManager(HostUnit *_host, bool autoWake)
+    : ComponentManager(_host, autoWake) {
 };
 
 CollectorManager::~CollectorManager() = default;
@@ -47,7 +47,7 @@ ComponentUnit *CollectorManager::createUnit(long id, Address& address) {
     return new CollectorUnit(id, address);
 }
 
-bool CollectorManager::addRequest(long collID, int reqNodeCount) {
+bool CollectorManager::addRequest(long collID, size_t reqNodeCount) {
 
     collMutex.lock();
 
@@ -74,7 +74,7 @@ CollectorRequest* CollectorManager::getRequest() {
     return request;
 }
 
-void CollectorManager::updateRequest(int reqCount) {
+void CollectorManager::updateRequest(size_t reqCount) {
 
     collMutex.lock();
 

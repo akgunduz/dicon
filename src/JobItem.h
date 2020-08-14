@@ -74,7 +74,7 @@ public:
     int getParameterCount() const;
     ParameterItem* getParameter(int) const;
 
-    ProcessItem* assignNode(ComponentUnit &);
+    ProcessItem* assignNode(ComponentUnit *);
 
     int getByOutput(int) const;
     bool setProcessIDByOutput(long, long);

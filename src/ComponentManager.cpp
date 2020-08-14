@@ -5,8 +5,12 @@
 #include "ComponentManager.h"
 #include "Log.h"
 
-ComponentManager::ComponentManager(HostUnit *_host)
+ComponentManager::ComponentManager(HostUnit *_host, bool autoWake)
         : idCounter(1), host(_host) {
+
+    if (!autoWake) {
+        return;
+    }
 
     thread = std::thread([](ComponentManager *manager){
         manager->process();
@@ -53,7 +57,7 @@ void ComponentManager::process() {
                 LOGS_I(*host, "%s[%d] is removed from network",
                       ComponentType::getName(object->getType()), object->getID());
 
-                delete object;
+                componentsMapDead.emplace_back(object);
 
             } else {
 
@@ -79,6 +83,20 @@ size_t ComponentManager::size() {
 TypeComponentMapIDList &ComponentManager::get() {
 
     return componentsMapID;
+}
+
+TypeComponentList &ComponentManager::getDead() {
+
+    return componentsMapDead;
+}
+
+ComponentUnit* ComponentManager::getDead(long index) {
+
+    if (index < componentsMapDead.size()) {
+        return componentsMapDead[index];
+    }
+
+    return nullptr;
 }
 
 ComponentUnit* ComponentManager::get(long id) {
@@ -145,7 +163,14 @@ void ComponentManager::clear() {
 
     }
 
+    for (auto & component : componentsMapDead) {
+
+        delete component;
+
+    }
+
     componentsMapID.clear();
+    componentsMapDead.clear();
     componentsMapAddress.clear();
 
     mutex.unlock();
