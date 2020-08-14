@@ -15,3 +15,10 @@ void ComponentObject::setAssigned(COMPONENT _type, long _id, Address _address) {
     assigned.setID(_id);
     assigned.setAddress(_address);
 }
+
+void ComponentObject::setAssigned(ComponentUnit *unit) {
+
+    assigned.setType(unit->getType());
+    assigned.setID(unit->getID());
+    assigned.setAddress(unit->getAddress());
+}

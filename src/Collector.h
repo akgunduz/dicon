@@ -25,6 +25,7 @@ class Collector : public Component {
 	bool processDistributorWakeupMsg(ComponentUnit&, Message *);
 	bool processDistributorIDMsg(ComponentUnit&, Message *);
 	bool processDistributorNodeMsg(ComponentUnit&, Message *);
+	bool processDistributorReplaceMsg(ComponentUnit&, Message *);
 	bool processNodeFileInfoMsg(ComponentUnit &owner, Message *msg);
 	bool processNodeFileBinaryMsg(ComponentUnit &owner, Message *msg);
 

@@ -51,7 +51,13 @@ bool CollectorManager::addRequest(long collID, size_t reqNodeCount) {
 
     collMutex.lock();
 
-    collReqList.emplace_back(CollectorRequest(collID, reqNodeCount));
+    auto *coll = (CollectorObject*)get(collID);
+    if (coll) {
+
+        coll->setState(COLLSTATE_BUSY);
+
+        collReqList.emplace_back(CollectorRequest(collID, reqNodeCount));
+    }
 
     collMutex.unlock();
 

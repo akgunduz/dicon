@@ -6,6 +6,7 @@
 #include "Distributor.h"
 #include "DistributorHost.h"
 #include "NetUtil.h"
+#include "CollectorUnit.h"
 
 Distributor *Distributor::instance = nullptr;
 
@@ -113,6 +114,8 @@ void Distributor::collProcess() {
 
         if (busyDeadCount) {
 
+            LOGS_W(getHost(), "Unresponsive Busy node detected, count : %d", busyDeadCount);
+
             TypeComponentReplaceIDList replaceIdList;
 
             size_t processDeadCount = std::min(nodeCount, busyDeadCount);
@@ -120,19 +123,32 @@ void Distributor::collProcess() {
             for (size_t i = 0; i < processDeadCount; i ++) {
 
                 auto *nodeBusy = nodeManager->getBusyDead();
-                auto *nodeIdle = nodeManager->getIdle();
-                replaceIdList[nodeBusy->getAssigned().getID()].emplace_back(nodeBusy);
-                replaceIdList[nodeBusy->getAssigned().getID()].emplace_back(nodeIdle);
+
+                long busyNodeAssignedColl = nodeBusy->getAssigned().getID();
+
+                if (busyNodeAssignedColl == 0) {
+
+                    LOGS_W(getHost(), "Unresponsive Node[%d] is not assigned with any Collector", nodeBusy->getID());
+                    continue;
+                }
+
+                auto *nodeIdle = nodeManager->getIdle(&nodeBusy->getAssigned());
+
+                replaceIdList[busyNodeAssignedColl].emplace_back(nodeBusy);
+                replaceIdList[busyNodeAssignedColl].emplace_back(nodeIdle);
+
+                LOGS_W(getHost(), "Node[%d] is replaced with Node[%d] for Collector[%d]",
+                       nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned().getID());
             }
 
-            //Put sendreplace here in loop
+            for (auto &collNodeDeadList : replaceIdList) {
+                send2CollectorReplaceMsg(*collectorManager->get(collNodeDeadList.first), collNodeDeadList.second);
+            }
 
-            if (processDeadCount >= nodeCount) {
+            nodeCount = nodeManager->getIdleCount();
+            if (nodeCount == 0) {
                 continue;
             }
-
-            nodeCount -= processDeadCount;
-
         }
 
         CollectorRequest *request = collectorManager->getRequest();
@@ -141,26 +157,28 @@ void Distributor::collProcess() {
         }
 
         TypeComponentList nodes;
-        long collID = request->collID;
+
+        auto *collector = (CollectorUnit *) collectorManager->get(request->collID);
+
+        size_t curReqCount = std::min(nodeCount, request->reqCount);
+
+        for (size_t i = 0; i < curReqCount; i++) {
+
+            auto *nodeIdle = nodeManager->getIdle(collector);
+
+            nodes.emplace_back(nodeIdle);
+        }
 
         if (request->reqCount > nodeCount) {
-
-            for (int i = 0; i < nodeCount; i++) {
-                nodes.emplace_back(nodeManager->getIdle());
-            }
 
             collectorManager->updateRequest(request->reqCount - nodeCount);
 
         } else {
 
-            for (int i = 0; i < request->reqCount; i++) {
-                nodes.emplace_back(nodeManager->getIdle());
-            }
-
             collectorManager->removeRequest();
         }
 
-        send2CollectorNodeMsg(*collectorManager->get(collID), nodes);
+        send2CollectorNodeMsg(*collector, nodes);
     }
 }
 
@@ -204,8 +222,6 @@ bool Distributor::processCollectorIDMsg(ComponentUnit& owner, Message *msg) {
 bool Distributor::processCollectorNodeMsg(ComponentUnit& owner, Message *msg) {
 
     collectorManager->addRequest(owner.getID(), (int)msg->getHeader().getVariant(0));
-
-    collectorManager->setState(owner.getID(), COLLSTATE_BUSY);
 
     notifyUI(NOTIFYSTATE_ONCE);
 
@@ -261,8 +277,6 @@ bool Distributor::processNodeBusyMsg(ComponentUnit& owner, Message *msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_BUSY);
 
-    nodeManager->setAssigned(owner.getID(), collID, collectorManager->get(collID)->getAddress());
-
     notifyUI(NOTIFYSTATE_ONCE);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is Busy with Collector[%d]\'s process", owner.getID(), collID);
@@ -307,6 +321,16 @@ bool Distributor::send2CollectorIDMsg(ComponentUnit& target, long id) {
 bool Distributor::send2CollectorNodeMsg(ComponentUnit& target, TypeComponentList& nodes) {
 
     auto *msg = new Message(getHost(), target, MSGTYPE_NODE);
+
+    msg->getData().setStreamFlag(STREAM_COMPONENT);
+    msg->getData().setComponentList(nodes);
+
+    return send(target, msg);
+}
+
+bool Distributor::send2CollectorReplaceMsg(ComponentUnit& target, TypeComponentList& nodes) {
+
+    auto *msg = new Message(getHost(), target, MSGTYPE_REPLACE);
 
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);

@@ -75,6 +75,7 @@ public:
     ParameterItem* getParameter(int) const;
 
     ProcessItem* assignNode(ComponentUnit *);
+    ProcessItem* reAssignNode(ComponentUnit *, ComponentUnit *);
 
     int getByOutput(int) const;
     bool setProcessIDByOutput(long, long);

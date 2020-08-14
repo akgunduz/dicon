@@ -22,7 +22,7 @@ public:
 	void setState(long, NODESTATES);
 
     Address& getAddress(long);
-    NodeUnit* getIdle();
+    NodeUnit* getIdle(ComponentUnit*);
     size_t getIdleCount();
     NodeUnit* getBusyDead();
     size_t getBusyDeadCount();

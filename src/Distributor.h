@@ -51,6 +51,7 @@ class Distributor : public Component {
 	bool send2CollectorWakeupMsg(ComponentUnit&);
 	bool send2CollectorIDMsg(ComponentUnit&, long);
 	bool send2CollectorNodeMsg(ComponentUnit&, TypeComponentList&);
+	bool send2CollectorReplaceMsg(ComponentUnit&, TypeComponentList&);
 
     bool send2NodeWakeupMsg(ComponentUnit&);
     bool send2NodeIDMsg(ComponentUnit&, long);

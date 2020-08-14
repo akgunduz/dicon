@@ -306,6 +306,26 @@ ProcessItem* JobItem::assignNode(ComponentUnit* node) {
     return nullptr;
 }
 
+ProcessItem* JobItem::reAssignNode(ComponentUnit* oldNode, ComponentUnit* newNode) {
+
+    mutex.lock();
+
+    for (int i = 0; i < getProcessCount(); i++) {
+
+        ProcessItem* process = getProcess(i);
+        if (process->getAssigned() == oldNode->getID()) {
+              process->setAssigned(newNode->getID());
+              process->setState(PROCESS_STATE_STARTED);
+              mutex.unlock();
+              return process;
+        }
+    }
+
+    mutex.unlock();
+
+    return nullptr;
+}
+
 int JobItem::getByOutput(int index) const {
 
     for (int i = 0; i < getProcessCount(); i++) {

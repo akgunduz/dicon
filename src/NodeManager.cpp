@@ -12,7 +12,7 @@ NodeManager::NodeManager(HostUnit *_host, bool autoWake)
 
 NodeManager::~NodeManager() = default;
 
-NodeUnit* NodeManager::getIdle() {
+NodeUnit* NodeManager::getIdle(ComponentUnit* assigned) {
 
     NodeUnit* leastUsedNode = nullptr;
 
@@ -40,7 +40,7 @@ NodeUnit* NodeManager::getIdle() {
 
         leastUsedNode->iterateUsage(true);
         leastUsedNode->setState(NODESTATE_PREBUSY);
-
+        leastUsedNode->setAssigned(assigned);
     }
 
     nodeMutex.unlock();
@@ -80,13 +80,17 @@ NodeUnit* NodeManager::getBusyDead() {
 
         auto *node = (NodeUnit*)component;
 
-        if (node->getState() == NODESTATE_IDLE) {
+        if (node->getState() == NODESTATE_DEAD) {
             continue;
         }
 
-        node->setState(NODESTATE_IDLE);
+        node->setState(NODESTATE_DEAD);
 
         busyDeadNode = node;
+
+        nodeMutex.unlock();
+
+        return busyDeadNode;
     }
 
     nodeMutex.unlock();
@@ -106,7 +110,7 @@ size_t NodeManager::getBusyDeadCount() {
 
         auto *node = (NodeUnit*)component;
 
-        if (node->getState() == NODESTATE_IDLE) {
+        if (node->getState() != NODESTATE_DEAD) {
             count++;
         }
     }

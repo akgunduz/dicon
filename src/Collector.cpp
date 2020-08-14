@@ -19,6 +19,7 @@ Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorIDMsg));
+    addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_REPLACE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorReplaceMsg));
 
     addProcessHandler(COMP_NODE, MSGTYPE_INFO, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileInfoMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileBinaryMsg));
@@ -62,6 +63,27 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, Message *msg) {
     for (auto *node : nodes) {
         ProcessItem *process = job->assignNode(node);
         send2NodeProcessMsg(*node, process);
+    }
+
+    return true;
+}
+
+bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, Message *msg) {
+
+    TypeComponentList& nodes = msg->getData().getComponentList();
+
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Distributor reassigned %d node", nodes.size() / 2);
+
+    if (nodes.size() < 2) {
+        LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "At least two node info should came, old and new node IDs");
+        delete msg;
+        return false;
+    }
+
+    for (size_t i = 0; i < nodes.size(); i = i + 2) {
+
+        ProcessItem *process = job->reAssignNode(nodes[i], nodes[i + 1]);
+        send2NodeProcessMsg(*nodes[i + 1], process);
     }
 
     return true;

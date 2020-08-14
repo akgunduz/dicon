@@ -15,6 +15,7 @@ public:
 
     ComponentUnit& getAssigned();
     void setAssigned(COMPONENT, long, Address);
+    void setAssigned(ComponentUnit*);
 
 };
 

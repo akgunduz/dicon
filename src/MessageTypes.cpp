@@ -17,6 +17,7 @@ std::map<int, std::string> msgNameList = {
         {MSGTYPE_ALIVE, "ALIVE"},
         {MSGTYPE_ID, "ID"},
         {MSGTYPE_PROCESS, "PROCESS"},
+        {MSGTYPE_REPLACE, "REPLACE"},
 };
 
 std::map<int, std::string> msgDirNameList = {
