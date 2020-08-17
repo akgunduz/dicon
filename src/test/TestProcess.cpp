@@ -33,6 +33,7 @@ void TestApp::testProcess(Distributor* distributor, Collector* collector, Node* 
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, processProcessMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
+    ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(),
+                         node->getHost().getAddress(COMP_COLLECTOR));
     sendProcess(collector, target);
 }

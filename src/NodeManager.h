@@ -32,7 +32,7 @@ public:
 	void setAssigned(long, long, Address&);
 	void releaseAssigned(long);
 
-    ComponentUnit* createUnit(long, Address&) final;
+    ComponentUnit* createUnit(ARCH, long, Address&) final;
 };
 
 #endif //DICON_NODEMANAGER_H

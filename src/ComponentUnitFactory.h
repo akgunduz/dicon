@@ -12,7 +12,7 @@
 class ComponentUnitFactory {
 public:
 
-    static ComponentUnit* create(COMPONENT, long, Address&);
+    static ComponentUnit* create(COMPONENT, ARCH, long, Address&);
 };
 
 

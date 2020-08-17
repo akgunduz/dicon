@@ -13,7 +13,7 @@ class HostUnit {
 
     const char *rootPath{};
 
-    long id{};
+    uint32_t id{};
 
     COMPONENT type{COMP_MAX};
 
@@ -33,6 +33,8 @@ public:
 
     long getID() const;
     void setID(long);
+
+    ARCH getArch() const;
 
     ComponentUnit getUnit(COMPONENT);
 

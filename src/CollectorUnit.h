@@ -13,10 +13,11 @@
 class CollectorUnit : public ComponentUnit, public CollectorObject {
 
 public:
-    CollectorUnit(COLLSTATES, long, Address);
-    explicit CollectorUnit(long, Address);
+    CollectorUnit(COLLSTATES, ARCH, long, Address);
+    explicit CollectorUnit(ARCH, long, Address);
     CollectorUnit();
     CollectorUnit(const CollectorUnit &);
+    CollectorUnit(ComponentUnit&);
 
     ~CollectorUnit();
 };

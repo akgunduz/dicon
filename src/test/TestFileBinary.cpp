@@ -41,6 +41,7 @@ void TestApp::testFileBinary(Distributor* distributor, Collector* collector, Nod
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY, processFileBinaryMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
+    ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(),
+                         node->getHost().getAddress(COMP_COLLECTOR));
     sendFileBinary(collector, target);
 }

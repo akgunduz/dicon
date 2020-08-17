@@ -41,10 +41,11 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentList &compon
         return false;
     }
 
-    for (int i = 0; i < list.size(); i = i + 5) {
-        Address address(BaseAddress(list[i + 1], list[i + 2]),
-                        BaseAddress(list[i + 3], list[i + 4]));
-        ComponentUnit *item = ComponentUnitFactory::create((COMPONENT)block.get(0), list[i], address);
+    for (int i = 0; i < list.size(); i = i + 6) {
+        Address address(BaseAddress(list[i + 2], list[i + 3]),
+                        BaseAddress(list[i + 4], list[i + 5]));
+        ComponentUnit *item = ComponentUnitFactory::create((COMPONENT)block.get(0),
+                                                           (ARCH)list[i], list[i + 1], address);
         componentList.emplace_back(item);
     }
 
@@ -261,6 +262,7 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& compo
 
     for (auto &component : componentList) {
 
+        list.emplace_back(component->getArch());
         list.emplace_back(component->getID());
         list.emplace_back(component->getAddress().get().base);
         list.emplace_back(component->getAddress().get().port);

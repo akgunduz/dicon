@@ -37,6 +37,7 @@ void TestApp::testFileInfo(Distributor* distributor, Collector* collector, Node*
 
     collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, processFileInfoMsg);
 
-    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getID(), collector->getHost().getAddress(COMP_NODE));
+    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getArch(), collector->getHost().getID(),
+                         collector->getHost().getAddress(COMP_NODE));
     sendFileInfo(node, target);
 }

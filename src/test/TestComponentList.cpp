@@ -11,9 +11,9 @@ void sendComponentList(Component *owner, ComponentUnit& target) {
 
     TypeComponentList nodes;
     Address address({999, 1}, {1999, 2});
-    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, 1, address));
+    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, ArchTypes::get(), 1, address));
     Address address2({9999, 3}, {19999, 4});
-    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, 2, address2));
+    nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, ArchTypes::get(), 2, address2));
 
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
@@ -39,6 +39,7 @@ void TestApp::testComponentList(Distributor* distributor, Collector* collector, 
 
     collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST, processComponentListMsg);
 
-    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getID(), collector->getHost().getAddress(COMP_DISTRIBUTOR));
+    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getArch(), collector->getHost().getID(),
+                         collector->getHost().getAddress(COMP_DISTRIBUTOR));
     sendComponentList(distributor, target);
 }

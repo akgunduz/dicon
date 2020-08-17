@@ -42,9 +42,9 @@ void CollectorManager::setState(long id, COLLSTATES state) {
     collMutex.unlock();
 }
 
-ComponentUnit *CollectorManager::createUnit(long id, Address& address) {
+ComponentUnit *CollectorManager::createUnit(ARCH arch, long id, Address& address) {
 
-    return new CollectorUnit(id, address);
+    return new CollectorUnit(arch, id, address);
 }
 
 bool CollectorManager::addRequest(long collID, size_t reqNodeCount) {

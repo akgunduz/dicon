@@ -4,9 +4,8 @@
 
 #include "CommUnit.h"
 
-
-CommUnit::CommUnit(COMPONENT _type, long _id, Address _address)
-        : id(_id), type(_type), address(_address) {
+CommUnit::CommUnit(COMPONENT _type, ARCH _arch, long _id, Address _address)
+        : id(_id), type(_type), arch(_arch), address(_address) {
 }
 
 CommUnit::CommUnit(COMPONENT _type)
@@ -23,6 +22,16 @@ long CommUnit::getID() const {
 void CommUnit::setID(long _id) {
 
     id = _id;
+}
+
+ARCH CommUnit::getArch() const {
+
+    return (ARCH) arch;
+}
+
+void CommUnit::setArch(ARCH _arch) {
+
+    arch = _arch;
 }
 
 COMPONENT CommUnit::getType() const {
@@ -61,6 +70,7 @@ COMPONENT CommUnit::prev(COMPONENT component) {
 void CommUnit::grab(CommUnit &unit) {
 
     id = unit.id;
+    arch = unit.arch;
     type = unit.type;
     address.set(unit.address.get());
     address.setUI(unit.address.getUI());

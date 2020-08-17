@@ -6,13 +6,13 @@
 #include "NodeUnit.h"
 #include "CollectorUnit.h"
 
-ComponentUnit *ComponentUnitFactory::create(COMPONENT type, long id, Address &address) {
+ComponentUnit *ComponentUnitFactory::create(COMPONENT type, ARCH arch, long id, Address &address) {
 
     switch(type) {
         case COMP_COLLECTOR:
-            return new CollectorUnit(id, address);
+            return new CollectorUnit(arch, id, address);
         case COMP_NODE:
-            return new NodeUnit(id, address);
+            return new NodeUnit(arch, id, address);
         default:
             break;
     }

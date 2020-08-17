@@ -27,6 +27,6 @@ void TestApp::testPing(Distributor* distributor, Collector* collector, Node* nod
     distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_DISTRIBUTOR));
+    ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_DISTRIBUTOR));
     sendPing(distributor, target);
 }

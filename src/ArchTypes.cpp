@@ -9,20 +9,19 @@ const char* sArchTypes[] = {
         "win-x86-64",
         "lnx-x86-64",
         "lnx-arm-32",
+        "lnx-arm-64",
 };
 
-const char *ArchTypes::getDir(ARCH arch) {
+const char *ArchTypes::getName(ARCH arch) {
     return sArchTypes[arch];
 }
 
-short ArchTypes::getMax() {
-    return ARCH_MAX;
-}
-
-ARCH ArchTypes::getNative() {
+ARCH ArchTypes::get() {
 
 #if defined(__arm__) && defined(__ARM_32BIT_STATE) && defined(__linux__)
     return ARCH_LINUX_ARM_32;
+#elif defined(__aarch64__) && defined(__linux__)
+    return ARCH_LINUX_ARM_64;
 #elif defined(__APPLE__)
     return ARCH_MACOS_X86_64;
 #elif defined(_WIN64)

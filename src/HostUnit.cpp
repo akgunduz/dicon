@@ -40,6 +40,11 @@ void HostUnit::setID(long _id) {
     id = _id;
 }
 
+ARCH HostUnit::getArch() const {
+
+    return ArchTypes::get();
+}
+
 COMPONENT HostUnit::getType() const {
 
     return type;
@@ -72,5 +77,5 @@ void HostUnit::set(COMPONENT _type, long _id, COMPONENT _out, Address _address) 
 
 ComponentUnit HostUnit::getUnit(COMPONENT targetType) {
 
-    return ComponentUnit(type, id, address[targetType]);
+    return ComponentUnit(type, getArch(), id, address[targetType]);
 }

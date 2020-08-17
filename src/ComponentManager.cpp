@@ -116,7 +116,7 @@ ComponentUnit* ComponentManager::get(long id) {
     return object;
 }
 
-long ComponentManager::add(Address& address, bool& isAlreadyAdded) {
+long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
 
     long newID = 0;
 
@@ -129,7 +129,7 @@ long ComponentManager::add(Address& address, bool& isAlreadyAdded) {
 
         newID = idCounter++;
 
-        ComponentUnit *object = createUnit(newID, address);
+        ComponentUnit *object = createUnit(arch, newID, address);
 
         object->setCheckTime(time(nullptr));
 

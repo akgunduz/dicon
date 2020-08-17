@@ -218,7 +218,7 @@ void NodeManager::releaseAssigned(long id) {
 }
 
 
-ComponentUnit* NodeManager::createUnit(long id, Address& address) {
+ComponentUnit* NodeManager::createUnit(ARCH arch, long id, Address& address) {
 
-    return new NodeUnit(id, address);
+    return new NodeUnit(arch, id, address);
 }

@@ -7,10 +7,15 @@
 
 #include "Address.h"
 #include "ComponentType.h"
+#include "ArchTypes.h"
 
 class CommUnit {
 
+protected:
+
     uint32_t id{};
+
+    uint16_t arch{ARCH_MAX};
 
     uint16_t type{COMP_MAX};
 
@@ -22,11 +27,14 @@ public:
 
     CommUnit() = default;
     explicit CommUnit(COMPONENT);
-    CommUnit(COMPONENT, long, Address);
+    CommUnit(COMPONENT, ARCH, long, Address);
     CommUnit(const CommUnit&);
 
     long getID() const;
     void setID(long);
+
+    ARCH getArch() const;
+    void setArch(ARCH);
 
     COMPONENT getType() const;
     void setType(COMPONENT);

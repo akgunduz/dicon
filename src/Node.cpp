@@ -72,7 +72,7 @@ bool Node::processDistributorProcessMsg(ComponentUnit& owner, Message *msg) {
 
     if (!requiredList.empty()) {
 
-        CollectorUnit collObj(nodeHost.getAssigned().getID(),nodeHost.getAssigned().getAddress());
+        CollectorUnit collObj(nodeHost.getAssigned());
 
         return send2CollectorInfoMsg(collObj, nodeHost.getProcess().getID(),requiredList);
 
@@ -157,7 +157,7 @@ bool Node::processJob(const ComponentUnit& owner, Message *msg) {
         }
     }
 
-    CollectorUnit obj(nodeHost.getAssigned().getID(),nodeHost.getAssigned().getAddress());
+    CollectorUnit obj(nodeHost.getAssigned());
 
     return send2CollectorBinaryMsg(obj, nodeHost.getProcess().getID(),outputList);
 }

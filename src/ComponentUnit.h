@@ -16,7 +16,7 @@ public:
 
     ComponentUnit() = default;
     explicit ComponentUnit(COMPONENT);
-    ComponentUnit(COMPONENT, long, Address);
+    ComponentUnit(COMPONENT, ARCH, long, Address);
     ComponentUnit(const ComponentUnit&);
     ComponentUnit(const CommUnit&);
 

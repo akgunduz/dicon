@@ -26,7 +26,7 @@ class CollectorManager : public ComponentManager {
 
 protected:
 
-    ComponentUnit* createUnit(long, Address&) final;
+    ComponentUnit* createUnit(ARCH, long, Address&) final;
 
 public:
 

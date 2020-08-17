@@ -10,15 +10,15 @@ enum ARCH {
     ARCH_WINDOWS_X86_64,
     ARCH_LINUX_X86_64,
     ARCH_LINUX_ARM_32,
+    ARCH_LINUX_ARM_64,
     ARCH_MAX,
 };
 
 class ArchTypes {
 
 public:
-    static const char* getDir(ARCH id);
-    static short getMax();
-    static ARCH getNative();
+    static const char* getName(ARCH id);
+    static ARCH get();
 };
 
 #endif //DICON_ARCHTYPES_H

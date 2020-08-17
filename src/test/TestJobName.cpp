@@ -31,6 +31,6 @@ void TestApp::testJobName(Distributor* distributor, Collector* collector, Node* 
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, processJobNameMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
+    ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
     sendJobName(collector, target);
 }

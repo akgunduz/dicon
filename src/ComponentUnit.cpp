@@ -4,8 +4,8 @@
 
 #include "ComponentUnit.h"
 
-ComponentUnit::ComponentUnit(COMPONENT _type, long _id, Address _address)
-    : CommUnit(_type, _id, _address) {
+ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, long _id, Address _address)
+    : CommUnit(_type, _arch, _id, _address) {
 }
 
 ComponentUnit::ComponentUnit(COMPONENT _type)

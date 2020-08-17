@@ -193,7 +193,7 @@ NodeManager *Distributor::getNodes() const {
 bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, Message *msg) {
 
     bool alreadyAdded = false;
-    long collID = collectorManager->add(owner.getAddress(), alreadyAdded);
+    long collID = collectorManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGC_D(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d] is already added", collID);
         notifyUI(NOTIFYSTATE_ONCE);
@@ -240,7 +240,7 @@ bool Distributor::processCollectorReadyMsg(ComponentUnit& owner, Message *msg) {
 bool Distributor::processNodeAliveMsg(ComponentUnit& owner, Message *msg) {
 
     bool alreadyAdded = false;
-    long nodeID = nodeManager->add(owner.getAddress(), alreadyAdded);
+    long nodeID = nodeManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGC_D(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is already added", nodeID);
         notifyUI(NOTIFYSTATE_ONCE);

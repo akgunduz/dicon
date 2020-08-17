@@ -31,7 +31,7 @@ class ComponentManager {
 
 protected:
 
-    virtual ComponentUnit* createUnit(long, Address&) = 0;
+    virtual ComponentUnit* createUnit(ARCH, long, Address&) = 0;
 
 public:
 
@@ -47,7 +47,7 @@ public:
     bool isExist(long);
 
     void process();
-    long add(Address&, bool&);
+    long add(ARCH, Address&, bool&);
 };
 
 #endif //DICON_COMPONENTMANAGER_H
