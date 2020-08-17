@@ -331,8 +331,6 @@
             let distPage = document.getElementById("distributor-block");
             let collPage = document.getElementById("collector-block");
             let nodePage = document.getElementById("node-block");
-            let nodeArea = document.getElementById("node-area");
-            let nodeNoWeb = document.getElementById("node-noweb");
 
             switch (this.type) {
                 case DISTRIBUTOR:
@@ -355,13 +353,8 @@
                     nodePage.style.display = "block";
                     document.getElementById("node-header").innerHTML =
                         "Node [" + this.id + "]";
-                    if (this.address === "0.0.0.0:0") {
-                        nodeNoWeb.style.display = "block";
-                        nodeArea.style.display = "none";
-                    } else {
-                        nodeNoWeb.style.display = "none";
-                        nodeArea.style.display = "block";
-                    }
+
+                    nodePageSwitch(0);
                     onNodeState(this.id, this.address);
                     break;
             }
@@ -408,6 +401,26 @@
                 dropdownContent.style.display = "block";
             }
         });
+    }
+
+    function nodePageSwitch(state) {
+        let nodeArea = document.getElementById("node-area");
+        let nodeNoWeb = document.getElementById("node-noweb");
+
+        switch(state) {
+            case 0:
+                nodeNoWeb.style.display = "none";
+                nodeArea.style.display = "none";
+                break;
+            case 1:
+                nodeNoWeb.style.display = "block";
+                nodeArea.style.display = "none";
+                break;
+            case 2:
+                nodeNoWeb.style.display = "none";
+                nodeArea.style.display = "block";
+                break;
+        }
     }
 
     function onDistClick() {
@@ -607,7 +620,14 @@
     function onNodeState(id, address) {
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
+            if (this.readyState === 4) {
+                if (this.status !== 200) {
+                    nodePageSwitch(1);
+                    return;
+                }
+
+                nodePageSwitch(2);
+
                 if (this.responseText === "") {
                     return;
                 }
