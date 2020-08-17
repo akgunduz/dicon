@@ -328,29 +328,19 @@
             this.type = _type;
             this.id = _id;
             this.address = _address;
-            let distPage = document.getElementById("distributor-block");
-            let collPage = document.getElementById("collector-block");
-            let nodePage = document.getElementById("node-block");
+
+            componentPageSwitch(this.type);
 
             switch (this.type) {
                 case DISTRIBUTOR:
-                    distPage.style.display = "block";
-                    collPage.style.display = "none";
-                    nodePage.style.display = "none";
-                    onDistState();
+                     onDistState();
                     break;
                 case COLLECTOR:
-                    distPage.style.display = "none";
-                    collPage.style.display = "block";
-                    nodePage.style.display = "none";
                     document.getElementById("coll-header").innerHTML =
                         "Collector [" + this.id + "]";
                     onCollState(this.id, this.address);
                     break;
                 case NODE:
-                    distPage.style.display = "none";
-                    collPage.style.display = "none";
-                    nodePage.style.display = "block";
                     document.getElementById("node-header").innerHTML =
                         "Node [" + this.id + "]";
 
@@ -403,6 +393,29 @@
         });
     }
 
+    function componentPageSwitch(type) {
+        let distPage = document.getElementById("distributor-block");
+        let collPage = document.getElementById("collector-block");
+        let nodePage = document.getElementById("node-block");
+        switch (type) {
+            case DISTRIBUTOR:
+                distPage.style.display = "block";
+                collPage.style.display = "none";
+                nodePage.style.display = "none";
+                break;
+            case COLLECTOR:
+                distPage.style.display = "none";
+                collPage.style.display = "block";
+                nodePage.style.display = "none";
+                break;
+            case NODE:
+                distPage.style.display = "none";
+                collPage.style.display = "none";
+                nodePage.style.display = "block";
+                break;
+        }
+    }
+
     function nodePageSwitch(state) {
         let nodeArea = document.getElementById("node-area");
         let nodeNoWeb = document.getElementById("node-noweb");
@@ -438,14 +451,18 @@
     function onDistState() {
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-                if (this.responseText === "") {
-                    return;
-                }
-                let data = JSON.parse(this.responseText);
-                onDistUpdateCollList(data);
-                onDistUpdateNodeList(data);
+
+            if (this.readyState !== 4) {
+                return;
             }
+
+            if (this.status !== 200 || this.responseText === "") {
+                return;
+            }
+
+            let data = JSON.parse(this.responseText);
+            onDistUpdateCollList(data);
+            onDistUpdateNodeList(data);
         };
         xHTTP.open("GET", "http://" + location.host + REST_DIST_URI + REST_STATE, true);
         xHTTP.send();
@@ -508,25 +525,28 @@
     function onCollState(id, address) {
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-                if (this.responseText === "") {
-                    return;
-                }
 
-                let data = JSON.parse(this.responseText);
-                document.getElementById("coll-state").innerHTML =
-                    COLL_STATES[data._state];
-                document.getElementById("coll-job-name").innerHTML =
-                    data._jobName;
-                document.getElementById("coll-duration").innerHTML =
-                    data._duration + " sn";
-                document.getElementById("coll-process-count").innerHTML =
-                    data._processCount;
-                document.getElementById("coll-process-btn").disabled = data._jobStatus !== JOBSTATUS_OK;
-
-                onCollUpdateFileList(data);
-                onCollUpdateProcessList(data);
+            if (this.readyState !== 4) {
+                return;
             }
+
+            if (this.status !== 200 || this.responseText === "") {
+                return;
+            }
+
+            let data = JSON.parse(this.responseText);
+            document.getElementById("coll-state").innerHTML =
+                COLL_STATES[data._state];
+            document.getElementById("coll-job-name").innerHTML =
+                data._jobName;
+            document.getElementById("coll-duration").innerHTML =
+                data._duration + " sn";
+            document.getElementById("coll-process-count").innerHTML =
+                data._processCount;
+            document.getElementById("coll-process-btn").disabled = data._jobStatus !== JOBSTATUS_OK;
+
+            onCollUpdateFileList(data);
+            onCollUpdateProcessList(data);
         };
         xHTTP.open(
             "GET",
@@ -620,22 +640,20 @@
     function onNodeState(id, address) {
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
-            if (this.readyState === 4) {
-                if (this.status !== 200) {
-                    nodePageSwitch(1);
-                    return;
-                }
-
-                nodePageSwitch(2);
-
-                if (this.responseText === "") {
-                    return;
-                }
-
-                let data = JSON.parse(this.responseText);
-                onNodeUpdateState(data);
-                onNodeUpdateProcessList(data);
+            if (this.readyState !== 4) {
+                return;
             }
+
+            if (this.status !== 200 || this.responseText === "") {
+                nodePageSwitch(1);
+                return;
+            }
+
+            nodePageSwitch(2);
+
+            let data = JSON.parse(this.responseText);
+            onNodeUpdateState(data);
+            onNodeUpdateProcessList(data);
         };
         xHTTP.open(
             "GET", "http://" + address + REST_NODE_URI + "/" + id + REST_STATE,
