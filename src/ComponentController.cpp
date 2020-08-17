@@ -97,11 +97,11 @@ bool ComponentController::startDistributor(bool autoWake) {
 
 bool ComponentController::startCollector(int count) {
 
-    for (int i = 0; i < count; i++) {
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
+    mkdir(path, 0777);
 
-        char path[PATH_MAX];
-        sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
-        mkdir(path, 0777);
+    for (int i = 0; i < count; i++) {
 
         collectors.push_back(Collector::newInstance(path, interface[0], interface[1]));
     }
@@ -109,16 +109,42 @@ bool ComponentController::startCollector(int count) {
     return true;
 }
 
+Collector* ComponentController::startCollector() {
+
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
+    mkdir(path, 0777);
+
+    auto *collector = Collector::newInstance(path, interface[0], interface[1]);
+
+    collectors.push_back(collector);
+
+    return collector;
+}
+
 bool ComponentController::startNode(int count) {
 
-    for (int i = 0; i < count; i++) {
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
+    mkdir(path, 0777);
 
-        char path[PATH_MAX];
-        sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
-        mkdir(path, 0777);
+    for (int i = 0; i < count; i++) {
 
         nodes.push_back(Node::newInstance(path, interface[1]));
     }
 
     return true;
+}
+
+Node* ComponentController::startNode() {
+
+    char path[PATH_MAX];
+    sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
+    mkdir(path, 0777);
+
+    auto *node = Node::newInstance(path, interface[1]);
+
+    nodes.push_back(node);
+
+    return node;
 }

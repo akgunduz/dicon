@@ -11,11 +11,11 @@ bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
 
+    char *nextStr;
+
+    int nodeID = (int) strtol(uri + 1, &nextStr, 10);
+
     if (0 == strcmp(ri->request_method, "GET")) {
-
-        char *nextStr;
-
-        int nodeID = (int) strtol(uri + 1, &nextStr, 10);
 
         if (0 == strcmp(nextStr, "/state")) {
 

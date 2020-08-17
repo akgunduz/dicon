@@ -135,7 +135,7 @@
     <div id="sidebar-node-list" class="dropdown-container"></div>
 </div>
 
-<div class="component-block" hidden>
+<div id="debug-block" class="component-block" hidden>
     <h1>Debug</h1>
     <p id="test-field">Test</p>
     <button id="test-button" type="button" class="button btn-full-width" onclick="onTestClick()">Test</button>
@@ -148,6 +148,10 @@
     </button>
     <div class="dual-tables-container">
         <div class="single-table-container">
+            <button id="dist-add-coll-btn" type="button" class="button btn-full-width"
+                    onclick="onDistAddColl()">
+                Add Collector
+            </button>
             <h3>Collectors</h3>
             <table id="dist-colls-table" class="table-wide">
                 <thead>
@@ -160,6 +164,10 @@
             </table>
         </div>
         <div class="single-table-container">
+            <button id="dist-add-node-btn" type="button" class="button btn-full-width"
+                    onclick="onDistAddNode()">
+                Add Node
+            </button>
             <h3>Nodes</h3>
             <table id="dist-nodes-table" class="table-wide">
                 <thead>
@@ -286,6 +294,8 @@
 
     let REST_DIST_URI = REST_URI + "/dist";
     let REST_DIST_POLL = "/poll";
+    let REST_DIST_ADDCOLL = "/addcoll";
+    let REST_DIST_ADDNODE = "/addnode";
 
     let REST_COLL_URI = REST_URI + "/coll";
     let REST_COLL_LOAD = "/load";
@@ -333,7 +343,7 @@
 
             switch (this.type) {
                 case DISTRIBUTOR:
-                     onDistState();
+                    onDistState();
                     break;
                 case COLLECTOR:
                     document.getElementById("coll-header").innerHTML =
@@ -343,7 +353,6 @@
                 case NODE:
                     document.getElementById("node-header").innerHTML =
                         "Node [" + this.id + "]";
-
                     nodePageSwitch(0);
                     onNodeState(this.id, this.address);
                     break;
@@ -394,6 +403,7 @@
     }
 
     function componentPageSwitch(type) {
+
         let distPage = document.getElementById("distributor-block");
         let collPage = document.getElementById("collector-block");
         let nodePage = document.getElementById("node-block");
@@ -417,6 +427,7 @@
     }
 
     function nodePageSwitch(state) {
+
         let nodeArea = document.getElementById("node-area");
         let nodeNoWeb = document.getElementById("node-noweb");
 
@@ -436,19 +447,63 @@
         }
     }
 
+    function onLoad() {
+
+        currentPage.set(DISTRIBUTOR);
+        const loadBtn = document.getElementById("load-btn");
+        const loadInput = document.getElementById("load-input");
+        loadBtn.addEventListener(
+            "click",
+            function (e) {
+                loadInput.click();
+            },
+            false
+        );
+    }
+
+    function onBeforeUnload() {
+
+        eventSource.close();
+    }
+
+    function onTestClick() {
+
+        eventSource.close();
+    }
+
     function onDistClick() {
+
         currentPage.set(DISTRIBUTOR);
     }
 
-    function onCollClick() {
-        currentPage.set(COLLECTOR, this.id, this.title);
+    function onDistAddColl() {
+
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = state => {
+            console.log(xHTTP.status);
+        }
+        xHTTP.open(
+            "GET", "http://" + location.host + REST_DIST_URI + "/" + REST_DIST_ADDCOLL,
+            true
+        );
+        xHTTP.send();
     }
 
-    function onNodeClick() {
-        currentPage.set(NODE, this.id, this.title);
+    function onDistAddNode() {
+
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = state => {
+            console.log(xHTTP.status);
+        }
+        xHTTP.open(
+            "GET", "http://" + location.host + REST_DIST_URI + "/" + REST_DIST_ADDNODE,
+            true
+        );
+        xHTTP.send();
     }
 
     function onDistState() {
+
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
 
@@ -456,7 +511,8 @@
                 return;
             }
 
-            if (this.status !== 200 || this.responseText === "") {
+            if (this.status !== 200 || this.responseText.startsWith("ERROR")) {
+                console.log("Distributor => Status : " + this.status + " Response : " + this.responseText);
                 return;
             }
 
@@ -469,12 +525,14 @@
     }
 
     function onDistPoll() {
+
         let xHTTP = new XMLHttpRequest();
         xHTTP.open("GET", "http://" + location.host + REST_DIST_URI + REST_DIST_POLL, true);
         xHTTP.send();
     }
 
     function onDistUpdateCollList(data) {
+
         let table = document
             .getElementById("dist-colls-table")
             .getElementsByTagName("tbody")[0];
@@ -499,6 +557,7 @@
     }
 
     function onDistUpdateNodeList(data) {
+
         let table = document
             .getElementById("dist-nodes-table")
             .getElementsByTagName("tbody")[0];
@@ -522,7 +581,13 @@
         }
     }
 
+    function onCollClick() {
+
+        currentPage.set(COLLECTOR, this.id, this.title);
+    }
+
     function onCollState(id, address) {
+
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
 
@@ -530,7 +595,15 @@
                 return;
             }
 
-            if (this.status !== 200 || this.responseText === "") {
+            if (this.status !== 200 || this.responseText.startsWith("ERROR")) {
+                document.getElementById("coll-state").innerHTML = "";
+                document.getElementById("coll-job-name").innerHTML = "";
+                document.getElementById("coll-duration").innerHTML = "";
+                document.getElementById("coll-process-count").innerHTML = "";
+                document.getElementById("coll-process-btn").disabled = true;
+                document.getElementById("coll-file-table").getElementsByTagName("tbody")[0].innerHTML = "";
+                document.getElementById("coll-process-table").getElementsByTagName("tbody")[0].innerHTML = "";
+                console.log("Collector[" + id + "] => Status : " + this.status + " Response : " + this.responseText);
                 return;
             }
 
@@ -557,6 +630,7 @@
     }
 
     function onCollLoadJob(id, address) {
+
         let uploadFile = document.getElementById("load-input");
         let file = uploadFile.files[0];
         uploadFile.value = "";
@@ -573,6 +647,7 @@
     }
 
     function onCollProcess(id, address) {
+
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = state => {
             console.log(xHTTP.status);
@@ -585,6 +660,7 @@
     }
 
     function onCollUpdateFileList(data) {
+
         let table = document
             .getElementById("coll-file-table")
             .getElementsByTagName("tbody")[0];
@@ -604,6 +680,7 @@
     }
 
     function onCollUpdateProcessList(data) {
+
         let table = document
             .getElementById("coll-process-table")
             .getElementsByTagName("tbody")[0];
@@ -637,14 +714,21 @@
         }
     }
 
+    function onNodeClick() {
+
+        currentPage.set(NODE, this.id, this.title);
+    }
+
     function onNodeState(id, address) {
+
         let xHTTP = new XMLHttpRequest();
         xHTTP.onreadystatechange = function () {
             if (this.readyState !== 4) {
                 return;
             }
 
-            if (this.status !== 200 || this.responseText === "") {
+            if (this.status !== 200 || this.responseText.startsWith("ERROR")) {
+                console.log("Node[" + id + "] => Status : " + this.status + " Response : " + this.responseText);
                 nodePageSwitch(1);
                 return;
             }
@@ -663,11 +747,13 @@
     }
 
     function onNodeUpdateState(data) {
+
         document.getElementById("node-state").innerHTML =
             NODE_STATES[data._state];
     }
 
     function onNodeUpdateProcessList(data) {
+
         let table = document
             .getElementById("node-process-table")
             .getElementsByTagName("tbody")[0];
@@ -681,27 +767,6 @@
             newRow.insertCell().innerHTML = processItem._process;
             newRow.insertCell().innerHTML = processItem._duration + " sn";
         }
-    }
-
-    function onLoad() {
-        currentPage.set(DISTRIBUTOR);
-        const loadBtn = document.getElementById("load-btn");
-        const loadInput = document.getElementById("load-input");
-        loadBtn.addEventListener(
-            "click",
-            function (e) {
-                loadInput.click();
-            },
-            false
-        );
-    }
-
-    function onBeforeUnload() {
-        eventSource.close();
-    }
-
-    function onTestClick() {
-        eventSource.close();
     }
 
 </script>

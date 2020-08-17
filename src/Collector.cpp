@@ -61,7 +61,7 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, Message *msg) {
     }
 
     for (auto *node : nodes) {
-        ProcessItem *process = job->assignNode(node);
+        auto *process = job->assignNode(node);
         send2NodeProcessMsg(*node, process);
     }
 
@@ -82,7 +82,7 @@ bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, Message *msg)
 
     for (size_t i = 0; i < nodes.size(); i = i + 2) {
 
-        ProcessItem *process = job->reAssignNode(nodes[i], nodes[i + 1]);
+        auto *process = job->reAssignNode(nodes[i], nodes[i + 1]);
         send2NodeProcessMsg(*nodes[i + 1], process);
     }
 

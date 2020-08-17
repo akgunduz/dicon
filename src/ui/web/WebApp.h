@@ -25,6 +25,7 @@ class WebApp : public App {
     struct mg_context *context;
     NOTIFYSTATE notifyData[COMP_MAX]{};
     std::mutex notifyMutex;
+    int webPort{DEFAULT_WEB_PORT};
 
 public:
 
@@ -35,8 +36,10 @@ public:
     int eventHandler(struct mg_connection *conn);
 
     bool distHandler(struct mg_connection *conn, const char * uri);
-    bool distPollHandler(struct mg_connection *conn);
     bool distStateHandler(struct mg_connection *conn);
+    bool distPollHandler(struct mg_connection *conn);
+    bool distAddCollHandler(struct mg_connection *conn);
+    bool distAddNodeHandler(struct mg_connection *conn);
 
     bool collHandler(struct mg_connection *conn, const char * uri);
     bool collStateHandler(struct mg_connection *conn, int id);

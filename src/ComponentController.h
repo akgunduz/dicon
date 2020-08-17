@@ -36,7 +36,9 @@ public:
 
     bool startDistributor(bool);
     bool startCollector(int);
+    Collector* startCollector();
     bool startNode(int);
+    Node* startNode();
 };
 
 #endif //DICON_COMPONENTCONTROLLER_H

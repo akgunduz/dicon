@@ -121,18 +121,17 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
     memset(&callbacks, 0, sizeof(callbacks));
 
     int tryCount = 10;
-    int lastFreePort = DEFAULT_WEB_PORT;
 
     for (int j = tryCount; j > 0; j--) {
 
-        options.setOption("listening_ports", lastFreePort);
+        options.setOption("listening_ports", webPort);
 
         context = mg_start(&callbacks, this, options.getOptions());
         if (context) {
             break;
         }
 
-        lastFreePort++;
+        webPort++;
     }
 
     if (!context) {
@@ -155,16 +154,16 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
         }, this);
 
 
-        componentController->getDistributor()->getHost().setAllUIAddress(lastFreePort);
+        componentController->getDistributor()->getHost().setAllUIAddress(webPort);
 
-        PRINT("Link : http://localhost:%d", lastFreePort);
+        PRINT("Link : http://localhost:%d", webPort);
     }
 
     if (componentController->getCollectorCount()) {
 
         for (auto *coll : componentController->getCollectors()) {
 
-            coll->getHost().setAllUIAddress(lastFreePort);
+            coll->getHost().setAllUIAddress(webPort);
         }
     }
 
@@ -172,7 +171,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
         for (auto *node : componentController->getNodes()) {
 
-            node->getHost().setAllUIAddress(lastFreePort);
+            node->getHost().setAllUIAddress(webPort);
         }
     }
 }

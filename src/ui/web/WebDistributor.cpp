@@ -24,6 +24,16 @@ bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
             return distPollHandler(conn);
         }
+
+        if (0 == strcmp(uri, "/addcoll")) {
+
+            return distAddCollHandler(conn);
+        }
+
+        if (0 == strcmp(uri, "/addnode")) {
+
+            return distAddNodeHandler(conn);
+        }
     }
 
     return false;
@@ -36,6 +46,32 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
     distributor->sendWakeupMessagesAll(false);
 
     sendOK(&distributor->getHost(), conn, "Polling is Executed");
+
+    return true;
+}
+
+bool WebApp::distAddCollHandler(struct mg_connection *conn) {
+
+    auto *distributor = componentController->getDistributor();
+
+    auto *collector = componentController->startCollector();
+
+    collector->getHost().setAllUIAddress(webPort);
+
+    sendOK(&distributor->getHost(), conn, "New Collector is Added");
+
+    return true;
+}
+
+bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
+
+    auto *distributor = componentController->getDistributor();
+
+    auto *node = componentController->startNode();
+
+    node->getHost().setAllUIAddress(webPort);
+
+    sendOK(&distributor->getHost(), conn, "New Node is Added");
 
     return true;
 }
