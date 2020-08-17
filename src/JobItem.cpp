@@ -313,7 +313,8 @@ ProcessItem* JobItem::reAssignNode(ComponentUnit* oldNode, ComponentUnit* newNod
     for (int i = 0; i < getProcessCount(); i++) {
 
         ProcessItem* process = getProcess(i);
-        if (process->getAssigned() == oldNode->getID()) {
+        if (process->getAssigned() == oldNode->getID() &&
+                process->getState() != PROCESS_STATE_ENDED) {
               process->setAssigned(newNode->getID());
               process->setState(PROCESS_STATE_STARTED);
               mutex.unlock();
@@ -534,14 +535,14 @@ int JobItem::updateDependency(long id, int &totalCount) {
 
 JOB_PATH JobItem::checkPath(const char *zipPath) {
 
-    struct stat status{};
+    struct stat fileStatus{};
 
-    if (stat(zipPath, &status) == -1) {
+    if (stat(zipPath, &fileStatus) == -1) {
         LOGS_E(getHost(), "Invalid Path");
         return JOBPATH_INVALID;
     }
 
-    if ((status.st_mode & S_IFMT) == S_IFDIR) {
+    if ((fileStatus.st_mode & S_IFMT) == S_IFDIR) {
 
         return JOBPATH_DIR;
     }
@@ -566,13 +567,13 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
 
     mz_bool status = mz_zip_reader_init_file(&zip_archive, zipFile, 0);
     if (!status) {
-        LOGS_E(getHost(), "mz_zip_reader_init_file() failed!");
+        LOGS_E(getHost(), "mz_zip_reader_init_file failed!");
         return false;
     }
 
     int fileCount = mz_zip_reader_get_num_files(&zip_archive);
     if (fileCount < 1) {
-        LOGS_E(getHost(), "mz_zip_reader_get_num_files() failed!");
+        LOGS_E(getHost(), "mz_zip_reader_get_num_files failed!");
         mz_zip_reader_end(&zip_archive);
         return false;
     }
@@ -588,7 +589,7 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
         }
 
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            printf("mz_zip_reader_file_stat() failed!\n");
+            printf("mz_zip_reader_file_stat failed!\n");
             mz_zip_reader_end(&zip_archive);
             return false;
         }
@@ -599,7 +600,7 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
 
         status = mz_zip_reader_extract_to_file(&zip_archive, i, absPath, 0);
         if (!status) {
-            printf("mz_zip_reader_extract_file_to_file() failed!\n");
+            printf("mz_zip_reader_extract_file_to_file failed!\n");
             mz_zip_reader_end(&zip_archive);
             return false;
         }
