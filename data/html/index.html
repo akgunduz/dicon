@@ -375,6 +375,7 @@
     let JOBSTATUS_MISSING_FILES = 5;
 
     let eventSource;
+    let distributorComponent;
     let currentComponent;
 
     class Component {
@@ -390,7 +391,7 @@
 
     class ComponentHTMLElement extends HTMLAnchorElement {
 
-        componentVal = new Component(0, ARCH_TYPES[0], 0, location.host);
+        componentVal = new Component(0, DISTRIBUTOR, ARCH_TYPES[0], 0, location.host);
 
         get component() {
             return this.componentVal;
@@ -412,7 +413,12 @@
         }
     }
 
-    customElements.define('component-element', ComponentHTMLElement, { extends: "a" });
+    function initComponents() {
+
+        distributorComponent = new Component(0, DISTRIBUTOR, ARCH_TYPES[0], 0, location.host);
+        currentComponent = distributorComponent;
+        customElements.define('component-element', ComponentHTMLElement, { extends: "a" });
+    }
 
     function initSideNav() {
 
@@ -477,6 +483,7 @@
         let distPage = document.getElementById("distributor-block");
         let collPage = document.getElementById("collector-block");
         let nodePage = document.getElementById("node-block");
+
         switch (type) {
             case DISTRIBUTOR:
                 distPage.style.display = "block";
@@ -508,6 +515,8 @@
             false
         );
 
+        initComponents();
+
         initSideNav();
 
         initEventSource();
@@ -520,13 +529,9 @@
         eventSource.close();
     }
 
-    function onTestClick() {
-
-        eventSource.close();
-    }
-
     function onDistClick(component) {
 
+        currentComponent = distributorComponent;
         componentPageSwitch(DISTRIBUTOR);
         onDistState();
     }
@@ -668,14 +673,10 @@
             }
 
             let data = JSON.parse(this.responseText);
-            document.getElementById("coll-state").innerHTML =
-                COLL_STATES[data._state];
-            document.getElementById("coll-job-name").innerHTML =
-                data._jobName;
-            document.getElementById("coll-duration").innerHTML =
-                data._duration + " sn";
-            document.getElementById("coll-process-count").innerHTML =
-                data._processCount;
+            document.getElementById("coll-state").innerHTML = COLL_STATES[data._state];
+            document.getElementById("coll-job-name").innerHTML = data._jobName;
+            document.getElementById("coll-duration").innerHTML = data._duration + " sn";
+            document.getElementById("coll-process-count").innerHTML = data._processCount;
             document.getElementById("coll-process-btn").disabled = data._jobStatus !== JOBSTATUS_OK;
 
             onCollUpdateFileList(data);
@@ -837,8 +838,7 @@
 
     function onNodeUpdateState(data) {
 
-        document.getElementById("node-state").innerHTML =
-            NODE_STATES[data._state];
+        document.getElementById("node-state").innerHTML = NODE_STATES[data._state];
     }
 
     function onNodeUpdateProcessList(data) {
