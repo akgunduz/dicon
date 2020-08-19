@@ -114,7 +114,7 @@ void Distributor::collProcess() {
 
         if (busyDeadCount) {
 
-            LOGS_W(getHost(), "Unresponsive Busy node detected, count : %d", busyDeadCount);
+            LOGS_W(getHost(), "Unresponsive node detected, count : %d", busyDeadCount);
 
             TypeComponentReplaceIDList replaceIdList;
 
