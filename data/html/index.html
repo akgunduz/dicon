@@ -11,6 +11,15 @@
             font-family: "Lato", sans-serif;
         }
 
+        .sidebar_btn_active {
+            background-color: green;
+            color: white;
+        }
+
+        .item-valid {
+            background-color: #00c000;
+        }
+
         /* Fixed sidenav, full height */
         .sidenav {
             height: 100%;
@@ -46,16 +55,6 @@
             color: #f1f1f1;
         }
 
-        /* Add an active class to the active dropdown button */
-        .sidebar_btn_active {
-            background-color: green;
-            color: white;
-        }
-
-        .item-valid {
-            background-color: #00c000;
-        }
-
         /* Optional: Style the caret down icon */
         .fa-caret-down {
             padding-top: 0.2rem;
@@ -70,6 +69,14 @@
             padding-left: 8px;
         }
 
+        .btn-full-width {
+            width: 100%;
+            height: 6rem;
+            font-size: 2rem;
+            background-color: #90e3ff;
+            margin-bottom: 2rem;
+        }
+
         /* Main content */
         .component-block {
             margin-left: 12rem;
@@ -81,20 +88,14 @@
 
         .standard-container {
             width: 100%;
-            padding: 1rem;
+            /*background-color: antiquewhite;*/
+            padding: 0rem;
         }
 
-        .btn-full-width {
+        .horizontal-container {
             width: 100%;
-            height: 6rem;
-            font-size: 2rem;
-            background-color: #90e3ff;
-            margin-bottom: 2rem;
-        }
-
-        .dual-tables-container {
-            width: 100%;
-            padding: 1rem;
+            /*background-color: #90e3ff;*/
+            padding: 0rem;
             display: flex;
             justify-content: space-between;
         }
@@ -113,7 +114,7 @@
             padding: 0.5rem;
         }
 
-        .single-table-container {
+        .single-container {
             width: 49%;
         }
     </style>
@@ -142,37 +143,53 @@
 </div>
 
 <div id="distributor-block" class="component-block" style="display: block;">
-    <h1>Distributor</h1>
+    <h1  style="margin-bottom: 1rem;">Distributor</h1>
     <button type="button" class="button btn-full-width" onclick="onDistPoll()" hidden>
         Poll
     </button>
-    <div class="dual-tables-container">
-        <div class="single-table-container">
+    <div class="horizontal-container">
+        <div class="single-container">
             <button id="dist-add-coll-btn" type="button" class="button btn-full-width"
                     onclick="onDistAddColl()">
                 Add Collector
             </button>
             <h3>Collectors</h3>
             <table id="dist-colls-table" class="table-wide">
+                <colgroup>
+                    <col span="1" style="width: 20%;"/>
+                    <col span="1" style="width: 20%;"/>
+                    <col span="1" style="width: 30%;"/>
+                    <col span="1" style="width: 30%;"/>
+                </colgroup>
                 <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Arch</th>
+                    <th>Address</th>
                     <th>State</th>
                 </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
-        <div class="single-table-container">
+        <div class="single-container">
             <button id="dist-add-node-btn" type="button" class="button btn-full-width"
                     onclick="onDistAddNode()">
                 Add Node
             </button>
             <h3>Nodes</h3>
             <table id="dist-nodes-table" class="table-wide">
+                <colgroup>
+                    <col span="1" style="width: 20%;"/>
+                    <col span="1" style="width: 20%;"/>
+                    <col span="1" style="width: 30%;"/>
+                    <col span="1" style="width: 30%;"/>
+                </colgroup>
                 <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Arch</th>
+                    <th>Address</th>
                     <th>State</th>
                 </tr>
                 </thead>
@@ -183,25 +200,35 @@
 </div>
 
 <div id="collector-block" class="component-block" style="display: none;">
-    <h1 id="coll-header">Collector</h1>
-    <div id="coll-area" class="dual-tables-container">
-        <div id="coll-file" class="single-table-container">
-            <input id="load-input" type="file" required accept=".zip, .tar.gz, .tgz" style="display: none;"
-                   onchange="onCollLoadJob(currentPage.id, currentPage.address)"/>
-            <button id="load-btn" type="button" class="button btn-full-width">
-                Load Job
-            </button>
-            <div class="dual-tables-container">
-                <h3 style="text-align: left; margin-bottom: 1rem;">
-                    State :
-                </h3>
-                <h3 id="coll-state" style="text-align: left; margin-bottom: 1rem;"></h3>
+    <h1 id="coll-header" style="margin-bottom: 1rem;">Collector</h1>
+    <div class="standard-container" style="margin-bottom: 2rem;">
+        <div class="horizontal-container">
+            <div class="horizontal-container" style="margin-right: 1rem">
+                <h5>Address : </h5>
+                <h5 id="coll-address">0</h5>
             </div>
-            <div class="dual-tables-container">
-                <h3 style="text-align: left; margin-bottom: 1rem;">
-                    Job :
-                </h3>
-                <h3 id="coll-job-name" style="text-align: left; margin-bottom: 1rem;"></h3>
+            <div class="horizontal-container" style="margin-left: 1rem">
+                <h5>Web Address : </h5>
+                <h5 id="coll-web-address">0</h5>
+            </div>
+        </div>
+        <div class="horizontal-container">
+            <h5>Architecture : </h5>
+            <h5 id="coll-arch">arm64-linux</h5>
+        </div>
+    </div>
+    <div id="coll-area" class="horizontal-container">
+        <div id="coll-file" class="single-container">
+            <input id="load-input" type="file" required accept=".zip, .tar.gz, .tgz" style="display: none;"
+                   onchange="onCollLoadJob(currentComponent.id, currentComponent.webAddress)"/>
+            <button id="load-btn" type="button" class="button btn-full-width"> Load Job </button>
+            <div class="horizontal-container">
+                <h3 style="text-align: left;"> State : </h3>
+                <h3 id="coll-state" style="text-align: left;"></h3>
+            </div>
+            <div class="horizontal-container">
+                <h3 style="text-align: left;"> Job : </h3>
+                <h3 id="coll-job-name" style="text-align: left;"></h3>
             </div>
             <table id="coll-file-table" class="table-wide">
                 <colgroup>
@@ -219,18 +246,18 @@
                 <tbody></tbody>
             </table>
         </div>
-        <div id="coll-process" class="single-table-container">
+        <div id="coll-process" class="single-container">
             <button id="coll-process-btn" type="button" class="button btn-full-width"
-                    onclick="onCollProcess(currentPage.id, currentPage.address)" disabled>
+                    onclick="onCollProcess(currentComponent.id, currentComponent.webAddress)" disabled>
                 Process
             </button>
-            <div class="dual-tables-container">
-                <h3 style="text-align: left; margin-bottom: 1rem;"> Duration : </h3>
-                <h3 id="coll-duration" style="text-align: left; margin-bottom: 1rem;"></h3>
+            <div class="horizontal-container">
+                <h3 style="text-align: left;"> Duration : </h3>
+                <h3 id="coll-duration" style="text-align: left;"></h3>
             </div>
-            <div class="dual-tables-container">
-                <h3 style="text-align: left; margin-bottom: 1rem;">Processes :</h3>
-                <h3 id="coll-process-count" style="text-align: left; margin-bottom: 1rem;"></h3>
+            <div class="horizontal-container">
+                <h3 style="text-align: left;">Processes :</h3>
+                <h3 id="coll-process-count" style="text-align: left;"></h3>
             </div>
             <table id="coll-process-table" class="table-wide">
                 <colgroup>
@@ -254,14 +281,32 @@
 </div>
 
 <div id="node-block" class="component-block" style="display: none;">
-    <h1 id="node-header">Node</h1>
-    <h2 id="node-noweb" style="margin: 2rem;">Node does not have Web Interface</h2>
+    <h1 id="node-header" style="margin-bottom: 1rem;">Node</h1>
+    <div class="standard-container" style="margin-bottom: 2rem;">
+        <div class="horizontal-container">
+            <div class="horizontal-container" style="margin-right: 1rem">
+                <h5>Address : </h5>
+                <h5 id="node-address">0</h5>
+            </div>
+            <div class="horizontal-container" style="margin-left: 1rem">
+                <h5>Web Address : </h5>
+                <h5 id="node-web-address">0</h5>
+            </div>
+        </div>
+        <div class="horizontal-container">
+            <h5>Architecture : </h5>
+            <h5 id="node-arch">arm64-linux</h5>
+        </div>
+    </div>
+    <h2 id="node-noweb">Node does not have Web Interface</h2>
     <div id="node-area" class="standard-container">
-        <div class="dual-tables-container">
+        <div class="horizontal-container">
             <h3>State :</h3>
             <h3 id="node-state">IDLE</h3>
         </div>
-        <h3 style="text-align: left; margin-left: 1rem; margin-bottom: 1rem;">Processes :</h3>
+        <div class="horizontal-container">
+            <h3>Processes :</h3>
+        </div>
         <table id="node-process-table" class="table-wide">
             <colgroup>
                 <col span="1" style="width: 10%;"/>
@@ -303,10 +348,18 @@
 
     let REST_NODE_URI = REST_URI + "/node";
 
+    let COMPONENTS = ["Distributor", "Collector", "Node"];
+    let COMPONENT_CLICK = [onDistClick, onCollClick, onNodeClick];
     let COLL_STATES = ["IDLE", "BUSY"];
     let NODE_STATES = ["IDLE", "PREBUSY", "BUSY", "DEAD"];
     let FILE_STATES = ["EXIST", "REQUIRED", "OUTPUT"];
     let PROCESS_STATES = ["INVALID", "DEPENDENT", "READY", "STARTED", "ENDED"];
+    let ARCH_TYPES = ["x86-64-linux", "x86-64-darwin", "arm32-linux", "arm64-linux"];
+
+    let ARCH_LINUX_X86_64 = 0;
+    let ARCH_DARWIN_X86_64 = 1;
+    let ARCH_LINUX_ARM_32 = 2;
+    let ARCH_LINUX_ARM_64 = 3;
 
     let PROCESS_STATE_INVALID = 0;
     let PROCESS_STATE_DEPENDENT = 1;
@@ -322,55 +375,85 @@
     let JOBSTATUS_MISSING_FILES = 5;
 
     let eventSource;
+    let currentComponent;
 
     class Component {
-        constructor(_id, _address) {
+
+        constructor(_id, _type, _arch, _address, _webAddress) {
             this.id = _id;
+            this.type = _type;
+            this.arch = _arch;
             this.address = _address;
+            this.webAddress = _webAddress;
         }
     }
 
-    const currentPage = {
-        type: DISTRIBUTOR,
-        id: 0,
-        address: location.host,
-        set(_type, _id = 0, _address = location.host) {
-            this.type = _type;
-            this.id = _id;
-            this.address = _address;
+    class ComponentHTMLElement extends HTMLAnchorElement {
 
-            componentPageSwitch(this.type);
+        componentVal = new Component(0, ARCH_TYPES[0], 0, location.host);
 
-            switch (this.type) {
-                case DISTRIBUTOR:
-                    onDistState();
-                    break;
-                case COLLECTOR:
-                    document.getElementById("coll-header").innerHTML =
-                        "Collector [" + this.id + "]";
-                    onCollState(this.id, this.address);
-                    break;
-                case NODE:
-                    document.getElementById("node-header").innerHTML =
-                        "Node [" + this.id + "]";
-                    nodePageSwitch(0);
-                    onNodeState(this.id, this.address);
-                    break;
+        get component() {
+            return this.componentVal;
+        }
+
+        set component(val) {
+            this.componentVal = val;
+            this.onclick = () => {
+                currentComponent = this.componentVal;
+                COMPONENT_CLICK[this.componentVal.type](this.componentVal);
             }
-        },
-    };
+            this.appendChild(
+                document.createTextNode(COMPONENTS[this.componentVal.type] + " " + this.componentVal.id)
+            );
+        }
 
-    if (typeof (EventSource) !== "undefined") {
+        constructor() {
+            super();
+        }
+    }
+
+    customElements.define('component-element', ComponentHTMLElement, { extends: "a" });
+
+    function initSideNav() {
+
+        let dropdown = document.getElementsByClassName("dropdown-btn");
+        for (let i = 0; i < dropdown.length; i++) {
+            dropdown[i].addEventListener("click", function () {
+                this.classList.toggle("sidebar_btn_active");
+                let dropdownContent = this.nextElementSibling;
+
+                if (dropdownContent.style.display === "block") {
+                    dropdownContent.style.display = "none";
+                } else {
+                    dropdownContent.style.display = "block";
+                }
+            });
+        }
+    }
+
+    function addToSideNav(side, component) {
+
+        let element = document.createElement("a", {is: 'component-element'});
+        element.component = component;
+        side.appendChild(element);
+    }
+
+    function initEventSource() {
+
+        if (typeof (EventSource) === "undefined") {
+            return;
+        }
+
         eventSource = new EventSource("/event");
 
         eventSource.onmessage = function (event) {
             let state = JSON.parse(event.data);
-            if (state.dist > 0 && currentPage.type === DISTRIBUTOR) {
+            if (state.dist > 0 && currentComponent.type === DISTRIBUTOR) {
                 onDistState();
-            } else if (state.coll > 0 && currentPage.type === COLLECTOR) {
-                onCollState(currentPage.id, currentPage.address);
-            } else if (state.node > 0 && currentPage.type === NODE) {
-                onNodeState(currentPage.id, currentPage.address);
+            } else if (state.coll > 0 && currentComponent.type === COLLECTOR) {
+                onCollState(currentComponent.id, currentComponent.webAddress);
+            } else if (state.node > 0 && currentComponent.type === NODE) {
+                onNodeState(currentComponent.id, currentComponent.webAddress);
             }
         };
 
@@ -387,19 +470,6 @@
         eventSource.onopen = function (event) {
             console.log("SSE connection opened");
         }
-    }
-
-    let dropdown = document.getElementsByClassName("dropdown-btn");
-    for (let i = 0; i < dropdown.length; i++) {
-        dropdown[i].addEventListener("click", function () {
-            this.classList.toggle("sidebar_btn_active");
-            let dropdownContent = this.nextElementSibling;
-            if (dropdownContent.style.display === "block") {
-                dropdownContent.style.display = "none";
-            } else {
-                dropdownContent.style.display = "block";
-            }
-        });
     }
 
     function componentPageSwitch(type) {
@@ -426,30 +496,8 @@
         }
     }
 
-    function nodePageSwitch(state) {
-
-        let nodeArea = document.getElementById("node-area");
-        let nodeNoWeb = document.getElementById("node-noweb");
-
-        switch(state) {
-            case 0:
-                nodeNoWeb.style.display = "none";
-                nodeArea.style.display = "none";
-                break;
-            case 1:
-                nodeNoWeb.style.display = "block";
-                nodeArea.style.display = "none";
-                break;
-            case 2:
-                nodeNoWeb.style.display = "none";
-                nodeArea.style.display = "block";
-                break;
-        }
-    }
-
     function onLoad() {
 
-        currentPage.set(DISTRIBUTOR);
         const loadBtn = document.getElementById("load-btn");
         const loadInput = document.getElementById("load-input");
         loadBtn.addEventListener(
@@ -459,6 +507,12 @@
             },
             false
         );
+
+        initSideNav();
+
+        initEventSource();
+
+        onDistState();
     }
 
     function onBeforeUnload() {
@@ -471,9 +525,10 @@
         eventSource.close();
     }
 
-    function onDistClick() {
+    function onDistClick(component) {
 
-        currentPage.set(DISTRIBUTOR);
+        componentPageSwitch(DISTRIBUTOR);
+        onDistState();
     }
 
     function onDistAddColl() {
@@ -541,18 +596,17 @@
         side.innerHTML = "";
 
         for (let collItem of data._collList) {
+
+            let component = new Component(collItem._id, COLLECTOR, collItem._arch,
+                collItem._address, collItem._webAddress);
+
             let newRow = table.insertRow();
             newRow.insertCell().innerHTML = collItem._id;
+            newRow.insertCell().innerHTML = ARCH_TYPES[collItem._arch];
+            newRow.insertCell().innerHTML = collItem._address;
             newRow.insertCell().innerHTML = COLL_STATES[collItem._state];
 
-            let component = document.createElement("a");
-            component.onclick = onCollClick;
-            component.id = collItem._id;
-            component.title = collItem._address;
-            component.appendChild(
-                document.createTextNode("Collector " + component.id)
-            );
-            side.appendChild(component);
+            addToSideNav(side, component);
         }
     }
 
@@ -566,24 +620,30 @@
         side.innerHTML = "";
 
         for (let nodeItem of data._nodeList) {
+
+            let component = new Component(nodeItem._id, NODE, nodeItem._arch,
+                nodeItem._address, nodeItem._webAddress);
+
             let newRow = table.insertRow();
             newRow.insertCell().innerHTML = nodeItem._id;
+            newRow.insertCell().innerHTML = ARCH_TYPES[nodeItem._arch];
+            newRow.insertCell().innerHTML = nodeItem._address;
             newRow.insertCell().innerHTML = NODE_STATES[nodeItem._state];
 
-            let component = document.createElement("a");
-            component.onclick = onNodeClick;
-            component.id = nodeItem._id;
-            component.title = nodeItem._address;
-            component.appendChild(
-                document.createTextNode("Node " + component.id)
-            );
-            side.appendChild(component);
+            addToSideNav(side, component);
         }
     }
 
-    function onCollClick() {
+    function onCollClick(component) {
 
-        currentPage.set(COLLECTOR, this.id, this.title);
+        componentPageSwitch(COLLECTOR);
+
+        document.getElementById("coll-header").innerHTML = "Collector [" + component.id + "]";
+        document.getElementById("coll-address").innerHTML = component.address;
+        document.getElementById("coll-web-address").innerHTML = component.webAddress;
+        document.getElementById("coll-arch").innerHTML = ARCH_TYPES[component.arch];
+
+        onCollState(component.id, component.webAddress);
     }
 
     function onCollState(id, address) {
@@ -714,9 +774,38 @@
         }
     }
 
-    function onNodeClick() {
+    function nodePageSwitch(state) {
 
-        currentPage.set(NODE, this.id, this.title);
+        let nodeArea = document.getElementById("node-area");
+        let nodeNoWeb = document.getElementById("node-noweb");
+
+        switch(state) {
+            case 0:
+                nodeNoWeb.style.display = "none";
+                nodeArea.style.display = "none";
+                break;
+            case 1:
+                nodeNoWeb.style.display = "block";
+                nodeArea.style.display = "none";
+                break;
+            case 2:
+                nodeNoWeb.style.display = "none";
+                nodeArea.style.display = "block";
+                break;
+        }
+    }
+
+    function onNodeClick(component) {
+
+        componentPageSwitch(NODE);
+
+        document.getElementById("node-header").innerHTML = "Node [" + component.id + "]";
+        document.getElementById("node-address").innerHTML = component.address;
+        document.getElementById("node-web-address").innerHTML = component.webAddress;
+        document.getElementById("node-arch").innerHTML = ARCH_TYPES[component.arch];
+
+        nodePageSwitch(0);
+        onNodeState(component.id, component.webAddress);
     }
 
     function onNodeState(id, address) {

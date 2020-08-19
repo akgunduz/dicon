@@ -98,8 +98,11 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
         auto *collItem = json_object_new_object();
         json_object_object_add(collItem, "_id", json_object_new_int(collector->getID()));
+        json_object_object_add(collItem, "_arch", json_object_new_int(collector->getArch()));
         json_object_object_add(collItem, "_state", json_object_new_int(collector->getState()));
         json_object_object_add(collItem, "_address",
+                               json_object_new_string(NetUtil::getIPPortString(collector->getAddress().get()).c_str()));
+        json_object_object_add(collItem, "_webAddress",
                                json_object_new_string(NetUtil::getIPPortString(collector->getAddress().getUI()).c_str()));
 
         json_object_array_add(collList, collItem);
@@ -115,8 +118,11 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
         auto *nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "_id", json_object_new_int(node->getID()));
+        json_object_object_add(nodeItem, "_arch", json_object_new_int(node->getArch()));
         json_object_object_add(nodeItem, "_state", json_object_new_int(node->getState()));
         json_object_object_add(nodeItem, "_address",
+                               json_object_new_string(NetUtil::getIPPortString(node->getAddress().get()).c_str()));
+        json_object_object_add(nodeItem, "_webAddress",
                                json_object_new_string(NetUtil::getIPPortString(node->getAddress().getUI()).c_str()));
 
         json_object_array_add(nodeList, nodeItem);
