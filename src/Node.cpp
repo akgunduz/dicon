@@ -18,7 +18,7 @@ Node *Node::newInstance(const char* path, int interface) {
 Node::Node(const char *rootPath, int interface) :
         Component(rootPath) {
 
-    host = new NodeHost(getRootPath());
+    host = std::make_unique<NodeHost>(getRootPath());
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg));
@@ -35,7 +35,6 @@ Node::~Node() {
 
     LOGS_T(getHost(), "Deallocating Node");
 
-    delete host;
 };
 
 bool Node::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {

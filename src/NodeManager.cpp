@@ -5,7 +5,7 @@
 
 #include "NodeManager.h"
 
-NodeManager::NodeManager(HostUnit *_host, bool _protect)
+NodeManager::NodeManager(TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {
 };
 

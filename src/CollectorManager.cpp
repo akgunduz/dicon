@@ -8,7 +8,7 @@
 #include "ComponentManager.h"
 #include "CollectorUnit.h"
 
-CollectorManager::CollectorManager(HostUnit *_host, bool _protect)
+CollectorManager::CollectorManager(TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {
 };
 

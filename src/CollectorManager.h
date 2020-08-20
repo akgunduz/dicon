@@ -30,7 +30,7 @@ protected:
 
 public:
 
-    CollectorManager(HostUnit *, bool);
+    CollectorManager(TypeHostUnit&, bool);
     ~CollectorManager() override;
 
     COLLSTATES getState(long);

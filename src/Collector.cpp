@@ -14,7 +14,7 @@ Collector *Collector::newInstance(const char* path, int interfaceOther, int inte
 Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode) :
         Component(rootPath) {
 
-    host = new CollectorHost(getRootPath());
+    host = std::make_unique<CollectorHost>(getRootPath());
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
@@ -33,7 +33,6 @@ Collector::~Collector() {
 
     delete job;
 
-    delete host;
 }
 
 bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {

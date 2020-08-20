@@ -22,7 +22,7 @@ Distributor *Distributor::newInstance(const char* path, int interfaceOther, int 
 Distributor::Distributor(const char *rootPath, int interfaceOther, int interfaceNode, bool autoWake) :
         Component(rootPath) {
 
-    host = new DistributorHost(getRootPath());
+    host = std::make_unique<DistributorHost>(getRootPath());
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
@@ -70,8 +70,6 @@ Distributor::~Distributor() {
     delete nodeManager;
 
     delete collectorManager;
-
-    delete host;
 
 }
 

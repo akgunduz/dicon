@@ -15,7 +15,7 @@ typedef std::map<long, TypeComponentUnit> TypeComponentMapIDList;
 
 class ComponentManager {
 
-    HostUnit *host;
+    TypeHostUnit& host;
 
     long idCounter;
 
@@ -37,7 +37,7 @@ protected:
 
 public:
 
-    explicit ComponentManager(HostUnit *, bool);
+    explicit ComponentManager(TypeHostUnit&, bool);
     virtual ~ComponentManager();
 
     TypeComponentMapIDList& get();

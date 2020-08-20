@@ -40,7 +40,7 @@ class Component {
 
 protected :
 
-    HostUnit *host{};
+    TypeHostUnit host{};
 
     TypeProcessMsgMap processMsg[COMP_MAX];
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];

@@ -5,7 +5,7 @@
 #include "ComponentManager.h"
 #include "Log.h"
 
-ComponentManager::ComponentManager(HostUnit *_host, bool _protect)
+ComponentManager::ComponentManager(TypeHostUnit& _host, bool _protect)
         : idCounter(1), host(_host), protect(_protect) {
 
     if (protect) {
