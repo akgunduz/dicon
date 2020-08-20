@@ -38,6 +38,7 @@ public:
     void testJobName(Distributor*, Collector*, Node*);
     void testLoadJob(Distributor*, Collector*, Node*);
     void testWakeUp(Distributor*, Collector*, Node*);
+    void testPipeControl(Distributor*, Collector*, Node*);
 
     int run() override;
 

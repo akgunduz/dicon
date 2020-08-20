@@ -116,6 +116,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestJobName.cpp
         ${TEST_PATH}/TestLoadJob.cpp
         ${TEST_PATH}/TestWakeUp.cpp
+        ${TEST_PATH}/TestPipeControl.cpp
         ${SOURCE_PATH}/Entry.cpp
         )
 

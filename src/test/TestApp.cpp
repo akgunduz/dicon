@@ -21,6 +21,7 @@ void TestApp::help() {
     PRINT("\tTest Job Name       : 'j'");
     PRINT("\tTest Load Job       : 'l'");
     PRINT("\tTest WakeUp         : 'w'");
+    PRINT("\tTest Pipe           : 'e'");
     PRINT("\tHelp                : 'h'");
     PRINT("\tQuit                : 'q'");
 }
@@ -30,6 +31,8 @@ int TestApp::run() {
     Distributor *d = componentController->getDistributor();
     Collector *c = componentController->getCollector(0);
     Node *n = componentController->getNode(0);
+
+    testPipeControl(d, c, n);
 
     int in;
     do {
@@ -59,6 +62,9 @@ int TestApp::run() {
                 break;
             case 'w':
                 testWakeUp(d, c, n);
+                break;
+            case 'e':
+                testPipeControl(d, c, n);
                 break;
             case 'h':
                 help();
