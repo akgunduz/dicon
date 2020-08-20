@@ -33,8 +33,8 @@ bool ConsoleApp::collStateHandler(long id) {
         return false;
     }
 
-    auto *job = collector->getJob();
-    if (job == nullptr) {
+    auto job = collector->getJob();
+    if (!job) {
         return false;
     }
 

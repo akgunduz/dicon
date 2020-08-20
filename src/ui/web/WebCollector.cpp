@@ -86,7 +86,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     fclose(uploadJobFile);
 
-    JobItem* job = collector->loadJob(tmpFile);
+    auto job = collector->loadJob(tmpFile);
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
@@ -140,8 +140,8 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto host = (CollectorHost&) collector->getHost();
 
-    auto *job = collector->getJob();
-    if (job == nullptr) {
+    auto job = collector->getJob();
+    if (!job) {
         sendError(&collector->getHost(), conn, "No Job is loaded yet!!!");
         return false;
     }

@@ -91,5 +91,7 @@ public:
     JOB_STATUS getStatus();
 };
 
+typedef std::shared_ptr<JobItem> TypeJobItem;
+typedef std::vector<TypeJobItem> TypeJobList;
 
 #endif //DICON_JOBITEM_H

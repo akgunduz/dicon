@@ -15,7 +15,7 @@
 
 class Collector : public Component {
 
-	JobItem *job{};
+    TypeJobItem job;
     ComponentUnit distributor{};
 
     explicit Collector(const char *, int, int);
@@ -42,9 +42,9 @@ public:
     ~Collector() override;
     static Collector* newInstance(const char*, int, int);
 
-    JobItem* getJob();
+    TypeJobItem& getJob();
     bool processJob();
-    JobItem* loadJob(const char*);
+    TypeJobItem& loadJob(const char*);
 };
 
 #endif //DICON_COLLECTOR_H

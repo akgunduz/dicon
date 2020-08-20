@@ -7,7 +7,7 @@
 
 void TestApp::testPipeControl(Distributor* distributor, Collector* collector, Node* node) {
 
-    auto* job = collector->loadJob("../sample/Job1_x86_linux");
+    auto job = collector->loadJob("../sample/Job1_x86_linux");
     if (!job) {
         PRINT("Job could not initialized");
         return;

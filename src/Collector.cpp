@@ -30,9 +30,6 @@ Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode
 Collector::~Collector() {
 
     LOGS_T(getHost(), "Deallocating Collector");
-
-    delete job;
-
 }
 
 bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {
@@ -229,20 +226,16 @@ bool Collector::processJob() {
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }
 
-JobItem* Collector::loadJob(const char* zipFile) {
+TypeJobItem& Collector::loadJob(const char* zipFile) {
 
-    if (job) {
-        delete job;
-    }
-
-    job = new JobItem(getHost(), zipFile, JobItem::jobID++);
+    job = std::make_shared<JobItem>(getHost(), zipFile, JobItem::jobID++);
 
     notifyUI(NOTIFYSTATE_ONCE);
 
     return job;
 }
 
-JobItem *Collector::getJob() {
+TypeJobItem& Collector::getJob() {
 
     return job;
 }
