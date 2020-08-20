@@ -25,12 +25,15 @@
             height: 100%;
             width: 12rem;
             position: fixed;
+            display: flex;
+            flex-direction: column;
             z-index: auto;
             top: 0;
             left: 0;
             background-color: #222;
             overflow-x: hidden;
             padding-top: 2rem;
+            justify-content: space-between;
         }
 
         /* Style the sidenav links and the dropdown button */
@@ -86,16 +89,18 @@
             background-color: #bababa;
         }
 
+        .single-container {
+            width: 49%;
+        }
+
         .standard-container {
             width: 100%;
             /*background-color: antiquewhite;*/
-            padding: 0rem;
         }
 
         .horizontal-container {
             width: 100%;
             /*background-color: #90e3ff;*/
-            padding: 0rem;
             display: flex;
             justify-content: space-between;
         }
@@ -113,27 +118,26 @@
             text-align: left;
             padding: 0.5rem;
         }
-
-        .single-container {
-            width: 49%;
-        }
     </style>
 </head>
 
 <body onload="onLoad()" onbeforeunload="onBeforeUnload()">
 
 <div class="sidenav">
-    <a onclick="onDistClick()"> Distributor</a>
-    <button class="dropdown-btn">
-        Collectors
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div id="sidebar-coll-list" class="dropdown-container"></div>
-    <button class="dropdown-btn">
-        Nodes
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div id="sidebar-node-list" class="dropdown-container"></div>
+    <div>
+        <a onclick="onDistClick()"> Distributor </a>
+        <button class="dropdown-btn"> Collectors
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="sidebar-coll-list" class="dropdown-container"></div>
+        <button class="dropdown-btn"> Nodes
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="sidebar-node-list" class="dropdown-container"></div>
+    </div>
+    <div>
+        <a onclick="onQuitClick()"> Quit </a>
+    </div>
 </div>
 
 <div id="debug-block" class="component-block" hidden>
@@ -336,6 +340,7 @@
 
     let REST_URI = "/rest";
     let REST_STATE = "/state";
+    let REST_QUIT = "/quit";
 
     let REST_DIST_URI = REST_URI + "/dist";
     let REST_DIST_POLL = "/poll";
@@ -527,6 +532,19 @@
     function onBeforeUnload() {
 
         eventSource.close();
+    }
+
+    function onQuitClick() {
+
+        let xHTTP = new XMLHttpRequest();
+        xHTTP.onreadystatechange = state => {
+            console.log(xHTTP.status);
+        }
+        xHTTP.open(
+            "GET", "http://" + location.host + REST_URI + "/" + REST_QUIT,
+            true
+        );
+        xHTTP.send();
     }
 
     function onDistClick(component) {
