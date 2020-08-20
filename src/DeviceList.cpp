@@ -25,7 +25,6 @@ int createMask(uint32_t baseAddress) {
 
 DeviceList::DeviceList() {
 
-    Device *device = nullptr;
     struct ifaddrs* ifAddrStruct = nullptr;
     struct ifaddrs* loop = nullptr;
 
@@ -42,12 +41,10 @@ DeviceList::DeviceList() {
                 continue;
             }
 
-            device = new Device(loop->ifa_name, INTERFACE_NET,
-                                ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
-                                               (loop->ifa_flags & IFF_LOOPBACK) > 0);
-
-            add(device);
+            add(std::make_unique<Device>(loop->ifa_name, INTERFACE_NET,
+                                         ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
+                                         createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
+                                         (loop->ifa_flags & IFF_LOOPBACK) > 0));
         }
     };
 
@@ -57,9 +54,7 @@ DeviceList::DeviceList() {
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution(1, time(nullptr));
 
-    device = new Device("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator));
-
-    add(device);
+    add(std::make_unique<Device>("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator)));
 }
 
 DeviceList *DeviceList::getInstance() {
@@ -70,13 +65,14 @@ DeviceList *DeviceList::getInstance() {
     return instance;
 }
 
-bool DeviceList::add(Device *device) {
+bool DeviceList::add(TypeDevice device) {
 
-    list.push_back(device);
-    return false;
+    list.emplace_back(std::move(device));
+
+    return true;
 }
 
-Device* DeviceList::get(int index) {
+TypeDevice& DeviceList::get(int index) {
 
     return list[index];
 }
@@ -89,9 +85,4 @@ long DeviceList::getCount() {
 DeviceList::~DeviceList() {
 
     PRINT("Deallocating DeviceList");
-
-    for (auto* device : list) {
-
-        delete device;
-    }
 }

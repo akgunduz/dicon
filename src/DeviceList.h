@@ -9,8 +9,6 @@
 
 #include "Device.h"
 
-typedef std::vector<Device*> TypeDeviceList;
-
 class DeviceList {
 
     static DeviceList *instance;
@@ -23,8 +21,8 @@ public:
 
     ~DeviceList();
     static DeviceList* getInstance();
-    bool add(Device*);
-    Device* get(int);
+    bool add(TypeDevice);
+    TypeDevice& get(int);
     long getCount();
 
 };

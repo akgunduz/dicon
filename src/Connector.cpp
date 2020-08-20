@@ -7,7 +7,7 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-Interface* Connector::createInterface(Device *device,
+Interface* Connector::createInterface(TypeDevice& device,
                                       const InterfaceSchedulerCB *schedulerCB,
                                       const InterfaceHostCB *hostCB) {
 

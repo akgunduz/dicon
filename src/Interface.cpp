@@ -5,7 +5,7 @@
 
 #include "Interface.h"
 
-Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
+Interface::Interface(TypeDevice& _device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
         : device(_device), hostCB(hostCB) {
 
     scheduler = new Scheduler();
@@ -125,7 +125,7 @@ HostUnit &Interface::getHost() {
     return hostCB->hostCB(hostCB->arg);
 }
 
-Device *Interface::getDevice() {
+TypeDevice& Interface::getDevice() {
 
     return device;
 }

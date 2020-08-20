@@ -9,7 +9,7 @@
 
 class Device {
 
-    char name[NAME_MAX]{};
+    std::string name;
 
     INTERFACE type;
 
@@ -19,15 +19,18 @@ class Device {
 
 public:
 
-    Device(const char*, INTERFACE, uint32_t , uint8_t = 0, bool = false);
+    Device(std::string , INTERFACE, uint32_t , uint8_t = 0, bool = false);
     ~Device();
 
-    const char* getName() const;
+    const std::string& getName() const;
     INTERFACE getType() const;
     uint32_t getBase() const;
     uint8_t getMask() const;
     bool isLoopback() const;
 
 };
+
+typedef std::unique_ptr<Device> TypeDevice;
+typedef std::vector<TypeDevice> TypeDeviceList;
 
 #endif //DICON_DEVICE_H

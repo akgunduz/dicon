@@ -18,7 +18,8 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
     deviceList = DeviceList::getInstance();
 
     PRINT("Using network interfaces : %s and %s",
-          deviceList->get(interfaces[0])->getName(), deviceList->get(interfaces[1])->getName());
+          deviceList->get(interfaces[0])->getName().c_str(),
+          deviceList->get(interfaces[1])->getName().c_str());
 
     componentController = ComponentController::newInstance(interfaces);
 

@@ -63,7 +63,7 @@ public:
 
     const char* getRootPath();
 
-    Device* getDevice(COMPONENT);
+    TypeDevice& getDevice(COMPONENT);
     Address& getInterfaceAddress(COMPONENT);
     Address& getInterfaceMulticastAddress(COMPONENT);
     TypeAddressList getInterfaceAddressList(COMPONENT);

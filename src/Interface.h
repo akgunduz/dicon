@@ -21,7 +21,7 @@ enum NOTIFIER_TYPE {
 
 class Interface {
 
-	Device *device{};
+    TypeDevice& device;
 
     Address address{};
     Address multicastAddress{};
@@ -41,7 +41,7 @@ protected :
 
 	bool initThread();
 	void end();
-	Interface(Device *,
+	Interface(TypeDevice&,
               const InterfaceSchedulerCB*,
               const InterfaceHostCB*);
 
@@ -51,7 +51,7 @@ public :
 
 	bool push(MSG_DIR, CommUnit&, TypeMessage);
 	HostUnit& getHost();
-	Device* getDevice();
+    TypeDevice& getDevice();
     Address& getAddress();
     Address& getMulticastAddress();
 

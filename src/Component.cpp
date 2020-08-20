@@ -37,8 +37,8 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
 
     auto *deviceList = DeviceList::getInstance();
 
-    auto *nodeDevice = deviceList->get(interfaceNode);
-    auto *otherDevice = deviceList->get(interfaceOther);
+    auto &nodeDevice = deviceList->get(interfaceNode);
+    auto &otherDevice = deviceList->get(interfaceOther);
 
     interfaces[COMP_NODE] = Connector::createInterface(nodeDevice, schedulerCB, hostCB);
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
@@ -105,59 +105,34 @@ bool Component::defaultProcessMsg(ComponentUnit &owner, TypeMessage msg) {
     return true;
 }
 
-Device *Component::getDevice(COMPONENT target) {
+TypeDevice& Component::getDevice(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->getDevice();
-    }
-
-    return nullptr;
+    return interfaces[target]->getDevice();
 }
 
 Address &Component::getInterfaceAddress(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->getAddress();
-    }
-
-    return Address::invalid;
+    return interfaces[target]->getAddress();
 }
 
 Address &Component::getInterfaceMulticastAddress(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->getMulticastAddress();
-    }
-
-    return Address::invalid;
+    return interfaces[target]->getMulticastAddress();
 }
 
 TypeAddressList Component::getInterfaceAddressList(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->getAddressList();
-    }
-
-    return TypeAddressList();
+    return interfaces[target]->getAddressList();
 }
 
 INTERFACE Component::getInterfaceType(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->getType();
-    }
-
-    return INTERFACE_MAX;
+    return interfaces[target]->getType();
 }
-
 
 bool Component::isSupportMulticast(COMPONENT target) {
 
-    if (interfaces[target] != nullptr) {
-        return interfaces[target]->isSupportMulticast();
-    }
-
-    return false;
+    return interfaces[target]->isSupportMulticast();
 }
 
 bool Component::send(ComponentUnit &target, TypeMessage msg) {

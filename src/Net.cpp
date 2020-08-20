@@ -7,7 +7,7 @@
 #include "Util.h"
 #include "NetUtil.h"
 
-Net::Net(Device *device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
+Net::Net(TypeDevice& device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
         : Interface(device, scb, hcb) {
 
     if (!initTCP()) {

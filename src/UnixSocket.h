@@ -24,7 +24,7 @@ class UnixSocket : public Interface {
 
 public :
 
-	UnixSocket(Device*, const InterfaceSchedulerCB*, const InterfaceHostCB*);
+	UnixSocket(TypeDevice&, const InterfaceSchedulerCB*, const InterfaceHostCB*);
 	~UnixSocket() override;
 
     INTERFACE getType() override;
