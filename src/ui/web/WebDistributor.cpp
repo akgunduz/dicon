@@ -94,7 +94,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
 
-        auto *collector = (CollectorUnit*) collectorPair.second;
+        auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
 
         auto *collItem = json_object_new_object();
         json_object_object_add(collItem, "_id", json_object_new_int(collector->getID()));
@@ -114,7 +114,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
 
-        auto *node = (NodeUnit*) nodePair.second;
+        auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 
         auto *nodeItem = json_object_new_object();
         json_object_object_add(nodeItem, "_id", json_object_new_int(node->getID()));
@@ -138,5 +138,3 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     return true;
 }
-
-

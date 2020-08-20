@@ -26,8 +26,8 @@ class Net : public Interface {
 	bool initTCP();
 	bool initMulticast();
     bool runReceiver() override;
-	bool runSender(ComponentUnit, Message *) override;
-    bool runMulticastSender(ComponentUnit, Message *) override;
+	bool runSender(ComponentUnit, TypeMessage) override;
+    bool runMulticastSender(ComponentUnit, TypeMessage) override;
 
 public :
 

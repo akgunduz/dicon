@@ -6,19 +6,19 @@
 
 void sendWakeUp(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP);
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
 void sendAlive(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ALIVE);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ALIVE);
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processWakeUpMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processWakeUpMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(component->getHost(), owner, MSGDIR_SEND, "Sending Alive");
 
@@ -26,7 +26,7 @@ bool processWakeUpMsg(Component* component, ComponentUnit& owner, Message *msg) 
     return true;
 }
 
-bool processAliveMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processAliveMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     return true;
 }

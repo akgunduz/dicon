@@ -18,7 +18,7 @@ void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* 
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
-        auto *content = job->getFile(j);
+        auto content = job->getFile(j);
 
         PRINT("\tFile : %s, State : %s", content->getName(), content->required() ? "required"
             : content->check() ? "exists" : "output");
@@ -28,7 +28,7 @@ void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* 
 
     for (int j = 0; j < job->getProcessCount(); j++) {
 
-        auto* process = job->getProcess(j);
+        auto process = job->getProcess(j);
         PRINT("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
               process->getID(),
               process->getProcess(),

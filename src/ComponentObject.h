@@ -9,13 +9,13 @@
 
 class ComponentObject {
 
-    ComponentUnit assigned{};
+    TypeComponentUnit assigned{};
 
 public:
 
-    ComponentUnit& getAssigned();
-    void setAssigned(COMPONENT, long, Address);
-    void setAssigned(ComponentUnit*);
+    TypeComponentUnit& getAssigned();
+    void setAssigned(COMPONENT, ARCH, long, Address);
+    void setAssigned(const TypeComponentUnit&);
 
 };
 

@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "Util.h"
 #include "CollectorUnit.h"
+#include "pstreams/pstream.h"
 
 #define PROCESS_SLEEP_TIME 1000
 
@@ -30,16 +31,21 @@ Node::Node(const char *rootPath, int interface) :
     initInterfaces(COMP_NODE, interface, interface);
 }
 
-Node::~Node() = default;
+Node::~Node() {
 
-bool Node::processDistributorWakeupMsg(ComponentUnit& owner, Message *msg) {
+    LOGS_T(getHost(), "Deallocating Node");
+
+    delete host;
+};
+
+bool Node::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {
 
     setDistributor(owner);
 
     return send2DistributorAliveMsg(owner);
 }
 
-bool Node::processDistributorIDMsg(ComponentUnit& owner, Message *msg) {
+bool Node::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     if (!setID(msg->getHeader().getVariant(0))) {
 
@@ -51,12 +57,12 @@ bool Node::processDistributorIDMsg(ComponentUnit& owner, Message *msg) {
     return send2DistributorIDMsg(owner);
 }
 
-bool Node::processDistributorProcessMsg(ComponentUnit& owner, Message *msg) {
+bool Node::processDistributorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
     auto& nodeHost = (NodeHost&) getHost();
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] is approved by distributor",
-           nodeHost.getAssigned().getID(),
+           nodeHost.getAssigned()->getID(),
            nodeHost.getProcess().getID());
 
     TypeProcessFileList requiredList;
@@ -72,24 +78,24 @@ bool Node::processDistributorProcessMsg(ComponentUnit& owner, Message *msg) {
 
     if (!requiredList.empty()) {
 
-        CollectorUnit collObj(nodeHost.getAssigned());
+        CollectorUnit collObj(*nodeHost.getAssigned());
 
         return send2CollectorInfoMsg(collObj, nodeHost.getProcess().getID(),requiredList);
 
     } else {
 
-        return processJob(owner, msg);
+        return processJob(owner, std::move(msg));
     }
 }
 
-bool Node::processCollectorProcessMsg(ComponentUnit& owner, Message *msg) {
+bool Node::processCollectorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
     auto& nodeHost = (NodeHost&) getHost();
 
     componentWatch.start();
 
     nodeHost.setState(NODESTATE_BUSY);
-    nodeHost.setAssigned(owner.getType(), owner.getID(), owner.getAddress());
+    nodeHost.setAssigned(owner.getType(), owner.getArch(), owner.getID(), owner.getAddress());
 
     nodeHost.getProcess() = *msg->getData().getProcess(0);
     nodeHost.getProcess().setAssigned(owner.getID());
@@ -102,17 +108,17 @@ bool Node::processCollectorProcessMsg(ComponentUnit& owner, Message *msg) {
     return send2DistributorBusyMsg(distributor, owner.getID());
 }
 
-bool Node::processCollectorBinaryMsg(ComponentUnit& owner, Message *msg) {
+bool Node::processCollectorBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
     auto& nodeHost = (NodeHost&) getHost();
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received",
            owner.getID(), nodeHost.getProcess().getID());
 
-    return processJob(owner, msg);
+    return processJob(owner, std::move(msg));
 }
 
-bool Node::processCollectorReadyMsg(ComponentUnit& owner, Message *msg) {
+bool Node::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
     auto& nodeHost = (NodeHost&) getHost();
 
@@ -130,15 +136,15 @@ bool Node::processCollectorReadyMsg(ComponentUnit& owner, Message *msg) {
 }
 
 
-bool Node::processJob(const ComponentUnit& owner, Message *msg) {
+bool Node::processJob(const ComponentUnit& owner, TypeMessage msg) {
 
     auto& nodeHost = (NodeHost&) getHost();
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
-           nodeHost.getAssigned().getID(),
+           nodeHost.getAssigned()->getID(),
            nodeHost.getProcess().getID());
 
-    int result = processCommand(nodeHost.getAssigned().getID(),
+    int result = processCommand(nodeHost.getAssigned()->getID(),
                                 nodeHost.getProcess().getID(),
                                 nodeHost.getProcess().getParsedProcess());
 
@@ -157,44 +163,44 @@ bool Node::processJob(const ComponentUnit& owner, Message *msg) {
         }
     }
 
-    CollectorUnit obj(nodeHost.getAssigned());
+    CollectorUnit obj(*nodeHost.getAssigned());
 
     return send2CollectorBinaryMsg(obj, nodeHost.getProcess().getID(),outputList);
 }
 
 bool Node::send2DistributorReadyMsg(ComponentUnit& target) {
 
-	auto *msg = new Message(getHost(), target, MSGTYPE_READY);
+	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
 
-	return send(target, msg);
+	return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorAliveMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ALIVE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ALIVE);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorIDMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorBusyMsg(ComponentUnit& target, long collID) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_BUSY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BUSY);
 
     msg->getHeader().setVariant(0, collID);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Node::send2CollectorInfoMsg(ComponentUnit& target, long processID, TypeProcessFileList &fileList) {
 
-	auto *msg = new Message(getHost(), target, MSGTYPE_INFO);
+	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO);
 
     msg->getData().setStreamFlag(STREAM_FILEINFO);
     msg->getData().addFileList(processID, fileList);
@@ -204,12 +210,12 @@ bool Node::send2CollectorInfoMsg(ComponentUnit& target, long processID, TypeProc
            processID,
            fileList.size());
 
-	return send(target, msg);
+	return send(target, std::move(msg));
 }
 
 bool Node::send2CollectorBinaryMsg(ComponentUnit& target, long processID, TypeProcessFileList &fileList) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_BINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
     msg->getData().setStreamFlag(STREAM_FILEBINARY);
     msg->getData().addFileList(processID, fileList);
@@ -218,7 +224,7 @@ bool Node::send2CollectorBinaryMsg(ComponentUnit& target, long processID, TypePr
            target.getID(),
            processID);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 void Node::setDistributor(const ComponentUnit& _distributor) {
@@ -245,30 +251,31 @@ void Node::parseCommand(char *cmd, char **argv) {
 
 bool Node::processCommand(long collID, long processID, const char *cmd) {
 
-    char fullCmd[PATH_MAX];
+    std::string childOut;
+    std::string parsedCmd = Util::parsePath(getHost().getRootPath(), cmd);
 
-    strcpy(fullCmd, Util::parsePath(getHost().getRootPath(), cmd).c_str());
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
+           collID, processID, parsedCmd.c_str());
 
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s", collID, processID, fullCmd);
-
-    char childOut[PATH_MAX];
     int tryCount = 1;
     while(tryCount++ < 10) {
 
-        FILE *fdProcess = popen(fullCmd, "r");
-        if (fdProcess == nullptr) {
-            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command", collID, processID, fullCmd);
+        redi::ipstream inProcess(parsedCmd);
+
+        if (!inProcess.good()) {
+            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command",
+                   collID, processID, parsedCmd.c_str());
             return false;
         }
 
-        while (fgets(childOut, PATH_MAX, fdProcess)) {
-            const char *p = Util::trimEndLine(childOut);
-            if (strcmp(p, "") != 0) {
-                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s", collID, processID, p);
+        while (std::getline(inProcess, childOut)) {
+            Util::trim(childOut);
+            if (!childOut.empty()) {
+                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s", collID, processID, childOut.c_str());
             }
         }
 
-        int res = pclose(fdProcess);
+        int res = inProcess.close();
         if (res == 0) {
             return true;
         }

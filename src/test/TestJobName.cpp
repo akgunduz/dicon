@@ -6,17 +6,17 @@
 
 void sendJobName(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
 
-    auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
+    auto job = std::make_unique<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     msg->getData().setStreamFlag(STREAM_JOB);
     msg->getData().setJobName(job->getJobName());
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processJobNameMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processJobNameMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     const char* jobName = msg->getData().getJobName();
 
@@ -32,5 +32,6 @@ void TestApp::testJobName(Distributor* distributor, Collector* collector, Node* 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, processJobNameMsg);
 
     ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
+
     sendJobName(collector, target);
 }

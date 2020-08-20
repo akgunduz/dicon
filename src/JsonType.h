@@ -27,4 +27,6 @@ public:
     }
 };
 
+typedef std::unique_ptr<JsonType> TypeJsonType;
+
 #endif //DICON_JSONTYPE_H

@@ -21,8 +21,8 @@ enum NOTIFYSTATE {
 
 class Component;
 
-typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, Message *);
-typedef bool (*TypeStaticProcessComponentMsg)(Component*, ComponentUnit&, Message *);
+typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, TypeMessage);
+typedef bool (*TypeStaticProcessComponentMsg)(Component*, ComponentUnit&, TypeMessage);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
@@ -69,11 +69,11 @@ public:
     TypeAddressList getInterfaceAddressList(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
-    bool onReceive(ComponentUnit&, MSG_TYPE, Message *);
+    bool onReceive(ComponentUnit&, MSG_TYPE, TypeMessage);
 
-    bool send(ComponentUnit&, Message*);
+    bool send(ComponentUnit&, TypeMessage);
 
-    bool defaultProcessMsg(ComponentUnit&, Message *);
+    bool defaultProcessMsg(ComponentUnit&, TypeMessage);
 
     static void registerNotify(void*, TypeNotifyCB);
 

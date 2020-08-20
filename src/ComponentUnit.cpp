@@ -37,3 +37,5 @@ void ComponentUnit::setCheckTime(long _checkTime) {
 
     checkTime = _checkTime;
 }
+
+ComponentUnit::~ComponentUnit() = default;

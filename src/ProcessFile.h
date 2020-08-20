@@ -11,14 +11,15 @@ class ProcessFile {
 
     bool is_output{};
     long processID{};
-    FileItem *content{};
+    TypeFileItem content{};
 
 public:
 
-    ProcessFile(FileItem*, long = 0, bool = false);
+    ProcessFile(TypeFileItem, long = 0, bool = false);
+    ~ProcessFile();
     bool isOutput() const;
-    FileItem* get();
-    long getAssignedProcess();
+    TypeFileItem get();
+    long getAssignedProcess() const;
     void setAssignedProcess(long _processID);
     void setOutputState(bool);
 };

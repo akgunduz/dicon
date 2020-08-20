@@ -13,14 +13,17 @@
 class MessageItem : public SchedulerItem {
 
     CommUnit unit{};
-    Message *msg{};
+    TypeMessage msg{};
 
 public:
 
-    MessageItem(MSG_DIR, CommUnit&, Message * = nullptr);
+    MessageItem(MSG_DIR, CommUnit&, TypeMessage = nullptr);
+    ~MessageItem() override;
 
     CommUnit& getUnit();
-    Message* getMessage();
+    TypeMessage& getMessage();
 };
+
+typedef std::unique_ptr<MessageItem> TypeMessageItem;
 
 #endif //DICON_MESSAGEITEM_H

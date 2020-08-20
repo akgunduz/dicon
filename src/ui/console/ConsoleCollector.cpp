@@ -44,7 +44,7 @@ bool ConsoleApp::collStateHandler(long id) {
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
-        auto *content = job->getFile(j);
+        auto content = job->getFile(j);
 
         PRINT("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
     }

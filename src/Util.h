@@ -21,7 +21,6 @@ public:
 	static std::string hex2str(const uint8_t *, int);
 	static bool str2hex(uint8_t *, const char *, uint32_t);
     static void replaceStr(std::string&, const std::string&, const std::string&);
-    static const char* trimEndLine(char *);
     static void mkPath(const char *);
 	static void removePath(const char *);
 	static std::string extractFile(const char *);
@@ -38,6 +37,23 @@ public:
     static bool isMulticast();
 	static void init();
 	static bool extractZipFile(const char*, const char*);
+
+    static inline void ltrim(std::string &s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+            return !std::isspace(ch);
+        }));
+    }
+
+    static inline void rtrim(std::string &s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
+    }
+
+    static inline void trim(std::string &s) {
+        ltrim(s);
+        rtrim(s);
+    }
 
 };
 

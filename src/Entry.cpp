@@ -150,5 +150,9 @@ int main(int argc, char** argv) {
 
 #endif
 
-    return app->run();
+    int status = app->run();
+
+    delete app;
+
+    return status;
 }

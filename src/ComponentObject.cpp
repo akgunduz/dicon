@@ -4,21 +4,17 @@
 
 #include "ComponentObject.h"
 
-ComponentUnit &ComponentObject::getAssigned() {
+TypeComponentUnit& ComponentObject::getAssigned() {
 
     return assigned;
 }
 
-void ComponentObject::setAssigned(COMPONENT _type, long _id, Address _address) {
+void ComponentObject::setAssigned(COMPONENT _type, ARCH _arch, long _id, Address _address) {
 
-    assigned.setType(_type);
-    assigned.setID(_id);
-    assigned.setAddress(_address);
+    assigned = std::make_shared<ComponentUnit>(_type, _arch, _id, _address);
 }
 
-void ComponentObject::setAssigned(ComponentUnit *unit) {
+void ComponentObject::setAssigned(const TypeComponentUnit& unit) {
 
-    assigned.setType(unit->getType());
-    assigned.setID(unit->getID());
-    assigned.setAddress(unit->getAddress());
+    assigned = unit;
 }

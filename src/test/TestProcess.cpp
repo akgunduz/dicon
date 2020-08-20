@@ -6,23 +6,25 @@
 
 void sendProcess(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
 
-    auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
+    auto job = std::make_unique<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     job->getProcess(0)->check();
 
     msg->getData().setStreamFlag(STREAM_PROCESS);
     msg->getData().addProcess(job->getProcess(0));
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processProcessMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processProcessMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
-    ProcessItem *processItem = msg->getData().getProcess(0);
+    auto processItem = msg->getData().getProcess(0);
 
-    LOGS_I(component->getHost(), "Message Process has came from : %s", ComponentType::getName(owner.getType()));
+    LOGS_I(component->getHost(), "Message Process[%d] has came from : %s",
+           processItem->getID(),
+           ComponentType::getName(owner.getType()));
 
     return true;
 }

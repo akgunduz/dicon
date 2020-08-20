@@ -5,10 +5,10 @@
 #include "ComponentManager.h"
 #include "Log.h"
 
-ComponentManager::ComponentManager(HostUnit *_host, bool autoWake)
-        : idCounter(1), host(_host) {
+ComponentManager::ComponentManager(HostUnit *_host, bool _protect)
+        : idCounter(1), host(_host), protect(_protect) {
 
-    if (!autoWake) {
+    if (protect) {
         return;
     }
 
@@ -19,9 +19,35 @@ ComponentManager::ComponentManager(HostUnit *_host, bool autoWake)
 
 ComponentManager::~ComponentManager() {
 
-    threadRun = false;
-    thread.join();
+    if (!protect) {
+        threadRun = false;
+        thread.join();
+    }
     clear();
+}
+
+void ComponentManager::checkDead() {
+
+    std::unique_lock<std::mutex> lock(mutex);
+
+    long curTime = time(nullptr);
+
+    for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
+
+        if (curTime - iterator->second->getCheckTime() > ALIVE_INTERVAL) {
+
+            LOGS_I(*host, "%s[%d] is removed from network",
+                   ComponentType::getName(iterator->second->getType()), iterator->second->getID());
+
+            componentsMapDead.emplace_back(std::move(iterator->second));
+
+            iterator = componentsMapID.erase(iterator);
+
+        } else {
+
+            ++iterator;
+        }
+    }
 }
 
 void ComponentManager::process() {
@@ -32,65 +58,47 @@ void ComponentManager::process() {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
-        if (!threadRun) {
-            break;
-        }
-
         if (loop++ < CHECK_INTERVAL) {
             continue;
         }
 
         loop = 0;
 
-        long curTime = time(nullptr);
-
-        mutex.lock();
-
-        for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
-
-            if (curTime - iterator->second->getCheckTime() > ALIVE_INTERVAL) {
-
-                ComponentUnit *object = iterator->second;
-                componentsMapAddress.erase(object->getAddress());
-                iterator = componentsMapID.erase(iterator);
-
-                LOGS_I(*host, "%s[%d] is removed from network",
-                      ComponentType::getName(object->getType()), object->getID());
-
-                componentsMapDead.emplace_back(object);
-
-            } else {
-
-                ++iterator;
-            }
-        }
-
-        mutex.unlock();
+        checkDead();
     }
 }
 
 size_t ComponentManager::size() {
 
-    mutex.lock();
-
-    size_t size = componentsMapID.size();
-
-    mutex.unlock();
-
-    return size;
+    return componentsMapID.size();
 }
 
-TypeComponentMapIDList &ComponentManager::get() {
+TypeComponentMapIDList& ComponentManager::get() {
 
     return componentsMapID;
 }
 
-TypeComponentList &ComponentManager::getDead() {
+TypeComponentUnit ComponentManager::get(long id) {
+
+    std::unique_lock<std::mutex> lock(mutex);
+
+    auto search = componentsMapID.find(id);
+    if (search != componentsMapID.end()) {
+
+        return componentsMapID[id];
+    }
+
+    return nullptr;
+}
+
+TypeComponentList& ComponentManager::getDead() {
 
     return componentsMapDead;
 }
 
-ComponentUnit* ComponentManager::getDead(long index) {
+TypeComponentUnit ComponentManager::getDead(long index) {
+
+    std::unique_lock<std::mutex> lock(mutex);
 
     if (index < componentsMapDead.size()) {
         return componentsMapDead[index];
@@ -99,88 +107,44 @@ ComponentUnit* ComponentManager::getDead(long index) {
     return nullptr;
 }
 
-ComponentUnit* ComponentManager::get(long id) {
-
-    ComponentUnit *object = nullptr;
-
-    mutex.lock();
-
-    auto search = componentsMapID.find(id);
-    if (search != componentsMapID.end()) {
-
-        object = componentsMapID[id];
-    }
-
-    mutex.unlock();
-
-    return object;
-}
-
 long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
 
-    long newID = 0;
-
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
 
     isAlreadyAdded = false;
 
-    auto search = componentsMapAddress.find(address);
-    if (search == componentsMapAddress.end()) {
+    for (auto &component : componentsMapID) {
 
-        newID = idCounter++;
-
-        ComponentUnit *object = createUnit(arch, newID, address);
-
-        object->setCheckTime(time(nullptr));
-
-        componentsMapAddress[address] = object;
-        componentsMapID[newID] = object;
-
-        LOGS_I(*host, "%s[%d] is added to network",
-               ComponentType::getName(object->getType()), object->getID());
-
-    } else {
+        if (component.second->getAddress() != address) {
+            continue;
+        }
 
         isAlreadyAdded = true;
 
-        search->second->setCheckTime(time(nullptr));
+        component.second->setCheckTime(time(nullptr));
 
-        newID = search->second->getID();
+        return component.second->getID();
+
     }
 
-    mutex.unlock();
+    long newID = idCounter++;
+
+    auto object = createUnit(arch, newID, address);
+
+    object->setCheckTime(time(nullptr));
+
+    LOGS_I(*host, "%s[%d] is added to network",
+           ComponentType::getName(object->getType()), object->getID());
+
+    componentsMapID[newID] = std::move(object);
 
     return newID;
 }
 
 void ComponentManager::clear() {
 
-    mutex.lock();
-
-    for (auto & component : componentsMapID) {
-
-        delete component.second;
-
-    }
-
-    for (auto & component : componentsMapDead) {
-
-        delete component;
-
-    }
+    std::unique_lock<std::mutex> lock(mutex);
 
     componentsMapID.clear();
     componentsMapDead.clear();
-    componentsMapAddress.clear();
-
-    mutex.unlock();
-
 }
-
-bool ComponentManager::isExist(long id) {
-
-    return get(id) != nullptr;
-}
-
-
-

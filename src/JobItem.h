@@ -30,9 +30,9 @@ protected:
 
     std::mutex mutex;
 
-    std::vector<ContentItem *> contentList[MAX_CONTENT_TYPE];
+    TypeContentList contentList[MAX_CONTENT_TYPE];
 
-    std::map<int, JsonType *> contentTypes;
+    std::map<int, TypeJsonType> contentTypes;
 
     long duration{};
 
@@ -46,7 +46,7 @@ public:
 
     JobItem(const HostUnit&, const char*, long);
     ~JobItem() override;
-    ContentItem* getContent(int type, int index) const;
+    TypeContentItem getContent(int type, int index) const;
     int getContentCount(int type) const;
     void reset();
     bool parse();
@@ -64,18 +64,18 @@ public:
 
     int getProcessCount() const;
     int getProcessCount(PROCESS_STATE) const;
-    ProcessItem* getProcess(int) const;
-    ProcessItem* getProcessByID(long) const;
+    TypeProcessItem getProcess(int) const;
+    TypeProcessItem getProcessByID(long) const;
 
     int getFileCount() const;
-    FileItem* getFile(int) const;
-    FileItem* getFileByID(long) const;
+    TypeFileItem getFile(int) const;
+    TypeFileItem getFileByID(long) const;
 
     int getParameterCount() const;
-    ParameterItem* getParameter(int) const;
+    TypeParameterItem getParameter(int) const;
 
-    ProcessItem* assignNode(ComponentUnit *);
-    ProcessItem* reAssignNode(ComponentUnit *, ComponentUnit *);
+    TypeProcessItem assignNode(long);
+    TypeProcessItem reAssignNode(long, long);
 
     int getByOutput(int) const;
     bool setProcessIDByOutput(long, long);

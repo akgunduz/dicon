@@ -21,13 +21,13 @@ class Node : public Component {
 
 	void setDistributor(const ComponentUnit&);
 
-    bool processDistributorWakeupMsg(ComponentUnit&, Message *);
-    bool processDistributorIDMsg(ComponentUnit&, Message *);
-    bool processDistributorProcessMsg(ComponentUnit&, Message *);
+    bool processDistributorWakeupMsg(ComponentUnit&, TypeMessage);
+    bool processDistributorIDMsg(ComponentUnit&, TypeMessage);
+    bool processDistributorProcessMsg(ComponentUnit&, TypeMessage);
 
-    bool processCollectorProcessMsg(ComponentUnit &owner, Message *msg);
-    bool processCollectorBinaryMsg(ComponentUnit&, Message *);
-    bool processCollectorReadyMsg(ComponentUnit&, Message *);
+    bool processCollectorProcessMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorBinaryMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorReadyMsg(ComponentUnit&, TypeMessage);
 
     bool send2DistributorReadyMsg(ComponentUnit&);
     bool send2DistributorAliveMsg(ComponentUnit&);
@@ -37,7 +37,7 @@ class Node : public Component {
     bool send2CollectorInfoMsg(ComponentUnit&, long, TypeProcessFileList&);
 	bool send2CollectorBinaryMsg(ComponentUnit&, long, TypeProcessFileList&);
 
-    bool processJob(const ComponentUnit&, Message *);
+    bool processJob(const ComponentUnit&, TypeMessage);
     void parseCommand(char *cmd, char **argv);
     bool processCommand(long, long, const char *);
 

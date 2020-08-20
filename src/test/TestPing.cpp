@@ -6,12 +6,12 @@
 
 void sendPing(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PING);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PING);
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processPingMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processPingMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGS_I(component->getHost(), "Message Ping has came from : %s, replying back", ComponentType::getName(owner.getType()));
 
@@ -28,5 +28,6 @@ void TestApp::testPing(Distributor* distributor, Collector* collector, Node* nod
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
 
     ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_DISTRIBUTOR));
+
     sendPing(distributor, target);
 }

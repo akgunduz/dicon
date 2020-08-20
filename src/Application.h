@@ -34,6 +34,7 @@ public:
 
     virtual int notifyHandler(COMPONENT, NOTIFYSTATE) = 0;
 
+    virtual ~App();
 };
 
 #endif //DICON_APPLICATION_H

@@ -38,3 +38,12 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
           type == APPTYPE_WEB ? "Web" : "Console",
           componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
+
+App::~App() {
+
+    PRINT("Deallocating App");
+
+    delete componentController;
+
+    delete deviceList;
+}

@@ -23,13 +23,15 @@ class Scheduler {
 
     std::thread thread;
 
-	std::list<SchedulerItem*> items;
+	std::list<TypeSchedulerItem> items;
 
 	std::map<int, const InterfaceSchedulerCB*> callbacks;
 
 	int capacity;
 
-	bool initialized;
+	bool initialized{false};
+
+	bool endFlag{false};
 
 	static void* run(void *);
 
@@ -39,9 +41,9 @@ public:
 
     void setCB(int, const InterfaceSchedulerCB*);
 
-	bool push(SchedulerItem *item);
+	bool push(TypeSchedulerItem item);
 
-    SchedulerItem* pull();
+    TypeSchedulerItem pull();
 
 	void end();
 

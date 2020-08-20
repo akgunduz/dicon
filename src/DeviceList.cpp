@@ -7,6 +7,7 @@
 #include <random>
 #include "DeviceList.h"
 #include "Address.h"
+#include "Log.h"
 
 DeviceList* DeviceList::instance = nullptr;
 
@@ -83,4 +84,14 @@ Device* DeviceList::get(int index) {
 long DeviceList::getCount() {
 
     return list.size();
+}
+
+DeviceList::~DeviceList() {
+
+    PRINT("Deallocating DeviceList");
+
+    for (auto* device : list) {
+
+        delete device;
+    }
 }

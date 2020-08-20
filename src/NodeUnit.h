@@ -21,6 +21,7 @@ public:
     ~NodeUnit();
 };
 
-typedef std::vector<NodeUnit> TypeNodeList;
+typedef std::shared_ptr<NodeUnit> TypeNodeUnit;
+typedef std::vector<TypeNodeUnit> TypeNodeList;
 
 #endif //DICON_NODEUNIT_H

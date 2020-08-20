@@ -202,11 +202,13 @@ bool Net::runReceiver() {
                 ComponentUnit source;
                 source.setSocket(acceptSocket);
 
-                auto *msg = new Message(interface->getHost());
+                auto msg = std::make_unique<Message>(interface->getHost());
 
                 if (msg->readFromStream(source)) {
 
-                    interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
+                    auto owner = msg->getHeader().getOwner();
+
+                    interface->push(MSGDIR_RECEIVE, owner, std::move(msg));
                 }
 
                 close(acceptSocket);
@@ -222,9 +224,13 @@ bool Net::runReceiver() {
             source.setSocket(multicastSocket);
             source.getAddress().setMulticast(true);
 
-            auto *msg = new Message(getHost());
+            auto msg = std::make_unique<Message>(getHost());
+
             if (msg->readFromStream(source)) {
-                push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
+
+                auto owner = msg->getHeader().getOwner();
+
+                push(MSGDIR_RECEIVE, owner, std::move(msg));
             }
         }
 
@@ -245,7 +251,7 @@ bool Net::runReceiver() {
     return true;
 }
 
-bool Net::runSender(ComponentUnit target, Message *msg) {
+bool Net::runSender(ComponentUnit target, TypeMessage msg) {
 
     int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (clientSocket < 0) {
@@ -271,7 +277,7 @@ bool Net::runSender(ComponentUnit target, Message *msg) {
     return true;
 }
 
-bool Net::runMulticastSender(ComponentUnit target, Message *msg) {
+bool Net::runMulticastSender(ComponentUnit target, TypeMessage msg) {
 
     int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
@@ -294,8 +300,13 @@ bool Net::runMulticastSender(ComponentUnit target, Message *msg) {
 }
 
 Net::~Net() {
+
+    LOGS_T(getHost(), "Deallocating Net");
+
     end();
+
     close(multicastSocket);
+
     close(netSocket);
 }
 

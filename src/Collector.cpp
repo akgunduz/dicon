@@ -27,16 +27,23 @@ Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode
     initInterfaces(COMP_COLLECTOR, interfaceOther, interfaceNode);
 }
 
-Collector::~Collector() = default;
+Collector::~Collector() {
 
-bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, Message *msg) {
+    LOGS_T(getHost(), "Deallocating Collector");
+
+    delete job;
+
+    delete host;
+}
+
+bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {
 
     setDistributor(owner);
 
     return send2DistributorAliveMsg(owner);
 }
 
-bool Collector::processDistributorIDMsg(ComponentUnit& owner, Message *msg) {
+bool Collector::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     if (!setID(msg->getHeader().getVariant(0))) {
 
@@ -48,7 +55,7 @@ bool Collector::processDistributorIDMsg(ComponentUnit& owner, Message *msg) {
     return send2DistributorIDMsg(owner);
 }
 
-bool Collector::processDistributorNodeMsg(ComponentUnit& owner, Message *msg) {
+bool Collector::processDistributorNodeMsg(ComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentList& nodes = msg->getData().getComponentList();
 
@@ -56,19 +63,18 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, Message *msg) {
 
     if (nodes.empty()) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "No available node is came from Distributor", nodes.size());
-        delete msg;
         return false;
     }
 
-    for (auto *node : nodes) {
-        auto *process = job->assignNode(node);
+    for (auto &node : nodes) {
+        auto process = job->assignNode(node->getID());
         send2NodeProcessMsg(*node, process);
     }
 
     return true;
 }
 
-bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, Message *msg) {
+bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentList& nodes = msg->getData().getComponentList();
 
@@ -76,25 +82,26 @@ bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, Message *msg)
 
     if (nodes.size() < 2) {
         LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "At least two node info should came, old and new node IDs");
-        delete msg;
         return false;
     }
 
     for (size_t i = 0; i < nodes.size(); i = i + 2) {
 
-        auto *process = job->reAssignNode(nodes[i], nodes[i + 1]);
-        send2NodeProcessMsg(*nodes[i + 1], process);
+        auto process = job->reAssignNode(nodes[i]->getID(), nodes[i + 1]->getID());
+        if (process) {
+            send2NodeProcessMsg(*nodes[i + 1], process);
+        }
     }
 
     return true;
 }
 
-bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, Message *msg) {
+bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d]:Process[%d] requested %d missing files",
             owner.getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
 
-    auto *processItem = job->getProcessByID(msg->getData().getFileProcess());
+    auto processItem = job->getProcessByID(msg->getData().getFileProcess());
     if (!processItem) {
 
         LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "Process[%d] could not find in the Job!", msg->getData().getFileProcess());
@@ -111,7 +118,7 @@ bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, Message *msg) {
     return send2NodeBinaryMsg(owner, processItem->getID(), newList);
 }
 
-bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, Message *msg) {
+bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
     auto& collectorHost = (CollectorHost&) getHost();
 
@@ -143,61 +150,61 @@ bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, Message *msg) {
 
 bool Collector::send2DistributorAliveMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ALIVE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ALIVE);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Collector::send2DistributorIDMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Collector::send2DistributorNodeMsg(ComponentUnit& target, long readyProcessCount) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_NODE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
 
     msg->getHeader().setVariant(0, readyProcessCount);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Collector::send2DistributorReadyMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_READY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeProcessMsg(ComponentUnit& target, ProcessItem *processItem) {
+bool Collector::send2NodeProcessMsg(ComponentUnit& target, const TypeProcessItem& processItem) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_PROCESS);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
 
     msg->getData().setStreamFlag(STREAM_PROCESS);
     msg->getData().addProcess(processItem);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Node[%d]:Process[%d] is triggered ", target.getID(), processItem->getID());
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Collector::send2NodeBinaryMsg(ComponentUnit& target, long processID, TypeProcessFileList &fileList) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_BINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
     msg->getData().setStreamFlag(STREAM_FILEBINARY);
     msg->getData().addFileList(processID, fileList);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Collector::send2NodeReadyMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_READY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 void Collector::setDistributor(const ComponentUnit& _distributor) {
@@ -225,7 +232,9 @@ bool Collector::processJob() {
 
 JobItem* Collector::loadJob(const char* zipFile) {
 
-    delete job;
+    if (job) {
+        delete job;
+    }
 
     job = new JobItem(getHost(), zipFile, JobItem::jobID++);
 

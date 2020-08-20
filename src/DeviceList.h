@@ -21,6 +21,7 @@ class DeviceList {
 
 public:
 
+    ~DeviceList();
     static DeviceList* getInstance();
     bool add(Device*);
     Device* get(int);

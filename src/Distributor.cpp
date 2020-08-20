@@ -34,12 +34,14 @@ Distributor::Distributor(const char *rootPath, int interfaceOther, int interface
     addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
 
-    nodeManager = new NodeManager(host, autoWake);
+    nodeManager = new NodeManager(host, false);
 
-    collectorManager = new CollectorManager(host, autoWake);
+    collectorManager = new CollectorManager(host, true);
 
     collThread = std::thread([](Distributor *distributor){
+
         distributor->collProcess();
+
     }, this);
 
     if (!autoWake) {
@@ -51,9 +53,11 @@ Distributor::Distributor(const char *rootPath, int interfaceOther, int interface
         }, this);
 
     initInterfaces(COMP_DISTRIBUTOR, interfaceOther, interfaceNode);
-};
+}
 
 Distributor::~Distributor() {
+
+    LOGS_T(getHost(), "Deallocating Distributor");
 
     runPollThread = false;
 
@@ -66,6 +70,8 @@ Distributor::~Distributor() {
     delete nodeManager;
 
     delete collectorManager;
+
+    delete host;
 
 }
 
@@ -85,10 +91,6 @@ void Distributor::pollProcess() {
     while(runPollThread) {
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
-
-        if (!runPollThread) {
-            break;
-        }
 
         if (loop++ < WAKEUP_INTERVAL) {
             continue;
@@ -122,9 +124,9 @@ void Distributor::collProcess() {
 
             for (size_t i = 0; i < processDeadCount; i ++) {
 
-                auto *nodeBusy = nodeManager->getBusyDead();
+                auto nodeBusy = nodeManager->getBusyDead();
 
-                long busyNodeAssignedColl = nodeBusy->getAssigned().getID();
+                long busyNodeAssignedColl = nodeBusy->getAssigned()->getID();
 
                 if (busyNodeAssignedColl == 0) {
 
@@ -132,13 +134,13 @@ void Distributor::collProcess() {
                     continue;
                 }
 
-                auto *nodeIdle = nodeManager->getIdle(&nodeBusy->getAssigned());
+                auto nodeIdle = nodeManager->getIdle(nodeBusy->getAssigned());
 
                 replaceIdList[busyNodeAssignedColl].emplace_back(nodeBusy);
                 replaceIdList[busyNodeAssignedColl].emplace_back(nodeIdle);
 
                 LOGS_W(getHost(), "Node[%d] is replaced with Node[%d] for Collector[%d]",
-                       nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned().getID());
+                       nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned()->getID());
             }
 
             for (auto &collNodeDeadList : replaceIdList) {
@@ -158,13 +160,13 @@ void Distributor::collProcess() {
 
         TypeComponentList nodes;
 
-        auto *collector = (CollectorUnit *) collectorManager->get(request->collID);
+        auto coll = std::static_pointer_cast<CollectorUnit>(collectorManager->get(request->collID));
 
         size_t curReqCount = std::min(nodeCount, request->reqCount);
 
         for (size_t i = 0; i < curReqCount; i++) {
 
-            auto *nodeIdle = nodeManager->getIdle(collector);
+            auto nodeIdle = nodeManager->getIdle(coll);
 
             nodes.emplace_back(nodeIdle);
         }
@@ -178,7 +180,7 @@ void Distributor::collProcess() {
             collectorManager->removeRequest();
         }
 
-        send2CollectorNodeMsg(*collector, nodes);
+        send2CollectorNodeMsg(*coll, nodes);
     }
 }
 
@@ -190,7 +192,7 @@ NodeManager *Distributor::getNodes() const {
     return nodeManager;
 }
 
-bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, TypeMessage msg) {
 
     bool alreadyAdded = false;
     long collID = collectorManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
@@ -208,7 +210,7 @@ bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, Message *msg) {
     return send2CollectorIDMsg(owner, collID);
 }
 
-bool Distributor::processCollectorIDMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processCollectorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
@@ -219,7 +221,7 @@ bool Distributor::processCollectorIDMsg(ComponentUnit& owner, Message *msg) {
     return true;
 }
 
-bool Distributor::processCollectorNodeMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processCollectorNodeMsg(ComponentUnit& owner, TypeMessage msg) {
 
     collectorManager->addRequest(owner.getID(), (int)msg->getHeader().getVariant(0));
 
@@ -228,7 +230,7 @@ bool Distributor::processCollectorNodeMsg(ComponentUnit& owner, Message *msg) {
     return true;
 }
 
-bool Distributor::processCollectorReadyMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
@@ -237,7 +239,7 @@ bool Distributor::processCollectorReadyMsg(ComponentUnit& owner, Message *msg) {
     return true;
 }
 
-bool Distributor::processNodeAliveMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processNodeAliveMsg(ComponentUnit& owner, TypeMessage msg) {
 
     bool alreadyAdded = false;
     long nodeID = nodeManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
@@ -255,7 +257,7 @@ bool Distributor::processNodeAliveMsg(ComponentUnit& owner, Message *msg) {
     return send2NodeIDMsg(owner, nodeID);
 }
 
-bool Distributor::processNodeIDMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processNodeIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
@@ -266,9 +268,9 @@ bool Distributor::processNodeIDMsg(ComponentUnit& owner, Message *msg) {
     return true;
 }
 
-bool Distributor::processNodeBusyMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processNodeBusyMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    if (!nodeManager->isExist(owner.getID())) {
+    if (!nodeManager->get(owner.getID())) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "Could not found a node with id : %ld", owner.getID());
         return false;
     }
@@ -284,9 +286,9 @@ bool Distributor::processNodeBusyMsg(ComponentUnit& owner, Message *msg) {
     return send2NodeProcessMsg(owner);
 }
 
-bool Distributor::processNodeReadyMsg(ComponentUnit& owner, Message *msg) {
+bool Distributor::processNodeReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    if (!nodeManager->isExist(owner.getID())) {
+    if (!nodeManager->get(owner.getID())) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "Could not found a node with id : %ld", owner.getID());
         return false;
     }
@@ -304,61 +306,61 @@ bool Distributor::processNodeReadyMsg(ComponentUnit& owner, Message *msg) {
 
 bool Distributor::send2CollectorWakeupMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_WAKEUP);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2CollectorIDMsg(ComponentUnit& target, long id) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
 
     msg->getHeader().setVariant(0, id);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2CollectorNodeMsg(ComponentUnit& target, TypeComponentList& nodes) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_NODE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
 
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2CollectorReplaceMsg(ComponentUnit& target, TypeComponentList& nodes) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_REPLACE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE);
 
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2NodeWakeupMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_WAKEUP);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2NodeIDMsg(ComponentUnit& target, long id) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
 
     msg->getHeader().setVariant(0, id);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::send2NodeProcessMsg(ComponentUnit& target) {
 
-    auto *msg = new Message(getHost(), target, MSGTYPE_PROCESS);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
 
-    return send(target, msg);
+    return send(target, std::move(msg));
 }
 
 bool Distributor::sendWakeupMessage(COMPONENT targetType) {
@@ -367,10 +369,11 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
     if (isSupportMulticast(targetType)) {
 
-        auto *msg = new Message(getHost(), target, MSGTYPE_WAKEUP);
+        auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
         target.setAddress(getInterfaceMulticastAddress(targetType), true);
-        send(target, msg);
+
+        send(target, std::move(msg));
 
     } else {
 
@@ -378,11 +381,11 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
         for (auto &address : list) {
 
-            auto *msg = new Message(getHost(), target, MSGTYPE_WAKEUP);
+            auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
             target.setAddress(address);
 
-            send(target, msg);
+            send(target, std::move(msg));
         }
     }
 

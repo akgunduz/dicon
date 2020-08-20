@@ -5,6 +5,7 @@
 
 #include <Log.h>
 #include <NodeState.h>
+#include <CollectorUnit.h>
 #include "ConsoleApp.h"
 
 
@@ -21,18 +22,18 @@ bool ConsoleApp::distStateHandler() {
 
     for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
 
-        auto *collector = collectorPair.second;
+        auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
 
-        PRINT("\t ID : %d, State : %s", collector->getID(), CollState::getName(((CollectorObject*)collector)->getState()));
+        PRINT("\t ID : %d, State : %s", collector->getID(), CollState::getName(collector->getState()));
     }
 
     PRINT("Node List : ");
 
     for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
 
-        auto *node = nodePair.second;
+        auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 
-        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(((NodeHost*)node)->getState()));
+        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(node->getState()));
     }
 
     return true;

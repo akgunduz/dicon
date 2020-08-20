@@ -4,23 +4,22 @@
 //
 
 #include "NodeManager.h"
-#include "Address.h"
 
-NodeManager::NodeManager(HostUnit *_host, bool autoWake)
-    : ComponentManager(_host, autoWake) {
+NodeManager::NodeManager(HostUnit *_host, bool _protect)
+    : ComponentManager(_host, _protect) {
 };
 
 NodeManager::~NodeManager() = default;
 
-NodeUnit* NodeManager::getIdle(ComponentUnit* assigned) {
+TypeNodeUnit NodeManager::getIdle(const TypeComponentUnit& assigned) {
 
-    NodeUnit* leastUsedNode = nullptr;
+    TypeNodeUnit leastUsedNode = nullptr;
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    for (auto &nodePair : get()) {
+    for (const auto& nodePair : get()) {
 
-        auto *node = (NodeUnit*)nodePair.second;
+        auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 
         if (node->getState() != NODESTATE_IDLE) {
             continue;
@@ -43,8 +42,6 @@ NodeUnit* NodeManager::getIdle(ComponentUnit* assigned) {
         leastUsedNode->setAssigned(assigned);
     }
 
-    nodeMutex.unlock();
-
     assert(leastUsedNode != nullptr);
 
     return leastUsedNode;
@@ -54,31 +51,27 @@ size_t NodeManager::getIdleCount() {
 
     size_t count = 0;
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
     for (auto &nodePair : get()) {
 
-        auto *node = (NodeUnit*) nodePair.second;
+        auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 
         if (node->getState() == NODESTATE_IDLE) {
             count++;
         }
     }
 
-    nodeMutex.unlock();
-
     return count;
 }
 
-NodeUnit* NodeManager::getBusyDead() {
+TypeNodeUnit NodeManager::getBusyDead() {
 
-    NodeUnit *busyDeadNode = nullptr;
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    nodeMutex.lock();
+    for (const auto& component : getDead()) {
 
-    for (auto *component : getDead()) {
-
-        auto *node = (NodeUnit*)component;
+        auto node = std::static_pointer_cast<NodeUnit>(component);
 
         if (node->getState() == NODESTATE_DEAD) {
             continue;
@@ -86,139 +79,118 @@ NodeUnit* NodeManager::getBusyDead() {
 
         node->setState(NODESTATE_DEAD);
 
-        busyDeadNode = node;
-
-        nodeMutex.unlock();
-
-        return busyDeadNode;
+        return node;
     }
 
-    nodeMutex.unlock();
-
-    assert(busyDeadNode != nullptr);
-
-    return busyDeadNode;
+    return nullptr;
 }
 
 size_t NodeManager::getBusyDeadCount() {
 
     size_t count = 0;
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    for (auto *component : getDead()) {
+    for (const auto &component : getDead()) {
 
-        auto *node = (NodeUnit*)component;
+        auto node = std::static_pointer_cast<NodeUnit>(component);
 
         if (node->getState() != NODESTATE_DEAD) {
             count++;
         }
     }
 
-    nodeMutex.unlock();
-
     return count;
 }
 
 Address& NodeManager::getAddress(long id) {
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    auto *node = (NodeUnit*)get(id);
+    auto node = get(id);
     if (node) {
 
-        Address &address = node->getAddress();
-        nodeMutex.unlock();
-        return address;
+        return node->getAddress();
     }
-
-    nodeMutex.unlock();
 
     return Address::invalid;
 }
 
 NODESTATES NodeManager::getState(long id) {
 
-    NODESTATES state = NODESTATE_MAX;
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    nodeMutex.lock();
-
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
     if (node) {
-        state = node->getState();
+
+        return node->getState();
     }
 
-    nodeMutex.unlock();
-
-    return state;
+    return NODESTATE_MAX;
 }
 
 void NodeManager::setState(long id, NODESTATES state) {
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
     if (node) {
+
         node->setState(state);
     }
-
-    nodeMutex.unlock();
 }
 
-ComponentUnit NodeManager::getAssigned(long id) {
+TypeComponentUnit NodeManager::getAssigned(long id) {
 
-    ComponentUnit assigned;
+     std::unique_lock<std::mutex> lock(nodeMutex);
 
-    nodeMutex.lock();
-
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
     if (node) {
-        assigned = node->getAssigned();
+
+        return node->getAssigned();
     }
 
-    nodeMutex.unlock();
 
-    return assigned;
+    return nullptr;
 }
 
-void NodeManager::setAssigned(long id, ComponentUnit& assigned) {
+void NodeManager::setAssigned(long id, TypeComponentUnit& assigned) {
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
     if (node) {
-        node->setAssigned(assigned.getType(), assigned.getID(), assigned.getAddress());
-    }
 
-    nodeMutex.unlock();
+        node->setAssigned(assigned);
+    }
 }
 
-void NodeManager::setAssigned(long id, long assignedID, Address& assignedAddress) {
+void NodeManager::setAssigned(long id, ARCH assignedArch, long assignedID, Address& assignedAddress) {
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
+
     if (node) {
-        node->setAssigned(COMP_COLLECTOR, assignedID, assignedAddress);
-    }
 
-    nodeMutex.unlock();
+        node->setAssigned(COMP_COLLECTOR, assignedArch, assignedID, assignedAddress);
+    }
 }
 
 void NodeManager::releaseAssigned(long id) {
 
-    nodeMutex.lock();
+    std::unique_lock<std::mutex> lock(nodeMutex);
 
-    auto *node = (NodeUnit*)get(id);
+    auto node = std::static_pointer_cast<NodeUnit>(get(id));
+
     if (node) {
-        node->setAssigned(COMP_COLLECTOR, 0, Address());
-    }
 
-    nodeMutex.unlock();
+        node->setAssigned(nullptr);
+    }
 }
 
 
-ComponentUnit* NodeManager::createUnit(ARCH arch, long id, Address& address) {
+TypeComponentUnit NodeManager::createUnit(ARCH arch, long id, Address& address) {
 
-    return new NodeUnit(arch, id, address);
+    return std::make_shared<NodeUnit>(arch, id, address);
 }

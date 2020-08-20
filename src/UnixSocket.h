@@ -19,8 +19,8 @@ class UnixSocket : public Interface {
 
 	bool initUnixSocket();
     bool runReceiver() override;
-    bool runSender(ComponentUnit , Message *) override;
-    bool runMulticastSender(ComponentUnit, Message *) override;
+    bool runSender(ComponentUnit , TypeMessage) override;
+    bool runMulticastSender(ComponentUnit, TypeMessage) override;
 
 public :
 

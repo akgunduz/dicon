@@ -4,8 +4,8 @@
 
 #include "MessageItem.h"
 
-MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, Message *_msg)
-        : SchedulerItem(_type), unit(_unit), msg(_msg) {
+MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, TypeMessage _msg)
+        : SchedulerItem(_type), unit(_unit), msg(std::move(_msg)) {
 
     if (msg != nullptr) {
         priority = msg->getHeader().getPriority();
@@ -17,7 +17,9 @@ CommUnit& MessageItem::getUnit() {
     return unit;
 }
 
-Message *MessageItem::getMessage() {
+TypeMessage& MessageItem::getMessage() {
 
     return msg;
 }
+
+MessageItem::~MessageItem() = default;

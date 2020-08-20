@@ -22,6 +22,7 @@ public:
     ~CollectorUnit();
 };
 
-typedef std::vector<CollectorUnit> TypeCollectorList;
+typedef std::shared_ptr<CollectorUnit> TypeCollectorUnit;
+typedef std::vector<TypeCollectorUnit> TypeCollectorList;
 
 #endif //DICON_COLLECTORUNIT_H

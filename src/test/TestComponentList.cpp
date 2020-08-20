@@ -7,7 +7,7 @@
 
 void sendComponentList(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST);
 
     TypeComponentList nodes;
     Address address({999, 1}, {1999, 2});
@@ -18,10 +18,10 @@ void sendComponentList(Component *owner, ComponentUnit& target) {
     msg->getData().setStreamFlag(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processComponentListMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processComponentListMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentList nodes = msg->getData().getComponentList();
 

@@ -52,7 +52,7 @@ public:
     int getFileCount() const;
     ProcessFile& getFile(ProcessFile&);
     TypeProcessFileList& getFileList();
-    void addFile(FileItem*, long, bool);
+    void addFile(TypeFileItem, long, bool);
     void addFileList(TypeProcessFileList& fileList);
 
     PROCESS_STATE getState() const;
@@ -71,6 +71,7 @@ public:
     bool check() override;
 };
 
-typedef std::vector<ProcessItem*> TypeProcessList;
+typedef std::shared_ptr<ProcessItem> TypeProcessItem;
+typedef std::vector<TypeProcessItem> TypeProcessList;
 
 #endif //DICON_PROCESSITEM_H

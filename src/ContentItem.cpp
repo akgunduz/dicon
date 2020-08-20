@@ -41,7 +41,7 @@ void ContentItem::setAssignedJob(long _assignedJob) {
     assignedJob = _assignedJob;
 }
 
-bool compareContentID(ContentItem * ci1, ContentItem * ci2)
+bool compareContentID(const TypeContentItem& ci1, const TypeContentItem& ci2)
 {
     return (ci1->getID() < ci2->getID());
 }

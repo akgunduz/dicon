@@ -20,6 +20,7 @@ class Device {
 public:
 
     Device(const char*, INTERFACE, uint32_t , uint8_t = 0, bool = false);
+    ~Device();
 
     const char* getName() const;
     INTERFACE getType() const;

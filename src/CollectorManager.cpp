@@ -8,58 +8,55 @@
 #include "ComponentManager.h"
 #include "CollectorUnit.h"
 
-CollectorManager::CollectorManager(HostUnit *_host, bool autoWake)
-    : ComponentManager(_host, autoWake) {
+CollectorManager::CollectorManager(HostUnit *_host, bool _protect)
+    : ComponentManager(_host, _protect) {
 };
 
 CollectorManager::~CollectorManager() = default;
 
 COLLSTATES CollectorManager::getState(long id) {
 
-    COLLSTATES state = COLLSTATE_MAX;
+    std::unique_lock<std::mutex> lock(collMutex);
 
-    collMutex.lock();
+    auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
 
-    auto *coll = (CollectorObject*)get(id);
     if (coll) {
-        state = coll->getState();
+
+        return coll->getState();
     }
 
-    collMutex.unlock();
-
-    return state;
+    return COLLSTATE_MAX;
 }
 
 void CollectorManager::setState(long id, COLLSTATES state) {
 
-    collMutex.lock();
+    std::unique_lock<std::mutex> lock(collMutex);
 
-    auto *coll = (CollectorObject*)get(id);
+    auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
+
     if (coll) {
+
         coll->setState(state);
     }
-
-    collMutex.unlock();
 }
 
-ComponentUnit *CollectorManager::createUnit(ARCH arch, long id, Address& address) {
+TypeComponentUnit CollectorManager::createUnit(ARCH arch, long id, Address& address) {
 
-    return new CollectorUnit(arch, id, address);
+    return std::make_shared<CollectorUnit>(arch, id, address);
 }
 
-bool CollectorManager::addRequest(long collID, size_t reqNodeCount) {
+bool CollectorManager::addRequest(long id, size_t reqNodeCount) {
 
-    collMutex.lock();
+    std::unique_lock<std::mutex> lock(collMutex);
 
-    auto *coll = (CollectorObject*)get(collID);
+    auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
+
     if (coll) {
 
         coll->setState(COLLSTATE_BUSY);
 
-        collReqList.emplace_back(CollectorRequest(collID, reqNodeCount));
+        collReqList.emplace_back(CollectorRequest(id, reqNodeCount));
     }
-
-    collMutex.unlock();
 
     return true;
 }
@@ -68,34 +65,28 @@ CollectorRequest* CollectorManager::getRequest() {
 
     CollectorRequest* request = nullptr;
 
-    collMutex.lock();
+    std::unique_lock<std::mutex> lock(collMutex);
 
     if (!collReqList.empty()) {
 
         request = &collReqList.front();
     }
 
-    collMutex.unlock();
-
     return request;
 }
 
 void CollectorManager::updateRequest(size_t reqCount) {
 
-    collMutex.lock();
+    std::unique_lock<std::mutex> lock(collMutex);
 
     collReqList.front().reqCount = reqCount;
-
-    collMutex.unlock();
 }
 
 void CollectorManager::removeRequest() {
 
-    collMutex.lock();
+    std::unique_lock<std::mutex> lock(collMutex);
 
     collReqList.pop_front();
-
-    collMutex.unlock();
 }
 
 

@@ -26,6 +26,8 @@ Message::Message(HostUnit& host, ComponentUnit& target, MSG_TYPE type)
     data.setStreamFlag(STREAM_NONE);
 }
 
+Message::~Message() = default;
+
 bool Message::readComponentList(ComponentUnit& source, TypeComponentList &componentList,
         MessageBlockHeader& block, uint32_t& crc) {
 
@@ -50,7 +52,7 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentList &compon
     }
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
-    for (auto* item : componentList) {
+    for (auto &item : componentList) {
         LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
 
@@ -91,7 +93,8 @@ bool Message::readProcessID(ComponentUnit& source, long& processID, MessageBlock
     return true;
 }
 
-bool Message::readProcess(ComponentUnit& source, ProcessItem *content, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcess(ComponentUnit& source, const TypeProcessItem& content,
+                          MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSINFO) {
         LOGS_E(getHost(), "readProcessInfo can not read other blocks");
@@ -205,7 +208,7 @@ bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block,
         case BLOCK_FILEINFO:
         case BLOCK_FILEBINARY: {
 
-            ProcessFile processFile(new FileItem(getHost()));
+            ProcessFile processFile(std::make_shared<FileItem>(getHost()));
 
             if (!readFile(source, processFile, block, crc)) {
                 return false;
@@ -229,7 +232,7 @@ bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block,
 
         case BLOCK_PROCESSINFO: {
 
-            auto *processItem = new ProcessItem(getHost());
+            auto processItem = std::make_shared<ProcessItem>(getHost());
 
             if (!readProcess(source, processItem, block, crc)) {
                 return false;
@@ -286,7 +289,7 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& compo
     }
 
     LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
-    for (auto* item : componentList) {
+    for (auto& item : componentList) {
         LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
 
@@ -333,7 +336,7 @@ bool Message::writeProcessID(ComponentUnit& target, long processID, uint32_t& cr
     return true;
 }
 
-bool Message::writeProcess(ComponentUnit& target, ProcessItem* processItem, uint32_t& crc) {
+bool Message::writeProcess(ComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
 
@@ -437,7 +440,7 @@ bool Message::writeMessageStream(ComponentUnit& target, uint32_t& crc) {
 
             for (int i = 0; i < data.getProcessCount(); i++) {
 
-                ProcessItem* processItem = data.getProcess(i);
+                auto processItem = data.getProcess(i);
 
                 if (!writeProcess(target, processItem, crc)) {
                     return false;

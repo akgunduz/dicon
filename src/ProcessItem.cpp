@@ -19,10 +19,10 @@ ProcessItem::ProcessItem(const ProcessItem &copy) :
     fileList = copy.fileList;
 };
 
-ProcessItem::ProcessItem(const HostUnit& host, long id, long jobID, const char *_process) :
-	ContentItem(host, id, jobID) {
+ProcessItem::ProcessItem(const HostUnit& host, long id, long jobID, const char *_process)
+    : ContentItem(host, id, jobID) {
 
-	if (_process) {
+	if (_process != nullptr) {
 		strcpy(process, _process);
 	}
 }
@@ -89,7 +89,7 @@ bool ProcessItem::parse(void *job) {
 				}
 				//no break
 			default:
-                sprintf(parsedProcess, "%s%c", parsedProcess, process[i]);
+			    parsedProcess[strlen(parsedProcess)] = process[i];
 				break;
 
 		}
@@ -109,16 +109,18 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
         case PROCESS_INPUT:
 		case PROCESS_OUTPUT: {
-            auto *content = ((JobItem*)jobItem)->getFile(cmdIndex - 1);
+            auto content = ((JobItem*)jobItem)->getFile(cmdIndex - 1);
             if (content != nullptr) {
-                sprintf(parsedProcess, "%s%s/%s", parsedProcess, ROOT_SIGN,
-                        Util::getRefPath(content->getHost().getRootPath(), content->getAssignedJob(), content->getName()).c_str());
+                strcat(parsedProcess, ROOT_SIGN);
+                strcat(parsedProcess, "/");
+                strcat(parsedProcess, Util::getRefPath(content->getHost().getRootPath(),
+                                                       content->getAssignedJob(), content->getName()).c_str());
 				addFile(content, getID(), cmdType == PROCESS_OUTPUT);
             }
         } break;
 
         case PROCESS_PARAM: {
-            auto *content = ((JobItem*)jobItem)->getParameter(cmdIndex - 1);
+            auto content = ((JobItem*)jobItem)->getParameter(cmdIndex - 1);
             if (content != nullptr) {
                 strcat(parsedProcess, content->getParam());
             }
@@ -189,7 +191,7 @@ TypeProcessFileList& ProcessItem::getFileList() {
 	return fileList;
 }
 
-void ProcessItem::addFile(FileItem *file, long processID, bool isOutput) {
+void ProcessItem::addFile(TypeFileItem file, long processID, bool isOutput) {
 
     fileList.emplace_back(ProcessFile(file, processID, isOutput));
 }

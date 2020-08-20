@@ -10,28 +10,31 @@ Interface::Interface(Device *_device, const InterfaceSchedulerCB *receiveCB, con
 
     scheduler = new Scheduler();
 
-    schedulerCB = new InterfaceSchedulerCB([](void *arg, SchedulerItem *item) -> bool {
+    schedulerCB = new InterfaceSchedulerCB([](void *arg, TypeSchedulerItem item) -> bool {
 
         bool status;
         auto *interface = (Interface *) arg;
-        auto *msgItem = (MessageItem *) item;
+
+        TypeMessageItem msgItem(dynamic_cast<MessageItem *>(item.release()));
+
+        auto msgType = msgItem->getMessage()->getHeader().getType();
 
         LOGC_T(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
                "\"%s\" is sending",
-               MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
+               MessageTypes::getMsgName(msgType));
 
         if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
 
-            status = interface->runSender(msgItem->getUnit(), msgItem->getMessage());
+            status = interface->runSender(msgItem->getUnit(), std::move(msgItem->getMessage()));
 
         } else {
 
-            status = interface->runMulticastSender(msgItem->getUnit(), msgItem->getMessage());
+            status = interface->runMulticastSender(msgItem->getUnit(), std::move(msgItem->getMessage()));
         }
 
         LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
                "\"%s\" is sent",
-               MessageTypes::getMsgName(msgItem->getMessage()->getHeader().getType()));
+               MessageTypes::getMsgName(msgType));
 
         return status;
 
@@ -71,17 +74,23 @@ bool Interface::initThread() {
 
 Interface::~Interface() {
 
+    LOGS_T(getHost(), "Deallocating Interface");
+
     delete schedulerCB;
+
+    delete scheduler;
 
     close(notifierPipe[1]);
     close(notifierPipe[0]);
 }
 
-bool Interface::push(MSG_DIR type, CommUnit &target, Message *msg) {
+bool Interface::push(MSG_DIR type, CommUnit &target, TypeMessage msg) {
 
     if (target.getAddress().getInterface() == getType()) {
 
-        scheduler->push(new MessageItem(type, target, msg));
+        auto msgItem = std::make_unique<MessageItem>(type, target, std::move(msg));
+
+        scheduler->push(std::move(msgItem));
 
         return true;
     }

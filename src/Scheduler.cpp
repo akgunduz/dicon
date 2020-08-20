@@ -17,29 +17,35 @@ Scheduler::Scheduler() {
 
 Scheduler::~Scheduler() {
 
+    PRINT("Deallocating Scheduler");
+
     end();
 
 }
 
-bool Scheduler::push(SchedulerItem *item) {
+bool Scheduler::push(TypeSchedulerItem item) {
 
     assert(item != nullptr);
 
     std::unique_lock<std::mutex> lock(mutex);
 
-	if (items.size() < capacity) {
+    if (endFlag || items.size() >= capacity) {
 
-		items.push_back(item);
+        return false;
+    }
 
-        cond.notify_one();
+    if (item->type == END_ITEM) {
+        endFlag = true;
+    }
 
-		return true;
-	}
+    items.push_back(std::move(item));
 
-	return false;
+    cond.notify_one();
+
+    return true;
 }
 
-SchedulerItem* Scheduler::pull() {
+TypeSchedulerItem Scheduler::pull() {
 
     std::unique_lock<std::mutex> lock(mutex);
 
@@ -49,22 +55,20 @@ SchedulerItem* Scheduler::pull() {
 
     assert(!items.empty());
 
-    std::list<SchedulerItem*>::iterator itr, ref = items.begin();
+    std::list<TypeSchedulerItem>::iterator itr, ref = items.begin();
 
     for (itr = ref;	itr != items.end(); itr++) {
 
-        SchedulerItem *itrItem = *itr;
-        SchedulerItem *refItem = *ref;
-        if (itrItem->priority < refItem->priority) {
+        if ((*itr)->priority < (*ref)->priority) {
             ref = itr;
         }
 
-        if (itrItem->priority > 0) {
-            itrItem->priority--;
+        if ((*itr)->priority > 0) {
+            (*itr)->priority--;
         }
     }
 
-    SchedulerItem *item = *(ref);
+    TypeSchedulerItem item = std::move(*(ref));
 
     items.erase(ref);
 
@@ -77,19 +81,16 @@ void *Scheduler::run(void *arg) {
 
 	while(true) {
 
-        SchedulerItem *item = scheduler->pull();
+        TypeSchedulerItem item = scheduler->pull();
 
         if (item->type == END_ITEM) {
-            delete item;
             break;
         }
 
         const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
         if (iCB != nullptr) {
-            iCB->schedulerCB(iCB->arg, item);
+            iCB->schedulerCB(iCB->arg, std::move(item));
         }
-
-        delete item;
 	}
 
 	return nullptr;
@@ -101,7 +102,7 @@ void Scheduler::end() {
         return;
     }
 
-    push(new SchedulerItem());
+    push(std::make_unique<SchedulerItem>());
     thread.join();
 
     items.clear();

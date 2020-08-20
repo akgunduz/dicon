@@ -19,7 +19,7 @@ class ComponentController {
 
     static ComponentController *instance;
 
-    ComponentController(int*);
+    ComponentController(const int*);
 
 public:
 

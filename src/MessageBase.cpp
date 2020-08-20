@@ -6,7 +6,6 @@
 #include "MessageBase.h"
 #include "Log.h"
 #include "Util.h"
-#include "Address.h"
 #include "Net.h"
 #include "UnixSocket.h"
 
@@ -38,11 +37,11 @@ TypeWriteCB MessageBase::getWriteCB(ComponentUnit& target) {
 
 bool MessageBase::transferBinary(ComponentUnit& source, ComponentUnit& target, size_t size, uint32_t& crc) {
 
-    uint8_t buf[BUFFER_SIZE];
+    uint8_t buf[BUFFER_SIZE] = {};
 
     bool error = false;
-    long readSize;
-    uint32_t fakeCrc;
+    long readSize = 0;
+    uint32_t fakeCrc = 0;
 
     do {
 
@@ -470,7 +469,7 @@ bool MessageBase::writeString(ComponentUnit& target, const char* str, uint32_t& 
 
 bool MessageBase::writeNumber(ComponentUnit& target, long number, uint32_t& crc) {
 
-    uint8_t buffer[64];
+    uint8_t buffer[64] = {};
     *((long *) buffer) = htonll(number);
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Number write process is started => Number : %ld", number);
@@ -487,7 +486,7 @@ bool MessageBase::writeNumber(ComponentUnit& target, long number, uint32_t& crc)
 
 bool MessageBase::writeNumberList(ComponentUnit& target, std::vector<long>& list, uint32_t& crc) {
 
-    uint8_t buffer[64];
+    uint8_t buffer[64] = {};
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "NumberList write process is started  => Count : %ld, First Number : %ld",
            list.size(), list[0]);
@@ -549,7 +548,7 @@ bool MessageBase::writeEndStream(ComponentUnit& target, uint32_t& crc) {
 
 bool MessageBase::writeCRC(ComponentUnit& target, uint32_t &crc) {
 
-    uint8_t buffer[32];
+    uint8_t buffer[32] = {};
     uint32_t calcCRC = crc;
     *((uint32_t *) buffer) = htonl(crc);
 

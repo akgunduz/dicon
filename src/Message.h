@@ -18,14 +18,14 @@ class Message : public MessageBase {
 
     bool readComponentList(ComponentUnit&, TypeComponentList&, MessageBlockHeader&, uint32_t&);
     bool readJobName(ComponentUnit&, char*, MessageBlockHeader&, uint32_t&);
-    bool readProcess(ComponentUnit&, ProcessItem*, MessageBlockHeader&, uint32_t&);
+    bool readProcess(ComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
     bool readProcessID(ComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
     bool readFile(ComponentUnit&, ProcessFile&, MessageBlockHeader&, uint32_t&);
     bool readMessageBlock(ComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
     bool writeComponentList(ComponentUnit&, TypeComponentList&, uint32_t&);
     bool writeJobName(ComponentUnit&, const char*, uint32_t&);
-    bool writeProcess(ComponentUnit&, ProcessItem*, uint32_t&);
+    bool writeProcess(ComponentUnit&, const TypeProcessItem&, uint32_t&);
     bool writeProcessID(ComponentUnit&, long, uint32_t&);
     bool writeFile(ComponentUnit&, ProcessFile&, bool, uint32_t&);
 
@@ -40,9 +40,12 @@ public:
 
 	explicit Message(HostUnit&);
 	Message(HostUnit&, ComponentUnit&, MSG_TYPE);
+	~Message();
 
 	MessageHeader& getHeader();
 	MessageData& getData();
 };
+
+typedef std::unique_ptr<Message> TypeMessage;
 
 #endif //DICON_MESSAGE_H

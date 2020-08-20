@@ -11,8 +11,7 @@
 #define ALIVE_INTERVAL 8
 #define CHECK_INTERVAL ALIVE_INTERVAL + 2
 
-typedef std::map<long, ComponentUnit*> TypeComponentMapIDList;
-typedef std::map<Address, ComponentUnit*> TypeComponentMapAddressList;
+typedef std::map<long, TypeComponentUnit> TypeComponentMapIDList;
 
 class ComponentManager {
 
@@ -20,31 +19,33 @@ class ComponentManager {
 
     long idCounter;
 
-    volatile bool threadRun = true;
+    bool protect{false};
+
+    volatile bool threadRun{true};
 
     std::mutex mutex;
     std::thread thread;
 
     TypeComponentMapIDList componentsMapID;
     TypeComponentList componentsMapDead;
-    TypeComponentMapAddressList componentsMapAddress;
+
+    void checkDead();
 
 protected:
 
-    virtual ComponentUnit* createUnit(ARCH, long, Address&) = 0;
+    virtual TypeComponentUnit createUnit(ARCH, long, Address&) = 0;
 
 public:
 
-    ComponentManager(HostUnit *, bool);
+    explicit ComponentManager(HostUnit *, bool);
     virtual ~ComponentManager();
 
     TypeComponentMapIDList& get();
     TypeComponentList& getDead();
-    ComponentUnit* get(long);
-    ComponentUnit* getDead(long index);
+    TypeComponentUnit get(long);
+    TypeComponentUnit getDead(long);
     size_t size();
     void clear();
-    bool isExist(long);
 
     void process();
     long add(ARCH, Address&, bool&);

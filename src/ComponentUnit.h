@@ -19,6 +19,7 @@ public:
     ComponentUnit(COMPONENT, ARCH, long, Address);
     ComponentUnit(const ComponentUnit&);
     ComponentUnit(const CommUnit&);
+    virtual ~ComponentUnit();
 
     int getSocket() const;
     void setSocket(int);
@@ -27,6 +28,7 @@ public:
     void setCheckTime(long checkTime);
 };
 
-typedef std::vector<ComponentUnit*> TypeComponentList;
+typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;
+typedef std::vector<TypeComponentUnit> TypeComponentList;
 
 #endif //DICON_COMPONENTUNIT_H

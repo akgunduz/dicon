@@ -41,6 +41,9 @@ public:
     void setAssignedJob(long);
 };
 
-bool compareContentID(ContentItem * ci1, ContentItem * ci2);
+typedef std::shared_ptr<ContentItem> TypeContentItem;
+typedef std::vector<TypeContentItem> TypeContentList;
+
+bool compareContentID(const TypeContentItem&, const TypeContentItem&);
 
 #endif //DICON_CONTENTITEM_H

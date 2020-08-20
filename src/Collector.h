@@ -22,18 +22,18 @@ class Collector : public Component {
 
 	void setDistributor(const ComponentUnit&);
 
-	bool processDistributorWakeupMsg(ComponentUnit&, Message *);
-	bool processDistributorIDMsg(ComponentUnit&, Message *);
-	bool processDistributorNodeMsg(ComponentUnit&, Message *);
-	bool processDistributorReplaceMsg(ComponentUnit&, Message *);
-	bool processNodeFileInfoMsg(ComponentUnit &owner, Message *msg);
-	bool processNodeFileBinaryMsg(ComponentUnit &owner, Message *msg);
+	bool processDistributorWakeupMsg(ComponentUnit&, TypeMessage);
+	bool processDistributorIDMsg(ComponentUnit&, TypeMessage);
+	bool processDistributorNodeMsg(ComponentUnit&, TypeMessage);
+	bool processDistributorReplaceMsg(ComponentUnit&, TypeMessage);
+	bool processNodeFileInfoMsg(ComponentUnit&, TypeMessage);
+	bool processNodeFileBinaryMsg(ComponentUnit&, TypeMessage);
 
 	bool send2DistributorAliveMsg(ComponentUnit&);
 	bool send2DistributorIDMsg(ComponentUnit&);
 	bool send2DistributorNodeMsg(ComponentUnit&, long);
     bool send2DistributorReadyMsg(ComponentUnit&);
-    bool send2NodeProcessMsg(ComponentUnit&, ProcessItem *);
+    bool send2NodeProcessMsg(ComponentUnit&, const TypeProcessItem&);
 	bool send2NodeBinaryMsg(ComponentUnit&, long, TypeProcessFileList&);
 	bool send2NodeReadyMsg(ComponentUnit&);
 

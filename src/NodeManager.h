@@ -15,24 +15,24 @@ class NodeManager : public ComponentManager {
 
 public:
 
-	NodeManager(HostUnit *, bool);
+	explicit NodeManager(HostUnit *, bool);
 	~NodeManager() override;
 
     NODESTATES getState(long);
 	void setState(long, NODESTATES);
 
     Address& getAddress(long);
-    NodeUnit* getIdle(ComponentUnit*);
+    TypeNodeUnit getIdle(const TypeComponentUnit&);
     size_t getIdleCount();
-    NodeUnit* getBusyDead();
+    TypeNodeUnit getBusyDead();
     size_t getBusyDeadCount();
 
-    ComponentUnit getAssigned(long);
-	void setAssigned(long, ComponentUnit &);
-	void setAssigned(long, long, Address&);
+    TypeComponentUnit getAssigned(long);
+	void setAssigned(long, TypeComponentUnit&);
+	void setAssigned(long, ARCH, long, Address&);
 	void releaseAssigned(long);
 
-    ComponentUnit* createUnit(ARCH, long, Address&) final;
+    TypeComponentUnit createUnit(ARCH, long, Address&) final;
 };
 
 #endif //DICON_NODEMANAGER_H

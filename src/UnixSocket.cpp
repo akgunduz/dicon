@@ -106,10 +106,13 @@ bool UnixSocket::runReceiver() {
                 ComponentUnit source;
                 source.setSocket(acceptSocket);
 
-                auto *msg = new Message(interface->getHost());
+                auto msg = std::make_unique<Message>(interface->getHost());
 
                 if (msg->readFromStream(source)) {
-                    interface->push(MSGDIR_RECEIVE, msg->getHeader().getOwner(), msg);
+
+                    auto owner = msg->getHeader().getOwner();
+
+                    interface->push(MSGDIR_RECEIVE, owner, std::move(msg));
                 }
             }, this, acceptSocket);
             threadAccept.detach();
@@ -132,7 +135,7 @@ bool UnixSocket::runReceiver() {
     return true;
 }
 
-bool UnixSocket::runSender(ComponentUnit target, Message *msg) {
+bool UnixSocket::runSender(ComponentUnit target, TypeMessage msg) {
 
     int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (clientSocket < 0) {
@@ -160,7 +163,7 @@ bool UnixSocket::runSender(ComponentUnit target, Message *msg) {
     return true;
 }
 
-bool UnixSocket::runMulticastSender(ComponentUnit target, Message *message) {
+bool UnixSocket::runMulticastSender(ComponentUnit target, TypeMessage message) {
 
     return false;
 }
@@ -182,7 +185,11 @@ TypeWriteCB UnixSocket::getWriteCB(ComponentUnit &source) {
 }
 
 UnixSocket::~UnixSocket() {
+
+    LOGS_T(getHost(), "Deallocating UnixSocket");
+
     end();
+
     close(unixSocket);
 }
 

@@ -14,6 +14,7 @@
 #define MAIN_URI "/"
 #define REST_URI "/rest"
 #define EVENT_URI "/event"
+#define QUIT_URI "/quit"
 
 #define DIST_URI "/dist"
 #define COLL_URI "/coll"
@@ -26,14 +27,17 @@ class WebApp : public App {
     NOTIFYSTATE notifyData[COMP_MAX]{};
     std::mutex notifyMutex;
     int webPort{DEFAULT_WEB_PORT};
+    volatile bool runLoop{true};
 
 public:
 
     WebApp(int *, LOGLEVEL*, std::vector<int>&);
+    ~WebApp();
 
     int restHandler(struct mg_connection *conn);
     int mainHandler(struct mg_connection *conn);
     int eventHandler(struct mg_connection *conn);
+    int quitHandler(struct mg_connection *conn);
 
     bool distHandler(struct mg_connection *conn, const char * uri);
     bool distStateHandler(struct mg_connection *conn);

@@ -7,8 +7,6 @@
 #include "WebApp.h"
 #include "WebOption.h"
 
-volatile int exitNow = 0;
-
 #define MAIN_PAGE DOCUMENT_ROOT "./index.html"
 
 int WebApp::mainHandler(struct mg_connection *conn)
@@ -58,7 +56,7 @@ int WebApp::eventHandler(struct mg_connection *conn)
         mg_printf(conn, "data: {\"dist\" : %d, \"coll\" : %d, \"node\" : %d}\r\n\r\n",
                   notifyState[COMP_DISTRIBUTOR], notifyState[COMP_COLLECTOR], notifyState[COMP_NODE]);
 
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
     } while(loopCount--);
 
@@ -106,7 +104,19 @@ int WebApp::restHandler(struct mg_connection *conn) {
         return nodeHandler(conn, pos + len);
     }
 
+    len = strlen(QUIT_URI);
+    if (0 == strncmp(pos, QUIT_URI, len)) {
+        return quitHandler(conn);
+    }
+
     return 0;
+}
+
+int WebApp::quitHandler(struct mg_connection *conn) {
+
+    runLoop = false;
+
+    return true;
 }
 
 WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
@@ -176,16 +186,23 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
     }
 }
 
+WebApp::~WebApp() {
+
+    PRINT("Deallocating WebApp");
+
+    mg_stop(context);
+
+}
+
 int WebApp::run() {
 
-    while (!exitNow) {
-        sleep(1);
+    while (runLoop) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    /* Stop the server */
-    mg_stop(context);
-    PRINT("Exiting....");
-    return 1;
+    PRINT("WebApp Exiting....");
+
+    return EXIT_SUCCESS;
 }
 
 int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {

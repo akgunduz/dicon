@@ -6,9 +6,9 @@
 
 void sendFileBinary(Component *owner, ComponentUnit& target) {
 
-    auto *msg = new Message(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
 
-    auto *job = new JobItem(owner->getHost(), "../sample/Job1_macos.zip", JobItem::jobID++);
+    auto job = std::make_unique<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     TypeProcessFileList list = job->getProcess(0)->getFileList();
     for (auto processFile : list) {
@@ -18,10 +18,10 @@ void sendFileBinary(Component *owner, ComponentUnit& target) {
     msg->getData().setStreamFlag(STREAM_FILEBINARY);
     msg->getData().addFileList(job->getProcess(0)->getID(), list);
 
-    owner->send(target, msg);
+    owner->send(target, std::move(msg));
 }
 
-bool processFileBinaryMsg(Component* component, ComponentUnit& owner, Message *msg) {
+bool processFileBinaryMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 

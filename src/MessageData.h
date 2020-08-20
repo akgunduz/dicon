@@ -10,16 +10,19 @@
 
 class MessageData {
 
-    int streamFlag;
+    int streamFlag{};
 
-    char jobName[PATH_MAX];
+    char jobName[PATH_MAX]{};
 
-    std::tuple<long, TypeProcessFileList> fileList;
+    std::pair<long, TypeProcessFileList> fileList;
     TypeProcessList processList;
 
     TypeComponentList componentList;
 
 public:
+
+    MessageData() = default;
+    ~MessageData();
 
     int getStreamFlag() const;
     void setStreamFlag(int);
@@ -32,8 +35,8 @@ public:
     void addFileList(long, TypeProcessFileList&);
     long getFileCount();
 
-    ProcessItem* getProcess(int);
-    void addProcess(ProcessItem*);
+    TypeProcessItem getProcess(int);
+    void addProcess(const TypeProcessItem&);
     long getProcessCount();
 
     char* getJobName();

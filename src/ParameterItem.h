@@ -20,4 +20,7 @@ public:
     virtual bool check();
 };
 
+typedef std::shared_ptr<ParameterItem> TypeParameterItem;
+typedef std::vector<TypeParameterItem> TypeParameterList;
+
 #endif //DICON_PARAMETERITEM_H

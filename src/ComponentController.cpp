@@ -18,20 +18,22 @@ ComponentController *ComponentController::newInstance(int *interfaces) {
 
 ComponentController::~ComponentController() {
 
+    PRINT("Deallocating ComponentController");
+
     delete distributor;
 
-    for (int i = 0; i < collectors.size(); i++) {
-        delete collectors[i];
+    for (auto *collector : collectors) {
+        delete collector;
     }
 
-    for (int i = 0; i < nodes.size(); i++) {
-        delete nodes[i];
+    for (auto *node : nodes) {
+        delete node;
     }
 
     instance = nullptr;
 }
 
-ComponentController::ComponentController(int *_interfaces) {
+ComponentController::ComponentController(const int *_interfaces) {
 
     interface[0] = _interfaces[0];
     interface[1] = _interfaces[1];
@@ -87,7 +89,8 @@ std::vector<Node *> &ComponentController::getNodes() {
 bool ComponentController::startDistributor(bool autoWake) {
 
     char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(nullptr, 0), DISTRIBUTOR_PATH);
+    char cwd[PATH_MAX - 100];
+    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), DISTRIBUTOR_PATH);
     mkdir(path, 0777);
 
     distributor = Distributor::newInstance(path, interface[0], interface[1], autoWake);
@@ -98,7 +101,8 @@ bool ComponentController::startDistributor(bool autoWake) {
 bool ComponentController::startCollector(int count) {
 
     char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
+    char cwd[PATH_MAX - 100];
+    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), COLLECTOR_PATH);
     mkdir(path, 0777);
 
     for (int i = 0; i < count; i++) {
@@ -125,7 +129,8 @@ Collector* ComponentController::startCollector() {
 bool ComponentController::startNode(int count) {
 
     char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
+    char cwd[PATH_MAX - 100];
+    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), NODE_PATH);
     mkdir(path, 0777);
 
     for (int i = 0; i < count; i++) {
@@ -139,7 +144,8 @@ bool ComponentController::startNode(int count) {
 Node* ComponentController::startNode() {
 
     char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(nullptr, 0), NODE_PATH);
+    char cwd[PATH_MAX - 100];
+    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), NODE_PATH);
     mkdir(path, 0777);
 
     auto *node = Node::newInstance(path, interface[1]);

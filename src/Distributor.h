@@ -38,15 +38,15 @@ class Distributor : public Component {
 	void pollProcess();
     void collProcess();
 
-    bool processCollectorAliveMsg(ComponentUnit&, Message *);
-    bool processCollectorIDMsg(ComponentUnit&, Message *);
-    bool processCollectorNodeMsg(ComponentUnit&, Message *);
-    bool processCollectorReadyMsg(ComponentUnit&, Message *);
+    bool processCollectorAliveMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorIDMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorNodeMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorReadyMsg(ComponentUnit&, TypeMessage);
 
-    bool processNodeAliveMsg(ComponentUnit&, Message *);
-    bool processNodeIDMsg(ComponentUnit&, Message *);
-    bool processNodeBusyMsg(ComponentUnit&, Message *);
-    bool processNodeReadyMsg(ComponentUnit&, Message *);
+    bool processNodeAliveMsg(ComponentUnit&, TypeMessage);
+    bool processNodeIDMsg(ComponentUnit&, TypeMessage);
+    bool processNodeBusyMsg(ComponentUnit&, TypeMessage);
+    bool processNodeReadyMsg(ComponentUnit&, TypeMessage);
 
 	bool send2CollectorWakeupMsg(ComponentUnit&);
 	bool send2CollectorIDMsg(ComponentUnit&, long);

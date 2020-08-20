@@ -5,6 +5,8 @@
 
 #include "MessageData.h"
 
+MessageData::~MessageData() = default;
+
 int MessageData::getStreamFlag() const {
 
     return streamFlag;
@@ -17,51 +19,51 @@ void MessageData::setStreamFlag(int _streamFlag) {
 
 long MessageData::getFileProcess() {
 
-    return std::get<0>(fileList);
+    return fileList.first;
 }
 
 void MessageData::setFileProcess(long processID) {
 
-    std::get<0>(fileList) = processID;
+    fileList.first = processID;
 }
 
 long MessageData::getFileCount() {
 
-    return std::get<1>(fileList).size();
+    return fileList.second.size();
 }
 
 ProcessFile& MessageData::getFile(int index) {
 
-    return std::get<1>(fileList)[index];
+    return fileList.second[index];
 }
 
 TypeProcessFileList& MessageData::getFileList() {
 
-    return std::get<1>(fileList);
+    return fileList.second;
 }
 
 void MessageData::addFile(ProcessFile& fileItem) {
 
-    std::get<1>(fileList).emplace_back(fileItem);
+    fileList.second.emplace_back(fileItem);
 }
 
 void MessageData::addFileList(long assignedProcess, TypeProcessFileList& _fileList) {
 
-    std::get<0>(fileList) = assignedProcess;
-    std::get<1>(fileList).insert(std::get<1>(fileList).end(), _fileList.begin(), _fileList.end());
+    fileList.first = assignedProcess;
+    fileList.second.insert(fileList.second.end(), _fileList.begin(), _fileList.end());
 }
 
 long MessageData::getProcessCount() {
 
-    return processList.size();;
+    return processList.size();
 }
 
-ProcessItem* MessageData::getProcess(int index) {
+TypeProcessItem MessageData::getProcess(int index) {
 
     return processList[index];
 }
 
-void MessageData::addProcess(ProcessItem *processItem) {
+void MessageData::addProcess(const TypeProcessItem& processItem) {
 
     processList.emplace_back(processItem);
 }
@@ -85,5 +87,3 @@ void MessageData::setComponentList(TypeComponentList &list) {
 
     componentList = list;
 }
-
-

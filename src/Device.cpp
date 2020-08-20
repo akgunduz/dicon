@@ -3,11 +3,17 @@
 //
 
 #include "Device.h"
+#include "Log.h"
 
 Device::Device(const char *_name, INTERFACE _type, uint32_t _base, uint8_t _mask, bool _loopback)
     : type(_type), base(_base), mask(_mask), loopback(_loopback) {
 
     strcpy(this->name, _name);
+}
+
+Device::~Device() {
+
+    PRINT("Deallocating Device: %s", name);
 }
 
 const char* Device::getName() const {

@@ -33,6 +33,7 @@ public:
     void setRequired(bool);
 };
 
-typedef std::vector<FileItem*> TypeFileList;
+typedef std::shared_ptr<FileItem> TypeFileItem;
+typedef std::vector<TypeFileItem> TypeFileList;
 
 #endif //DICON_FILEITEM_H
