@@ -44,11 +44,12 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentList &compon
     }
 
     for (int i = 0; i < list.size(); i = i + 6) {
+
         Address address(BaseAddress(list[i + 2], list[i + 3]),
                         BaseAddress(list[i + 4], list[i + 5]));
-        ComponentUnit *item = ComponentUnitFactory::create((COMPONENT)block.get(0),
-                                                           (ARCH)list[i], list[i + 1], address);
-        componentList.emplace_back(item);
+
+        componentList.emplace_back(ComponentUnitFactory::create((COMPONENT)block.get(0),
+                                                                (ARCH)list[i], list[i + 1], address));
     }
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
