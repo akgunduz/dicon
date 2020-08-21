@@ -18,7 +18,7 @@ class Connector {
 
 public:
 
-    static Interface* createInterface(TypeDevice&,
+    static TypeInterface createInterface(TypeDevice&,
                                       const InterfaceSchedulerCB*,
                                       const InterfaceHostCB*);
 };

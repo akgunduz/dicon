@@ -63,4 +63,7 @@ public :
     virtual TypeAddressList getAddressList() = 0;
 };
 
+typedef std::shared_ptr<Interface> TypeInterface;
+typedef std::map<COMPONENT, TypeInterface> TypeInterfaceList;
+
 #endif //DICON_INTERFACE_H

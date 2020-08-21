@@ -33,7 +33,7 @@ class Component {
 
     char rootPath[PATH_MAX]{};
 
-    Interface *interfaces[COMP_MAX]{};
+    TypeInterfaceList interfaces;
 
     static void *notifyContext;
     static TypeNotifyCB notifyCB;

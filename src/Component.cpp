@@ -56,12 +56,6 @@ Component::~Component() {
 
     LOGS_T(getHost(), "Deallocating Component");
 
-    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
-        delete interfaces[COMP_DISTRIBUTOR];
-    }
-
-    delete interfaces[COMP_NODE];
-
     delete schedulerCB;
 
     delete hostCB;

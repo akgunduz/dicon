@@ -7,22 +7,22 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-Interface* Connector::createInterface(TypeDevice& device,
+TypeInterface Connector::createInterface(TypeDevice& device,
                                       const InterfaceSchedulerCB *schedulerCB,
                                       const InterfaceHostCB *hostCB) {
 
-    Interface *interface = nullptr;
+    TypeInterface interface = nullptr;
 
     try {
 
         switch (device->getType()) {
 
             case INTERFACE_NET:
-                interface = new Net(device, schedulerCB, hostCB);
+                interface = std::make_shared<Net>(device, schedulerCB, hostCB);
                 break;
 
             case INTERFACE_UNIXSOCKET:
-                interface = new UnixSocket(device, schedulerCB, hostCB);
+                interface = std::make_shared<UnixSocket>(device, schedulerCB, hostCB);
                 break;
 
             default:
