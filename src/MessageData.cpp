@@ -78,12 +78,12 @@ void MessageData::setJobName(const char *_jobName) {
     strcpy(this->jobName, _jobName);
 }
 
-TypeComponentList &MessageData::getComponentList() {
+TypeComponentUnitList &MessageData::getComponentList() {
 
     return componentList;
 }
 
-void MessageData::setComponentList(TypeComponentList &list) {
+void MessageData::setComponentList(TypeComponentUnitList &list) {
 
     componentList = list;
 }

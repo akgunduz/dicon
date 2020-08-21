@@ -156,7 +156,7 @@ void Distributor::collProcess() {
             continue;
         }
 
-        TypeComponentList nodes;
+        TypeComponentUnitList nodes;
 
         auto coll = std::static_pointer_cast<CollectorUnit>(collectorManager->get(request->collID));
 
@@ -318,7 +318,7 @@ bool Distributor::send2CollectorIDMsg(ComponentUnit& target, long id) {
     return send(target, std::move(msg));
 }
 
-bool Distributor::send2CollectorNodeMsg(ComponentUnit& target, TypeComponentList& nodes) {
+bool Distributor::send2CollectorNodeMsg(ComponentUnit& target, TypeComponentUnitList& nodes) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
 
@@ -328,7 +328,7 @@ bool Distributor::send2CollectorNodeMsg(ComponentUnit& target, TypeComponentList
     return send(target, std::move(msg));
 }
 
-bool Distributor::send2CollectorReplaceMsg(ComponentUnit& target, TypeComponentList& nodes) {
+bool Distributor::send2CollectorReplaceMsg(ComponentUnit& target, TypeComponentUnitList& nodes) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE);
 

@@ -4,21 +4,21 @@
 
 #include "TestApp.h"
 
-void sendWakeUp(Component *owner, ComponentUnit& target) {
+void sendWakeUp(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP);
 
     owner->send(target, std::move(msg));
 }
 
-void sendAlive(Component *owner, ComponentUnit& target) {
+void sendAlive(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ALIVE);
 
     owner->send(target, std::move(msg));
 }
 
-bool processWakeUpMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processWakeUpMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(component->getHost(), owner, MSGDIR_SEND, "Sending Alive");
 
@@ -26,15 +26,15 @@ bool processWakeUpMsg(Component* component, ComponentUnit& owner, TypeMessage ms
     return true;
 }
 
-bool processAliveMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processAliveMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     return true;
 }
 
-void TestApp::testWakeUp(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testWakeUp(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageTypes::addMsg(MSG_TYPE_TEST_WAKEUP, "TEST_WAKEUP");
-    MessageTypes::addMsg(MSG_TYPE_TEST_ALIVE, "TEST_ALIVE");
+    MessageType::addMsg(MSG_TYPE_TEST_WAKEUP, "TEST_WAKEUP");
+    MessageType::addMsg(MSG_TYPE_TEST_ALIVE, "TEST_ALIVE");
 
     collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
@@ -44,5 +44,5 @@ void TestApp::testWakeUp(Distributor* distributor, Collector* collector, Node* n
 
     ComponentUnit target(COMP_NODE);
     target.setAddress(distributor->getInterfaceMulticastAddress(target.getType()), true);
-    sendWakeUp(distributor, target);
+    sendWakeUp((TypeComponent&) distributor, target);
 }

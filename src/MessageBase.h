@@ -9,7 +9,7 @@
 
 #include "crc/CRC.h"
 #include "MessageBlockHeader.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 #include "HostUnit.h"
 #include "Address.h"
 

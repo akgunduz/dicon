@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendFileBinary(Component *owner, ComponentUnit& target) {
+void sendFileBinary(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
 
@@ -21,7 +21,7 @@ void sendFileBinary(Component *owner, ComponentUnit& target) {
     owner->send(target, std::move(msg));
 }
 
-bool processFileBinaryMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processFileBinaryMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
@@ -35,13 +35,13 @@ bool processFileBinaryMsg(Component* component, ComponentUnit& owner, TypeMessag
     return true;
 }
 
-void TestApp::testFileBinary(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testFileBinary(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageTypes::addMsg(MSG_TYPE_TEST_FILEBINARY, "TEST_FILEBINARY");
+    MessageType::addMsg(MSG_TYPE_TEST_FILEBINARY, "TEST_FILEBINARY");
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY, processFileBinaryMsg);
 
     ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(),
                          node->getHost().getAddress(COMP_COLLECTOR));
-    sendFileBinary(collector, target);
+    sendFileBinary((TypeComponent&) collector, target);
 }

@@ -26,7 +26,7 @@ void listDevices() {
     PRINT("Listing Interfaces .....");
 
     for (int j = 0; j < deviceList->getCount(); j++) {
-        PRINT("%s : %s", InterfaceTypes::getName(deviceList->get(j)->getType()),
+        PRINT("%s : %s", InterfaceType::getName(deviceList->get(j)->getType()),
               deviceList->get(j)->getName());
     }
 }

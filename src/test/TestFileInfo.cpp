@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendFileInfo(Component *owner, ComponentUnit& target) {
+void sendFileInfo(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
 
@@ -20,7 +20,7 @@ void sendFileInfo(Component *owner, ComponentUnit& target) {
     delete job;
 }
 
-bool processFileInfoMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processFileInfoMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
@@ -33,13 +33,13 @@ bool processFileInfoMsg(Component* component, ComponentUnit& owner, TypeMessage 
     return true;
 }
 
-void TestApp::testFileInfo(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testFileInfo(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageTypes::addMsg(MSG_TYPE_TEST_FILEINFO, "TEST_FILEINFO");
+    MessageType::addMsg(MSG_TYPE_TEST_FILEINFO, "TEST_FILEINFO");
 
     collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, processFileInfoMsg);
 
     ComponentUnit target(COMP_COLLECTOR, collector->getHost().getArch(), collector->getHost().getID(),
                          collector->getHost().getAddress(COMP_NODE));
-    sendFileInfo(node, target);
+    sendFileInfo((TypeComponent&) node, target);
 }

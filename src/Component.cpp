@@ -8,6 +8,8 @@
 void *Component::notifyContext = nullptr;
 TypeNotifyCB Component::notifyCB = nullptr;
 
+TypeComponent Component::nullComponent = nullptr;
+
 Component::Component(const char *rootPath) {
 
     strcpy(this->rootPath, rootPath);
@@ -40,9 +42,9 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = Connector::createInterface(nodeDevice, schedulerCB, hostCB);
+    interfaces[COMP_NODE] = InterfaceFactory::createInterface(nodeDevice, schedulerCB, hostCB);
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   Connector::createInterface(otherDevice, schedulerCB, hostCB) :
+                                   InterfaceFactory::createInterface(otherDevice, schedulerCB, hostCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
@@ -70,7 +72,7 @@ bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, TypeMessage ms
 
     LOGC_D(getHost(), owner, MSGDIR_RECEIVE,
            "\"%s\" is received",
-           MessageTypes::getMsgName(msgType));
+           MessageType::getMsgName(msgType));
 
     auto processCB = processMsg[owner.getType()].find(msgType);
     if (processCB == processMsg[owner.getType()].end()) {
@@ -81,7 +83,7 @@ bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, TypeMessage ms
             return defaultProcessMsg(owner, std::move(msg));
         }
 
-        return (processStaticMsg[owner.getType()][msgType])(this, owner, std::move(msg));
+        return (processStaticMsg[owner.getType()][msgType])( (TypeComponent&) *this, owner, std::move(msg));
     }
 
     return (this->*processMsg[owner.getType()][msgType])(owner, std::move(msg));
@@ -93,7 +95,7 @@ bool Component::defaultProcessMsg(ComponentUnit &owner, TypeMessage msg) {
     if (getHost().getType() != owner.getType()) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE,
                "No Handler is found for message : \"%s\"",
-               MessageTypes::getMsgName(msg->getHeader().getType()));
+               MessageType::getMsgName(msg->getHeader().getType()));
     }
 
     return true;

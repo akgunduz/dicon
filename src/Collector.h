@@ -7,7 +7,7 @@
 #define	DICON_COLLECTOR_H
 
 #include "Component.h"
-#include "Connector.h"
+#include "InterfaceFactory.h"
 #include "Message.h"
 #include "JobItem.h"
 #include "DistributorObject.h"
@@ -46,6 +46,8 @@ public:
     bool processJob();
     TypeJobItem& loadJob(const char*);
 };
+
+typedef std::unique_ptr<Collector> TypeCollector;
 
 #endif //DICON_COLLECTOR_H
 

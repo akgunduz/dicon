@@ -133,7 +133,7 @@ bool JobItem::parseFileNode(JobItem *parent, json_object *node) {
 
         const char* path = json_object_get_string(child);
 
-        auto *content = new FileItem(parent->getHost(), i + 1, parent->getID(), path);
+        auto content = std::make_shared<FileItem>(parent->getHost(), i + 1, parent->getID(), path);
 
         parent->contentList[CONTENT_FILE].emplace_back(content);
 
@@ -160,7 +160,7 @@ bool JobItem::parseParamNode(JobItem *parent, json_object *node) {
 
         const char *param = json_object_get_string(child);
 
-        auto *content = new ParameterItem(parent->getHost(), i + 1, parent->getID(), param);
+        auto content = std::make_shared<ParameterItem>(parent->getHost(), i + 1, parent->getID(), param);
 
         parent->contentList[CONTENT_PARAM].emplace_back(content);
     }
@@ -187,7 +187,7 @@ bool JobItem::parseProcessNode(JobItem *parent, json_object *node) {
 
         const char *process = json_object_get_string(child);
 
-        auto *content = new ProcessItem(parent->getHost(), i + 1, parent->getID(), process);
+        auto content = std::make_shared<ProcessItem>(parent->getHost(), i + 1, parent->getID(), process);
 
         parent->contentList[CONTENT_PROCESS].emplace_back(content);
     }

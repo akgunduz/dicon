@@ -28,8 +28,8 @@ Message::Message(HostUnit& host, ComponentUnit& target, MSG_TYPE type)
 
 Message::~Message() = default;
 
-bool Message::readComponentList(ComponentUnit& source, TypeComponentList &componentList,
-        MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readComponentList(ComponentUnit& source, TypeComponentUnitList &componentList,
+                                MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_COMPONENT) {
         LOGS_E(getHost(), "readComponentList can not read other blocks");
@@ -260,7 +260,7 @@ bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block,
     return true;
 }
 
-bool Message::writeComponentList(ComponentUnit& target, TypeComponentList& componentList, uint32_t& crc) {
+bool Message::writeComponentList(ComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
 
     std::vector<long> list;
 

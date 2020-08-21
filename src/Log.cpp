@@ -118,7 +118,7 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
     sprintf(logout, "%11s[%ld] %s %11s[%ld] : %s \n",
             ComponentType::getName(host.getType()),
             host.getID(),
-            MessageTypes::getMsgDirName(direction),
+            MessageType::getMsgDirName(direction),
             ComponentType::getName(target.getType()),
             target.getID(),
             buf);

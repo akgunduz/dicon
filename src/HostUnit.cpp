@@ -42,7 +42,7 @@ void HostUnit::setID(long _id) {
 
 ARCH HostUnit::getArch() const {
 
-    return ArchTypes::get();
+    return ArchType::get();
 }
 
 COMPONENT HostUnit::getType() const {

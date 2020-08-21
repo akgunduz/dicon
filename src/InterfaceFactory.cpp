@@ -3,13 +3,13 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Connector.h"
+#include "InterfaceFactory.h"
 #include "Net.h"
 #include "UnixSocket.h"
 
-TypeInterface Connector::createInterface(TypeDevice& device,
-                                      const InterfaceSchedulerCB *schedulerCB,
-                                      const InterfaceHostCB *hostCB) {
+TypeInterface InterfaceFactory::createInterface(TypeDevice& device,
+                                                const InterfaceSchedulerCB *schedulerCB,
+                                                const InterfaceHostCB *hostCB) {
 
     TypeInterface interface = nullptr;
 

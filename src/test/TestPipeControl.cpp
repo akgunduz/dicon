@@ -5,7 +5,7 @@
 #include <pstreams/pstream.h>
 #include "TestApp.h"
 
-void TestApp::testPipeControl(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     auto job = collector->loadJob("../sample/Job1_x86_linux");
     if (!job) {

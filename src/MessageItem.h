@@ -7,7 +7,7 @@
 
 #include "Address.h"
 #include "Message.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 #include "SchedulerItem.h"
 
 class MessageItem : public SchedulerItem {

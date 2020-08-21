@@ -8,7 +8,7 @@
 
 #include "Component.h"
 #include "Node.h"
-#include "Connector.h"
+#include "InterfaceFactory.h"
 #include "Util.h"
 #include "NodeManager.h"
 #include "CollectorManager.h"
@@ -16,7 +16,7 @@
 
 #define WAKEUP_INTERVAL 5
 
-typedef std::map<long, TypeComponentList> TypeComponentReplaceIDList;
+typedef std::map<long, TypeComponentUnitList> TypeComponentReplaceIDList;
 
 class Distributor : public Component {
 
@@ -50,8 +50,8 @@ class Distributor : public Component {
 
 	bool send2CollectorWakeupMsg(ComponentUnit&);
 	bool send2CollectorIDMsg(ComponentUnit&, long);
-	bool send2CollectorNodeMsg(ComponentUnit&, TypeComponentList&);
-	bool send2CollectorReplaceMsg(ComponentUnit&, TypeComponentList&);
+	bool send2CollectorNodeMsg(ComponentUnit&, TypeComponentUnitList&);
+	bool send2CollectorReplaceMsg(ComponentUnit&, TypeComponentUnitList&);
 
     bool send2NodeWakeupMsg(ComponentUnit&);
     bool send2NodeIDMsg(ComponentUnit&, long);
@@ -70,5 +70,7 @@ public:
     CollectorManager* getCollectors() const;
     NodeManager* getNodes() const;
 };
+
+typedef std::unique_ptr<Distributor> TypeDistributor;
 
 #endif //DICON_DISTRIBUTOR_H

@@ -18,67 +18,67 @@ set(TEST_PATH "${SOURCE_PATH}/test")
 
 set(FRAMEWORK_FILES
         ${EXTERNAL_PATH}/miniz/miniz.cpp
-        ${SOURCE_PATH}/ArchTypes.cpp
+        ${SOURCE_PATH}/ArchType.cpp
+        ${SOURCE_PATH}/Address.cpp
+        ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Collector.cpp
+        ${SOURCE_PATH}/CollectorHost.cpp
+        ${SOURCE_PATH}/CollectorManager.cpp
+        ${SOURCE_PATH}/CollectorObject.cpp
+        ${SOURCE_PATH}/CollectorState.cpp
+        ${SOURCE_PATH}/CollectorUnit.cpp
         ${SOURCE_PATH}/Common.cpp
+        ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/Component.cpp
-        ${SOURCE_PATH}/Device.cpp
-        ${SOURCE_PATH}/Connector.cpp
+        ${SOURCE_PATH}/ComponentFactory.cpp
+        ${SOURCE_PATH}/ComponentManager.cpp
+        ${SOURCE_PATH}/ComponentObject.cpp
+        ${SOURCE_PATH}/ComponentType.cpp
+        ${SOURCE_PATH}/ComponentUnit.cpp
+        ${SOURCE_PATH}/ComponentUnitFactory.cpp
         ${SOURCE_PATH}/ContentItem.cpp
-        ${SOURCE_PATH}/FileItem.cpp
-        ${SOURCE_PATH}/ParameterItem.cpp
-        ${SOURCE_PATH}/ProcessItem.cpp
+        ${SOURCE_PATH}/Device.cpp
+        ${SOURCE_PATH}/DeviceList.cpp
         ${SOURCE_PATH}/Distributor.cpp
+        ${SOURCE_PATH}/DistributorHost.cpp
+        ${SOURCE_PATH}/DistributorObject.cpp
+        ${SOURCE_PATH}/FileItem.cpp
+        ${SOURCE_PATH}/HostUnit.cpp
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
+        ${SOURCE_PATH}/InterfaceFactory.cpp
+        ${SOURCE_PATH}/InterfaceType.cpp
+        ${SOURCE_PATH}/JobItem.cpp
+        ${SOURCE_PATH}/JobStatus.cpp
+        ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/Log.cpp
-        ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/Message.cpp
+        ${SOURCE_PATH}/MessageBase.cpp
+        ${SOURCE_PATH}/MessageBlockHeader.cpp
+        ${SOURCE_PATH}/MessageData.cpp
+        ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/MessageItem.cpp
-        ${SOURCE_PATH}/MessageTypes.cpp
+        ${SOURCE_PATH}/MessageItem.cpp
+        ${SOURCE_PATH}/MessageType.cpp
         ${SOURCE_PATH}/Net.cpp
+        ${SOURCE_PATH}/NetUtil.cpp
         ${SOURCE_PATH}/Node.cpp
-        ${SOURCE_PATH}/NodeObject.cpp
+        ${SOURCE_PATH}/NodeHost.cpp
         ${SOURCE_PATH}/NodeManager.cpp
+        ${SOURCE_PATH}/NodeObject.cpp
+        ${SOURCE_PATH}/NodeObject.cpp
+        ${SOURCE_PATH}/NodeState.cpp
+        ${SOURCE_PATH}/NodeUnit.cpp
+        ${SOURCE_PATH}/ParameterItem.cpp
+        ${SOURCE_PATH}/ProcessFile.cpp
+        ${SOURCE_PATH}/ProcessItem.cpp
+        ${SOURCE_PATH}/ProcessState.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/Util.cpp
+        ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/UnixSocket.cpp
-        ${SOURCE_PATH}/Address.cpp
-        ${SOURCE_PATH}/MessageItem.cpp
-        ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/JsonType.cpp
-        ${SOURCE_PATH}/JobItem.cpp
-        ${SOURCE_PATH}/MessageHeader.cpp
-        ${SOURCE_PATH}/MessageBlockHeader.cpp
-        ${SOURCE_PATH}/InterfaceTypes.cpp
-        ${SOURCE_PATH}/DeviceList.cpp
-        ${SOURCE_PATH}/MessageData.cpp
-        ${SOURCE_PATH}/CollectorState.cpp
-        ${SOURCE_PATH}/NodeState.cpp
-        ${SOURCE_PATH}/CollectorManager.cpp
-        ${SOURCE_PATH}/HostUnit.cpp
-        ${SOURCE_PATH}/NodeHost.cpp
-        ${SOURCE_PATH}/ComponentController.cpp
-        ${SOURCE_PATH}/ComponentManager.cpp
-        ${SOURCE_PATH}/CollectorObject.cpp
-        ${SOURCE_PATH}/DistributorObject.cpp
-        ${SOURCE_PATH}/ComponentUnit.cpp
-        ${SOURCE_PATH}/Application.cpp
-        ${SOURCE_PATH}/ProcessState.cpp
-        ${SOURCE_PATH}/ProcessFile.cpp
-        ${SOURCE_PATH}/ComponentType.cpp
-        ${SOURCE_PATH}/NodeObject.cpp
-        ${SOURCE_PATH}/NodeUnit.cpp
-        ${SOURCE_PATH}/ComponentObject.cpp
-        ${SOURCE_PATH}/CollectorUnit.cpp
-        ${SOURCE_PATH}/CollectorHost.cpp
-        ${SOURCE_PATH}/DistributorHost.cpp
-        ${SOURCE_PATH}/CommUnit.cpp
-        ${SOURCE_PATH}/NetUtil.cpp
-        ${SOURCE_PATH}/JobStatus.cpp
-        ${SOURCE_PATH}/ComponentUnitFactory.cpp
+        ${SOURCE_PATH}/Util.cpp
         )
 
 set(CONSOLE_FILES

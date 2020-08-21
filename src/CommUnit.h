@@ -7,7 +7,7 @@
 
 #include "Address.h"
 #include "ComponentType.h"
-#include "ArchTypes.h"
+#include "ArchType.h"
 
 class CommUnit {
 

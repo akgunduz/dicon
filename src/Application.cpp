@@ -21,7 +21,7 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
           deviceList->get(interfaces[0])->getName().c_str(),
           deviceList->get(interfaces[1])->getName().c_str());
 
-    componentController = ComponentController::newInstance(interfaces);
+    componentController = ComponentFactory::newInstance(interfaces);
 
     if (componentCount[COMP_DISTRIBUTOR]) {
         componentController->startDistributor(autoWake);

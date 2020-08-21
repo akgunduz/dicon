@@ -8,7 +8,7 @@
 #include <DeviceList.h>
 #include <Log.h>
 #include <Util.h>
-#include <ComponentController.h>
+#include <ComponentFactory.h>
 
 enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING = 100,
@@ -30,15 +30,15 @@ class TestApp : public App {
 public:
     TestApp(int *, LOGLEVEL*, std::vector<int>&);
 
-    void testPing(Distributor*, Collector*, Node*);
-    void testComponentList(Distributor*, Collector*, Node*);
-    void testProcess(Distributor*, Collector*, Node*);
-    void testFileInfo(Distributor*, Collector*, Node*);
-    void testFileBinary(Distributor*, Collector*, Node*);
-    void testJobName(Distributor*, Collector*, Node*);
-    void testLoadJob(Distributor*, Collector*, Node*);
-    void testWakeUp(Distributor*, Collector*, Node*);
-    void testPipeControl(Distributor*, Collector*, Node*);
+    void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testProcess(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testJobName(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
 
     int run() override;
 

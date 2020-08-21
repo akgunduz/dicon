@@ -3,8 +3,8 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DICON_MESSAGETYPES_H
-#define DICON_MESSAGETYPES_H
+#ifndef DICON_MESSAGETYPE_H
+#define DICON_MESSAGETYPE_H
 
 #include <Common.h>
 
@@ -56,7 +56,7 @@ enum MSG_DIR {
     MSGDIR_SEND
 };
 
-class MessageTypes {
+class MessageType {
 
 public:
     static const char* getMsgName(int);
@@ -68,4 +68,4 @@ public:
     static void addBlock(int, std::string);
 };
 
-#endif //DICON_MESSAGETYPES_H
+#endif //DICON_MESSAGETYPE_H

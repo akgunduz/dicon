@@ -46,7 +46,7 @@ bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 
 bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* fileName) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (!collector) {
         sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
         return false;
@@ -102,7 +102,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
 bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (collector != nullptr) {
 
         if (!collector->getJob()) {
@@ -132,7 +132,7 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
 
 bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (!collector) {
         sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
         return false;

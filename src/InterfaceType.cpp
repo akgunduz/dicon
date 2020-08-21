@@ -3,7 +3,7 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#include "InterfaceTypes.h"
+#include "InterfaceType.h"
 #include "Net.h"
 #include "UnixSocket.h"
 
@@ -12,7 +12,7 @@ const char* sInterfaceNames[INTERFACE_MAX] = {
         "UnixSocket",
 };
 
-const char* InterfaceTypes::getName(INTERFACE type) {
+const char* InterfaceType::getName(INTERFACE type) {
 
     return sInterfaceNames[type];
 }

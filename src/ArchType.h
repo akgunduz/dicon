@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 10/18/15.
 //
 
-#ifndef DICON_ARCHTYPES_H
-#define DICON_ARCHTYPES_H
+#ifndef DICON_ARCHTYPE_H
+#define DICON_ARCHTYPE_H
 
 enum ARCH {
     ARCH_LINUX_X86_64,
@@ -13,11 +13,11 @@ enum ARCH {
     ARCH_MAX,
 };
 
-class ArchTypes {
+class ArchType {
 
 public:
     static const char* getName(ARCH id);
     static ARCH get();
 };
 
-#endif //DICON_ARCHTYPES_H
+#endif //DICON_ARCHTYPE_H

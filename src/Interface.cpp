@@ -21,7 +21,7 @@ Interface::Interface(TypeDevice& _device, const InterfaceSchedulerCB *receiveCB,
 
         LOGC_T(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
                "\"%s\" is sending",
-               MessageTypes::getMsgName(msgType));
+               MessageType::getMsgName(msgType));
 
         if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
 
@@ -34,7 +34,7 @@ Interface::Interface(TypeDevice& _device, const InterfaceSchedulerCB *receiveCB,
 
         LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
                "\"%s\" is sent",
-               MessageTypes::getMsgName(msgType));
+               MessageType::getMsgName(msgType));
 
         return status;
 

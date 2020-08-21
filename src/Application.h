@@ -6,7 +6,7 @@
 #ifndef DICON_APPLICATION_H
 #define DICON_APPLICATION_H
 
-#include "ComponentController.h"
+#include "ComponentFactory.h"
 
 enum APPTYPE {
 
@@ -24,7 +24,7 @@ class App {
 
 protected:
 
-    ComponentController* componentController;
+    ComponentFactory* componentController;
 
     App(enum APPTYPE, int *, LOGLEVEL*, std::vector<int>, bool);
 

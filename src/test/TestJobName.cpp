@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendJobName(Component *owner, ComponentUnit& target) {
+void sendJobName(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
 
@@ -16,7 +16,7 @@ void sendJobName(Component *owner, ComponentUnit& target) {
     owner->send(target, std::move(msg));
 }
 
-bool processJobNameMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processJobNameMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     const char* jobName = msg->getData().getJobName();
 
@@ -25,13 +25,13 @@ bool processJobNameMsg(Component* component, ComponentUnit& owner, TypeMessage m
     return true;
 }
 
-void TestApp::testJobName(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testJobName(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageTypes::addMsg(MSG_TYPE_TEST_JOBNAME, "TEST_JOBNAME");
+    MessageType::addMsg(MSG_TYPE_TEST_JOBNAME, "TEST_JOBNAME");
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, processJobNameMsg);
 
     ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_COLLECTOR));
 
-    sendJobName(collector, target);
+    sendJobName((TypeComponent&) collector, target);
 }

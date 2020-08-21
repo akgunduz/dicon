@@ -3,7 +3,7 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#include "MessageTypes.h"
+#include "MessageType.h"
 
 std::map<int, std::string> msgNameList = {
         {MSGTYPE_NODE, "NODE"},
@@ -46,37 +46,37 @@ std::map<int, std::string> blockNameList = {
         {BLOCK_NONE, "BLOCK_NONE"},
 };
 
-const char* MessageTypes::getMsgName(int type) {
+const char* MessageType::getMsgName(int type) {
 
     return msgNameList[type].c_str();
 }
 
-const char* MessageTypes::getMsgDirName(int type) {
+const char* MessageType::getMsgDirName(int type) {
 
     return msgDirNameList[type].c_str();
 }
 
-void MessageTypes::addMsg(int type, std::string str) {
+void MessageType::addMsg(int type, std::string str) {
 
     msgNameList[type] = str;
 }
 
-const char* MessageTypes::getStreamName(int type) {
+const char* MessageType::getStreamName(int type) {
 
     return streamNameList[type].c_str();
 }
 
-void MessageTypes::addStream(int type, std::string str) {
+void MessageType::addStream(int type, std::string str) {
 
     streamNameList[type] = str;
 }
 
-const char* MessageTypes::getBlockName(int type) {
+const char* MessageType::getBlockName(int type) {
 
     return blockNameList[type].c_str();
 }
 
-void MessageTypes::addBlock(int type, std::string str) {
+void MessageType::addBlock(int type, std::string str) {
 
     blockNameList[type] = str;
 }

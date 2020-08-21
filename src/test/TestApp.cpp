@@ -28,11 +28,9 @@ void TestApp::help() {
 
 int TestApp::run() {
 
-    Distributor *d = componentController->getDistributor();
-    Collector *c = componentController->getCollector(0);
-    Node *n = componentController->getNode(0);
-
-    testPipeControl(d, c, n);
+    auto &d = componentController->getDistributor();
+    auto &c = componentController->getCollector(0);
+    auto &n = componentController->getNode(0);
 
     int in;
     do {

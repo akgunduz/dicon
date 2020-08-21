@@ -2,7 +2,7 @@
 // Created by Haluk Akgunduz on 10/18/15.
 //
 
-#include "ArchTypes.h"
+#include "ArchType.h"
 
 const char* sArchTypes[] = {
         "x86-64-linux",
@@ -11,11 +11,11 @@ const char* sArchTypes[] = {
         "arm64-linux",
 };
 
-const char *ArchTypes::getName(ARCH arch) {
+const char *ArchType::getName(ARCH arch) {
     return sArchTypes[arch];
 }
 
-ARCH ArchTypes::get() {
+ARCH ArchType::get() {
 
 #if defined(__arm__) && defined(__ARM_32BIT_STATE) && defined(__linux__)
     return ARCH_LINUX_ARM_32;

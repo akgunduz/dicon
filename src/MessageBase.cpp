@@ -188,7 +188,7 @@ bool MessageBase::readBlockHeader(ComponentUnit& source, MessageBlockHeader &blo
     }
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header is read successfully => Type : %s, Count : %d",
-           MessageTypes::getBlockName(blockHeader.getType()), blockHeader.getCount());
+           MessageType::getBlockName(blockHeader.getType()), blockHeader.getCount());
 
     for (int i = 0; i < blockHeader.getCount(); i++) {
         LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header Data[%d] : %d", i, blockHeader.get(i));
@@ -436,7 +436,7 @@ bool MessageBase::writeBlockHeader(ComponentUnit& target, MessageBlockHeader &bl
     }
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Block header write process is started => Type : %s, Count : %d",
-           MessageTypes::getBlockName(blockHeader.getType()), blockHeader.getCount());
+           MessageType::getBlockName(blockHeader.getType()), blockHeader.getCount());
 
     if (!writeBlock(target, tmpBuf, p - tmpBuf, crc)) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write block header to stream");
@@ -444,7 +444,7 @@ bool MessageBase::writeBlockHeader(ComponentUnit& target, MessageBlockHeader &bl
     }
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Block header is written successfully => Type : %s, Count : %d",
-           MessageTypes::getBlockName(blockHeader.getType()), blockHeader.getCount());
+           MessageType::getBlockName(blockHeader.getType()), blockHeader.getCount());
 
     for (int i = 0; i < blockHeader.getCount(); i++) {
         LOGC_T(getHost(), target, MSGDIR_SEND, "Block Header Data[%d] : %d", i, blockHeader.get(i));

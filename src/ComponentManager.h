@@ -27,7 +27,7 @@ class ComponentManager {
     std::thread thread;
 
     TypeComponentMapIDList componentsMapID;
-    TypeComponentList componentsMapDead;
+    TypeComponentUnitList componentsMapDead;
 
     void checkDead();
 
@@ -41,7 +41,7 @@ public:
     virtual ~ComponentManager();
 
     TypeComponentMapIDList& get();
-    TypeComponentList& getDead();
+    TypeComponentUnitList& getDead();
     TypeComponentUnit get(long);
     TypeComponentUnit getDead(long);
     size_t size();

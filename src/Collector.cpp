@@ -53,7 +53,7 @@ bool Collector::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Collector::processDistributorNodeMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    TypeComponentList& nodes = msg->getData().getComponentList();
+    TypeComponentUnitList& nodes = msg->getData().getComponentList();
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Distributor assigned %d node", nodes.size());
 
@@ -72,7 +72,7 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, TypeMessage msg)
 
 bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    TypeComponentList& nodes = msg->getData().getComponentList();
+    TypeComponentUnitList& nodes = msg->getData().getComponentList();
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Distributor reassigned %d node", nodes.size() / 2);
 

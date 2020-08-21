@@ -4,14 +4,14 @@
 
 #include "TestApp.h"
 
-void sendPing(Component *owner, ComponentUnit& target) {
+void sendPing(TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PING);
 
     owner->send(target, std::move(msg));
 }
 
-bool processPingMsg(Component* component, ComponentUnit& owner, TypeMessage msg) {
+bool processPingMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGS_I(component->getHost(), "Message Ping has came from : %s, replying back", ComponentType::getName(owner.getType()));
 
@@ -20,14 +20,14 @@ bool processPingMsg(Component* component, ComponentUnit& owner, TypeMessage msg)
     return true;
 }
 
-void TestApp::testPing(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testPing(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageTypes::addMsg(MSG_TYPE_TEST_PING, "TEST_PING");
+    MessageType::addMsg(MSG_TYPE_TEST_PING, "TEST_PING");
 
     distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
 
     ComponentUnit target(COMP_NODE, node->getHost().getArch(), node->getHost().getID(), node->getHost().getAddress(COMP_DISTRIBUTOR));
 
-    sendPing(distributor, target);
+    sendPing((TypeComponent &)distributor, target);
 }

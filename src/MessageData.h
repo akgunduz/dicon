@@ -17,7 +17,7 @@ class MessageData {
     std::pair<long, TypeProcessFileList> fileList;
     TypeProcessList processList;
 
-    TypeComponentList componentList;
+    TypeComponentUnitList componentList;
 
 public:
 
@@ -42,8 +42,8 @@ public:
     char* getJobName();
     void setJobName(const char*);
 
-    TypeComponentList& getComponentList();
-    void setComponentList(TypeComponentList&);
+    TypeComponentUnitList& getComponentList();
+    void setComponentList(TypeComponentUnitList&);
 };
 
 #endif //DICON_MESSAGEDATA_H

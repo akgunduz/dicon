@@ -10,7 +10,7 @@
 #include "Message.h"
 #include "Address.h"
 #include "InterfaceCallback.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 #include "SchedulerItem.h"
 
 #define MAX_SCHEDULER_CAPACITY 10000

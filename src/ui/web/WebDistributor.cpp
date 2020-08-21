@@ -41,7 +41,7 @@ bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
 bool WebApp::distPollHandler(struct mg_connection *conn) {
 
-    auto *distributor = componentController->getDistributor();
+    auto &distributor = componentController->getDistributor();
 
     distributor->sendWakeupMessagesAll(false);
 
@@ -52,9 +52,9 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
 
 bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
-    auto *distributor = componentController->getDistributor();
+    auto &distributor = componentController->getDistributor();
 
-    auto *collector = componentController->startCollector();
+    auto &collector = componentController->startCollector();
 
     collector->getHost().setAllUIAddress(webPort);
 
@@ -65,9 +65,9 @@ bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
 bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
-    auto *distributor = componentController->getDistributor();
+    auto &distributor = componentController->getDistributor();
 
-    auto *node = componentController->startNode();
+    auto &node = componentController->startNode();
 
     node->getHost().setAllUIAddress(webPort);
 
@@ -78,7 +78,7 @@ bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
 bool WebApp::distStateHandler(struct mg_connection *conn) {
 
-    auto *distributor = componentController->getDistributor();
+    auto &distributor = componentController->getDistributor();
     if (!distributor) {
         sendError(nullptr, conn, "Can not find the distributor !!!");
         return false;

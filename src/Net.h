@@ -11,7 +11,7 @@
 #include "Interface.h"
 #include "Message.h"
 #include "Component.h"
-#include "InterfaceTypes.h"
+#include "InterfaceType.h"
 
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101

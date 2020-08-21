@@ -171,7 +171,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
     if (componentController->getCollectorCount()) {
 
-        for (auto *coll : componentController->getCollectors()) {
+        for (auto &coll : componentController->getCollectors()) {
 
             coll->getHost().setAllUIAddress(webPort);
         }
@@ -179,7 +179,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
     if (componentController->getNodeCount()) {
 
-        for (auto *node : componentController->getNodes()) {
+        for (auto &node : componentController->getNodes()) {
 
             node->getHost().setAllUIAddress(webPort);
         }

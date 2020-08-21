@@ -49,4 +49,6 @@ public:
     std::vector<ProcessItem>& getProcessList();
 };
 
+typedef std::unique_ptr<Node> TypeNode;
+
 #endif //DICON_NODE_H

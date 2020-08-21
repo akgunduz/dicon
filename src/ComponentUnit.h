@@ -29,6 +29,6 @@ public:
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;
-typedef std::vector<TypeComponentUnit> TypeComponentList;
+typedef std::vector<TypeComponentUnit> TypeComponentUnitList;
 
 #endif //DICON_COMPONENTUNIT_H

@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DICON_CONNECTOR_H
-#define DICON_CONNECTOR_H
+#ifndef DICON_INTERFACEFACTORY_H
+#define DICON_INTERFACEFACTORY_H
 
 #include "Log.h"
 #include "Scheduler.h"
@@ -12,9 +12,9 @@
 #include "Message.h"
 #include "Address.h"
 
-class Connector {
+class InterfaceFactory {
 
-    Connector()= default;
+    InterfaceFactory()= default;
 
 public:
 
@@ -23,4 +23,4 @@ public:
                                       const InterfaceHostCB*);
 };
 
-#endif //DICON_CONNECTOR_H
+#endif //DICON_INTERFACEFACTORY_H

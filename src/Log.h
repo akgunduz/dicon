@@ -8,7 +8,7 @@
 #define DICON_LOG_H
 
 #include "HostUnit.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 
 enum LOGLEVEL {
 

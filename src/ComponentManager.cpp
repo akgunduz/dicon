@@ -91,7 +91,7 @@ TypeComponentUnit ComponentManager::get(long id) {
     return nullptr;
 }
 
-TypeComponentList& ComponentManager::getDead() {
+TypeComponentUnitList& ComponentManager::getDead() {
 
     return componentsMapDead;
 }

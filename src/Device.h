@@ -5,7 +5,7 @@
 #ifndef DICON_DEVICE_H
 #define DICON_DEVICE_H
 
-#include "InterfaceTypes.h"
+#include "InterfaceType.h"
 
 class Device {
 

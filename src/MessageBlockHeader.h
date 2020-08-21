@@ -6,7 +6,7 @@
 #define DICON_MESSAGEBLOCKHEADER_H
 
 #include "Common.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 
 #define BLOCK_HEADER_SIZE 8
 

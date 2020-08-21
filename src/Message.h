@@ -16,14 +16,14 @@ class Message : public MessageBase {
 	MessageHeader header{};
     MessageData data{};
 
-    bool readComponentList(ComponentUnit&, TypeComponentList&, MessageBlockHeader&, uint32_t&);
+    bool readComponentList(ComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
     bool readJobName(ComponentUnit&, char*, MessageBlockHeader&, uint32_t&);
     bool readProcess(ComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
     bool readProcessID(ComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
     bool readFile(ComponentUnit&, ProcessFile&, MessageBlockHeader&, uint32_t&);
     bool readMessageBlock(ComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
-    bool writeComponentList(ComponentUnit&, TypeComponentList&, uint32_t&);
+    bool writeComponentList(ComponentUnit&, TypeComponentUnitList&, uint32_t&);
     bool writeJobName(ComponentUnit&, const char*, uint32_t&);
     bool writeProcess(ComponentUnit&, const TypeProcessItem&, uint32_t&);
     bool writeProcessID(ComponentUnit&, long, uint32_t&);

@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void TestApp::testLoadJob(Distributor* distributor, Collector* collector, Node* node) {
+void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     auto job = collector->loadJob("../sample/Job1_x86_linux");
     if (!job) {

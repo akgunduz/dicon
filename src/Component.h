@@ -5,9 +5,9 @@
 #ifndef DICON_COMPONENT_H
 #define DICON_COMPONENT_H
 
-#include "Connector.h"
+#include "InterfaceFactory.h"
 #include "DeviceList.h"
-#include "MessageTypes.h"
+#include "MessageType.h"
 #include "HostUnit.h"
 #include "StopWatch.h"
 
@@ -21,8 +21,11 @@ enum NOTIFYSTATE {
 
 class Component;
 
+typedef std::unique_ptr<Component> TypeComponent;
+typedef std::vector<TypeComponent> TypeComponentList;
+typedef std::map<COMPONENT, TypeComponentList> TypeComponentMapList;
 typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, TypeMessage);
-typedef bool (*TypeStaticProcessComponentMsg)(Component*, ComponentUnit&, TypeMessage);
+typedef bool (*TypeStaticProcessComponentMsg)(TypeComponent&, ComponentUnit&, TypeMessage);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
@@ -56,6 +59,8 @@ protected :
 
 public:
 
+    static std::unique_ptr<Component> nullComponent;
+
     explicit Component(const char* rootPath);
     virtual ~Component();
 
@@ -81,7 +86,6 @@ public:
 
     bool addProcessHandler(COMPONENT, MSG_TYPE, TypeProcessComponentMsg);
     bool addStaticProcessHandler(COMPONENT, MSG_TYPE, TypeStaticProcessComponentMsg);
-
 };
 
 #endif //DICON_COMPONENT_H

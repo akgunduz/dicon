@@ -5,7 +5,7 @@
 #ifndef DICON_ADDRESS_H
 #define DICON_ADDRESS_H
 
-#include "InterfaceTypes.h"
+#include "InterfaceType.h"
 
 #define INTERFACE_POS 0
 #define INTERFACE_MASK 0x00FF

@@ -7,7 +7,7 @@
 
 bool ConsoleApp::collLoadJobHandler(long id) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (collector != nullptr) {
         collector->loadJob(nullptr);
     }
@@ -17,7 +17,7 @@ bool ConsoleApp::collLoadJobHandler(long id) {
 
 bool ConsoleApp::collProcessHandler(long id) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (collector != nullptr) {
         collector->processJob();
     }
@@ -27,7 +27,7 @@ bool ConsoleApp::collProcessHandler(long id) {
 
 bool ConsoleApp::collStateHandler(long id) {
 
-    auto *collector = componentController->getCollector(id);
+    auto &collector = componentController->getCollector(id);
     if (!collector) {
         PRINT("Can not find the collector with ID : %d !!!", id);
         return false;
