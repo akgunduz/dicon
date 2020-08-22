@@ -9,7 +9,7 @@
 
 long JobItem::jobID = 1;
 
-JobItem::JobItem(const TypeHostUnit& host, const char* jobPath, long _jobID)
+JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
     contentTypes[CONTENT_NAME] = std::make_unique<JsonType>(CONTENT_NAME, "name", this, parseNameNode);
@@ -524,22 +524,20 @@ int JobItem::updateDependency(long id, int &totalCount) {
     return readyCount;
 }
 
-JOB_PATH JobItem::checkPath(const char *zipPath) {
+JOB_PATH JobItem::checkPath(const std::filesystem::path& jobPath) {
 
-    struct stat fileStatus{};
+    if (!std::filesystem::exists(jobPath)) {
 
-    if (stat(zipPath, &fileStatus) == -1) {
         LOGS_E(getHost(), "Invalid Path");
         return JOBPATH_INVALID;
     }
 
-    if ((fileStatus.st_mode & S_IFMT) == S_IFDIR) {
+    if (std::filesystem::is_directory(jobPath)) {
 
         return JOBPATH_DIR;
     }
 
-    const char* p = strrchr(zipPath, '.');
-    if (strcmp(p + 1, "zip") == 0) {
+    if (jobPath.has_extension() && jobPath.extension() == ".zip") {
 
         return JOBPATH_ZIP;
     }

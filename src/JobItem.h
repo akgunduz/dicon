@@ -44,7 +44,7 @@ public:
 
     static long jobID;
 
-    JobItem(const TypeHostUnit&, const char*, long);
+    JobItem(const TypeHostUnit&, const std::filesystem::path&, long);
     ~JobItem() override;
     TypeContentItem getContent(int type, int index) const;
     int getContentCount(int type) const;
@@ -83,7 +83,7 @@ public:
     JOB_STATUS createDependencyMap(std::vector<long>&);
     int updateDependency(long, int &);
 
-    JOB_PATH checkPath(const  char*);
+    JOB_PATH checkPath(const std::filesystem::path&);
     bool extract(const std::string&, long&);
 
     bool check() override;
