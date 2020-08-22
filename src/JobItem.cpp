@@ -548,30 +548,33 @@ JOB_PATH JobItem::checkPath(const char *zipPath) {
 }
 
 
-bool JobItem::extract(const char *zipFile, long& _jobID) {
+bool JobItem::extract(const std::string& zipFile, long& _jobID) {
 
     mz_zip_archive zip_archive;
     mz_zip_archive_file_stat file_stat;
-    char absPath[PATH_MAX];
 
     memset(&zip_archive, 0, sizeof(zip_archive));
 
-    mz_bool zipStatus = mz_zip_reader_init_file(&zip_archive, zipFile, 0);
+    mz_bool zipStatus = mz_zip_reader_init_file(&zip_archive, zipFile.c_str(), 0);
     if (!zipStatus) {
-        LOGS_E(getHost(), "mz_zip_reader_init_file failed!");
+        LOGS_E(getHost(), "Zip reader init is failed!");
         return false;
     }
 
     int fileCount = mz_zip_reader_get_num_files(&zip_archive);
     if (fileCount < 1) {
-        LOGS_E(getHost(), "mz_zip_reader_get_num_files failed!");
+        LOGS_E(getHost(), "Zip reader no files found!");
         mz_zip_reader_end(&zip_archive);
         return false;
     }
 
-    sprintf(absPath, "%s/%ld", getHost()->getRootPath().c_str(), _jobID);
+    std::filesystem::path path = getHost()->getRootPath() / std::to_string(_jobID);
 
-    Util::removePath(absPath);
+    if (std::filesystem::exists(path)) {
+        std::filesystem::remove_all(path);
+    }
+
+    std::filesystem::create_directory(path);
 
     for (int i = 0; i < fileCount; i++) {
 
@@ -580,18 +583,16 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
         }
 
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
-            printf("mz_zip_reader_file_stat failed!\n");
+            LOGS_E(getHost(), "Zip reader can not read file[%s] status!", file_stat.m_filename);
             mz_zip_reader_end(&zip_archive);
             return false;
         }
 
-        sprintf(absPath, "%s/%ld/%s", getHost()->getRootPath().c_str(), _jobID, file_stat.m_filename);
+        std::filesystem::path filePath = path / file_stat.m_filename;
 
-        Util::mkPath(absPath);
-
-        zipStatus = mz_zip_reader_extract_to_file(&zip_archive, i, absPath, 0);
+        zipStatus = mz_zip_reader_extract_to_file(&zip_archive, i, filePath.c_str(), 0);
         if (!zipStatus) {
-            printf("mz_zip_reader_extract_file_to_file failed!\n");
+            LOGS_E(getHost(), "Zip reader can not extract file[%s]!", file_stat.m_filename);
             mz_zip_reader_end(&zip_archive);
             return false;
         }

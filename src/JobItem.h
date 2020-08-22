@@ -84,7 +84,7 @@ public:
     int updateDependency(long, int &);
 
     JOB_PATH checkPath(const  char*);
-    bool extract(const char*, long&);
+    bool extract(const std::string&, long&);
 
     bool check() override;
 
