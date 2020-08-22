@@ -11,8 +11,6 @@
 #define ALIVE_INTERVAL 8
 #define CHECK_INTERVAL ALIVE_INTERVAL + 2
 
-typedef std::map<long, TypeComponentUnit> TypeComponentMapIDList;
-
 class ComponentManager {
 
     TypeHostUnit& host;

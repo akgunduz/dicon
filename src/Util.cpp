@@ -17,9 +17,9 @@ std::string Util::hex2str(const uint8_t *in, int len) {
 
     for (size_t i = 0; i < len; ++i) {
 
-        output.push_back(lut[in[i] >> 4]);
+        output.push_back(lut[in[i] >> 4u]);
 
-        output.push_back(lut[in[i] & 15]);
+        output.push_back(lut[in[i] & 15u]);
     }
 
     return output;
