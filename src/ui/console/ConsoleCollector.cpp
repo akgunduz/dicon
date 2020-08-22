@@ -9,7 +9,8 @@ bool ConsoleApp::collLoadJobHandler(long id) {
 
     auto &collector = componentController->getCollector(id);
     if (collector != nullptr) {
-        collector->loadJob(nullptr);
+        std::filesystem::path zipFile = "../sample/Job1_x86_linux.zip";
+        collector->loadJob(zipFile);
     }
 
     return true;

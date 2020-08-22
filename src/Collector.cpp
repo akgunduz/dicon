@@ -223,7 +223,7 @@ bool Collector::processJob() {
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }
 
-TypeJobItem& Collector::loadJob(const char* zipFile) {
+TypeJobItem& Collector::loadJob(const std::filesystem::path& zipFile) {
 
     job = std::make_shared<JobItem>(getHost(), zipFile, JobItem::jobID++);
 

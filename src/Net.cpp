@@ -318,9 +318,8 @@ INTERFACE Net::getType() {
 
 bool Net::isSupportMulticast() {
 
-    return Util::isMulticast();
+    return true;
 }
-
 
 TypeAddressList Net::getAddressList() {
 

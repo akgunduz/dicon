@@ -42,7 +42,7 @@ public:
 
     TypeJobItem& getJob();
     bool processJob();
-    TypeJobItem& loadJob(const char*);
+    TypeJobItem& loadJob(const std::filesystem::path&);
 };
 
 typedef std::unique_ptr<Collector> TypeCollector;

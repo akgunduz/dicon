@@ -60,39 +60,42 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     char buffer[TMP_BUFFER_SIZE];
     int len = 0;
 
-    char tmpFile[PATH_MAX];
-    sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
-    FILE *uploadJobFile = fopen(tmpFile, "w");
+    std::filesystem::path tmpFile = std::filesystem::temp_directory_path() / fileName;
+
+    std::FILE* uploadJobFile = std::fopen(tmpFile.c_str(), "w");
+
     if (!uploadJobFile) {
-        sendError(collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile);
+        sendError(collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile.c_str());
         return false;
     }
+
     do {
 
         len = mg_read(conn, buffer, TMP_BUFFER_SIZE);
+
         if (len < 0) {
             mg_send_http_error(conn, 404, "%s", "No request body data");
-            fclose(uploadJobFile);
+            std::fclose(uploadJobFile);
             return false;
         }
 
         if (len > 0) {
-            fwrite(buffer, 1, len, uploadJobFile);
+            std::fwrite(buffer, 1, len, uploadJobFile);
         }
 
     } while (len > 0);
 
-    fclose(uploadJobFile);
+    std::fclose(uploadJobFile);
 
     auto job = collector->loadJob(tmpFile);
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
         sendError(collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
-                  tmpFile, JobStatus::getDesc(job->getStatus()));
+                  uploadJobFile, JobStatus::getDesc(job->getStatus()));
     } else {
 
-        sendOK(collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
+        sendOK(collector->getHost(), conn, "Job : %s is loaded...", tmpFile.c_str());
     }
 
     return true;

@@ -24,9 +24,11 @@ void show(const char *format, ...) {
 
 int main(int argc, char** argv) {
 
-    Util::removePath(GENERATE_ROOT);
+    if (std::filesystem::exists(GENERATE_ROOT)) {
+        std::filesystem::remove_all(GENERATE_ROOT);
+    }
 
-    mkdir(GENERATE_ROOT, S_IRWXU);
+    std::filesystem::create_directories(GENERATE_ROOT);
 
     char line [200];
     char generated [256];
