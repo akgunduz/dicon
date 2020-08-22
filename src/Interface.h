@@ -21,13 +21,14 @@ enum NOTIFIER_TYPE {
 
 class Interface {
 
-    TypeDevice& device;
+    const TypeHostUnit& host;
+    const TypeDevice& device;
 
     Address address{};
     Address multicastAddress{};
 
     const InterfaceSchedulerCB *schedulerCB{};
-    const InterfaceHostCB *hostCB{};
+  //  const InterfaceHostCB *hostCB{};
 
 protected :
 
@@ -41,17 +42,15 @@ protected :
 
 	bool initThread();
 	void end();
-	Interface(TypeDevice&,
-              const InterfaceSchedulerCB*,
-              const InterfaceHostCB*);
+	Interface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 
 public :
 
     virtual ~Interface();
 
 	bool push(MSG_DIR, CommUnit&, TypeMessage);
-	HostUnit& getHost();
-    TypeDevice& getDevice();
+    const TypeHostUnit& getHost() const;
+    const TypeDevice& getDevice() const;
     Address& getAddress();
     Address& getMulticastAddress();
 

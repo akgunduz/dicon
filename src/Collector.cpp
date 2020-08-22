@@ -6,15 +6,9 @@
 #include "Collector.h"
 #include "CollectorHost.h"
 
-Collector *Collector::newInstance(const char* path, int interfaceOther, int interfaceNode) {
+Collector::Collector(int interfaceOther, int interfaceNode) {
 
-    return new Collector(path, interfaceOther, interfaceNode);
-}
-
-Collector::Collector(const char *rootPath, int interfaceOther, int interfaceNode) :
-        Component(rootPath) {
-
-    host = std::make_unique<CollectorHost>(getRootPath());
+    host = std::make_unique<CollectorHost>();
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
@@ -46,7 +40,7 @@ bool Collector::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
         return false;
     }
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New ID : %d is assigned by Distributor", getHost().getID());
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "New ID : %d is assigned by Distributor", getHost()->getID());
 
     return send2DistributorIDMsg(owner);
 }
@@ -98,9 +92,12 @@ bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
             owner.getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
 
     auto processItem = job->getProcessByID(msg->getData().getFileProcess());
+
     if (!processItem) {
 
-        LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "Process[%d] could not find in the Job!", msg->getData().getFileProcess());
+        LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "Process[%d] could not find in the Job!",
+               msg->getData().getFileProcess());
+
         return false;
     }
 
@@ -116,7 +113,7 @@ bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto& collectorHost = (CollectorHost&) getHost();
+    auto& collectorHost = reinterpret_cast<TypeCollectorHost&>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries", owner.getID(), msg->getData().getFileCount());
 
@@ -132,7 +129,7 @@ bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) 
 
     if (totalCount == 0) {
 
-        collectorHost.setState(COLLSTATE_IDLE);
+        collectorHost->setState(COLLSTATE_IDLE);
 
         job->setDuration(componentWatch.stop());
 
@@ -210,7 +207,7 @@ void Collector::setDistributor(const ComponentUnit& _distributor) {
 
 bool Collector::processJob() {
 
-    auto& collectorHost = (CollectorHost&) getHost();
+    auto& collectorHost = reinterpret_cast<TypeCollectorHost&>(host);
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
@@ -221,7 +218,7 @@ bool Collector::processJob() {
 
     notifyUI(NOTIFYSTATE_ACTIVE);
 
-    collectorHost.setState(COLLSTATE_BUSY);
+    collectorHost->setState(COLLSTATE_BUSY);
 
     return send2DistributorNodeMsg(distributor, job->getProcessCount(PROCESS_STATE_READY));
 }

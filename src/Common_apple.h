@@ -12,8 +12,4 @@
 #define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
-#define DISTRIBUTOR_PATH "Distributor"
-#define COLLECTOR_PATH "Collector"
-#define NODE_PATH "Node"
-
 #endif //DICON_COMMONAPPLE_H

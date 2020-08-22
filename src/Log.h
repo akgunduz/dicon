@@ -73,8 +73,8 @@ public:
 
     static void init(LOGLEVEL, LOGLEVEL);
 	static void setLogLevel(LOGLEVEL, LOGLEVEL);
-    static void logs(LOGLEVEL level, const char *, int, const HostUnit, ...);
-    static void logc(LOGLEVEL level, const char *, int, const HostUnit, const ComponentUnit&, MSG_DIR, ...);
+    static void logs(LOGLEVEL level, const char *, int, const TypeHostUnit&, ...);
+    static void logc(LOGLEVEL level, const char *, int, const TypeHostUnit&, const ComponentUnit&, MSG_DIR, ...);
 	static void show(const char *format, ...);
 };
 

@@ -5,8 +5,8 @@
 
 #include "Interface.h"
 
-Interface::Interface(TypeDevice& _device, const InterfaceSchedulerCB *receiveCB, const InterfaceHostCB *hostCB)
-        : device(_device), hostCB(hostCB) {
+Interface::Interface(const TypeHostUnit& _host, const TypeDevice& _device, const InterfaceSchedulerCB *receiveCB)
+        : host(_host), device(_device) {
 
     scheduler = new Scheduler();
 
@@ -120,12 +120,12 @@ void Interface::setMulticastAddress(Address &_multicastAddress) {
     multicastAddress = _multicastAddress;
 }
 
-HostUnit &Interface::getHost() {
+const TypeHostUnit& Interface::getHost() const {
 
-    return hostCB->hostCB(hostCB->arg);
+    return host;
 }
 
-TypeDevice& Interface::getDevice() {
+const TypeDevice& Interface::getDevice() const {
 
     return device;
 }

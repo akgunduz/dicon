@@ -4,12 +4,12 @@
 //
 
 #include "FileItem.h"
+
+#include <utility>
 #include "Util.h"
 
-FileItem::FileItem(const HostUnit& host, long _id, long _assignedJob, const char* _name)
-        : ContentItem (host, _id, _assignedJob) {
-
-    strcpy(name, _name);
+FileItem::FileItem(const TypeHostUnit& host, long _id, long _assignedJob, std::string _name)
+        : ContentItem (host, _id, _assignedJob),  name(std::move(_name)) {
 }
 
 CONTENT_TYPES FileItem::getType() const {
@@ -17,14 +17,14 @@ CONTENT_TYPES FileItem::getType() const {
 	return CONTENT_FILE;
 }
 
-const char *FileItem::getName() const {
+const std::string& FileItem::getName() const {
 
     return name;
 }
 
-void FileItem::setName(const char *_name) {
+void FileItem::setName(const std::string& _name) {
 
-    strcpy(name, _name);
+    name = _name;
 }
 
 long FileItem::getSize() const {
@@ -35,36 +35,36 @@ long FileItem::getSize() const {
 bool FileItem::check() {
 
     if (is_exist) {
-        LOGS_T(getHost(), "FileContent %s is already validated", name);
+        LOGS_T(getHost(), "FileContent %s is already validated", name.c_str());
         return true;
     }
 
-    if (getAssignedJob() == 0 || strcmp(name, "") == 0) {
-        LOGS_T(getHost(), "FileContent %s could not opened", name);
+    if (getAssignedJob() == 0 || name.empty()) {
+        LOGS_T(getHost(), "FileContent info is invalid");
         return false;
     }
 
-    FILE *file = fopen(Util::getAbsRefPath(getHost().getRootPath(), getAssignedJob(), name).c_str(), "r");
-    if (file == nullptr) {
-        LOGS_T(getHost(), "FileContent %s could not opened", name);
+    try {
+
+        size = std::filesystem::file_size(getHost()->getRootPath() / std::to_string(getAssignedJob()) / name);
+
+    } catch(std::filesystem::filesystem_error& e) {
+
+        LOGS_T(getHost(), "FileContent %s could not opened, err : %s", name.c_str(), e.what());
         return false;
     }
 
-    fseek(file, 0, SEEK_END);
-    size = ftell(file);
     if (size == 0) {
-        LOGS_T(getHost(), "FileContent %s is empty", name);
+        LOGS_T(getHost(), "FileContent %s is empty", name.c_str());
         return false;
     }
-
-    fclose(file);
 
     is_exist = true;
 
     return true;
 }
 
-bool FileItem::required() {
+bool FileItem::required() const {
 
     return is_required;
 }

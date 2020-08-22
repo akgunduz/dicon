@@ -12,20 +12,15 @@
 
 class NodeHost : public HostUnit, public NodeObject {
 
-    ProcessItem processItem{HostUnit(COMP_NODE)};
-
 public:
 
-    NodeHost(NODESTATES, int, long);
-    explicit NodeHost(long);
-    explicit NodeHost(const char*);
-    NodeHost();
+    explicit NodeHost(long = 0, NODESTATES = NODESTATE_IDLE, int = 0);
+
     NodeHost(const NodeHost &);
 
     ~NodeHost() override;
-
-    ProcessItem& getProcess();
-
 };
+
+typedef std::unique_ptr<NodeHost> TypeNodeHost;
 
 #endif //DICON_NODEHOST_H

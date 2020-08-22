@@ -31,7 +31,8 @@ class Net : public Interface {
 
 public :
 
-	Net(TypeDevice&, const InterfaceSchedulerCB*, const InterfaceHostCB*);
+	Net(const TypeHostUnit&, const TypeDevice&,
+        const InterfaceSchedulerCB *);
 	~Net() override;
 
     INTERFACE getType() override;

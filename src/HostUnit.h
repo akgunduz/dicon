@@ -11,7 +11,8 @@
 
 class HostUnit {
 
-    const char *rootPath{};
+    const std::filesystem::path basePath;
+    std::filesystem::path rootPath;
 
     uint32_t id{};
 
@@ -21,22 +22,20 @@ class HostUnit {
 
 public:
 
-    HostUnit(COMPONENT, long);
-    explicit HostUnit(COMPONENT, const char* = nullptr);
-    HostUnit(COMPONENT, long, const char*);
+    HostUnit(COMPONENT, long = 0);
     HostUnit(const HostUnit&);
 
     virtual ~HostUnit();
 
-    const char* getRootPath() const;
-    void setRootPath(const char*);
+    const std::filesystem::path& getRootPath() const;
+    void updateRootPath(long id);
 
     long getID() const;
     void setID(long);
 
     ARCH getArch() const;
 
-    ComponentUnit getUnit(COMPONENT);
+    CommUnit getUnit(COMPONENT);
 
     COMPONENT getType() const;
     void setType(COMPONENT);

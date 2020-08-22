@@ -58,9 +58,9 @@ public:
     bool sendServerEvent(struct mg_connection *conn, int id);
 
     bool sendStr(struct mg_connection *, const char*);
-    bool sendResponse(const char*, const HostUnit*, struct mg_connection *, va_list);
-    bool sendOK(const HostUnit*, struct mg_connection *, ...);
-    bool sendError(const HostUnit*, struct mg_connection *, ...);
+    bool sendResponse(const char*, const TypeHostUnit&, struct mg_connection *, va_list);
+    bool sendOK(const TypeHostUnit&, struct mg_connection *, ...);
+    bool sendError(const TypeHostUnit&, struct mg_connection *, ...);
 };
 
 void sendHtml(struct mg_connection *conn);

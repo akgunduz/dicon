@@ -24,7 +24,7 @@ class Message : public MessageBase {
     bool readMessageBlock(ComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
     bool writeComponentList(ComponentUnit&, TypeComponentUnitList&, uint32_t&);
-    bool writeJobName(ComponentUnit&, const char*, uint32_t&);
+    bool writeJobName(ComponentUnit&, const std::string&, uint32_t&);
     bool writeProcess(ComponentUnit&, const TypeProcessItem&, uint32_t&);
     bool writeProcessID(ComponentUnit&, long, uint32_t&);
     bool writeFile(ComponentUnit&, ProcessFile&, bool, uint32_t&);
@@ -38,8 +38,8 @@ class Message : public MessageBase {
 
 public:
 
-	explicit Message(HostUnit&);
-	Message(HostUnit&, ComponentUnit&, MSG_TYPE);
+	explicit Message(const TypeHostUnit&);
+	Message(const TypeHostUnit&, ComponentUnit&, MSG_TYPE);
 	~Message();
 
 	MessageHeader& getHeader();

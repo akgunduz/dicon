@@ -27,13 +27,13 @@ class MessageBase {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
-	HostUnit host;
+    const TypeHostUnit& host;
 
     static CRC::Table<std::uint32_t, 32> crcTable;
 
 public:
 
-    explicit MessageBase(HostUnit&);
+    explicit MessageBase(const TypeHostUnit&);
 
     TypeReadCB getReadCB(ComponentUnit& source);
     TypeWriteCB getWriteCB(ComponentUnit& source);
@@ -60,7 +60,7 @@ public:
 	bool writeSignature(ComponentUnit&, uint32_t&);
 	bool writeHeader(ComponentUnit&, uint32_t&);
 	bool writeBlockHeader(ComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool writeString(ComponentUnit&, const char*, uint32_t&);
+	bool writeString(ComponentUnit&, const std::string&, uint32_t&);
 	bool writeNumber(ComponentUnit&, long, uint32_t&);
     bool writeNumberList(ComponentUnit&, std::vector<long>&, uint32_t&);
 	bool writeBinary(ComponentUnit&, const char*, size_t, uint32_t&);
@@ -77,7 +77,7 @@ public:
     virtual void grabOwner(ComponentUnit&) = 0;
     virtual long getHeaderSize() = 0;
 
-	HostUnit& getHost();
+    const TypeHostUnit& getHost();
 };
 
 #endif //DICON_MESSAGEBASE_H

@@ -58,7 +58,7 @@ void Log::show(const char *format, ...) {
 }
 
 void Log::logs(LOGLEVEL level, const char *file, int line,
-               const HostUnit host, ...) {
+               const TypeHostUnit& host, ...) {
 
     if (logLevel[0] < level) {
         return;
@@ -82,8 +82,8 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
     sprintf(logout, "%11s[%ld]                    : %s \n",
-            ComponentType::getName(host.getType()),
-            host.getID(),
+            ComponentType::getName(host->getType()).c_str(),
+            host->getID(),
             buf);
 
     va_end(ap);
@@ -91,7 +91,7 @@ void Log::logs(LOGLEVEL level, const char *file, int line,
 }
 
 void Log::logc(LOGLEVEL level, const char *file, int line,
-               const HostUnit host, const ComponentUnit& target, MSG_DIR direction, ...) {
+               const TypeHostUnit& host, const ComponentUnit& target, MSG_DIR direction, ...) {
 
     if (logLevel[1] < level) {
         return;
@@ -116,10 +116,10 @@ void Log::logc(LOGLEVEL level, const char *file, int line,
     char * fmt = va_arg(ap, char *);
     vsnprintf(buf, sizeof(buf), fmt, ap);
     sprintf(logout, "%11s[%ld] %s %11s[%ld] : %s \n",
-            ComponentType::getName(host.getType()),
-            host.getID(),
+            ComponentType::getName(host->getType()).c_str(),
+            host->getID(),
             MessageType::getMsgDirName(direction),
-            ComponentType::getName(target.getType()),
+            ComponentType::getName(target.getType()).c_str(),
             target.getID(),
             buf);
 

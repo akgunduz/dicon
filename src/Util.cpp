@@ -203,26 +203,25 @@ bool Util::checkPath(const char *rootPath, long jobID, const char *fileName, boo
     return true;
 }
 
-std::string Util::parsePath(const char *rootPath, const char *str) {
+std::string Util::parsePath(const std::filesystem::path& path, const std::string &str) {
 
     unsigned long len = strlen(ROOT_SIGN);
     unsigned long pos = 0;
-
-    std::string newstr = str;
+    std::string parsed = str;
 
     do {
 
-        pos = newstr.find(ROOT_SIGN, pos);
+        pos = parsed.find(ROOT_SIGN, pos);
 
         if (pos == std::string::npos) {
             break;
         }
 
-        newstr.replace(pos, len, rootPath);
+        parsed.replace(pos, len, path);
 
     } while (true);
 
-    return newstr;
+    return parsed;
 }
 
 std::string Util::getAbsPath(const char *rootPath, const char *path2) {

@@ -18,9 +18,8 @@ class InterfaceFactory {
 
 public:
 
-    static TypeInterface createInterface(TypeDevice&,
-                                      const InterfaceSchedulerCB*,
-                                      const InterfaceHostCB*);
+    static TypeInterface createInterface(const TypeHostUnit&, const TypeDevice&,
+                                         const InterfaceSchedulerCB *);
 };
 
 #endif //DICON_INTERFACEFACTORY_H

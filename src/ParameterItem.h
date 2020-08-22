@@ -11,7 +11,7 @@
 class ParameterItem : public ContentItem {
 	char sPtr[NAME_MAX];
 public:
-	ParameterItem(const HostUnit&, long, long, const char *);
+	ParameterItem(const TypeHostUnit&, long, long, const char *);
 	~ParameterItem(){};
 	const char* getParam();
 	void setParam(const char*);

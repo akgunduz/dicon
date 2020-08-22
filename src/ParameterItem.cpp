@@ -5,7 +5,7 @@
 
 #include "ParameterItem.h"
 
-ParameterItem::ParameterItem(const HostUnit& host, long id, long jobID, const char *param)
+ParameterItem::ParameterItem(const TypeHostUnit& host, long id, long jobID, const char *param)
         : ContentItem (host, id, jobID) {
 
 	strcpy(sPtr, param);

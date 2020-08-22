@@ -7,8 +7,8 @@
 #include "Util.h"
 #include "NetUtil.h"
 
-Net::Net(TypeDevice& device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
-        : Interface(device, scb, hcb) {
+Net::Net(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
+        : Interface(host, device, schedulerCB) {
 
     if (!initTCP()) {
         throw std::runtime_error("Net : initTCP failed!!!");
@@ -199,6 +199,7 @@ bool Net::runReceiver() {
             }
 
             threadAccept = std::thread([](Interface *interface, int acceptSocket) {
+
                 ComponentUnit source;
                 source.setSocket(acceptSocket);
 

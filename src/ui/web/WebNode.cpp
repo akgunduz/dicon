@@ -34,27 +34,27 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto host = (NodeHost&) node->getHost();
+    auto &host = reinterpret_cast<TypeNodeHost&>(node->getHost());
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        sendError(&node->getHost(), conn, "Can not create json object!!!");
+        sendError(node->getHost(), conn, "Can not create json object!!!");
         return false;
     }
 
-    json_object_object_add(jsonObj, "_state", json_object_new_int(host.getState()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(host->getState()));
 
     auto* processList = json_object_new_array();
     for (auto &process : node->getProcessList()) {
 
         auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "_processID", json_object_new_int(process.getID()));
-        json_object_object_add(processItem, "_collectorID", json_object_new_int(process.getAssigned()));
-        json_object_object_add(processItem, "_jobID", json_object_new_int(process.getAssignedJob()));
-        std::string processCommand = process.getParsedProcess();
+        json_object_object_add(processItem, "_processID", json_object_new_int(process->getID()));
+        json_object_object_add(processItem, "_collectorID", json_object_new_int(process->getAssigned()));
+        json_object_object_add(processItem, "_jobID", json_object_new_int(process->getAssignedJob()));
+        std::string processCommand = process->getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
         json_object_object_add(processItem, "_process", json_object_new_string(processCommand.c_str()));
-        json_object_object_add(processItem, "_duration", json_object_new_int64(process.getDuration()));
+        json_object_object_add(processItem, "_duration", json_object_new_int64(process->getDuration()));
 
         json_object_array_add(processList, processItem);
     }

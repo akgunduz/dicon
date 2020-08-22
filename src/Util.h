@@ -27,7 +27,7 @@ public:
     static std::vector<std::string> getFileList(const char*, const char*);
     static std::vector<std::string> getDirList(const char*, const char*);
 	static std::string mixPath(const char*, const char*);
-	static std::string parsePath(const char *, const char *);
+    static std::string parsePath(const std::filesystem::path&, const std::string &);
 	static std::string getAbsPath(const char *, const char *);
 	static std::string getAbsRefPath(const char *, long, const char*);
 	static std::string getRefPath(const char *, long, const char*);

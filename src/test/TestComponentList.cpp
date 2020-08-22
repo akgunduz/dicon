@@ -5,7 +5,7 @@
 #include <ComponentUnitFactory.h>
 #include "TestApp.h"
 
-void sendComponentList(TypeComponent& owner, ComponentUnit& target) {
+void sendComponentList(const TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST);
 
@@ -21,12 +21,12 @@ void sendComponentList(TypeComponent& owner, ComponentUnit& target) {
     owner->send(target, std::move(msg));
 }
 
-bool processComponentListMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processComponentListMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentUnitList nodes = msg->getData().getComponentList();
 
     LOGS_I(component->getHost(), "Message Component List has came from : %s, data amount: %d",
-           ComponentType::getName(owner.getType()), nodes.size());
+           ComponentType::getName(owner.getType()).c_str(), nodes.size());
     LOGS_I(component->getHost(), "Node 1 : %d, %u", nodes[0]->getID(), nodes[0]->getAddress().get().base);
     LOGS_I(component->getHost(), "Node 2 : %d, %u", nodes[1]->getID(), nodes[1]->getAddress().get().base);
 
@@ -39,7 +39,7 @@ void TestApp::testComponentList(TypeDistributor& distributor, TypeCollector& col
 
     collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST, processComponentListMsg);
 
-    ComponentUnit target(COMP_COLLECTOR, collector->getHost().getArch(), collector->getHost().getID(),
-                         collector->getHost().getAddress(COMP_DISTRIBUTOR));
+    ComponentUnit target(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
+                         collector->getHost()->getAddress(COMP_DISTRIBUTOR));
     sendComponentList((TypeComponent &) distributor, target);
 }

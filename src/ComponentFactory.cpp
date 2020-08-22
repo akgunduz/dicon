@@ -41,7 +41,7 @@ size_t ComponentFactory::getCollectorCount() {
 TypeCollector& ComponentFactory::getCollector(long id) {
 
     for (auto& collector : components[COMP_COLLECTOR]) {
-        if (collector->getHost().getID() == id) {
+        if (collector->getHost()->getID() == id) {
             return reinterpret_cast<TypeCollector &>(collector);
         }
     }
@@ -62,7 +62,7 @@ size_t ComponentFactory::getNodeCount() {
 TypeNode& ComponentFactory::getNode(long id) {
 
     for (auto& node : components[COMP_NODE]) {
-        if (node->getHost().getID() == id) {
+        if (node->getHost()->getID() == id) {
             return reinterpret_cast<TypeNode &>(node);
         }
     }
@@ -77,13 +77,8 @@ TypeComponentList& ComponentFactory::getNodes() {
 
 bool ComponentFactory::startDistributor(bool autoWake) {
 
-    char path[PATH_MAX];
-    char cwd[PATH_MAX - 100];
-    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), DISTRIBUTOR_PATH);
-    mkdir(path, 0777);
-
     if (components[COMP_DISTRIBUTOR].empty()) {
-        components[COMP_DISTRIBUTOR].emplace_back(Distributor::newInstance(path, interface[0], interface[1], autoWake));
+        components[COMP_DISTRIBUTOR].emplace_back(std::make_unique<Distributor>(interface[0], interface[1], autoWake));
     }
 
     return true;
@@ -91,14 +86,9 @@ bool ComponentFactory::startDistributor(bool autoWake) {
 
 bool ComponentFactory::startCollector(int count) {
 
-    char path[PATH_MAX];
-    char cwd[PATH_MAX - 100];
-    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), COLLECTOR_PATH);
-    mkdir(path, 0777);
-
     for (int i = 0; i < count; i++) {
 
-        components[COMP_COLLECTOR].emplace_back(Collector::newInstance(path, interface[0], interface[1]));
+        components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(interface[0], interface[1]));
     }
 
     return true;
@@ -106,25 +96,16 @@ bool ComponentFactory::startCollector(int count) {
 
 TypeCollector& ComponentFactory::startCollector() {
 
-    char path[PATH_MAX];
-    sprintf(path, "%s/%s", getcwd(nullptr, 0), COLLECTOR_PATH);
-    mkdir(path, 0777);
-
-    components[COMP_COLLECTOR].emplace_back(Collector::newInstance(path, interface[0], interface[1]));
+    components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(interface[0], interface[1]));
 
     return reinterpret_cast<TypeCollector &>(components[COMP_COLLECTOR].back());
 }
 
 bool ComponentFactory::startNode(int count) {
 
-    char path[PATH_MAX];
-    char cwd[PATH_MAX - 100];
-    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), NODE_PATH);
-    mkdir(path, 0777);
-
     for (int i = 0; i < count; i++) {
 
-        components[COMP_NODE].emplace_back(Node::newInstance(path, interface[1]));
+        components[COMP_NODE].emplace_back(std::make_unique<Node>(interface[1]));
     }
 
     return true;
@@ -132,12 +113,7 @@ bool ComponentFactory::startNode(int count) {
 
 TypeNode& ComponentFactory::startNode() {
 
-    char path[PATH_MAX];
-    char cwd[PATH_MAX - 100];
-    sprintf(path, "%s/%s", getcwd(cwd, PATH_MAX - 100), NODE_PATH);
-    mkdir(path, 0777);
-
-    components[COMP_NODE].emplace_back(Node::newInstance(path, interface[1]));
+    components[COMP_NODE].emplace_back(std::make_unique<Node>(interface[1]));
 
     return reinterpret_cast<TypeNode &>(components[COMP_NODE].back());
 }

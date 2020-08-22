@@ -4,27 +4,21 @@
 //
 
 #include "ProcessItem.h"
+
+#include <utility>
 #include "ParameterItem.h"
 #include "JobItem.h"
 #include "Util.h"
 
-ProcessItem::ProcessItem(const ProcessItem &copy) :
-        ContentItem(copy),
+ProcessItem::ProcessItem(const ProcessItem &copy)
+    : ContentItem(copy), state(copy.state), process(copy.process),
+        parsedProcess(copy.parsedProcess), duration(copy.duration),
         assignedComponent(copy.assignedComponent),
-        state(copy.state),
-        duration(copy.duration) {
-
-    strcpy(process, copy.getProcess());
-    strcpy(parsedProcess, copy.getParsedProcess());
-    fileList = copy.fileList;
+        fileList(copy.fileList) {
 };
 
-ProcessItem::ProcessItem(const HostUnit& host, long id, long jobID, const char *_process)
-    : ContentItem(host, id, jobID) {
-
-	if (_process != nullptr) {
-		strcpy(process, _process);
-	}
+ProcessItem::ProcessItem(const TypeHostUnit& host, long id, long jobID, std::string _process)
+    : ContentItem(host, id, jobID), process(std::move(_process)) {
 }
 
 bool ProcessItem::parse(void *job) {
@@ -33,7 +27,7 @@ bool ProcessItem::parse(void *job) {
 	int cmdIndex = 0;
 	PROCESS_OPTIONS cmdType = PROCESS_MAX;
 
-	for (uint32_t i = 0; i < strlen(process); i++) {
+	for (uint32_t i = 0; i < process.size(); i++) {
 		switch(process[i]) {
 			case '$':
 				if (!cmdMode) {
@@ -89,7 +83,7 @@ bool ProcessItem::parse(void *job) {
 				}
 				//no break
 			default:
-			    parsedProcess[strlen(parsedProcess)] = process[i];
+			    parsedProcess += process[i];
 				break;
 
 		}
@@ -109,21 +103,28 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
         case PROCESS_INPUT:
 		case PROCESS_OUTPUT: {
+
             auto content = ((JobItem*)jobItem)->getFile(cmdIndex - 1);
-            if (content != nullptr) {
-                strcat(parsedProcess, ROOT_SIGN);
-                strcat(parsedProcess, "/");
-                strcat(parsedProcess, Util::getRefPath(content->getHost().getRootPath(),
-                                                       content->getAssignedJob(), content->getName()).c_str());
+
+            if (content) {
+
+                parsedProcess = parsedProcess + ROOT_SIGN + "/" +
+                        std::to_string(content->getAssignedJob()) + "/" + content->getName();
+
 				addFile(content, getID(), cmdType == PROCESS_OUTPUT);
             }
+
         } break;
 
         case PROCESS_PARAM: {
+
             auto content = ((JobItem*)jobItem)->getParameter(cmdIndex - 1);
-            if (content != nullptr) {
-                strcat(parsedProcess, content->getParam());
+
+            if (content) {
+
+                parsedProcess += content->getParam();
             }
+
         } break;
 
         default:
@@ -150,25 +151,28 @@ bool ProcessItem::check() {
 }
 
 CONTENT_TYPES ProcessItem::getType() const {
+
 	return CONTENT_PROCESS;
 }
 
-const char* ProcessItem::getProcess() const {
+const std::string& ProcessItem::getProcess() const {
+
 	return process;
 }
 
-void ProcessItem::setProcess(const char *_process) {
+void ProcessItem::setProcess(const std::string& _process) {
 
-	strcpy(this->process, _process);
+    process = _process;
 }
 
-const char *ProcessItem::getParsedProcess() const {
+const std::string& ProcessItem::getParsedProcess() const {
+
 	return parsedProcess;
 }
 
-void ProcessItem::setParsedProcess(const char *_parsedProcess) {
+void ProcessItem::setParsedProcess(const std::string& _parsedProcess) {
 
-	strcpy(this->parsedProcess, _parsedProcess);
+    parsedProcess = _parsedProcess;
 }
 
 int ProcessItem::getFileCount() const {
@@ -179,10 +183,12 @@ int ProcessItem::getFileCount() const {
 ProcessFile& ProcessItem::getFile(ProcessFile& ref) {
 
     for (auto& file : fileList) {
+
         if (file.get()->getID() == ref.get()->getID()) {
             return file;
         }
     }
+
     return *fileList.end();
 }
 
@@ -231,9 +237,11 @@ void ProcessItem::setID(long _id) {
 }
 
 long ProcessItem::getDuration() const {
+
     return duration;
 }
 
 void ProcessItem::setDuration(long _duration) {
+
     duration = _duration;
 }

@@ -5,18 +5,18 @@
 
 #include "ContentItem.h"
 
-ContentItem::ContentItem(const HostUnit& _host, long _id, long _assignedJob) :
+ContentItem::ContentItem(const TypeHostUnit& _host, long _id, long _assignedJob) :
         host(_host), id(_id), assignedJob(_assignedJob) {
 }
 
 ContentItem::ContentItem(const ContentItem &copy) :
         SchedulerItem(copy),
-        host(copy.getHost()),
-        id(copy.getID()),
-        assignedJob(copy.getAssignedJob()){
+        host(copy.host),
+        id(copy.id),
+        assignedJob(copy.assignedJob) {
 }
 
-const HostUnit& ContentItem::getHost() const {
+const TypeHostUnit& ContentItem::getHost() const {
 
     return host;
 }
@@ -45,4 +45,3 @@ bool compareContentID(const TypeContentItem& ci1, const TypeContentItem& ci2)
 {
     return (ci1->getID() < ci2->getID());
 }
-

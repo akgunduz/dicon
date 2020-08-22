@@ -4,30 +4,20 @@
 
 #include "HostUnit.h"
 
-HostUnit::HostUnit(COMPONENT _type, const char *_rootPath)
-        : type(_type), rootPath(_rootPath) {
-}
-
 HostUnit::HostUnit(COMPONENT _type, long _id)
-        : type(_type), id(_id)  {
-}
+        : type(_type), id(_id),
+        basePath(std::filesystem::current_path() / ComponentType::getName(_type)) {
 
-HostUnit::HostUnit(COMPONENT _type, long _id, const char* _rootPath)
-        : type(_type), id(_id), rootPath(_rootPath) {
+    rootPath = basePath;
 }
 
 HostUnit::HostUnit(const HostUnit &copy) = default;
 
 HostUnit::~HostUnit() = default;
 
-const char* HostUnit::getRootPath() const {
+const std::filesystem::path& HostUnit::getRootPath() const {
 
     return rootPath;
-}
-
-void HostUnit::setRootPath(const char *_rootPath) {
-
-    rootPath = _rootPath;
 }
 
 long HostUnit::getID() const {
@@ -38,6 +28,14 @@ long HostUnit::getID() const {
 void HostUnit::setID(long _id) {
 
     id = _id;
+
+    rootPath = basePath / std::to_string(_id);
+
+    if (std::filesystem::exists(rootPath)) {
+        std::filesystem::remove_all(rootPath);
+    }
+
+    std::filesystem::create_directories(rootPath);
 }
 
 ARCH HostUnit::getArch() const {
@@ -75,7 +73,7 @@ void HostUnit::set(COMPONENT _type, long _id, COMPONENT _out, Address _address) 
     address[_out] = _address;
 }
 
-ComponentUnit HostUnit::getUnit(COMPONENT targetType) {
+CommUnit HostUnit::getUnit(COMPONENT targetType) {
 
-    return ComponentUnit(type, getArch(), id, address[targetType]);
+    return CommUnit(type, getArch(), id, address[targetType]);
 }

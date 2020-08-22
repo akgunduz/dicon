@@ -7,9 +7,8 @@
 #include "Net.h"
 #include "UnixSocket.h"
 
-TypeInterface InterfaceFactory::createInterface(TypeDevice& device,
-                                                const InterfaceSchedulerCB *schedulerCB,
-                                                const InterfaceHostCB *hostCB) {
+TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
+                                                const InterfaceSchedulerCB *schedulerCB) {
 
     TypeInterface interface = nullptr;
 
@@ -18,11 +17,11 @@ TypeInterface InterfaceFactory::createInterface(TypeDevice& device,
         switch (device->getType()) {
 
             case INTERFACE_NET:
-                interface = std::make_shared<Net>(device, schedulerCB, hostCB);
+                interface = std::make_shared<Net>(host, device, schedulerCB);
                 break;
 
             case INTERFACE_UNIXSOCKET:
-                interface = std::make_shared<UnixSocket>(device, schedulerCB, hostCB);
+                interface = std::make_shared<UnixSocket>(host, device, schedulerCB);
                 break;
 
             default:
@@ -30,7 +29,7 @@ TypeInterface InterfaceFactory::createInterface(TypeDevice& device,
         }
     } catch (std::exception &e) {
 
-        LOGS_E(hostCB->hostCB(hostCB->arg), "%s", e.what());
+        LOGS_E(host, "%s", e.what());
     }
 
     return interface;

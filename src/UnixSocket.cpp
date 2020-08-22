@@ -6,8 +6,8 @@
 #include "UnixSocket.h"
 #include "NetUtil.h"
 
-UnixSocket::UnixSocket(TypeDevice& device, const InterfaceSchedulerCB *scb, const InterfaceHostCB *hcb)
-        : Interface(device, scb, hcb) {
+UnixSocket::UnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
+        : Interface(host, device, schedulerCB) {
 
     if (!initUnixSocket()) {
         LOGS_E(getHost(), "initUnixSocket failed!!!");

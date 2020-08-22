@@ -52,10 +52,8 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
         return false;
     }
 
-    auto host = (CollectorHost&) collector->getHost();
-
     if (!fileName) {
-        sendError(&collector->getHost(), conn, "Invalid upload process!!!");
+        sendError(collector->getHost(), conn, "Invalid upload process!!!");
         return false;
     }
 
@@ -66,7 +64,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     sprintf(tmpFile, "%s%s", _PATH_TMP, fileName);
     FILE *uploadJobFile = fopen(tmpFile, "w");
     if (!uploadJobFile) {
-        sendError(&collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile);
+        sendError(collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile);
         return false;
     }
     do {
@@ -90,11 +88,11 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
-        sendError(&collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
+        sendError(collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
                   tmpFile, JobStatus::getDesc(job->getStatus()));
     } else {
 
-        sendOK(&collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
+        sendOK(collector->getHost(), conn, "Job : %s is loaded...", tmpFile);
     }
 
     return true;
@@ -107,20 +105,20 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
 
         if (!collector->getJob()) {
 
-            sendError(&collector->getHost(), conn, "No Job is loaded yet!!!");
+            sendError(collector->getHost(), conn, "No Job is loaded yet!!!");
 
             return false;
         }
 
         if (!collector->processJob()) {
 
-            sendError(&collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
+            sendError(collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
                       collector->getJob()->getJobName(), JobStatus::getDesc(collector->getJob()->getStatus()));
 
             return false;
         }
 
-        sendOK(&collector->getHost(), conn, "Job : %s 's execution is started...", collector->getJob()->getJobName());
+        sendOK(collector->getHost(), conn, "Job : %s 's execution is started...", collector->getJob()->getJobName());
 
         return true;
     }
@@ -138,22 +136,22 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto host = (CollectorHost&) collector->getHost();
+    auto &host = reinterpret_cast<TypeCollectorHost&>(collector->getHost());
 
     auto job = collector->getJob();
     if (!job) {
-        sendError(&collector->getHost(), conn, "No Job is loaded yet!!!");
+        sendError(collector->getHost(), conn, "No Job is loaded yet!!!");
         return false;
     }
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        sendError(&collector->getHost(), conn, "Can not create json object!!!");
+        sendError(collector->getHost(), conn, "Can not create json object!!!");
         return false;
     }
 
     json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName()));
-    json_object_object_add(jsonObj, "_state", json_object_new_int(host.getState()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(host->getState()));
     json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
     json_object_object_add(jsonObj, "_processCount",
             json_object_new_int(job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED)));
@@ -165,7 +163,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         auto content = job->getFile(j);
 
         auto* fileItem = json_object_new_object();
-        json_object_object_add(fileItem, "_name", json_object_new_string(content->getName()));
+        json_object_object_add(fileItem, "_name", json_object_new_string(content->getName().c_str()));
         json_object_object_add(fileItem, "_state", json_object_new_int(content->required() ? 1 : content->check() ? 0 : 2));
         json_object_object_add(fileItem, "_size", json_object_new_int64(content->getSize()));
 
@@ -179,7 +177,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
         auto* processItem = json_object_new_object();
         json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j)->getID()));
-        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j)->getProcess()));
+        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j)->getProcess().c_str()));
         json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j)->getState()));
         json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j)->getAssigned()));
 

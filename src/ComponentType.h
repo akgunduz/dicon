@@ -5,6 +5,8 @@
 #ifndef DICON_COMPONENTTYPE_H
 #define DICON_COMPONENTTYPE_H
 
+#include "Common.h"
+
 enum COMPONENT {
 
     COMP_DISTRIBUTOR,
@@ -15,8 +17,10 @@ enum COMPONENT {
 
 class ComponentType {
 
+    static const std::string sComponentTypes[COMP_MAX];
+
 public:
-    static const char* getName(COMPONENT);
+    static const std::string& getName(COMPONENT);
 
 };
 

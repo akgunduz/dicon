@@ -10,18 +10,18 @@
 
 class FileItem : public ContentItem {
 
-	char name[PATH_MAX]{};
+	std::string name;
 
 	bool is_exist{};
 	bool is_required{};
 	long size{};
 
 public:
-	explicit FileItem(const HostUnit&, long = 0, long = 0, const char* = "");
+	explicit FileItem(const TypeHostUnit&, long = 0, long = 0, std::string = "");
 	~FileItem() override = default;
 
-    const char* getName() const;
-    void setName(const char*);
+    const std::string& getName() const;
+    void setName(const std::string&);
 
     long getSize() const;
 
@@ -29,7 +29,7 @@ public:
 
     bool check() override;
 
-    bool required();
+    bool required() const;
     void setRequired(bool);
 };
 

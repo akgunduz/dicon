@@ -15,9 +15,9 @@ class Node : public Component {
 
     ComponentUnit distributor;
 
-    std::vector<ProcessItem> processList;
+    TypeProcessItem processItem;
 
-	explicit Node(const char *, int);
+    TypeProcessList processList;
 
 	void setDistributor(const ComponentUnit&);
 
@@ -39,14 +39,14 @@ class Node : public Component {
 
     bool processJob(const ComponentUnit&, TypeMessage);
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(long, long, const char *);
+    bool processCommand(long, long, const std::string&);
 
 public:
 
+    explicit Node(int);
 	~Node() override;
-    static Node* newInstance(const char*, int);
 
-    std::vector<ProcessItem>& getProcessList();
+    TypeProcessList& getProcessList();
 };
 
 typedef std::unique_ptr<Node> TypeNode;

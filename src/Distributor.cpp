@@ -8,21 +8,9 @@
 #include "NetUtil.h"
 #include "CollectorUnit.h"
 
-Distributor *Distributor::instance = nullptr;
+Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
 
-Distributor *Distributor::newInstance(const char* path, int interfaceOther, int interfaceNode, bool autoWake) {
-
-    if (!instance) {
-        instance = new Distributor(path, interfaceOther, interfaceNode, autoWake);
-    }
-
-    return instance;
-}
-
-Distributor::Distributor(const char *rootPath, int interfaceOther, int interfaceNode, bool autoWake) :
-        Component(rootPath) {
-
-    host = std::make_unique<DistributorHost>(getRootPath());
+    host = std::make_unique<DistributorHost>();
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
@@ -124,9 +112,7 @@ void Distributor::collProcess() {
 
                 auto nodeBusy = nodeManager->getBusyDead();
 
-                long busyNodeAssignedColl = nodeBusy->getAssigned()->getID();
-
-                if (busyNodeAssignedColl == 0) {
+                if (!nodeBusy->getAssigned()) {
 
                     LOGS_W(getHost(), "Unresponsive Node[%d] is not assigned with any Collector", nodeBusy->getID());
                     continue;
@@ -134,8 +120,8 @@ void Distributor::collProcess() {
 
                 auto nodeIdle = nodeManager->getIdle(nodeBusy->getAssigned());
 
-                replaceIdList[busyNodeAssignedColl].emplace_back(nodeBusy);
-                replaceIdList[busyNodeAssignedColl].emplace_back(nodeIdle);
+                replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeBusy);
+                replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeIdle);
 
                 LOGS_W(getHost(), "Node[%d] is replaced with Node[%d] for Collector[%d]",
                        nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned()->getID());

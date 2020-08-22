@@ -25,13 +25,13 @@ bool ConsoleApp::nodeStateHandler(long id) {
 
     for (auto &process : node->getProcessList()) {
 
-        std::string processCommand = process.getParsedProcess();
+        std::string processCommand = process->getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
 
         PRINT("ID : %d, Assigned Collector : %d, Job ID : %ld, Process : %s",
-              process.getID(),
-              process.getAssigned(),
-              process.getAssignedJob(),
+              process->getID(),
+              process->getAssigned(),
+              process->getAssignedJob(),
               processCommand.c_str());
     }
 

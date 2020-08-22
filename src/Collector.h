@@ -18,8 +18,6 @@ class Collector : public Component {
     TypeJobItem job;
     ComponentUnit distributor{};
 
-    explicit Collector(const char *, int, int);
-
 	void setDistributor(const ComponentUnit&);
 
 	bool processDistributorWakeupMsg(ComponentUnit&, TypeMessage);
@@ -39,8 +37,8 @@ class Collector : public Component {
 
 public:
 
+    Collector(int, int);
     ~Collector() override;
-    static Collector* newInstance(const char*, int, int);
 
     TypeJobItem& getJob();
     bool processJob();

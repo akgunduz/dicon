@@ -21,20 +21,18 @@ enum NOTIFYSTATE {
 
 class Component;
 
-typedef std::unique_ptr<Component> TypeComponent;
+typedef std::shared_ptr<Component> TypeComponent;
 typedef std::vector<TypeComponent> TypeComponentList;
 typedef std::map<COMPONENT, TypeComponentList> TypeComponentMapList;
 typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, TypeMessage);
-typedef bool (*TypeStaticProcessComponentMsg)(TypeComponent&, ComponentUnit&, TypeMessage);
+typedef bool (*TypeStaticProcessComponentMsg)(const TypeComponent&, ComponentUnit&, TypeMessage);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
 
 typedef bool (*TypeNotifyCB)(void*, COMPONENT, NOTIFYSTATE);
 
-class Component {
-
-    char rootPath[PATH_MAX]{};
+class Component : public std::enable_shared_from_this<Component> {
 
     TypeInterfaceList interfaces;
 
@@ -43,13 +41,12 @@ class Component {
 
 protected :
 
-    TypeHostUnit host{};
+    TypeHostUnit host;
 
     TypeProcessMsgMap processMsg[COMP_MAX];
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
 
     const InterfaceSchedulerCB *schedulerCB;
-    const InterfaceHostCB *hostCB;
 
     StopWatch componentWatch;
 
@@ -59,16 +56,14 @@ protected :
 
 public:
 
-    static std::unique_ptr<Component> nullComponent;
+    static TypeComponent nullComponent;
 
-    explicit Component(const char* rootPath);
+    Component();
     virtual ~Component();
 
-    HostUnit& getHost();
+    TypeHostUnit& getHost();
 
-    const char* getRootPath();
-
-    TypeDevice& getDevice(COMPONENT);
+    const TypeDevice& getDevice(COMPONENT);
     Address& getInterfaceAddress(COMPONENT);
     Address& getInterfaceMulticastAddress(COMPONENT);
     TypeAddressList getInterfaceAddressList(COMPONENT);

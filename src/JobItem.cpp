@@ -9,7 +9,7 @@
 
 long JobItem::jobID = 1;
 
-JobItem::JobItem(const HostUnit& host, const char* jobPath, long _jobID)
+JobItem::JobItem(const TypeHostUnit& host, const char* jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
     contentTypes[CONTENT_NAME] = std::make_unique<JsonType>(CONTENT_NAME, "name", this, parseNameNode);
@@ -32,7 +32,7 @@ JobItem::JobItem(const HostUnit& host, const char* jobPath, long _jobID)
 
     } else {
         char absPath[PATH_MAX];
-        sprintf(absPath, "%s/%ld", getHost().getRootPath(), _jobID);
+        sprintf(absPath, "%s/%ld", getHost()->getRootPath().c_str(), _jobID);
         std::filesystem::copy(jobPath, absPath,
                 std::filesystem::copy_options::recursive |
                 std::filesystem::copy_options::update_existing);
@@ -73,8 +73,8 @@ void JobItem::reset() {
 
 bool JobItem::parse() {
 
-    struct json_object* node = json_object_from_file(
-            Util::getAbsRefPath(getHost().getRootPath(), getID(), getName()).c_str());
+    std::filesystem::path jobFilePath = getHost()->getRootPath() / std::to_string(getID()) / getName();
+    struct json_object* node = json_object_from_file(jobFilePath.c_str());
 
     if (node == nullptr){
         LOGS_E(getHost(), "Invalid JSON File");
@@ -569,7 +569,7 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
         return false;
     }
 
-    sprintf(absPath, "%s/%ld", getHost().getRootPath(), _jobID);
+    sprintf(absPath, "%s/%ld", getHost()->getRootPath().c_str(), _jobID);
 
     Util::removePath(absPath);
 
@@ -585,7 +585,7 @@ bool JobItem::extract(const char *zipFile, long& _jobID) {
             return false;
         }
 
-        sprintf(absPath, "%s/%ld/%s", getHost().getRootPath(), _jobID, file_stat.m_filename);
+        sprintf(absPath, "%s/%ld/%s", getHost()->getRootPath().c_str(), _jobID, file_stat.m_filename);
 
         Util::mkPath(absPath);
 

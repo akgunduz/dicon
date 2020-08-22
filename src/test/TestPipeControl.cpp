@@ -22,11 +22,11 @@ void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& colle
             continue;
         }
 
-        std::string parsed = Util::parsePath(collector->getRootPath(), process->getParsedProcess());
+        std::string parsed = Util::parsePath(collector->getHost()->getRootPath(), process->getParsedProcess());
 
         PRINT("\tID : %d, Process : %s, Parsed : %s",
               process->getID(),
-              process->getProcess(),
+              process->getProcess().c_str(),
               parsed.c_str());
 
         std::string childOut;

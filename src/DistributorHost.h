@@ -11,11 +11,13 @@
 class DistributorHost : public HostUnit, public DistributorObject  {
 
 public:
-    explicit DistributorHost(long = 0);
-    explicit DistributorHost(const char*);
+    DistributorHost();
+
     DistributorHost(const DistributorHost &);
 
     ~DistributorHost() override;
 };
+
+typedef std::unique_ptr<DistributorHost> TypeDistributorHost;
 
 #endif //DICON_DISTRIBUTORHOST_H

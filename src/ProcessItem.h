@@ -24,8 +24,8 @@ class ProcessItem : public ContentItem {
 
     PROCESS_STATE state{PROCESS_STATE_DEPENDENT};
 
-	char process[PATH_MAX]{};
-	char parsedProcess[PATH_MAX]{};
+    std::string process;
+    std::string parsedProcess;
 
     TypeProcessFileList fileList;
 
@@ -38,16 +38,16 @@ class ProcessItem : public ContentItem {
 public:
 
 	ProcessItem(const ProcessItem &);
-	explicit ProcessItem(const HostUnit&, long = 0, long = 0, const char * = nullptr);
+	explicit ProcessItem(const TypeHostUnit&, long = 0, long = 0, std::string = "");
 	~ProcessItem() override = default;
 
     bool parse(void *);
 
-    const char* getProcess() const;
-    void setProcess(const char*);
+    const std::string& getProcess() const;
+    void setProcess(const std::string&);
 
-    const char* getParsedProcess() const;
-    void setParsedProcess(const char*);
+    const std::string& getParsedProcess() const;
+    void setParsedProcess(const std::string&);
 
     int getFileCount() const;
     ProcessFile& getFile(ProcessFile&);

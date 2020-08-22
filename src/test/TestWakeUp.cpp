@@ -4,21 +4,21 @@
 
 #include "TestApp.h"
 
-void sendWakeUp(TypeComponent& owner, ComponentUnit& target) {
+void sendWakeUp(const TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP);
 
     owner->send(target, std::move(msg));
 }
 
-void sendAlive(TypeComponent& owner, ComponentUnit& target) {
+void sendAlive(const TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ALIVE);
 
     owner->send(target, std::move(msg));
 }
 
-bool processWakeUpMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processWakeUpMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(component->getHost(), owner, MSGDIR_SEND, "Sending Alive");
 
@@ -26,7 +26,7 @@ bool processWakeUpMsg(TypeComponent& component, ComponentUnit& owner, TypeMessag
     return true;
 }
 
-bool processAliveMsg(TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processAliveMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     return true;
 }

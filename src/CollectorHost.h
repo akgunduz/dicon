@@ -11,14 +11,13 @@
 class CollectorHost : public HostUnit, public CollectorObject {
 
 public:
-    CollectorHost(COLLSTATES, long);
-    explicit CollectorHost(long);
-    explicit CollectorHost(const char*);
-    CollectorHost();
+    explicit CollectorHost(long = 0, COLLSTATES = COLLSTATE_IDLE);
+
     CollectorHost(const CollectorHost &);
 
     ~CollectorHost() override;
-
 };
+
+typedef std::unique_ptr<CollectorHost> TypeCollectorHost;
 
 #endif //DICON_COLLECTORHOST_H

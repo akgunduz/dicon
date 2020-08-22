@@ -7,7 +7,7 @@
 #include "Util.h"
 #include "ComponentUnitFactory.h"
 
-Message::Message(HostUnit& host)
+Message::Message(const TypeHostUnit& host)
 		: MessageBase(host) {
 
     header.setPriority(MESSAGE_DEFAULT_PRIORITY);
@@ -16,11 +16,11 @@ Message::Message(HostUnit& host)
 
 }
 
-Message::Message(HostUnit& host, ComponentUnit& target, MSG_TYPE type)
+Message::Message(const TypeHostUnit& host, ComponentUnit& target, MSG_TYPE type)
 		: MessageBase(host) {
 
     header.setType(type);
-    header.setOwner(host.getUnit(target.getType()));
+    header.setOwner(host->getUnit(target.getType()));
     header.setPriority(MESSAGE_DEFAULT_PRIORITY);
 
     data.setStreamFlag(STREAM_NONE);
@@ -54,7 +54,7 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentUnitList &co
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
     for (auto &item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()).c_str(), item->getID());
     }
 
     return true;
@@ -179,8 +179,8 @@ bool Message::readFile(ComponentUnit& source, ProcessFile& content, MessageBlock
         return true;
     }
 
-    if (!readBinary(source, Util::getAbsRefPath(getHost().getRootPath(), jobID, fileName).c_str(),
-                    block.get(1), crc)) {
+    std::filesystem::path filePath = getHost()->getRootPath() / std::to_string(jobID) / fileName;
+    if (!readBinary(source, filePath.c_str(), block.get(1), crc)) {
         LOGS_E(getHost(), "readFile can not read Binary data");
         return false;
     }
@@ -291,17 +291,17 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentUnitList& c
 
     LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
     for (auto& item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()).c_str(), item->getID());
     }
 
     return true;
 }
 
-bool Message::writeJobName(ComponentUnit& target, const char *jobName, uint32_t& crc) {
+bool Message::writeJobName(ComponentUnit& target, const std::string& jobName, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_JOB);
 
-    blockHeader.add(strlen(jobName));
+    blockHeader.add(jobName.size());
 
     if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeJobName can not write block header");
@@ -313,7 +313,7 @@ bool Message::writeJobName(ComponentUnit& target, const char *jobName, uint32_t&
         return false;
     }
 
-    LOGS_D(getHost(), "Job Name is written successfully => Name : %s", jobName);
+    LOGS_D(getHost(), "Job Name is written successfully => Name : %s", jobName.c_str());
 
     return true;
 }
@@ -341,7 +341,7 @@ bool Message::writeProcess(ComponentUnit& target, const TypeProcessItem& process
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
 
-    blockHeader.add(strlen(processItem->getParsedProcess()));
+    blockHeader.add(processItem->getParsedProcess().size());
 
     if (!writeBlockHeader(target, blockHeader, crc)) {
         LOGS_E(getHost(), "writeProcess can not write block header");
@@ -364,21 +364,21 @@ bool Message::writeProcess(ComponentUnit& target, const TypeProcessItem& process
     }
 
     LOGS_D(getHost(), "Process is written successfully => ID : %ld, jobID : %ld, Process : %s",
-           processItem->getID(), processItem->getAssignedJob(), processItem->getParsedProcess());
+           processItem->getID(), processItem->getAssignedJob(), processItem->getParsedProcess().c_str());
 
     return true;
 }
 
 bool Message::writeFile(ComponentUnit& target, ProcessFile &content, bool isBinary, uint32_t& crc) {
 
-    std::string absPath = Util::getAbsRefPath(content.get()->getHost().getRootPath(),
-            content.get()->getAssignedJob(), content.get()->getName());
+    std::filesystem::path filePath = content.get()->getHost()->getRootPath() /
+            std::to_string(content.get()->getAssignedJob()) / content.get()->getName();
 
     bool isBinaryTransfer = !content.isOutput() && isBinary;
 
     MessageBlockHeader blockHeader(!isBinaryTransfer ? BLOCK_FILEINFO : BLOCK_FILEBINARY);
 
-    blockHeader.add(strlen(content.get()->getName()));
+    blockHeader.add(content.get()->getName().size());
     blockHeader.add(content.get()->getSize());
 
 	if (!writeBlockHeader(target, blockHeader, crc)) {
@@ -413,7 +413,7 @@ bool Message::writeFile(ComponentUnit& target, ProcessFile &content, bool isBina
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(target, absPath.c_str(), content.get()->getSize(), crc)) {
+        if (!writeBinary(target, filePath.c_str(), content.get()->getSize(), crc)) {
             LOGS_E(getHost(), "writeFile can not write Binary data");
             return false;
         }

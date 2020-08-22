@@ -45,7 +45,7 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
 
     distributor->sendWakeupMessagesAll(false);
 
-    sendOK(&distributor->getHost(), conn, "Polling is Executed");
+    sendOK(distributor->getHost(), conn, "Polling is Executed");
 
     return true;
 }
@@ -56,9 +56,9 @@ bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
     auto &collector = componentController->startCollector();
 
-    collector->getHost().setAllUIAddress(webPort);
+    collector->getHost()->setAllUIAddress(webPort);
 
-    sendOK(&distributor->getHost(), conn, "New Collector is Added");
+    sendOK(distributor->getHost(), conn, "New Collector is Added");
 
     return true;
 }
@@ -69,9 +69,9 @@ bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
     auto &node = componentController->startNode();
 
-    node->getHost().setAllUIAddress(webPort);
+    node->getHost()->setAllUIAddress(webPort);
 
-    sendOK(&distributor->getHost(), conn, "New Node is Added");
+    sendOK(distributor->getHost(), conn, "New Node is Added");
 
     return true;
 }
@@ -86,7 +86,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
-        sendError(&distributor->getHost(), conn, "Can not create json object!!!");
+        sendError(distributor->getHost(), conn, "Can not create json object!!!");
         return false;
     }
 

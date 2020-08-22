@@ -44,7 +44,7 @@ public:
 
     static long jobID;
 
-    JobItem(const HostUnit&, const char*, long);
+    JobItem(const TypeHostUnit&, const char*, long);
     ~JobItem() override;
     TypeContentItem getContent(int type, int index) const;
     int getContentCount(int type) const;

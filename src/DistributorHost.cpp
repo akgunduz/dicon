@@ -4,12 +4,8 @@
 
 #include "DistributorHost.h"
 
-DistributorHost::DistributorHost(long _id)
-        : HostUnit(COMP_DISTRIBUTOR, _id) {
-}
-
-DistributorHost::DistributorHost(const char* rootPath) :
-        HostUnit(COMP_DISTRIBUTOR, rootPath)  {
+DistributorHost::DistributorHost() :
+        HostUnit(COMP_DISTRIBUTOR, 0)  {
 }
 
 DistributorHost::DistributorHost(const DistributorHost &copy) = default;

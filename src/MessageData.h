@@ -12,9 +12,10 @@ class MessageData {
 
     int streamFlag{};
 
-    char jobName[PATH_MAX]{};
+    std::string jobName;
 
     std::pair<long, TypeProcessFileList> fileList;
+
     TypeProcessList processList;
 
     TypeComponentUnitList componentList;
@@ -35,12 +36,12 @@ public:
     void addFileList(long, TypeProcessFileList&);
     long getFileCount();
 
-    TypeProcessItem getProcess(int);
+    TypeProcessItem& getProcess(int);
     void addProcess(const TypeProcessItem&);
     long getProcessCount();
 
-    char* getJobName();
-    void setJobName(const char*);
+    const std::string& getJobName() const;
+    void setJobName(const std::string&);
 
     TypeComponentUnitList& getComponentList();
     void setComponentList(TypeComponentUnitList&);

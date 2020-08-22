@@ -11,7 +11,7 @@
 
 CRC::Table<std::uint32_t, 32> MessageBase::crcTable{CRC::CRC_32()};
 
-MessageBase::MessageBase(HostUnit &host)
+MessageBase::MessageBase(const TypeHostUnit& host)
 		: host(host) {
 }
 
@@ -453,16 +453,16 @@ bool MessageBase::writeBlockHeader(ComponentUnit& target, MessageBlockHeader &bl
 	return true;
 }
 
-bool MessageBase::writeString(ComponentUnit& target, const char* str, uint32_t& crc) {
+bool MessageBase::writeString(ComponentUnit& target, const std::string& str, uint32_t& crc) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "String write process is started => String : %s", str);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "String write process is started => String : %s", str.c_str());
 
-	if (!writeBlock(target, (uint8_t*)str, strlen(str), crc)) {
+	if (!writeBlock(target, (uint8_t*)str.c_str(), str.size(), crc)) {
 		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write string to stream");
 		return false;
 	}
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "String is written successfully => String : %s", str);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "String is written successfully => String : %s", str.c_str());
 
 	return true;
 }
@@ -585,7 +585,7 @@ bool MessageBase::writeToStream(ComponentUnit& target) {
 	return writeCRC(target, crc);
 }
 
-HostUnit& MessageBase::getHost() {
+const TypeHostUnit& MessageBase::getHost() {
 
     return host;
 }

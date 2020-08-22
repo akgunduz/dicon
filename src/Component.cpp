@@ -10,9 +10,7 @@ TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component(const char *rootPath) {
-
-    strcpy(this->rootPath, rootPath);
+Component::Component() {
 
     schedulerCB = new InterfaceSchedulerCB([](void *arg, TypeSchedulerItem item) -> bool {
 
@@ -27,12 +25,6 @@ Component::Component(const char *rootPath) {
         return component->onReceive(obj, msgType, std::move(msgItem->getMessage()));
 
     }, this);
-
-    hostCB = new InterfaceHostCB([](void *arg) -> HostUnit & {
-
-        return ((Component *) arg)->getHost();
-
-    }, this);
 }
 
 bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interfaceNode) {
@@ -42,9 +34,9 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = InterfaceFactory::createInterface(nodeDevice, schedulerCB, hostCB);
+    interfaces[COMP_NODE] = InterfaceFactory::createInterface(host, nodeDevice, schedulerCB);
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   InterfaceFactory::createInterface(otherDevice, schedulerCB, hostCB) :
+                                   InterfaceFactory::createInterface(host, otherDevice, schedulerCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
@@ -59,13 +51,6 @@ Component::~Component() {
     LOGS_T(getHost(), "Deallocating Component");
 
     delete schedulerCB;
-
-    delete hostCB;
-}
-
-const char *Component::getRootPath() {
-
-    return rootPath;
 }
 
 bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, TypeMessage msg) {
@@ -83,16 +68,15 @@ bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, TypeMessage ms
             return defaultProcessMsg(owner, std::move(msg));
         }
 
-        return (processStaticMsg[owner.getType()][msgType])( (TypeComponent&) *this, owner, std::move(msg));
+        return (processStaticMsg[owner.getType()][msgType])(shared_from_this(), owner, std::move(msg));
     }
 
     return (this->*processMsg[owner.getType()][msgType])(owner, std::move(msg));
 }
 
-
 bool Component::defaultProcessMsg(ComponentUnit &owner, TypeMessage msg) {
 
-    if (getHost().getType() != owner.getType()) {
+    if (getHost()->getType() != owner.getType()) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE,
                "No Handler is found for message : \"%s\"",
                MessageType::getMsgName(msg->getHeader().getType()));
@@ -101,7 +85,7 @@ bool Component::defaultProcessMsg(ComponentUnit &owner, TypeMessage msg) {
     return true;
 }
 
-TypeDevice& Component::getDevice(COMPONENT target) {
+const TypeDevice& Component::getDevice(COMPONENT target) {
 
     return interfaces[target]->getDevice();
 }
@@ -136,9 +120,9 @@ bool Component::send(ComponentUnit &target, TypeMessage msg) {
     return interfaces[target.getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
-HostUnit &Component::getHost() {
+TypeHostUnit& Component::getHost() {
 
-    return (*host);
+    return host;
 }
 
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
@@ -151,7 +135,7 @@ bool Component::notifyUI(NOTIFYSTATE state) {
 
     if (notifyContext) {
 
-        return notifyCB(notifyContext, getHost().getType(), state);
+        return notifyCB(notifyContext, getHost()->getType(), state);
     }
 
     return false;
@@ -164,13 +148,7 @@ bool Component::setID(long id) {
         return false;
     }
 
-    getHost().setID(id);
-
-    int pos = strlen(rootPath);
-    sprintf(&rootPath[pos], "/%ld", id);
-
-    Util::removePath(getRootPath());
-    mkdir(rootPath, 0777);
+    getHost()->setID(id);
 
     return true;
 }

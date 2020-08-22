@@ -58,7 +58,7 @@ long MessageData::getProcessCount() {
     return processList.size();
 }
 
-TypeProcessItem MessageData::getProcess(int index) {
+TypeProcessItem& MessageData::getProcess(int index) {
 
     return processList[index];
 }
@@ -68,14 +68,14 @@ void MessageData::addProcess(const TypeProcessItem& processItem) {
     processList.emplace_back(processItem);
 }
 
-char *MessageData::getJobName() {
+const std::string& MessageData::getJobName() const {
 
     return jobName;
 }
 
-void MessageData::setJobName(const char *_jobName) {
+void MessageData::setJobName(const std::string& _jobName) {
 
-    strcpy(this->jobName, _jobName);
+    jobName = _jobName;
 }
 
 TypeComponentUnitList &MessageData::getComponentList() {

@@ -20,8 +20,6 @@ typedef std::map<long, TypeComponentUnitList> TypeComponentReplaceIDList;
 
 class Distributor : public Component {
 
-    static Distributor *instance;
-
     volatile bool runCollThread = true;
 
     volatile bool runPollThread = true;
@@ -32,8 +30,6 @@ class Distributor : public Component {
 
     std::thread collThread;
     std::thread pollThread;
-
-    explicit Distributor(const char *, int, int, bool);
 
 	void pollProcess();
     void collProcess();
@@ -59,9 +55,8 @@ class Distributor : public Component {
 
 public:
 
-
+    Distributor(int, int, bool);
 	~Distributor() override;
-    static Distributor* newInstance(const char*, int, int, bool);
 
     bool sendWakeupMessage(COMPONENT);
     bool sendWakeupMessagesAll(bool);

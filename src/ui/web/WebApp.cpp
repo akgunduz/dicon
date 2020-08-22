@@ -164,7 +164,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
         }, this);
 
 
-        componentController->getDistributor()->getHost().setAllUIAddress(webPort);
+        componentController->getDistributor()->getHost()->setAllUIAddress(webPort);
 
         PRINT("Link : http://localhost:%d", webPort);
     }
@@ -173,7 +173,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
         for (auto &coll : componentController->getCollectors()) {
 
-            coll->getHost().setAllUIAddress(webPort);
+            coll->getHost()->setAllUIAddress(webPort);
         }
     }
 
@@ -181,7 +181,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
         for (auto &node : componentController->getNodes()) {
 
-            node->getHost().setAllUIAddress(webPort);
+            node->getHost()->setAllUIAddress(webPort);
         }
     }
 }
@@ -231,7 +231,7 @@ bool WebApp::sendStr(struct mg_connection *conn, const char *str) {
     return true;
 }
 
-bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_connection *conn, va_list args) {
+bool WebApp::sendResponse(const char* type, const TypeHostUnit& host, struct mg_connection *conn, va_list args) {
 
     char buf[PATH_MAX - NAME_MAX];
     char webOut[PATH_MAX];
@@ -241,11 +241,11 @@ bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_conn
 
     if (host != nullptr) {
 
-        LOGS_I(*host, buf);
+        LOGS_I(host, buf);
 
         sprintf(webOut, "%s : %s(%ld) => %s \n",
                 type,
-                ComponentType::getName(host->getType()),
+                ComponentType::getName(host->getType()).c_str(),
                 host->getID(),
                 buf);
     } else {
@@ -260,7 +260,7 @@ bool WebApp::sendResponse(const char* type, const HostUnit* host, struct mg_conn
     return true;
 }
 
-bool WebApp::sendOK(const HostUnit* host, struct mg_connection *conn, ...) {
+bool WebApp::sendOK(const TypeHostUnit& host, struct mg_connection *conn, ...) {
 
     va_list ap;
     va_start(ap, conn);
@@ -272,7 +272,7 @@ bool WebApp::sendOK(const HostUnit* host, struct mg_connection *conn, ...) {
     return true;
 }
 
-bool WebApp::sendError(const HostUnit* host, struct mg_connection *conn, ...) {
+bool WebApp::sendError(const TypeHostUnit& host, struct mg_connection *conn, ...) {
 
     va_list ap;
     va_start(ap, conn);
