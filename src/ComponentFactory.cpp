@@ -17,7 +17,7 @@ ComponentFactory *ComponentFactory::newInstance(int *interfaces) {
 
 ComponentFactory::~ComponentFactory() {
 
-    PRINT("Deallocating ComponentController");
+    LOGP_T("Deallocating ComponentController");
 
     instance = nullptr;
 }

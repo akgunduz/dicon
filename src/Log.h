@@ -10,6 +10,24 @@
 #include "HostUnit.h"
 #include "MessageType.h"
 
+#define LOGP_E(a, ...) Log::logP(LEVEL_ERROR, a, ##__VA_ARGS__)
+#define LOGP_W(a, ...) Log::logP(LEVEL_WARN, a, ##__VA_ARGS__)
+#define LOGP_I(a, ...) Log::logP(LEVEL_INFO, a, ##__VA_ARGS__)
+#define LOGP_D(a, ...) Log::logP(LEVEL_DEBUG, a, ##__VA_ARGS__)
+#define LOGP_T(a, ...) Log::logP(LEVEL_TRACE, a, ##__VA_ARGS__)
+
+#define LOGS_E(a, b, ...) Log::logS(LEVEL_ERROR, a, b, ##__VA_ARGS__)
+#define LOGS_W(a, b, ...) Log::logS(LEVEL_WARN, a, b, ##__VA_ARGS__)
+#define LOGS_I(a, b, ...) Log::logS(LEVEL_INFO, a, b, ##__VA_ARGS__)
+#define LOGS_D(a, b, ...) Log::logS(LEVEL_DEBUG, a, b, ##__VA_ARGS__)
+#define LOGS_T(a, b, ...) Log::logS(LEVEL_TRACE, a, b, ##__VA_ARGS__)
+
+#define LOGC_E(a, b, c, d, ...) Log::logC(LEVEL_ERROR, a, b, c, d, ##__VA_ARGS__)
+#define LOGC_W(a, b, c, d, ...) Log::logC(LEVEL_WARN, a, b, c, d, ##__VA_ARGS__)
+#define LOGC_I(a, b, c, d, ...) Log::logC(LEVEL_INFO, a, b, c, d, ##__VA_ARGS__)
+#define LOGC_D(a, b, c, d, ...) Log::logC(LEVEL_DEBUG, a, b, c, d, ##__VA_ARGS__)
+#define LOGC_T(a, b, c, d, ...) Log::logC(LEVEL_TRACE, a, b, c, d, ##__VA_ARGS__)
+
 enum LOGLEVEL {
 
 	LEVEL_NONE,
@@ -49,33 +67,151 @@ struct LogLevel {
     const char* color;
 };
 
-#define LOG_A(c, a, ...) if (!(c)) { Log::log(LEVEL_ASSERT, __FILE__, __LINE__, a, ##__VA_ARGS__);\
-				char *(_do_crash) = NULL; *(_do_crash) = 1;} assert(c)
-#define PRINT(a, ...) Log::show(a, ##__VA_ARGS__)
-
-#define LOGC_E(a, b, c, ...) Log::logc(LEVEL_ERROR, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
-#define LOGC_W(a, b, c, ...) Log::logc(LEVEL_WARN, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
-#define LOGC_I(a, b, c, ...) Log::logc(LEVEL_INFO, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
-#define LOGC_D(a, b, c, ...) Log::logc(LEVEL_DEBUG, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
-#define LOGC_T(a, b, c, ...) Log::logc(LEVEL_TRACE, __FILE__, __LINE__, a, b, c, ##__VA_ARGS__)
-
-#define LOGS_E(a, ...) Log::logs(LEVEL_ERROR, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOGS_W(a, ...) Log::logs(LEVEL_WARN, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOGS_I(a, ...) Log::logs(LEVEL_INFO, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOGS_D(a, ...) Log::logs(LEVEL_DEBUG, __FILE__, __LINE__, a, ##__VA_ARGS__)
-#define LOGS_T(a, ...) Log::logs(LEVEL_TRACE, __FILE__, __LINE__, a, ##__VA_ARGS__)
-
 class Log {
 
-	static LOGLEVEL logLevel[2];
+	inline static LOGLEVEL logLevel = LEVEL_ERROR;
+
+    static constexpr const char* sColorCodes[COLOR_MAX] = {
+            "[0m",
+            "[0;30m",
+            "[0;31m",
+            "[0;32m",
+            "[0;33m",
+            "[0;34m",
+            "[0;35m",
+            "[0;36m",
+            "[0;37m",
+    };
+
+    static constexpr LogLevel sLogLevels[LEVEL_MAX] = {
+            {"NONE  ", sColorCodes[COLOR_RESET]},
+            {"ERROR ", sColorCodes[COLOR_RED]},
+            {"WARN  ", sColorCodes[COLOR_BLUE]},
+            {"INFO  ", sColorCodes[COLOR_GREEN]},
+            {"DEBUG  ", sColorCodes[COLOR_RESET]},
+            {"TRACE  ", sColorCodes[COLOR_RESET]},
+            {"ASSERT  ", sColorCodes[COLOR_RESET]},
+    };
 
 public:
 
-    static void init(LOGLEVEL, LOGLEVEL);
-	static void setLogLevel(LOGLEVEL, LOGLEVEL);
-    static void logs(LOGLEVEL level, const char *, int, const TypeHostUnit&, ...);
-    static void logc(LOGLEVEL level, const char *, int, const TypeHostUnit&, const ComponentUnit&, MSG_DIR, ...);
-	static void show(const char *format, ...);
+    static void init(LOGLEVEL level) {
+
+        setLogLevel(level);
+    };
+	static void setLogLevel(LOGLEVEL level) {
+
+        logLevel = level;
+
+        setbuf(stdout, nullptr);
+
+        printf("Log Level Set to %s\n", sLogLevels[level].name);
+	};
+
+    static void logP(LOGLEVEL level, const char* format) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, "%s", format);
+
+        printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
+    }
+
+    template<typename... Args>
+    static void logP(LOGLEVEL level, const char* format, Args&&... args) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, format, args...);
+
+        printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
+    }
+
+    static void logS(LOGLEVEL level, const TypeHostUnit& host, const char* format) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, "%s", format);
+
+        printf("\033%s%11s[%ld]                    : %s\033%s\n",
+               sLogLevels[level].color,
+               ComponentType::getName(host->getType()).c_str(),
+               host->getID(),
+               logout,
+               sColorCodes[COLOR_RESET]);
+    }
+
+    template<typename... Args>
+    static void logS(LOGLEVEL level, const TypeHostUnit& host, const char* format, Args&&... args) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, format, args...);
+
+        printf("\033%s%11s[%ld]                    : %s\033%s\n",
+               sLogLevels[level].color,
+               ComponentType::getName(host->getType()).c_str(),
+               host->getID(),
+               logout,
+               sColorCodes[COLOR_RESET]);
+    }
+
+    static void logC(LOGLEVEL level, const TypeHostUnit& host,
+                     const ComponentUnit& target, MSG_DIR direction,
+                     const char* format) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, "%s", format);
+
+        printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
+               sLogLevels[level].color,
+               ComponentType::getName(host->getType()).c_str(),
+               host->getID(),
+               MessageType::getMsgDirName(direction),
+               ComponentType::getName(target.getType()).c_str(),
+               target.getID(),
+               logout,
+               sColorCodes[COLOR_RESET]);
+    }
+
+    template<typename... Args>
+    static void logC(LOGLEVEL level, const TypeHostUnit& host,
+                     const ComponentUnit& target, MSG_DIR direction,
+                     const char* format, Args&&... args) {
+
+        if (logLevel < level) {
+            return;
+        }
+
+        char logout[PATH_MAX];
+        std::sprintf(logout, format, args...);
+
+        printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
+               sLogLevels[level].color,
+               ComponentType::getName(host->getType()).c_str(),
+               host->getID(),
+               MessageType::getMsgDirName(direction),
+               ComponentType::getName(target.getType()).c_str(),
+               target.getID(),
+               logout,
+               sColorCodes[COLOR_RESET]);
+    }
 };
 
 #endif // DICON_LOG_H

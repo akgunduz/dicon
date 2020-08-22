@@ -5,14 +5,14 @@
 
 #include "ConsoleApp.h"
 
-ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
+ConsoleApp::ConsoleApp(int *interfaceID, LOGLEVEL logLevel, std::vector<int>& componentCount)
     : App(APPTYPE_CONSOLE, interfaceID, logLevel, componentCount, true) {
 
-    PRINT("Commands : ");
-    PRINT("\tPoll     : 'p' ==> Execute polling command");
-    PRINT("\tLoad job : 'l' ==> Execute load job command");
-    PRINT("\tProcess  : 'x' ==> Execute process command");
-    PRINT("\tQuit     : 'q' ==> Exit program");
+    LOGP_I("Commands : ");
+    LOGP_I("\tPoll     : 'p' ==> Execute polling command");
+    LOGP_I("\tLoad job : 'l' ==> Execute load job command");
+    LOGP_I("\tProcess  : 'x' ==> Execute process command");
+    LOGP_I("\tQuit     : 'q' ==> Exit program");
 }
 
 int ConsoleApp::run() {

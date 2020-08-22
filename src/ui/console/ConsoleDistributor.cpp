@@ -18,22 +18,22 @@ bool ConsoleApp::distPollHandler() {
 
 bool ConsoleApp::distStateHandler() {
 
-    PRINT("Collector List : ");
+    LOGP_I("Collector List : ");
 
     for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
 
         auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
 
-        PRINT("\t ID : %d, State : %s", collector->getID(), CollState::getName(collector->getState()));
+        LOGP_I("\t ID : %d, State : %s", collector->getID(), CollState::getName(collector->getState()));
     }
 
-    PRINT("Node List : ");
+    LOGP_I("Node List : ");
 
     for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
 
         auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 
-        PRINT("\t ID : %d, State : %s", node->getID(), NodeState::getName(node->getState()));
+        LOGP_I("\t ID : %d, State : %s", node->getID(), NodeState::getName(node->getState()));
     }
 
     return true;

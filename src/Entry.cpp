@@ -23,16 +23,16 @@ void listDevices() {
 
     DeviceList *deviceList = DeviceList::getInstance();
 
-    PRINT("Listing Interfaces .....");
+    LOGP_I("Listing Interfaces .....");
 
     for (int j = 0; j < deviceList->getCount(); j++) {
-        PRINT("%s : %s", InterfaceType::getName(deviceList->get(j)->getType()),
+        LOGP_I("%s : %s", InterfaceType::getName(deviceList->get(j)->getType()),
               deviceList->get(j)->getName().c_str());
     }
 }
 
 APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
-                     LOGLEVEL* logLevel, std::vector<int>& componentCount) {
+                     LOGLEVEL& logLevel, std::vector<int>& componentCount) {
 
     for (int i = 1; i < argc; i++) {
 
@@ -90,14 +90,7 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
             if (argc > i + 1) {
 
                 if (isdigit(argv[++i][0])) {
-                    logLevel[0] = (LOGLEVEL)atoi(argv[i]);
-
-                } else {
-                    return APPPARAM_ERROR;
-                }
-
-                if (isdigit(argv[++i][0])) {
-                    logLevel[1] = (LOGLEVEL)atoi(argv[i]);
+                    logLevel = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
                     return APPPARAM_ERROR;
@@ -115,7 +108,7 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LOGLEVEL logLevel[2] = {LEVEL_INFO, LEVEL_INFO};
+    LOGLEVEL logLevel = LEVEL_INFO;
 
     std::vector<int> componentCount = {0, 0, 0};
 
@@ -124,7 +117,7 @@ int main(int argc, char** argv) {
     if (res != APPPARAM_OK) {
 
         if (res == APPPARAM_ERROR) {
-            PRINT("Parameter problem, exiting.....");
+            LOGP_E("Parameter problem, exiting.....");
         }
 
         return 0;

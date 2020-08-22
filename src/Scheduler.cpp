@@ -17,7 +17,7 @@ Scheduler::Scheduler() {
 
 Scheduler::~Scheduler() {
 
-    PRINT("Deallocating Scheduler");
+    LOGP_T("Deallocating Scheduler");
 
     end();
 

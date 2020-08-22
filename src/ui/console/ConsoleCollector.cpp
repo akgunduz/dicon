@@ -30,7 +30,7 @@ bool ConsoleApp::collStateHandler(long id) {
 
     auto &collector = componentController->getCollector(id);
     if (!collector) {
-        PRINT("Can not find the collector with ID : %d !!!", id);
+        LOGP_E("Can not find the collector with ID : %d !!!", id);
         return false;
     }
 
@@ -39,22 +39,22 @@ bool ConsoleApp::collStateHandler(long id) {
         return false;
     }
 
-    PRINT("Collector[%d] Status", id);
+    LOGP_I("Collector[%d] Status", id);
 
-    PRINT("Files of Job : %s", job->getName());
+    LOGP_I("Files of Job : %s", job->getName());
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
         auto content = job->getFile(j);
 
-        PRINT("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
+        LOGP_I("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
     }
 
-    PRINT("Processes");
+    LOGP_I("Processes");
 
     for (int j = 0; j < job->getProcessCount(); j++) {
 
-        PRINT("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
+        LOGP_I("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
                 job->getProcess(j)->getID(),
                 job->getProcess(j)->getProcess(),
                 ProcessState::getName(job->getProcess(j)->getState()),

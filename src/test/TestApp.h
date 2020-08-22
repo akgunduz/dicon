@@ -28,7 +28,7 @@ class TestApp : public App {
     int overrideCount[COMP_MAX] {1, 1, 1};
 
 public:
-    TestApp(int *, LOGLEVEL*, std::vector<int>&);
+    TestApp(int *, LOGLEVEL, std::vector<int>&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
     void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);

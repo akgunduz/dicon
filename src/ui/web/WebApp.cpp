@@ -83,7 +83,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     int restLen = strlen(REST_URI);
     if (0 != strncmp(ri->request_uri, REST_URI, restLen)) {
-        PRINT("Wrong REST Call has came!!!");
+        LOGP_E("Wrong REST Call has came!!!");
         return 0;
     }
 
@@ -119,7 +119,7 @@ int WebApp::quitHandler(struct mg_connection *conn) {
     return true;
 }
 
-WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& componentCount)
+WebApp::WebApp(int *interfaceID, LOGLEVEL logLevel, std::vector<int>& componentCount)
     : App(APPTYPE_WEB, interfaceID, logLevel, componentCount, true) {
 
 
@@ -145,7 +145,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
     }
 
     if (!context) {
-        PRINT("Can not start web server....");
+        LOGP_E("Can not start web server....");
         return;
     }
 
@@ -166,7 +166,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
         componentController->getDistributor()->getHost()->setAllUIAddress(webPort);
 
-        PRINT("Link : http://localhost:%d", webPort);
+        LOGP_I("Link : http://localhost:%d", webPort);
     }
 
     if (componentController->getCollectorCount()) {
@@ -188,7 +188,7 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL* logLevel, std::vector<int>& component
 
 WebApp::~WebApp() {
 
-    PRINT("Deallocating WebApp");
+    LOGP_T("Deallocating WebApp");
 
     mg_stop(context);
 
@@ -200,7 +200,7 @@ int WebApp::run() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    PRINT("WebApp Exiting....");
+    LOGP_I("WebApp Exiting....");
 
     return EXIT_SUCCESS;
 }
@@ -250,7 +250,7 @@ bool WebApp::sendResponse(const char* type, const TypeHostUnit& host, struct mg_
                 buf);
     } else {
 
-        PRINT(buf);
+        LOGP_I(buf);
 
         sprintf(webOut, "%s : %s \n", type, buf);
     }

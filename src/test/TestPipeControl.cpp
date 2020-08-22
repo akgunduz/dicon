@@ -9,11 +9,11 @@ void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& colle
 
     auto job = collector->loadJob("../sample/Job1_x86_linux");
     if (!job) {
-        PRINT("Job could not initialized");
+        LOGP_E("Job could not initialized");
         return;
     }
 
-    PRINT("Execute Ready Processes");
+    LOGP_I("Execute Ready Processes");
 
     for (int j = 0; j < job->getProcessCount(); j++) {
 
@@ -24,7 +24,7 @@ void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& colle
 
         std::string parsed = Util::parsePath(collector->getHost()->getRootPath(), process->getParsedProcess());
 
-        PRINT("\tID : %d, Process : %s, Parsed : %s",
+        LOGP_I("\tID : %d, Process : %s, Parsed : %s",
               process->getID(),
               process->getProcess().c_str(),
               parsed.c_str());
@@ -39,7 +39,7 @@ void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& colle
         while (std::getline(inProcess, childOut)) {
             Util::trim(childOut);
             if (!childOut.empty()) {
-                PRINT("Process[%d] Output : %s", process->getID(), childOut.c_str());
+                LOGP_I("Process[%d] Output : %s", process->getID(), childOut.c_str());
             }
         }
     }

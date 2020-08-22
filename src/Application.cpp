@@ -5,10 +5,10 @@
 
 #include "Application.h"
 
-App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int> componentCount, bool autoWake) :
+App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int> componentCount, bool autoWake) :
         type(type) {
 
-    Log::init(logLevel[0], logLevel[1]);
+    Log::init(logLevel);
 
     Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYSTATE state) -> bool {
 
@@ -17,7 +17,7 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
 
     deviceList = DeviceList::getInstance();
 
-    PRINT("Using network interfaces : %s and %s",
+    LOGP_I("Using network interfaces : %s and %s",
           deviceList->get(interfaces[0])->getName().c_str(),
           deviceList->get(interfaces[1])->getName().c_str());
 
@@ -35,14 +35,14 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL* logLevel, std::vector<int
         componentController->startNode(componentCount[COMP_NODE]);
     }
 
-    PRINT("Running in %s Mode with %d Distributor, %d Collector and %d Node",
+    LOGP_I("Running in %s Mode with %d Distributor, %d Collector and %d Node",
           type == APPTYPE_WEB ? "Web" : "Console",
           componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
 }
 
 App::~App() {
 
-    PRINT("Deallocating App");
+    LOGP_T("Deallocating App");
 
     delete componentController;
 

@@ -51,7 +51,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/JobStatus.cpp
         ${SOURCE_PATH}/JsonType.cpp
-        ${SOURCE_PATH}/Log.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/MessageBlockHeader.cpp

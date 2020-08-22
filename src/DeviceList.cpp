@@ -84,5 +84,5 @@ long DeviceList::getCount() {
 
 DeviceList::~DeviceList() {
 
-    PRINT("Deallocating DeviceList");
+    LOGP_T("Deallocating DeviceList");
 }

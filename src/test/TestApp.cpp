@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-TestApp::TestApp(int *_interfaces, LOGLEVEL* _logLevel, std::vector<int>& _componentCount)
+TestApp::TestApp(int *_interfaces, LOGLEVEL _logLevel, std::vector<int>& _componentCount)
         : App(APPTYPE_TEST, _interfaces, _logLevel, {1, 1, 1}, false) {
 
     help();
@@ -12,18 +12,18 @@ TestApp::TestApp(int *_interfaces, LOGLEVEL* _logLevel, std::vector<int>& _compo
 
 void TestApp::help() {
 
-    PRINT("Commands : ");
-    PRINT("\tTest Ping           : 'p'");
-    PRINT("\tTest Component List : 'c'");
-    PRINT("\tTest Process        : 's'");
-    PRINT("\tTest File Info      : 'i'");
-    PRINT("\tTest File Binary    : 'b'");
-    PRINT("\tTest Job Name       : 'j'");
-    PRINT("\tTest Load Job       : 'l'");
-    PRINT("\tTest WakeUp         : 'w'");
-    PRINT("\tTest Pipe           : 'e'");
-    PRINT("\tHelp                : 'h'");
-    PRINT("\tQuit                : 'q'");
+    LOGP_I("Commands : ");
+    LOGP_I("\tTest Ping           : 'p'");
+    LOGP_I("\tTest Component List : 'c'");
+    LOGP_I("\tTest Process        : 's'");
+    LOGP_I("\tTest File Info      : 'i'");
+    LOGP_I("\tTest File Binary    : 'b'");
+    LOGP_I("\tTest Job Name       : 'j'");
+    LOGP_I("\tTest Load Job       : 'l'");
+    LOGP_I("\tTest WakeUp         : 'w'");
+    LOGP_I("\tTest Pipe           : 'e'");
+    LOGP_I("\tHelp                : 'h'");
+    LOGP_I("\tQuit                : 'q'");
 }
 
 int TestApp::run() {

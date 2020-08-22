@@ -11,24 +11,24 @@ bool ConsoleApp::nodeStateHandler(long id) {
 
     auto &node = componentController->getNode(id);
     if (!node) {
-        PRINT("Can not find the node with ID : %d !!!", id);
+        LOGP_E("Can not find the node with ID : %d !!!", id);
         return false;
     }
 
     auto nodeObj = (NodeHost&) node->getHost();
 
-    PRINT("Node[%d] Status", id);
+    LOGP_I("Node[%d] Status", id);
 
-    PRINT("State", nodeObj.getState());
+    LOGP_I("State", nodeObj.getState());
 
-    PRINT("Processes");
+    LOGP_I("Processes");
 
     for (auto &process : node->getProcessList()) {
 
         std::string processCommand = process->getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
 
-        PRINT("ID : %d, Assigned Collector : %d, Job ID : %ld, Process : %s",
+        LOGP_I("ID : %d, Assigned Collector : %d, Job ID : %ld, Process : %s",
               process->getID(),
               process->getAssigned(),
               process->getAssignedJob(),
