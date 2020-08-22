@@ -15,10 +15,9 @@ class NodeUnit : public ComponentUnit, public NodeObject {
 public:
     NodeUnit(NODESTATES, int, ARCH, long, Address);
     explicit NodeUnit(ARCH, long, Address);
-    NodeUnit();
     NodeUnit(const NodeUnit &);
 
-    ~NodeUnit();
+    ~NodeUnit() override;
 };
 
 typedef std::shared_ptr<NodeUnit> TypeNodeUnit;

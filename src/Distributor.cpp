@@ -349,9 +349,10 @@ bool Distributor::send2NodeProcessMsg(ComponentUnit& target) {
 
 bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
-    auto target = ComponentUnit(targetType);
-
     if (isSupportMulticast(targetType)) {
+
+        auto target = ComponentUnit(targetType, getInterfaceMulticastAddress(targetType));
+        target.getAddress().setMulticast(true);
 
         auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
@@ -365,9 +366,9 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
         for (auto &address : list) {
 
-            auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
+            auto target = ComponentUnit(targetType, address);
 
-            target.setAddress(address);
+            auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
             send(target, std::move(msg));
         }

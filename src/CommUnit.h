@@ -27,6 +27,7 @@ public:
 
     CommUnit() = default;
     explicit CommUnit(COMPONENT);
+    CommUnit(COMPONENT, Address);
     CommUnit(COMPONENT, ARCH, long, Address);
     CommUnit(const CommUnit&);
 

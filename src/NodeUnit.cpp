@@ -12,10 +12,6 @@ NodeUnit::NodeUnit(ARCH _arch, long _id, Address _address)
         : ComponentUnit(COMP_NODE, _arch, _id, _address) {
 }
 
-NodeUnit::NodeUnit()
-        : ComponentUnit(COMP_NODE) {
-}
-
 NodeUnit::NodeUnit(const NodeUnit &copy) = default;
 
 NodeUnit::~NodeUnit() = default;

@@ -8,6 +8,10 @@ CommUnit::CommUnit(COMPONENT _type, ARCH _arch, long _id, Address _address)
         : id(_id), type(_type), arch(_arch), address(_address) {
 }
 
+CommUnit::CommUnit(COMPONENT _type, Address _address)
+        : type(_type), address(_address) {
+}
+
 CommUnit::CommUnit(COMPONENT _type)
         : type(_type) {
 }

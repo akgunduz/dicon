@@ -14,12 +14,11 @@ class CollectorUnit : public ComponentUnit, public CollectorObject {
 
 public:
     CollectorUnit(COLLSTATES, ARCH, long, Address);
-    explicit CollectorUnit(ARCH, long, Address);
-    CollectorUnit();
+    CollectorUnit(ARCH, long, Address);
     CollectorUnit(const CollectorUnit &);
-    CollectorUnit(ComponentUnit&);
+    explicit CollectorUnit(ComponentUnit&);
 
-    ~CollectorUnit();
+    ~CollectorUnit() override;
 };
 
 typedef std::shared_ptr<CollectorUnit> TypeCollectorUnit;

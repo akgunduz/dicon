@@ -48,7 +48,7 @@ public:
 	bool readString(ComponentUnit&, char*, size_t, uint32_t&);
 	bool readNumber(ComponentUnit&, long&, uint32_t&);
     bool readNumberList(ComponentUnit&, std::vector<long> &, size_t, uint32_t&);
-    bool readBinary(ComponentUnit&, const char*, size_t, uint32_t&);
+    bool readBinary(ComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
     bool readCRC(ComponentUnit&, uint32_t&);
 	bool readFromStream(ComponentUnit&);
 

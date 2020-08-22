@@ -42,7 +42,8 @@ void TestApp::testWakeUp(TypeDistributor& distributor, TypeCollector& collector,
     distributor->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
     distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
 
-    ComponentUnit target(COMP_NODE);
-    target.setAddress(distributor->getInterfaceMulticastAddress(target.getType()), true);
+    ComponentUnit target(COMP_NODE, distributor->getInterfaceMulticastAddress(COMP_NODE));
+    target.getAddress().setMulticast(true);
+
     sendWakeUp((TypeComponent&) distributor, target);
 }

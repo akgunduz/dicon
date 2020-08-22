@@ -264,26 +264,25 @@ bool MessageBase::readNumberList(ComponentUnit& source, std::vector<long> &list,
     return true;
 }
 
-bool MessageBase::readBinary(ComponentUnit& source, const char* path, size_t size, uint32_t& crc) {
+bool MessageBase::readBinary(ComponentUnit& source, const std::filesystem::path& path, size_t size, uint32_t& crc) {
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", path);
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", path.c_str());
 
-	Util::mkPath(path);
+    std::filesystem::create_directories(path.parent_path());
 
-	int out = open(path, O_CREAT|O_WRONLY|O_TRUNC, 00755);
+	int out = open(path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
-        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Read File could not created or opened at path : %s", path);
+        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Read File could not created or opened at path : %s", path.c_str());
 		return false;
 	}
 
-    ComponentUnit target;
-	target.setSocket(out);
+    ComponentUnit target(out);
 
 	bool status = transferBinary(source, target, size, crc);
 
 	close(out);
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "File is read successfully => at path : %s", path);
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "File is read successfully => at path : %s", path.c_str());
 
 	return status;
 

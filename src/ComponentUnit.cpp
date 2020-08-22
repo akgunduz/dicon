@@ -8,8 +8,12 @@ ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, long _id, Address _add
     : CommUnit(_type, _arch, _id, _address) {
 }
 
-ComponentUnit::ComponentUnit(COMPONENT _type)
-    : CommUnit(_type) {
+ComponentUnit::ComponentUnit(COMPONENT _type, Address _address)
+        : CommUnit(_type, _address) {
+}
+
+ComponentUnit::ComponentUnit(int _socket)
+    : socket(_socket) {
 }
 
 ComponentUnit::ComponentUnit(const ComponentUnit &copy) = default;

@@ -15,8 +15,9 @@ class ComponentUnit : public CommUnit {
 public:
 
     ComponentUnit() = default;
-    explicit ComponentUnit(COMPONENT);
+    explicit ComponentUnit(int);
     ComponentUnit(COMPONENT, ARCH, long, Address);
+    ComponentUnit(COMPONENT, Address);
     ComponentUnit(const ComponentUnit&);
     ComponentUnit(const CommUnit&);
     virtual ~ComponentUnit();
