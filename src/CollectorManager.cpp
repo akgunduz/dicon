@@ -6,7 +6,7 @@
 #include "CollectorManager.h"
 #include "CollectorUnit.h"
 
-CollectorManager::CollectorManager(TypeHostUnit& _host, bool _protect)
+CollectorManager::CollectorManager(const TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {
 };
 

@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendProcess(const TypeComponent& owner, ComponentUnit& target) {
+void sendProcess(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
 
@@ -18,13 +18,13 @@ void sendProcess(const TypeComponent& owner, ComponentUnit& target) {
     owner->send(target, std::move(msg));
 }
 
-bool processProcessMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processProcessMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto processItem = msg->getData().getProcess(0);
 
     LOGS_I(component->getHost(), "Message Process[%d] has came from : %s",
            processItem->getID(),
-           ComponentType::getName(owner.getType()));
+           ComponentType::getName(owner->getType()));
 
     return true;
 }
@@ -35,7 +35,7 @@ void TestApp::testProcess(TypeDistributor& distributor, TypeCollector& collector
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, processProcessMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
+    auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
                          node->getHost()->getAddress(COMP_COLLECTOR));
     sendProcess((TypeComponent&) collector, target);
 }

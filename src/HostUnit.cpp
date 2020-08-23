@@ -73,7 +73,7 @@ void HostUnit::set(COMPONENT _type, long _id, COMPONENT _out, Address _address) 
     address[_out] = _address;
 }
 
-CommUnit HostUnit::getUnit(COMPONENT targetType) {
+TypeCommUnit HostUnit::getUnit(COMPONENT targetType) {
 
-    return CommUnit(type, getArch(), id, address[targetType]);
+    return std::make_shared<CommUnit>(type, getArch(), id, address[targetType]);
 }

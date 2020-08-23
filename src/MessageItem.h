@@ -12,15 +12,15 @@
 
 class MessageItem : public SchedulerItem {
 
-    CommUnit unit{};
-    TypeMessage msg{};
+    TypeCommUnit unit;
+    TypeMessage msg;
 
 public:
 
-    MessageItem(MSG_DIR, CommUnit&, TypeMessage = nullptr);
+    MessageItem(MSG_DIR, const TypeCommUnit&, TypeMessage = nullptr);
     ~MessageItem() override;
 
-    CommUnit& getUnit();
+    const TypeCommUnit& getUnit();
     TypeMessage& getMessage();
 };
 

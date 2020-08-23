@@ -4,7 +4,7 @@
 
 #include "MessageItem.h"
 
-MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, TypeMessage _msg)
+MessageItem::MessageItem(MSG_DIR _type, const TypeCommUnit& _unit, TypeMessage _msg)
         : SchedulerItem(_type), unit(_unit), msg(std::move(_msg)) {
 
     if (msg != nullptr) {
@@ -12,7 +12,7 @@ MessageItem::MessageItem(MSG_DIR _type, CommUnit& _unit, TypeMessage _msg)
     }
 }
 
-CommUnit& MessageItem::getUnit() {
+const TypeCommUnit& MessageItem::getUnit() {
 
     return unit;
 }

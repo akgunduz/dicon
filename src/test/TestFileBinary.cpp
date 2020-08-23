@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendFileBinary(const TypeComponent& owner, ComponentUnit& target) {
+void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
 
@@ -21,12 +21,12 @@ void sendFileBinary(const TypeComponent& owner, ComponentUnit& target) {
     owner->send(target, std::move(msg));
 }
 
-bool processFileBinaryMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processFileBinaryMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
     LOGS_I(component->getHost(), "Message File Binary has came from : %s with assigned Process : %d",
-           ComponentType::getName(owner.getType()), msg->getData().getFileProcess());
+           ComponentType::getName(owner->getType()), msg->getData().getFileProcess());
     LOGS_I(component->getHost(), "File 1 : %d, %s, %d", list[0].get()->getID(), list[0].get()->getName().c_str(), list[0].get()->getSize());
     LOGS_I(component->getHost(), "File 2 : %d, %s, %d", list[1].get()->getID(), list[1].get()->getName().c_str(), list[1].get()->getSize());
     LOGS_I(component->getHost(), "File 3 : %d, %s, %d", list[2].get()->getID(), list[2].get()->getName().c_str(), list[2].get()->getSize());
@@ -41,7 +41,7 @@ void TestApp::testFileBinary(TypeDistributor& distributor, TypeCollector& collec
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY, processFileBinaryMsg);
 
-    ComponentUnit target(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
+    auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
                          node->getHost()->getAddress(COMP_COLLECTOR));
     sendFileBinary((TypeComponent&) collector, target);
 }

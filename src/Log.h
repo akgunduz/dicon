@@ -170,7 +170,7 @@ public:
     }
 
     static void logC(LOGLEVEL level, const TypeHostUnit& host,
-                     const ComponentUnit& target, MSG_DIR direction,
+                     const TypeCommUnit& target, MSG_DIR direction,
                      const char* format) {
 
         if (logLevel < level) {
@@ -185,15 +185,15 @@ public:
                ComponentType::getName(host->getType()),
                host->getID(),
                MessageType::getMsgDirName(direction),
-               ComponentType::getName(target.getType()),
-               target.getID(),
+               ComponentType::getName(target->getType()),
+               target->getID(),
                logout,
                sColorCodes[COLOR_RESET]);
     }
 
     template<typename... Args>
     static void logC(LOGLEVEL level, const TypeHostUnit& host,
-                     const ComponentUnit& target, MSG_DIR direction,
+                     const TypeCommUnit& target, MSG_DIR direction,
                      const char* format, Args&&... args) {
 
         if (logLevel < level) {
@@ -208,8 +208,8 @@ public:
                ComponentType::getName(host->getType()),
                host->getID(),
                MessageType::getMsgDirName(direction),
-               ComponentType::getName(target.getType()),
-               target.getID(),
+               ComponentType::getName(target->getType()),
+               target->getID(),
                logout,
                sColorCodes[COLOR_RESET]);
     }

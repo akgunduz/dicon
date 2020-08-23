@@ -34,24 +34,24 @@ class Distributor : public Component {
 	void pollProcess();
     void collProcess();
 
-    bool processCollectorAliveMsg(ComponentUnit&, TypeMessage);
-    bool processCollectorIDMsg(ComponentUnit&, TypeMessage);
-    bool processCollectorNodeMsg(ComponentUnit&, TypeMessage);
-    bool processCollectorReadyMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorAliveMsg(const TypeComponentUnit&, TypeMessage);
+    bool processCollectorIDMsg(const TypeComponentUnit&, TypeMessage);
+    bool processCollectorNodeMsg(const TypeComponentUnit&, TypeMessage);
+    bool processCollectorReadyMsg(const TypeComponentUnit&, TypeMessage);
 
-    bool processNodeAliveMsg(ComponentUnit&, TypeMessage);
-    bool processNodeIDMsg(ComponentUnit&, TypeMessage);
-    bool processNodeBusyMsg(ComponentUnit&, TypeMessage);
-    bool processNodeReadyMsg(ComponentUnit&, TypeMessage);
+    bool processNodeAliveMsg(const TypeComponentUnit&, TypeMessage);
+    bool processNodeIDMsg(const TypeComponentUnit&, TypeMessage);
+    bool processNodeBusyMsg(const TypeComponentUnit&, TypeMessage);
+    bool processNodeReadyMsg(const TypeComponentUnit&, TypeMessage);
 
-	bool send2CollectorWakeupMsg(ComponentUnit&);
-	bool send2CollectorIDMsg(ComponentUnit&, long);
-	bool send2CollectorNodeMsg(ComponentUnit&, TypeComponentUnitList&);
-	bool send2CollectorReplaceMsg(ComponentUnit&, TypeComponentUnitList&);
+	bool send2CollectorWakeupMsg(const TypeComponentUnit&);
+	bool send2CollectorIDMsg(const TypeComponentUnit&, long);
+	bool send2CollectorNodeMsg(const TypeComponentUnit&, TypeComponentUnitList&);
+	bool send2CollectorReplaceMsg(const TypeComponentUnit&, TypeComponentUnitList&);
 
-    bool send2NodeWakeupMsg(ComponentUnit&);
-    bool send2NodeIDMsg(ComponentUnit&, long);
-	bool send2NodeProcessMsg(ComponentUnit&);
+    bool send2NodeWakeupMsg(const TypeComponentUnit&);
+    bool send2NodeIDMsg(const TypeComponentUnit&, long);
+	bool send2NodeProcessMsg(const TypeComponentUnit&);
 
 public:
 

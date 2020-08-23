@@ -18,11 +18,11 @@ Component::Component() {
 
         auto msgItem = std::static_pointer_cast<MessageItem>(item);
 
-        ComponentUnit obj(msgItem->getMessage()->getHeader().getOwner());
+        auto owner = std::make_shared<ComponentUnit>(msgItem->getMessage()->getHeader().getOwner());
 
         auto msgType = msgItem->getMessage()->getHeader().getType();
 
-        return component->onReceive(obj, msgType, std::move(msgItem->getMessage()));
+        return component->onReceive(owner, msgType, std::move(msgItem->getMessage()));
 
     }, this);
 }
@@ -53,30 +53,30 @@ Component::~Component() {
     delete schedulerCB;
 }
 
-bool Component::onReceive(ComponentUnit &owner, MSG_TYPE msgType, TypeMessage msg) {
+bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, TypeMessage msg) {
 
     LOGC_D(getHost(), owner, MSGDIR_RECEIVE,
            "\"%s\" is received",
            MessageType::getMsgName(msgType));
 
-    auto processCB = processMsg[owner.getType()].find(msgType);
-    if (processCB == processMsg[owner.getType()].end()) {
+    auto processCB = processMsg[owner->getType()].find(msgType);
+    if (processCB == processMsg[owner->getType()].end()) {
 
-        auto processStaticCB = processStaticMsg[owner.getType()].find(msgType);
-        if (processStaticCB == processStaticMsg[owner.getType()].end()) {
+        auto processStaticCB = processStaticMsg[owner->getType()].find(msgType);
+        if (processStaticCB == processStaticMsg[owner->getType()].end()) {
 
             return defaultProcessMsg(owner, std::move(msg));
         }
 
-        return (processStaticMsg[owner.getType()][msgType])(shared_from_this(), owner, std::move(msg));
+        return (processStaticMsg[owner->getType()][msgType])(shared_from_this(), owner, std::move(msg));
     }
 
-    return (this->*processMsg[owner.getType()][msgType])(owner, std::move(msg));
+    return (this->*processMsg[owner->getType()][msgType])(owner, std::move(msg));
 }
 
-bool Component::defaultProcessMsg(ComponentUnit &owner, TypeMessage msg) {
+bool Component::defaultProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (getHost()->getType() != owner.getType()) {
+    if (getHost()->getType() != owner->getType()) {
         LOGC_W(getHost(), owner, MSGDIR_RECEIVE,
                "No Handler is found for message : \"%s\"",
                MessageType::getMsgName(msg->getHeader().getType()));
@@ -115,9 +115,9 @@ bool Component::isSupportMulticast(COMPONENT target) {
     return interfaces[target]->isSupportMulticast();
 }
 
-bool Component::send(ComponentUnit &target, TypeMessage msg) {
+bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
 
-    return interfaces[target.getType()]->push(MSGDIR_SEND, target, std::move(msg));
+    return interfaces[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
 TypeHostUnit& Component::getHost() {

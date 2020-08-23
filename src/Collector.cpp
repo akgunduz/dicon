@@ -26,14 +26,14 @@ Collector::~Collector() {
     LOGP_T("Deallocating Collector");
 }
 
-bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     setDistributor(owner);
 
     return send2DistributorAliveMsg(owner);
 }
 
-bool Collector::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     if (!setID(msg->getHeader().getVariant(0))) {
 
@@ -45,7 +45,7 @@ bool Collector::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
     return send2DistributorIDMsg(owner);
 }
 
-bool Collector::processDistributorNodeMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processDistributorNodeMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentUnitList& nodes = msg->getData().getComponentList();
 
@@ -56,15 +56,17 @@ bool Collector::processDistributorNodeMsg(ComponentUnit& owner, TypeMessage msg)
         return false;
     }
 
-    for (auto &node : nodes) {
+    for (const auto& node : nodes) {
+
         auto process = job->assignNode(node->getID());
-        send2NodeProcessMsg(*node, process);
+
+        send2NodeProcessMsg(node, process);
     }
 
     return true;
 }
 
-bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processDistributorReplaceMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     TypeComponentUnitList& nodes = msg->getData().getComponentList();
 
@@ -78,18 +80,20 @@ bool Collector::processDistributorReplaceMsg(ComponentUnit& owner, TypeMessage m
     for (size_t i = 0; i < nodes.size(); i = i + 2) {
 
         auto process = job->reAssignNode(nodes[i]->getID(), nodes[i + 1]->getID());
+
         if (process) {
-            send2NodeProcessMsg(*nodes[i + 1], process);
+
+            send2NodeProcessMsg(nodes[i + 1], process);
         }
     }
 
     return true;
 }
 
-bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d]:Process[%d] requested %d missing files",
-            owner.getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
+            owner->getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
 
     auto processItem = job->getProcessByID(msg->getData().getFileProcess());
 
@@ -111,11 +115,12 @@ bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
     return send2NodeBinaryMsg(owner, processItem->getID(), newList);
 }
 
-bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
+bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries", owner.getID(), msg->getData().getFileCount());
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries",
+           owner->getID(), msg->getData().getFileCount());
 
     int totalCount = 0;
     int readyCount = job->updateDependency(msg->getData().getFileProcess(), totalCount);
@@ -141,21 +146,21 @@ bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) 
     return true;
 }
 
-bool Collector::send2DistributorAliveMsg(ComponentUnit& target) {
+bool Collector::send2DistributorAliveMsg(const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ALIVE);
 
     return send(target, std::move(msg));
 }
 
-bool Collector::send2DistributorIDMsg(ComponentUnit& target) {
+bool Collector::send2DistributorIDMsg(const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
 
     return send(target, std::move(msg));
 }
 
-bool Collector::send2DistributorNodeMsg(ComponentUnit& target, long readyProcessCount) {
+bool Collector::send2DistributorNodeMsg(const TypeComponentUnit& target, long readyProcessCount) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
 
@@ -164,26 +169,27 @@ bool Collector::send2DistributorNodeMsg(ComponentUnit& target, long readyProcess
     return send(target, std::move(msg));
 }
 
-bool Collector::send2DistributorReadyMsg(ComponentUnit& target) {
+bool Collector::send2DistributorReadyMsg(const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
 
     return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeProcessMsg(ComponentUnit& target, const TypeProcessItem& processItem) {
+bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
 
     msg->getData().setStreamFlag(STREAM_PROCESS);
     msg->getData().addProcess(processItem);
 
-    LOGC_I(getHost(), target, MSGDIR_SEND, "Node[%d]:Process[%d] is triggered ", target.getID(), processItem->getID());
+    LOGC_I(getHost(), target, MSGDIR_SEND, "Node[%d]:Process[%d] is triggered ",
+           target->getID(), processItem->getID());
 
     return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeBinaryMsg(ComponentUnit& target, long processID, TypeProcessFileList &fileList) {
+bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, TypeProcessFileList &fileList) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
@@ -193,14 +199,14 @@ bool Collector::send2NodeBinaryMsg(ComponentUnit& target, long processID, TypePr
     return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeReadyMsg(ComponentUnit& target) {
+bool Collector::send2NodeReadyMsg(const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
 
     return send(target, std::move(msg));
 }
 
-void Collector::setDistributor(const ComponentUnit& _distributor) {
+void Collector::setDistributor(const TypeComponentUnit& _distributor) {
 
     distributor = _distributor;
 }

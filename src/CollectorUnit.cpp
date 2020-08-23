@@ -12,10 +12,6 @@ CollectorUnit::CollectorUnit(ARCH _arch, long _id, Address _address)
         : ComponentUnit(COMP_COLLECTOR, _arch, _id, _address) {
 }
 
-CollectorUnit::CollectorUnit(ComponentUnit& copy)
-        : ComponentUnit(copy.getType(), copy.getArch(), copy.getID(), copy.getAddress()) {
-}
-
 CollectorUnit::CollectorUnit(const CollectorUnit &copy) = default;
 
 CollectorUnit::~CollectorUnit() = default;

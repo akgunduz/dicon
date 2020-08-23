@@ -35,7 +35,7 @@ public:
 
     ARCH getArch() const;
 
-    CommUnit getUnit(COMPONENT);
+    TypeCommUnit getUnit(COMPONENT);
 
     COMPONENT getType() const;
     void setType(COMPONENT);

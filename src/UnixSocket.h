@@ -19,8 +19,8 @@ class UnixSocket : public Interface {
 
 	bool initUnixSocket();
     bool runReceiver() override;
-    bool runSender(ComponentUnit , TypeMessage) override;
-    bool runMulticastSender(ComponentUnit, TypeMessage) override;
+    bool runSender(const TypeComponentUnit& , TypeMessage) override;
+    bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
 public :
 
@@ -31,8 +31,8 @@ public :
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
 
-    static TypeReadCB getReadCB(ComponentUnit&);
-    static TypeWriteCB getWriteCB(ComponentUnit&);
+    static TypeReadCB getReadCB(const TypeComponentUnit&);
+    static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };
 
 #endif //DICON_UNIXSOCKET_H

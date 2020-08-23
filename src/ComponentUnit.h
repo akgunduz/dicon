@@ -15,11 +15,11 @@ class ComponentUnit : public CommUnit {
 public:
 
     ComponentUnit() = default;
-    explicit ComponentUnit(int);
     ComponentUnit(COMPONENT, ARCH, long, Address);
     ComponentUnit(COMPONENT, Address);
     ComponentUnit(const ComponentUnit&);
-    ComponentUnit(const CommUnit&);
+    explicit ComponentUnit(const TypeCommUnit&);
+    explicit ComponentUnit(int);
     virtual ~ComponentUnit();
 
     int getSocket() const;

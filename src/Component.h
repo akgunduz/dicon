@@ -17,8 +17,8 @@ class Component;
 typedef std::shared_ptr<Component> TypeComponent;
 typedef std::vector<TypeComponent> TypeComponentList;
 typedef std::map<COMPONENT, TypeComponentList> TypeComponentMapList;
-typedef bool (Component::*TypeProcessComponentMsg)(ComponentUnit&, TypeMessage);
-typedef bool (*TypeStaticProcessComponentMsg)(const TypeComponent&, ComponentUnit&, TypeMessage);
+typedef bool (Component::*TypeProcessComponentMsg)(const TypeComponentUnit&, TypeMessage);
+typedef bool (*TypeStaticProcessComponentMsg)(const TypeComponent&, const TypeComponentUnit&, TypeMessage);
 
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
@@ -62,11 +62,11 @@ public:
     TypeAddressList getInterfaceAddressList(COMPONENT);
     INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
-    bool onReceive(ComponentUnit&, MSG_TYPE, TypeMessage);
+    bool onReceive(const TypeComponentUnit&, MSG_TYPE, TypeMessage);
 
-    bool send(ComponentUnit&, TypeMessage);
+    bool send(const TypeComponentUnit&, TypeMessage);
 
-    bool defaultProcessMsg(ComponentUnit&, TypeMessage);
+    bool defaultProcessMsg(const TypeComponentUnit&, TypeMessage);
 
     static void registerNotify(void*, TypeNotifyCB);
     static void deRegisterNotify();

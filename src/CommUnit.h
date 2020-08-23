@@ -43,10 +43,13 @@ public:
     Address& getAddress();
     void setAddress(Address, bool = false);
 
-    void grab(CommUnit&);
+    void set(const CommUnit&);
 
     static COMPONENT next(COMPONENT);
     static COMPONENT prev(COMPONENT);
 };
+
+typedef std::shared_ptr<CommUnit> TypeCommUnit;
+typedef std::vector<TypeCommUnit> TypeCommUnitList;
 
 #endif //DICON_COMMUNIT_H

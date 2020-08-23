@@ -5,7 +5,7 @@
 #include "ComponentManager.h"
 #include "Log.h"
 
-ComponentManager::ComponentManager(TypeHostUnit& _host, bool _protect)
+ComponentManager::ComponentManager(const TypeHostUnit& _host, bool _protect)
         : idCounter(1), host(_host), protect(_protect) {
 
     if (protect) {
@@ -23,6 +23,7 @@ ComponentManager::~ComponentManager() {
         threadRun = false;
         thread.join();
     }
+
     clear();
 }
 

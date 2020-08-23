@@ -16,7 +16,6 @@ public:
     CollectorUnit(COLLSTATES, ARCH, long, Address);
     CollectorUnit(ARCH, long, Address);
     CollectorUnit(const CollectorUnit &);
-    explicit CollectorUnit(ComponentUnit&);
 
     ~CollectorUnit() override;
 };

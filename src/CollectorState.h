@@ -7,6 +7,7 @@
 #define DICON_COLLECTORSTATE_H
 
 enum COLLSTATES {
+
     COLLSTATE_IDLE,
     COLLSTATE_BUSY,
     COLLSTATE_MAX
@@ -14,8 +15,17 @@ enum COLLSTATES {
 
 class CollState {
 
+    static constexpr const char* sCollStates[COLLSTATE_MAX] = {
+            "IDLE",
+            "BUSY",
+    };
+
 public:
-    static const char* getName(COLLSTATES);
+
+    static const char* getName(COLLSTATES _state) {
+
+        return sCollStates[_state];
+    }
 };
 
 #endif //DICON_COLLECTORSTATE_H

@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
 #include "MessageHeader.h"
 #include "MessageType.h"
 
@@ -24,19 +23,19 @@ MSG_TYPE MessageHeader::getType() const {
     return (MSG_TYPE)type;
 }
 
-CommUnit& MessageHeader::getOwner() {
+TypeCommUnit MessageHeader::getOwner() {
 
-    return owner;
+    return std::make_shared<CommUnit>(owner);
 }
 
-void MessageHeader::setOwner(CommUnit _owner) {
+void MessageHeader::setOwner(const TypeCommUnit& _owner) {
 
-    owner = _owner;
+    owner = *_owner;
 }
 
-void MessageHeader::grabOwner(CommUnit &unit) {
+void MessageHeader::grabOwner(const TypeCommUnit& unit) {
 
-    unit.grab(owner);
+    unit->set(owner);
 }
 
 uint64_t MessageHeader::getVariant(int id) {

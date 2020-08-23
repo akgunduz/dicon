@@ -13,7 +13,7 @@
 
 class ComponentManager {
 
-    TypeHostUnit& host;
+    const TypeHostUnit host;
 
     long idCounter;
 
@@ -35,7 +35,7 @@ protected:
 
 public:
 
-    explicit ComponentManager(TypeHostUnit&, bool);
+    ComponentManager(const TypeHostUnit&, bool);
     virtual ~ComponentManager();
 
     TypeComponentMapIDList& get();

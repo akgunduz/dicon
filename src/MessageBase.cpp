@@ -15,9 +15,9 @@ MessageBase::MessageBase(const TypeHostUnit& host)
 		: host(host) {
 }
 
-TypeReadCB MessageBase::getReadCB(ComponentUnit& source) {
+TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
 
-    if (source.getAddress().getInterface() == INTERFACE_NET) {
+    if (source->getAddress().getInterface() == INTERFACE_NET) {
 
         return Net::getReadCB(source);
     }
@@ -25,9 +25,9 @@ TypeReadCB MessageBase::getReadCB(ComponentUnit& source) {
     return UnixSocket::getReadCB(source);
 }
 
-TypeWriteCB MessageBase::getWriteCB(ComponentUnit& target) {
+TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
 
-    if (target.getAddress().getInterface() == INTERFACE_NET) {
+    if (target->getAddress().getInterface() == INTERFACE_NET) {
 
         return Net::getWriteCB(target);
     }
@@ -35,7 +35,7 @@ TypeWriteCB MessageBase::getWriteCB(ComponentUnit& target) {
     return UnixSocket::getWriteCB(target);
 }
 
-bool MessageBase::transferBinary(ComponentUnit& source, ComponentUnit& target, size_t size, uint32_t& crc) {
+bool MessageBase::transferBinary(const TypeComponentUnit& source, const TypeComponentUnit& target, size_t size, uint32_t& crc) {
 
     uint8_t buf[BUFFER_SIZE] = {};
 
@@ -71,7 +71,7 @@ bool MessageBase::transferBinary(ComponentUnit& source, ComponentUnit& target, s
 
 }
 
-bool MessageBase::readBlock(ComponentUnit& source, uint8_t *buf, size_t size, uint32_t& crc) {
+bool MessageBase::readBlock(const TypeComponentUnit& source, uint8_t *buf, size_t size, uint32_t& crc) {
 
 	long offset = 0;
 	bool busy = false;
@@ -124,7 +124,7 @@ bool MessageBase::readBlock(ComponentUnit& source, uint8_t *buf, size_t size, ui
 	return true;
 }
 
-bool MessageBase::readSignature(ComponentUnit& source, uint32_t& crc) {
+bool MessageBase::readSignature(const TypeComponentUnit& source, uint32_t& crc) {
 
     LOGS_T(getHost(), "Signature read process is started");
 
@@ -145,7 +145,7 @@ bool MessageBase::readSignature(ComponentUnit& source, uint32_t& crc) {
 	return true;
 }
 
-bool MessageBase::readHeader(ComponentUnit& source, uint32_t& crc) {
+bool MessageBase::readHeader(const TypeComponentUnit& source, uint32_t& crc) {
 
     LOGS_T(getHost(), "Header read process is started");
 
@@ -161,7 +161,7 @@ bool MessageBase::readHeader(ComponentUnit& source, uint32_t& crc) {
 	return true;
 }
 
-bool MessageBase::readBlockHeader(ComponentUnit& source, MessageBlockHeader &blockHeader, uint32_t& crc) {
+bool MessageBase::readBlockHeader(const TypeComponentUnit& source, MessageBlockHeader &blockHeader, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header read process is started");
 
@@ -197,7 +197,7 @@ bool MessageBase::readBlockHeader(ComponentUnit& source, MessageBlockHeader &blo
 	return true;
 }
 
-bool MessageBase::readString(ComponentUnit& source, char* str, size_t size, uint32_t& crc) {
+bool MessageBase::readString(const TypeComponentUnit& source, char* str, size_t size, uint32_t& crc) {
 
     strcpy(str, "");
 
@@ -229,7 +229,7 @@ bool MessageBase::readString(ComponentUnit& source, char* str, size_t size, uint
 	return true;
 }
 
-bool MessageBase::readNumber(ComponentUnit& source, long &number, uint32_t& crc) {
+bool MessageBase::readNumber(const TypeComponentUnit& source, long &number, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Number read process is started");
 
@@ -245,7 +245,7 @@ bool MessageBase::readNumber(ComponentUnit& source, long &number, uint32_t& crc)
 	return true;
 }
 
-bool MessageBase::readNumberList(ComponentUnit& source, std::vector<long> &list, size_t size, uint32_t& crc) {
+bool MessageBase::readNumberList(const TypeComponentUnit& source, std::vector<long> &list, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList read process is started, count : %ld", size);
 
@@ -264,7 +264,7 @@ bool MessageBase::readNumberList(ComponentUnit& source, std::vector<long> &list,
     return true;
 }
 
-bool MessageBase::readBinary(ComponentUnit& source, const std::filesystem::path& path, size_t size, uint32_t& crc) {
+bool MessageBase::readBinary(const TypeComponentUnit& source, const std::filesystem::path& path, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", path.c_str());
 
@@ -276,7 +276,7 @@ bool MessageBase::readBinary(ComponentUnit& source, const std::filesystem::path&
 		return false;
 	}
 
-    ComponentUnit target(out);
+    auto target = std::make_shared<ComponentUnit>(out);
 
 	bool status = transferBinary(source, target, size, crc);
 
@@ -288,7 +288,7 @@ bool MessageBase::readBinary(ComponentUnit& source, const std::filesystem::path&
 
 }
 
-bool MessageBase::readCRC(ComponentUnit& source, uint32_t &crc) {
+bool MessageBase::readCRC(const TypeComponentUnit& source, uint32_t &crc) {
 
     uint32_t resCrc;
     uint32_t calcCrc = crc;
@@ -307,7 +307,7 @@ bool MessageBase::readCRC(ComponentUnit& source, uint32_t &crc) {
     return resCrc == calcCrc;
 }
 
-bool MessageBase::readFromStream(ComponentUnit& source) {
+bool MessageBase::readFromStream(const TypeComponentUnit& source) {
 
     uint32_t crc = 0;
 
@@ -339,7 +339,7 @@ bool MessageBase::readFromStream(ComponentUnit& source) {
     } while(true);
 }
 
-bool MessageBase::writeBlock(ComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {
+bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {
 
 	long offset = 0;
 	bool busy = false;
@@ -393,7 +393,7 @@ bool MessageBase::writeBlock(ComponentUnit& target, const uint8_t *buf, size_t s
 
 }
 
-bool MessageBase::writeSignature(ComponentUnit& target, uint32_t& crc) {
+bool MessageBase::writeSignature(const TypeComponentUnit& target, uint32_t& crc) {
 
 	*((short *) tmpBuf) = htons(SIGNATURE);
 
@@ -409,7 +409,7 @@ bool MessageBase::writeSignature(ComponentUnit& target, uint32_t& crc) {
 	return true;
 }
 
-bool MessageBase::writeHeader(ComponentUnit& target, uint32_t& crc) {
+bool MessageBase::writeHeader(const TypeComponentUnit& target, uint32_t& crc) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Header write process is started");
 
@@ -425,7 +425,7 @@ bool MessageBase::writeHeader(ComponentUnit& target, uint32_t& crc) {
 	return true;
 }
 
-bool MessageBase::writeBlockHeader(ComponentUnit& target, MessageBlockHeader &blockHeader, uint32_t& crc) {
+bool MessageBase::writeBlockHeader(const TypeComponentUnit& target, MessageBlockHeader &blockHeader, uint32_t& crc) {
 
     uint8_t *p = tmpBuf;
     *((int *) p) = htonl(blockHeader.getType()); p += 4;
@@ -452,7 +452,7 @@ bool MessageBase::writeBlockHeader(ComponentUnit& target, MessageBlockHeader &bl
 	return true;
 }
 
-bool MessageBase::writeString(ComponentUnit& target, const std::string& str, uint32_t& crc) {
+bool MessageBase::writeString(const TypeComponentUnit& target, const std::string& str, uint32_t& crc) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "String write process is started => String : %s", str.c_str());
 
@@ -466,7 +466,7 @@ bool MessageBase::writeString(ComponentUnit& target, const std::string& str, uin
 	return true;
 }
 
-bool MessageBase::writeNumber(ComponentUnit& target, long number, uint32_t& crc) {
+bool MessageBase::writeNumber(const TypeComponentUnit& target, long number, uint32_t& crc) {
 
     uint8_t buffer[64] = {};
     *((long *) buffer) = htonll(number);
@@ -483,7 +483,7 @@ bool MessageBase::writeNumber(ComponentUnit& target, long number, uint32_t& crc)
 	return true;
 }
 
-bool MessageBase::writeNumberList(ComponentUnit& target, std::vector<long>& list, uint32_t& crc) {
+bool MessageBase::writeNumberList(const TypeComponentUnit& target, std::vector<long>& list, uint32_t& crc) {
 
     uint8_t buffer[64] = {};
 
@@ -505,7 +505,7 @@ bool MessageBase::writeNumberList(ComponentUnit& target, std::vector<long>& list
     return true;
 }
 
-bool MessageBase::writeBinary(ComponentUnit& target, const char* path, size_t size, uint32_t& crc) {
+bool MessageBase::writeBinary(const TypeComponentUnit& target, const char* path, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary write process is started at path : %s", path);
 
@@ -515,8 +515,7 @@ bool MessageBase::writeBinary(ComponentUnit& target, const char* path, size_t si
 		return false;
 	}
 
-    ComponentUnit source;
-	source.setSocket(in);
+    auto source = std::make_shared<ComponentUnit>(in);
 
 	bool status = transferBinary(source, target, size, crc);
 
@@ -528,7 +527,7 @@ bool MessageBase::writeBinary(ComponentUnit& target, const char* path, size_t si
 
 }
 
-bool MessageBase::writeEndStream(ComponentUnit& target, uint32_t& crc) {
+bool MessageBase::writeEndStream(const TypeComponentUnit& target, uint32_t& crc) {
 
 	MessageBlockHeader block;
 
@@ -545,7 +544,7 @@ bool MessageBase::writeEndStream(ComponentUnit& target, uint32_t& crc) {
 	return true;
 }
 
-bool MessageBase::writeCRC(ComponentUnit& target, uint32_t &crc) {
+bool MessageBase::writeCRC(const TypeComponentUnit& target, uint32_t &crc) {
 
     uint8_t buffer[32] = {};
     uint32_t calcCRC = crc;
@@ -563,7 +562,7 @@ bool MessageBase::writeCRC(ComponentUnit& target, uint32_t &crc) {
     return true;
 }
 
-bool MessageBase::writeToStream(ComponentUnit& target) {
+bool MessageBase::writeToStream(const TypeComponentUnit& target) {
 
     uint32_t crc = 0;
 

@@ -71,11 +71,7 @@ COMPONENT CommUnit::prev(COMPONENT component) {
     return COMPONENT (((int)component + COMP_MAX - 1) % COMP_MAX);
 }
 
-void CommUnit::grab(CommUnit &unit) {
+void CommUnit::set(const CommUnit &unit) {
 
-    id = unit.id;
-    arch = unit.arch;
-    type = unit.type;
-    address.set(unit.address.get());
-    address.setUI(unit.address.getUI());
+    *this = unit;
 }

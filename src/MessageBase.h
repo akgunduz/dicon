@@ -20,8 +20,8 @@
 
 #define BUSY_SLEEP_TIME 200
 
-typedef size_t (*TypeReadCB) (ComponentUnit&, uint8_t*, size_t);
-typedef size_t (*TypeWriteCB) (ComponentUnit&, const uint8_t*, size_t);
+typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);
+typedef size_t (*TypeWriteCB) (const TypeComponentUnit&, const uint8_t*, size_t);
 
 class MessageBase {
 
@@ -35,46 +35,46 @@ public:
 
     explicit MessageBase(const TypeHostUnit&);
 
-    TypeReadCB getReadCB(ComponentUnit& source);
-    TypeWriteCB getWriteCB(ComponentUnit& source);
+    TypeReadCB getReadCB(const TypeComponentUnit& source);
+    TypeWriteCB getWriteCB(const TypeComponentUnit& source);
 
-    bool transferBinary(ComponentUnit&, ComponentUnit&, size_t, uint32_t&);
+    bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t, uint32_t&);
 
-	bool readBlock(ComponentUnit&, uint8_t*, size_t, uint32_t&);
+	bool readBlock(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
 
-	bool readSignature(ComponentUnit&, uint32_t&);
-	bool readHeader(ComponentUnit&, uint32_t&);
-	bool readBlockHeader(ComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool readString(ComponentUnit&, char*, size_t, uint32_t&);
-	bool readNumber(ComponentUnit&, long&, uint32_t&);
-    bool readNumberList(ComponentUnit&, std::vector<long> &, size_t, uint32_t&);
-    bool readBinary(ComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
-    bool readCRC(ComponentUnit&, uint32_t&);
-	bool readFromStream(ComponentUnit&);
+	bool readSignature(const TypeComponentUnit&, uint32_t&);
+	bool readHeader(const TypeComponentUnit&, uint32_t&);
+	bool readBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
+	bool readString(const TypeComponentUnit&, char*, size_t, uint32_t&);
+	bool readNumber(const TypeComponentUnit&, long&, uint32_t&);
+    bool readNumberList(const TypeComponentUnit&, std::vector<long> &, size_t, uint32_t&);
+    bool readBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
+    bool readCRC(const TypeComponentUnit&, uint32_t&);
+	bool readFromStream(const TypeComponentUnit&);
 
-    virtual bool readMessageBlock(ComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
+    virtual bool readMessageBlock(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
 
 
-	bool writeBlock(ComponentUnit&, const uint8_t *, size_t, uint32_t&);
+	bool writeBlock(const TypeComponentUnit&, const uint8_t *, size_t, uint32_t&);
 
-	bool writeSignature(ComponentUnit&, uint32_t&);
-	bool writeHeader(ComponentUnit&, uint32_t&);
-	bool writeBlockHeader(ComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool writeString(ComponentUnit&, const std::string&, uint32_t&);
-	bool writeNumber(ComponentUnit&, long, uint32_t&);
-    bool writeNumberList(ComponentUnit&, std::vector<long>&, uint32_t&);
-	bool writeBinary(ComponentUnit&, const char*, size_t, uint32_t&);
-    bool writeCRC(ComponentUnit&, uint32_t&);
+	bool writeSignature(const TypeComponentUnit&, uint32_t&);
+	bool writeHeader(const TypeComponentUnit&, uint32_t&);
+	bool writeBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
+	bool writeString(const TypeComponentUnit&, const std::string&, uint32_t&);
+	bool writeNumber(const TypeComponentUnit&, long, uint32_t&);
+    bool writeNumberList(const TypeComponentUnit&, std::vector<long>&, uint32_t&);
+	bool writeBinary(const TypeComponentUnit&, const char*, size_t, uint32_t&);
+    bool writeCRC(const TypeComponentUnit&, uint32_t&);
 
-	bool writeToStream(ComponentUnit&);
+	bool writeToStream(const TypeComponentUnit&);
 
-    bool writeEndStream(ComponentUnit&, uint32_t&);
+    bool writeEndStream(const TypeComponentUnit&, uint32_t&);
 
-    virtual bool writeMessageStream(ComponentUnit&, uint32_t&) = 0;
+    virtual bool writeMessageStream(const TypeComponentUnit&, uint32_t&) = 0;
 
     virtual void deSerializeHeader(const uint8_t*) = 0;
     virtual void serializeHeader(uint8_t *) = 0;
-    virtual void grabOwner(ComponentUnit&) = 0;
+    virtual void grabOwner(const TypeCommUnit&) = 0;
     virtual long getHeaderSize() = 0;
 
     const TypeHostUnit& getHost();

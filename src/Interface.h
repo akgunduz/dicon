@@ -36,8 +36,8 @@ protected :
 	int notifierPipe[2]{};
 
 	virtual bool runReceiver() = 0;
-	virtual bool runSender(ComponentUnit, TypeMessage) = 0;
-	virtual bool runMulticastSender(ComponentUnit, TypeMessage) = 0;
+	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
+	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 
 	bool initThread();
 	void end();
@@ -47,7 +47,7 @@ public :
 
     virtual ~Interface();
 
-	bool push(MSG_DIR, CommUnit&, TypeMessage);
+	bool push(MSG_DIR, const TypeCommUnit&, TypeMessage);
     const TypeHostUnit& getHost() const;
     const TypeDevice& getDevice() const;
     Address& getAddress();

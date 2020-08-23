@@ -32,9 +32,9 @@ public:
     void setType(MSG_TYPE);
     MSG_TYPE getType() const;
 
-    CommUnit& getOwner();
-    void setOwner(CommUnit);
-    void grabOwner(CommUnit&);
+    TypeCommUnit getOwner();
+    void setOwner(const TypeCommUnit&);
+    void grabOwner(const TypeCommUnit&);
 
     uint64_t getVariant(int id);
     void setVariant(int id, uint64_t _variant);

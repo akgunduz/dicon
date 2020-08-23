@@ -23,13 +23,15 @@ Interface::Interface(const TypeHostUnit& _host, const TypeDevice& _device, const
                "\"%s\" is sending",
                MessageType::getMsgName(msgType));
 
-        if (msgItem->getUnit().getAddress() != interface->getMulticastAddress()) {
+        auto target = std::make_shared<ComponentUnit>(msgItem->getUnit());
 
-            status = interface->runSender(msgItem->getUnit(), std::move(msgItem->getMessage()));
+        if (msgItem->getUnit()->getAddress() != interface->getMulticastAddress()) {
+
+            status = interface->runSender(target, std::move(msgItem->getMessage()));
 
         } else {
 
-            status = interface->runMulticastSender(msgItem->getUnit(), std::move(msgItem->getMessage()));
+            status = interface->runMulticastSender(target, std::move(msgItem->getMessage()));
         }
 
         LOGC_D(interface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
@@ -84,9 +86,9 @@ Interface::~Interface() {
     close(notifierPipe[0]);
 }
 
-bool Interface::push(MSG_DIR type, CommUnit &target, TypeMessage msg) {
+bool Interface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage msg) {
 
-    if (target.getAddress().getInterface() == getType()) {
+    if (target->getAddress().getInterface() == getType()) {
 
         auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
 
@@ -95,7 +97,7 @@ bool Interface::push(MSG_DIR type, CommUnit &target, TypeMessage msg) {
         return true;
     }
 
-    LOGS_E(getHost(), "Interface is not suitable for target : %d", target.getAddress().get().base);
+    LOGS_E(getHost(), "Interface is not suitable for target : %d", target->getAddress().get().base);
 
     return false;
 }

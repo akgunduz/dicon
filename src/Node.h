@@ -13,31 +13,31 @@
 
 class Node : public Component {
 
-    ComponentUnit distributor;
+    TypeComponentUnit distributor;
 
     TypeProcessItem processItem;
 
     TypeProcessList processList;
 
-	void setDistributor(const ComponentUnit&);
+	void setDistributor(const TypeComponentUnit&);
 
-    bool processDistributorWakeupMsg(ComponentUnit&, TypeMessage);
-    bool processDistributorIDMsg(ComponentUnit&, TypeMessage);
-    bool processDistributorProcessMsg(ComponentUnit&, TypeMessage);
+    bool processDistributorWakeupMsg(const TypeComponentUnit&, TypeMessage);
+    bool processDistributorIDMsg(const TypeComponentUnit&, TypeMessage);
+    bool processDistributorProcessMsg(const TypeComponentUnit&, TypeMessage);
 
-    bool processCollectorProcessMsg(ComponentUnit&, TypeMessage);
-    bool processCollectorBinaryMsg(ComponentUnit&, TypeMessage);
-    bool processCollectorReadyMsg(ComponentUnit&, TypeMessage);
+    bool processCollectorProcessMsg(const TypeComponentUnit&, TypeMessage);
+    bool processCollectorBinaryMsg(const TypeComponentUnit&, TypeMessage);
+    bool processCollectorReadyMsg(const TypeComponentUnit&, TypeMessage);
 
-    bool send2DistributorReadyMsg(ComponentUnit&);
-    bool send2DistributorAliveMsg(ComponentUnit&);
-    bool send2DistributorIDMsg(ComponentUnit&);
-    bool send2DistributorBusyMsg(ComponentUnit&, long);
+    bool send2DistributorReadyMsg(const TypeComponentUnit&);
+    bool send2DistributorAliveMsg(const TypeComponentUnit&);
+    bool send2DistributorIDMsg(const TypeComponentUnit&);
+    bool send2DistributorBusyMsg(const TypeComponentUnit&, long);
 
-    bool send2CollectorInfoMsg(ComponentUnit&, long, TypeProcessFileList&);
-	bool send2CollectorBinaryMsg(ComponentUnit&, long, TypeProcessFileList&);
+    bool send2CollectorInfoMsg(const TypeComponentUnit&, long, TypeProcessFileList&);
+	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, TypeProcessFileList&);
 
-    bool processJob(const ComponentUnit&, TypeMessage);
+    bool processJob(const TypeComponentUnit&, TypeMessage);
     void parseCommand(char *cmd, char **argv);
     bool processCommand(long, long, const std::string&);
 

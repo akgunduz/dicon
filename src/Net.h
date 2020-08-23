@@ -26,8 +26,8 @@ class Net : public Interface {
 	bool initTCP();
 	bool initMulticast();
     bool runReceiver() override;
-	bool runSender(ComponentUnit, TypeMessage) override;
-    bool runMulticastSender(ComponentUnit, TypeMessage) override;
+	bool runSender(const TypeComponentUnit&, TypeMessage) override;
+    bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
 public :
 
@@ -40,8 +40,8 @@ public :
 
     TypeAddressList getAddressList() override;
 
-    static TypeReadCB getReadCB(ComponentUnit&);
-    static TypeWriteCB getWriteCB(ComponentUnit&);
+    static TypeReadCB getReadCB(const TypeComponentUnit&);
+    static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };
 
 #endif //DICON_NET_H

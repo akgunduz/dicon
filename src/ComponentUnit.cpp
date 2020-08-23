@@ -18,8 +18,8 @@ ComponentUnit::ComponentUnit(int _socket)
 
 ComponentUnit::ComponentUnit(const ComponentUnit &copy) = default;
 
-ComponentUnit::ComponentUnit(const CommUnit &copy)
-    : CommUnit(copy) {
+ComponentUnit::ComponentUnit(const TypeCommUnit &copy)
+    : CommUnit(*copy) {
 }
 
 int ComponentUnit::getSocket() const {

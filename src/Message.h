@@ -16,30 +16,30 @@ class Message : public MessageBase {
 	MessageHeader header{};
     MessageData data{};
 
-    bool readComponentList(ComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
-    bool readJobName(ComponentUnit&, char*, MessageBlockHeader&, uint32_t&);
-    bool readProcess(ComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
-    bool readProcessID(ComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
-    bool readFile(ComponentUnit&, ProcessFile&, MessageBlockHeader&, uint32_t&);
-    bool readMessageBlock(ComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
+    bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
+    bool readJobName(const TypeComponentUnit&, char*, MessageBlockHeader&, uint32_t&);
+    bool readProcess(const TypeComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
+    bool readProcessID(const TypeComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
+    bool readFile(const TypeComponentUnit&, ProcessFile&, MessageBlockHeader&, uint32_t&);
+    bool readMessageBlock(const TypeComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
-    bool writeComponentList(ComponentUnit&, TypeComponentUnitList&, uint32_t&);
-    bool writeJobName(ComponentUnit&, const std::string&, uint32_t&);
-    bool writeProcess(ComponentUnit&, const TypeProcessItem&, uint32_t&);
-    bool writeProcessID(ComponentUnit&, long, uint32_t&);
-    bool writeFile(ComponentUnit&, ProcessFile&, bool, uint32_t&);
+    bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&, uint32_t&);
+    bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
+    bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
+    bool writeProcessID(const TypeComponentUnit&, long, uint32_t&);
+    bool writeFile(const TypeComponentUnit&, ProcessFile&, bool, uint32_t&);
 
-    bool writeMessageStream(ComponentUnit& out, uint32_t&) override;
+    bool writeMessageStream(const TypeComponentUnit& out, uint32_t&) override;
 
     void deSerializeHeader(const uint8_t*) override;
     void serializeHeader(uint8_t *) override;
-    void grabOwner(ComponentUnit&) override;
+    void grabOwner(const TypeCommUnit&) override;
     long getHeaderSize() override;
 
 public:
 
 	explicit Message(const TypeHostUnit&);
-	Message(const TypeHostUnit&, ComponentUnit&, MSG_TYPE);
+	Message(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE);
 	~Message();
 
 	MessageHeader& getHeader();

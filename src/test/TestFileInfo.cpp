@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void sendFileInfo(const TypeComponent& owner, ComponentUnit& target) {
+void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
 
@@ -20,11 +20,11 @@ void sendFileInfo(const TypeComponent& owner, ComponentUnit& target) {
     delete job;
 }
 
-bool processFileInfoMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
+bool processFileInfoMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList list = msg->getData().getFileList();
 
-    LOGS_I(component->getHost(), "Message File Info has came from : %s", ComponentType::getName(owner.getType()));
+    LOGS_I(component->getHost(), "Message File Info has came from : %s", ComponentType::getName(owner->getType()));
     LOGS_I(component->getHost(), "File 1 : %d, %s", list[0].get()->getID(), list[0].get()->getName().c_str());
     LOGS_I(component->getHost(), "File 2 : %d, %s", list[1].get()->getID(), list[1].get()->getName().c_str());
     LOGS_I(component->getHost(), "File 3 : %d, %s", list[2].get()->getID(), list[2].get()->getName().c_str());
@@ -39,7 +39,7 @@ void TestApp::testFileInfo(TypeDistributor& distributor, TypeCollector& collecto
 
     collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, processFileInfoMsg);
 
-    ComponentUnit target(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
+    auto target = std::make_shared<ComponentUnit>(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
                          collector->getHost()->getAddress(COMP_NODE));
     sendFileInfo((TypeComponent&) node, target);
 }

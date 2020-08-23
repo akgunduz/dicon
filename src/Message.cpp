@@ -16,11 +16,11 @@ Message::Message(const TypeHostUnit& host)
 
 }
 
-Message::Message(const TypeHostUnit& host, ComponentUnit& target, MSG_TYPE type)
+Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE type)
 		: MessageBase(host) {
 
     header.setType(type);
-    header.setOwner(host->getUnit(target.getType()));
+    header.setOwner(host->getUnit(target->getType()));
     header.setPriority(MESSAGE_DEFAULT_PRIORITY);
 
     data.setStreamFlag(STREAM_NONE);
@@ -28,7 +28,7 @@ Message::Message(const TypeHostUnit& host, ComponentUnit& target, MSG_TYPE type)
 
 Message::~Message() = default;
 
-bool Message::readComponentList(ComponentUnit& source, TypeComponentUnitList &componentList,
+bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUnitList &componentList,
                                 MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_COMPONENT) {
@@ -60,7 +60,7 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentUnitList &co
     return true;
 }
 
-bool Message::readJobName(ComponentUnit& source, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readJobName(const TypeComponentUnit& source, char *jobName, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_JOB) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
@@ -77,7 +77,7 @@ bool Message::readJobName(ComponentUnit& source, char *jobName, MessageBlockHead
     return true;
 }
 
-bool Message::readProcessID(ComponentUnit& source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readProcessID(const TypeComponentUnit& source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSID) {
         LOGS_E(getHost(), "readJobName can not read other blocks");
@@ -94,7 +94,7 @@ bool Message::readProcessID(ComponentUnit& source, long& processID, MessageBlock
     return true;
 }
 
-bool Message::readProcess(ComponentUnit& source, const TypeProcessItem& content,
+bool Message::readProcess(const TypeComponentUnit& source, const TypeProcessItem& content,
                           MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_PROCESSINFO) {
@@ -129,7 +129,7 @@ bool Message::readProcess(ComponentUnit& source, const TypeProcessItem& content,
     return true;
 }
 
-bool Message::readFile(ComponentUnit& source, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readFile(const TypeComponentUnit& source, ProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_FILEBINARY && block.getType() != BLOCK_FILEINFO) {
         LOGS_E(getHost(), "readFile can not read other blocks");
@@ -191,7 +191,7 @@ bool Message::readFile(ComponentUnit& source, ProcessFile& content, MessageBlock
     return true;
 }
 
-bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block, uint32_t& crc) {
+bool Message::readMessageBlock(const TypeComponentUnit& source, MessageBlockHeader &block, uint32_t& crc) {
 
     switch(block.getType()) {
 
@@ -260,7 +260,7 @@ bool Message::readMessageBlock(ComponentUnit& source, MessageBlockHeader &block,
     return true;
 }
 
-bool Message::writeComponentList(ComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
+bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
 
     std::vector<long> list;
 
@@ -297,7 +297,7 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentUnitList& c
     return true;
 }
 
-bool Message::writeJobName(ComponentUnit& target, const std::string& jobName, uint32_t& crc) {
+bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_JOB);
 
@@ -318,7 +318,7 @@ bool Message::writeJobName(ComponentUnit& target, const std::string& jobName, ui
     return true;
 }
 
-bool Message::writeProcessID(ComponentUnit& target, long processID, uint32_t& crc) {
+bool Message::writeProcessID(const TypeComponentUnit& target, long processID, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSID);
 
@@ -337,7 +337,7 @@ bool Message::writeProcessID(ComponentUnit& target, long processID, uint32_t& cr
     return true;
 }
 
-bool Message::writeProcess(ComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcess(const TypeComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
 
@@ -369,7 +369,7 @@ bool Message::writeProcess(ComponentUnit& target, const TypeProcessItem& process
     return true;
 }
 
-bool Message::writeFile(ComponentUnit& target, ProcessFile &content, bool isBinary, uint32_t& crc) {
+bool Message::writeFile(const TypeComponentUnit& target, ProcessFile &content, bool isBinary, uint32_t& crc) {
 
     std::filesystem::path filePath = content.get()->getHost()->getRootPath() /
             std::to_string(content.get()->getAssignedJob()) / content.get()->getName();
@@ -433,7 +433,7 @@ bool Message::writeFile(ComponentUnit& target, ProcessFile &content, bool isBina
 
 }
 
-bool Message::writeMessageStream(ComponentUnit& target, uint32_t& crc) {
+bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc) {
 
     switch(data.getStreamFlag()) {
 
@@ -507,7 +507,7 @@ void Message::deSerializeHeader(const uint8_t *buffer) {
     header.deSerialize(buffer);
 }
 
-void Message::grabOwner(ComponentUnit& unit) {
+void Message::grabOwner(const TypeCommUnit& unit) {
     header.grabOwner(unit);
 }
 

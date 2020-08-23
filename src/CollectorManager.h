@@ -10,19 +10,25 @@
 #include "NodeHost.h"
 #include "CollectorObject.h"
 
-struct CollectorRequest {
+typedef struct CollectorRequest {
+
     long collID;
+
     size_t reqCount;
+
     CollectorRequest(long _collID, size_t _reqCount)
-    : collID(_collID), reqCount(_reqCount){};
-};
+        : collID(_collID), reqCount(_reqCount){
+
+    };
+
+} TypeCollectorRequest;
 
 class CollectorManager : public ComponentManager {
 
     std::mutex collMutex;
 
     std::map<long, CollectorObject> collList;
-    std::deque<struct CollectorRequest> collReqList;
+    std::deque<TypeCollectorRequest> collReqList;
 
 protected:
 
@@ -30,7 +36,7 @@ protected:
 
 public:
 
-    CollectorManager(TypeHostUnit&, bool);
+    CollectorManager(const TypeHostUnit&, bool);
     ~CollectorManager() override;
 
     COLLSTATES getState(long);

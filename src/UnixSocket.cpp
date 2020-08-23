@@ -103,8 +103,8 @@ bool UnixSocket::runReceiver() {
             }
 
             threadAccept = std::thread([](Interface *interface, int acceptSocket) {
-                ComponentUnit source;
-                source.setSocket(acceptSocket);
+
+                auto source = std::make_shared<ComponentUnit>(acceptSocket);
 
                 auto msg = std::make_unique<Message>(interface->getHost());
 
@@ -135,7 +135,7 @@ bool UnixSocket::runReceiver() {
     return true;
 }
 
-bool UnixSocket::runSender(ComponentUnit target, TypeMessage msg) {
+bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (clientSocket < 0) {
@@ -143,7 +143,7 @@ bool UnixSocket::runSender(ComponentUnit target, TypeMessage msg) {
         return false;
     }
 
-    sockaddr_un clientAddress = NetUtil::getUnixAddress(target.getAddress());
+    sockaddr_un clientAddress = NetUtil::getUnixAddress(target->getAddress());
 
     socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(clientAddress.sun_path);
 
@@ -153,7 +153,7 @@ bool UnixSocket::runSender(ComponentUnit target, TypeMessage msg) {
         return false;
     }
 
-    target.setSocket(clientSocket);
+    target->setSocket(clientSocket);
 
     msg->writeToStream(target);
 
@@ -163,24 +163,24 @@ bool UnixSocket::runSender(ComponentUnit target, TypeMessage msg) {
     return true;
 }
 
-bool UnixSocket::runMulticastSender(ComponentUnit target, TypeMessage message) {
+bool UnixSocket::runMulticastSender(const TypeComponentUnit& target, TypeMessage message) {
 
     return false;
 }
 
-TypeReadCB UnixSocket::getReadCB(ComponentUnit &source) {
+TypeReadCB UnixSocket::getReadCB(const TypeComponentUnit& source) {
 
-    return [] (ComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
+    return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
 
-        return read(source.getSocket(), buf, size);
+        return read(source->getSocket(), buf, size);
     };
 }
 
-TypeWriteCB UnixSocket::getWriteCB(ComponentUnit &source) {
+TypeWriteCB UnixSocket::getWriteCB(const TypeComponentUnit& source) {
 
-    return [] (ComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
+    return [] (const TypeComponentUnit& target, const uint8_t *buf, size_t size) -> size_t {
 
-        return write(target.getSocket(), buf, size);
+        return write(target->getSocket(), buf, size);
     };
 }
 

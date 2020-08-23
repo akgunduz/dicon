@@ -25,9 +25,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorHost.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
-        ${SOURCE_PATH}/CollectorState.cpp
         ${SOURCE_PATH}/CollectorUnit.cpp
-        ${SOURCE_PATH}/Common.cpp
         ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/ComponentFactory.cpp
