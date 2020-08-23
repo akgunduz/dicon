@@ -54,7 +54,7 @@ bool Message::readComponentList(ComponentUnit& source, TypeComponentUnitList &co
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
     for (auto &item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()).c_str(), item->getID());
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
 
     return true;
@@ -291,7 +291,7 @@ bool Message::writeComponentList(ComponentUnit& target, TypeComponentUnitList& c
 
     LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
     for (auto& item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()).c_str(), item->getID());
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
 
     return true;

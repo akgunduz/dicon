@@ -60,6 +60,6 @@ public:
     void set(COMPONENT, long, COMPONENT, Address);
 };
 
-typedef std::unique_ptr<HostUnit> TypeHostUnit;
+typedef std::shared_ptr<HostUnit> TypeHostUnit;
 
 #endif //DICON_HOSTUNIT_H

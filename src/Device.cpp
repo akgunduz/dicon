@@ -13,7 +13,7 @@ Device::Device(std::string _name, INTERFACE _type, uint32_t _base, uint8_t _mask
 
 Device::~Device() {
 
-    LOGP_T("Deallocating Device: %s", name.c_str());
+    LOGP_T("Deallocating Device");
 }
 
 const std::string& Device::getName() const {

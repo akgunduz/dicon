@@ -10,8 +10,10 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int>
 
     Log::init(logLevel);
 
-    Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYSTATE state) -> bool {
+    Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYTYPE state) -> bool {
 
+        LOGP_T("Notifying Application UI, target : %s, state : %s",
+               ComponentType::getName(target), NotifyType::getName(state));
         return ((App*) context)->notifyHandler(target, state);
     });
 
@@ -43,6 +45,8 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int>
 App::~App() {
 
     LOGP_T("Deallocating App");
+
+    Component::deRegisterNotify();
 
     delete componentController;
 

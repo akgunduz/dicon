@@ -24,6 +24,6 @@ public:
     TypeMessage& getMessage();
 };
 
-typedef std::unique_ptr<MessageItem> TypeMessageItem;
+typedef std::shared_ptr<MessageItem> TypeMessageItem;
 
 #endif //DICON_MESSAGEITEM_H

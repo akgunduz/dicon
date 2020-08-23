@@ -21,6 +21,6 @@ public:
     virtual ~SchedulerItem();
 };
 
-typedef std::unique_ptr<SchedulerItem> TypeSchedulerItem;
+typedef std::shared_ptr<SchedulerItem> TypeSchedulerItem;
 
 #endif //DICON_SCHEDULERITEM_H

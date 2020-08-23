@@ -17,10 +17,18 @@ enum COMPONENT {
 
 class ComponentType {
 
-    static const std::string sComponentTypes[COMP_MAX];
+    static constexpr const char* sComponentTypes[COMP_MAX] = {
+            "Distributor",
+            "Collector",
+            "Node",
+    };
 
 public:
-    static const std::string& getName(COMPONENT);
+
+    static const char* getName(COMPONENT _type) {
+
+        return sComponentTypes[_type];
+    }
 
 };
 

@@ -33,7 +33,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/ComponentFactory.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
         ${SOURCE_PATH}/ComponentObject.cpp
-        ${SOURCE_PATH}/ComponentType.cpp
         ${SOURCE_PATH}/ComponentUnit.cpp
         ${SOURCE_PATH}/ComponentUnitFactory.cpp
         ${SOURCE_PATH}/ContentItem.cpp

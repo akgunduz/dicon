@@ -24,7 +24,7 @@ public:
 
     int run() override;
 
-    int notifyHandler(COMPONENT, NOTIFYSTATE) override;
+    int notifyHandler(COMPONENT, NOTIFYTYPE) override;
 };
 
 #endif //DICON_CONSOLEAPP_H

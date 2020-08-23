@@ -8,7 +8,7 @@ void sendFileBinary(const TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY);
 
-    auto job = std::make_unique<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
+    auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     TypeProcessFileList list = job->getProcess(0)->getFileList();
     for (auto processFile : list) {
@@ -26,7 +26,7 @@ bool processFileBinaryMsg(const TypeComponent& component, ComponentUnit& owner, 
     TypeProcessFileList list = msg->getData().getFileList();
 
     LOGS_I(component->getHost(), "Message File Binary has came from : %s with assigned Process : %d",
-           ComponentType::getName(owner.getType()).c_str(), msg->getData().getFileProcess());
+           ComponentType::getName(owner.getType()), msg->getData().getFileProcess());
     LOGS_I(component->getHost(), "File 1 : %d, %s, %d", list[0].get()->getID(), list[0].get()->getName().c_str(), list[0].get()->getSize());
     LOGS_I(component->getHost(), "File 2 : %d, %s, %d", list[1].get()->getID(), list[1].get()->getName().c_str(), list[1].get()->getSize());
     LOGS_I(component->getHost(), "File 3 : %d, %s, %d", list[2].get()->getID(), list[2].get()->getName().c_str(), list[2].get()->getSize());

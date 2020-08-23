@@ -12,7 +12,7 @@
 
 Node::Node(int interface) {
 
-    host = std::make_unique<NodeHost>();
+    host = std::make_shared<NodeHost>();
 
     LOGS_T(getHost(), "Node[%d] is initializing", host->getID());
 
@@ -33,7 +33,7 @@ Node::Node(int interface) {
 
 Node::~Node() {
 
-    LOGS_T(getHost(), "Deallocating Node");
+    LOGP_T("Deallocating Node");
 
 };
 
@@ -62,7 +62,7 @@ bool Node::processDistributorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Node::processDistributorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto &nodeHost = reinterpret_cast<TypeNodeHost&>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] is approved by distributor",
            nodeHost->getAssigned()->getID(),
@@ -105,7 +105,7 @@ bool Node::processDistributorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Node::processCollectorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto &nodeHost = reinterpret_cast<TypeNodeHost&>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] request is received ",
            owner.getID(), processItem->getID());
@@ -129,7 +129,7 @@ bool Node::processCollectorProcessMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Node::processCollectorBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto &nodeHost = reinterpret_cast<TypeNodeHost&>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received",
            owner.getID(), processItem->getID());
@@ -143,7 +143,7 @@ bool Node::processCollectorBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Node::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto &nodeHost = reinterpret_cast<TypeNodeHost&>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     nodeHost->setState(NODESTATE_IDLE);
 
@@ -153,7 +153,7 @@ bool Node::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
     processList.emplace_back(processItem);
 
-    notifyUI(NOTIFYSTATE_TRANSPARENT);
+    notifyUI(NOTIFYTYPE_TRANSPARENT);
 
     return send2DistributorReadyMsg(distributor);
 }
@@ -161,7 +161,7 @@ bool Node::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Node::processJob(const ComponentUnit& owner, TypeMessage msg) {
 
-    auto &nodeHost = reinterpret_cast<TypeNodeHost&>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
            nodeHost->getAssigned()->getID(),

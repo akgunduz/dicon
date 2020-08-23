@@ -4,8 +4,6 @@
 //
 
 #include "CollectorManager.h"
-#include "Address.h"
-#include "ComponentManager.h"
 #include "CollectorUnit.h"
 
 CollectorManager::CollectorManager(TypeHostUnit& _host, bool _protect)

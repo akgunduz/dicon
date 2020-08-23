@@ -10,12 +10,12 @@ Interface::Interface(const TypeHostUnit& _host, const TypeDevice& _device, const
 
     scheduler = new Scheduler();
 
-    schedulerCB = new InterfaceSchedulerCB([](void *arg, TypeSchedulerItem item) -> bool {
+    schedulerCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         bool status;
         auto *interface = (Interface *) arg;
 
-        TypeMessageItem msgItem(dynamic_cast<MessageItem *>(item.release()));
+        auto msgItem = std::static_pointer_cast<MessageItem>(item);
 
         auto msgType = msgItem->getMessage()->getHeader().getType();
 
@@ -74,7 +74,7 @@ bool Interface::initThread() {
 
 Interface::~Interface() {
 
-    LOGS_T(getHost(), "Deallocating Interface");
+    LOGP_T("Deallocating Interface");
 
     delete schedulerCB;
 
@@ -88,7 +88,7 @@ bool Interface::push(MSG_DIR type, CommUnit &target, TypeMessage msg) {
 
     if (target.getAddress().getInterface() == getType()) {
 
-        auto msgItem = std::make_unique<MessageItem>(type, target, std::move(msg));
+        auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
 
         scheduler->push(std::move(msgItem));
 

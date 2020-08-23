@@ -41,7 +41,7 @@ DeviceList::DeviceList() {
                 continue;
             }
 
-            add(std::make_unique<Device>(loop->ifa_name, INTERFACE_NET,
+            add(std::make_shared<Device>(loop->ifa_name, INTERFACE_NET,
                                          ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
                                          createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                          (loop->ifa_flags & IFF_LOOPBACK) > 0));
@@ -54,7 +54,7 @@ DeviceList::DeviceList() {
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution(1, time(nullptr));
 
-    add(std::make_unique<Device>("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator)));
+    add(std::make_shared<Device>("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator)));
 }
 
 DeviceList *DeviceList::getInstance() {

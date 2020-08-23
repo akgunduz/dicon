@@ -10,14 +10,7 @@
 #include "MessageType.h"
 #include "HostUnit.h"
 #include "StopWatch.h"
-
-enum NOTIFYSTATE {
-    NOTIFYSTATE_PASSIVE,
-    NOTIFYSTATE_ACTIVE,
-    NOTIFYSTATE_ONCE,
-    NOTIFYSTATE_TRANSPARENT,
-    NOTIFYSTATE_MAX,
-};
+#include "NotifyType.h"
 
 class Component;
 
@@ -30,7 +23,7 @@ typedef bool (*TypeStaticProcessComponentMsg)(const TypeComponent&, ComponentUni
 typedef std::map<const MSG_TYPE, TypeProcessComponentMsg> TypeProcessMsgMap;
 typedef std::map<const MSG_TYPE, TypeStaticProcessComponentMsg> TypeStaticProcessMsgMap;
 
-typedef bool (*TypeNotifyCB)(void*, COMPONENT, NOTIFYSTATE);
+typedef bool (*TypeNotifyCB)(void*, COMPONENT, NOTIFYTYPE);
 
 class Component : public std::enable_shared_from_this<Component> {
 
@@ -52,7 +45,7 @@ protected :
 
     bool initInterfaces(COMPONENT type, int, int);
 
-    bool notifyUI(NOTIFYSTATE);
+    bool notifyUI(NOTIFYTYPE);
 
 public:
 
@@ -76,6 +69,7 @@ public:
     bool defaultProcessMsg(ComponentUnit&, TypeMessage);
 
     static void registerNotify(void*, TypeNotifyCB);
+    static void deRegisterNotify();
 
     bool setID(long);
 

@@ -8,9 +8,7 @@
 #include "Message.h"
 #include "SchedulerItem.h"
 
-typedef bool (*TypeSchedulerCB)(void*, TypeSchedulerItem);
-typedef TypeHostUnit& (*TypeGetHostCB)(void*);
-typedef int (*TypeGetIDCB)(void*);
+typedef bool (*TypeSchedulerCB)(void*, const TypeSchedulerItem&);
 
 class InterfaceSchedulerCB {
 public:
@@ -18,14 +16,6 @@ public:
     void *arg;
     InterfaceSchedulerCB(TypeSchedulerCB, void *);
     ~InterfaceSchedulerCB();
-};
-
-class InterfaceHostCB {
-public:
-    TypeGetHostCB hostCB;
-    void *arg;
-    InterfaceHostCB(TypeGetHostCB, void *);
-    ~InterfaceHostCB();
 };
 
 #endif //DICON_INTERFACECALLBACK_H

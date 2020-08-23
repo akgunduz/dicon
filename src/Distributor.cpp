@@ -10,7 +10,7 @@
 
 Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
 
-    host = std::make_unique<DistributorHost>();
+    host = std::make_shared<DistributorHost>();
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
@@ -45,7 +45,7 @@ Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
 
 Distributor::~Distributor() {
 
-    LOGS_T(getHost(), "Deallocating Distributor");
+    LOGP_T("Deallocating Distributor");
 
     runPollThread = false;
 
@@ -182,7 +182,7 @@ bool Distributor::processCollectorAliveMsg(ComponentUnit& owner, TypeMessage msg
     long collID = collectorManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGC_D(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d] is already added", collID);
-        notifyUI(NOTIFYSTATE_ONCE);
+        notifyUI(NOTIFYTYPE_ONCE);
         return true;
     }
 
@@ -198,7 +198,7 @@ bool Distributor::processCollectorIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d] is confirmed", owner.getID());
 
@@ -209,7 +209,7 @@ bool Distributor::processCollectorNodeMsg(ComponentUnit& owner, TypeMessage msg)
 
     collectorManager->addRequest(owner.getID(), (int)msg->getHeader().getVariant(0));
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     return true;
 }
@@ -218,7 +218,7 @@ bool Distributor::processCollectorReadyMsg(ComponentUnit& owner, TypeMessage msg
 
     collectorManager->setState(owner.getID(), COLLSTATE_IDLE);
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     return true;
 }
@@ -229,7 +229,7 @@ bool Distributor::processNodeAliveMsg(ComponentUnit& owner, TypeMessage msg) {
     long nodeID = nodeManager->add(owner.getArch(), owner.getAddress(), alreadyAdded);
     if (alreadyAdded) {
         LOGC_D(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is already added", nodeID);
-        notifyUI(NOTIFYSTATE_ONCE);
+        notifyUI(NOTIFYTYPE_ONCE);
         return true;
     }
 
@@ -245,7 +245,7 @@ bool Distributor::processNodeIDMsg(ComponentUnit& owner, TypeMessage msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_IDLE);
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is confirmed", owner.getID());
 
@@ -263,7 +263,7 @@ bool Distributor::processNodeBusyMsg(ComponentUnit& owner, TypeMessage msg) {
 
     nodeManager->setState(owner.getID(), NODESTATE_BUSY);
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is Busy with Collector[%d]\'s process", owner.getID(), collID);
 
@@ -281,7 +281,7 @@ bool Distributor::processNodeReadyMsg(ComponentUnit& owner, TypeMessage msg) {
 
     nodeManager->releaseAssigned(owner.getID());
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is IDLE", owner.getID());
 

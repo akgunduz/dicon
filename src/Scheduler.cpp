@@ -102,7 +102,7 @@ void Scheduler::end() {
         return;
     }
 
-    push(std::make_unique<SchedulerItem>());
+    push(std::make_shared<SchedulerItem>());
     thread.join();
 
     items.clear();

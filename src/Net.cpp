@@ -302,7 +302,7 @@ bool Net::runMulticastSender(ComponentUnit target, TypeMessage msg) {
 
 Net::~Net() {
 
-    LOGS_T(getHost(), "Deallocating Net");
+    LOGP_T("Deallocating Net");
 
     end();
 

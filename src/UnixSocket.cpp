@@ -186,7 +186,7 @@ TypeWriteCB UnixSocket::getWriteCB(ComponentUnit &source) {
 
 UnixSocket::~UnixSocket() {
 
-    LOGS_T(getHost(), "Deallocating UnixSocket");
+    LOGP_T("Deallocating UnixSocket");
 
     end();
 

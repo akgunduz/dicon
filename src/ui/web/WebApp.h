@@ -24,7 +24,7 @@ class WebApp : public App {
 
     struct mg_callbacks callbacks{};
     struct mg_context *context;
-    NOTIFYSTATE notifyData[COMP_MAX]{};
+    NOTIFYTYPE notifyData[COMP_MAX]{};
     std::mutex notifyMutex;
     int webPort{DEFAULT_WEB_PORT};
     volatile bool runLoop{true};
@@ -54,7 +54,7 @@ public:
     bool nodeStateHandler(struct mg_connection *conn, int id);
 
     int run() override;
-    int notifyHandler(COMPONENT, NOTIFYSTATE) override;
+    int notifyHandler(COMPONENT, NOTIFYTYPE) override;
     bool sendServerEvent(struct mg_connection *conn, int id);
 
     bool sendStr(struct mg_connection *, const char*);

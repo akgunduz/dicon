@@ -32,7 +32,7 @@ public:
 
     virtual int run() = 0;
 
-    virtual int notifyHandler(COMPONENT, NOTIFYSTATE) = 0;
+    virtual int notifyHandler(COMPONENT, NOTIFYTYPE) = 0;
 
     virtual ~App();
 };

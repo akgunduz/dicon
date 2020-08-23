@@ -30,7 +30,7 @@ public:
 
 };
 
-typedef std::unique_ptr<Device> TypeDevice;
+typedef std::shared_ptr<Device> TypeDevice;
 typedef std::vector<TypeDevice> TypeDeviceList;
 
 #endif //DICON_DEVICE_H

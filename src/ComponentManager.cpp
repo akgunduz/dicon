@@ -37,7 +37,7 @@ void ComponentManager::checkDead() {
         if (curTime - iterator->second->getCheckTime() > ALIVE_INTERVAL) {
 
             LOGS_I(host, "%s[%d] is removed from network",
-                   ComponentType::getName(iterator->second->getType()).c_str(), iterator->second->getID());
+                   ComponentType::getName(iterator->second->getType()), iterator->second->getID());
 
             componentsMapDead.emplace_back(std::move(iterator->second));
 
@@ -134,7 +134,7 @@ long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
     object->setCheckTime(time(nullptr));
 
     LOGS_I(host, "%s[%d] is added to network",
-           ComponentType::getName(object->getType()).c_str(), object->getID());
+           ComponentType::getName(object->getType()), object->getID());
 
     componentsMapID[newID] = std::move(object);
 

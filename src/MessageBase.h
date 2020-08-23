@@ -27,7 +27,7 @@ class MessageBase {
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
-    const TypeHostUnit& host;
+    const TypeHostUnit host;
 
     static CRC::Table<std::uint32_t, 32> crcTable;
 

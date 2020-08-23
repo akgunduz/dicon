@@ -8,7 +8,7 @@ void sendProcess(const TypeComponent& owner, ComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
 
-    auto job = std::make_unique<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
+    auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     job->getProcess(0)->check();
 
@@ -24,7 +24,7 @@ bool processProcessMsg(const TypeComponent& component, ComponentUnit& owner, Typ
 
     LOGS_I(component->getHost(), "Message Process[%d] has came from : %s",
            processItem->getID(),
-           ComponentType::getName(owner.getType()).c_str());
+           ComponentType::getName(owner.getType()));
 
     return true;
 }

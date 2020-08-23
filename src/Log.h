@@ -99,6 +99,7 @@ public:
 
         setLogLevel(level);
     };
+
 	static void setLogLevel(LOGLEVEL level) {
 
         logLevel = level;
@@ -144,7 +145,7 @@ public:
 
         printf("\033%s%11s[%ld]                    : %s\033%s\n",
                sLogLevels[level].color,
-               ComponentType::getName(host->getType()).c_str(),
+               ComponentType::getName(host->getType()),
                host->getID(),
                logout,
                sColorCodes[COLOR_RESET]);
@@ -162,7 +163,7 @@ public:
 
         printf("\033%s%11s[%ld]                    : %s\033%s\n",
                sLogLevels[level].color,
-               ComponentType::getName(host->getType()).c_str(),
+               ComponentType::getName(host->getType()),
                host->getID(),
                logout,
                sColorCodes[COLOR_RESET]);
@@ -181,10 +182,10 @@ public:
 
         printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
                sLogLevels[level].color,
-               ComponentType::getName(host->getType()).c_str(),
+               ComponentType::getName(host->getType()),
                host->getID(),
                MessageType::getMsgDirName(direction),
-               ComponentType::getName(target.getType()).c_str(),
+               ComponentType::getName(target.getType()),
                target.getID(),
                logout,
                sColorCodes[COLOR_RESET]);
@@ -204,10 +205,10 @@ public:
 
         printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
                sLogLevels[level].color,
-               ComponentType::getName(host->getType()).c_str(),
+               ComponentType::getName(host->getType()),
                host->getID(),
                MessageType::getMsgDirName(direction),
-               ComponentType::getName(target.getType()).c_str(),
+               ComponentType::getName(target.getType()),
                target.getID(),
                logout,
                sColorCodes[COLOR_RESET]);

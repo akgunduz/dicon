@@ -26,7 +26,7 @@ bool processComponentListMsg(const TypeComponent& component, ComponentUnit& owne
     TypeComponentUnitList nodes = msg->getData().getComponentList();
 
     LOGS_I(component->getHost(), "Message Component List has came from : %s, data amount: %d",
-           ComponentType::getName(owner.getType()).c_str(), nodes.size());
+           ComponentType::getName(owner.getType()), nodes.size());
     LOGS_I(component->getHost(), "Node 1 : %d, %u", nodes[0]->getID(), nodes[0]->getAddress().get().base);
     LOGS_I(component->getHost(), "Node 2 : %d, %u", nodes[1]->getID(), nodes[1]->getAddress().get().base);
 

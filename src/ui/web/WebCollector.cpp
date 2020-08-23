@@ -139,7 +139,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto &host = reinterpret_cast<TypeCollectorHost&>(collector->getHost());
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(collector->getHost());
 
     auto job = collector->getJob();
     if (!job) {
@@ -154,7 +154,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
     }
 
     json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName()));
-    json_object_object_add(jsonObj, "_state", json_object_new_int(host->getState()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(collectorHost->getState()));
     json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
     json_object_object_add(jsonObj, "_processCount",
             json_object_new_int(job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED)));

@@ -14,7 +14,7 @@ void sendPing(const TypeComponent& owner, ComponentUnit& target) {
 bool processPingMsg(const TypeComponent& component, ComponentUnit& owner, TypeMessage msg) {
 
     LOGS_I(component->getHost(), "Message Ping has came from : %s, replying back",
-           ComponentType::getName(owner.getType()).c_str());
+           ComponentType::getName(owner.getType()));
 
     sendPing(component, owner);
 

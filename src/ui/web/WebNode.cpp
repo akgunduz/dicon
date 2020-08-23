@@ -34,7 +34,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto &host = reinterpret_cast<TypeNodeHost&>(node->getHost());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(node->getHost());
 
     auto* jsonObj = json_object_new_object();
     if (jsonObj == nullptr) {
@@ -42,7 +42,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    json_object_object_add(jsonObj, "_state", json_object_new_int(host->getState()));
+    json_object_object_add(jsonObj, "_state", json_object_new_int(nodeHost->getState()));
 
     auto* processList = json_object_new_array();
     for (auto &process : node->getProcessList()) {

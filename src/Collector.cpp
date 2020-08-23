@@ -8,7 +8,7 @@
 
 Collector::Collector(int interfaceOther, int interfaceNode) {
 
-    host = std::make_unique<CollectorHost>();
+    host = std::make_shared<CollectorHost>();
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
@@ -23,7 +23,7 @@ Collector::Collector(int interfaceOther, int interfaceNode) {
 
 Collector::~Collector() {
 
-    LOGS_T(getHost(), "Deallocating Collector");
+    LOGP_T("Deallocating Collector");
 }
 
 bool Collector::processDistributorWakeupMsg(ComponentUnit& owner, TypeMessage msg) {
@@ -113,7 +113,7 @@ bool Collector::processNodeFileInfoMsg(ComponentUnit& owner, TypeMessage msg) {
 
 bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) {
 
-    auto& collectorHost = reinterpret_cast<TypeCollectorHost&>(host);
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries", owner.getID(), msg->getData().getFileCount());
 
@@ -133,7 +133,7 @@ bool Collector::processNodeFileBinaryMsg(ComponentUnit& owner, TypeMessage msg) 
 
         job->setDuration(componentWatch.stop());
 
-        notifyUI(NOTIFYSTATE_PASSIVE);
+        notifyUI(NOTIFYTYPE_PASSIVE);
 
         return send2DistributorReadyMsg(distributor);
     }
@@ -207,7 +207,7 @@ void Collector::setDistributor(const ComponentUnit& _distributor) {
 
 bool Collector::processJob() {
 
-    auto& collectorHost = reinterpret_cast<TypeCollectorHost&>(host);
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
@@ -216,7 +216,7 @@ bool Collector::processJob() {
 
     componentWatch.start();
 
-    notifyUI(NOTIFYSTATE_ACTIVE);
+    notifyUI(NOTIFYTYPE_ACTIVE);
 
     collectorHost->setState(COLLSTATE_BUSY);
 
@@ -227,7 +227,7 @@ TypeJobItem& Collector::loadJob(const std::filesystem::path& zipFile) {
 
     job = std::make_shared<JobItem>(getHost(), zipFile, JobItem::jobID++);
 
-    notifyUI(NOTIFYSTATE_ONCE);
+    notifyUI(NOTIFYTYPE_ONCE);
 
     return job;
 }

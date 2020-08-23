@@ -12,11 +12,11 @@ TypeComponent Component::nullComponent = nullptr;
 
 Component::Component() {
 
-    schedulerCB = new InterfaceSchedulerCB([](void *arg, TypeSchedulerItem item) -> bool {
+    schedulerCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         auto *component = (Component *) arg;
 
-        TypeMessageItem msgItem(dynamic_cast<MessageItem *>(item.release()));
+        auto msgItem = std::static_pointer_cast<MessageItem>(item);
 
         ComponentUnit obj(msgItem->getMessage()->getHeader().getOwner());
 
@@ -48,7 +48,7 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
 
 Component::~Component() {
 
-    LOGS_T(getHost(), "Deallocating Component");
+    LOGP_T("Deallocating Component");
 
     delete schedulerCB;
 }
@@ -131,7 +131,12 @@ void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
     notifyCB = _notifyCB;
 }
 
-bool Component::notifyUI(NOTIFYSTATE state) {
+void Component::deRegisterNotify() {
+
+    notifyContext = nullptr;
+}
+
+bool Component::notifyUI(NOTIFYTYPE state) {
 
     if (notifyContext) {
 

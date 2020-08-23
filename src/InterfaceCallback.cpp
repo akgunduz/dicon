@@ -13,13 +13,3 @@ InterfaceSchedulerCB::~InterfaceSchedulerCB() {
 
     LOGP_T("Deallocating InterfaceSchedulerCB");
 }
-
-InterfaceHostCB::InterfaceHostCB(TypeGetHostCB _hostCB, void *_arg)
-    : hostCB(_hostCB), arg(_arg) {
-
-}
-
-InterfaceHostCB::~InterfaceHostCB() {
-
-    LOGP_T("Deallocating InterfaceHostCB");
-}

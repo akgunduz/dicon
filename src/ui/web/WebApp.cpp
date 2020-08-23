@@ -30,25 +30,25 @@ int WebApp::eventHandler(struct mg_connection *conn)
 
     int loopCount = 5;
 
-    NOTIFYSTATE notifyState[COMP_MAX] = {NOTIFYSTATE_PASSIVE, NOTIFYSTATE_PASSIVE, NOTIFYSTATE_PASSIVE};
+    NOTIFYTYPE notifyState[COMP_MAX] = {NOTIFYTYPE_PASSIVE, NOTIFYTYPE_PASSIVE, NOTIFYTYPE_PASSIVE};
 
     do {
 
         notifyMutex.lock();
 
-        if (notifyData[COMP_DISTRIBUTOR] == NOTIFYSTATE_ONCE) {
-            notifyState[COMP_DISTRIBUTOR] = NOTIFYSTATE_ONCE;
-            notifyData[COMP_DISTRIBUTOR] = NOTIFYSTATE_PASSIVE;
+        if (notifyData[COMP_DISTRIBUTOR] == NOTIFYTYPE_ONCE) {
+            notifyState[COMP_DISTRIBUTOR] = NOTIFYTYPE_ONCE;
+            notifyData[COMP_DISTRIBUTOR] = NOTIFYTYPE_PASSIVE;
         }
 
-        if (notifyData[COMP_COLLECTOR] == NOTIFYSTATE_ACTIVE) {
-            notifyState[COMP_COLLECTOR] = NOTIFYSTATE_ACTIVE;
-            notifyState[COMP_NODE] = NOTIFYSTATE_ACTIVE;
+        if (notifyData[COMP_COLLECTOR] == NOTIFYTYPE_ACTIVE) {
+            notifyState[COMP_COLLECTOR] = NOTIFYTYPE_ACTIVE;
+            notifyState[COMP_NODE] = NOTIFYTYPE_ACTIVE;
             loopCount = 5;
 
-        } else if (notifyData[COMP_COLLECTOR] == NOTIFYSTATE_ONCE) {
-            notifyState[COMP_COLLECTOR] = NOTIFYSTATE_ONCE;
-            notifyData[COMP_COLLECTOR] = NOTIFYSTATE_PASSIVE;
+        } else if (notifyData[COMP_COLLECTOR] == NOTIFYTYPE_ONCE) {
+            notifyState[COMP_COLLECTOR] = NOTIFYTYPE_ONCE;
+            notifyData[COMP_COLLECTOR] = NOTIFYTYPE_PASSIVE;
         }
 
         notifyMutex.unlock();
@@ -205,11 +205,11 @@ int WebApp::run() {
     return EXIT_SUCCESS;
 }
 
-int WebApp::notifyHandler(COMPONENT target, NOTIFYSTATE state) {
+int WebApp::notifyHandler(COMPONENT target, NOTIFYTYPE state) {
 
     notifyMutex.lock();
 
-    if (state != NOTIFYSTATE_TRANSPARENT) {
+    if (state != NOTIFYTYPE_TRANSPARENT) {
 
         notifyData[target] = state;
     }
@@ -245,7 +245,7 @@ bool WebApp::sendResponse(const char* type, const TypeHostUnit& host, struct mg_
 
         sprintf(webOut, "%s : %s(%ld) => %s \n",
                 type,
-                ComponentType::getName(host->getType()).c_str(),
+                ComponentType::getName(host->getType()),
                 host->getID(),
                 buf);
     } else {

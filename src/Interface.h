@@ -21,14 +21,13 @@ enum NOTIFIER_TYPE {
 
 class Interface {
 
-    const TypeHostUnit& host;
-    const TypeDevice& device;
+    const TypeHostUnit host;
+    const TypeDevice device;
 
     Address address{};
     Address multicastAddress{};
 
     const InterfaceSchedulerCB *schedulerCB{};
-  //  const InterfaceHostCB *hostCB{};
 
 protected :
 
