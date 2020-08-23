@@ -6,6 +6,7 @@
 #define DICON_JOBSTATUS_H
 
 enum JOB_STATUS {
+
     JOBSTATUS_OK,
     JOBSTATUS_PATH_INVALID,
     JOBSTATUS_ZIP_INVALID,
@@ -17,8 +18,21 @@ enum JOB_STATUS {
 
 class JobStatus {
 
+    static constexpr const char* sJobStatus[JOBSTATUS_MAX] = {
+            "OK",
+            "PATH_INVALID",
+            "ZIP_INVALID",
+            "RULES_INVALID",
+            "DEPENDENCY_LOOP",
+            "MISSING_FILES",
+    };
+
 public:
-    static const char* getDesc(JOB_STATUS);
+
+    static const char* getDesc(JOB_STATUS _status) {
+
+        return sJobStatus[_status];
+    }
 };
 
 

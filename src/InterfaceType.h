@@ -9,15 +9,25 @@
 #include "Common.h"
 
 enum INTERFACE {
+
     INTERFACE_NET,
     INTERFACE_UNIXSOCKET,
     INTERFACE_MAX
 };
 
 class InterfaceType {
+
+    static constexpr const char* sInterfaceNames[INTERFACE_MAX] = {
+            "TCP",
+            "UnixSocket",
+    };
+
 public:
 
-    static const char* getName(INTERFACE);
+    static const char* getName(INTERFACE _type) {
+
+        return sInterfaceNames[_type];
+    }
 };
 
 #endif //DICON_INTERFACETYPE_H

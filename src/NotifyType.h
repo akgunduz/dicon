@@ -25,6 +25,7 @@ class NotifyType {
     };
 
 public:
+
     static const char* getName(NOTIFYTYPE _type) {
 
         return sNotifyTypes[_type];

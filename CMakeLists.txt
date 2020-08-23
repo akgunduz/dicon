@@ -18,7 +18,6 @@ set(TEST_PATH "${SOURCE_PATH}/test")
 
 set(FRAMEWORK_FILES
         ${EXTERNAL_PATH}/miniz/miniz.cpp
-        ${SOURCE_PATH}/ArchType.cpp
         ${SOURCE_PATH}/Address.cpp
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Collector.cpp
@@ -44,9 +43,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/InterfaceFactory.cpp
-        ${SOURCE_PATH}/InterfaceType.cpp
         ${SOURCE_PATH}/JobItem.cpp
-        ${SOURCE_PATH}/JobStatus.cpp
         ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
@@ -63,12 +60,10 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/NodeManager.cpp
         ${SOURCE_PATH}/NodeObject.cpp
         ${SOURCE_PATH}/NodeObject.cpp
-        ${SOURCE_PATH}/NodeState.cpp
         ${SOURCE_PATH}/NodeUnit.cpp
         ${SOURCE_PATH}/ParameterItem.cpp
         ${SOURCE_PATH}/ProcessFile.cpp
         ${SOURCE_PATH}/ProcessItem.cpp
-        ${SOURCE_PATH}/ProcessState.cpp
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp

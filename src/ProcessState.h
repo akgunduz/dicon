@@ -6,6 +6,7 @@
 #define DICON_PROCESSSTATE_H
 
 enum PROCESS_STATE {
+
     PROCESS_STATE_INVALID,
     PROCESS_STATE_DEPENDENT,
     PROCESS_STATE_READY,
@@ -16,8 +17,20 @@ enum PROCESS_STATE {
 
 class ProcessState {
 
+    static constexpr const char* sProcessStates[PROCESS_STATE_MAX] = {
+            "INVALID",
+            "DEPENDENT",
+            "READY",
+            "STARTED",
+            "ENDED",
+    };
+
 public:
-    static const char* getName(PROCESS_STATE);
+
+    static const char* getName(PROCESS_STATE _state) {
+
+        return sProcessStates[_state];
+    }
 };
 
 
