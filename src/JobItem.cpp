@@ -4,8 +4,6 @@
 
 #include <external/miniz/miniz.h>
 #include "JobItem.h"
-#include "ParameterItem.h"
-#include "Util.h"
 
 long JobItem::jobID = 1;
 

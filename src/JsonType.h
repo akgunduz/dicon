@@ -6,6 +6,7 @@
 #define DICON_JSONTYPE_H
 
 #include "Common.h"
+#include <json.h>
 
 class JobItem;
 

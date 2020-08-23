@@ -44,7 +44,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/InterfaceFactory.cpp
         ${SOURCE_PATH}/JobItem.cpp
-        ${SOURCE_PATH}/JsonType.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/MessageBlockHeader.cpp

@@ -46,7 +46,6 @@
 #include <ifaddrs.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <json.h>
 
 #ifdef __APPLE__
 #include "Common_apple.h"

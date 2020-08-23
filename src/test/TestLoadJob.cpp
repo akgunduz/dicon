@@ -14,13 +14,13 @@ void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector
 
     LOGP_I("Job status : %d", job->getStatus());
 
-    LOGP_I("Files of Job : %s", job->getName());
+    LOGP_I("Files of Job : %s", job->getName().c_str());
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
         auto content = job->getFile(j);
 
-        LOGP_I("\tFile : %s, State : %s", content->getName(), content->required() ? "required"
+        LOGP_I("\tFile : %s, State : %s", content->getName().c_str(), content->required() ? "required"
             : content->check() ? "exists" : "output");
     }
 
@@ -31,7 +31,7 @@ void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector
         auto process = job->getProcess(j);
         LOGP_I("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
               process->getID(),
-              process->getProcess(),
+              process->getProcess().c_str(),
               ProcessState::getName(process->getState()),
               process->getAssigned());
 
@@ -39,7 +39,7 @@ void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector
 
             LOGP_I("\tFile => ID : %d, Name : %s, State : %s",
                   file.get()->getID(),
-                  file.get()->getName(),
+                  file.get()->getName().c_str(),
                   file.isOutput() ? "output" : "input");
         }
     }
