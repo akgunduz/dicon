@@ -9,12 +9,7 @@ ContentItem::ContentItem(const TypeHostUnit& _host, long _id, long _assignedJob)
         host(_host), id(_id), assignedJob(_assignedJob) {
 }
 
-ContentItem::ContentItem(const ContentItem &copy) :
-        SchedulerItem(copy),
-        host(copy.host),
-        id(copy.id),
-        assignedJob(copy.assignedJob) {
-}
+ContentItem::ContentItem(const ContentItem &copy) = default;
 
 const TypeHostUnit& ContentItem::getHost() const {
 

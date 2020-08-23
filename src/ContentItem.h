@@ -19,7 +19,7 @@ enum CONTENT_TYPES {
 
 class ContentItem : public SchedulerItem {
 
-    const TypeHostUnit& host;
+    const TypeHostUnit host;
     long id{};
     long assignedJob{};
 
