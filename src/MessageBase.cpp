@@ -505,13 +505,14 @@ bool MessageBase::writeNumberList(const TypeComponentUnit& target, std::vector<l
     return true;
 }
 
-bool MessageBase::writeBinary(const TypeComponentUnit& target, const char* path, size_t size, uint32_t& crc) {
+bool MessageBase::writeBinary(const TypeComponentUnit& target,
+                              const std::filesystem::path& path, size_t size, uint32_t& crc) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary write process is started at path : %s", path);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary write process is started at path : %s", path.c_str());
 
-	int in = open(path, O_RDONLY);
+	int in = open(path.c_str(), O_RDONLY);
 	if (in == -1) {
-		LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary could not created or opened at path : %s", path);
+		LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary could not created or opened at path : %s", path.c_str());
 		return false;
 	}
 
@@ -521,7 +522,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target, const char* path,
 
 	close(in);
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary is written successfully at path : %s", path);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary is written successfully at path : %s", path.c_str());
 
 	return status;
 

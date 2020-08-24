@@ -63,7 +63,7 @@ public:
 	bool writeString(const TypeComponentUnit&, const std::string&, uint32_t&);
 	bool writeNumber(const TypeComponentUnit&, long, uint32_t&);
     bool writeNumberList(const TypeComponentUnit&, std::vector<long>&, uint32_t&);
-	bool writeBinary(const TypeComponentUnit&, const char*, size_t, uint32_t&);
+	bool writeBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
     bool writeCRC(const TypeComponentUnit&, uint32_t&);
 
 	bool writeToStream(const TypeComponentUnit&);

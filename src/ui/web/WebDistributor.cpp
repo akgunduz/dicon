@@ -80,7 +80,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     auto &distributor = componentController->getDistributor();
     if (!distributor) {
-        sendError(nullptr, conn, "Can not find the distributor !!!");
+        sendError(conn, "Can not find the distributor !!!");
         return false;
     }
 

@@ -48,7 +48,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     auto &collector = componentController->getCollector(id);
     if (!collector) {
-        sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
+        sendError(conn, "Can not find the collector with ID : %d !!!", id);
         return false;
     }
 
@@ -127,7 +127,7 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
         return true;
     }
 
-    sendError(nullptr, conn, "No collector with ID : %d is found!!!", id);
+    sendError(conn, "No collector with ID : %d is found!!!", id);
 
     return false;
 }
@@ -136,7 +136,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     auto &collector = componentController->getCollector(id);
     if (!collector) {
-        sendError(nullptr, conn, "Can not find the collector with ID : %d !!!", id);
+        sendError(conn, "Can not find the collector with ID : %d !!!", id);
         return false;
     }
 

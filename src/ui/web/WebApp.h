@@ -57,10 +57,132 @@ public:
     int notifyHandler(COMPONENT, NOTIFYTYPE) override;
     bool sendServerEvent(struct mg_connection *conn, int id);
 
-    bool sendStr(struct mg_connection *, const char*);
-    bool sendResponse(const char*, const TypeHostUnit&, struct mg_connection *, va_list);
-    bool sendOK(const TypeHostUnit&, struct mg_connection *, ...);
-    bool sendError(const TypeHostUnit&, struct mg_connection *, ...);
+    bool sendStr(struct mg_connection *conn, const char* str) {
+
+        size_t len = strlen(str);
+
+        mg_send_http_ok(conn, "application/json; charset=utf-8", len);
+
+        mg_write(conn, str, len);
+
+        return true;
+    }
+
+    bool sendFormatted(struct mg_connection *conn,
+                       const std::string& type, const char* response) {
+
+        char webOut[PATH_MAX];
+
+        sprintf(webOut, "%s : %s \n",
+                type.c_str(),
+                response);
+
+        sendStr(conn, webOut);
+
+        return true;
+    }
+
+    bool sendFormatted(const TypeHostUnit& host, struct mg_connection *conn,
+                 const std::string& type, const char* response) {
+
+        char webOut[PATH_MAX];
+
+        sprintf(webOut, "%s : %s(%ld) => %s \n",
+                type.c_str(),
+                ComponentType::getName(host->getType()),
+                host->getID(),
+                response);
+
+        sendStr(conn, webOut);
+
+        return true;
+    }
+
+    void sendResponse(const TypeHostUnit& host, struct mg_connection *conn,
+            const std::string& type, const char* format) {
+
+        char response[PATH_MAX];
+        std::sprintf(response, "%s", format);
+
+        sendFormatted(host, conn, type, response);
+    }
+
+    template<typename... Args>
+    void sendResponse(const TypeHostUnit& host, struct mg_connection *conn,
+            const std::string& type, const char* format, Args&&... args) {
+
+        char response[PATH_MAX];
+        std::sprintf(response, format, args...);
+
+        sendFormatted(host, conn, type, response);
+    }
+
+    void sendResponse(struct mg_connection *conn,
+                      const std::string& type, const char* format) {
+
+        char response[PATH_MAX];
+        std::sprintf(response, "%s", format);
+
+        sendFormatted(conn, type, response);
+    }
+
+    template<typename... Args>
+    void sendResponse(struct mg_connection *conn, const std::string& type,
+                      const char* format, Args&&... args) {
+
+        char response[PATH_MAX];
+        std::sprintf(response, format, args...);
+
+        sendFormatted(conn, type, response);
+    }
+
+    void sendOK(const TypeHostUnit& host, struct mg_connection *conn, const char* format) {
+
+        sendResponse(host, conn, "OK", format);
+    }
+
+    template<typename... Args>
+    void sendOK(const TypeHostUnit& host, struct mg_connection *conn,
+                      const char* format, Args&&... args) {
+
+        sendResponse(host, conn, "OK", format, std::forward<Args>(args)...);
+    }
+
+    void sendOK(struct mg_connection *conn, const char* format) {
+
+        sendResponse(conn, "OK", format);
+    }
+
+    template<typename... Args>
+    void sendOK(struct mg_connection *conn,
+                const char* format, Args&&... args) {
+
+        sendResponse(conn, "OK", format, std::forward<Args>(args)...);
+    }
+
+    void sendError(const TypeHostUnit& host, struct mg_connection *conn, const char* format) {
+
+        sendResponse(host, conn, "ERROR", format);
+    }
+
+    template<typename... Args>
+    void sendError(const TypeHostUnit& host, struct mg_connection *conn,
+                const char* format, Args&&... args) {
+
+        sendResponse(host, conn, "ERROR", format, std::forward<Args>(args)...);
+    }
+
+    void sendError(struct mg_connection *conn, const char* format) {
+
+        sendResponse(conn, "ERROR", format);
+    }
+
+    template<typename... Args>
+    void sendError(struct mg_connection *conn,
+                   const char* format, Args&&... args) {
+
+        sendResponse(conn, "ERROR", format, std::forward<Args>(args)...);
+    }
 };
 
 void sendHtml(struct mg_connection *conn);
