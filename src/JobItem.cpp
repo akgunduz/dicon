@@ -2,7 +2,7 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#include <external/miniz/miniz.h>
+#include "miniz/miniz.h"
 #include "JobItem.h"
 
 long JobItem::jobID = 1;
@@ -73,6 +73,7 @@ void JobItem::reset() {
 bool JobItem::parse() {
 
     std::filesystem::path jobFilePath = getHost()->getRootPath() / std::to_string(getID()) / getName();
+
     struct json_object* node = json_object_from_file(jobFilePath.c_str());
 
     if (node == nullptr){

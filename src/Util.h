@@ -20,7 +20,6 @@ public:
 	static bool str2hex(uint8_t *, const char *, uint32_t);
     static void replaceStr(std::string&, const std::string&, const std::string&);
     static std::string parsePath(const std::filesystem::path&, const std::string &);
-	static void init();
 
     static inline void ltrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {

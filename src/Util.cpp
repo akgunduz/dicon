@@ -91,25 +91,3 @@ void Util::replaceStr(std::string &main, const std::string &search,
         pos += replace.length();
     }
 }
-
-void Util::init() {
-
-    DIR *unixDir = opendir(UNIXSOCKET_PATH);
-    if (!unixDir) {
-        printf("Can not open unix socket path!!!");
-        return;
-    }
-
-    dirent *entry;
-    char path[300];
-
-    while ((entry = readdir(unixDir)) != nullptr) {
-
-        if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) == 0) {
-            sprintf(path, "%s%s", UNIXSOCKET_PATH, entry->d_name);
-            unlink(path);
-        }
-    }
-
-    closedir(unixDir);
-}

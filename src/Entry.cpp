@@ -104,8 +104,6 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
 
 int main(int argc, char** argv) {
 
-    Util::init();
-
     int interfaceID[2] = {0, 0};
 
     LOGLEVEL logLevel = LEVEL_INFO;

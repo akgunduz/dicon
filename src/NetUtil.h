@@ -7,6 +7,9 @@
 
 #include "Address.h"
 
+#define UNIXSOCKET_FILE_PREFIX "dicon_"
+#define UNIXSOCKET_FILE_SUFFIX ".sock"
+
 class NetUtil {
 
 public:

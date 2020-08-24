@@ -208,7 +208,7 @@ TypeAddressList UnixSocket::getAddressList() {
 
     TypeAddressList list;
 
-    DIR *unixdir = opendir(UNIXSOCKET_PATH);
+    DIR *unixdir = opendir(std::filesystem::temp_directory_path().c_str());
     if (!unixdir) {
         return list;
     }

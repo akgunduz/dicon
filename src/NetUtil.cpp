@@ -87,7 +87,7 @@ sockaddr_un NetUtil::getUnixAddress(Address& address) {
     sockaddr_un unix_addr;
     bzero((char *) &unix_addr, sizeof(unix_addr));
     unix_addr.sun_family = AF_UNIX;
-    sprintf(unix_addr.sun_path, "%s%s%u%s", UNIXSOCKET_PATH, UNIXSOCKET_FILE_PREFIX,
+    sprintf(unix_addr.sun_path, "%s%s%u%s", std::filesystem::temp_directory_path().c_str(), UNIXSOCKET_FILE_PREFIX,
             address.get().base, UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }

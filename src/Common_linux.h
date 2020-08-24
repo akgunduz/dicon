@@ -9,12 +9,4 @@
 #define ntohll(x) be64toh(x)
 #define htonll(x) htobe64(x)
 
-#ifndef MD5_DIGEST_LENGTH
-#define MD5_DIGEST_LENGTH 16
-#endif
-
-#define UNIXSOCKET_PATH "/var/tmp/"
-#define UNIXSOCKET_FILE_PREFIX "dicon_"
-#define UNIXSOCKET_FILE_SUFFIX ".sock"
-
 #endif //DICON_COMMONLINUX_H

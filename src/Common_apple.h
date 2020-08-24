@@ -8,8 +8,5 @@
 #define DICON_COMMONAPPLE_H
 
 #include <IOKit/IOKitKeys.h>
-#define UNIXSOCKET_PATH "/var/tmp/"
-#define UNIXSOCKET_FILE_PREFIX "dicon_"
-#define UNIXSOCKET_FILE_SUFFIX ".sock"
 
 #endif //DICON_COMMONAPPLE_H
