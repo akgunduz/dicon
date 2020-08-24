@@ -110,24 +110,10 @@ set(TEST_FILES
         ${SOURCE_PATH}/Entry.cpp
         )
 
-if (APPLE)
-    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/local/opt/json-c/include/json-c)
-    set(LIBRARY_DIR ${CMAKE_SYSROOT}/usr/local/lib)
-else()
-    set(JSON-C_INCLUDE_DIRS ${CMAKE_SYSROOT}/usr/include/json-c)
-    set(LIBRARY_DIR ${CMAKE_SYSROOT}/usr/lib)
-endif()
-
-set(JSON-C_LIBRARIES json-c)
-
-add_definitions(-DDISABLE_RECOVERY)
-add_definitions(-DDISABLE_BACKUP)
 add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH} ${UI_PATH} ${EXTERNAL_PATH})
-include_directories(${JSON-C_INCLUDE_DIRS})
-link_directories(${LIBRARY_DIR})
 
 add_library(dicon-framework ${FRAMEWORK_FILES})
 
@@ -135,15 +121,15 @@ add_executable(dicon-generator ${GENERATOR_FILES})
 
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
-target_link_libraries(dicon-console dicon-framework ${JSON-C_LIBRARIES} pthread)
+target_link_libraries(dicon-console dicon-framework pthread)
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework ${JSON-C_LIBRARIES} pthread)
+target_link_libraries(dicon-web dicon-framework pthread)
 
 add_executable(dicon-test ${TEST_FILES})
 target_compile_definitions(dicon-test PUBLIC -DTEST)
-target_link_libraries(dicon-test dicon-framework ${JSON-C_LIBRARIES} pthread)
+target_link_libraries(dicon-test dicon-framework pthread)
 
 add_custom_command(
         OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp

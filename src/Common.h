@@ -43,10 +43,6 @@
 #include "Common_linux.h"
 #endif
 
-#ifndef nullptr
-#define nullptr NULL
-#endif
-
 #define BUFFER_SIZE 512
 
 #define SHUTDOWN_NOTIFIER 'Q'

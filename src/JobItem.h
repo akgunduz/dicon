@@ -5,15 +5,18 @@
 #ifndef DICON_JOBITEM_H
 #define DICON_JOBITEM_H
 
+#include "nlohmann/json.hpp"
+#include "miniz/miniz.h"
+
 #include "SchedulerItem.h"
 #include "FileItem.h"
-#include "JsonType.h"
 #include "ProcessItem.h"
 #include "ParameterItem.h"
 #include "JobStatus.h"
 
 #define MAX_CONTENT_TYPE 10
 #define JOB_FILE "Job.json"
+#define JOB_SIGN "Job"
 
 enum JOB_PATH {
     JOBPATH_ZIP,
@@ -21,6 +24,10 @@ enum JOB_PATH {
     JOBPATH_INVALID,
     JOBPATH_MAX,
 };
+
+class JobItem;
+
+typedef bool (JobItem::*TypeJobParser)(const nlohmann::json&);
 
 class JobItem : public FileItem {
 
@@ -32,7 +39,7 @@ protected:
 
     TypeContentList contentList[MAX_CONTENT_TYPE];
 
-    std::map<int, TypeJsonType> contentTypes;
+    std::map<std::string, TypeJobParser> contentParser;
 
     long duration{};
 
@@ -51,10 +58,10 @@ public:
     void reset();
     bool parse();
 
-    static bool parseNameNode(JobItem*, json_object *node);
-    static bool parseFileNode(JobItem*, json_object *node);
-    static bool parseParamNode(JobItem*, json_object *node);
-    static bool parseProcessNode(JobItem *parent, json_object *node);
+    bool parseNameNode(const nlohmann::json&);
+    bool parseFileNode(const nlohmann::json&);
+    bool parseParamNode(const nlohmann::json&);
+    bool parseProcessNode(const nlohmann::json&);
 
     const std::string& getJobName();
     void setJobName(const std::string&);

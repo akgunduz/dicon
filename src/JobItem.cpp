@@ -2,16 +2,15 @@
 // Created by akgunduz on 26.10.2015.
 //
 
-#include "miniz/miniz.h"
 #include "JobItem.h"
 
 JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
-    contentTypes[CONTENT_NAME] = std::make_unique<JsonType>(CONTENT_NAME, "name", this, parseNameNode);
-    contentTypes[CONTENT_FILE] = std::make_unique<JsonType>(CONTENT_FILE, "files", this, parseFileNode);
-    contentTypes[CONTENT_PARAM] = std::make_unique<JsonType>(CONTENT_PARAM, "parameters", this, parseParamNode);
-    contentTypes[CONTENT_PROCESS] = std::make_unique<JsonType>(CONTENT_PROCESS, "processes", this, parseProcessNode);
+    contentParser["name"] = &JobItem::parseNameNode;
+    contentParser["files"] = &JobItem::parseFileNode;
+    contentParser["parameters"] = &JobItem::parseParamNode;
+    contentParser["processes"] = &JobItem::parseProcessNode;
 
     JOB_PATH pathType = checkPath(jobPath);
 
@@ -72,122 +71,101 @@ bool JobItem::parse() {
 
     std::filesystem::path jobFilePath = getHost()->getRootPath() / std::to_string(getID()) / getName();
 
-    struct json_object* node = json_object_from_file(jobFilePath.c_str());
+    std::ifstream jobFile(jobFilePath, std::ifstream::in);
 
-    if (node == nullptr){
-        LOGS_E(getHost(), "Invalid JSON File");
+    if (!jobFile.good()) {
         return false;
     }
 
-    auto* header = (struct json_object*)json_object_get_object(node)->head->v;
+    nlohmann::json node = nlohmann::json::parse(jobFile)[JOB_SIGN];
 
-    json_object_object_foreach(header, key, val) {
+    for (auto & contentType : contentParser) {
 
-        for (auto & contentType : contentTypes) {
-
-            if (contentType.second->name == key) {
-                (contentType.second->parser)(contentType.second->parent, val);
-                break;
-            }
-        }
+        (this->*contentType.second)(node[contentType.first]);
     }
-
-    json_object_put(node);
 
     return true;
 }
 
-bool JobItem::parseNameNode(JobItem *parent, json_object *node) {
+bool JobItem::parseNameNode(const nlohmann::json& node) {
 
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_string) {
-        LOGS_E(parent->getHost(), "Invalid JSON Name Node");
+    if (!node.is_string()) {
+        LOGS_E(getHost(), "Invalid JSON Name Node");
         return false;
     }
 
-    const char *name = json_object_get_string(node);
-
-    parent->setJobName(name);
+    setJobName(node);
 
     return true;
 }
 
-bool JobItem::parseFileNode(JobItem *parent, json_object *node) {
+bool JobItem::parseFileNode(const nlohmann::json& node) {
 
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_array) {
-        LOGS_E(parent->getHost(), "Invalid JSON Files Node");
+    if (!node.is_array()) {
+        LOGS_E(getHost(), "Invalid JSON Files Node");
         return false;
     }
 
-    for (int i = 0; i < json_object_array_length(node); i++) {
-        json_object *child = json_object_array_get_idx(node, i);
+    int index = 1;
 
-        type = json_object_get_type(child);
-        if (type != json_type_string) {
-            LOGS_E(parent->getHost(), "Invalid JSON Files Node");
+    for (const auto& fileNode : node) {
+
+        if (!fileNode.is_string()) {
+            LOGS_E(getHost(), "Invalid JSON Files Node");
             return false;
         }
 
-        const char* path = json_object_get_string(child);
+        auto content = std::make_shared<FileItem>(getHost(), index++, getID(), fileNode);
 
-        auto content = std::make_shared<FileItem>(parent->getHost(), i + 1, parent->getID(), path);
-
-        parent->contentList[CONTENT_FILE].emplace_back(content);
-
-    }
-    return true;
-}
-
-bool JobItem::parseParamNode(JobItem *parent, json_object *node) {
-
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_array) {
-        LOGS_E(parent->getHost(), "Invalid JSON Parameter Node");
-        return false;
-    }
-
-    for (unsigned int i = 0; i < json_object_array_length(node); i++) {
-        json_object *child = json_object_array_get_idx(node, i);
-
-        type = json_object_get_type(child);
-        if (type != json_type_string) {
-            LOGS_E(parent->getHost(), "Invalid JSON Parameter Node");
-            return false;
-        }
-
-        const char *param = json_object_get_string(child);
-
-        auto content = std::make_shared<ParameterItem>(parent->getHost(), i + 1, parent->getID(), param);
-
-        parent->contentList[CONTENT_PARAM].emplace_back(content);
+        contentList[CONTENT_FILE].emplace_back(content);
     }
 
     return true;
 }
 
-bool JobItem::parseProcessNode(JobItem *parent, json_object *node) {
+bool JobItem::parseParamNode(const nlohmann::json& node) {
 
-    enum json_type type = json_object_get_type(node);
-    if (type != json_type_array) {
-        LOGS_E(parent->getHost(), "Invalid JSON Process Node");
+    if (!node.is_array()) {
+        LOGS_E(getHost(), "Invalid JSON Parameter Node");
         return false;
     }
 
-    for (unsigned int i = 0; i < json_object_array_length(node); i++) {
-        json_object *child = json_object_array_get_idx(node, i);
+    int index = 1;
 
-        type = json_object_get_type(child);
-        if (type != json_type_string) {
-            LOGS_E(parent->getHost(), "Invalid JSON Process Node");
+    for (const auto& paramNode : node) {
+
+        if (!paramNode.is_string()) {
+            LOGS_E(getHost(), "Invalid JSON Parameter Node");
             return false;
         }
 
-        const char *process = json_object_get_string(child);
+        auto content = std::make_shared<ParameterItem>(getHost(), index++, getID(), paramNode);
 
-        auto content = std::make_shared<ProcessItem>(parent->getHost(), i + 1, parent->getID(), process);
+        contentList[CONTENT_PARAM].emplace_back(content);
+    }
 
-        parent->contentList[CONTENT_PROCESS].emplace_back(content);
+    return true;
+}
+
+bool JobItem::parseProcessNode(const nlohmann::json& node) {
+
+    if (!node.is_array()) {
+        LOGS_E(getHost(), "Invalid JSON Process Node");
+        return false;
+    }
+
+    int index = 1;
+
+    for (const auto& processNode : node) {
+
+        if (!processNode.is_string()) {
+            LOGS_E(getHost(), "Invalid JSON Process Node");
+            return false;
+        }
+
+        auto content = std::make_shared<ProcessItem>(getHost(), index++, getID(), processNode);
+
+        contentList[CONTENT_PROCESS].emplace_back(content);
     }
 
     return true;

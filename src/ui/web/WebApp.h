@@ -57,13 +57,11 @@ public:
     int notifyHandler(COMPONENT, NOTIFYTYPE) override;
     bool sendServerEvent(struct mg_connection *conn, int id);
 
-    bool sendStr(struct mg_connection *conn, const char* str) {
+    bool sendStr(struct mg_connection *conn, const std::string& str) {
 
-        size_t len = strlen(str);
+        mg_send_http_ok(conn, "application/json; charset=utf-8", str.size());
 
-        mg_send_http_ok(conn, "application/json; charset=utf-8", len);
-
-        mg_write(conn, str, len);
+        mg_write(conn, str.c_str(), str.size());
 
         return true;
     }

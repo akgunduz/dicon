@@ -148,53 +148,47 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto* jsonObj = json_object_new_object();
-    if (jsonObj == nullptr) {
-        sendError(collector->getHost(), conn, "Can not create json object!!!");
-        return false;
-    }
+    nlohmann::json jobInfo;
 
-    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName().c_str()));
-    json_object_object_add(jsonObj, "_state", json_object_new_int(collectorHost->getState()));
-    json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
-    json_object_object_add(jsonObj, "_processCount",
-            json_object_new_int(job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED)));
-    json_object_object_add(jsonObj, "_jobStatus", json_object_new_int(job->getStatus()));
+    jobInfo["_jobName"] = job->getJobName();
+    jobInfo["_state"] = collectorHost->getState();
+    jobInfo["_duration"] = job->getDuration();
+    jobInfo["_processCount"] = job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED);
+    jobInfo["_jobStatus"] = job->getStatus();
 
-    auto* fileList = json_object_new_array();
+    nlohmann::json fileList;
+
     for (int j = 0; j < job->getFileCount(); j++) {
 
-        auto content = job->getFile(j);
+        nlohmann::json fileItem;
 
-        auto* fileItem = json_object_new_object();
-        json_object_object_add(fileItem, "_name", json_object_new_string(content->getName().c_str()));
-        json_object_object_add(fileItem, "_state", json_object_new_int(content->required() ? 1 : content->check() ? 0 : 2));
-        json_object_object_add(fileItem, "_size", json_object_new_int64(content->getSize()));
+        fileItem["_name"] = job->getFile(j)->getName();
+        fileItem["_state"] = job->getFile(j)->required() ? 1 : job->getFile(j)->check() ? 0 : 2;
+        fileItem["_size"] = job->getFile(j)->getSize();
 
-        json_object_array_add(fileList, fileItem);
+        fileList += fileItem;
+
     }
 
-    json_object_object_add(jsonObj, "_fileList", fileList);
+    nlohmann::json processList;
 
-    auto* processList = json_object_new_array();
     for (int j = 0; j < job->getProcessCount(); j++) {
 
-        auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "_id", json_object_new_int(job->getProcess(j)->getID()));
-        json_object_object_add(processItem, "_process", json_object_new_string(job->getProcess(j)->getProcess().c_str()));
-        json_object_object_add(processItem, "_state", json_object_new_int(job->getProcess(j)->getState()));
-        json_object_object_add(processItem, "_node", json_object_new_int(job->getProcess(j)->getAssigned()));
+        nlohmann::json processItem;
 
-        json_object_array_add(processList, processItem);
+        processItem["_id"] = job->getProcess(j)->getID();
+        processItem["_process"] = job->getProcess(j)->getProcess();
+        processItem["_state"] = job->getProcess(j)->getState();
+        processItem["_node"] = job->getProcess(j)->getAssigned();
+
+        processList += processItem;
+
     }
 
-    json_object_object_add(jsonObj, "_processList", processList);
+    jobInfo["_fileList"] = fileList;
+    jobInfo["_processList"] = processList;
 
-    const char *json_str = json_object_to_json_string(jsonObj);
-
-    sendStr(conn, json_str);
-
-    json_object_put(jsonObj);
+    sendStr(conn, jobInfo.dump());
 
     return true;
 }

@@ -36,36 +36,32 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
     auto nodeHost = std::static_pointer_cast<NodeHost>(node->getHost());
 
-    auto* jsonObj = json_object_new_object();
-    if (jsonObj == nullptr) {
-        sendError(node->getHost(), conn, "Can not create json object!!!");
-        return false;
-    }
+    nlohmann::json nodeInfo;
 
-    json_object_object_add(jsonObj, "_state", json_object_new_int(nodeHost->getState()));
+    nodeInfo["_state"] = nodeHost->getState();
 
-    auto* processList = json_object_new_array();
+    nlohmann::json processList;
+
     for (auto &process : node->getProcessList()) {
 
-        auto* processItem = json_object_new_object();
-        json_object_object_add(processItem, "_processID", json_object_new_int(process->getID()));
-        json_object_object_add(processItem, "_collectorID", json_object_new_int(process->getAssigned()));
-        json_object_object_add(processItem, "_jobID", json_object_new_int(process->getAssignedJob()));
+        nlohmann::json processItem;
+
         std::string processCommand = process->getParsedProcess();
         Util::replaceStr(processCommand, ROOT_SIGN, "");
-        json_object_object_add(processItem, "_process", json_object_new_string(processCommand.c_str()));
-        json_object_object_add(processItem, "_duration", json_object_new_int64(process->getDuration()));
 
-        json_object_array_add(processList, processItem);
+        processItem["_processID"] = process->getID();
+        processItem["_collectorID"] = process->getAssigned();
+        processItem["_jobID"] = process->getAssignedJob();
+        processItem["_process"] = processCommand;
+        processItem["_duration"] = process->getDuration();
+
+        processList += processItem;
+
     }
 
-    json_object_object_add(jsonObj, "_processList", processList);
+    nodeInfo["_processList"] = processList;
 
-    const char *json_str = json_object_to_json_string(jsonObj);
-
-    sendStr(conn, json_str);
-
-    json_object_put(jsonObj);
+    sendStr(conn, nodeInfo.dump());
 
     return true;
 }

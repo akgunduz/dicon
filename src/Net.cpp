@@ -4,7 +4,6 @@
 //
 
 #include "Net.h"
-#include "Util.h"
 #include "NetUtil.h"
 
 Net::Net(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
