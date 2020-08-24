@@ -8,11 +8,6 @@
 
 Message::Message(const TypeHostUnit& host)
 		: MessageBase(host), data(host) {
-
-    header.setPriority(MESSAGE_DEFAULT_PRIORITY);
-
-    data.setStreamFlag(STREAM_NONE);
-
 }
 
 Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE type)
@@ -20,12 +15,7 @@ Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_
 
     header.setType(type);
     header.setOwner(host->getUnit(target->getType()));
-    header.setPriority(MESSAGE_DEFAULT_PRIORITY);
-
-    data.setStreamFlag(STREAM_NONE);
 }
-
-Message::~Message() = default;
 
 bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUnitList &componentList,
                                 MessageBlockHeader& block, uint32_t& crc) {
@@ -434,7 +424,7 @@ bool Message::writeFile(const TypeComponentUnit& target, const TypeProcessFile& 
 
 bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc) {
 
-    switch(data.getStreamFlag()) {
+    switch(data.getStreamType()) {
 
         case STREAM_PROCESS:
 
@@ -460,7 +450,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             for (const auto& processFile : data.getProcess()->getFileList()) {
 
-                if (!writeFile(target, processFile, data.getStreamFlag() == STREAM_FILEBINARY, crc)) {
+                if (!writeFile(target, processFile, data.getStreamType() == STREAM_FILEBINARY, crc)) {
                     return false;
                 }
             }

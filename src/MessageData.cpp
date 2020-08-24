@@ -10,14 +10,14 @@ MessageData::MessageData(const TypeHostUnit& host) {
     process = std::make_shared<ProcessItem>(host);
 }
 
-int MessageData::getStreamFlag() const {
+int MessageData::getStreamType() {
 
-    return streamFlag;
+    return streamType;
 }
 
-void MessageData::setStreamFlag(int _streamFlag) {
+void MessageData::setStreamType(int _streamFlag) {
 
-    streamFlag = _streamFlag;
+    streamType = _streamFlag;
 }
 
 const TypeProcessItem& MessageData::getProcess() {

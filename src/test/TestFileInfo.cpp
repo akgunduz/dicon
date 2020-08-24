@@ -12,7 +12,7 @@ void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto list = job->getProcess(0)->getFileList();
 
-    msg->getData().setStreamFlag(STREAM_FILEINFO);
+    msg->getData().setStreamType(STREAM_FILEINFO);
     msg->getData().setProcess(job->getProcess(0)->getID(), list);
 
     owner->send(target, std::move(msg));

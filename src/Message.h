@@ -40,7 +40,7 @@ public:
 
 	explicit Message(const TypeHostUnit&);
 	Message(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE);
-	~Message();
+	~Message() = default;
 
 	MessageHeader& getHeader();
 	MessageData& getData();

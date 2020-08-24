@@ -15,7 +15,7 @@ void sendComponentList(const TypeComponent& owner, const TypeComponentUnit& targ
     Address address2({9999, 3}, {19999, 4});
     nodes.emplace_back(ComponentUnitFactory::create(COMP_NODE, ArchType::get(), 2, address2));
 
-    msg->getData().setStreamFlag(STREAM_COMPONENT);
+    msg->getData().setStreamType(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
     owner->send(target, std::move(msg));

@@ -16,7 +16,7 @@ void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target)
         processFile->get()->check();
     }
 
-    msg->getData().setStreamFlag(STREAM_FILEBINARY);
+    msg->getData().setStreamType(STREAM_FILEBINARY);
     msg->getData().setProcess(job->getProcess(0)->getID(), list);
 
     owner->send(target, std::move(msg));

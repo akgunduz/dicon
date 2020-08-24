@@ -12,7 +12,7 @@ void sendProcess(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     job->getProcess(0)->check();
 
-    msg->getData().setStreamFlag(STREAM_PROCESS);
+    msg->getData().setStreamType(STREAM_PROCESS);
     msg->getData().setProcess(job->getProcess(0));
 
     owner->send(target, std::move(msg));

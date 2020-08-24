@@ -10,7 +10,7 @@
 
 class MessageData {
 
-    int streamFlag{};
+    int streamType{STREAM_NONE};
 
     std::string jobName;
 
@@ -20,11 +20,11 @@ class MessageData {
 
 public:
 
-    MessageData(const TypeHostUnit&);
+    explicit MessageData(const TypeHostUnit&);
     ~MessageData() = default;
 
-    int getStreamFlag() const;
-    void setStreamFlag(int);
+    int getStreamType();
+    void setStreamType(int);
 
     const TypeProcessItem& getProcess();
     void setProcess(const TypeProcessItem&);

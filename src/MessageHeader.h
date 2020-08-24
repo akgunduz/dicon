@@ -18,7 +18,7 @@
 class MessageHeader {
 
     uint16_t type{};
-    uint16_t priority{};
+    uint16_t priority{MESSAGE_DEFAULT_PRIORITY};
 
     CommUnit owner;
 

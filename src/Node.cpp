@@ -221,7 +221,7 @@ bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID
 
 	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO);
 
-    msg->getData().setStreamFlag(STREAM_FILEINFO);
+    msg->getData().setStreamType(STREAM_FILEINFO);
     msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d]'s missing files are requested, total %d files",
@@ -236,7 +236,7 @@ bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long process
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
-    msg->getData().setStreamFlag(STREAM_FILEBINARY);
+    msg->getData().setStreamType(STREAM_FILEBINARY);
     msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d] is successfully executed, sending back output data",
