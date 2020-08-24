@@ -34,8 +34,8 @@ class Node : public Component {
     bool send2DistributorIDMsg(const TypeComponentUnit&);
     bool send2DistributorBusyMsg(const TypeComponentUnit&, long);
 
-    bool send2CollectorInfoMsg(const TypeComponentUnit&, long, TypeProcessFileList&);
-	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, TypeProcessFileList&);
+    bool send2CollectorInfoMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
+	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 
     bool processJob(const TypeComponentUnit&, TypeMessage);
     void parseCommand(char *cmd, char **argv);

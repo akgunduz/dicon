@@ -13,14 +13,14 @@ void sendProcess(const TypeComponent& owner, const TypeComponentUnit& target) {
     job->getProcess(0)->check();
 
     msg->getData().setStreamFlag(STREAM_PROCESS);
-    msg->getData().addProcess(job->getProcess(0));
+    msg->getData().setProcess(job->getProcess(0));
 
     owner->send(target, std::move(msg));
 }
 
 bool processProcessMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto processItem = msg->getData().getProcess(0);
+    auto processItem = msg->getData().getProcess();
 
     LOGS_I(component->getHost(), "Message Process[%d] has came from : %s",
            processItem->getID(),

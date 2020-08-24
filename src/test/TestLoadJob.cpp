@@ -35,12 +35,12 @@ void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector
               ProcessState::getName(process->getState()),
               process->getAssigned());
 
-        for (auto file : process->getFileList()) {
+        for (const auto& file : process->getFileList()) {
 
             LOGP_I("\tFile => ID : %d, Name : %s, State : %s",
-                  file.get()->getID(),
-                  file.get()->getName().c_str(),
-                  file.isOutput() ? "output" : "input");
+                  file->get()->getID(),
+                  file->get()->getName().c_str(),
+                  file->isOutput() ? "output" : "input");
         }
     }
 }

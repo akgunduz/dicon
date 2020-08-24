@@ -32,7 +32,7 @@ class Collector : public Component {
 	bool send2DistributorNodeMsg(const TypeComponentUnit&, long);
     bool send2DistributorReadyMsg(const TypeComponentUnit&);
     bool send2NodeProcessMsg(const TypeComponentUnit&, const TypeProcessItem&);
-	bool send2NodeBinaryMsg(const TypeComponentUnit&, long, TypeProcessFileList&);
+	bool send2NodeBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 	bool send2NodeReadyMsg(const TypeComponentUnit&);
 
 public:

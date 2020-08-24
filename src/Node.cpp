@@ -74,11 +74,11 @@ bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMess
            nodeHost->getAssigned()->getID(),
            processItem->getID());
 
-    for (auto processFile : processItem->getFileList()) {
-        if (!processFile.isOutput() &&
+    for (const auto& processFile : processItem->getFileList()) {
+        if (!processFile->isOutput() &&
                 !std::filesystem::exists(nodeHost->getRootPath() /
-                    std::to_string(processFile.get()->getAssignedJob()) /
-                    processFile.get()->getName())) {
+                    std::to_string(processFile->get()->getAssignedJob()) /
+                    processFile->get()->getName())) {
             requiredList.emplace_back(processFile);
         }
     }
@@ -113,10 +113,10 @@ bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessag
     nodeHost->setState(NODESTATE_BUSY);
     nodeHost->setAssigned(owner->getType(), owner->getArch(), owner->getID(), owner->getAddress());
 
-    processItem = msg->getData().getProcess(0);
+    processItem = msg->getData().getProcess();
     processItem->setAssigned(owner->getID());
     processItem->setState(PROCESS_STATE_STARTED);
-    processItem->addFileList(msg->getData().getFileList());
+  //  processItem->addFileList(msg->getData().getFileList());
 
     LOGC_T(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] Prepared....",
            nodeHost->getAssigned()->getID(),
@@ -175,10 +175,10 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
     TypeProcessFileList outputList;
 
-    for (auto processFile : processItem->getFileList()) {
-        if (processFile.isOutput()) {
-            if (processFile.get()->check()) {
-                processFile.setOutputState(false);
+    for (const auto& processFile : processItem->getFileList()) {
+        if (processFile->isOutput()) {
+            if (processFile->get()->check()) {
+                processFile->setOutputState(false);
                 outputList.emplace_back(processFile);
             }
         }
@@ -217,12 +217,12 @@ bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, long collID)
     return send(target, std::move(msg));
 }
 
-bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID, TypeProcessFileList &fileList) {
+bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
 	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO);
 
     msg->getData().setStreamFlag(STREAM_FILEINFO);
-    msg->getData().addFileList(processID, fileList);
+    msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d]'s missing files are requested, total %d files",
            target->getID(),
@@ -232,12 +232,12 @@ bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID
 	return send(target, std::move(msg));
 }
 
-bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long processID, TypeProcessFileList &fileList) {
+bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
     msg->getData().setStreamFlag(STREAM_FILEBINARY);
-    msg->getData().addFileList(processID, fileList);
+    msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d] is successfully executed, sending back output data",
            target->getID(),

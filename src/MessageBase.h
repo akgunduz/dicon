@@ -45,7 +45,7 @@ public:
 	bool readSignature(const TypeComponentUnit&, uint32_t&);
 	bool readHeader(const TypeComponentUnit&, uint32_t&);
 	bool readBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool readString(const TypeComponentUnit&, char*, size_t, uint32_t&);
+	bool readString(const TypeComponentUnit&, std::string&, size_t, uint32_t&);
 	bool readNumber(const TypeComponentUnit&, long&, uint32_t&);
     bool readNumberList(const TypeComponentUnit&, std::vector<long> &, size_t, uint32_t&);
     bool readBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);

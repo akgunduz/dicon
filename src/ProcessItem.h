@@ -11,8 +11,6 @@
 #include "ProcessState.h"
 #include "ProcessFile.h"
 
-typedef std::vector<ProcessFile> TypeProcessFileList;
-
 enum PROCESS_OPTIONS {
 	PROCESS_INPUT,
 	PROCESS_PARAM,
@@ -37,7 +35,7 @@ class ProcessItem : public ContentItem {
 
 public:
 
-	ProcessItem(const ProcessItem &);
+	ProcessItem(const ProcessItem &) = default;
 	explicit ProcessItem(const TypeHostUnit&, long = 0, long = 0, std::string = "");
 	~ProcessItem() override = default;
 
@@ -50,10 +48,11 @@ public:
     void setParsedProcess(const std::string&);
 
     int getFileCount() const;
-    ProcessFile& getFile(ProcessFile&);
-    TypeProcessFileList& getFileList();
-    void addFile(TypeFileItem, long, bool);
-    void addFileList(TypeProcessFileList& fileList);
+    TypeProcessFile getFile(const TypeProcessFile&);
+    const TypeProcessFileList& getFileList();
+    void addFile(const TypeFileItem&, long, bool);
+    void addFile(const TypeProcessFile&);
+    void addFileList(const TypeProcessFileList&);
 
     PROCESS_STATE getState() const;
     void setState(PROCESS_STATE);

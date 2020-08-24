@@ -26,7 +26,7 @@ class JobItem : public FileItem {
 
 protected:
 
-    char jobName[NAME_MAX]{};
+    std::string jobName;
 
     std::mutex mutex;
 
@@ -56,8 +56,8 @@ public:
     static bool parseParamNode(JobItem*, json_object *node);
     static bool parseProcessNode(JobItem *parent, json_object *node);
 
-    const char* getJobName() const;
-    void setJobName(const char*);
+    const std::string& getJobName() const;
+    void setJobName(const std::string&);
 
     long getDuration() const;
     void setDuration(long duration);

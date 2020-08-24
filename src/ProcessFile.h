@@ -10,12 +10,14 @@
 class ProcessFile {
 
     bool is_output{};
+
     long processID{};
-    TypeFileItem content{};
+
+    TypeFileItem content;
 
 public:
 
-    ProcessFile(TypeFileItem, long = 0, bool = false);
+    explicit ProcessFile(TypeFileItem, long = 0, bool = false);
     ~ProcessFile();
     bool isOutput() const;
     TypeFileItem get();
@@ -23,5 +25,8 @@ public:
     void setAssignedProcess(long _processID);
     void setOutputState(bool);
 };
+
+typedef std::shared_ptr<ProcessFile> TypeProcessFile;
+typedef std::vector<TypeProcessFile> TypeProcessFileList;
 
 #endif //DICON_PROCESSFILE_H

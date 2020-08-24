@@ -16,15 +16,15 @@ class JsonType {
 
 public:
     int id;
-    char name[50];
+    std::string name;
     fParser parser;
     JobItem* parent;
 
-    JsonType(int id, const char* name, JobItem *parent, fParser parser) {
-        this->id = id;
-        strcpy(this->name, name);
-        this->parser = parser;
-        this->parent = parent;
+    JsonType(int _id, const std::string& _name, JobItem *_parent, fParser _parser) {
+        id = _id;
+        name = _name;
+        parent = _parent;
+        parser = _parser;
     }
 };
 

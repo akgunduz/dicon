@@ -93,21 +93,21 @@ bool Collector::processDistributorReplaceMsg(const TypeComponentUnit& owner, Typ
 bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d]:Process[%d] requested %d missing files",
-            owner->getID(), msg->getData().getFileProcess(), msg->getData().getFileCount());
+            owner->getID(), msg->getData().getProcess()->getID(), msg->getData().getProcess()->getFileCount());
 
-    auto processItem = job->getProcessByID(msg->getData().getFileProcess());
+    auto processItem = job->getProcessByID(msg->getData().getProcess()->getID());
 
     if (!processItem) {
 
         LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "Process[%d] could not find in the Job!",
-               msg->getData().getFileProcess());
+               msg->getData().getProcess()->getID());
 
         return false;
     }
 
     TypeProcessFileList newList;
 
-    for (auto file : msg->getData().getFileList()) {
+    for (const auto& file : msg->getData().getProcess()->getFileList()) {
 
         newList.emplace_back(processItem->getFile(file));
     }
@@ -120,10 +120,10 @@ bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMes
     auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries",
-           owner->getID(), msg->getData().getFileCount());
+           owner->getID(), msg->getData().getProcess()->getFileCount());
 
     int totalCount = 0;
-    int readyCount = job->updateDependency(msg->getData().getFileProcess(), totalCount);
+    int readyCount = job->updateDependency(msg->getData().getProcess()->getID(), totalCount);
 
     send2NodeReadyMsg(owner);
 
@@ -181,7 +181,7 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
 
     msg->getData().setStreamFlag(STREAM_PROCESS);
-    msg->getData().addProcess(processItem);
+    msg->getData().setProcess(processItem);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Node[%d]:Process[%d] is triggered ",
            target->getID(), processItem->getID());
@@ -189,12 +189,12 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
     return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, TypeProcessFileList &fileList) {
+bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
 
     msg->getData().setStreamFlag(STREAM_FILEBINARY);
-    msg->getData().addFileList(processID, fileList);
+    msg->getData().setProcess(processID, fileList);
 
     return send(target, std::move(msg));
 }

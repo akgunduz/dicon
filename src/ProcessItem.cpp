@@ -4,18 +4,9 @@
 //
 
 #include "ProcessItem.h"
-
-#include <utility>
 #include "ParameterItem.h"
 #include "JobItem.h"
 #include "Util.h"
-
-ProcessItem::ProcessItem(const ProcessItem &copy)
-    : ContentItem(copy), state(copy.state), process(copy.process),
-        parsedProcess(copy.parsedProcess), duration(copy.duration),
-        assignedComponent(copy.assignedComponent),
-        fileList(copy.fileList) {
-};
 
 ProcessItem::ProcessItem(const TypeHostUnit& host, long id, long jobID, std::string _process)
     : ContentItem(host, id, jobID), process(std::move(_process)) {
@@ -23,78 +14,80 @@ ProcessItem::ProcessItem(const TypeHostUnit& host, long id, long jobID, std::str
 
 bool ProcessItem::parse(void *job) {
 
+    bool status = true;
+
 	bool cmdMode = false;
+
 	int cmdIndex = 0;
+
 	PROCESS_OPTIONS cmdType = PROCESS_MAX;
 
-	for (uint32_t i = 0; i < process.size(); i++) {
-		switch(process[i]) {
-			case '$':
-				if (!cmdMode) {
-					cmdMode = true;
-					cmdIndex = 0;
-					cmdType = PROCESS_MAX;
-					break;
-				}
-				cmdMode = false;
-				//no break
-			case 'F':
-			case 'f':
-            case 'I':
-            case 'i':
-				if (cmdMode) {
-					cmdType = PROCESS_INPUT;
-					break;
-				}
-				//no break
-            case 'O':
-            case 'o':
+	for (char pChar : process) {
+
+        switch(pChar) {
+
+            case '$':
+                if (!cmdMode) {
+                    cmdMode = true;
+                    cmdIndex = 0;
+                    cmdType = PROCESS_MAX;
+                    break;
+                }
+                cmdMode = false;
+                //no break
+
+            case 'F': case 'f':
+            case 'I': case 'i':
+                if (cmdMode) {
+                    cmdType = PROCESS_INPUT;
+                    break;
+                }
+                //no break
+
+            case 'O': case 'o':
                 if (cmdMode) {
                     cmdType = PROCESS_OUTPUT;
                     break;
                 }
                 //no break
-			case 'P':
-			case 'p':
-				if (cmdMode) {
-					cmdType = PROCESS_PARAM;
-					break;
-				}
-				//no break
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				if (cmdMode) {
-					cmdIndex = cmdIndex * 10 + (process[i] - '0');
-					break;
-				}
-				//no break
-			case ' ':
-				if (cmdMode) {
-					cmdMode = false;
-					parseCommand(job, cmdType, cmdIndex);
-				}
-				//no break
-			default:
-			    parsedProcess += process[i];
-				break;
 
-		}
+            case 'P': case 'p':
+                if (cmdMode) {
+                    cmdType = PROCESS_PARAM;
+                    break;
+                }
+                //no break
 
+            case '0': case '1': case '2':
+            case '3': case '4': case '5':
+            case '6': case '7': case '8':
+            case '9':
+                if (cmdMode) {
+                    cmdIndex = cmdIndex * 10 + (pChar - '0');
+                    break;
+                }
+                //no break
+
+            case ' ':
+                if (cmdMode) {
+                    cmdMode = false;
+                    status &= parseCommand(job, cmdType, cmdIndex);
+                }
+                //no break
+
+            default:
+                parsedProcess += pChar;
+                break;
+        }
 	}
 
-	if (cmdMode) {
-		parseCommand(job, cmdType, cmdIndex);
+	if (!cmdMode) {
+	    return status;
 	}
 
-	return true;
+    status &= parseCommand(job, cmdType, cmdIndex);
+
+	return status;
 }
 
 bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
@@ -112,7 +105,11 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
                         std::to_string(content->getAssignedJob()) + "/" + content->getName();
 
 				addFile(content, getID(), cmdType == PROCESS_OUTPUT);
+
+				return true;
             }
+
+            return false;
 
         } break;
 
@@ -122,27 +119,31 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
             if (content) {
 
-                parsedProcess += content->getParam();
+                parsedProcess += content->get();
+
+                return true;
             }
+
+            return false;
 
         } break;
 
         default:
-            break;
+
+            return false;
     }
 
-	return true;
 }
 
 bool ProcessItem::check() {
 
-	for (auto & file : fileList) {
+	for (const auto& file : fileList) {
 
-	    if (file.isOutput()) {
+	    if (file->isOutput()) {
 	        continue;
 	    }
 
-	    if (!file.get()->check()) {
+	    if (!file->get()->check()) {
 	        return false;
 	    }
 	}
@@ -180,29 +181,34 @@ int ProcessItem::getFileCount() const {
     return fileList.size();
 }
 
-ProcessFile& ProcessItem::getFile(ProcessFile& ref) {
+TypeProcessFile ProcessItem::getFile(const TypeProcessFile& ref) {
 
-    for (auto& file : fileList) {
+    for (const auto& file : fileList) {
 
-        if (file.get()->getID() == ref.get()->getID()) {
+        if (file->get()->getID() == ref->get()->getID()) {
             return file;
         }
     }
 
-    return *fileList.end();
+    return nullptr;
 }
 
-TypeProcessFileList& ProcessItem::getFileList() {
+const TypeProcessFileList& ProcessItem::getFileList() {
 
 	return fileList;
 }
 
-void ProcessItem::addFile(TypeFileItem file, long processID, bool isOutput) {
+void ProcessItem::addFile(const TypeFileItem& file, long processID, bool isOutput) {
 
-    fileList.emplace_back(ProcessFile(file, processID, isOutput));
+    fileList.emplace_back(std::make_shared<ProcessFile>(file, processID, isOutput));
 }
 
-void ProcessItem::addFileList(TypeProcessFileList& _fileList) {
+void ProcessItem::addFile(const TypeProcessFile& processFile) {
+
+    fileList.emplace_back(processFile);
+}
+
+void ProcessItem::addFileList(const TypeProcessFileList& _fileList) {
 
     fileList.insert(fileList.end(), _fileList.begin(), _fileList.end());
 }
@@ -232,7 +238,7 @@ void ProcessItem::setID(long _id) {
     ContentItem::setID(_id);
 
     for (auto& file : getFileList()) {
-        file.setAssignedProcess(_id);
+        file->setAssignedProcess(_id);
     }
 }
 

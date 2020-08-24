@@ -5,24 +5,30 @@
 
 #include "ParameterItem.h"
 
-ParameterItem::ParameterItem(const TypeHostUnit& host, long id, long jobID, const char *param)
+ParameterItem::ParameterItem(const TypeHostUnit& host, long id, long jobID, const std::string& _param)
         : ContentItem (host, id, jobID) {
 
-	strcpy(sPtr, param);
+	param = _param;
 };
 
 CONTENT_TYPES ParameterItem::getType() const {
+
 	return CONTENT_PARAM;
 }
 
-void ParameterItem::setParam(const char *param) {
-	strcpy(sPtr, param);
+const std::string& ParameterItem::get() {
+
+    return param;
+}
+
+void ParameterItem::set(const std::string& _param) {
+
+    param = _param;
 }
 
 bool ParameterItem::check() {
-    return true;
+
+    return !param.empty();
 }
 
-const char *ParameterItem::getParam() {
-	return sPtr;
-}
+

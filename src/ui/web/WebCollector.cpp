@@ -116,12 +116,13 @@ bool WebApp::collProcessHandler(struct mg_connection *conn, int id) {
         if (!collector->processJob()) {
 
             sendError(collector->getHost(), conn, "Job : %s is not a valid job, reason : %s !!!",
-                      collector->getJob()->getJobName(), JobStatus::getDesc(collector->getJob()->getStatus()));
+                      collector->getJob()->getJobName().c_str(), JobStatus::getDesc(collector->getJob()->getStatus()));
 
             return false;
         }
 
-        sendOK(collector->getHost(), conn, "Job : %s 's execution is started...", collector->getJob()->getJobName());
+        sendOK(collector->getHost(), conn, "Job : %s 's execution is started...",
+               collector->getJob()->getJobName().c_str());
 
         return true;
     }
@@ -153,7 +154,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName()));
+    json_object_object_add(jsonObj, "_jobName", json_object_new_string(job->getJobName().c_str()));
     json_object_object_add(jsonObj, "_state", json_object_new_int(collectorHost->getState()));
     json_object_object_add(jsonObj, "_duration", json_object_new_int(job->getDuration()));
     json_object_object_add(jsonObj, "_processCount",

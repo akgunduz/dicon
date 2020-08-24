@@ -5,7 +5,10 @@
 
 #include "MessageData.h"
 
-MessageData::~MessageData() = default;
+MessageData::MessageData(const TypeHostUnit& host) {
+
+    process = std::make_shared<ProcessItem>(host);
+}
 
 int MessageData::getStreamFlag() const {
 
@@ -17,58 +20,23 @@ void MessageData::setStreamFlag(int _streamFlag) {
     streamFlag = _streamFlag;
 }
 
-long MessageData::getFileProcess() {
+const TypeProcessItem& MessageData::getProcess() {
 
-    return fileList.first;
+    return process;
 }
 
-void MessageData::setFileProcess(long processID) {
+void MessageData::setProcess(const TypeProcessItem& _process) {
 
-    fileList.first = processID;
+    process = _process;
 }
 
-long MessageData::getFileCount() {
+void MessageData::setProcess(long id, const TypeProcessFileList& _fileList) {
 
-    return fileList.second.size();
+    process->addFileList(_fileList);
+    process->setID(id);
 }
 
-ProcessFile& MessageData::getFile(int index) {
-
-    return fileList.second[index];
-}
-
-TypeProcessFileList& MessageData::getFileList() {
-
-    return fileList.second;
-}
-
-void MessageData::addFile(ProcessFile& fileItem) {
-
-    fileList.second.emplace_back(fileItem);
-}
-
-void MessageData::addFileList(long assignedProcess, TypeProcessFileList& _fileList) {
-
-    fileList.first = assignedProcess;
-    fileList.second.insert(fileList.second.end(), _fileList.begin(), _fileList.end());
-}
-
-long MessageData::getProcessCount() {
-
-    return processList.size();
-}
-
-TypeProcessItem& MessageData::getProcess(int index) {
-
-    return processList[index];
-}
-
-void MessageData::addProcess(const TypeProcessItem& processItem) {
-
-    processList.emplace_back(processItem);
-}
-
-const std::string& MessageData::getJobName() const {
+std::string& MessageData::getJobName() {
 
     return jobName;
 }

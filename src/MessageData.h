@@ -14,33 +14,23 @@ class MessageData {
 
     std::string jobName;
 
-    std::pair<long, TypeProcessFileList> fileList;
-
-    TypeProcessList processList;
+    TypeProcessItem process;
 
     TypeComponentUnitList componentList;
 
 public:
 
-    MessageData() = default;
-    ~MessageData();
+    MessageData(const TypeHostUnit&);
+    ~MessageData() = default;
 
     int getStreamFlag() const;
     void setStreamFlag(int);
 
-    ProcessFile& getFile(int);
-    long getFileProcess();
-    void setFileProcess(long);
-    TypeProcessFileList& getFileList();
-    void addFile(ProcessFile&);
-    void addFileList(long, TypeProcessFileList&);
-    long getFileCount();
+    const TypeProcessItem& getProcess();
+    void setProcess(const TypeProcessItem&);
+    void setProcess(long, const TypeProcessFileList&);
 
-    TypeProcessItem& getProcess(int);
-    void addProcess(const TypeProcessItem&);
-    long getProcessCount();
-
-    const std::string& getJobName() const;
+    std::string& getJobName();
     void setJobName(const std::string&);
 
     TypeComponentUnitList& getComponentList();

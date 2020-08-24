@@ -197,11 +197,11 @@ bool MessageBase::readBlockHeader(const TypeComponentUnit& source, MessageBlockH
 	return true;
 }
 
-bool MessageBase::readString(const TypeComponentUnit& source, char* str, size_t size, uint32_t& crc) {
-
-    strcpy(str, "");
+bool MessageBase::readString(const TypeComponentUnit& source, std::string& str, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String read process is started => String Length: %d", size);
+
+    str = "";
 
 	while(size > TMP_BUFFER_SIZE - 1) {
 
@@ -211,7 +211,7 @@ bool MessageBase::readString(const TypeComponentUnit& source, char* str, size_t 
 		}
 
         tmpBuf[TMP_BUFFER_SIZE - 1] = '\0';
-		strcat(str, (char *)tmpBuf);
+		str += (char *)tmpBuf;
 
 		size -= TMP_BUFFER_SIZE + 1;
 	}
@@ -222,9 +222,9 @@ bool MessageBase::readString(const TypeComponentUnit& source, char* str, size_t 
 	}
 
     tmpBuf[size] = '\0';
-    strcat(str, (char *)tmpBuf);
+    str += (char *)tmpBuf;
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String is read successfully => String : %s", str);
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String is read successfully => String : %s", str.c_str());
 
 	return true;
 }

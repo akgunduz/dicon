@@ -9,12 +9,19 @@
 #include "ContentItem.h"
 
 class ParameterItem : public ContentItem {
-	char sPtr[NAME_MAX];
+
+	std::string param;
+
 public:
-	ParameterItem(const TypeHostUnit&, long, long, const char *);
-	~ParameterItem(){};
-	const char* getParam();
-	void setParam(const char*);
+
+	ParameterItem(const TypeHostUnit&, long, long, const std::string&);
+
+	~ParameterItem() override{};
+
+    const std::string& get();
+
+	void set(const std::string&);
+
 	virtual CONTENT_TYPES getType() const;
 
     virtual bool check();

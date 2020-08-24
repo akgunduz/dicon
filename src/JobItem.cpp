@@ -42,6 +42,7 @@ JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath,
     }
 
     for (int i = 0; i < getProcessCount(); i++) {
+
         getProcess(i)->parse(this);
     }
 
@@ -85,7 +86,7 @@ bool JobItem::parse() {
 
         for (auto & contentType : contentTypes) {
 
-            if (strcmp(contentType.second->name, key) == 0) {
+            if (contentType.second->name == key) {
                 (contentType.second->parser)(contentType.second->parent, val);
                 break;
             }
@@ -193,14 +194,14 @@ bool JobItem::parseProcessNode(JobItem *parent, json_object *node) {
     return true;
 }
 
-const char *JobItem::getJobName() const {
+const std::string& JobItem::getJobName() const {
 
     return jobName;
 }
 
-void JobItem::setJobName(const char *_jobName) {
+void JobItem::setJobName(const std::string& _jobName) {
 
-    strncpy(jobName, _jobName, NAME_MAX);
+    jobName = _jobName;
 }
 
 int JobItem::getProcessCount() const {
@@ -322,9 +323,9 @@ int JobItem::getByOutput(int index) const {
 
         auto process = getProcess(i);
 
-        for (auto processFile : process->getFileList()) {
+        for (const auto& processFile : process->getFileList()) {
 
-            if (processFile.isOutput() && processFile.get()->getID() == index) {
+            if (processFile->isOutput() && processFile->get()->getID() == index) {
                 return i;
             }
         }
@@ -339,10 +340,10 @@ bool JobItem::setProcessIDByOutput(long outputID, long processID) {
 
         auto process = getProcess(i);
 
-        for (auto processFile : process->getFileList()) {
+        for (const auto& processFile : process->getFileList()) {
 
-            if (processFile.isOutput()
-                    && processFile.get()->getID() == outputID
+            if (processFile->isOutput()
+                    && processFile->get()->getID() == outputID
                     && process->getID() == 0) {
 
                 process->setID(processID);
@@ -365,23 +366,23 @@ bool JobItem::setProcessStateByFile(std::vector<long> &errorList) {
 
         bool errFound = false;
 
-        for (auto processFile : process->getFileList()) {
+        for (const auto& processFile : process->getFileList()) {
 
             for (auto fileID : errorList) {
 
-                if (processFile.get()->getID() == fileID) {
+                if (processFile->get()->getID() == fileID) {
 
-                    processFile.get()->setRequired(true);
+                    processFile->get()->setRequired(true);
 
                     errFound = true;
                 }
             }
 
-            if (processFile.isOutput()) {
+            if (processFile->isOutput()) {
                 continue;
             }
 
-            if (!processFile.get()->check()) {
+            if (!processFile->get()->check()) {
 
                 ready = false;
             }
@@ -411,11 +412,11 @@ JOB_STATUS JobItem::createDependencyMap(std::vector<long>& reqList) {
 
         std::vector<long> outList, depList;
 
-        for (auto processFile : getProcess(i)->getFileList()) {
+        for (const auto& processFile : getProcess(i)->getFileList()) {
 
-            processFile.isOutput() ?
-                outList.emplace_back(processFile.get()->getID())
-                : depList.emplace_back(processFile.get()->getID());
+            processFile->isOutput() ?
+                outList.emplace_back(processFile->get()->getID())
+                : depList.emplace_back(processFile->get()->getID());
         }
 
         for (auto &outID : outList) {
