@@ -27,7 +27,7 @@ class Scheduler {
 
 	std::map<int, const InterfaceSchedulerCB*> callbacks;
 
-	int capacity;
+	int capacity {MAX_SCHEDULER_CAPACITY};
 
 	bool initialized{false};
 

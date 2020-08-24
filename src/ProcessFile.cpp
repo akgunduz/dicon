@@ -8,8 +8,6 @@ ProcessFile::ProcessFile(TypeFileItem _content, long _processID, bool _is_output
     : processID(_processID), content(_content), is_output(_is_output) {
 }
 
-ProcessFile::~ProcessFile() = default;
-
 bool ProcessFile::isOutput() const {
 
     return is_output;

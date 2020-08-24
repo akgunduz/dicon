@@ -5,8 +5,6 @@
 #include "miniz/miniz.h"
 #include "JobItem.h"
 
-long JobItem::jobID = 1;
-
 JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {
 
@@ -53,12 +51,12 @@ JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath,
 
 JobItem::~JobItem() = default;
 
-TypeContentItem JobItem::getContent(int type, int index) const {
+TypeContentItem JobItem::getContent(int type, int index) {
 
     return contentList[type][index];
 }
 
-int JobItem::getContentCount(int type) const {
+int JobItem::getContentCount(int type) {
 
     return (int) contentList[type].size();
 }
@@ -195,7 +193,7 @@ bool JobItem::parseProcessNode(JobItem *parent, json_object *node) {
     return true;
 }
 
-const std::string& JobItem::getJobName() const {
+const std::string& JobItem::getJobName() {
 
     return jobName;
 }
@@ -205,12 +203,12 @@ void JobItem::setJobName(const std::string& _jobName) {
     jobName = _jobName;
 }
 
-int JobItem::getProcessCount() const {
+int JobItem::getProcessCount() {
 
     return getContentCount(CONTENT_PROCESS);
 }
 
-int JobItem::getProcessCount(PROCESS_STATE state) const {
+int JobItem::getProcessCount(PROCESS_STATE state) {
 
     int count = 0;
 
@@ -224,12 +222,12 @@ int JobItem::getProcessCount(PROCESS_STATE state) const {
     return count;
 }
 
-TypeProcessItem JobItem::getProcess(int index) const {
+TypeProcessItem JobItem::getProcess(int index) {
 
     return std::static_pointer_cast<ProcessItem>(getContent(CONTENT_PROCESS, index));
 }
 
-TypeProcessItem JobItem::getProcessByID(long id) const {
+TypeProcessItem JobItem::getProcessByID(long id) {
 
     for (int i = 0; i < getProcessCount(); i++) {
 
@@ -243,17 +241,17 @@ TypeProcessItem JobItem::getProcessByID(long id) const {
     return nullptr;
 }
 
-int JobItem::getFileCount() const {
+int JobItem::getFileCount() {
 
     return getContentCount(CONTENT_FILE);
 }
 
-TypeFileItem JobItem::getFile(int index) const {
+TypeFileItem JobItem::getFile(int index) {
 
     return std::static_pointer_cast<FileItem>(getContent(CONTENT_FILE, index));
 }
 
-TypeFileItem JobItem::getFileByID(long id) const {
+TypeFileItem JobItem::getFileByID(long id) {
 
     for (int i = 0; i < getFileCount(); i++) {
 
@@ -267,12 +265,12 @@ TypeFileItem JobItem::getFileByID(long id) const {
     return nullptr;
 }
 
-int JobItem::getParameterCount() const {
+int JobItem::getParameterCount() {
 
     return getContentCount(CONTENT_PARAM);
 }
 
-TypeParameterItem JobItem::getParameter(int index) const {
+TypeParameterItem JobItem::getParameter(int index) {
 
     return std::static_pointer_cast<ParameterItem>(getContent(CONTENT_PARAM, index));
 }
@@ -318,7 +316,7 @@ TypeProcessItem JobItem::reAssignNode(long oldNodeID, long newNodeID) {
     return nullptr;
 }
 
-int JobItem::getByOutput(int index) const {
+int JobItem::getByOutput(int index) {
 
     for (int i = 0; i < getProcessCount(); i++) {
 
@@ -619,7 +617,7 @@ bool JobItem::check() {
     return true;
 }
 
-long JobItem::getDuration() const {
+long JobItem::getDuration() {
 
     return duration;
 }

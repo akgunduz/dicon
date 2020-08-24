@@ -7,9 +7,6 @@
 
 Scheduler::Scheduler() {
 
-    this->initialized = false;
-	this->capacity = MAX_SCHEDULER_CAPACITY;
-
 	thread = std::thread(run, this);
 
 	initialized = true;

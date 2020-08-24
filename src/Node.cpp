@@ -5,7 +5,6 @@
 
 #include "Node.h"
 #include "Util.h"
-#include "CollectorUnit.h"
 #include "pstreams/pstream.h"
 
 #define PROCESS_SLEEP_TIME 1000

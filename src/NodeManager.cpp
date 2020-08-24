@@ -9,8 +9,6 @@ NodeManager::NodeManager(TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {
 };
 
-NodeManager::~NodeManager() = default;
-
 TypeNodeUnit NodeManager::getIdle(const TypeComponentUnit& assigned) {
 
     TypeNodeUnit leastUsedNode = nullptr;

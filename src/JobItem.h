@@ -42,12 +42,12 @@ protected:
 
 public:
 
-    static long jobID;
+    inline static long jobID = 1;
 
     JobItem(const TypeHostUnit&, const std::filesystem::path&, long);
     ~JobItem() override;
-    TypeContentItem getContent(int type, int index) const;
-    int getContentCount(int type) const;
+    TypeContentItem getContent(int type, int index);
+    int getContentCount(int type);
     void reset();
     bool parse();
 
@@ -56,28 +56,28 @@ public:
     static bool parseParamNode(JobItem*, json_object *node);
     static bool parseProcessNode(JobItem *parent, json_object *node);
 
-    const std::string& getJobName() const;
+    const std::string& getJobName();
     void setJobName(const std::string&);
 
-    long getDuration() const;
+    long getDuration();
     void setDuration(long duration);
 
-    int getProcessCount() const;
-    int getProcessCount(PROCESS_STATE) const;
-    TypeProcessItem getProcess(int) const;
-    TypeProcessItem getProcessByID(long) const;
+    int getProcessCount();
+    int getProcessCount(PROCESS_STATE);
+    TypeProcessItem getProcess(int);
+    TypeProcessItem getProcessByID(long);
 
-    int getFileCount() const;
-    TypeFileItem getFile(int) const;
-    TypeFileItem getFileByID(long) const;
+    int getFileCount();
+    TypeFileItem getFile(int);
+    TypeFileItem getFileByID(long);
 
-    int getParameterCount() const;
-    TypeParameterItem getParameter(int) const;
+    int getParameterCount();
+    TypeParameterItem getParameter(int);
 
     TypeProcessItem assignNode(long);
     TypeProcessItem reAssignNode(long, long);
 
-    int getByOutput(int) const;
+    int getByOutput(int);
     bool setProcessIDByOutput(long, long);
     bool setProcessStateByFile(std::vector<long>&);
     JOB_STATUS createDependencyMap(std::vector<long>&);

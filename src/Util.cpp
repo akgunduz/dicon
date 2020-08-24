@@ -1,10 +1,8 @@
-#include <climits>
 //
 // Created by Haluk AKGUNDUZ on 02/07/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <miniz/miniz.h>
 #include "Util.h"
 
 std::string Util::hex2str(const uint8_t *in, int len) {

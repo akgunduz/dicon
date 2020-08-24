@@ -18,7 +18,7 @@ class ProcessFile {
 public:
 
     explicit ProcessFile(TypeFileItem, long = 0, bool = false);
-    ~ProcessFile();
+    ~ProcessFile() = default;
     bool isOutput() const;
     TypeFileItem get();
     long getAssignedProcess() const;

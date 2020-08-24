@@ -4,9 +4,6 @@
 //
 
 #include "MessageHeader.h"
-#include "MessageType.h"
-
-MessageHeader::MessageHeader() = default;
 
 long MessageHeader::getSize() {
 
@@ -18,7 +15,7 @@ void MessageHeader::setType(MSG_TYPE _type) {
     type = (uint16_t)_type;
 }
 
-MSG_TYPE MessageHeader::getType() const {
+MSG_TYPE MessageHeader::getType() {
 
     return (MSG_TYPE)type;
 }
@@ -56,7 +53,7 @@ void MessageHeader::setVariant(int id, uint64_t _variant) {
     this->variant[id] = _variant;
 }
 
-int MessageHeader::getPriority() const {
+int MessageHeader::getPriority() {
 
     return priority;
 }

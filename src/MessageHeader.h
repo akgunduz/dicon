@@ -25,12 +25,12 @@ class MessageHeader {
     uint64_t variant[MAX_VARIANT]{};
 
 public:
-    MessageHeader();
+    MessageHeader() = default;
 
     long getSize();
 
     void setType(MSG_TYPE);
-    MSG_TYPE getType() const;
+    MSG_TYPE getType();
 
     TypeCommUnit getOwner();
     void setOwner(const TypeCommUnit&);
@@ -39,7 +39,7 @@ public:
     uint64_t getVariant(int id);
     void setVariant(int id, uint64_t _variant);
 
-    int getPriority() const;
+    int getPriority();
     void setPriority(int);
     void normalizePriority();
     int iteratePriority();

@@ -15,12 +15,12 @@ HostUnit::HostUnit(const HostUnit &copy) = default;
 
 HostUnit::~HostUnit() = default;
 
-const std::filesystem::path& HostUnit::getRootPath() const {
+const std::filesystem::path& HostUnit::getRootPath() {
 
     return rootPath;
 }
 
-long HostUnit::getID() const {
+long HostUnit::getID() {
 
     return id;
 }
@@ -38,12 +38,12 @@ void HostUnit::setID(long _id) {
     std::filesystem::create_directories(rootPath);
 }
 
-ARCH HostUnit::getArch() const {
+ARCH HostUnit::getArch() {
 
     return ArchType::get();
 }
 
-COMPONENT HostUnit::getType() const {
+COMPONENT HostUnit::getType() {
 
     return type;
 }

@@ -27,17 +27,16 @@ public:
 
     virtual ~HostUnit();
 
-    const std::filesystem::path& getRootPath() const;
-    void updateRootPath(long id);
+    const std::filesystem::path& getRootPath();
 
-    long getID() const;
+    long getID();
     void setID(long);
 
-    ARCH getArch() const;
+    ARCH getArch();
 
     TypeCommUnit getUnit(COMPONENT);
 
-    COMPONENT getType() const;
+    COMPONENT getType();
     void setType(COMPONENT);
 
     Address& getAddress(COMPONENT);

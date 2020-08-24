@@ -11,8 +11,6 @@
 #include <test/TestApp.h>
 #endif
 
-#include "Application.h"
-
 enum APPPARAM {
     APPPARAM_OK,
     APPPARAM_ERROR,
