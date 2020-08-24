@@ -11,6 +11,7 @@ enum ARCH {
     ARCH_DARWIN_X86_64,
     ARCH_LINUX_ARM_32,
     ARCH_LINUX_ARM_64,
+    ARCH_WINDOWS_X86_64,
     ARCH_MAX,
 };
 
@@ -21,6 +22,7 @@ class ArchType {
             "x86-64-darwin",
             "arm32-linux",
             "arm64-linux",
+            "x86-64-windows",
     };
 
 public:
@@ -39,6 +41,8 @@ public:
         return ARCH_DARWIN_X86_64;
 #elif defined(__x86_64__) && defined(__linux__)
         return ARCH_LINUX_X86_64;
+#elif defined(WIN32)
+        return ARCH_WINDOWS_X86_64;
 #else
 #error "Platform is not Supported!!!";
 #endif

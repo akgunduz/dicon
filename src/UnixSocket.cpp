@@ -208,30 +208,19 @@ TypeAddressList UnixSocket::getAddressList() {
 
     TypeAddressList list;
 
-    DIR *unixdir = opendir(std::filesystem::temp_directory_path().c_str());
-    if (!unixdir) {
-        return list;
-    }
+    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::temp_directory_path())) {
 
-    dirent *entry;
-
-    while ((entry = readdir(unixdir)) != nullptr) {
-
-        if (strncmp(entry->d_name, UNIXSOCKET_FILE_PREFIX, strlen(UNIXSOCKET_FILE_PREFIX)) != 0) {
+        if (!entry.is_regular_file() || entry.path().filename().string().find(UNIXSOCKET_FILE_PREFIX) != 0) {
             continue;
         }
 
-        std::string path = entry->d_name;
-
-        uint32_t start = (uint32_t) path.find('_') + 1;
-        std::string saddress = path.substr(start, path.find('.') - start);
-        Address address(atol(saddress.c_str()), 0);
+        uint32_t start = (uint32_t) entry.path().filename().string().find('_') + 1;
+        uint32_t end = (uint32_t) entry.path().filename().string().find('.');
+        std::string sAddress = entry.path().filename().string().substr(start, end - start);
+        Address address(atol(sAddress.c_str()), 0);
 
         list.push_back(address);
-
     }
-
-    closedir(unixdir);
 
     return list;
 }

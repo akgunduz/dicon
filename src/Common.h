@@ -33,23 +33,12 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <net/if.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#include <unistd.h>
-#include <ifaddrs.h>
 #include <fcntl.h>
-#include <dirent.h>
 
 #ifdef __APPLE__
 #include "Common_apple.h"
 #elif WIN32
+#include "Common_windows.h"
 #else
 #include "Common_linux.h"
 #endif

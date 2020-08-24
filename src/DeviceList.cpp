@@ -54,7 +54,7 @@ DeviceList::DeviceList() {
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution(1, time(nullptr));
 
-    add(std::make_shared<Device>("us", INTERFACE_UNIXSOCKET, getpid(), distribution(generator)));
+    add(std::make_shared<Device>("us", INTERFACE_UNIXSOCKET, distribution(generator)));
 }
 
 DeviceList *DeviceList::getInstance() {
