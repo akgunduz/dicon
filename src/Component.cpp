@@ -105,7 +105,7 @@ TypeAddressList Component::getInterfaceAddressList(COMPONENT target) {
     return interfaces[target]->getAddressList();
 }
 
-INTERFACE Component::getInterfaceType(COMPONENT target) {
+COMM_INTERFACE Component::getInterfaceType(COMPONENT target) {
 
     return interfaces[target]->getType();
 }

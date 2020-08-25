@@ -7,7 +7,7 @@
 #include "NetUtil.h"
 
 Net::Net(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
-        : Interface(host, device, schedulerCB) {
+        : CommInterface(host, device, schedulerCB) {
 
     if (!initTCP()) {
         throw std::runtime_error("Net : initTCP failed!!!");
@@ -58,7 +58,12 @@ bool Net::initTCP() {
             return false;
         }
 
+#ifndef WIN32
         if (fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+#else
+        u_long nonblocking_enabled = true;
+        if (ioctlsocket( netSocket, FIONBIO, &nonblocking_enabled ) != 0) {
+#endif
             LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
             close(netSocket);
             return false;
@@ -96,12 +101,6 @@ bool Net::initMulticast() {
         return false;
     }
 
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char *) &on, sizeof(int)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
-
     struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
     if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
         LOGS_E(getHost(), "Socket bind with err : %d!!!", errno);
@@ -111,7 +110,7 @@ bool Net::initMulticast() {
 
     ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), MULTICAST_ADDRESS);
 
-    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const void *) &imreq, sizeof(ip_mreq)) < 0) {
+    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *) &imreq, sizeof(ip_mreq)) < 0) {
         LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
         close(multicastSocket);
         return false;
@@ -137,7 +136,7 @@ TypeReadCB Net::getReadCB(const TypeComponentUnit& source) {
 
     return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
 
-        return recvfrom(source->getSocket(), buf, size, 0, nullptr, nullptr);
+        return recvfrom(source->getSocket(), (char*)buf, size, 0, nullptr, nullptr);
     };
 }
 
@@ -155,7 +154,7 @@ TypeWriteCB Net::getWriteCB(const TypeComponentUnit& target) {
 
         struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-        return sendto(target->getSocket(), buf, size, 0,
+        return sendto(target->getSocket(), (const char*)buf, size, 0,
                       (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
     };
 }
@@ -166,48 +165,49 @@ bool Net::runReceiver() {
     std::thread threadAccept;
 
     struct sockaddr_in cli_addr{};
-    socklen_t clilen = sizeof(cli_addr);
 
-    fd_set readfs, orjreadfs;
-    FD_ZERO(&orjreadfs);
+    socklen_t cliLen = sizeof(cli_addr);
+
+    fd_set readFS, orjReadFS;
+    FD_ZERO(&orjReadFS);
 
     int maxfd = std::max(netSocket, notifierPipe[0]);
     maxfd = std::max(maxfd, multicastSocket);
     maxfd++;
 
-    FD_SET(multicastSocket, &orjreadfs);
-    FD_SET(netSocket, &orjreadfs);
-    FD_SET(notifierPipe[0], &orjreadfs);
+    FD_SET(multicastSocket, &orjReadFS);
+    FD_SET(netSocket, &orjReadFS);
+    FD_SET(notifierPipe[0], &orjReadFS);
 
     while (thread_started) {
 
-        readfs = orjreadfs;
+        readFS = orjReadFS;
 
-        int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
-        if (nready == -1) {
+        int nReady = select(maxfd, &readFS, nullptr, nullptr, nullptr);
+        if (nReady == -1) {
             LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
             return false;
         }
 
-        if (FD_ISSET(netSocket, &readfs)) {
+        if (FD_ISSET(netSocket, &readFS)) {
 
-            int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &clilen);
+            int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &cliLen);
             if (acceptSocket < 0) {
                 LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
                 return false;
             }
 
-            threadAccept = std::thread([](Interface *interface, int acceptSocket) {
+            threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
                 auto source = std::make_shared<ComponentUnit>(acceptSocket);
 
-                auto msg = std::make_unique<Message>(interface->getHost());
+                auto msg = std::make_unique<Message>(commInterface->getHost());
 
                 if (msg->readFromStream(source)) {
 
                     auto owner = msg->getHeader().getOwner();
 
-                    interface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
                 }
 
                 close(acceptSocket);
@@ -217,7 +217,7 @@ bool Net::runReceiver() {
             threadAccept.detach();
         }
 
-        if (FD_ISSET(multicastSocket, &readfs)) {
+        if (FD_ISSET(multicastSocket, &readFS)) {
 
             auto source = std::make_shared<ComponentUnit>(multicastSocket);
             source->getAddress().setMulticast(true);
@@ -232,7 +232,7 @@ bool Net::runReceiver() {
             }
         }
 
-        if (FD_ISSET(notifierPipe[0], &readfs)) {
+        if (FD_ISSET(notifierPipe[0], &readFS)) {
 
             char data;
             read(notifierPipe[0], &data, 1);
@@ -270,6 +270,7 @@ bool Net::runSender(const TypeComponentUnit& target, TypeMessage msg) {
     msg->writeToStream(target);
 
     shutdown(clientSocket, SHUT_RDWR);
+
     close(clientSocket);
 
     return true;
@@ -283,15 +284,15 @@ bool Net::runMulticastSender(const TypeComponentUnit& target, TypeMessage msg) {
         return false;
     }
 
-    struct in_addr interface_addr = NetUtil::
-    getInetAddressByAddress(getAddress()).sin_addr;
-    setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, &interface_addr, sizeof(interface_addr));
+    struct in_addr interface_addr = NetUtil::getInetAddressByAddress(getAddress()).sin_addr;
+    setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&interface_addr, sizeof(interface_addr));
 
     target->setSocket(clientSocket);
 
     msg->writeToStream(target);
 
     shutdown(clientSocket, SHUT_RDWR);
+
     close(clientSocket);
 
     return true;
@@ -308,9 +309,9 @@ Net::~Net() {
     close(netSocket);
 }
 
-INTERFACE Net::getType() {
+COMM_INTERFACE Net::getType() {
 
-    return INTERFACE_NET;
+    return COMMINTERFACE_TCPIP;
 }
 
 bool Net::isSupportMulticast() {

@@ -10,18 +10,18 @@
 TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
                                                 const InterfaceSchedulerCB *schedulerCB) {
 
-    TypeInterface interface = nullptr;
+    TypeInterface commInterface = nullptr;
 
     try {
 
         switch (device->getType()) {
 
-            case INTERFACE_NET:
-                interface = std::make_shared<Net>(host, device, schedulerCB);
+            case COMMINTERFACE_TCPIP:
+                commInterface = std::make_shared<Net>(host, device, schedulerCB);
                 break;
 
-            case INTERFACE_UNIXSOCKET:
-                interface = std::make_shared<UnixSocket>(host, device, schedulerCB);
+            case COMMINTERFACE_UNIXSOCKET:
+                commInterface = std::make_shared<UnixSocket>(host, device, schedulerCB);
                 break;
 
             default:
@@ -32,5 +32,5 @@ TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const 
         LOGS_E(host, "%s", e.what());
     }
 
-    return interface;
+    return commInterface;
 }

@@ -8,7 +8,7 @@
 #include "NetUtil.h"
 #include "CollectorUnit.h"
 
-Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
+Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) {
 
     host = std::make_shared<DistributorHost>();
 
@@ -21,6 +21,8 @@ Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
     addProcessHandler(COMP_NODE, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeIDMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
+
+    initInterfaces(COMP_DISTRIBUTOR, _commInterfaceOther, _commInterfaceNode);
 
     nodeManager = new NodeManager(host, false);
 
@@ -39,8 +41,6 @@ Distributor::Distributor(int interfaceOther, int interfaceNode, bool autoWake) {
     pollThread = std::thread([](Distributor *distributor){
             distributor->pollProcess();
         }, this);
-
-    initInterfaces(COMP_DISTRIBUTOR, interfaceOther, interfaceNode);
 }
 
 Distributor::~Distributor() {

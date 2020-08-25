@@ -24,8 +24,8 @@ void listDevices() {
     LOGP_I("Listing Interfaces .....");
 
     for (int j = 0; j < deviceList->getCount(); j++) {
-        LOGP_I("%s : %s", InterfaceType::getName(deviceList->get(j)->getType()),
-              deviceList->get(j)->getName().c_str());
+        LOGP_I("%s : %s", CommInterfaceType::getName(deviceList->get(j)->getType()),
+               deviceList->get(j)->getName().c_str());
     }
 }
 

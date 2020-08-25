@@ -5,7 +5,7 @@
 
 #include "Util.h"
 
-std::string Util::hex2str(const uint8_t *in, int len) {
+std::string Util::hex2str(const uint8_t *in, size_t len) {
 
     static const char *const lut = "0123456789ABCDEF";
 
@@ -71,7 +71,7 @@ std::string Util::parsePath(const std::filesystem::path& path, const std::string
             break;
         }
 
-        parsed.replace(pos, len, path);
+        parsed.replace(pos, len, path.string());
 
     } while (true);
 

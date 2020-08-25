@@ -15,6 +15,7 @@ class NetUtil {
 public:
 
     static std::string getIPString(BaseAddress&);
+    static std::string getIPString(const sockaddr_in *);
     static long parseIPAddress(const std::string&);
     static sockaddr_in getInetAddressByAddress(Address&);
     static sockaddr_in getInetAddressByPort(int);

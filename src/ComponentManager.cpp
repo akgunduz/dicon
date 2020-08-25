@@ -97,7 +97,7 @@ TypeComponentUnitList& ComponentManager::getDead() {
     return componentsMapDead;
 }
 
-TypeComponentUnit ComponentManager::getDead(long index) {
+TypeComponentUnit ComponentManager::getDead(size_t index) {
 
     std::unique_lock<std::mutex> lock(mutex);
 

@@ -25,6 +25,18 @@ std::string NetUtil::getIPString(BaseAddress& address) {
     return std::string(cIP);
 }
 
+std::string NetUtil::getIPString(const sockaddr_in *address) {
+
+    char cIP[INET_ADDRSTRLEN];
+
+    const char *dst = inet_ntop(AF_INET, &(address->sin_addr), cIP, INET_ADDRSTRLEN);
+    if (!dst) {
+        return "";
+    }
+
+    return std::string(cIP);
+}
+
 long NetUtil::parseIPAddress(const std::string& address) {
 
     struct in_addr addr{};
@@ -84,11 +96,13 @@ ip_mreq NetUtil::getInetMulticastAddress(Address& address, uint32_t multicastAdd
 
 sockaddr_un NetUtil::getUnixAddress(Address& address) {
 
-    sockaddr_un unix_addr;
-    bzero((char *) &unix_addr, sizeof(unix_addr));
+    sockaddr_un unix_addr{};
     unix_addr.sun_family = AF_UNIX;
-    sprintf(unix_addr.sun_path, "%s%s%u%s", std::filesystem::temp_directory_path().c_str(), UNIXSOCKET_FILE_PREFIX,
-            address.get().base, UNIXSOCKET_FILE_SUFFIX);
+    sprintf(unix_addr.sun_path, "%s%s%u%s",
+            std::filesystem::temp_directory_path().string().c_str(),
+            UNIXSOCKET_FILE_PREFIX,
+            address.get().base,
+            UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }
 

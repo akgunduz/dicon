@@ -8,17 +8,17 @@
 
 #include "Common.h"
 #include "Scheduler.h"
-#include "Interface.h"
+#include "CommInterface.h"
 #include "Message.h"
 #include "Component.h"
-#include "InterfaceType.h"
+#include "CommInterfaceType.h"
 
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101
 #define DEFAULT_PORT 61001
 #define DEFAULT_MULTICAST_PORT 62001
 
-class Net : public Interface {
+class Net : public CommInterface {
 
 	int netSocket{};
 	int multicastSocket{};
@@ -35,7 +35,7 @@ public :
         const InterfaceSchedulerCB *);
 	~Net() override;
 
-    INTERFACE getType() override;
+    COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
 
     TypeAddressList getAddressList() override;

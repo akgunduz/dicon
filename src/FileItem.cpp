@@ -12,12 +12,12 @@ FileItem::FileItem(const TypeHostUnit& host, long _id, long _assignedJob, std::s
         : ContentItem (host, _id, _assignedJob),  name(std::move(_name)) {
 }
 
-CONTENT_TYPES FileItem::getType() const {
+CONTENT_TYPES FileItem::getType() {
 
 	return CONTENT_FILE;
 }
 
-const std::string& FileItem::getName() const {
+const std::string& FileItem::getName() {
 
     return name;
 }
@@ -27,7 +27,7 @@ void FileItem::setName(const std::string& _name) {
     name = _name;
 }
 
-long FileItem::getSize() const {
+std::uintmax_t FileItem::getSize() {
 
     return size;
 }

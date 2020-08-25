@@ -9,7 +9,7 @@
 
 #define PROCESS_SLEEP_TIME 1000
 
-Node::Node(int interface) {
+Node::Node(int _commInterface) {
 
     host = std::make_shared<NodeHost>();
 
@@ -23,7 +23,7 @@ Node::Node(int interface) {
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg));
 
-    initInterfaces(COMP_NODE, interface, interface);
+    initInterfaces(COMP_NODE, _commInterface, _commInterface);
 
     processItem = std::make_shared<ProcessItem>(host);
 

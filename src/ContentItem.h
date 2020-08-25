@@ -27,17 +27,17 @@ public:
     explicit ContentItem(const TypeHostUnit&, long = 0, long = 0);
     ContentItem(const ContentItem&);
 
-    virtual CONTENT_TYPES getType() const = 0;
+    virtual CONTENT_TYPES getType() = 0;
     virtual bool check() = 0;
-	virtual ~ContentItem() = default;
+	~ContentItem() override = default;
 
-    const TypeHostUnit& getHost() const;
+    const TypeHostUnit& getHost();
 
-    long getID() const;
+    long getID();
 
     virtual void setID(long);
 
-    long getAssignedJob() const;
+    long getAssignedJob();
     void setAssignedJob(long);
 };
 

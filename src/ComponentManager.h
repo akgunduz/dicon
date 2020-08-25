@@ -41,7 +41,7 @@ public:
     TypeComponentMapIDList& get();
     TypeComponentUnitList& getDead();
     TypeComponentUnit get(long);
-    TypeComponentUnit getDead(long);
+    TypeComponentUnit getDead(size_t);
     size_t size();
     void clear();
 

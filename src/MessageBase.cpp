@@ -17,7 +17,7 @@ MessageBase::MessageBase(const TypeHostUnit& host)
 
 TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
 
-    if (source->getAddress().getInterface() == INTERFACE_NET) {
+    if (source->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
         return Net::getReadCB(source);
     }
@@ -27,7 +27,7 @@ TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
 
 TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
 
-    if (target->getAddress().getInterface() == INTERFACE_NET) {
+    if (target->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
         return Net::getWriteCB(target);
     }
@@ -73,12 +73,12 @@ bool MessageBase::transferBinary(const TypeComponentUnit& source, const TypeComp
 
 bool MessageBase::readBlock(const TypeComponentUnit& source, uint8_t *buf, size_t size, uint32_t& crc) {
 
-	long offset = 0;
+    size_t offset = 0;
 	bool busy = false;
 
 	do {
 
-        long count = getReadCB(source)(source, buf + offset, (size_t) size);
+        size_t count = getReadCB(source)(source, buf + offset, (size_t) size);
 
 		if (count == -1) {
 
@@ -249,7 +249,7 @@ bool MessageBase::readNumberList(const TypeComponentUnit& source, std::vector<lo
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList read process is started, count : %ld", size);
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
 
         if (!readBlock(source, tmpBuf, 64, crc)) {
             LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read number from stream");
@@ -270,7 +270,7 @@ bool MessageBase::readBinary(const TypeComponentUnit& source, const std::filesys
 
     std::filesystem::create_directories(path.parent_path());
 
-	int out = open(path.c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
+	int out = open(path.string().c_str(), O_CREAT|O_WRONLY|O_TRUNC, 00755);
 	if (out == -1) {
         LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Read File could not created or opened at path : %s", path.c_str());
 		return false;
@@ -510,7 +510,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary write process is started at path : %s", path.c_str());
 
-	int in = open(path.c_str(), O_RDONLY);
+	int in = open(path.string().c_str(), O_RDONLY);
 	if (in == -1) {
 		LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary could not created or opened at path : %s", path.c_str());
 		return false;

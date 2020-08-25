@@ -7,7 +7,7 @@
 #include "NetUtil.h"
 
 UnixSocket::UnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
-        : Interface(host, device, schedulerCB) {
+        : CommInterface(host, device, schedulerCB) {
 
     if (!initUnixSocket()) {
         LOGS_E(getHost(), "initUnixSocket failed!!!");
@@ -51,7 +51,12 @@ bool UnixSocket::initUnixSocket() {
             return false;
         }
 
+#ifndef WIN32
         if (fcntl(unixSocket, F_SETFD, O_NONBLOCK) < 0) {
+#else
+        u_long nonblocking_enabled = true;
+        if (ioctlsocket( unixSocket, FIONBIO, &nonblocking_enabled ) != 0) {
+#endif
             LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
             close(unixSocket);
             return false;
@@ -102,17 +107,17 @@ bool UnixSocket::runReceiver() {
                 return false;
             }
 
-            threadAccept = std::thread([](Interface *interface, int acceptSocket) {
+            threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
                 auto source = std::make_shared<ComponentUnit>(acceptSocket);
 
-                auto msg = std::make_unique<Message>(interface->getHost());
+                auto msg = std::make_unique<Message>(commInterface->getHost());
 
                 if (msg->readFromStream(source)) {
 
                     auto owner = msg->getHeader().getOwner();
 
-                    interface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
                 }
             }, this, acceptSocket);
             threadAccept.detach();
@@ -193,9 +198,9 @@ UnixSocket::~UnixSocket() {
     close(unixSocket);
 }
 
-INTERFACE UnixSocket::getType() {
+COMM_INTERFACE UnixSocket::getType() {
 
-    return INTERFACE_UNIXSOCKET;
+    return COMMINTERFACE_UNIXSOCKET;
 
 }
 

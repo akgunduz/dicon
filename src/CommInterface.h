@@ -2,8 +2,8 @@
 // Created by Haluk Akgunduz on 24/06/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
-#ifndef DICON_INTERFACE_H
-#define DICON_INTERFACE_H
+#ifndef DICON_COMMINTERFACE_H
+#define DICON_COMMINTERFACE_H
 
 #include "Scheduler.h"
 #include "Message.h"
@@ -19,7 +19,7 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-class Interface {
+class CommInterface {
 
     const TypeHostUnit host;
     const TypeDevice device;
@@ -41,27 +41,27 @@ protected :
 
 	bool initThread();
 	void end();
-	Interface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
+	CommInterface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 
 public :
 
-    virtual ~Interface();
+    virtual ~CommInterface();
 
 	bool push(MSG_DIR, const TypeCommUnit&, TypeMessage);
-    const TypeHostUnit& getHost() const;
-    const TypeDevice& getDevice() const;
+    const TypeHostUnit& getHost();
+    const TypeDevice& getDevice();
     Address& getAddress();
     Address& getMulticastAddress();
 
     void setAddress(Address&);
     void setMulticastAddress(Address&);
 
-    virtual INTERFACE getType() = 0;
+    virtual COMM_INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;
 };
 
-typedef std::shared_ptr<Interface> TypeInterface;
+typedef std::shared_ptr<CommInterface> TypeInterface;
 typedef std::map<COMPONENT, TypeInterface> TypeInterfaceList;
 
-#endif //DICON_INTERFACE_H
+#endif //DICON_COMMINTERFACE_H

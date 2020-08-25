@@ -3,7 +3,6 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <paths.h>
 #include <CollectorHost.h>
 #include "JobItem.h"
 #include "WebApp.h"
@@ -62,7 +61,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     std::filesystem::path tmpFile = std::filesystem::temp_directory_path() / fileName;
 
-    std::FILE* uploadJobFile = std::fopen(tmpFile.c_str(), "w");
+    std::FILE* uploadJobFile = std::fopen(tmpFile.string().c_str(), "w");
 
     if (!uploadJobFile) {
         sendError(collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile.c_str());

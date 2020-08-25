@@ -3,11 +3,10 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-
-#include <random>
 #include "DeviceList.h"
 #include "Address.h"
 #include "Log.h"
+#include "Util.h"
 
 DeviceList* DeviceList::instance = nullptr;
 
@@ -25,6 +24,8 @@ int createMask(uint32_t baseAddress) {
 
 DeviceList::DeviceList() {
 
+#ifndef WIN32
+
     struct ifaddrs* ifAddrStruct = nullptr;
     struct ifaddrs* loop = nullptr;
 
@@ -41,7 +42,7 @@ DeviceList::DeviceList() {
                 continue;
             }
 
-            add(std::make_shared<Device>(loop->ifa_name, INTERFACE_NET,
+            add(std::make_shared<Device>(loop->ifa_name, COMMINTERFACE_TCPIP,
                                          ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
                                          createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
                                          (loop->ifa_flags & IFF_LOOPBACK) > 0));
@@ -50,18 +51,60 @@ DeviceList::DeviceList() {
 
     freeifaddrs(ifAddrStruct);
 
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+#else
+
+    WSADATA wsaData;
+    int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if (iResult != 0) {
+        LOGP_E("WSAStartup failed: %d", iResult);
+        return;
+    }
+
+    unsigned long outBufLen = 15000;
+
+    auto pAddresses = (IP_ADAPTER_ADDRESSES *) malloc(outBufLen);
+
+    auto status = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_PREFIX, nullptr, pAddresses, &outBufLen);
+
+    if (status == ERROR_BUFFER_OVERFLOW) {
+        free(pAddresses);
+        return;
+    }
+
+    for (auto pCurrAddress = pAddresses; pCurrAddress; pCurrAddress = pCurrAddress->Next) {
+
+        if (pCurrAddress->OperStatus != IfOperStatusUp) {
+            continue;
+        }
+
+        auto *si = (sockaddr_in *)(pCurrAddress->FirstUnicastAddress->Address.lpSockaddr);
+
+        add(std::make_shared<Device>(Util::to_narrow(pCurrAddress->FriendlyName),
+                                     COMMINTERFACE_TCPIP,
+                                     ntohl(si->sin_addr.s_addr),
+                                     pCurrAddress->FirstUnicastAddress->OnLinkPrefixLength,
+                                     pCurrAddress->IfType == IF_TYPE_SOFTWARE_LOOPBACK));
+
+    }
+
+    free(pAddresses);
+
+#endif
+
+    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution(1, time(nullptr));
 
-    add(std::make_shared<Device>("us", INTERFACE_UNIXSOCKET, distribution(generator)));
+    add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, distribution(generator)));
 }
 
 DeviceList *DeviceList::getInstance() {
 
     if (instance == nullptr) {
+
         instance = new DeviceList();
     }
+
     return instance;
 }
 
@@ -85,4 +128,8 @@ long DeviceList::getCount() {
 DeviceList::~DeviceList() {
 
     LOGP_T("Deallocating DeviceList");
+
+#ifdef WIN32
+    WSACleanup();
+#endif
 }

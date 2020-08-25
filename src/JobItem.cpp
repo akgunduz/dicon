@@ -20,14 +20,14 @@ JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath,
     }
 
     if (pathType == JOBPATH_ZIP) {
-        if (!extract(jobPath, _jobID)) {
+        if (!extract(jobPath.string(), _jobID)) {
          status = JOBSTATUS_ZIP_INVALID;
          return;
         }
 
     } else {
         char absPath[PATH_MAX];
-        sprintf(absPath, "%s/%ld", getHost()->getRootPath().c_str(), _jobID);
+        sprintf(absPath, "%s/%ld", getHost()->getRootPath().string().c_str(), _jobID);
         std::filesystem::copy(jobPath, absPath,
                 std::filesystem::copy_options::recursive |
                 std::filesystem::copy_options::update_existing);
@@ -62,7 +62,7 @@ int JobItem::getContentCount(int type) {
 
 void JobItem::reset() {
 
-    for (int i = 0; i < contentList->size(); i++) {
+    for (size_t i = 0; i < contentList->size(); i++) {
         contentList[i].clear();
     }
 }
@@ -564,7 +564,7 @@ bool JobItem::extract(const std::string& zipFile, long& _jobID) {
 
         std::filesystem::path filePath = path / file_stat.m_filename;
 
-        zipStatus = mz_zip_reader_extract_to_file(&zip_archive, i, filePath.c_str(), 0);
+        zipStatus = mz_zip_reader_extract_to_file(&zip_archive, i, filePath.string().c_str(), 0);
         if (!zipStatus) {
             LOGS_E(getHost(), "Zip reader can not extract file[%s]!", file_stat.m_filename);
             mz_zip_reader_end(&zip_archive);

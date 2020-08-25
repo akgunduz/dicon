@@ -41,31 +41,31 @@ public:
 
     bool parse(void *);
 
-    const std::string& getProcess() const;
+    const std::string& getProcess();
     void setProcess(const std::string&);
 
-    const std::string& getParsedProcess() const;
+    const std::string& getParsedProcess();
     void setParsedProcess(const std::string&);
 
-    int getFileCount() const;
+    int getFileCount();
     TypeProcessFile getFile(const TypeProcessFile&);
     const TypeProcessFileList& getFileList();
     void addFile(const TypeFileItem&, long, bool);
     void addFile(const TypeProcessFile&);
     void addFileList(const TypeProcessFileList&);
 
-    PROCESS_STATE getState() const;
+    PROCESS_STATE getState();
     void setState(PROCESS_STATE);
 
-    long getAssigned() const;
+    long getAssigned();
     void setAssigned(long);
 
     void setID(long) override;
 
-    long getDuration() const;
+    long getDuration();
     void setDuration(long duration);
 
-	CONTENT_TYPES getType() const override;
+	CONTENT_TYPES getType() override;
 
     bool check() override;
 };

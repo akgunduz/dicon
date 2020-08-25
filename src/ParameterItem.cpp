@@ -11,7 +11,7 @@ ParameterItem::ParameterItem(const TypeHostUnit& host, long id, long jobID, cons
 	param = _param;
 };
 
-CONTENT_TYPES ParameterItem::getType() const {
+CONTENT_TYPES ParameterItem::getType() {
 
 	return CONTENT_PARAM;
 }

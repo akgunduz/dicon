@@ -13,7 +13,7 @@ class ComponentFactory {
 
     TypeComponentMapList components;
 
-    int interface[2]{};
+    int commInterfaces[2]{};
 
     static ComponentFactory *instance;
 

@@ -8,12 +8,12 @@
 
 #include "Common.h"
 #include "Scheduler.h"
-#include "Interface.h"
+#include "CommInterface.h"
 #include "Message.h"
 
 #define UNIXSOCKETADDRESS_MASK 0xFFFFFFFFFFFFFF
 
-class UnixSocket : public Interface {
+class UnixSocket : public CommInterface {
 
 	int unixSocket;
 
@@ -27,7 +27,7 @@ public :
 	UnixSocket(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 	~UnixSocket() override;
 
-    INTERFACE getType() override;
+    COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
 

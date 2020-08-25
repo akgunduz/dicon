@@ -151,12 +151,12 @@ bool ProcessItem::check() {
     return true;
 }
 
-CONTENT_TYPES ProcessItem::getType() const {
+CONTENT_TYPES ProcessItem::getType() {
 
 	return CONTENT_PROCESS;
 }
 
-const std::string& ProcessItem::getProcess() const {
+const std::string& ProcessItem::getProcess() {
 
 	return process;
 }
@@ -166,7 +166,7 @@ void ProcessItem::setProcess(const std::string& _process) {
     process = _process;
 }
 
-const std::string& ProcessItem::getParsedProcess() const {
+const std::string& ProcessItem::getParsedProcess() {
 
 	return parsedProcess;
 }
@@ -176,7 +176,7 @@ void ProcessItem::setParsedProcess(const std::string& _parsedProcess) {
     parsedProcess = _parsedProcess;
 }
 
-int ProcessItem::getFileCount() const {
+int ProcessItem::getFileCount() {
 
     return fileList.size();
 }
@@ -213,7 +213,7 @@ void ProcessItem::addFileList(const TypeProcessFileList& _fileList) {
     fileList.insert(fileList.end(), _fileList.begin(), _fileList.end());
 }
 
-PROCESS_STATE ProcessItem::getState() const {
+PROCESS_STATE ProcessItem::getState() {
 
 	return state;
 }
@@ -223,7 +223,7 @@ void ProcessItem::setState(PROCESS_STATE _state) {
 	state = _state;
 }
 
-long ProcessItem::getAssigned() const {
+long ProcessItem::getAssigned() {
 
 	return assignedComponent;
 }
@@ -242,7 +242,7 @@ void ProcessItem::setID(long _id) {
     }
 }
 
-long ProcessItem::getDuration() const {
+long ProcessItem::getDuration() {
 
     return duration;
 }

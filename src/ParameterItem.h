@@ -22,7 +22,7 @@ public:
 
 	void set(const std::string&);
 
-	virtual CONTENT_TYPES getType() const;
+	virtual CONTENT_TYPES getType();
 
     virtual bool check();
 };

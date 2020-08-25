@@ -6,7 +6,7 @@
 #include "Collector.h"
 #include "CollectorHost.h"
 
-Collector::Collector(int interfaceOther, int interfaceNode) {
+Collector::Collector(int _commInterfaceOther, int _commInterfaceNode) {
 
     host = std::make_shared<CollectorHost>();
 
@@ -18,7 +18,7 @@ Collector::Collector(int interfaceOther, int interfaceNode) {
     addProcessHandler(COMP_NODE, MSGTYPE_INFO, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileInfoMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileBinaryMsg));
 
-    initInterfaces(COMP_COLLECTOR, interfaceOther, interfaceNode);
+    initInterfaces(COMP_COLLECTOR, _commInterfaceOther, _commInterfaceNode);
 }
 
 Collector::~Collector() {
@@ -35,7 +35,7 @@ bool Collector::processDistributorWakeupMsg(const TypeComponentUnit& owner, Type
 
 bool Collector::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (!setID(msg->getHeader().getVariant(0))) {
+    if (!setID((long)msg->getHeader().getVariant(0))) {
 
         return false;
     }

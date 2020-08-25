@@ -60,7 +60,7 @@ public:
     Address& getInterfaceAddress(COMPONENT);
     Address& getInterfaceMulticastAddress(COMPONENT);
     TypeAddressList getInterfaceAddressList(COMPONENT);
-    INTERFACE getInterfaceType(COMPONENT);
+    COMM_INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
     bool onReceive(const TypeComponentUnit&, MSG_TYPE, TypeMessage);
 

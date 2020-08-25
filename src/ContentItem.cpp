@@ -11,12 +11,12 @@ ContentItem::ContentItem(const TypeHostUnit& _host, long _id, long _assignedJob)
 
 ContentItem::ContentItem(const ContentItem &copy) = default;
 
-const TypeHostUnit& ContentItem::getHost() const {
+const TypeHostUnit& ContentItem::getHost() {
 
     return host;
 }
 
-long ContentItem::getID() const {
+long ContentItem::getID() {
 
     return id;
 }
@@ -26,7 +26,7 @@ void ContentItem::setID(long _id) {
     id = _id;
 }
 
-long ContentItem::getAssignedJob() const {
+long ContentItem::getAssignedJob() {
 
     return assignedJob;
 }

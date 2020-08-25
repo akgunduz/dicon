@@ -5,7 +5,7 @@
 #ifndef DICON_ADDRESS_H
 #define DICON_ADDRESS_H
 
-#include "InterfaceType.h"
+#include "CommInterfaceType.h"
 
 #define INTERFACE_POS 0
 #define INTERFACE_MASK 0x00FF
@@ -40,8 +40,8 @@ public:
 
     static Address invalid;
 
-    Address(INTERFACE = INTERFACE_NET);
-    Address(uint32_t, uint16_t, INTERFACE = INTERFACE_NET);
+    Address(COMM_INTERFACE = COMMINTERFACE_TCPIP);
+    Address(uint32_t, uint16_t, COMM_INTERFACE = COMMINTERFACE_TCPIP);
     explicit Address(BaseAddress);
     Address(BaseAddress, BaseAddress);
 
@@ -56,10 +56,10 @@ public:
     void setUI(BaseAddress&);
 
     bool isMulticast();
-    INTERFACE getInterface() const;
+    COMM_INTERFACE getInterface() const;
 
     void setMulticast(bool);
-    void setInterface(INTERFACE);
+    void setInterface(COMM_INTERFACE);
 
     bool operator==(const Address& ref) const
     {

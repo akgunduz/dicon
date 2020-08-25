@@ -25,6 +25,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/CollectorUnit.cpp
+        ${SOURCE_PATH}/CommInterface.cpp
         ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/ComponentFactory.cpp
@@ -40,7 +41,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/DistributorObject.cpp
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/HostUnit.cpp
-        ${SOURCE_PATH}/Interface.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/InterfaceFactory.cpp
         ${SOURCE_PATH}/JobItem.cpp
@@ -115,21 +115,27 @@ add_definitions(-DMULTICAST_ENABLED)
 
 include_directories(${SOURCE_PATH} ${UI_PATH} ${EXTERNAL_PATH})
 
+if(WIN32)
+    set(LIBRARIES ws2_32 Iphlpapi)
+else()
+    set(LIBRARIES pthread)
+endif()
+
 add_library(dicon-framework ${FRAMEWORK_FILES})
 
 add_executable(dicon-generator ${GENERATOR_FILES})
 
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
-target_link_libraries(dicon-console dicon-framework pthread)
+target_link_libraries(dicon-console dicon-framework ${LIBRARIES})
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework pthread)
+target_link_libraries(dicon-web dicon-framework ${LIBRARIES})
 
 add_executable(dicon-test ${TEST_FILES})
 target_compile_definitions(dicon-test PUBLIC -DTEST)
-target_link_libraries(dicon-test dicon-framework pthread)
+target_link_libraries(dicon-test dicon-framework ${LIBRARIES})
 
 add_custom_command(
         OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp

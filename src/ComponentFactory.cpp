@@ -24,8 +24,8 @@ ComponentFactory::~ComponentFactory() {
 
 ComponentFactory::ComponentFactory(const int *_interfaces) {
 
-    interface[0] = _interfaces[0];
-    interface[1] = _interfaces[1];
+    commInterfaces[0] = _interfaces[0];
+    commInterfaces[1] = _interfaces[1];
 }
 
 TypeDistributor& ComponentFactory::getDistributor() {
@@ -78,7 +78,7 @@ TypeComponentList& ComponentFactory::getNodes() {
 bool ComponentFactory::startDistributor(bool autoWake) {
 
     if (components[COMP_DISTRIBUTOR].empty()) {
-        components[COMP_DISTRIBUTOR].emplace_back(std::make_unique<Distributor>(interface[0], interface[1], autoWake));
+        components[COMP_DISTRIBUTOR].emplace_back(std::make_unique<Distributor>(commInterfaces[0], commInterfaces[1], autoWake));
     }
 
     return true;
@@ -88,7 +88,7 @@ bool ComponentFactory::startCollector(int count) {
 
     for (int i = 0; i < count; i++) {
 
-        components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(interface[0], interface[1]));
+        components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(commInterfaces[0], commInterfaces[1]));
     }
 
     return true;
@@ -96,7 +96,7 @@ bool ComponentFactory::startCollector(int count) {
 
 TypeCollector& ComponentFactory::startCollector() {
 
-    components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(interface[0], interface[1]));
+    components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(commInterfaces[0], commInterfaces[1]));
 
     return reinterpret_cast<TypeCollector &>(components[COMP_COLLECTOR].back());
 }
@@ -105,7 +105,7 @@ bool ComponentFactory::startNode(int count) {
 
     for (int i = 0; i < count; i++) {
 
-        components[COMP_NODE].emplace_back(std::make_unique<Node>(interface[1]));
+        components[COMP_NODE].emplace_back(std::make_unique<Node>(commInterfaces[1]));
     }
 
     return true;
@@ -113,7 +113,7 @@ bool ComponentFactory::startNode(int count) {
 
 TypeNode& ComponentFactory::startNode() {
 
-    components[COMP_NODE].emplace_back(std::make_unique<Node>(interface[1]));
+    components[COMP_NODE].emplace_back(std::make_unique<Node>(commInterfaces[1]));
 
     return reinterpret_cast<TypeNode &>(components[COMP_NODE].back());
 }

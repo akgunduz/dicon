@@ -14,18 +14,18 @@ class FileItem : public ContentItem {
 
 	bool is_exist{};
 	bool is_required{};
-	long size{};
+    std::uintmax_t size{};
 
 public:
 	explicit FileItem(const TypeHostUnit&, long = 0, long = 0, std::string = "");
 	~FileItem() override = default;
 
-    const std::string& getName() const;
+    const std::string& getName();
     void setName(const std::string&);
 
-    long getSize() const;
+    std::uintmax_t getSize();
 
-	CONTENT_TYPES getType() const override;
+	CONTENT_TYPES getType() override;
 
     bool check() override;
 

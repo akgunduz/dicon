@@ -64,6 +64,4 @@ int main(int argc, char** argv) {
 
     fclose(source);
     fclose(target);
-
-    printf("Hello World!\n");
 }

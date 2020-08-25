@@ -8,7 +8,7 @@
 
 #include "Log.h"
 #include "Scheduler.h"
-#include "Interface.h"
+#include "CommInterface.h"
 #include "Message.h"
 #include "Address.h"
 

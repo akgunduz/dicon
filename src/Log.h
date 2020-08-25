@@ -3,7 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_LOG_H
 #define DICON_LOG_H
 
@@ -69,7 +68,7 @@ struct LogLevel {
 
 class Log {
 
-	inline static LOGLEVEL logLevel = LEVEL_ERROR;
+	inline static LOGLEVEL logLevel = LEVEL_INFO;
 
     static constexpr const char* sColorCodes[COLOR_MAX] = {
             "[0m",
