@@ -142,3 +142,12 @@ add_custom_command(
         COMMAND dicon-generator
         DEPENDS dicon-generator
 )
+
+message(STATUS "summary of build options:
+    Install prefix:  ${CMAKE_INSTALL_PREFIX}
+    Target system:   ${CMAKE_SYSTEM_NAME}
+    Compiler:
+      C compiler:    ${CMAKE_C_COMPILER}
+      CFLAGS:        ${CMAKE_C_FLAGS_${_build_type}} ${CMAKE_C_FLAGS}
+      LDFLAGS:       ${CMAKE_EXE_LINKER_FLAGS}
+")
