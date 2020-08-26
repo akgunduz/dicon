@@ -47,7 +47,7 @@ bool ConsoleApp::collStateHandler(long id) {
 
         auto content = job->getFile(j);
 
-        LOGP_I("\tFile : %s, valid? : %s", content->getName(), content->check() ? "yes" : "no");
+        LOGP_I("\tFile : %s, valid? : %s", content->getName().c_str(), content->check() ? "yes" : "no");
     }
 
     LOGP_I("Processes");

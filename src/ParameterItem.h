@@ -16,15 +16,15 @@ public:
 
 	ParameterItem(const TypeHostUnit&, long, long, const std::string&);
 
-	~ParameterItem() override{};
+	~ParameterItem() override= default;
 
     const std::string& get();
 
 	void set(const std::string&);
 
-	virtual CONTENT_TYPES getType();
+	CONTENT_TYPES getType() override;
 
-    virtual bool check();
+    bool check() override;
 };
 
 typedef std::shared_ptr<ParameterItem> TypeParameterItem;

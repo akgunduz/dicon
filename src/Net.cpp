@@ -101,6 +101,12 @@ bool Net::initMulticast() {
         return false;
     }
 
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char *) &on, sizeof(int)) < 0) {
+        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
+        close(multicastSocket);
+        return false;
+    }
+
     struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
     if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
         LOGS_E(getHost(), "Socket bind with err : %d!!!", errno);
