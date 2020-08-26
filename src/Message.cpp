@@ -25,17 +25,17 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
         return false;
     }
 
-    std::vector<long> list;
+    std::vector<uint64_t> list;
 
     if (!readNumberList(source, list, block.get(1), crc)) {
         LOGS_E(getHost(), "readNumberList can not read number");
         return false;
     }
 
-    for (int i = 0; i < list.size(); i = i + 6) {
+    for (uint32_t i = 0; i < list.size(); i = i + 6) {
 
-        Address address(BaseAddress(list[i + 2], list[i + 3]),
-                        BaseAddress(list[i + 4], list[i + 5]));
+        Address address(BaseAddress((uint32_t)list[i + 2], (uint16_t)list[i + 3]),
+                        BaseAddress((uint32_t)list[i + 4], (uint16_t)list[i + 5]));
 
         componentList.emplace_back(ComponentUnitFactory::create((COMPONENT)block.get(0),
                                                                 (ARCH)list[i], list[i + 1], address));
@@ -73,10 +73,13 @@ bool Message::readProcessID(const TypeComponentUnit& source, long& processID, Me
         return false;
     }
 
-    if (!readNumber(source, processID, crc)) {
+    uint64_t number;
+    if (!readNumber(source, number, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
+
+    processID = (long)number;
 
     LOGS_D(getHost(), "Process ID is read successfully => ID : %ld", processID);
 
@@ -91,19 +94,19 @@ bool Message::readProcess(const TypeComponentUnit& source, const TypeProcessItem
         return false;
     }
 
-    long id;
+    uint64_t id;
     if (!readNumber(source, id, crc)) {
         LOGS_E(getHost(), "readProcessInfo can not read process id");
         return false;
     }
-    content->setID(id);
+    content->setID((long)id);
 
-    long jobID;
+    uint64_t jobID;
     if (!readNumber(source, jobID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
-    content->setAssignedJob(jobID);
+    content->setAssignedJob((long)jobID);
 
     std::string process;
     if (!readString(source, process, block.get(0), crc)) {
@@ -125,33 +128,33 @@ bool Message::readFile(const TypeComponentUnit& source, const TypeProcessFile& c
         return false;
     }
 
-    long id;
+    uint64_t id;
     if (!readNumber(source, id, crc)) {
         LOGS_E(getHost(), "readFile can not read id data");
         return false;
     }
-    content->get()->setID(id);
+    content->get()->setID((long)id);
 
-    long state;
+    uint64_t state;
     if (!readNumber(source, state, crc)) {
         LOGS_E(getHost(), "readFile can not read state data");
         return false;
     }
     content->setOutputState((bool)state);
 
-    long jobID;
+    uint64_t jobID;
     if (!readNumber(source, jobID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
-    content->get()->setAssignedJob(jobID);
+    content->get()->setAssignedJob((long)jobID);
 
-    long processID;
+    uint64_t processID;
     if (!readNumber(source, processID, crc)) {
         LOGS_E(getHost(), "readFile can not read jobID data");
         return false;
     }
-    content->setAssignedProcess(processID);
+    content->setAssignedProcess((long)processID);
 
     std::string fileName;
     if (!readString(source, fileName, block.get(0), crc)) {
@@ -251,7 +254,7 @@ bool Message::readMessageBlock(const TypeComponentUnit& source, MessageBlockHead
 
 bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
 
-    std::vector<long> list;
+    std::vector<uint64_t> list;
 
     for (auto &component : componentList) {
 

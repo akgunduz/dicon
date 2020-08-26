@@ -31,7 +31,7 @@ void ComponentManager::checkDead() {
 
     std::unique_lock<std::mutex> lock(mutex);
 
-    long curTime = time(nullptr);
+    long long curTime = time(nullptr);
 
     for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
 

@@ -51,7 +51,7 @@ long NetUtil::parseIPAddress(const std::string& address) {
 
 BaseAddress NetUtil::parseIPPortString(std::string address) {
 
-    long pos = address.find(':');
+    size_t pos = address.find(':');
 
     std::string sIP = address.substr(0, pos);
 

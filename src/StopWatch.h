@@ -10,8 +10,8 @@
 class StopWatch {
 
     bool initiated;
-    long tStart{};
-    long tStop{};
+    long long tStart{};
+    long long tStop{};
 
 public:
 

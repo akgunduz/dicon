@@ -120,7 +120,7 @@ TypeDevice& DeviceList::get(int index) {
     return list[index];
 }
 
-long DeviceList::getCount() {
+size_t DeviceList::getCount() {
 
     return list.size();
 }

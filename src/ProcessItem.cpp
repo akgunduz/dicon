@@ -176,7 +176,7 @@ void ProcessItem::setParsedProcess(const std::string& _parsedProcess) {
     parsedProcess = _parsedProcess;
 }
 
-int ProcessItem::getFileCount() {
+size_t ProcessItem::getFileCount() {
 
     return fileList.size();
 }

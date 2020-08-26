@@ -10,7 +10,7 @@
 class ComponentUnit : public CommUnit {
 
     int socket{};
-    long checkTime{};
+    long long checkTime{};
 
 public:
 

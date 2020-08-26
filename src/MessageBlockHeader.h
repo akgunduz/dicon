@@ -8,28 +8,26 @@
 #include "Common.h"
 #include "MessageType.h"
 
-#define BLOCK_HEADER_SIZE 8
-
 class MessageBlockHeader {
 
-    int type{};
-    int count{};
-    std::vector<long> data;
+    uint16_t type{};
+    uint16_t count{};
+    std::vector<uint64_t> data;
 
 public:
-    MessageBlockHeader(const MessageBlockHeader&);
-    explicit MessageBlockHeader(int = BLOCK_END_STREAM);
-    ~MessageBlockHeader();
+    MessageBlockHeader(const MessageBlockHeader&) = default;
+    explicit MessageBlockHeader(uint16_t = BLOCK_END_STREAM);
+    ~MessageBlockHeader() = default;
 
-    int getType() const;
-    void setType(int);
+    uint16_t getType();
+    void setType(uint16_t);
 
-    bool isEnd() const;
+    bool isEnd();
 
-    int getCount() const;
+    uint16_t getCount();
 
-    long get(int index);
-    int add(long _data);
+    uint64_t get(int index);
+    uint16_t add(uint64_t _data);
 };
 
 #endif //DICON_MESSAGEBLOCKHEADER_H

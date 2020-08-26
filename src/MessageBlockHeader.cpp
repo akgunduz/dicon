@@ -4,45 +4,36 @@
 
 #include "MessageBlockHeader.h"
 
-MessageBlockHeader::MessageBlockHeader(int _type) :
+MessageBlockHeader::MessageBlockHeader(uint16_t _type) :
     type(_type) {
 }
 
-MessageBlockHeader::MessageBlockHeader(const MessageBlockHeader& copy) {
-
-    type = copy.type;
-    count = copy.count;
-    data = copy.data;
-}
-
-MessageBlockHeader::~MessageBlockHeader() = default;
-
-int MessageBlockHeader::getType() const {
+uint16_t MessageBlockHeader::getType() {
 
     return type;
 }
 
-void MessageBlockHeader::setType(int _type) {
+void MessageBlockHeader::setType(uint16_t _type) {
 
     type = _type;
 }
 
-bool MessageBlockHeader::isEnd() const {
+bool MessageBlockHeader::isEnd() {
 
     return type == BLOCK_END_STREAM;
 }
 
-int MessageBlockHeader::getCount() const {
+uint16_t MessageBlockHeader::getCount() {
 
     return count;
 }
 
-long MessageBlockHeader::get(int index) {
+uint64_t MessageBlockHeader::get(int index) {
 
     return data[index];
 }
 
-int MessageBlockHeader::add(long _data) {
+uint16_t MessageBlockHeader::add(uint64_t _data) {
 
     data.emplace_back(_data);
     count++;

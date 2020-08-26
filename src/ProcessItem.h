@@ -47,7 +47,7 @@ public:
     const std::string& getParsedProcess();
     void setParsedProcess(const std::string&);
 
-    int getFileCount();
+    size_t getFileCount();
     TypeProcessFile getFile(const TypeProcessFile&);
     const TypeProcessFileList& getFileList();
     void addFile(const TypeFileItem&, long, bool);

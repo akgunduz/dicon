@@ -59,8 +59,8 @@ bool Util::str2hex(uint8_t *out, const char *in, uint32_t len) {
 
 std::string Util::parsePath(const std::filesystem::path& path, const std::string &str) {
 
-    unsigned long len = strlen(ROOT_SIGN);
-    unsigned long pos = 0;
+    size_t len = strlen(ROOT_SIGN);
+    size_t pos = 0;
     std::string parsed = str;
 
     do {

@@ -46,8 +46,8 @@ public:
 	bool readHeader(const TypeComponentUnit&, uint32_t&);
 	bool readBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
 	bool readString(const TypeComponentUnit&, std::string&, size_t, uint32_t&);
-	bool readNumber(const TypeComponentUnit&, long&, uint32_t&);
-    bool readNumberList(const TypeComponentUnit&, std::vector<long> &, size_t, uint32_t&);
+	bool readNumber(const TypeComponentUnit&, uint64_t&, uint32_t&);
+    bool readNumberList(const TypeComponentUnit&, std::vector<uint64_t> &, size_t, uint32_t&);
     bool readBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
     bool readCRC(const TypeComponentUnit&, uint32_t&);
 	bool readFromStream(const TypeComponentUnit&);
@@ -61,8 +61,8 @@ public:
 	bool writeHeader(const TypeComponentUnit&, uint32_t&);
 	bool writeBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
 	bool writeString(const TypeComponentUnit&, const std::string&, uint32_t&);
-	bool writeNumber(const TypeComponentUnit&, long, uint32_t&);
-    bool writeNumberList(const TypeComponentUnit&, std::vector<long>&, uint32_t&);
+	bool writeNumber(const TypeComponentUnit&, uint64_t, uint32_t&);
+    bool writeNumberList(const TypeComponentUnit&, std::vector<uint64_t>&, uint32_t&);
 	bool writeBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
     bool writeCRC(const TypeComponentUnit&, uint32_t&);
 
