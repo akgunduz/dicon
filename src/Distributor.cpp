@@ -115,7 +115,7 @@ void Distributor::collProcess() {
 
             LOGS_W(getHost(), "Unresponsive node detected, count : %d", busyDeadCount);
 
-            TypeComponentReplaceIDList replaceIdList;
+            TypeComponentListMapIDList replaceIdList;
 
             size_t processDeadCount = std::min(nodeCount, busyDeadCount);
 

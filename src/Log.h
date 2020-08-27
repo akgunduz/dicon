@@ -108,6 +108,11 @@ public:
         printf("Log Level Set to %s\n", sLogLevels[level].name);
 	};
 
+	static inline void _logP(LOGLEVEL level, const char* logout) {
+
+        printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
+	}
+
     static void logP(LOGLEVEL level, const char* format) {
 
         if (logLevel < level) {
@@ -117,7 +122,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, "%s", format);
 
-        printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
+        _logP(level, logout);
     }
 
     template<typename... Args>
@@ -130,7 +135,17 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, format, args...);
 
-        printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
+        _logP(level, logout);
+    }
+
+    static inline void _logS(LOGLEVEL level, const TypeHostUnit& host, const char* logout) {
+
+        printf("\033%s%11s[%d]                    : %s\033%s\n",
+               sLogLevels[level].color,
+               ComponentType::getName(host->getType()),
+               host->getID(),
+               logout,
+               sColorCodes[COLOR_RESET]);
     }
 
     static void logS(LOGLEVEL level, const TypeHostUnit& host, const char* format) {
@@ -142,12 +157,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, "%s", format);
 
-        printf("\033%s%11s[%d]                    : %s\033%s\n",
-               sLogLevels[level].color,
-               ComponentType::getName(host->getType()),
-               host->getID(),
-               logout,
-               sColorCodes[COLOR_RESET]);
+        _logS(level, host, logout);
     }
 
     template<typename... Args>
@@ -160,10 +170,20 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, format, args...);
 
-        printf("\033%s%11s[%d]                    : %s\033%s\n",
+        _logS(level, host, logout);
+    }
+
+    static inline void _logC(LOGLEVEL level, const TypeHostUnit& host,
+                             const TypeCommUnit& target, MSG_DIR direction,
+                             const char* logout) {
+
+        printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
                host->getID(),
+               MessageType::getMsgDirName(direction),
+               ComponentType::getName(target->getType()),
+               target->getID(),
                logout,
                sColorCodes[COLOR_RESET]);
     }
@@ -179,15 +199,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, "%s", format);
 
-        printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
-               sLogLevels[level].color,
-               ComponentType::getName(host->getType()),
-               host->getID(),
-               MessageType::getMsgDirName(direction),
-               ComponentType::getName(target->getType()),
-               target->getID(),
-               logout,
-               sColorCodes[COLOR_RESET]);
+        _logC(level, host, target, direction, logout);
     }
 
     template<typename... Args>
@@ -202,15 +214,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, format, args...);
 
-        printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
-               sLogLevels[level].color,
-               ComponentType::getName(host->getType()),
-               host->getID(),
-               MessageType::getMsgDirName(direction),
-               ComponentType::getName(target->getType()),
-               target->getID(),
-               logout,
-               sColorCodes[COLOR_RESET]);
+        _logC(level, host, target, direction, logout);
     }
 };
 

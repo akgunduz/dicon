@@ -79,7 +79,7 @@ TypeComponentMapIDList& ComponentManager::get() {
     return componentsMapID;
 }
 
-TypeComponentUnit ComponentManager::get(long id) {
+TypeComponentUnit ComponentManager::get(TypeID id) {
 
     std::unique_lock<std::mutex> lock(mutex);
 
@@ -108,7 +108,7 @@ TypeComponentUnit ComponentManager::getDead(size_t index) {
     return nullptr;
 }
 
-long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
+TypeID ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
 
     std::unique_lock<std::mutex> lock(mutex);
 

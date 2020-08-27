@@ -31,6 +31,7 @@ public:
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;
 typedef std::vector<TypeComponentUnit> TypeComponentUnitList;
-typedef std::map<long, TypeComponentUnit> TypeComponentMapIDList;
+typedef std::map<TypeID, TypeComponentUnit> TypeComponentMapIDList;
+typedef std::map<TypeID, TypeComponentUnitList> TypeComponentListMapIDList;
 
 #endif //DICON_COMPONENTUNIT_H

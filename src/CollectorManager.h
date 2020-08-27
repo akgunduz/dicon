@@ -12,11 +12,11 @@
 
 typedef struct CollectorRequest {
 
-    long collID;
+    TypeID collID;
 
     size_t reqCount;
 
-    CollectorRequest(long _collID, size_t _reqCount)
+    CollectorRequest(TypeID _collID, size_t _reqCount)
         : collID(_collID), reqCount(_reqCount){
 
     };
@@ -27,22 +27,22 @@ class CollectorManager : public ComponentManager {
 
     std::mutex collMutex;
 
-    std::map<long, CollectorObject> collList;
+    std::map<TypeID, CollectorObject> collList;
     std::deque<TypeCollectorRequest> collReqList;
 
 protected:
 
-    TypeComponentUnit createUnit(ARCH, long, Address&) final;
+    TypeComponentUnit createUnit(ARCH, TypeID, Address&) final;
 
 public:
 
     CollectorManager(const TypeHostUnit&, bool);
     ~CollectorManager() override;
 
-    COLLSTATES getState(long);
-    void setState(long, COLLSTATES);
+    COLLSTATES getState(TypeID);
+    void setState(TypeID, COLLSTATES);
 
-    bool addRequest(long, size_t);
+    bool addRequest(TypeID, size_t);
     CollectorRequest* getRequest();
     void updateRequest(size_t);
     void removeRequest();

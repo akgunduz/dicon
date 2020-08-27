@@ -12,7 +12,7 @@ CollectorManager::CollectorManager(const TypeHostUnit& _host, bool _protect)
 
 CollectorManager::~CollectorManager() = default;
 
-COLLSTATES CollectorManager::getState(long id) {
+COLLSTATES CollectorManager::getState(TypeID id) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 
@@ -26,7 +26,7 @@ COLLSTATES CollectorManager::getState(long id) {
     return COLLSTATE_MAX;
 }
 
-void CollectorManager::setState(long id, COLLSTATES state) {
+void CollectorManager::setState(TypeID id, COLLSTATES state) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 
@@ -38,12 +38,12 @@ void CollectorManager::setState(long id, COLLSTATES state) {
     }
 }
 
-TypeComponentUnit CollectorManager::createUnit(ARCH arch, long id, Address& address) {
+TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, Address& address) {
 
     return std::make_shared<CollectorUnit>(arch, id, address);
 }
 
-bool CollectorManager::addRequest(long id, size_t reqNodeCount) {
+bool CollectorManager::addRequest(TypeID id, size_t reqNodeCount) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 

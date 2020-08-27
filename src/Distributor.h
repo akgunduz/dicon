@@ -16,8 +16,6 @@
 
 #define WAKEUP_INTERVAL 5
 
-typedef std::map<long, TypeComponentUnitList> TypeComponentReplaceIDList;
-
 class Distributor : public Component {
 
     volatile bool runCollThread = true;

@@ -101,7 +101,7 @@ size_t NodeManager::getBusyDeadCount() {
     return count;
 }
 
-Address& NodeManager::getAddress(long id) {
+Address& NodeManager::getAddress(TypeID id) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -114,7 +114,7 @@ Address& NodeManager::getAddress(long id) {
     return Address::invalid;
 }
 
-NODESTATES NodeManager::getState(long id) {
+NODESTATES NodeManager::getState(TypeID id) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -127,7 +127,7 @@ NODESTATES NodeManager::getState(long id) {
     return NODESTATE_MAX;
 }
 
-void NodeManager::setState(long id, NODESTATES state) {
+void NodeManager::setState(TypeID id, NODESTATES state) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -138,7 +138,7 @@ void NodeManager::setState(long id, NODESTATES state) {
     }
 }
 
-TypeComponentUnit NodeManager::getAssigned(long id) {
+TypeComponentUnit NodeManager::getAssigned(TypeID id) {
 
      std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -152,7 +152,7 @@ TypeComponentUnit NodeManager::getAssigned(long id) {
     return nullptr;
 }
 
-void NodeManager::setAssigned(long id, TypeComponentUnit& assigned) {
+void NodeManager::setAssigned(TypeID id, TypeComponentUnit& assigned) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -163,7 +163,7 @@ void NodeManager::setAssigned(long id, TypeComponentUnit& assigned) {
     }
 }
 
-void NodeManager::setAssigned(long id, ARCH assignedArch, long assignedID, Address& assignedAddress) {
+void NodeManager::setAssigned(TypeID id, ARCH assignedArch, TypeID assignedID, Address& assignedAddress) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -175,7 +175,7 @@ void NodeManager::setAssigned(long id, ARCH assignedArch, long assignedID, Addre
     }
 }
 
-void NodeManager::releaseAssigned(long id) {
+void NodeManager::releaseAssigned(TypeID id) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -188,7 +188,7 @@ void NodeManager::releaseAssigned(long id) {
 }
 
 
-TypeComponentUnit NodeManager::createUnit(ARCH arch, long id, Address& address) {
+TypeComponentUnit NodeManager::createUnit(ARCH arch, TypeID id, Address& address) {
 
     return std::make_shared<NodeUnit>(arch, id, address);
 }

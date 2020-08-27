@@ -18,21 +18,21 @@ public:
 	explicit NodeManager(TypeHostUnit&, bool);
     ~NodeManager() override = default;
 
-    NODESTATES getState(long);
-	void setState(long, NODESTATES);
+    NODESTATES getState(TypeID);
+	void setState(TypeID, NODESTATES);
 
-    Address& getAddress(long);
+    Address& getAddress(TypeID);
     TypeNodeUnit getIdle(const TypeComponentUnit&);
     size_t getIdleCount();
     TypeNodeUnit getBusyDead();
     size_t getBusyDeadCount();
 
-    TypeComponentUnit getAssigned(long);
-	void setAssigned(long, TypeComponentUnit&);
-	void setAssigned(long, ARCH, long, Address&);
-	void releaseAssigned(long);
+    TypeComponentUnit getAssigned(TypeID);
+	void setAssigned(TypeID, TypeComponentUnit&);
+	void setAssigned(TypeID, ARCH, TypeID, Address&);
+	void releaseAssigned(TypeID);
 
-    TypeComponentUnit createUnit(ARCH, long, Address&) final;
+    TypeComponentUnit createUnit(ARCH, TypeID, Address&) final;
 };
 
 #endif //DICON_NODEMANAGER_H

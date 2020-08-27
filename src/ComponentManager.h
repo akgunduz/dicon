@@ -15,7 +15,7 @@ class ComponentManager {
 
     const TypeHostUnit host;
 
-    long idCounter;
+    TypeID idCounter;
 
     bool protect{false};
 
@@ -31,7 +31,7 @@ class ComponentManager {
 
 protected:
 
-    virtual TypeComponentUnit createUnit(ARCH, long, Address&) = 0;
+    virtual TypeComponentUnit createUnit(ARCH, TypeID, Address&) = 0;
 
 public:
 
@@ -40,13 +40,13 @@ public:
 
     TypeComponentMapIDList& get();
     TypeComponentUnitList& getDead();
-    TypeComponentUnit get(long);
+    TypeComponentUnit get(TypeID);
     TypeComponentUnit getDead(size_t);
     size_t size();
     void clear();
 
     void process();
-    long add(ARCH, Address&, bool&);
+    TypeID add(ARCH, Address&, bool&);
 };
 
 #endif //DICON_COMPONENTMANAGER_H
