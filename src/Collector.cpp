@@ -18,7 +18,14 @@ Collector::Collector(int _commInterfaceOther, int _commInterfaceNode) {
     addProcessHandler(COMP_NODE, MSGTYPE_INFO, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileInfoMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Collector::processNodeFileBinaryMsg));
 
-    initInterfaces(COMP_COLLECTOR, _commInterfaceOther, _commInterfaceNode);
+    if (!initInterfaces(COMP_COLLECTOR, _commInterfaceOther, _commInterfaceNode)) {
+        LOGS_E(getHost(), "Collector could not initialized");
+        return;
+    }
+
+    initialized = true;
+
+    LOGS_T(getHost(), "Collector is initialized");
 }
 
 Collector::~Collector() {

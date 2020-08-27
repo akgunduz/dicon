@@ -122,7 +122,7 @@ long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
 
         isAlreadyAdded = true;
 
-        component.second->setCheckTime(time(nullptr));
+        component.second->setCheckTime(std::chrono::system_clock::now().time_since_epoch().count());
 
         return component.second->getID();
 
@@ -132,7 +132,7 @@ long ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
 
     auto object = createUnit(arch, newID, address);
 
-    object->setCheckTime(time(nullptr));
+    object->setCheckTime(std::chrono::system_clock::now().time_since_epoch().count());
 
     LOGS_I(host, "%s[%d] is added to network",
            ComponentType::getName(object->getType()), object->getID());

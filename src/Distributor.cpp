@@ -22,7 +22,10 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
     addProcessHandler(COMP_NODE, MSGTYPE_BUSY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeBusyMsg));
     addProcessHandler(COMP_NODE, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Distributor::processNodeReadyMsg));
 
-    initInterfaces(COMP_DISTRIBUTOR, _commInterfaceOther, _commInterfaceNode);
+    if (!initInterfaces(COMP_DISTRIBUTOR, _commInterfaceOther, _commInterfaceNode)) {
+        LOGS_E(getHost(), "Distributor could not initialized");
+        return;
+    }
 
     nodeManager = new NodeManager(host, false);
 
@@ -41,11 +44,19 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
     pollThread = std::thread([](Distributor *distributor){
             distributor->pollProcess();
         }, this);
+
+    initialized = true;
+
+    LOGS_T(getHost(), "Distributor is initialized");
 }
 
 Distributor::~Distributor() {
 
     LOGP_T("Deallocating Distributor");
+
+    if (!initialized) {
+        return;
+    }
 
     runPollThread = false;
 

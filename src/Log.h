@@ -142,7 +142,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, "%s", format);
 
-        printf("\033%s%11s[%ld]                    : %s\033%s\n",
+        printf("\033%s%11s[%d]                    : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
                host->getID(),
@@ -160,7 +160,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, format, args...);
 
-        printf("\033%s%11s[%ld]                    : %s\033%s\n",
+        printf("\033%s%11s[%d]                    : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
                host->getID(),
@@ -179,7 +179,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, "%s", format);
 
-        printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
+        printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
                host->getID(),
@@ -202,7 +202,7 @@ public:
         char logout[PATH_MAX];
         std::sprintf(logout, format, args...);
 
-        printf("\033%s%11s[%ld] %s %11s[%ld] : %s\033%s\n",
+        printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
                host->getID(),

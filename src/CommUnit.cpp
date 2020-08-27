@@ -4,7 +4,7 @@
 
 #include "CommUnit.h"
 
-CommUnit::CommUnit(COMPONENT _type, ARCH _arch, long _id, Address _address)
+CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id, Address _address)
         : id(_id), type(_type), arch(_arch), address(_address) {
 }
 
@@ -18,12 +18,12 @@ CommUnit::CommUnit(COMPONENT _type)
 
 CommUnit::CommUnit(const CommUnit &copy) = default;
 
-long CommUnit::getID() const {
+TypeID CommUnit::getID() const {
 
     return id;
 }
 
-void CommUnit::setID(long _id) {
+void CommUnit::setID(TypeID _id) {
 
     id = _id;
 }

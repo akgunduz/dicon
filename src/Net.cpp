@@ -136,13 +136,13 @@ TypeReadCB Net::getReadCB(const TypeComponentUnit& source) {
 
         return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
 
-            return read(source->getSocket(), buf, size);
+            return read(source->getSocket(), buf, (unsigned int)size);
         };
     }
 
     return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
 
-        return recvfrom(source->getSocket(), (char*)buf, size, 0, nullptr, nullptr);
+        return recvfrom(source->getSocket(), (char*)buf, (int)size, 0, nullptr, nullptr);
     };
 }
 
@@ -152,7 +152,7 @@ TypeWriteCB Net::getWriteCB(const TypeComponentUnit& target) {
 
         return [] (const TypeComponentUnit& target, const uint8_t *buf, size_t size) -> size_t {
 
-            return write(target->getSocket(), buf, size);
+            return write(target->getSocket(), buf, (unsigned int)size);
         };
     }
 
@@ -160,7 +160,7 @@ TypeWriteCB Net::getWriteCB(const TypeComponentUnit& target) {
 
         struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-        return sendto(target->getSocket(), (const char*)buf, size, 0,
+        return sendto(target->getSocket(), (const char*)buf, (int)size, 0,
                       (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
     };
 }

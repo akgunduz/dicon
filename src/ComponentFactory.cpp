@@ -78,7 +78,11 @@ TypeComponentList& ComponentFactory::getNodes() {
 bool ComponentFactory::startDistributor(bool autoWake) {
 
     if (components[COMP_DISTRIBUTOR].empty()) {
-        components[COMP_DISTRIBUTOR].emplace_back(std::make_unique<Distributor>(commInterfaces[0], commInterfaces[1], autoWake));
+        auto distributor = std::make_unique<Distributor>(commInterfaces[0], commInterfaces[1], autoWake);
+        if (!distributor->isInitialized()) {
+            return false;
+        }
+        components[COMP_DISTRIBUTOR].emplace_back(std::move(distributor));
     }
 
     return true;
@@ -88,15 +92,22 @@ bool ComponentFactory::startCollector(int count) {
 
     for (int i = 0; i < count; i++) {
 
-        components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(commInterfaces[0], commInterfaces[1]));
-    }
+        if (startCollector() == Component::nullComponent) {
+            return false;
+        }
+     }
 
     return true;
 }
 
 TypeCollector& ComponentFactory::startCollector() {
 
-    components[COMP_COLLECTOR].emplace_back(std::make_unique<Collector>(commInterfaces[0], commInterfaces[1]));
+    auto collector = std::make_shared<Collector>(commInterfaces[0], commInterfaces[1]);
+    if (!collector->isInitialized()) {
+        return reinterpret_cast<TypeCollector &>(Component::nullComponent);
+    }
+
+    components[COMP_COLLECTOR].emplace_back(std::move(collector));
 
     return reinterpret_cast<TypeCollector &>(components[COMP_COLLECTOR].back());
 }
@@ -105,7 +116,9 @@ bool ComponentFactory::startNode(int count) {
 
     for (int i = 0; i < count; i++) {
 
-        components[COMP_NODE].emplace_back(std::make_unique<Node>(commInterfaces[1]));
+        if (startNode() == Component::nullComponent) {
+            return false;
+        }
     }
 
     return true;
@@ -113,7 +126,12 @@ bool ComponentFactory::startNode(int count) {
 
 TypeNode& ComponentFactory::startNode() {
 
-    components[COMP_NODE].emplace_back(std::make_unique<Node>(commInterfaces[1]));
+    auto node = std::make_shared<Node>(commInterfaces[1]);
+    if (!node->isInitialized()) {
+        return reinterpret_cast<TypeNode &>(Component::nullComponent);
+    }
+
+    components[COMP_NODE].emplace_back(std::move(node));
 
     return reinterpret_cast<TypeNode &>(components[COMP_NODE].back());
 }

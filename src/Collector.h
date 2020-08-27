@@ -45,7 +45,7 @@ public:
     TypeJobItem& loadJob(const std::filesystem::path&);
 };
 
-typedef std::unique_ptr<Collector> TypeCollector;
+typedef std::shared_ptr<Collector> TypeCollector;
 
 #endif //DICON_COLLECTOR_H
 

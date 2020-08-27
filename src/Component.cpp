@@ -40,6 +40,11 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
+    if (!interfaces[COMP_NODE] || !interfaces[COMP_DISTRIBUTOR]) {
+
+        return false;
+    }
+
     host->setAddress(ComponentUnit::next(type), getInterfaceAddress(ComponentUnit::next(type)));
     host->setAddress(ComponentUnit::prev(type), getInterfaceAddress(ComponentUnit::prev(type)));
 
@@ -172,6 +177,11 @@ bool Component::addStaticProcessHandler(COMPONENT component, MSG_TYPE msgType,
     processStaticMsg[component][msgType] = handler;
 
     return true;
+}
+
+bool Component::isInitialized() {
+
+    return initialized;
 }
 
 

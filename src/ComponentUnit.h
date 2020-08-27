@@ -15,7 +15,7 @@ class ComponentUnit : public CommUnit {
 public:
 
     ComponentUnit() = default;
-    ComponentUnit(COMPONENT, ARCH, long, Address);
+    ComponentUnit(COMPONENT, ARCH, TypeID, Address);
     ComponentUnit(COMPONENT, Address);
     ComponentUnit(const ComponentUnit&);
     explicit ComponentUnit(const TypeCommUnit&);
@@ -25,8 +25,8 @@ public:
     int getSocket() const;
     void setSocket(int);
 
-    long getCheckTime() const;
-    void setCheckTime(long checkTime);
+    long long getCheckTime() const;
+    void setCheckTime(long long checkTime);
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;

@@ -123,6 +123,10 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL logLevel, std::vector<int>& componentC
     : App(APPTYPE_WEB, interfaceID, logLevel, componentCount, true) {
 
 
+    if (!initialized) {
+        return;
+    }
+
     WebOption options;
     options.setOption("enable_keep_alive", "yes");
     options.setOption("request_timeout_ms", 10000);
@@ -189,6 +193,10 @@ WebApp::WebApp(int *interfaceID, LOGLEVEL logLevel, std::vector<int>& componentC
 WebApp::~WebApp() {
 
     LOGP_T("Deallocating WebApp");
+
+    if (!initialized) {
+        return;
+    }
 
     mg_stop(context);
 

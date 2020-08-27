@@ -4,7 +4,7 @@
 
 #include "ComponentUnit.h"
 
-ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, long _id, Address _address)
+ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, TypeID _id, Address _address)
     : CommUnit(_type, _arch, _id, _address) {
 }
 
@@ -32,12 +32,12 @@ void ComponentUnit::setSocket(int _socket) {
     socket = _socket;
 }
 
-long ComponentUnit::getCheckTime() const {
+long long ComponentUnit::getCheckTime() const {
 
     return checkTime;
 }
 
-void ComponentUnit::setCheckTime(long _checkTime) {
+void ComponentUnit::setCheckTime(long long _checkTime) {
 
     checkTime = _checkTime;
 }

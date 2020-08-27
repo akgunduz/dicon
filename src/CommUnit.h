@@ -9,11 +9,13 @@
 #include "ComponentType.h"
 #include "ArchType.h"
 
+typedef uint32_t TypeID;
+
 class CommUnit {
 
 protected:
 
-    uint32_t id{};
+    TypeID id{};
 
     uint16_t arch{ARCH_MAX};
 
@@ -28,11 +30,11 @@ public:
     CommUnit() = default;
     explicit CommUnit(COMPONENT);
     CommUnit(COMPONENT, Address);
-    CommUnit(COMPONENT, ARCH, long, Address);
+    CommUnit(COMPONENT, ARCH, TypeID, Address);
     CommUnit(const CommUnit&);
 
-    long getID() const;
-    void setID(long);
+    TypeID getID() const;
+    void setID(TypeID);
 
     ARCH getArch() const;
     void setArch(ARCH);

@@ -23,9 +23,14 @@ Node::Node(int _commInterface) {
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_BINARY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorBinaryMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_READY, static_cast<TypeProcessComponentMsg>(&Node::processCollectorReadyMsg));
 
-    initInterfaces(COMP_NODE, _commInterface, _commInterface);
+    if (!initInterfaces(COMP_NODE, _commInterface, _commInterface)) {
+        LOGS_E(getHost(), "Node could not initialized");
+        return;
+    }
 
     processItem = std::make_shared<ProcessItem>(host);
+
+    initialized = true;
 
     LOGS_T(getHost(), "Node is initialized");
 }

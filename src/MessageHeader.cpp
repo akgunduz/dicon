@@ -83,7 +83,7 @@ void MessageHeader::deSerialize(const uint8_t* buffer) {
     priority = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.type = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.arch = ntohs(*((uint16_t *) buffer)); buffer += 2;
-    owner.id = ntohl(*((uint32_t *) buffer)); buffer += 4;
+    owner.id = ntohl(*((TypeID *) buffer)); buffer += sizeof(TypeID);
     owner.address.flag = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.get().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.get().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
@@ -100,7 +100,7 @@ void MessageHeader::serialize(uint8_t *buffer) {
     *((uint16_t *) buffer) = htons(priority); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.type); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.arch); buffer += 2;
-    *((uint32_t *) buffer) = htonl(owner.id); buffer += 4;
+    *((TypeID *) buffer) = htonl(owner.id); buffer += sizeof(TypeID);
     *((uint16_t *) buffer) = htons(owner.address.flag); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.address.get().port); buffer += 2;
     *((uint32_t *) buffer) = htonl(owner.address.get().base); buffer += 4;

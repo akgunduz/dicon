@@ -26,6 +26,8 @@ protected:
 
     ComponentFactory* componentController;
 
+    bool initialized{false};
+
     App(enum APPTYPE, int *, LOGLEVEL, std::vector<int>, bool);
 
 public:
@@ -35,6 +37,8 @@ public:
     virtual int notifyHandler(COMPONENT, NOTIFYTYPE) = 0;
 
     virtual ~App();
+
+    bool isInitialized();
 };
 
 #endif //DICON_APPLICATION_H

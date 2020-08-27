@@ -14,7 +14,7 @@ class HostUnit {
     const std::filesystem::path basePath;
     std::filesystem::path rootPath;
 
-    uint32_t id{};
+    TypeID id{};
 
     COMPONENT type{COMP_MAX};
 
@@ -22,15 +22,15 @@ class HostUnit {
 
 public:
 
-    HostUnit(COMPONENT, long = 0);
+    HostUnit(COMPONENT, TypeID = 0);
     HostUnit(const HostUnit&);
 
     virtual ~HostUnit();
 
     const std::filesystem::path& getRootPath();
 
-    long getID();
-    void setID(long);
+    TypeID getID();
+    void setID(TypeID);
 
     ARCH getArch();
 
@@ -56,7 +56,7 @@ public:
         address[ComponentUnit::prev(type)].setUI(_address);
     }
 
-    void set(COMPONENT, long, COMPONENT, Address);
+    void set(COMPONENT, TypeID, COMPONENT, Address);
 };
 
 typedef std::shared_ptr<HostUnit> TypeHostUnit;

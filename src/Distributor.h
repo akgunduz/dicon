@@ -66,6 +66,6 @@ public:
     NodeManager* getNodes() const;
 };
 
-typedef std::unique_ptr<Distributor> TypeDistributor;
+typedef std::shared_ptr<Distributor> TypeDistributor;
 
 #endif //DICON_DISTRIBUTOR_H

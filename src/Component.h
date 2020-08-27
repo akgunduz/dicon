@@ -36,7 +36,10 @@ protected :
 
     TypeHostUnit host;
 
+    bool initialized{false};
+
     TypeProcessMsgMap processMsg[COMP_MAX];
+
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
 
     const InterfaceSchedulerCB *schedulerCB;
@@ -72,6 +75,7 @@ public:
     static void deRegisterNotify();
 
     bool setID(long);
+    bool isInitialized();
 
     bool addProcessHandler(COMPONENT, MSG_TYPE, TypeProcessComponentMsg);
     bool addStaticProcessHandler(COMPONENT, MSG_TYPE, TypeStaticProcessComponentMsg);

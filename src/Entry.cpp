@@ -139,7 +139,10 @@ int main(int argc, char** argv) {
 
 #endif
 
-    int status = app->run();
+    int status = EXIT_FAILURE;
+    if (app->isInitialized()) {
+        status = app->run();
+    }
 
     delete app;
 

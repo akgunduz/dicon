@@ -49,6 +49,6 @@ public:
     TypeProcessList& getProcessList();
 };
 
-typedef std::unique_ptr<Node> TypeNode;
+typedef std::shared_ptr<Node> TypeNode;
 
 #endif //DICON_NODE_H

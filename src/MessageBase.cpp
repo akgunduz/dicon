@@ -341,7 +341,7 @@ bool MessageBase::readFromStream(const TypeComponentUnit& source) {
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {
 
-	long offset = 0;
+	size_t offset = 0;
 	bool busy = false;
 
 	do {

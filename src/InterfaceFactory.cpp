@@ -30,6 +30,8 @@ TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const 
     } catch (std::exception &e) {
 
         LOGS_E(host, "%s", e.what());
+
+        return nullptr;
     }
 
     return commInterface;

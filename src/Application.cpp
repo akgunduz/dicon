@@ -10,13 +10,6 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int>
 
     Log::init(logLevel);
 
-    Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYTYPE state) -> bool {
-
-        LOGP_T("Notifying Application UI, target : %s, state : %s",
-               ComponentType::getName(target), NotifyType::getName(state));
-        return ((App*) context)->notifyHandler(target, state);
-    });
-
     deviceList = DeviceList::getInstance();
 
     LOGP_I("Using network interfaces : %s and %s",
@@ -25,17 +18,38 @@ App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int>
 
     componentController = ComponentFactory::newInstance(interfaces);
 
+    if (!componentCount[COMP_DISTRIBUTOR] &&
+        !componentCount[COMP_COLLECTOR] &&
+        !componentCount[COMP_NODE]) {
+            return;
+    }
+
     if (componentCount[COMP_DISTRIBUTOR]) {
-        componentController->startDistributor(autoWake);
+        if (!componentController->startDistributor(autoWake)) {
+            return;
+        }
     }
 
     if (componentCount[COMP_COLLECTOR]) {
-        componentController->startCollector(componentCount[COMP_COLLECTOR]);
+        if (!componentController->startCollector(componentCount[COMP_COLLECTOR])) {
+            return;
+        }
     }
 
     if (componentCount[COMP_NODE]) {
-        componentController->startNode(componentCount[COMP_NODE]);
+        if (!componentController->startNode(componentCount[COMP_NODE])) {
+            return;
+        }
     }
+
+    Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYTYPE state) -> bool {
+
+        LOGP_T("Notifying Application UI, target : %s, state : %s",
+               ComponentType::getName(target), NotifyType::getName(state));
+        return ((App*) context)->notifyHandler(target, state);
+    });
+
+    initialized = true;
 
     LOGP_I("Running in %s Mode with %d Distributor, %d Collector and %d Node",
           type == APPTYPE_WEB ? "Web" : "Console",
@@ -46,9 +60,19 @@ App::~App() {
 
     LOGP_T("Deallocating App");
 
-    Component::deRegisterNotify();
-
     delete componentController;
 
     delete deviceList;
+
+    if (!initialized) {
+        return;
+    }
+
+    Component::deRegisterNotify();
+
+}
+
+bool App::isInitialized() {
+
+    return initialized;
 }

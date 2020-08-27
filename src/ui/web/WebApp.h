@@ -85,7 +85,7 @@ public:
 
         char webOut[PATH_MAX];
 
-        sprintf(webOut, "%s : %s(%ld) => %s \n",
+        sprintf(webOut, "%s : %s(%d) => %s \n",
                 type.c_str(),
                 ComponentType::getName(host->getType()),
                 host->getID(),

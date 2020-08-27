@@ -4,7 +4,7 @@
 
 #include "HostUnit.h"
 
-HostUnit::HostUnit(COMPONENT _type, long _id)
+HostUnit::HostUnit(COMPONENT _type, TypeID _id)
         : type(_type), id(_id),
         basePath(std::filesystem::current_path() / ComponentType::getName(_type)) {
 
@@ -20,12 +20,12 @@ const std::filesystem::path& HostUnit::getRootPath() {
     return rootPath;
 }
 
-long HostUnit::getID() {
+TypeID HostUnit::getID() {
 
     return id;
 }
 
-void HostUnit::setID(long _id) {
+void HostUnit::setID(TypeID _id) {
 
     id = _id;
 
@@ -65,7 +65,7 @@ void HostUnit::setAddress(COMPONENT _out, Address _address) {
     address[_out] = _address;
 }
 
-void HostUnit::set(COMPONENT _type, long _id, COMPONENT _out, Address _address) {
+void HostUnit::set(COMPONENT _type, TypeID _id, COMPONENT _out, Address _address) {
 
     assert(_out != _type);
     type = _type;
