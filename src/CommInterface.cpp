@@ -9,9 +9,11 @@ CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _devic
                              const InterfaceSchedulerCB *receiveCB)
         : host(_host), device(_device) {
 
+    uv_loop_init(&loop);
+
     scheduler = new Scheduler();
 
-    schedulerCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
+    senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         bool status;
         auto *commInterface = (CommInterface *) arg;
@@ -44,7 +46,7 @@ CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _devic
     }, this);
 
     scheduler->setCB(MSGDIR_RECEIVE, receiveCB);
-    scheduler->setCB(MSGDIR_SEND, schedulerCB);
+    scheduler->setCB(MSGDIR_SEND, senderCB);
 }
 
 void CommInterface::end() {
@@ -54,6 +56,8 @@ void CommInterface::end() {
     write(notifierPipe[1], buf, 1);
 
     threadRcv.join();
+
+    uv_loop_close(&loop);
 
 }
 
@@ -79,7 +83,7 @@ CommInterface::~CommInterface() {
 
     LOGP_T("Deallocating Interface");
 
-    delete schedulerCB;
+    delete senderCB;
 
     delete scheduler;
 

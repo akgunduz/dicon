@@ -10,11 +10,9 @@ Message::Message(const TypeHostUnit& host)
 		: MessageBase(host), data(host) {
 }
 
-Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE type)
-		: MessageBase(host), data(host) {
+Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE msgType)
+		: MessageBase(host, target, msgType), data(host) {
 
-    header.setType(type);
-    header.setOwner(host->getUnit(target->getType()));
 }
 
 bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUnitList &componentList,
@@ -49,6 +47,25 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
     return true;
 }
 
+bool Message::readNumberList(const TypeComponentUnit& source, std::vector<uint64_t> &list, size_t size, uint32_t& crc) {
+
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList read process is started, count : %ld", size);
+
+//    for (size_t i = 0; i < size; i++) {
+//
+//        if (!readBlock(source, tmpBuf, 8, crc)) {
+//            LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read number from stream");
+//            return false;
+//        }
+//
+//        list.emplace_back(ntohll(*((uint64_t*) tmpBuf)));
+//    }
+
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList is read successfully, count : %ld, first number => %ld", size, list[0]);
+
+    return true;
+}
+
 bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_JOB) {
@@ -56,10 +73,10 @@ bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName,
         return false;
     }
 
-    if (!readString(source, jobName, block.get(0), crc)) {
-        LOGS_E(getHost(), "readJobName can not read job name");
-        return false;
-    }
+//    if (!readString(source, jobName, block.get(0), crc)) {
+//        LOGS_E(getHost(), "readJobName can not read job name");
+//        return false;
+//    }
 
     LOGS_D(getHost(), "Job Name is read successfully => Name : %s", jobName.c_str());
 
@@ -74,10 +91,10 @@ bool Message::readProcessID(const TypeComponentUnit& source, long& processID, Me
     }
 
     uint64_t number;
-    if (!readNumber(source, number, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
+//    if (!readNumber(source, number, crc)) {
+//        LOGS_E(getHost(), "readFile can not read jobID data");
+//        return false;
+//    }
 
     processID = (long)number;
 
@@ -95,24 +112,24 @@ bool Message::readProcess(const TypeComponentUnit& source, const TypeProcessItem
     }
 
     uint64_t id;
-    if (!readNumber(source, id, crc)) {
-        LOGS_E(getHost(), "readProcessInfo can not read process id");
-        return false;
-    }
+//    if (!readNumber(source, id, crc)) {
+//        LOGS_E(getHost(), "readProcessInfo can not read process id");
+//        return false;
+//    }
     content->setID((long)id);
 
     uint64_t jobID;
-    if (!readNumber(source, jobID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
+//    if (!readNumber(source, jobID, crc)) {
+//        LOGS_E(getHost(), "readFile can not read jobID data");
+//        return false;
+//    }
     content->setAssignedJob((long)jobID);
 
     std::string process;
-    if (!readString(source, process, block.get(0), crc)) {
-        LOGS_E(getHost(), "readProcessInfo can not read process info");
-        return false;
-    }
+//    if (!readString(source, process, block.get(0), crc)) {
+//        LOGS_E(getHost(), "readProcessInfo can not read process info");
+//        return false;
+//    }
     content->setParsedProcess(process);
 
     LOGS_D(getHost(), "Process is read successfully => ID : %ld, jobID : %ld, Process : %s",
@@ -129,38 +146,38 @@ bool Message::readFile(const TypeComponentUnit& source, const TypeProcessFile& c
     }
 
     uint64_t id;
-    if (!readNumber(source, id, crc)) {
-        LOGS_E(getHost(), "readFile can not read id data");
-        return false;
-    }
+//    if (!readNumber(source, id, crc)) {
+//        LOGS_E(getHost(), "readFile can not read id data");
+//        return false;
+//    }
     content->get()->setID((long)id);
 
     uint64_t state;
-    if (!readNumber(source, state, crc)) {
-        LOGS_E(getHost(), "readFile can not read state data");
-        return false;
-    }
+//    if (!readNumber(source, state, crc)) {
+//        LOGS_E(getHost(), "readFile can not read state data");
+//        return false;
+//    }
     content->setOutputState((bool)state);
 
     uint64_t jobID;
-    if (!readNumber(source, jobID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
+//    if (!readNumber(source, jobID, crc)) {
+//        LOGS_E(getHost(), "readFile can not read jobID data");
+//        return false;
+//    }
     content->get()->setAssignedJob((long)jobID);
 
     uint64_t processID;
-    if (!readNumber(source, processID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
+//    if (!readNumber(source, processID, crc)) {
+//        LOGS_E(getHost(), "readFile can not read jobID data");
+//        return false;
+//    }
     content->setAssignedProcess((long)processID);
 
     std::string fileName;
-    if (!readString(source, fileName, block.get(0), crc)) {
-        LOGS_E(getHost(), "readFile can not read path data");
-        return false;
-    }
+//    if (!readString(source, fileName, block.get(0), crc)) {
+//        LOGS_E(getHost(), "readFile can not read path data");
+//        return false;
+//    }
     content->get()->setName(fileName);
 
     if (block.getType() == BLOCK_FILEINFO || content->isOutput()) {
@@ -289,16 +306,38 @@ bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentU
     return true;
 }
 
+bool Message::writeNumberList(const TypeComponentUnit& target, std::vector<uint64_t>& list, uint32_t& crc) {
+
+    uint8_t buffer[8] = {};
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "NumberList write process is started  => Count : %ld, First Number : %lld",
+           list.size(), list[0]);
+
+    for (auto number : list) {
+
+        *((uint64_t *) buffer) = htonll(number);
+        if (!writeBlock(target, buffer, 8, crc)) {
+            LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write char array to stream");
+            return false;
+        }
+    }
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "NumberList is written successfully => Count : %ld, First Number : %lld",
+           list.size(), list[0]);
+
+    return true;
+}
+
 bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
 
     MessageBlockHeader blockHeader(BLOCK_JOB);
 
     blockHeader.add(jobName.size());
 
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeJobName can not write block header");
-        return false;
-    }
+//    if (!writeBlockHeader(target, blockHeader, crc)) {
+//        LOGS_E(getHost(), "writeJobName can not write block header");
+//        return false;
+//    }
 
     if (!writeString(target, jobName, crc)) {
         LOGS_E(getHost(), "writeJobName can not write job info");
@@ -484,31 +523,6 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
     return true;
 
-}
-
-MessageHeader& Message::getHeader() {
-
-    return header;
-}
-
-void Message::deSerializeHeader(const uint8_t *buffer) {
-
-    header.deSerialize(buffer);
-}
-
-void Message::grabOwner(const TypeCommUnit& unit) {
-
-    header.grabOwner(unit);
-}
-
-void Message::serializeHeader(uint8_t *buffer) {
-
-    header.serialize(buffer);
-}
-
-long Message::getHeaderSize() {
-
-    return header.getSize();
 }
 
 MessageData& Message::getData() {

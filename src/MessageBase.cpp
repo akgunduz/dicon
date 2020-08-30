@@ -6,20 +6,31 @@
 #include "MessageBase.h"
 #include "Log.h"
 #include "Util.h"
-#include "Net.h"
+#include "CommTCP.h"
 #include "UnixSocket.h"
-
-CRC::Table<std::uint32_t, 32> MessageBase::crcTable{CRC::CRC_32()};
 
 MessageBase::MessageBase(const TypeHostUnit& host)
 		: host(host) {
+
+    readParser[MSGHEADER_HEADER] = &MessageBase::readHeader;
+    readParser[MSGHEADER_STRING] = &MessageBase::readString;
+    readParser[MSGHEADER_NUMBER] = &MessageBase::readNumber;
+  //  readParser[MSGHEADER_BINARY] = &MessageBase::readNumber;
+    readParser[MSGHEADER_END] = &MessageBase::readEndStream;
+}
+
+MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE msgType)
+		: MessageBase(host) {
+
+    header.setType(msgType);
+    header.setOwner(host->getUnit(target->getType()));
 }
 
 TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
 
     if (source->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
-        return Net::getReadCB(source);
+        return CommTCP::getReadCB(source);
     }
 
     return UnixSocket::getReadCB(source);
@@ -29,7 +40,7 @@ TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
 
     if (target->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
-        return Net::getWriteCB(target);
+        return CommTCP::getWriteCB(target);
     }
 
     return UnixSocket::getWriteCB(target);
@@ -124,147 +135,42 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, uint8_t *buf, size_
 	return true;
 }
 
-bool MessageBase::readSignature(const TypeComponentUnit& source, uint32_t& crc) {
-
-    LOGS_T(getHost(), "Signature read process is started");
-
-	if (!readBlock(source, tmpBuf, SIGNATURE_SIZE, crc)) {
-		LOGS_E(getHost(), "Can not read signature from stream");
-		return false;
-	}
-
-	short signature = ntohs(*((uint16_t *) tmpBuf));
-
-    if (signature != SIGNATURE) {
-		LOGS_E(getHost(), "Signature Mismatch!!!, read : 0x%X, expected : 0x%X", signature, SIGNATURE);
-        return false;
-    }
-
-    LOGS_T(getHost(), "Signature is read successfully");
-
-	return true;
-}
-
-bool MessageBase::readHeader(const TypeComponentUnit& source, uint32_t& crc) {
+bool MessageBase::readHeader(const TypeComponentUnit& source, uint8_t* buffer, size_t size, uint32_t& crc) {
 
     LOGS_T(getHost(), "Header read process is started");
 
-	if (!readBlock(source, tmpBuf, getHeaderSize(), crc)) {
-		LOGS_E(getHost(), "Can not read message header from stream");
-		return false;
-	}
-
-    deSerializeHeader(tmpBuf);
+    deSerializeHeader(buffer);
 
     LOGS_T(getHost(), "Header is read successfully");
 
 	return true;
 }
 
-bool MessageBase::readBlockHeader(const TypeComponentUnit& source, MessageBlockHeader &blockHeader, uint32_t& crc) {
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header read process is started");
-
-	if (!readBlock(source, tmpBuf, 4, crc)) {
-		LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read block header from stream");
-		return false;
-	}
-
-	uint8_t *p = tmpBuf;
-    blockHeader.setType(ntohs(*((uint16_t *) p))); p += 2;
-    uint16_t count = ntohs(*((uint16_t *) p));p += 2;
-
-    if (count > 0) {
-
-        if (!readBlock(source, tmpBuf, count * 8, crc)) {
-            LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read block header from stream");
-            return false;
-        }
-
-        p = tmpBuf;
-        for (uint16_t i = 0; i < count; i++) {
-            blockHeader.add(ntohll(*((uint64_t *) p))); p += 8;
-        }
-    }
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header is read successfully => Type : %s, Count : %d",
-           MessageType::getBlockName(blockHeader.getType()), blockHeader.getCount());
-
-    for (uint16_t i = 0; i < blockHeader.getCount(); i++) {
-        LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block Header Data[%d] : %d", i, blockHeader.get(i));
-    }
-
-	return true;
-}
-
-bool MessageBase::readString(const TypeComponentUnit& source, std::string& str, size_t size, uint32_t& crc) {
+bool MessageBase::readString(const TypeComponentUnit& source, uint8_t* buffer, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String read process is started => String Length: %d", size);
 
-    str = "";
+    buffer[size] = '\0';
+    strings.emplace_back((char *)buffer);
 
-	while(size > TMP_BUFFER_SIZE - 1) {
-
-		if (!readBlock(source, tmpBuf, TMP_BUFFER_SIZE - 1, crc)) {
-			LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read object data from stream");
-			return false;
-		}
-
-        tmpBuf[TMP_BUFFER_SIZE - 1] = '\0';
-		str += (char *)tmpBuf;
-
-		size -= TMP_BUFFER_SIZE + 1;
-	}
-
-	if (!readBlock(source, tmpBuf, size, crc)) {
-		LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read object data from stream");
-		return false;
-	}
-
-    tmpBuf[size] = '\0';
-    str += (char *)tmpBuf;
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String is read successfully => String : %s", str.c_str());
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String is read successfully => String : %s", strings.back().c_str());
 
 	return true;
 }
 
-bool MessageBase::readNumber(const TypeComponentUnit& source, uint64_t&number, uint32_t& crc) {
+bool MessageBase::readNumber(const TypeComponentUnit& source, uint8_t* buffer, size_t size, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Number read process is started");
 
-	if (!readBlock(source, tmpBuf, 8, crc)) {
-		LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read number from stream");
-		return false;
-	}
+    numbers.emplace_back(ntohll(*((uint64_t*) buffer)));
 
-    number = ntohll(*((uint64_t*) tmpBuf));
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Number is read successfully, number => %ld", number);
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Number is read successfully, number => %ld", numbers.back());
 
 	return true;
 }
 
-bool MessageBase::readNumberList(const TypeComponentUnit& source, std::vector<uint64_t> &list, size_t size, uint32_t& crc) {
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList read process is started, count : %ld", size);
-
-    for (size_t i = 0; i < size; i++) {
-
-        if (!readBlock(source, tmpBuf, 8, crc)) {
-            LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read number from stream");
-            return false;
-        }
-
-        list.emplace_back(ntohll(*((uint64_t*) tmpBuf)));
-    }
-
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "NumberList is read successfully, count : %ld, first number => %ld", size, list[0]);
-
-    return true;
-}
-
-bool MessageBase::readBinary(const TypeComponentUnit& source, const std::filesystem::path& path, size_t size, uint32_t& crc) {
+bool MessageBase::readBinary(const TypeComponentUnit& source, uint8_t* buffer,
+                             size_t pathSize, size_t binSize, uint32_t& crc) {
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", path.c_str());
 
@@ -288,17 +194,12 @@ bool MessageBase::readBinary(const TypeComponentUnit& source, const std::filesys
 
 }
 
-bool MessageBase::readCRC(const TypeComponentUnit& source, uint32_t &crc) {
+bool MessageBase::readEndStream(const TypeComponentUnit& source, uint8_t* buffer, size_t size, uint32_t &crc) {
 
     uint32_t resCrc;
     uint32_t calcCrc = crc;
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "CRC read process is started, => Calculated : 0x%X", calcCrc);
-
-    if (!readBlock(source, tmpBuf, 4, crc)) {
-        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read number from stream");
-        return false;
-    }
 
     resCrc = ntohl(*((uint32_t *) tmpBuf));
 
@@ -307,36 +208,125 @@ bool MessageBase::readCRC(const TypeComponentUnit& source, uint32_t &crc) {
     return resCrc == calcCrc;
 }
 
-bool MessageBase::readFromStream(const TypeComponentUnit& source) {
+bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
 
-    uint32_t crc = 0;
+    if (nRead == UV_EOF || nRead == 0) {
+      //  LOGP_E("Data : EOF or 0");
+        return false;
+    }
 
-	if (!readSignature(source, crc)) {
-		return false;
-	}
+//    LOGP_E("Data received, count : %d, bufPtr : %s",
+//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
 
-	if (!readHeader(source, crc)) {
-		return false;
-	}
+    uint32_t crc;
 
-	grabOwner(source);
+    uint32_t minContDataLength;
+    size_t remaining = 0;
+
+    auto *bufPtr = (uint8_t*)buf->base;
 
     do {
 
-        MessageBlockHeader blockHeader;
-
-        if (!readBlockHeader(source, blockHeader, crc)) {
-            return false;
+        if (nRead <= 0) {
+            break;
         }
 
-        if (blockHeader.isEnd()) {
-            return readCRC(source, crc);
+        minContDataLength = state == MSGSTATE_INIT ? sizeof(MessageBlock) : state == MSGSTATE_DATA ? block.size : 1;
 
-        } else if (!readMessageBlock(source, blockHeader, crc)) {
-            return false;
+        remaining = minContDataLength - tmpBufPos;
+
+        if (nRead < remaining) {
+
+            memcpy(tmpBuf + tmpBufPos, bufPtr, nRead);
+            tmpBufPos += nRead;
+
+//            LOGP_E("Partial Read, nRead : %d, remaining : %d, tmpBuf : %s",
+//                   nRead, remaining, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+
+            return true;
         }
+
+        if (tmpBufPos) {
+
+            memcpy(tmpBuf + tmpBufPos, bufPtr, remaining);
+//            LOGP_E("Copied remaining, : %d, tmpBuf : %s",
+//                   remaining, Util::hex2str(tmpBuf, tmpBufPos + remaining).c_str());
+
+            bufPtr += remaining;
+        }
+
+        auto *ptr = tmpBufPos ? tmpBuf : bufPtr;
+        auto *rrr = ptr;
+
+        if (state == MSGSTATE_INIT) {
+
+            block.sign = ntohs(*((uint16_t *) ptr)); ptr += 2;
+            block.type = ntohs(*((uint16_t *) ptr)); ptr += 2;
+            block.size = ntohl(*((uint32_t *) ptr)); ptr += 4;
+            block.binSize = ntohl(*((uint32_t *) ptr)); ptr += 4;
+
+//            LOGP_E("Read  BlockBase => Len : %d, %s : %s",
+//                   sizeof(MessageBlock), ptr == tmpBuf ? "tmpBuf" : "bufPtr",
+//                   Util::hex2str(rrr, sizeof(MessageBlock)).c_str());
+
+            if (!tmpBufPos) {
+                bufPtr += sizeof(MessageBlock);
+            }
+
+            state = block.type != MSGHEADER_BINARY ? MSGSTATE_DATA : MSGSTATE_BINARY;
+
+        } else if (state == MSGSTATE_DATA) {
+
+            (this->*readParser[static_cast<MSG_HEADER>(block.type)])(source, ptr, block.size, crc);
+
+            state = MSGSTATE_INIT;
+
+            if (!tmpBufPos) {
+                bufPtr += block.size;
+            }
+
+        } else {
+
+
+        }
+
+        tmpBufPos = 0;
+
+        nRead -= remaining;
 
     } while(true);
+
+    return true;
+}
+
+bool MessageBase::readFromStream(const TypeComponentUnit& source) {
+
+//    uint32_t crc = 0;
+//
+//	if (!readHeader(source, crc)) {
+//		return false;
+//	}
+//
+//	grabOwner(source);
+//
+//    do {
+//
+//        MessageBlockHeader blockHeader;
+//
+//        if (!readBlockHeader(source, blockHeader, crc)) {
+//            return false;
+//        }
+//
+//        if (blockHeader.isEnd()) {
+//            return readCRC(source, crc);
+//
+//        } else if (!readMessageBlock(source, blockHeader, crc)) {
+//            return false;
+//        }
+//
+//    } while(true);
+
+    return true;
 }
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {
@@ -346,7 +336,7 @@ bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf
 
 	do {
 
-        size_t count = getWriteCB(target)(target, buf + offset, size);
+	    size_t count = getWriteCB(target)(target, buf + offset, size);
 
 		if (count == -1) {
 
@@ -393,45 +383,13 @@ bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf
 
 }
 
-bool MessageBase::writeSignature(const TypeComponentUnit& target, uint32_t& crc) {
-
-	*((uint16_t *) tmpBuf) = htons(SIGNATURE);
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Signature write process is started");
-
-    if (!writeBlock(target, tmpBuf, 2, crc)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write signature to stream");
-        return false;
-    }
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Signature is written successfully");
-
-	return true;
-}
-
-bool MessageBase::writeHeader(const TypeComponentUnit& target, uint32_t& crc) {
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Header write process is started");
-
-    serializeHeader(tmpBuf);
-
-	if (!writeBlock(target, tmpBuf, getHeaderSize(), crc)) {
-		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write message header to stream");
-		return false;
-	}
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Header is written successfully");
-
-	return true;
-}
-
 bool MessageBase::writeBlockHeader(const TypeComponentUnit& target, MessageBlockHeader &blockHeader, uint32_t& crc) {
 
     uint8_t *p = tmpBuf;
     *((uint16_t *) p) = htons(blockHeader.getType()); p += 2;
     *((uint16_t *) p) = htons(blockHeader.getCount()); p += 2;
-    for (uint16_t i = 0; i < blockHeader.getCount(); i++) {
-        *((uint64_t *) p) = htonll(blockHeader.get(i)); p += 8;
+    for (uint16_t i = 0; i < 3; i++) {
+        *((uint32_t *) p) = htonl(blockHeader.get(i)); p += 4;
     }
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Block header write process is started => Type : %s, Count : %d",
@@ -449,6 +407,59 @@ bool MessageBase::writeBlockHeader(const TypeComponentUnit& target, MessageBlock
         LOGC_T(getHost(), target, MSGDIR_SEND, "Block Header Data[%d] : %d", i, blockHeader.get(i));
     }
 
+    LOGP_E("Write => Len : %d, Block : %s", p - tmpBuf, Util::hex2str(tmpBuf, p - tmpBuf).c_str());
+
+    return true;
+}
+
+bool MessageBase::writeBlockBase(const TypeComponentUnit& target, const MessageBlock& baseHeader, uint32_t& crc) {
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "BlockBase write process is started");
+
+    uint8_t *p = tmpBuf;
+    *((uint16_t *) p) = htons(baseHeader.sign); p += 2;
+    *((uint16_t *) p) = htons(baseHeader.type); p += 2;
+    *((uint32_t *) p) = htonl(baseHeader.size); p += 4;
+    *((uint32_t *) p) = htonl(baseHeader.binSize); p += 4;
+
+    if (!writeBlock(target, tmpBuf, sizeof(MessageBlock), crc)) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write BlockBase to stream");
+        return false;
+    }
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "BlockBase is written successfully");
+
+//    LOGP_E("Write BlockBase => Len : %d, Data   : %s", sizeof(MessageBlock),
+//           Util::hex2str(tmpBuf, sizeof(MessageBlock)).c_str());
+
+    return true;
+}
+
+bool MessageBase::writeHeader(const TypeComponentUnit& target, uint32_t& crc) {
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Header write process is started");
+
+    MessageBlock baseHeader;
+    baseHeader.type = MSGHEADER_HEADER;
+    baseHeader.size = sizeof(MessageHeader);
+
+    if (!writeBlockBase(target, baseHeader, crc)) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Header BlockBase to stream");
+        return false;
+    }
+
+    serializeHeader(tmpBuf);
+
+	if (!writeBlock(target, tmpBuf, header.getSize(), crc)) {
+		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Header to stream");
+		return false;
+	}
+
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Header is written successfully");
+
+//    LOGP_E("Write Header => Len : %d, Data   : %s", header.getSize(),
+//    Util::hex2str(tmpBuf, header.getSize()).c_str());
+
 	return true;
 }
 
@@ -456,53 +467,52 @@ bool MessageBase::writeString(const TypeComponentUnit& target, const std::string
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "String write process is started => String : %s", str.c_str());
 
+    MessageBlock baseHeader;
+    baseHeader.type = MSGHEADER_STRING;
+    baseHeader.size = str.size();
+
+    if (!writeBlockBase(target, baseHeader, crc)) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write String BlockBase to stream");
+        return false;
+    }
+
 	if (!writeBlock(target, (uint8_t*)str.c_str(), str.size(), crc)) {
-		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write string to stream");
+		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write String to stream");
 		return false;
 	}
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "String is written successfully => String : %s", str.c_str());
+
+//    LOGP_E("Write String => Len : %d, Data   : %s", str.size(),
+//           Util::hex2str((const uint8_t*)str.c_str(), str.size()).c_str());
 
 	return true;
 }
 
 bool MessageBase::writeNumber(const TypeComponentUnit& target, uint64_t number, uint32_t& crc) {
 
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Number write process is started => Number : %ld", number);
+
+    MessageBlock baseHeader;
+    baseHeader.type = MSGHEADER_NUMBER;
+    baseHeader.size = sizeof(uint64_t);
+
+    if (!writeBlockBase(target, baseHeader, crc)) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number BlockBase to stream");
+        return false;
+    }
+
     uint8_t buffer[8] = {};
     *((uint64_t *) buffer) = htonll(number);
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Number write process is started => Number : %ld", number);
-
 	if (!writeBlock(target, buffer, 8, crc)) {
-		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write char array to stream");
+		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number to stream");
 		return false;
 	}
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Number is written successfully => Number : %ld", number);
 
 	return true;
-}
-
-bool MessageBase::writeNumberList(const TypeComponentUnit& target, std::vector<uint64_t>& list, uint32_t& crc) {
-
-    uint8_t buffer[8] = {};
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "NumberList write process is started  => Count : %ld, First Number : %lld",
-           list.size(), list[0]);
-
-    for (auto number : list) {
-
-        *((uint64_t *) buffer) = htonll(number);
-        if (!writeBlock(target, buffer, 8, crc)) {
-            LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write char array to stream");
-            return false;
-        }
-    }
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "NumberList is written successfully => Count : %ld, First Number : %lld",
-            list.size(), list[0]);
-
-    return true;
 }
 
 bool MessageBase::writeBinary(const TypeComponentUnit& target,
@@ -530,46 +540,37 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
 
 bool MessageBase::writeEndStream(const TypeComponentUnit& target, uint32_t& crc) {
 
-	MessageBlockHeader block;
+    LOGC_T(getHost(), target, MSGDIR_SEND, "EndStream write process is started => CRC : 0x%X", crc);
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream write process is started");
+    MessageBlock baseHeader;
+    baseHeader.type = MSGHEADER_END;
+    baseHeader.size = sizeof(uint32_t);
 
-    if (!writeBlockHeader(target, block, crc)) {
-
-        LOGC_E(getHost(), target, MSGDIR_SEND, "End Stream can not be written");
+    if (!writeBlockBase(target, baseHeader, crc)) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write EndStream BlockBase to stream");
         return false;
     }
-
-    LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream is written successfully");
-
-	return true;
-}
-
-bool MessageBase::writeCRC(const TypeComponentUnit& target, uint32_t &crc) {
 
     uint8_t buffer[4] = {};
     uint32_t calcCRC = crc;
     *((uint32_t *) buffer) = htonl(crc);
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "CRC write process is started => 0x%X", calcCRC);
-
     if (!writeBlock(target, buffer, 4, crc)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write CRC to stream");
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write EndStream to stream");
         return false;
     }
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "CRC is written successfully => 0x%X", calcCRC);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream is written successfully => 0x%X", crc);
 
-    return true;
+//    LOGP_E("Write End => Len : %d, CRC    : %s", 4,
+//           Util::hex2str(buffer, 4).c_str());
+
+	return true;
 }
 
 bool MessageBase::writeToStream(const TypeComponentUnit& target) {
 
     uint32_t crc = 0;
-
-	if (!writeSignature(target, crc)) {
-		return false;
-	}
 
 	if (!writeHeader(target, crc)) {
 		return false;
@@ -579,12 +580,30 @@ bool MessageBase::writeToStream(const TypeComponentUnit& target) {
         return false;
     }
 
-    writeEndStream(target, crc);
-
-	return writeCRC(target, crc);
+	return writeEndStream(target, crc);
 }
 
 const TypeHostUnit& MessageBase::getHost() {
 
     return host;
+}
+
+bool MessageBase::deSerializeHeader(const uint8_t *buffer) {
+
+    return header.deSerialize(buffer);
+}
+
+void MessageBase::grabOwner(const TypeCommUnit& unit) {
+
+    header.grabOwner(unit);
+}
+
+void MessageBase::serializeHeader(uint8_t *buffer) {
+
+    header.serialize(buffer);
+}
+
+MessageHeader& MessageBase::getHeader() {
+
+    return header;
 }

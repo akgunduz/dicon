@@ -9,6 +9,8 @@
 #include "MessageType.h"
 #include "HostUnit.h"
 
+#define SIGNATURE 0x55AA
+
 #define MAX_VARIANT 2
 
 #define PRIORITY_COEFFICIENT 10
@@ -44,7 +46,7 @@ public:
     void normalizePriority();
     int iteratePriority();
 
-    void deSerialize(const uint8_t*);
+    bool deSerialize(const uint8_t*);
     void serialize(uint8_t*);
 
 };

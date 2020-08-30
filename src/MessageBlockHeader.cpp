@@ -28,14 +28,23 @@ uint16_t MessageBlockHeader::getCount() {
     return count;
 }
 
-uint64_t MessageBlockHeader::get(int index) {
+void MessageBlockHeader::setCount(uint16_t _count) {
+
+    count = _count;
+}
+
+uint32_t MessageBlockHeader::get(int index) {
 
     return data[index];
 }
 
-uint16_t MessageBlockHeader::add(uint64_t _data) {
+uint16_t MessageBlockHeader::add(uint32_t _data) {
 
-    data.emplace_back(_data);
-    count++;
+    data[count++] = _data;
     return count;
+}
+
+void MessageBlockHeader::set(int index, uint32_t _data) {
+
+    data[index] = _data;
 }

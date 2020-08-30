@@ -12,7 +12,7 @@ class MessageBlockHeader {
 
     uint16_t type{};
     uint16_t count{};
-    std::vector<uint64_t> data;
+    uint32_t data[3]{};
 
 public:
     MessageBlockHeader(const MessageBlockHeader&) = default;
@@ -25,9 +25,11 @@ public:
     bool isEnd();
 
     uint16_t getCount();
+    void setCount(uint16_t);
 
-    uint64_t get(int index);
-    uint16_t add(uint64_t _data);
+    uint32_t get(int index);
+    uint16_t add(uint32_t);
+    void set(int, uint32_t);
 };
 
 #endif //DICON_MESSAGEBLOCKHEADER_H

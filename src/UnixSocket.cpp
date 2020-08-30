@@ -113,12 +113,12 @@ bool UnixSocket::runReceiver() {
 
                 auto msg = std::make_unique<Message>(commInterface->getHost());
 
-                if (msg->readFromStream(source)) {
-
-                    auto owner = msg->getHeader().getOwner();
-
-                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-                }
+//                if (msg->readFromStream(source)) {
+//
+//                    auto owner = msg->getHeader().getOwner();
+//
+//                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+//                }
             }, this, acceptSocket);
             threadAccept.detach();
         }

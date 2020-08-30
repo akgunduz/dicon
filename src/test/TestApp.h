@@ -9,6 +9,9 @@
 #include <Log.h>
 #include <Util.h>
 #include <ComponentFactory.h>
+#include "Application.h"
+
+#define TEST_JOB_PATH "../scratch/Job1_x86_linux"
 
 enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING = 100,
@@ -20,8 +23,6 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_WAKEUP,
     MSG_TYPE_TEST_ALIVE,
 };
-
-#include "Application.h"
 
 class TestApp : public App {
 

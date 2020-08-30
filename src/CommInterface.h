@@ -27,13 +27,15 @@ class CommInterface {
     Address address{};
     Address multicastAddress{};
 
-    const InterfaceSchedulerCB *schedulerCB{};
+    const InterfaceSchedulerCB *senderCB{};
 
 protected :
 
+    uv_loop_t loop;
 	Scheduler *scheduler;
 	std::thread threadRcv;
 	int notifierPipe[2]{};
+    TypeClientMsgList msgMap;
 
 	virtual bool runReceiver() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;

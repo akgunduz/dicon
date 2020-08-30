@@ -77,7 +77,7 @@ void MessageHeader::normalizePriority() {
     priority *= PRIORITY_COEFFICIENT;
 }
 
-void MessageHeader::deSerialize(const uint8_t* buffer) {
+bool MessageHeader::deSerialize(const uint8_t* buffer) {
 
     type = ntohs(*((uint16_t *) buffer)); buffer += 2;
     priority = ntohs(*((uint16_t *) buffer)); buffer += 2;
@@ -92,6 +92,8 @@ void MessageHeader::deSerialize(const uint8_t* buffer) {
     for (int i = 0; i < MAX_VARIANT; i++) {
         variant[i] = ntohll(*((uint64_t *) buffer)); buffer += 8;
     }
+
+    return true;
 }
 
 void MessageHeader::serialize(uint8_t *buffer) {
