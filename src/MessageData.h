@@ -29,6 +29,7 @@ public:
     const TypeProcessItem& getProcess();
     void setProcess(const TypeProcessItem&);
     void setProcess(long, const TypeProcessFileList&);
+    void setProcess(long, const TypeProcessFile&);
 
     std::string& getJobName();
     void setJobName(const std::string&);

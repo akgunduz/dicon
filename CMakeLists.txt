@@ -106,6 +106,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestPing.cpp
         ${TEST_PATH}/TestComponentList.cpp
         ${TEST_PATH}/TestProcess.cpp
+        ${TEST_PATH}/TestProcessFile.cpp
         ${TEST_PATH}/TestFileInfo.cpp
         ${TEST_PATH}/TestFileBinary.cpp
         ${TEST_PATH}/TestJobName.cpp

@@ -91,7 +91,7 @@ public:
 	bool readHeader(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
 	bool readString(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
 	bool readNumber(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
-    bool readBinary(const TypeComponentUnit&, uint8_t*, size_t, size_t, uint32_t&);
+    bool readBinary(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
     bool readEndStream(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
 
 	bool readFromStream(const TypeComponentUnit&);

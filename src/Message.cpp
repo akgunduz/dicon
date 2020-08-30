@@ -189,10 +189,10 @@ bool Message::readFile(const TypeComponentUnit& source, const TypeProcessFile& c
     }
 
     std::filesystem::path filePath = getHost()->getRootPath() / std::to_string(jobID) / fileName;
-    if (!readBinary(source, filePath.c_str(), block.get(1), crc)) {
-        LOGS_E(getHost(), "readFile can not read Binary data");
-        return false;
-    }
+//    if (!readBinary(source, filePath.c_str(), block.get(1), crc)) {
+//        LOGS_E(getHost(), "readFile can not read Binary data");
+//        return false;
+//    }
 
     LOGS_D(getHost(), "File Binary is read successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
            id, state? "output" : "input", jobID, processID, fileName.c_str());
@@ -330,9 +330,9 @@ bool Message::writeNumberList(const TypeComponentUnit& target, std::vector<uint6
 
 bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
 
-    MessageBlockHeader blockHeader(BLOCK_JOB);
-
-    blockHeader.add(jobName.size());
+//    MessageBlockHeader blockHeader(BLOCK_JOB);
+//
+//    blockHeader.add(jobName.size());
 
 //    if (!writeBlockHeader(target, blockHeader, crc)) {
 //        LOGS_E(getHost(), "writeJobName can not write block header");
@@ -345,6 +345,25 @@ bool Message::writeJobName(const TypeComponentUnit& target, const std::string& j
     }
 
     LOGS_D(getHost(), "Job Name is written successfully => Name : %s", jobName.c_str());
+
+    return true;
+}
+
+bool Message::writeFileBinary(const TypeComponentUnit& target, const std::string& name, size_t size, uint32_t& crc) {
+
+    std::filesystem::path filePath = getHost()->getRootPath() / name;
+
+    if (!writeString(target, name, crc)) {
+        LOGS_E(getHost(), "writeFileBinary can not write file path");
+        return false;
+    }
+
+    if (!writeBinary(target, filePath, size, crc)) {
+        LOGS_E(getHost(), "writeFileBinary can not write file binary");
+        return false;
+    }
+
+    LOGS_D(getHost(), "File Binary is written successfully => Name : %s", name.c_str());
 
     return true;
 }
@@ -495,6 +514,16 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
                 if (!writeFile(target, processFile, data.getStreamType() == STREAM_FILEBINARY, crc)) {
                     return false;
                 }
+            }
+
+            break;
+
+        case STREAM_FILESOLO: {
+
+            auto &processFile = data.getProcess()->getFileList()[0];
+
+            writeFileBinary(target, processFile->get()->getName(), processFile->get()->getSize(), crc);
+
             }
 
             break;

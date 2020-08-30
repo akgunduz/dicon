@@ -30,6 +30,8 @@ class Message : public MessageBase {
     bool writeProcessID(const TypeComponentUnit&, long, uint32_t&);
     bool writeFile(const TypeComponentUnit&, const TypeProcessFile&, bool, uint32_t&);
 
+    bool writeFileBinary(const TypeComponentUnit&, const std::string&, size_t, uint32_t&);
+
     bool writeMessageStream(const TypeComponentUnit& out, uint32_t&) override;
 
 public:

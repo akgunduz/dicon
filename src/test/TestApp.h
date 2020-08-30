@@ -34,6 +34,7 @@ public:
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
     void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
     void testProcess(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testProcessFile(TypeDistributor&, TypeCollector&, TypeNode&);
     void testFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
     void testFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
     void testJobName(TypeDistributor&, TypeCollector&, TypeNode&);

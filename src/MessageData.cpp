@@ -36,6 +36,12 @@ void MessageData::setProcess(long id, const TypeProcessFileList& _fileList) {
     process->setID(id);
 }
 
+void MessageData::setProcess(long id, const TypeProcessFile& _file) {
+
+    process->addFile(_file);
+    process->setID(id);
+}
+
 std::string& MessageData::getJobName() {
 
     return jobName;
