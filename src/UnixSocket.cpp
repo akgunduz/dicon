@@ -109,7 +109,7 @@ bool UnixSocket::runReceiver() {
 
             threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
-                auto source = std::make_shared<ComponentUnit>(acceptSocket);
+                auto source = std::make_shared<ComponentUnit>(acceptSocket, 0);
 
                 auto msg = std::make_unique<Message>(commInterface->getHost());
 

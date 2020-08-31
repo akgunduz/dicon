@@ -18,6 +18,7 @@
 enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING = 100,
     MSG_TYPE_TEST_COMPLIST,
+    MSG_TYPE_TEST_PROCESS,
     MSG_TYPE_TEST_PROCESSID,
     MSG_TYPE_TEST_PROCESSINFO,
     MSG_TYPE_TEST_FILEINFO,
@@ -40,7 +41,7 @@ public:
     void testSendProcessInfo(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessFiles(TypeDistributor&, TypeCollector&, TypeNode&);
-
+    void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
     void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);

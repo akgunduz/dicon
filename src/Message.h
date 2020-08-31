@@ -22,13 +22,8 @@ class Message : public MessageBase {
     bool readProcessFileCount(const TypeComponentUnit&, long&);
     bool readProcessFile(const TypeComponentUnit&, const TypeProcessFile&);
     bool readProcessFiles(const TypeComponentUnit&, const TypeProcessItem&);
-
-
-
-    bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
-    bool readNumberList(const TypeComponentUnit&, std::vector<uint64_t> &, size_t, uint32_t&);
-    bool readMessageBlock(const TypeComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
-
+    bool readProcess(const TypeComponentUnit&, const TypeProcessItem&);
+    bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&);
 
     bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
     bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&, uint32_t&);
@@ -37,13 +32,8 @@ class Message : public MessageBase {
     bool writeProcessFileCount(const TypeComponentUnit&, const TypeProcessItem&, uint32_t& crc);
     bool writeProcessFile(const TypeComponentUnit&, const TypeProcessFile&, bool, uint32_t&);
     bool writeProcessFiles(const TypeComponentUnit&, const TypeProcessItem&, bool, uint32_t&);
-
-
-
+    bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
     bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&, uint32_t&);
-    bool writeNumberList(const TypeComponentUnit&, std::vector<uint64_t>&, uint32_t&);
-
-
 
     bool writeMessageStream(const TypeComponentUnit& out, uint32_t&) override;
 

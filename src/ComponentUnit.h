@@ -17,9 +17,10 @@ public:
     ComponentUnit() = default;
     ComponentUnit(COMPONENT, ARCH, TypeID, Address);
     ComponentUnit(COMPONENT, Address);
+    explicit ComponentUnit(COMPONENT);
     ComponentUnit(const ComponentUnit&);
     explicit ComponentUnit(const TypeCommUnit&);
-    explicit ComponentUnit(int);
+    explicit ComponentUnit(int, int);
     virtual ~ComponentUnit();
 
     int getSocket() const;

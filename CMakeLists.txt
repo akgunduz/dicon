@@ -109,6 +109,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestSendProcessInfo.cpp
         ${TEST_PATH}/testSendProcessFileBinary.cpp
         ${TEST_PATH}/TestSendProcessFiles.cpp
+        ${TEST_PATH}/TestSendProcess.cpp
 
 
         ${TEST_PATH}/TestPing.cpp

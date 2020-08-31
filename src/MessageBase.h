@@ -14,6 +14,7 @@
 #include "HostUnit.h"
 #include "Address.h"
 #include "MessageHeader.h"
+#include "FileItem.h"
 
 #define TMP_BUFFER_SIZE 1000
 
@@ -97,9 +98,6 @@ public:
     bool readBinary(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
     bool readEndStream(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
 
-	bool readFromStream(const TypeComponentUnit&);
-
-    virtual bool readMessageBlock(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
     virtual bool build(const TypeComponentUnit&) = 0;
 
 
@@ -110,7 +108,7 @@ public:
 	bool writeBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
 	bool writeString(const TypeComponentUnit&, const std::string&, uint32_t&);
 	bool writeNumber(const TypeComponentUnit&, uint64_t, uint32_t&);
-	bool writeBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
+	bool writeBinary(const TypeComponentUnit&, const TypeFileItem&, uint32_t&);
 
     bool writeEndStream(const TypeComponentUnit&, uint32_t&);
 

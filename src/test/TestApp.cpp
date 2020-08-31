@@ -56,7 +56,9 @@ int TestApp::run() {
             case 'a':
                 testSendProcessFiles(d, c, n);
                 break;
-
+            case 'f':
+                testSendProcess(d, c, n);
+                break;
 
 
             case 'p':

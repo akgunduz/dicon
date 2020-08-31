@@ -159,8 +159,6 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
                "Block is read successfully, type : %d, size : %d", block.type, block.size);
     }
 
-    LOGP_E("Block Len : %d, Data : %s", size, Util::hex2str(buffer, size).c_str());
-
     return block.sign == SIGNATURE;
 }
 
@@ -171,8 +169,6 @@ bool MessageBase::readHeader(const TypeComponentUnit& source, const uint8_t* buf
     deSerializeHeader(buffer);
 
     LOGS_T(getHost(), "Header is read successfully");
-
-    LOGP_E("Header Len : %d, Data : %s", size, Util::hex2str(buffer, size).c_str());
 
 	return true;
 }
@@ -185,8 +181,6 @@ bool MessageBase::readString(const TypeComponentUnit& source, const uint8_t* buf
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "String is read successfully => String : %s", strings.back().c_str());
 
-    LOGP_E("String Len : %d, Data : %s", size, Util::hex2str(buffer, size).c_str());
-
 	return true;
 }
 
@@ -197,8 +191,6 @@ bool MessageBase::readNumber(const TypeComponentUnit& source, const uint8_t* buf
     numbers.emplace_back(ntohll(*((uint64_t*) buffer)));
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Number is read successfully, number => %ld", numbers.back());
-
-    LOGP_E("Number Len : %d, Data : %s", size, Util::hex2str(buffer, size).c_str());
 
 	return true;
 }
@@ -238,8 +230,6 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
     resCrc = ntohl(*((uint32_t *) tmpBuf));
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "CRC is read successfully, => Read : 0x%X, Calculated : 0x%X", resCrc, calcCrc);
-
-    LOGP_E("EndStream Len : %d, Data : %s", size, Util::hex2str(buffer, size).c_str());
 
     return resCrc == calcCrc;
 }
@@ -305,6 +295,10 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
 
                 state = MSGSTATE_BINARY;
 
+                assert(!strings.empty());
+
+                std::filesystem::remove(getHost()->getRootPath() / strings.back());
+
             } else {
 
                 state = MSGSTATE_DATA;
@@ -339,6 +333,8 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
                 state = MSGSTATE_INIT;
 
                 bufPtr += readSize;
+
+                strings.pop_back();
             }
 
         }
@@ -348,36 +344,6 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
         nRead -= remaining;
 
     } while(true);
-
-    return true;
-}
-
-bool MessageBase::readFromStream(const TypeComponentUnit& source) {
-
-//    uint32_t crc = 0;
-//
-//	if (!readHeader(source, crc)) {
-//		return false;
-//	}
-//
-//	grabOwner(source);
-//
-//    do {
-//
-//        MessageBlockHeader blockHeader;
-//
-//        if (!readBlockHeader(source, blockHeader, crc)) {
-//            return false;
-//        }
-//
-//        if (blockHeader.isEnd()) {
-//            return readCRC(source, crc);
-//
-//        } else if (!readMessageBlock(source, blockHeader, crc)) {
-//            return false;
-//        }
-//
-//    } while(true);
 
     return true;
 }
@@ -569,32 +535,40 @@ bool MessageBase::writeNumber(const TypeComponentUnit& target, uint64_t number, 
 }
 
 bool MessageBase::writeBinary(const TypeComponentUnit& target,
-                              const std::filesystem::path& path, size_t size, uint32_t& crc) {
+                              const TypeFileItem& fileItem, uint32_t& crc) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary write process is started at path : %s", path.c_str());
+    LOGC_T(getHost(), target, MSGDIR_SEND,
+           "File Binary write process is started at path : %s", fileItem->getPath().c_str());
+
+    if (!writeString(target, fileItem->getRefPath(), crc)) {
+        LOGS_E(getHost(), "File Binary can not write file path");
+        return false;
+    }
 
     MessageBlock baseHeader;
     baseHeader.type = MSGHEADER_BINARY;
-    baseHeader.size = size;
+    baseHeader.size = fileItem->getSize();
 
     if (!writeBlockBase(target, baseHeader, crc)) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Binary BlockBase to stream");
         return false;
     }
 
-	int in = open(path.string().c_str(), O_RDONLY);
+	int in = open(fileItem->getPath().string().c_str(), O_RDONLY);
 	if (in == -1) {
-		LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary could not created or opened at path : %s", path.c_str());
+		LOGC_E(getHost(), target, MSGDIR_SEND,
+         "File Binary could not created or opened at path : %s", fileItem->getPath().c_str());
 		return false;
 	}
 
-    auto source = std::make_shared<ComponentUnit>(in);
+    auto source = std::make_shared<ComponentUnit>(in, 0);
 
-	bool status = transferBinary(source, target, size, crc);
+	bool status = transferBinary(source, target, fileItem->getSize(), crc);
 
 	close(in);
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "File Binary is written successfully at path : %s", path.c_str());
+    LOGC_T(getHost(), target, MSGDIR_SEND,
+           "File Binary is written successfully at path : %s", fileItem->getPath().c_str());
 
 	return status;
 
