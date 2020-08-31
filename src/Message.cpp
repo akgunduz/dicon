@@ -330,15 +330,6 @@ bool Message::writeNumberList(const TypeComponentUnit& target, std::vector<uint6
 
 bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
 
-//    MessageBlockHeader blockHeader(BLOCK_JOB);
-//
-//    blockHeader.add(jobName.size());
-
-//    if (!writeBlockHeader(target, blockHeader, crc)) {
-//        LOGS_E(getHost(), "writeJobName can not write block header");
-//        return false;
-//    }
-
     if (!writeString(target, jobName, crc)) {
         LOGS_E(getHost(), "writeJobName can not write job info");
         return false;
@@ -349,21 +340,19 @@ bool Message::writeJobName(const TypeComponentUnit& target, const std::string& j
     return true;
 }
 
-bool Message::writeFileBinary(const TypeComponentUnit& target, const std::string& name, size_t size, uint32_t& crc) {
+bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileItem& file, uint32_t& crc) {
 
-    std::filesystem::path filePath = getHost()->getRootPath() / name;
-
-    if (!writeString(target, name, crc)) {
+    if (!writeString(target, file->getName(), crc)) {
         LOGS_E(getHost(), "writeFileBinary can not write file path");
         return false;
     }
 
-    if (!writeBinary(target, filePath, size, crc)) {
+    if (!writeBinary(target, file->getPath() / file->getName(), file->getSize(), crc)) {
         LOGS_E(getHost(), "writeFileBinary can not write file binary");
         return false;
     }
 
-    LOGS_D(getHost(), "File Binary is written successfully => Name : %s", name.c_str());
+    LOGS_D(getHost(), "File Binary is written successfully => Name : %s", file->getName().c_str());
 
     return true;
 }
@@ -518,12 +507,10 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_FILESOLO: {
+        case STREAM_FILESOLO:
 
-            auto &processFile = data.getProcess()->getFileList()[0];
-
-            writeFileBinary(target, processFile->get()->getName(), processFile->get()->getSize(), crc);
-
+            if (!writeFileBinary(target, data.getFile(), crc)) {
+                return false;
             }
 
             break;

@@ -22,7 +22,7 @@
 class MessageBase;
 typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);
 typedef size_t (*TypeWriteCB) (const TypeComponentUnit&, const uint8_t*, size_t);
-typedef bool (MessageBase::*TypeMsgReadParser)(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
+typedef bool (MessageBase::*TypeMsgReadParser)(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
 
 enum MSG_STATE {
 
@@ -57,6 +57,7 @@ class MessageBase {
     uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
     size_t tmpBufPos = 0;
+    size_t binBufPos = 0;
 
     MessageBlock block;
 
@@ -86,13 +87,14 @@ public:
 
     bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t, uint32_t&);
 
-	bool readBlock(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
+	bool readBlockDeprecated(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
 
-	bool readHeader(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
-	bool readString(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
-	bool readNumber(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
-    bool readBinary(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
-    bool readEndStream(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
+	bool readBlock(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
+	bool readHeader(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
+	bool readString(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
+	bool readNumber(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
+    bool readBinary(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
+    bool readEndStream(const TypeComponentUnit&, const uint8_t*, size_t, uint32_t&);
 
 	bool readFromStream(const TypeComponentUnit&);
 

@@ -16,6 +16,8 @@ class MessageData {
 
     TypeProcessItem process;
 
+    TypeFileItem file;
+
     TypeComponentUnitList componentList;
 
 public:
@@ -30,6 +32,9 @@ public:
     void setProcess(const TypeProcessItem&);
     void setProcess(long, const TypeProcessFileList&);
     void setProcess(long, const TypeProcessFile&);
+
+    const TypeFileItem& getFile();
+    void setFile(const TypeFileItem&);
 
     std::string& getJobName();
     void setJobName(const std::string&);

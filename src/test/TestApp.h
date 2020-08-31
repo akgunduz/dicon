@@ -12,6 +12,7 @@
 #include "Application.h"
 
 #define TEST_JOB_PATH "../scratch/Job1_x86_linux"
+#define TEST_JOB_FILE "matrop-multiply"
 
 enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING = 100,

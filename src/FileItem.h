@@ -11,13 +11,16 @@
 class FileItem : public ContentItem {
 
 	std::string name;
+    std::filesystem::path path;
 
+    bool is_independent{false};
 	bool is_exist{};
 	bool is_required{};
     std::uintmax_t size{};
 
 public:
 	explicit FileItem(const TypeHostUnit&, long = 0, long = 0, std::string = "");
+	FileItem(const TypeHostUnit&, long, std::filesystem::path, std::string);
 	~FileItem() override = default;
 
     const std::string& getName();
@@ -31,6 +34,8 @@ public:
 
     bool required() const;
     void setRequired(bool);
+
+    std::filesystem::path getPath();
 };
 
 typedef std::shared_ptr<FileItem> TypeFileItem;

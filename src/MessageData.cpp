@@ -20,6 +20,16 @@ void MessageData::setStreamType(int _streamFlag) {
     streamType = _streamFlag;
 }
 
+const TypeFileItem& MessageData::getFile() {
+
+    return file;
+}
+
+void MessageData::setFile(const TypeFileItem& _file) {
+
+    file = _file;
+}
+
 const TypeProcessItem& MessageData::getProcess() {
 
     return process;

@@ -9,7 +9,11 @@
 #include "Util.h"
 
 FileItem::FileItem(const TypeHostUnit& host, long _id, long _assignedJob, std::string _name)
-        : ContentItem (host, _id, _assignedJob),  name(std::move(_name)) {
+        : ContentItem (host, _id, _assignedJob),  name(std::move(_name)), is_independent(false) {
+}
+
+FileItem::FileItem(const TypeHostUnit& host, long _id, std::filesystem::path _path, std::string _name)
+        : ContentItem (host, _id, 0),  name(std::move(_name)), path(std::move(_path)), is_independent(true) {
 }
 
 CONTENT_TYPES FileItem::getType() {
@@ -39,14 +43,14 @@ bool FileItem::check() {
         return true;
     }
 
-    if (getAssignedJob() == 0 || name.empty()) {
+    if ((!is_independent && getAssignedJob() == 0) || name.empty()) {
         LOGS_T(getHost(), "FileContent info is invalid");
         return false;
     }
 
     try {
 
-        size = std::filesystem::file_size(getHost()->getRootPath() / std::to_string(getAssignedJob()) / name);
+        size = std::filesystem::file_size(getPath() / name);
 
     } catch(std::filesystem::filesystem_error& e) {
 
@@ -72,4 +76,9 @@ bool FileItem::required() const {
 void FileItem::setRequired(bool _is_required) {
 
     is_required = _is_required;
+}
+
+std::filesystem::path FileItem::getPath() {
+
+    return is_independent ? path : getHost()->getRootPath() / std::to_string(getAssignedJob());
 }
