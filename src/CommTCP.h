@@ -25,6 +25,9 @@ class CommTCP : public CommInterface {
 	int netSocket{};
 	int multicastSocket{};
 
+    //TODO will be removed later
+    static inline int lastFreePort = DEFAULT_PORT;
+
 	bool initTCP();
 	bool initMulticast();
     bool runReceiver() override;

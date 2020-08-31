@@ -5,7 +5,6 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
-#include "Util.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
@@ -26,10 +25,13 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
 bool CommTCP::initTCP() {
 
     uv_tcp_init(&loop, &server);
+
     server.data = this;
 
     int tryCount = 10;
-    int lastFreePort = DEFAULT_PORT;
+
+    //TODO will be enabled later
+    //int lastFreePort = DEFAULT_PORT;
 
     for (int j = tryCount; j > 0; j--) {
 
@@ -44,6 +46,9 @@ bool CommTCP::initTCP() {
             lastFreePort++;
             continue;
         }
+
+        //TODO will be removed later
+        lastFreePort++;
 
         result = uv_listen((uv_stream_t *) &server, MAX_SIMUL_CLIENTS,
                            [](uv_stream_t *serverPtr, int status) {
@@ -168,7 +173,7 @@ bool CommTCP::onConnection() {
         return false;
     }
 
-    msgMap[client] = {std::make_unique<Message>(getHost()), std::make_shared<ComponentUnit>(0)};
+    msgMap[client] = {std::make_unique<Message>(getHost()), std::make_shared<ComponentUnit>(0, 0)};
 
     client->data = this;
 
