@@ -185,9 +185,8 @@ bool Collector::send2DistributorReadyMsg(const TypeComponentUnit& target) {
 
 bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS, STREAM_PROCESS);
 
-    msg->getData().setStreamType(STREAM_PROCESS);
     msg->getData().setProcess(processItem);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Node[%d]:Process[%d] is triggered ",
@@ -198,9 +197,8 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
 
 bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_FILEBINARY);
 
-    msg->getData().setStreamType(STREAM_FILEBINARY);
     msg->getData().setProcess(processID, fileList);
 
     return send(target, std::move(msg));

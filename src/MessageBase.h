@@ -59,6 +59,8 @@ class MessageBase {
     size_t tmpBufPos = 0;
     size_t binBufPos = 0;
 
+    uint32_t crc;
+
     MessageBlock block;
 
     MessageHeader header;
@@ -71,14 +73,13 @@ class MessageBase {
 
 protected:
 
-    std::vector<uint64_t> numbers;
-    std::vector<std::string> strings;
-    std::vector<std::string> fileLocations;
+    std::deque<uint64_t> numbers;
+    std::deque<std::string> strings;
 
 public:
 
     explicit MessageBase(const TypeHostUnit&);
-    MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE);
+    MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
 
     bool onRead(const TypeComponentUnit&, ssize_t, const uv_buf_t *);
 
@@ -99,6 +100,7 @@ public:
 	bool readFromStream(const TypeComponentUnit&);
 
     virtual bool readMessageBlock(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
+    virtual bool build(const TypeComponentUnit&) = 0;
 
 
 	bool writeBlock(const TypeComponentUnit&, const uint8_t *, size_t, uint32_t&);
@@ -115,7 +117,7 @@ public:
 	bool writeToStream(const TypeComponentUnit&);
 
     virtual bool writeMessageStream(const TypeComponentUnit&, uint32_t&) = 0;
-
+    
     bool deSerializeHeader(const uint8_t*);
     void serializeHeader(uint8_t *);
     void grabOwner(const TypeCommUnit&);

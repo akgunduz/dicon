@@ -15,32 +15,47 @@ class Message : public MessageBase {
 
     MessageData data;
 
+    bool readJobName(const TypeComponentUnit&, std::string&);
+    bool readFileBinary(const TypeComponentUnit&, const TypeFileItem&);
+    bool readProcessID(const TypeComponentUnit&, const TypeProcessItem&);
+    bool readProcessInfo(const TypeComponentUnit&, const TypeProcessItem&);
+    bool readProcessFileCount(const TypeComponentUnit&, long&);
+    bool readProcessFile(const TypeComponentUnit&, const TypeProcessFile&);
+    bool readProcessFiles(const TypeComponentUnit&, const TypeProcessItem&);
+
+
+
     bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
     bool readNumberList(const TypeComponentUnit&, std::vector<uint64_t> &, size_t, uint32_t&);
-    bool readJobName(const TypeComponentUnit&, std::string&, MessageBlockHeader&, uint32_t&);
-    bool readProcess(const TypeComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
-    bool readProcessID(const TypeComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
-    bool readFile(const TypeComponentUnit&, const TypeProcessFile&, MessageBlockHeader&, uint32_t&);
     bool readMessageBlock(const TypeComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
+
+
+    bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
+    bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&, uint32_t&);
+    bool writeProcessID(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
+    bool writeProcessInfo(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
+    bool writeProcessFileCount(const TypeComponentUnit&, const TypeProcessItem&, uint32_t& crc);
+    bool writeProcessFile(const TypeComponentUnit&, const TypeProcessFile&, bool, uint32_t&);
+    bool writeProcessFiles(const TypeComponentUnit&, const TypeProcessItem&, bool, uint32_t&);
+
+
 
     bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&, uint32_t&);
     bool writeNumberList(const TypeComponentUnit&, std::vector<uint64_t>&, uint32_t&);
-    bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
-    bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
-    bool writeProcessID(const TypeComponentUnit&, long, uint32_t&);
-    bool writeFile(const TypeComponentUnit&, const TypeProcessFile&, bool, uint32_t&);
 
-    bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&, uint32_t&);
+
 
     bool writeMessageStream(const TypeComponentUnit& out, uint32_t&) override;
 
 public:
 
 	explicit Message(const TypeHostUnit&);
-	Message(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE);
+	Message(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE = STREAM_NONE);
 	~Message() = default;
 
 	MessageData& getData();
+
+    bool build(const TypeComponentUnit&) override;
 };
 
 typedef std::unique_ptr<Message> TypeMessage;

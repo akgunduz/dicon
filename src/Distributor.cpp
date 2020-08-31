@@ -320,9 +320,8 @@ bool Distributor::send2CollectorIDMsg(const TypeComponentUnit& target, long id) 
 
 bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE, STREAM_COMPONENT);
 
-    msg->getData().setStreamType(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
     return send(target, std::move(msg));
@@ -330,9 +329,8 @@ bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeCom
 
 bool Distributor::send2CollectorReplaceMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE, STREAM_COMPONENT);
 
-    msg->getData().setStreamType(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
     return send(target, std::move(msg));

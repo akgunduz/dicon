@@ -19,10 +19,12 @@ MessageBase::MessageBase(const TypeHostUnit& host)
     readParser[MSGHEADER_END] = &MessageBase::readEndStream;
 }
 
-MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE msgType)
+MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target,
+                         MSG_TYPE msgType, STREAM_TYPE streamType)
 		: MessageBase(host) {
 
     header.setType(msgType);
+    header.setStream(streamType);
     header.setOwner(host->getUnit(target->getType()));
 }
 
@@ -245,14 +247,16 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
 
     if (nRead == UV_EOF || nRead == 0) {
-      //  LOGP_E("Data : EOF or 0");
-        return false;
+        if (nRead == UV_EOF) {
+            LOGP_E("EOF received, building message");
+            build(source);
+        }
+
+        return true;
     }
 
 //    LOGP_E("Data received, count : %d, bufPtr : %s",
 //           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
-
-    uint32_t crc;
 
     uint32_t minContDataLength;
     size_t remaining = 0;

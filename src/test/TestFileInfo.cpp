@@ -6,13 +6,12 @@
 
 void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, STREAM_FILEINFO);
 
-    auto *job = new JobItem(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
+    auto *job = new JobItem(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
     auto list = job->getProcess(0)->getFileList();
 
-    msg->getData().setStreamType(STREAM_FILEINFO);
     msg->getData().setProcess(job->getProcess(0)->getID(), list);
 
     owner->send(target, std::move(msg));

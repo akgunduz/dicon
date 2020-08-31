@@ -10,13 +10,13 @@
 
 class MessageData {
 
-    int streamType{STREAM_NONE};
-
     std::string jobName;
 
     TypeProcessItem process;
 
     TypeFileItem file;
+
+    TypeProcessFile processFile;
 
     TypeComponentUnitList componentList;
 
@@ -25,9 +25,6 @@ public:
     explicit MessageData(const TypeHostUnit&);
     ~MessageData() = default;
 
-    int getStreamType();
-    void setStreamType(int);
-
     const TypeProcessItem& getProcess();
     void setProcess(const TypeProcessItem&);
     void setProcess(long, const TypeProcessFileList&);
@@ -35,6 +32,9 @@ public:
 
     const TypeFileItem& getFile();
     void setFile(const TypeFileItem&);
+
+    const TypeProcessFile& getProcessFile();
+    void setProcessFile(const TypeProcessFile&);
 
     std::string& getJobName();
     void setJobName(const std::string&);

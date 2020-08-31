@@ -8,16 +8,10 @@
 MessageData::MessageData(const TypeHostUnit& host) {
 
     process = std::make_shared<ProcessItem>(host);
-}
 
-int MessageData::getStreamType() {
+    file = std::make_shared<FileItem>(host, true);
 
-    return streamType;
-}
-
-void MessageData::setStreamType(int _streamFlag) {
-
-    streamType = _streamFlag;
+    processFile = std::make_shared<ProcessFile>(file, 0, false);
 }
 
 const TypeFileItem& MessageData::getFile() {
@@ -28,6 +22,16 @@ const TypeFileItem& MessageData::getFile() {
 void MessageData::setFile(const TypeFileItem& _file) {
 
     file = _file;
+}
+
+const TypeProcessFile& MessageData::getProcessFile() {
+
+    return processFile;
+}
+
+void MessageData::setProcessFile(const TypeProcessFile& _processFile) {
+
+    processFile = _processFile;
 }
 
 const TypeProcessItem& MessageData::getProcess() {

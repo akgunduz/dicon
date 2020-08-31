@@ -37,24 +37,40 @@ int TestApp::run() {
 
         in = getchar();
         switch(in) {
+
+            case 'j':
+                testSendJobName(d, c, n);
+                break;
+            case 'b':
+                testSendFileBinary(d, c, n);
+                break;
+            case 'y':
+                testSendProcessID(d, c, n);
+                break;
+            case 's':
+                testSendProcessInfo(d, c, n);
+                break;
+            case 't':
+                testSendProcessFileBinary(d, c, n);
+                break;
+            case 'a':
+                testSendProcessFiles(d, c, n);
+                break;
+
+
+
             case 'p':
                 testPing(d, c, n);
                 break;
             case 'c':
                 testComponentList(d, c, n);
                 break;
-            case 's':
-                testProcess(d, c, n);
-                break;
+
             case 'i':
                 testFileInfo(d, c, n);
                 break;
-            case 'b':
-                testFileBinary(d, c, n);
-                break;
-            case 'j':
-                testJobName(d, c, n);
-                break;
+
+
             case 'l':
                 testLoadJob(d, c, n);
                 break;

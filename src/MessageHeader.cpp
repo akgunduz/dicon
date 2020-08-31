@@ -20,6 +20,16 @@ MSG_TYPE MessageHeader::getType() {
     return (MSG_TYPE)type;
 }
 
+STREAM_TYPE MessageHeader::getStream() {
+
+    return (STREAM_TYPE)stream;
+}
+
+void MessageHeader::setStream(STREAM_TYPE _stream) {
+
+    stream = (uint16_t)_stream;
+}
+
 TypeCommUnit MessageHeader::getOwner() {
 
     return std::make_shared<CommUnit>(owner);
@@ -81,6 +91,7 @@ bool MessageHeader::deSerialize(const uint8_t* buffer) {
 
     type = ntohs(*((uint16_t *) buffer)); buffer += 2;
     priority = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    stream = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.type = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.arch = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.id = ntohl(*((TypeID *) buffer)); buffer += sizeof(TypeID);
@@ -89,6 +100,7 @@ bool MessageHeader::deSerialize(const uint8_t* buffer) {
     owner.address.get().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
     owner.address.getUI().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.getUI().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
+
     for (int i = 0; i < MAX_VARIANT; i++) {
         variant[i] = ntohll(*((uint64_t *) buffer)); buffer += 8;
     }
@@ -100,6 +112,7 @@ void MessageHeader::serialize(uint8_t *buffer) {
 
     *((uint16_t *) buffer) = htons(type); buffer += 2;
     *((uint16_t *) buffer) = htons(priority); buffer += 2;
+    *((uint16_t *) buffer) = htons(stream); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.type); buffer += 2;
     *((uint16_t *) buffer) = htons(owner.arch); buffer += 2;
     *((TypeID *) buffer) = htonl(owner.id); buffer += sizeof(TypeID);
@@ -108,6 +121,7 @@ void MessageHeader::serialize(uint8_t *buffer) {
     *((uint32_t *) buffer) = htonl(owner.address.get().base); buffer += 4;
     *((uint16_t *) buffer) = htons(owner.address.getUI().port); buffer += 2;
     *((uint32_t *) buffer) = htonl(owner.address.getUI().base); buffer += 4;
+
     for (int i = 0; i < MAX_VARIANT; i++) {
         *((uint64_t *) buffer) = htonll(variant[i]); buffer += 8;
     }
