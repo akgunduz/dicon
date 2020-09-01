@@ -18,7 +18,8 @@ class UnixSocket : public CommInterface {
 	int unixSocket;
 
 	bool initUnixSocket();
-    bool runReceiver() override;
+
+    void onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
     bool runSender(const TypeComponentUnit& , TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
@@ -30,8 +31,6 @@ public :
     COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
-
-    void onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
 
     static TypeReadCB getReadCB(const TypeComponentUnit&);
     static TypeWriteCB getWriteCB(const TypeComponentUnit&);

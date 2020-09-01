@@ -80,69 +80,69 @@ void UnixSocket::onRead(ReceiveData& receiveData, ssize_t nRead, const uv_buf_t 
 
 }
 
-bool UnixSocket::runReceiver() {
-
-    bool thread_started = true;
-    std::thread threadAccept;
-
-    int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
-
-    fd_set readfs, orjreadfs;
-
-    FD_ZERO(&orjreadfs);
-    FD_SET(unixSocket, &orjreadfs);
-    FD_SET(notifierPipe[0], &orjreadfs);
-
-    while (thread_started) {
-
-        readfs = orjreadfs;
-
-        int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
-        if (nready == -1) {
-            LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
-            return false;
-        }
-
-        if (FD_ISSET(unixSocket, &readfs)) {
-
-            int acceptSocket = accept(unixSocket, nullptr, nullptr);
-            if (acceptSocket < 0) {
-                LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
-                return false;
-            }
-
-            threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
-
-                auto source = std::make_shared<ComponentUnit>(acceptSocket, 0);
-
-                auto msg = std::make_unique<Message>(commInterface->getHost());
-
-//                if (msg->readFromStream(source)) {
+//bool UnixSocket::runReceiver() {
 //
-//                    auto owner = msg->getHeader().getOwner();
+//    bool thread_started = true;
+//    std::thread threadAccept;
 //
-//                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-//                }
-            }, this, acceptSocket);
-            threadAccept.detach();
-        }
-
-        if (FD_ISSET(notifierPipe[0], &readfs)) {
-
-            char data;
-            read(notifierPipe[0], &data, 1);
-            switch (data) {
-                case SHUTDOWN_NOTIFIER:
-                    thread_started = false;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    return true;
-}
+//    int maxfd = std::max(unixSocket, notifierPipe[0]) + 1;
+//
+//    fd_set readfs, orjreadfs;
+//
+//    FD_ZERO(&orjreadfs);
+//    FD_SET(unixSocket, &orjreadfs);
+//    FD_SET(notifierPipe[0], &orjreadfs);
+//
+//    while (thread_started) {
+//
+//        readfs = orjreadfs;
+//
+//        int nready = select(maxfd, &readfs, nullptr, nullptr, nullptr);
+//        if (nready == -1) {
+//            LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
+//            return false;
+//        }
+//
+//        if (FD_ISSET(unixSocket, &readfs)) {
+//
+//            int acceptSocket = accept(unixSocket, nullptr, nullptr);
+//            if (acceptSocket < 0) {
+//                LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
+//                return false;
+//            }
+//
+//            threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
+//
+//                auto source = std::make_shared<ComponentUnit>(acceptSocket, 0);
+//
+//                auto msg = std::make_unique<Message>(commInterface->getHost());
+//
+////                if (msg->readFromStream(source)) {
+////
+////                    auto owner = msg->getHeader().getOwner();
+////
+////                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+////                }
+//            }, this, acceptSocket);
+//            threadAccept.detach();
+//        }
+//
+//        if (FD_ISSET(notifierPipe[0], &readfs)) {
+//
+//            char data;
+//            read(notifierPipe[0], &data, 1);
+//            switch (data) {
+//                case SHUTDOWN_NOTIFIER:
+//                    thread_started = false;
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//    }
+//
+//    return true;
+//}
 
 bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 

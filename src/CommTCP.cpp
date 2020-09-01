@@ -168,6 +168,7 @@ void CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
         receiveData.msg = std::make_unique<Message>(getHost());
 
         receiveData.unit = std::make_shared<ComponentUnit>();
+        // receiveData.unit->getAddress().setMulticast(true);
 
         receiveData.state = DATASTATE_PROCESS;
     }
@@ -219,98 +220,6 @@ bool CommTCP::onConnection() {
                       commInterface->onRead(commInterface->receiveData[0], nRead, buf);
 
                   });
-
-    return true;
-}
-
-bool CommTCP::runReceiver() {
-
-    return uv_run(&loop, UV_RUN_DEFAULT);
-
-//    bool thread_started = true;
-//    std::thread threadAccept;
-//
-//    struct sockaddr_in cli_addr{};
-//
-//    socklen_t cliLen = sizeof(cli_addr);
-//
-//    fd_set readFS, orjReadFS;
-//    FD_ZERO(&orjReadFS);
-//
-//    int maxfd = std::max(netSocket, notifierPipe[0]);
-//    maxfd = std::max(maxfd, multicastSocket);
-//    maxfd++;
-//
-//    FD_SET(multicastSocket, &orjReadFS);
-//    FD_SET(netSocket, &orjReadFS);
-//    FD_SET(notifierPipe[0], &orjReadFS);
-//
-//    while (thread_started) {
-//
-//        readFS = orjReadFS;
-//
-//        int nReady = select(maxfd, &readFS, nullptr, nullptr, nullptr);
-//        if (nReady == -1) {
-//            LOGS_E(getHost(), "Problem with select call with err : %d!!!", errno);
-//            return false;
-//        }
-//
-//        if (FD_ISSET(netSocket, &readFS)) {
-//
-//            int acceptSocket = accept(netSocket, (struct sockaddr *) &cli_addr, &cliLen);
-//            if (acceptSocket < 0) {
-//                LOGS_E(getHost(), "Node Socket open with err : %d!!!", errno);
-//                return false;
-//            }
-//
-//            threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
-//
-//                auto source = std::make_shared<ComponentUnit>(acceptSocket);
-//
-//                auto msg = std::make_unique<Message>(commInterface->getHost());
-//
-//                if (msg->readFromStream(source)) {
-//
-//                    auto owner = msg->getHeader().getOwner();
-//
-//                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-//                }
-//
-//                close(acceptSocket);
-//
-//            }, this, acceptSocket);
-//
-//            threadAccept.detach();
-//        }
-//
-//        if (FD_ISSET(multicastSocket, &readFS)) {
-//
-//            auto source = std::make_shared<ComponentUnit>(multicastSocket);
-//            source->getAddress().setMulticast(true);
-//
-//            auto msg = std::make_unique<Message>(getHost());
-//
-//            if (msg->readFromStream(source)) {
-//
-//                auto owner = msg->getHeader().getOwner();
-//
-//                push(MSGDIR_RECEIVE, owner, std::move(msg));
-//            }
-//        }
-//
-//        if (FD_ISSET(notifierPipe[0], &readFS)) {
-//
-//            char data;
-//            read(notifierPipe[0], &data, 1);
-//            switch (data) {
-//                case SHUTDOWN_NOTIFIER:
-//                    thread_started = false;
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//    }
 
     return true;
 }

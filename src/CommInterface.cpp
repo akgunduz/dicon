@@ -72,7 +72,7 @@ bool CommInterface::initThread() {
 
     threadRcv = std::thread([](CommInterface *commInterface) {
 
-        commInterface->runReceiver();
+        return uv_run(&commInterface->loop, UV_RUN_DEFAULT);
 
     }, this);
 
