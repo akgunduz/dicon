@@ -549,7 +549,7 @@ bool JobItem::extract(const std::string& zipFile, long& _jobID) {
         std::filesystem::remove_all(path);
     }
 
-    std::filesystem::create_directory(path);
+    std::filesystem::create_directories(path);
 
     for (int i = 0; i < fileCount; i++) {
 

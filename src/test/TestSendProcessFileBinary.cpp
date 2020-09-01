@@ -9,7 +9,7 @@ void sendProcessFileBinary(const TypeComponent& owner, const TypeComponentUnit& 
     auto msg = std::make_unique<Message>(owner->getHost(), target,
                                          (MSG_TYPE)MSG_TYPE_TEST_FILEBINARY, STREAM_PROCESSFILEBINARY);
 
-    auto file = std::make_shared<FileItem>(owner->getHost(), 99, TEST_JOB_PATH, TEST_JOB_FILE);
+    auto file = std::make_shared<FileItem>(owner->getHost(), 99, ".", TEST_JOB_FILE);
 
     auto processFile = std::make_shared<ProcessFile>(file, 888, false);
 
@@ -26,8 +26,10 @@ bool processProcessFileBinaryMsg(const TypeComponent& component, const TypeCompo
 
     LOGS_I(component->getHost(), "Message Process File Binary has came from : %s ",
            ComponentType::getName(owner->getType()));
-    LOGS_I(component->getHost(), "Process[%d] File[%d] => Name : %s, Size : %d", processFile->getAssignedProcess(),
-           processFile->get()->getID(), processFile->get()->getName().c_str(), processFile->get()->getSize());
+    LOGS_I(component->getHost(), "Process[%d] File[%d] => Name : %s, Size : %d, Path : %s",
+           processFile->getAssignedProcess(),
+           processFile->get()->getID(), processFile->get()->getName().c_str(),
+           processFile->get()->getSize(), processFile->get()->getPath().c_str());
 
     return true;
 }
