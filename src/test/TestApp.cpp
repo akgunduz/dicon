@@ -47,14 +47,14 @@ int TestApp::run() {
             case 'y':
                 testSendProcessID(d, c, n);
                 break;
-            case 's':
+            case 'i':
                 testSendProcessInfo(d, c, n);
                 break;
             case 't':
                 testSendProcessFileBinary(d, c, n);
                 break;
             case 'a':
-                testSendProcessFiles(d, c, n);
+                testSendProcessFilesBinary(d, c, n);
                 break;
             case 'f':
                 testSendProcess(d, c, n);
@@ -67,9 +67,6 @@ int TestApp::run() {
 
             case 'p':
                 testPing(d, c, n);
-                break;
-            case 'i':
-                testFileInfo(d, c, n);
                 break;
             case 'l':
                 testLoadJob(d, c, n);

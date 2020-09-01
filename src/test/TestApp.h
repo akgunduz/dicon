@@ -16,16 +16,24 @@
 #define TEST_JOB_FILE "matrop-multiply"
 
 enum MSG_TYPE_TEST {
-    MSG_TYPE_TEST_PING = 100,
-    MSG_TYPE_TEST_COMPLIST,
+
+    MSG_TYPE_TEST_JOBNAME = 100,
+    MSG_TYPE_TEST_COMPONENT,
+    MSG_TYPE_TEST_COMPONENTS,
+    MSG_TYPE_TEST_FILE_INFO,
+    MSG_TYPE_TEST_FILE_BINARY,
     MSG_TYPE_TEST_PROCESS,
-    MSG_TYPE_TEST_PROCESSID,
-    MSG_TYPE_TEST_PROCESSINFO,
-    MSG_TYPE_TEST_FILEINFO,
-    MSG_TYPE_TEST_FILEBINARY,
-    MSG_TYPE_TEST_JOBNAME,
+    MSG_TYPE_TEST_PROCESSES,
+    MSG_TYPE_TEST_PROCESS_ID,
+    MSG_TYPE_TEST_PROCESS_INFO,
+    MSG_TYPE_TEST_PROCESS_FILE_INFO,
+    MSG_TYPE_TEST_PROCESS_FILE_BINARY,
+    MSG_TYPE_TEST_PROCESS_FILES_INFO,
+    MSG_TYPE_TEST_PROCESS_FILES_BINARY,
+
     MSG_TYPE_TEST_WAKEUP,
     MSG_TYPE_TEST_ALIVE,
+    MSG_TYPE_TEST_PING,
 };
 
 class TestApp : public App {
@@ -37,10 +45,11 @@ public:
 
     void testSendJobName(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessID(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessInfo(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testSendProcessFiles(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcessFilesBinary(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
 

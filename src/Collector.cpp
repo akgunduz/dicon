@@ -197,7 +197,7 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
 
 bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_FILEBINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_FILE_BINARY);
 
     msg->getData().setProcess(processID, fileList);
 

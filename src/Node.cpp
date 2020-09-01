@@ -223,7 +223,7 @@ bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, long collID)
 
 bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO, STREAM_FILEINFO);
+	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO, STREAM_FILE_INFO);
 
     msg->getData().setProcess(processID, fileList);
 
@@ -237,7 +237,7 @@ bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID
 
 bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_FILEBINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_FILE_BINARY);
 
     msg->getData().setProcess(processID, fileList);
 

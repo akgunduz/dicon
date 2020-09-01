@@ -105,19 +105,15 @@ set(TEST_FILES
         ${TEST_PATH}/TestApp.cpp
         ${TEST_PATH}/TestSendJobName.cpp
         ${TEST_PATH}/TestSendFileBinary.cpp
+        ${TEST_PATH}/testSendFileInfo.cpp
         ${TEST_PATH}/TestSendProcessID.cpp
         ${TEST_PATH}/TestSendProcessInfo.cpp
         ${TEST_PATH}/testSendProcessFileBinary.cpp
-        ${TEST_PATH}/TestSendProcessFiles.cpp
+        ${TEST_PATH}/TestSendProcessFilesBinary.cpp
         ${TEST_PATH}/TestSendProcess.cpp
         ${TEST_PATH}/TestSendComponentList.cpp
 
         ${TEST_PATH}/TestPing.cpp
-
-
-
-        ${TEST_PATH}/TestFileInfo.cpp
-
         ${TEST_PATH}/TestLoadJob.cpp
         ${TEST_PATH}/TestWakeUp.cpp
         ${TEST_PATH}/TestPipeControl.cpp

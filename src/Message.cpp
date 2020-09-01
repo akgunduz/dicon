@@ -212,33 +212,33 @@ bool Message::build(const TypeComponentUnit& source) {
 
             break;
 
-        case STREAM_FILEBINARY:
+        case STREAM_FILE_BINARY:
 
             readFileBinary(source, data.getFile());
 
             break;
 
-        case STREAM_PROCESSID:
+        case STREAM_PROCESS_ID:
 
             readProcessID(source, data.getProcess());
 
             break;
 
-        case STREAM_PROCESSINFO:
+        case STREAM_PROCESS_INFO:
 
             readProcessInfo(source, data.getProcess());
 
             break;
 
-        case STREAM_PROCESSFILEINFO:
-        case STREAM_PROCESSFILEBINARY:
+        case STREAM_PROCESS_FILE_INFO:
+        case STREAM_PROCESS_FILE_BINARY:
 
             readProcessFile(source, data.getProcessFile());
 
             break;
 
-        case STREAM_PROCESSFILEINFO_ALL:
-        case STREAM_PROCESSFILEBINARY_ALL:
+        case STREAM_PROCESS_FILES_INFO:
+        case STREAM_PROCESS_FILES_BINARY:
 
             readProcessFiles(source, data.getProcess());
 
@@ -250,7 +250,7 @@ bool Message::build(const TypeComponentUnit& source) {
 
             break;
 
-        case STREAM_COMPONENT:
+        case STREAM_COMPONENTS:
 
             readComponentList(source, data.getComponentList());
 
@@ -509,7 +509,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_FILEBINARY:
+        case STREAM_FILE_BINARY:
 
             if (!writeFileBinary(target, data.getFile(), crc)) {
                 return false;
@@ -517,13 +517,13 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_PROCESSID:
+        case STREAM_PROCESS_ID:
 
             if (!writeProcessID(target, data.getProcess(), crc)) {
                 return false;
             }
 
-        case STREAM_PROCESSINFO:
+        case STREAM_PROCESS_INFO:
 
             if (!writeProcessInfo(target, data.getProcess(), crc)) {
                 return false;
@@ -531,21 +531,21 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_PROCESSFILEINFO:
-        case STREAM_PROCESSFILEBINARY:
+        case STREAM_PROCESS_FILE_INFO:
+        case STREAM_PROCESS_FILE_BINARY:
 
             if (!writeProcessFile(target, data.getProcessFile(),
-                                  getHeader().getStream() == STREAM_PROCESSFILEBINARY, crc)) {
+                                  getHeader().getStream() == STREAM_PROCESS_FILE_BINARY, crc)) {
                 return false;
             }
 
             break;
 
-        case STREAM_PROCESSFILEINFO_ALL:
-        case STREAM_PROCESSFILEBINARY_ALL:
+        case STREAM_PROCESS_FILES_INFO:
+        case STREAM_PROCESS_FILES_BINARY:
 
             if (!writeProcessFiles(target, data.getProcess(),
-                                  getHeader().getStream() == STREAM_PROCESSFILEBINARY_ALL, crc)) {
+                                  getHeader().getStream() == STREAM_PROCESS_FILES_BINARY, crc)) {
                 return false;
             }
 
@@ -559,7 +559,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_COMPONENT: {
+        case STREAM_COMPONENTS: {
 
             if (!writeComponentList(target, data.getComponentList(), crc)) {
                 return false;

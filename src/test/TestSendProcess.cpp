@@ -33,7 +33,7 @@ bool processProcessMsg(const TypeComponent& component, const TypeComponentUnit& 
 
 void TestApp::testSendProcess(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_PROCESS, "TEST_FILEBINARY");
+    MessageType::addMsg(MSG_TYPE_TEST_PROCESS, "TEST_PROCESS");
 
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, processProcessMsg);
 
