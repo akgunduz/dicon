@@ -49,6 +49,5 @@ public:
 };
 
 typedef std::unique_ptr<Message> TypeMessage;
-typedef std::map<void*, std::pair<TypeMessage, TypeComponentUnit>> TypeClientMsgList;
 
 #endif //DICON_MESSAGE_H

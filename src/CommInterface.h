@@ -19,6 +19,19 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
+enum DATA_STATE {
+
+    DATASTATE_INIT,
+    DATASTATE_PROCESS
+};
+
+struct ReceiveData {
+
+    TypeMessage msg;
+    TypeComponentUnit unit;
+    DATA_STATE state;
+};
+
 class CommInterface {
 
     const TypeHostUnit host;
@@ -32,12 +45,13 @@ class CommInterface {
 protected :
 
     uv_loop_t loop;
-    uv_loop_t multicastLoop;
 	Scheduler *scheduler;
 	std::thread threadRcv;
 	int notifierPipe[2]{};
-    TypeClientMsgList msgMap;
 
+    ReceiveData receiveData[2];
+
+    virtual void onRead(ReceiveData&, ssize_t, const uv_buf_t*) = 0;
 	virtual bool runReceiver() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;

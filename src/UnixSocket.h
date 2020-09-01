@@ -31,6 +31,8 @@ public :
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
 
+    void onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
+
     static TypeReadCB getReadCB(const TypeComponentUnit&);
     static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };

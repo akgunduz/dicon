@@ -25,5 +25,6 @@ public:
 };
 
 typedef std::shared_ptr<MessageItem> TypeMessageItem;
+//typedef std::map<void*, TypeMessageItem> TypeMessageItemMap;
 
 #endif //DICON_MESSAGEITEM_H

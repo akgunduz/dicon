@@ -109,24 +109,15 @@ bool CommTCP::initMulticast() {
 
                       },
 
-                      [](uv_udp_t* client, ssize_t nRead, const uv_buf_t* buf,
-                              const struct sockaddr* addr, unsigned flags) {
+                      [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
+                         const struct sockaddr *addr, unsigned flags) {
 
-                              LOGP_E("Data received, count : %d, bufPtr : %s",
-                                    nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+                          LOGP_E("Data received, count : %d, bufPtr : %s",
+                                 nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
 
-//                          auto commInterface = (CommTCP *) client->data;
-//
-//                          auto& msg = commInterface->msgMap[client].first;
-//
-//                          bool isDone = msg->onRead(commInterface->msgMap[client].second, nRead, buf);
-//
-//                          if (isDone) {
-//
-//                              auto owner = msg->getHeader().getOwner();
-//
-//                              commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-//                          }
+                          auto commInterface = (CommTCP *) client->data;
+
+                          commInterface->onRead(commInterface->receiveData[1], nRead, buf);
 
                       });
 
@@ -170,6 +161,31 @@ TypeWriteCB CommTCP::getWriteCB(const TypeComponentUnit &target) {
     };
 }
 
+void CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *buf) {
+
+    if (receiveData.state == DATASTATE_INIT) {
+
+        receiveData.msg = std::make_unique<Message>(getHost());
+
+        receiveData.unit = std::make_shared<ComponentUnit>();
+
+        receiveData.state = DATASTATE_PROCESS;
+    }
+
+    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, buf);
+
+    if (isDone) {
+
+        receiveData.msg->build(receiveData.unit);
+
+        auto owner = receiveData.msg->getHeader().getOwner();
+
+        push(MSGDIR_RECEIVE, owner, std::move(receiveData.msg));
+
+        receiveData.state = DATASTATE_INIT;
+    }
+}
+
 bool CommTCP::onConnection() {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
@@ -184,8 +200,6 @@ bool CommTCP::onConnection() {
 
         return false;
     }
-
-    msgMap[client] = {std::make_unique<Message>(getHost()), std::make_shared<ComponentUnit>(0, 0)};
 
     client->data = this;
 
@@ -202,18 +216,7 @@ bool CommTCP::onConnection() {
 
                       auto commInterface = (CommTCP *) client->data;
 
-                      auto& msg = commInterface->msgMap[client].first;
-
-                      bool isDone = msg->onRead(commInterface->msgMap[client].second, nRead, buf);
-
-                      if (isDone) {
-
-                          msg->build(commInterface->msgMap[client].second);
-
-                          auto owner = msg->getHeader().getOwner();
-
-                          commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-                      }
+                      commInterface->onRead(commInterface->receiveData[0], nRead, buf);
 
                   });
 
