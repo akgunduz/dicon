@@ -188,9 +188,18 @@ bool CommTCP::onConnection() {
 
                   [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
-                      auto _commInterface = (CommTCP *) client->data;
+                      auto commInterface = (CommTCP *) client->data;
 
-                      _commInterface->msgMap[client].first->onRead(_commInterface->msgMap[client].second, nRead, buf);
+                      auto& msg = commInterface->msgMap[client].first;
+
+                      bool isDone = msg->onRead(commInterface->msgMap[client].second, nRead, buf);
+
+                      if (isDone) {
+
+                          auto owner = msg->getHeader().getOwner();
+
+                          commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+                      }
 
                   });
 

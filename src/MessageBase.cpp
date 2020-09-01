@@ -168,6 +168,8 @@ bool MessageBase::readHeader(const TypeComponentUnit& source, const uint8_t* buf
 
     deSerializeHeader(buffer);
 
+    grabOwner(source);
+
     LOGS_T(getHost(), "Header is read successfully");
 
 	return true;
@@ -236,12 +238,14 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 
 bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
 
-    if (nRead == UV_EOF || nRead == 0) {
-        if (nRead == UV_EOF) {
-            LOGP_E("EOF received, building message");
-            build(source);
-        }
+    if (nRead == 0) {
 
+        return false;
+    }
+
+    if (nRead == UV_EOF) {
+        LOGP_E("EOF received, building message");
+        build(source);
         return true;
     }
 
@@ -271,7 +275,7 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
 //            LOGP_E("Partial Read, nRead : %d, remaining : %d, tmpBuf : %s",
 //                   nRead, remaining, Util::hex2str(tmpBuf, tmpBufPos).c_str());
 
-            return true;
+            return false;
         }
 
         if (tmpBufPos) {
@@ -345,7 +349,7 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
 
     } while(true);
 
-    return true;
+    return false;
 }
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {

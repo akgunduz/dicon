@@ -32,7 +32,7 @@ bool processComponentListMsg(const TypeComponent& component, const TypeComponent
     return true;
 }
 
-void TestApp::testComponentList(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testSendComponentList(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     MessageType::addMsg(MSG_TYPE_TEST_COMPLIST, "TEST_COMPLIST");
 

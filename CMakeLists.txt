@@ -110,10 +110,10 @@ set(TEST_FILES
         ${TEST_PATH}/testSendProcessFileBinary.cpp
         ${TEST_PATH}/TestSendProcessFiles.cpp
         ${TEST_PATH}/TestSendProcess.cpp
-
+        ${TEST_PATH}/TestSendComponentList.cpp
 
         ${TEST_PATH}/TestPing.cpp
-        ${TEST_PATH}/TestComponentList.cpp
+
 
 
         ${TEST_PATH}/TestFileInfo.cpp

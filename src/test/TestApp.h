@@ -42,11 +42,9 @@ public:
     void testSendProcessFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcessFiles(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
-
-
     void testFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
 
 

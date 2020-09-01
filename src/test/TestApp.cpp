@@ -59,20 +59,18 @@ int TestApp::run() {
             case 'f':
                 testSendProcess(d, c, n);
                 break;
+            case 'c':
+                testSendComponentList(d, c, n);
+                break;
+
 
 
             case 'p':
                 testPing(d, c, n);
                 break;
-            case 'c':
-                testComponentList(d, c, n);
-                break;
-
             case 'i':
                 testFileInfo(d, c, n);
                 break;
-
-
             case 'l':
                 testLoadJob(d, c, n);
                 break;
