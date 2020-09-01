@@ -31,8 +31,7 @@ bool CommTCP::initTCP() {
 
     int tryCount = 10;
 
-    //TODO will be enabled later
-    //int lastFreePort = DEFAULT_PORT;
+    int lastFreePort = DEFAULT_PORT;
 
     for (int j = tryCount; j > 0; j--) {
 
@@ -47,9 +46,6 @@ bool CommTCP::initTCP() {
             lastFreePort++;
             continue;
         }
-
-        //TODO will be removed later
-        lastFreePort++;
 
         result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
                            [](uv_stream_t *serverPtr, int status) {
