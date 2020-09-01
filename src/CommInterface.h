@@ -32,6 +32,7 @@ class CommInterface {
 protected :
 
     uv_loop_t loop;
+    uv_loop_t multicastLoop;
 	Scheduler *scheduler;
 	std::thread threadRcv;
 	int notifierPipe[2]{};

@@ -5,6 +5,7 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
+#include "Util.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
@@ -24,9 +25,9 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
 
 bool CommTCP::initTCP() {
 
-    uv_tcp_init(&loop, &server);
+    uv_tcp_init(&loop, &tcpServer);
 
-    server.data = this;
+    tcpServer.data = this;
 
     int tryCount = 10;
 
@@ -39,9 +40,9 @@ bool CommTCP::initTCP() {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(new_address);
 
-        int result = uv_tcp_bind(&server, (const struct sockaddr *) &serverAddress, 0);
+        int result = uv_tcp_bind(&tcpServer, (const struct sockaddr *) &serverAddress, 0);
 
-        if (result < 0 || server.delayed_error != 0) {
+        if (result < 0 || tcpServer.delayed_error != 0) {
 
             lastFreePort++;
             continue;
@@ -50,7 +51,7 @@ bool CommTCP::initTCP() {
         //TODO will be removed later
         lastFreePort++;
 
-        result = uv_listen((uv_stream_t *) &server, MAX_SIMUL_CLIENTS,
+        result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
                            [](uv_stream_t *serverPtr, int status) {
 
                                auto commInterface = ((CommTCP *) serverPtr->data);
@@ -85,38 +86,49 @@ bool CommTCP::initTCP() {
 
 bool CommTCP::initMulticast() {
 
+    uv_udp_init(&loop, &multicastServer);
+
+    multicastServer.data = this;
+
     Address multicastAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT);
 
-    multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (multicastSocket < 0) {
-        LOGS_E(getHost(), "Socket receiver open with err : %d!!!", errno);
-        return false;
-    }
-
-    int on = 1;
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
-
     struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
-    if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
-        LOGS_E(getHost(), "Socket bind with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
 
-    ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), MULTICAST_ADDRESS);
+    uv_udp_bind(&multicastServer, (const struct sockaddr *) &serverAddress, 0);
 
-    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *) &imreq, sizeof(ip_mreq)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
+    uv_udp_set_membership(&multicastServer, NetUtil::getIPString(multicastAddress.get()).c_str(),
+                          NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
     multicastAddress.setMulticast(true);
     setMulticastAddress(multicastAddress);
+
+    uv_udp_recv_start(&multicastServer, [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+
+                          buf->base = (char *) malloc(suggested_size);
+                          buf->len = suggested_size;
+
+                      },
+
+                      [](uv_udp_t* client, ssize_t nRead, const uv_buf_t* buf,
+                              const struct sockaddr* addr, unsigned flags) {
+
+                              LOGP_E("Data received, count : %d, bufPtr : %s",
+                                    nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+
+//                          auto commInterface = (CommTCP *) client->data;
+//
+//                          auto& msg = commInterface->msgMap[client].first;
+//
+//                          bool isDone = msg->onRead(commInterface->msgMap[client].second, nRead, buf);
+//
+//                          if (isDone) {
+//
+//                              auto owner = msg->getHeader().getOwner();
+//
+//                              commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
+//                          }
+
+                      });
 
     LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress.get()).c_str());
 
@@ -164,7 +176,7 @@ bool CommTCP::onConnection() {
 
     uv_tcp_init(&loop, client);
 
-    int result = uv_accept((uv_stream_t *) &server, (uv_stream_t *) client);
+    int result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
 
     if (result != 0) {
 

@@ -20,7 +20,8 @@
 
 class CommTCP : public CommInterface {
 
-    uv_tcp_t server{};
+    uv_tcp_t tcpServer{};
+    uv_udp_t multicastServer{};
 
 	int netSocket{};
 	int multicastSocket{};

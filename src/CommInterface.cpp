@@ -10,6 +10,7 @@ CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _devic
         : host(_host), device(_device) {
 
     uv_loop_init(&loop);
+    uv_loop_init(&multicastLoop);
 
     scheduler = new Scheduler();
 

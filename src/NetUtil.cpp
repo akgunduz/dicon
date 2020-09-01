@@ -11,10 +11,10 @@ std::string NetUtil::getIPPortString(BaseAddress& address) {
     return std::string(sAddress);
 }
 
-std::string NetUtil::getIPString(BaseAddress& address) {
+std::string NetUtil::getIPString(uint32_t address) {
 
     struct in_addr addr{};
-    addr.s_addr = htonl(address.base);
+    addr.s_addr = htonl(address);
     char cIP[INET_ADDRSTRLEN];
 
     const char *dst = inet_ntop(AF_INET, &addr, cIP, INET_ADDRSTRLEN);
@@ -23,6 +23,11 @@ std::string NetUtil::getIPString(BaseAddress& address) {
     }
 
     return std::string(cIP);
+}
+
+std::string NetUtil::getIPString(BaseAddress& address) {
+
+    return getIPString(address.base);
 }
 
 std::string NetUtil::getIPString(const sockaddr_in *address) {
