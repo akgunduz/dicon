@@ -238,15 +238,9 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 
 bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
 
-    if (nRead == 0) {
+    if (nRead == 0 || nRead == UV_EOF) {
 
         return false;
-    }
-
-    if (nRead == UV_EOF) {
-        LOGP_E("EOF received, building message");
-        build(source);
-        return true;
     }
 
 //    LOGP_E("Data received, count : %d, bufPtr : %s",
@@ -316,6 +310,11 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
         } else if (state == MSGSTATE_DATA) {
 
             (this->*readParser[static_cast<MSG_HEADER>(block.type)])(source, ptr, block.size, crc);
+
+            if (block.type == MSGHEADER_END) {
+
+                return true;
+            }
 
             state = MSGSTATE_INIT;
 

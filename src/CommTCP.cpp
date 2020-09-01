@@ -208,6 +208,8 @@ bool CommTCP::onConnection() {
 
                       if (isDone) {
 
+                          msg->build(commInterface->msgMap[client].second);
+
                           auto owner = msg->getHeader().getOwner();
 
                           commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));

@@ -38,31 +38,33 @@ int TestApp::run() {
         in = getchar();
         switch(in) {
 
-            case 'j':
+            case '1':
                 testSendJobName(d, c, n);
                 break;
-            case 'b':
+            case '2':
                 testSendFileBinary(d, c, n);
                 break;
-            case 'y':
+            case '3':
                 testSendProcessID(d, c, n);
                 break;
-            case 'i':
+            case '4':
                 testSendProcessInfo(d, c, n);
                 break;
-            case 't':
+            case '5':
                 testSendProcessFileBinary(d, c, n);
                 break;
-            case 'a':
+            case '6':
                 testSendProcessFilesBinary(d, c, n);
                 break;
-            case 'f':
+            case '7':
                 testSendProcess(d, c, n);
                 break;
-            case 'c':
+            case '8':
                 testSendComponentList(d, c, n);
                 break;
-
+            case '9':
+                testSendWakeUp(d, c, n);
+                break;
 
 
             case 'p':
@@ -71,9 +73,7 @@ int TestApp::run() {
             case 'l':
                 testLoadJob(d, c, n);
                 break;
-            case 'w':
-                testWakeUp(d, c, n);
-                break;
+
             case 'e':
                 testPipeControl(d, c, n);
                 break;

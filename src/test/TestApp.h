@@ -52,13 +52,13 @@ public:
     void testSendProcessFilesBinary(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
 
 
     void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
+
     void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
 
     int run() override;

@@ -31,7 +31,7 @@ bool processAliveMsg(const TypeComponent& component, const TypeComponentUnit& ow
     return true;
 }
 
-void TestApp::testWakeUp(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testSendWakeUp(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     MessageType::addMsg(MSG_TYPE_TEST_WAKEUP, "TEST_WAKEUP");
     MessageType::addMsg(MSG_TYPE_TEST_ALIVE, "TEST_ALIVE");

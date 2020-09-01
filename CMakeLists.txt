@@ -112,10 +112,11 @@ set(TEST_FILES
         ${TEST_PATH}/TestSendProcessFilesBinary.cpp
         ${TEST_PATH}/TestSendProcess.cpp
         ${TEST_PATH}/TestSendComponentList.cpp
+        ${TEST_PATH}/TestSendWakeUp.cpp
 
         ${TEST_PATH}/TestPing.cpp
         ${TEST_PATH}/TestLoadJob.cpp
-        ${TEST_PATH}/TestWakeUp.cpp
+
         ${TEST_PATH}/TestPipeControl.cpp
         ${SOURCE_PATH}/Entry.cpp
         )
