@@ -139,7 +139,7 @@ bool MessageBase::readBlockDeprecated(const TypeComponentUnit& source, uint8_t *
 
 bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buffer,size_t size, uint32_t& crc) {
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Block read process is started");
+    LOGS_T(getHost(), "Block read process is started");
 
     auto* ptr = buffer;
 
@@ -150,13 +150,12 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
 
     if (block.sign != SIGNATURE) {
 
-        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Block Signature Mismatch, expected : 0x%X, read : 0x%X",
+        LOGS_E(getHost(), "Block Signature Mismatch, expected : 0x%X, read : 0x%X",
                SIGNATURE, block.sign);
 
     } else {
 
-        LOGC_T(getHost(), source, MSGDIR_RECEIVE,
-               "Block is read successfully, type : %d, size : %d", block.type, block.size);
+        LOGS_T(getHost(), "Block is read successfully, type : %d, size : %d", block.type, block.size);
     }
 
     return block.sign == SIGNATURE;

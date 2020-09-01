@@ -13,7 +13,7 @@ Node::Node(int _commInterface) {
 
     host = std::make_shared<NodeHost>();
 
-    LOGS_T(getHost(), "Node[%d] is initializing", host->getID());
+    LOGS_T(getHost(), "Node is initializing");
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg));
