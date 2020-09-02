@@ -25,17 +25,17 @@ class Message : public MessageBase {
     bool readProcess(const TypeComponentUnit&, const TypeProcessItem&);
     bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&);
 
-    bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
-    bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&, uint32_t&);
-    bool writeProcessID(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
-    bool writeProcessInfo(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
-    bool writeProcessFileCount(const TypeComponentUnit&, const TypeProcessItem&, uint32_t& crc);
-    bool writeProcessFile(const TypeComponentUnit&, const TypeProcessFile&, bool, uint32_t&);
-    bool writeProcessFiles(const TypeComponentUnit&, const TypeProcessItem&, bool, uint32_t&);
-    bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
-    bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&, uint32_t&);
+    bool writeJobName(const TypeComponentUnit&, const std::string&);
+    bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&);
+    bool writeProcessID(const TypeComponentUnit&, const TypeProcessItem&);
+    bool writeProcessInfo(const TypeComponentUnit&, const TypeProcessItem&);
+    bool writeProcessFileCount(const TypeComponentUnit&, const TypeProcessItem&);
+    bool writeProcessFile(const TypeComponentUnit&, const TypeProcessFile&, bool);
+    bool writeProcessFiles(const TypeComponentUnit&, const TypeProcessItem&, bool);
+    bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&);
+    bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&);
 
-    bool writeMessageStream(const TypeComponentUnit& out, uint32_t&) override;
+    bool writeMessageStream(const TypeComponentUnit& out) override;
 
 public:
 

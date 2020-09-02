@@ -32,7 +32,7 @@ int TestApp::run() {
     auto &c = componentController->getCollector(0);
     auto &n = componentController->getNode(0);
 
-    testSendID(d, c, n);
+    testSendProcessID(d, c, n);
 
     int in;
     do {

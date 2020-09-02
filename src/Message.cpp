@@ -263,9 +263,9 @@ bool Message::build(const TypeComponentUnit& source) {
     return true;
 }
 
-bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
+bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName) {
 
-    if (!writeString(target, jobName, crc)) {
+    if (!writeString(target, jobName)) {
         LOGS_E(getHost(), "writeJobName can not write job info");
         return false;
     }
@@ -275,14 +275,14 @@ bool Message::writeJobName(const TypeComponentUnit& target, const std::string& j
     return true;
 }
 
-bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileItem& file, uint32_t& crc) {
+bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileItem& file) {
 
-    if (!writeString(target, file->getName(), crc)) {
+    if (!writeString(target, file->getName())) {
         LOGS_E(getHost(), "writeFileBinary can not write file name");
         return false;
     }
 
-    if (!writeBinary(target, file, crc)) {
+    if (!writeBinary(target, file)) {
         LOGS_E(getHost(), "writeFileBinary can not write file binary");
         return false;
     }
@@ -292,9 +292,9 @@ bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileIte
     return true;
 }
 
-bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    if (!writeNumber(target, processItem->getID(), crc)) {
+    if (!writeNumber(target, processItem->getID())) {
         LOGS_E(getHost(), "writeProcessID can not write process ID");
         return false;
     }
@@ -304,19 +304,19 @@ bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessI
     return true;
 }
 
-bool Message::writeProcessInfo(const TypeComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcessInfo(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    if (!writeNumber(target, processItem->getID(), crc)) {
+    if (!writeNumber(target, processItem->getID())) {
         LOGS_E(getHost(), "writeProcessInfo can not write process ID");
         return false;
     }
 
-    if (!writeNumber(target, processItem->getAssignedJob(), crc)) {
+    if (!writeNumber(target, processItem->getAssignedJob())) {
         LOGS_E(getHost(), "writeProcessInfo can not write job ID");
         return false;
     }
 
-    if (!writeString(target, processItem->getParsedProcess(), crc)) {
+    if (!writeString(target, processItem->getParsedProcess())) {
         LOGS_E(getHost(), "writeProcessInfo can not write process info");
         return false;
     }
@@ -327,10 +327,9 @@ bool Message::writeProcessInfo(const TypeComponentUnit& target, const TypeProces
     return true;
 }
 
-bool Message::writeProcessFileCount(const TypeComponentUnit& target,
-                                    const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcessFileCount(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    if (!writeNumber(target, processItem->getFileCount(), crc)) {
+    if (!writeNumber(target, processItem->getFileCount())) {
         LOGS_E(getHost(), "writeProcessFileCount can not write process ID");
         return false;
     }
@@ -341,38 +340,38 @@ bool Message::writeProcessFileCount(const TypeComponentUnit& target,
 }
 
 bool Message::writeProcessFile(const TypeComponentUnit& target,
-                               const TypeProcessFile& file, bool isBinary, uint32_t& crc) {
+                               const TypeProcessFile& file, bool isBinary) {
 
     bool isBinaryTransfer = !file->isOutput() && isBinary;
 
-    if (!writeNumber(target, file->get()->getID(), crc)) {
+    if (!writeNumber(target, file->get()->getID())) {
         LOGS_E(getHost(), "writeProcessFile can not write file ID");
         return false;
     }
 
-    if (!writeNumber(target, file->isOutput(), crc)) {
+    if (!writeNumber(target, file->isOutput())) {
         LOGS_E(getHost(), "writeProcessFile can not write file state");
         return false;
     }
 
-    if (!writeNumber(target, file->get()->getAssignedJob(), crc)) {
+    if (!writeNumber(target, file->get()->getAssignedJob())) {
         LOGS_E(getHost(), "writeProcessFile can not write assigned job");
         return false;
     }
 
-    if (!writeNumber(target, file->getAssignedProcess(), crc)) {
+    if (!writeNumber(target, file->getAssignedProcess())) {
         LOGS_E(getHost(), "writeProcessFile can not write assigned job");
         return false;
     }
 
-    if (!writeString(target, file->get()->getName(), crc)) {
+    if (!writeString(target, file->get()->getName())) {
         LOGS_E(getHost(), "writeProcessFile can not write file name");
         return false;
     }
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(target, file->get(), crc)) {
+        if (!writeBinary(target, file->get())) {
             LOGS_E(getHost(), "writeProcessFile can not write file binary");
             return false;
         }
@@ -392,19 +391,19 @@ bool Message::writeProcessFile(const TypeComponentUnit& target,
 }
 
 bool Message::writeProcessFiles(const TypeComponentUnit& target,
-                                const TypeProcessItem& processItem, bool isBinary, uint32_t& crc) {
+                                const TypeProcessItem& processItem, bool isBinary) {
 
-    if (!writeProcessID(target, processItem, crc)) {
+    if (!writeProcessID(target, processItem)) {
         return false;
     }
 
-    if (!writeProcessFileCount(target, processItem, crc)) {
+    if (!writeProcessFileCount(target, processItem)) {
         return false;
     }
 
     for (const auto& processFile : processItem->getFileList()) {
 
-        if (!writeProcessFile(target, processFile, isBinary, crc)) {
+        if (!writeProcessFile(target, processFile, isBinary)) {
 
             return false;
         }
@@ -413,20 +412,19 @@ bool Message::writeProcessFiles(const TypeComponentUnit& target,
     return true;
 }
 
-bool Message::writeProcess(const TypeComponentUnit& target,
-                           const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcess(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    if (!writeProcessInfo(target, processItem, crc)) {
+    if (!writeProcessInfo(target, processItem)) {
         return false;
     }
 
-    if (!writeProcessFileCount(target, processItem, crc)) {
+    if (!writeProcessFileCount(target, processItem)) {
         return false;
     }
 
     for (const auto& processFile : processItem->getFileList()) {
 
-        if (!writeProcessFile(target, processFile, false, crc)) {
+        if (!writeProcessFile(target, processFile, false)) {
 
             return false;
         }
@@ -435,51 +433,51 @@ bool Message::writeProcess(const TypeComponentUnit& target,
     return true;
 }
 
-bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
+bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList) {
 
     if (componentList.empty()) {
         LOGS_E(getHost(), "writeComponentList list is empty");
         return false;
     }
 
-    if (!writeNumber(target, componentList[0]->getType(), crc)) {
+    if (!writeNumber(target, componentList[0]->getType())) {
         LOGS_E(getHost(), "writeComponentList can not write component type");
         return false;
     }
 
-    if (!writeNumber(target, componentList.size(), crc)) {
+    if (!writeNumber(target, componentList.size())) {
         LOGS_E(getHost(), "writeComponentList can not write component count");
         return false;
     }
 
     for (auto &component : componentList) {
 
-        if (!writeNumber(target, component->getArch(), crc)) {
+        if (!writeNumber(target, component->getArch())) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getID(), crc)) {
+        if (!writeNumber(target, component->getID())) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().get().base, crc)) {
+        if (!writeNumber(target, component->getAddress().get().base)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().get().port, crc)) {
+        if (!writeNumber(target, component->getAddress().get().port)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().getUI().base, crc)) {
+        if (!writeNumber(target, component->getAddress().getUI().base)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().getUI().port, crc)) {
+        if (!writeNumber(target, component->getAddress().getUI().port)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
@@ -497,13 +495,13 @@ bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentU
     return true;
 }
 
-bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc) {
+bool Message::writeMessageStream(const TypeComponentUnit& target) {
 
     switch(getHeader().getStream()) {
 
         case STREAM_JOBNAME:
 
-            if (!writeJobName(target, data.getJobName(), crc)) {
+            if (!writeJobName(target, data.getJobName())) {
                 return false;
             }
 
@@ -511,7 +509,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
         case STREAM_FILE_BINARY:
 
-            if (!writeFileBinary(target, data.getFile(), crc)) {
+            if (!writeFileBinary(target, data.getFile())) {
                 return false;
             }
 
@@ -519,13 +517,13 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
         case STREAM_PROCESS_ID:
 
-            if (!writeProcessID(target, data.getProcess(), crc)) {
+            if (!writeProcessID(target, data.getProcess())) {
                 return false;
             }
 
         case STREAM_PROCESS_INFO:
 
-            if (!writeProcessInfo(target, data.getProcess(), crc)) {
+            if (!writeProcessInfo(target, data.getProcess())) {
                 return false;
             }
 
@@ -535,7 +533,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
         case STREAM_PROCESS_FILE_BINARY:
 
             if (!writeProcessFile(target, data.getProcessFile(),
-                                  getHeader().getStream() == STREAM_PROCESS_FILE_BINARY, crc)) {
+                                  getHeader().getStream() == STREAM_PROCESS_FILE_BINARY)) {
                 return false;
             }
 
@@ -545,7 +543,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
         case STREAM_PROCESS_FILES_BINARY:
 
             if (!writeProcessFiles(target, data.getProcess(),
-                                  getHeader().getStream() == STREAM_PROCESS_FILES_BINARY, crc)) {
+                                  getHeader().getStream() == STREAM_PROCESS_FILES_BINARY)) {
                 return false;
             }
 
@@ -553,7 +551,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
         case STREAM_PROCESS:
 
-            if (!writeProcess(target, data.getProcess(), crc)) {
+            if (!writeProcess(target, data.getProcess())) {
                 return false;
             }
 
@@ -561,7 +559,7 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
         case STREAM_COMPONENTS: {
 
-            if (!writeComponentList(target, data.getComponentList(), crc)) {
+            if (!writeComponentList(target, data.getComponentList())) {
                 return false;
             }
 
