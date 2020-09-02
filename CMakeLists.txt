@@ -105,10 +105,10 @@ set(TEST_FILES
         ${TEST_PATH}/TestApp.cpp
         ${TEST_PATH}/TestSendJobName.cpp
         ${TEST_PATH}/TestSendFileBinary.cpp
-        ${TEST_PATH}/testSendFileInfo.cpp
+        ${TEST_PATH}/TestSendFileInfo.cpp
         ${TEST_PATH}/TestSendProcessID.cpp
         ${TEST_PATH}/TestSendProcessInfo.cpp
-        ${TEST_PATH}/testSendProcessFileBinary.cpp
+        ${TEST_PATH}/TestSendProcessFileBinary.cpp
         ${TEST_PATH}/TestSendProcessFilesBinary.cpp
         ${TEST_PATH}/TestSendProcess.cpp
         ${TEST_PATH}/TestSendComponentList.cpp
