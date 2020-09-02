@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LOGLEVEL logLevel = LEVEL_TRACE;
+    LOGLEVEL logLevel = LEVEL_DEBUG;
 
     std::vector<int> componentCount = {0, 0, 0};
 

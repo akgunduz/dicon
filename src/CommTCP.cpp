@@ -117,8 +117,6 @@ bool CommTCP::initMulticast() {
         break;
     }
 
-    lastFreeMulticastPort++;
-
     if (!tryCount) {
 
         LOGS_E(getHost(), "Could not bind to socket!!!");
@@ -142,8 +140,8 @@ bool CommTCP::initMulticast() {
                       [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
                          const struct sockaddr *addr, unsigned flags) {
 
-                          LOGP_E("Data received, count : %d, bufPtr : %s",
-                                 nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
+                          //LOGP_E("Data received, count : %d, bufPtr : %s",
+                           //      nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
 
                           auto commInterface = (CommTCP *) client->data;
 
@@ -344,9 +342,9 @@ TypeAddressList CommTCP::getAddressList() {
 
     } else {
 
-        uint32_t range = (1 << (32 - getDevice()->getMask())) - 2;
+        uint32_t range = (1u << (32u - getDevice()->getMask())) - 2u;
 
-        uint32_t mask = ((int) 0x80000000) >> (getDevice()->getMask() - 1);
+        uint32_t mask = 0x80000000 >> (getDevice()->getMask() - 1u);
 
         uint32_t net = mask & getDevice()->getBase();
 
