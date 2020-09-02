@@ -45,5 +45,5 @@ void TestApp::testSendWakeUp(TypeDistributor& distributor, TypeCollector& collec
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, distributor->getInterfaceMulticastAddress(COMP_NODE));
     target->getAddress().setMulticast(true);
 
-    sendWakeUp((TypeComponent&) distributor, target);
+    sendWakeUp((TypeComponent &) distributor, target);
 }

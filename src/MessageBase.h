@@ -48,12 +48,15 @@ struct MessageBlock {
     uint16_t sign{SIGNATURE};
     uint16_t type{MSGHEADER_HEADER};
     uint32_t size{};
-    uint32_t binSize{};
 };
 
 class MessageBase {
 
+    static inline uint64_t iter = 1;
+
     MSG_STATE state{MSGSTATE_INIT};
+
+    uint32_t prevtest = 0;
 
     uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 

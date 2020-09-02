@@ -137,8 +137,123 @@ bool MessageBase::readBlockDeprecated(const TypeComponentUnit& source, uint8_t *
 	return true;
 }
 
-bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buffer,size_t size, uint32_t& crc) {
+bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
 
+    if (nRead == 0 || nRead == UV_EOF) {
+
+        return false;
+    }
+
+//    LOGP_E("Data received, count : %d, bufPtr : %s",
+//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+
+    uint32_t minContDataLength;
+    size_t remaining = 0;
+
+    auto *bufPtr = (uint8_t*)buf->base;
+
+    do {
+
+        if (nRead <= 0) {
+            break;
+        }
+
+        minContDataLength = state == MSGSTATE_INIT ? sizeof(MessageBlock) : block.size;
+
+        remaining = minContDataLength - (state != MSGSTATE_BINARY ? tmpBufPos : binBufPos);
+
+        if (nRead < remaining && state != MSGSTATE_BINARY) {
+
+            memcpy(tmpBuf + tmpBufPos, bufPtr, nRead);
+            tmpBufPos += nRead;
+
+            LOGP_E("Partial Read, nRead : %d, remaining : %d, tmpBuf : %s",
+                   nRead, remaining, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+
+            return false;
+        }
+
+        if (tmpBufPos) {
+
+            memcpy(tmpBuf + tmpBufPos, bufPtr, remaining);
+            LOGP_E("Copied remaining, : %d, tmpBuf : %s",
+                   remaining, Util::hex2str(tmpBuf, tmpBufPos + remaining).c_str());
+
+            bufPtr += remaining;
+        }
+
+        auto *ptr = tmpBufPos ? tmpBuf : bufPtr;
+
+        if (state == MSGSTATE_INIT) {
+
+            readBlock(source, ptr, sizeof(MessageBlock), crc);
+
+            if (block.type == MSGHEADER_BINARY) {
+                LOGP_E("Binary touch 1");
+                binBufPos = 0;
+
+                state = MSGSTATE_BINARY;
+
+                assert(!strings.empty());
+
+                std::filesystem::remove(getHost()->getRootPath() / strings.back());
+
+            } else {
+
+                state = MSGSTATE_DATA;
+            }
+
+            if (!tmpBufPos) {
+
+                bufPtr += sizeof(MessageBlock);
+            }
+
+        } else if (state == MSGSTATE_DATA) {
+
+            (this->*readParser[static_cast<MSG_HEADER>(block.type)])(source, ptr, block.size, crc);
+
+            if (block.type == MSGHEADER_END) {
+
+                return true;
+            }
+
+            state = MSGSTATE_INIT;
+
+            if (!tmpBufPos) {
+
+                bufPtr += block.size;
+            }
+
+        } else if (state == MSGSTATE_BINARY) {
+            LOGP_E("Binary touch 2");
+            size_t readSize = nRead > remaining ? remaining : nRead;
+
+            readBinary(source, ptr, readSize, crc);
+
+            binBufPos += readSize;
+
+            if (nRead >= remaining) {
+
+                state = MSGSTATE_INIT;
+
+                bufPtr += readSize;
+
+                strings.pop_back();
+            }
+
+        }
+
+        tmpBufPos = 0;
+
+        nRead -= remaining;
+
+    } while(true);
+
+    return false;
+}
+
+bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buffer,size_t size, uint32_t& crc) {
+  //  LOGS_E(getHost(), "%d. Block : %s", iter++, Util::hex2str(buffer, sizeof(MessageBlock)).c_str());
     LOGS_T(getHost(), "Block read process is started");
 
     auto* ptr = buffer;
@@ -146,7 +261,8 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
     block.sign = ntohs(*((uint16_t *) ptr)); ptr += 2;
     block.type = ntohs(*((uint16_t *) ptr)); ptr += 2;
     block.size = ntohl(*((uint32_t *) ptr)); ptr += 4;
-    block.binSize = ntohl(*((uint32_t *) ptr)); ptr += 4;
+
+    assert(block.size != 0 && block.sign == SIGNATURE);
 
     if (block.sign != SIGNATURE) {
 
@@ -155,14 +271,14 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
 
     } else {
 
-        LOGS_T(getHost(), "Block is read successfully, type : %d, size : %d", block.type, block.size);
+        LOGS_T(getHost(), "Block is read successfully, Following block type : %d, size : %d", block.type, block.size);
     }
 
     return block.sign == SIGNATURE;
 }
 
 bool MessageBase::readHeader(const TypeComponentUnit& source, const uint8_t* buffer, size_t size, uint32_t& crc) {
-
+    LOGS_E(getHost(), "%d. Header : %s", iter++, Util::hex2str(buffer, size).c_str());
     LOGS_T(getHost(), "Header read process is started");
 
     deSerializeHeader(buffer);
@@ -235,120 +351,6 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
     return resCrc == calcCrc;
 }
 
-bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
-
-    if (nRead == 0 || nRead == UV_EOF) {
-
-        return false;
-    }
-
-//    LOGP_E("Data received, count : %d, bufPtr : %s",
-//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
-
-    uint32_t minContDataLength;
-    size_t remaining = 0;
-
-    auto *bufPtr = (uint8_t*)buf->base;
-
-    do {
-
-        if (nRead <= 0) {
-            break;
-        }
-
-        minContDataLength = state == MSGSTATE_INIT ? sizeof(MessageBlock) : block.size;
-
-        remaining = minContDataLength - (state != MSGSTATE_BINARY ? tmpBufPos : binBufPos);
-
-        if (nRead < remaining && state != MSGSTATE_BINARY) {
-
-            memcpy(tmpBuf + tmpBufPos, bufPtr, nRead);
-            tmpBufPos += nRead;
-
-//            LOGP_E("Partial Read, nRead : %d, remaining : %d, tmpBuf : %s",
-//                   nRead, remaining, Util::hex2str(tmpBuf, tmpBufPos).c_str());
-
-            return false;
-        }
-
-        if (tmpBufPos) {
-
-            memcpy(tmpBuf + tmpBufPos, bufPtr, remaining);
-//            LOGP_E("Copied remaining, : %d, tmpBuf : %s",
-//                   remaining, Util::hex2str(tmpBuf, tmpBufPos + remaining).c_str());
-
-            bufPtr += remaining;
-        }
-
-        auto *ptr = tmpBufPos ? tmpBuf : bufPtr;
-
-        if (state == MSGSTATE_INIT) {
-
-            readBlock(source, ptr, sizeof(MessageBlock), crc);
-
-            if (block.type == MSGHEADER_BINARY) {
-
-                binBufPos = 0;
-
-                state = MSGSTATE_BINARY;
-
-                assert(!strings.empty());
-
-                std::filesystem::remove(getHost()->getRootPath() / strings.back());
-
-            } else {
-
-                state = MSGSTATE_DATA;
-            }
-
-            if (!tmpBufPos) {
-
-                bufPtr += sizeof(MessageBlock);
-            }
-
-        } else if (state == MSGSTATE_DATA) {
-
-            (this->*readParser[static_cast<MSG_HEADER>(block.type)])(source, ptr, block.size, crc);
-
-            if (block.type == MSGHEADER_END) {
-
-                return true;
-            }
-
-            state = MSGSTATE_INIT;
-
-            if (!tmpBufPos) {
-
-                bufPtr += block.size;
-            }
-
-        } else if (state == MSGSTATE_BINARY) {
-
-            size_t readSize = nRead > remaining ? remaining : nRead;
-
-            readBinary(source, ptr, readSize, crc);
-
-            binBufPos += readSize;
-
-            if (nRead >= remaining) {
-
-                state = MSGSTATE_INIT;
-
-                bufPtr += readSize;
-
-                strings.pop_back();
-            }
-
-        }
-
-        tmpBufPos = 0;
-
-        nRead -= remaining;
-
-    } while(true);
-
-    return false;
-}
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const uint8_t *buf, size_t size, uint32_t& crc) {
 
@@ -441,7 +443,6 @@ bool MessageBase::writeBlockBase(const TypeComponentUnit& target, const MessageB
     *((uint16_t *) p) = htons(baseHeader.sign); p += 2;
     *((uint16_t *) p) = htons(baseHeader.type); p += 2;
     *((uint32_t *) p) = htonl(baseHeader.size); p += 4;
-    *((uint32_t *) p) = htonl(baseHeader.binSize); p += 4;
 
     if (!writeBlock(target, tmpBuf, sizeof(MessageBlock), crc)) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write BlockBase to stream");

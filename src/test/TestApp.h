@@ -32,6 +32,7 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PROCESS_FILES_BINARY,
 
     MSG_TYPE_TEST_WAKEUP,
+    MSG_TYPE_TEST_ID,
     MSG_TYPE_TEST_ALIVE,
     MSG_TYPE_TEST_PING,
 };
@@ -53,6 +54,7 @@ public:
     void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendID(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
 

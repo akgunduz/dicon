@@ -32,6 +32,8 @@ int TestApp::run() {
     auto &c = componentController->getCollector(0);
     auto &n = componentController->getNode(0);
 
+    testSendID(d, c, n);
+
     int in;
     do {
 
@@ -64,6 +66,9 @@ int TestApp::run() {
                 break;
             case '9':
                 testSendWakeUp(d, c, n);
+                break;
+            case 'a':
+                testSendID(d, c, n);
                 break;
 
 

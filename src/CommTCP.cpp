@@ -5,7 +5,6 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
-#include "Util.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
@@ -133,6 +132,7 @@ bool CommTCP::initMulticast() {
     uv_udp_recv_start(&multicastServer, [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
                           buf->base = (char *) malloc(suggested_size);
+                          assert(buf->base != nullptr);
                           buf->len = suggested_size;
 
                       },
@@ -237,6 +237,7 @@ bool CommTCP::onConnection() {
                   [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
                       buf->base = (char *) malloc(suggested_size);
+                      assert(buf->base != nullptr);
                       buf->len = suggested_size;
 
                   },

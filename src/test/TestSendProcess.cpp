@@ -39,5 +39,7 @@ void TestApp::testSendProcess(TypeDistributor& distributor, TypeCollector& colle
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
                          node->getHost()->getAddress(COMP_COLLECTOR));
+
+    for (int i = 0; i < 1000; i++)
     sendProcess((TypeComponent&) collector, target);
 }
