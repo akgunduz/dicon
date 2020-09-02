@@ -144,8 +144,8 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
         return false;
     }
 
-    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
-           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+//    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
+//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
@@ -586,7 +586,7 @@ bool MessageBase::writeEndStream(const TypeComponentUnit& target) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream is written successfully => 0x%X", crc);
 
-    LOGP_E("Write End => CRC    : %s", Util::hex2str(buffer, 4).c_str());
+    //LOGP_E("Write End => CRC    : %s", Util::hex2str(buffer, 4).c_str());
 
 	return true;
 }
