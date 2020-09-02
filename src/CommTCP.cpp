@@ -25,78 +25,112 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
 
 bool CommTCP::initTCP() {
 
+    int result;
+
+    int tryCount = 10;
+
+    Address address(getDevice()->getBase(), lastFreeTCPPort);
+
     uv_tcp_init(&loop, &tcpServer);
 
     tcpServer.data = this;
 
-    int tryCount = 10;
+    while(tryCount--) {
 
-    int lastFreePort = DEFAULT_PORT;
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(address);
 
-    for (int j = tryCount; j > 0; j--) {
-
-        Address new_address(getDevice()->getBase(), lastFreePort);
-
-        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(new_address);
-
-        int result = uv_tcp_bind(&tcpServer, (const struct sockaddr *) &serverAddress, 0);
+        result = uv_tcp_bind(&tcpServer, (const struct sockaddr *) &serverAddress, 0);
 
         if (result < 0 || tcpServer.delayed_error != 0) {
 
-            lastFreePort++;
+            lastFreeTCPPort++;
+            address.setPort(lastFreeTCPPort);
             continue;
         }
 
-        result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
-                           [](uv_stream_t *serverPtr, int status) {
-
-                               auto commInterface = ((CommTCP *) serverPtr->data);
-
-                               if (status < 0) {
-                                   LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
-                                   return;
-                               }
-
-                               ((CommTCP *) serverPtr->data)->onConnection();
-
-                           });
-
-        if (result < 0) {
-
-            LOGS_E(getHost(), "Socket listen with err : %d!!!", result);
-
-            return false;
-        }
-
-        setAddress(new_address);
-
-        LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(new_address.get()).c_str());
-
-        return true;
+        break;
     }
 
-    LOGS_E(getHost(), "Could not set create TCP communication!!!");
+    lastFreeTCPPort++;
 
-    return false;
+    if (!tryCount) {
+
+        LOGS_E(getHost(), "Could not bind to socket!!!");
+
+        return false;
+    }
+
+    result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
+                       [](uv_stream_t *serverPtr, int status) {
+
+                           auto commInterface = ((CommTCP *) serverPtr->data);
+
+                           if (status < 0) {
+                               LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
+                               return;
+                           }
+
+                           ((CommTCP *) serverPtr->data)->onConnection();
+
+                       });
+
+    if (result < 0) {
+
+        LOGS_E(getHost(), "Socket listen with err : %d!!!", result);
+
+        return false;
+    }
+
+    setAddress(address);
+
+    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address.get()).c_str());
+
+    return true;
+
 }
 
 bool CommTCP::initMulticast() {
+
+    int result;
+
+    int tryCount = 10;
+
+    Address address(MULTICAST_ADDRESS, lastFreeMulticastPort);
 
     uv_udp_init(&loop, &multicastServer);
 
     multicastServer.data = this;
 
-    Address multicastAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT);
+    while(tryCount--) {
 
-    struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
 
-    uv_udp_bind(&multicastServer, (const struct sockaddr *) &serverAddress, 0);
+        result = uv_udp_bind(&multicastServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
 
-    uv_udp_set_membership(&multicastServer, NetUtil::getIPString(multicastAddress.get()).c_str(),
+        if (result < 0) {
+
+            lastFreeMulticastPort++;
+            address.setPort(lastFreeMulticastPort);
+            continue;
+        }
+
+        break;
+    }
+
+    lastFreeMulticastPort++;
+
+    if (!tryCount) {
+
+        LOGS_E(getHost(), "Could not bind to socket!!!");
+
+        return false;
+    }
+
+    uv_udp_set_membership(&multicastServer, NetUtil::getIPString(address.get()).c_str(),
                           NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
-    multicastAddress.setMulticast(true);
-    setMulticastAddress(multicastAddress);
+    address.setMulticast(true);
+    setMulticastAddress(address);
 
     uv_udp_recv_start(&multicastServer, [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
@@ -117,7 +151,7 @@ bool CommTCP::initMulticast() {
 
                       });
 
-    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress.get()).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(address.get()).c_str());
 
     return true;
 }

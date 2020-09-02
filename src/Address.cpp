@@ -39,6 +39,12 @@ void Address::set(uint32_t _base, uint16_t _port) {
     self.port = _port;
 }
 
+void Address::setPort(uint16_t _port) {
+
+    self.port = _port;
+}
+
+
 void Address::setUI(uint32_t _base, uint16_t _port) {
 
     if (getInterface() == COMMINTERFACE_TCPIP) {

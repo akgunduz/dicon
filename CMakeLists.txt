@@ -173,5 +173,3 @@ target_compile_definitions(dicon-test PUBLIC -DTEST)
 target_link_libraries(dicon-test dicon-framework miniz ${LIBRARIES})
 
 ##################################################
-
-
