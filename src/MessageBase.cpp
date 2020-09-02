@@ -144,8 +144,8 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
         return false;
     }
 
-//    LOGP_E("Data received, count : %d, bufPtr : %s",
-//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
+           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
@@ -262,7 +262,12 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
     block.type = ntohs(*((uint16_t *) ptr)); ptr += 2;
     block.size = ntohl(*((uint32_t *) ptr)); ptr += 4;
 
-    assert(block.size != 0 && block.sign == SIGNATURE);
+    if (block.size == 0 || block.sign != SIGNATURE) {
+
+        LOGS_E(getHost(), "Block is invalid, len : %d, type : %d", block.size, block.type);
+        assert(false);
+    }
+
 
     if (block.sign != SIGNATURE) {
 
@@ -278,7 +283,7 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
 }
 
 bool MessageBase::readHeader(const TypeComponentUnit& source, const uint8_t* buffer, size_t size, uint32_t& crc) {
-    LOGS_E(getHost(), "%d. Header : %s", iter++, Util::hex2str(buffer, size).c_str());
+  //  LOGS_E(getHost(), "%d. Header : %s", iter++, Util::hex2str(buffer, size).c_str());
     LOGS_T(getHost(), "Header read process is started");
 
     deSerializeHeader(buffer);

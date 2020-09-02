@@ -52,7 +52,7 @@ struct MessageBlock {
 
 class MessageBase {
 
-    static inline uint64_t iter = 1;
+    uint64_t iter = 1;
 
     MSG_STATE state{MSGSTATE_INIT};
 
