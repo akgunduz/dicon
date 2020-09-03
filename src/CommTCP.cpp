@@ -215,7 +215,7 @@ bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
         receiveData.state = DATASTATE_INIT;
     }
 
-
+    return isDone;
 }
 
 bool CommTCP::onConnection() {
@@ -223,6 +223,8 @@ bool CommTCP::onConnection() {
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
     uv_tcp_init(&loop, client);
+
+    client->data = this;
 
     int result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
 
@@ -232,8 +234,6 @@ bool CommTCP::onConnection() {
 
         return false;
     }
-
-    client->data = this;
 
     uv_read_start((uv_stream_t *) client,
 
@@ -264,13 +264,36 @@ bool CommTCP::onConnection() {
 
 bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
-    int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (clientSocket < 0) {
-        LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
-        return false;
-    }
+    auto* client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
+
+    uv_tcp_init(&loop, client);
+
+    client->data = this;
+
+    auto* connect = (uv_connect_t*)malloc(sizeof(uv_connect_t));
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+
+    uv_tcp_connect(connect, client, (const struct sockaddr*)&clientAddress, [] (uv_connect_t* req, int status) {
+
+        auto commInterface = (CommTCP *) req->handle->data;
+
+//        auto *write_req = (uv_write_t*)malloc(sizeof(uv_write_t));
+//
+//        uv_write(write_req,
+//                 req->handle,
+//                 message->GetBuf(),
+//                 1,
+//                 nullptr);
+    });
+
+//    int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+//    if (clientSocket < 0) {
+//        LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
+//        return false;
+//    }
+
+
 
     if (connect(clientSocket, (struct sockaddr *) &clientAddress, sizeof(sockaddr_in)) == -1) {
         LOGS_E(getHost(), "Socket can not connect!!!");

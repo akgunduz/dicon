@@ -32,6 +32,13 @@ struct ReceiveData {
     DATA_STATE state;
 };
 
+struct SendData {
+
+    TypeMessage msg;
+    TypeComponentUnit unit;
+    DATA_STATE state;
+};
+
 class CommInterface {
 
     const TypeHostUnit host;

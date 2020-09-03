@@ -56,8 +56,6 @@ class MessageBase {
 
     MSG_STATE state{MSGSTATE_INIT};
 
-    uint32_t prevtest = 0;
-
     uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
     size_t tmpBufPos = 0;
@@ -81,6 +79,8 @@ protected:
     std::deque<std::string> strings;
 
 public:
+
+    uv_write_t* writeReq;
 
     explicit MessageBase(const TypeHostUnit&);
     MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);

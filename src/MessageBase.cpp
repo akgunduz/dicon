@@ -430,6 +430,8 @@ bool MessageBase::writeBlockBase(const TypeComponentUnit& target, const MessageB
     *((uint16_t *) p) = htons(baseHeader.type); p += 2;
     *((uint32_t *) p) = htonl(baseHeader.size); p += 4;
 
+    uv_write()
+
     if (!writeBlock(target, tmpBuf, sizeof(MessageBlock))) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write BlockBase to stream");
         return false;
