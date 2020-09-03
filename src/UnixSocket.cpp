@@ -76,8 +76,9 @@ bool UnixSocket::initUnixSocket() {
     return false;
 }
 
-void UnixSocket::onRead(ReceiveData& receiveData, ssize_t nRead, const uv_buf_t *buf) {
+bool UnixSocket::onRead(ReceiveData& receiveData, ssize_t nRead, const uv_buf_t *buf) {
 
+        return true;
 }
 
 //bool UnixSocket::runReceiver() {

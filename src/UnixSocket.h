@@ -15,11 +15,11 @@
 
 class UnixSocket : public CommInterface {
 
-	int unixSocket;
+	int unixSocket{};
 
 	bool initUnixSocket();
 
-    void onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
+    bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
     bool runSender(const TypeComponentUnit& , TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 

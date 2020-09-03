@@ -33,7 +33,7 @@ class CommTCP : public CommInterface {
 	bool initMulticast();
 
     bool onConnection();
-    void onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
+    bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
 
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;

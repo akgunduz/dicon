@@ -129,7 +129,9 @@ bool CommTCP::initMulticast() {
     address.setMulticast(true);
     setMulticastAddress(address);
 
-    uv_udp_recv_start(&multicastServer, [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+    uv_udp_recv_start(&multicastServer,
+
+                      [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
                           buf->base = (char *) malloc(suggested_size);
                           assert(buf->base != nullptr);
@@ -189,14 +191,13 @@ TypeWriteCB CommTCP::getWriteCB(const TypeComponentUnit &target) {
     };
 }
 
-void CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *buf) {
+bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *buf) {
 
     if (receiveData.state == DATASTATE_INIT) {
 
         receiveData.msg = std::make_unique<Message>(getHost());
 
         receiveData.unit = std::make_shared<ComponentUnit>();
-        // receiveData.unit->getAddress().setMulticast(true);
 
         receiveData.state = DATASTATE_PROCESS;
     }
@@ -213,6 +214,8 @@ void CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
 
         receiveData.state = DATASTATE_INIT;
     }
+
+
 }
 
 bool CommTCP::onConnection() {
@@ -246,7 +249,13 @@ bool CommTCP::onConnection() {
 
                       auto commInterface = (CommTCP *) client->data;
 
-                      commInterface->onRead(commInterface->receiveData[0], nRead, buf);
+                      bool done = commInterface->onRead(commInterface->receiveData[0], nRead, buf);
+
+                      if (done) {
+
+                          uv_close((uv_handle_t*)client, nullptr);
+                          free(client);
+                      }
 
                   });
 
