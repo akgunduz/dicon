@@ -274,8 +274,6 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE,
            "CRC is read successfully, => Read : 0x%X, Calculated : 0x%X", resCrc, crc);
 
-    LOGS_E(getHost(),
-           "CRC is read successfully, => Read : 0x%X, Calculated : 0x%X", resCrc, crc);
     return resCrc == crc;
 }
 
