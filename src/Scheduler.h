@@ -23,6 +23,8 @@ class Scheduler {
 
     std::thread thread;
 
+    uv_loop_t loop;
+
 	std::list<TypeSchedulerItem> items;
 
 	std::map<int, const InterfaceSchedulerCB*> callbacks;
@@ -40,6 +42,8 @@ public:
 	Scheduler();
 
     void setCB(int, const InterfaceSchedulerCB*);
+
+    uv_loop_t* getLoop();
 
 	bool push(TypeSchedulerItem item);
 

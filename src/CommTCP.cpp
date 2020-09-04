@@ -60,18 +60,18 @@ bool CommTCP::initTCP() {
     }
 
     result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
-                       [](uv_stream_t *serverPtr, int status) {
+               [](uv_stream_t *serverPtr, int status) {
 
-                           auto commInterface = ((CommTCP *) serverPtr->data);
+                   auto commInterface = ((CommTCP *) serverPtr->data);
 
-                           if (status < 0) {
-                               LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
-                               return;
-                           }
+                   if (status < 0) {
+                       LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
+                       return;
+                   }
 
-                           ((CommTCP *) serverPtr->data)->onConnection();
+                   ((CommTCP *) serverPtr->data)->onConnection();
 
-                       });
+               });
 
     if (result < 0) {
 
@@ -264,9 +264,12 @@ bool CommTCP::onConnection() {
 
 bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
+    sendData[0].msg = std::move(msg);
+    sendData[0].unit = target;
+
     auto* client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
 
-    uv_tcp_init(&loop, client);
+    uv_tcp_init(scheduler->getLoop(), client);
 
     client->data = this;
 
@@ -274,40 +277,29 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    uv_tcp_connect(connect, client, (const struct sockaddr*)&clientAddress, [] (uv_connect_t* req, int status) {
+    int result = uv_tcp_connect(connect, client, (const struct sockaddr*)&clientAddress, [] (uv_connect_t* req, int status) {
 
         auto commInterface = (CommTCP *) req->handle->data;
 
-//        auto *write_req = (uv_write_t*)malloc(sizeof(uv_write_t));
-//
-//        uv_write(write_req,
-//                 req->handle,
-//                 message->GetBuf(),
-//                 1,
-//                 nullptr);
+        commInterface->sendData->msg->writeHandle = req->handle;
+        commInterface->sendData->msg->writeToStream(commInterface->sendData->unit);
+
     });
 
-//    int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-//    if (clientSocket < 0) {
-//        LOGS_E(getHost(), "Socket sender open with err : %d!!!", errno);
-//        return false;
-//    }
+    if (result != 0) {
 
-
-
-    if (connect(clientSocket, (struct sockaddr *) &clientAddress, sizeof(sockaddr_in)) == -1) {
-        LOGS_E(getHost(), "Socket can not connect!!!");
-        close(clientSocket);
+        LOGS_E(getHost(), "Can not connect to server!!!");
         return false;
     }
 
-    target->setSocket(clientSocket);
 
-    msg->writeToStream(target);
 
-    shutdown(clientSocket, SHUT_RDWR);
+//    uv_close((uv_handle_t*)client, nullptr);
+//
+//    free(connect);
+//    free(client);
 
-    close(clientSocket);
+
 
     return true;
 }

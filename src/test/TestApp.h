@@ -60,6 +60,7 @@ public:
 
 
     void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testCRC(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
 

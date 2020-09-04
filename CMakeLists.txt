@@ -54,7 +54,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
-        ${SOURCE_PATH}/MessageBlockHeader.cpp
+        ${SOURCE_PATH}/MessageBlock.cpp
         ${SOURCE_PATH}/MessageData.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/MessageItem.cpp
@@ -117,6 +117,7 @@ set(TEST_FILES
 
         ${TEST_PATH}/TestPing.cpp
         ${TEST_PATH}/TestLoadJob.cpp
+        ${TEST_PATH}/TestCRC.cpp
 
         ${TEST_PATH}/TestPipeControl.cpp
         ${SOURCE_PATH}/Entry.cpp

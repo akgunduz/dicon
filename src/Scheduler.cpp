@@ -76,6 +76,9 @@ void *Scheduler::run(void *arg) {
 
 	auto *scheduler = (Scheduler *) arg;
 
+
+    uv_loop_init(&scheduler->loop);
+
 	while(true) {
 
         TypeSchedulerItem item = scheduler->pull();
@@ -87,8 +90,11 @@ void *Scheduler::run(void *arg) {
         const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
         if (iCB != nullptr) {
             iCB->schedulerCB(iCB->arg, std::move(item));
+            uv_run(&scheduler->loop, UV_RUN_ONCE);
         }
 	}
+
+    uv_loop_close(&scheduler->loop);
 
 	return nullptr;
 }
@@ -108,4 +114,9 @@ void Scheduler::end() {
 void Scheduler::setCB(int id, const InterfaceSchedulerCB *cb) {
 
 	callbacks[id] = cb;
+}
+
+uv_loop_t *Scheduler::getLoop() {
+
+    return &loop;
 }

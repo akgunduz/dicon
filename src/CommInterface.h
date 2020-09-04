@@ -52,11 +52,13 @@ class CommInterface {
 protected :
 
     uv_loop_t loop{};
+    uv_loop_t clientLoop{};
 	Scheduler *scheduler;
 	std::thread threadRcv;
 	int notifierPipe[2]{};
 
     ReceiveData receiveData[2];
+    SendData sendData[2];
 
     virtual bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;

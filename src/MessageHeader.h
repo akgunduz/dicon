@@ -9,8 +9,6 @@
 #include "MessageType.h"
 #include "HostUnit.h"
 
-#define SIGNATURE 0x55AA
-
 #define MAX_VARIANT 2
 
 #define PRIORITY_COEFFICIENT 10

@@ -9,7 +9,7 @@
 
 #include "crc/CRC.h"
 #include "uv.h"
-#include "MessageBlockHeader.h"
+#include "MessageBlock.h"
 #include "MessageType.h"
 #include "HostUnit.h"
 #include "Address.h"
@@ -33,23 +33,6 @@ enum MSG_STATE {
     MSGSTATE_MAX
 };
 
-enum MSG_HEADER {
-
-    MSGHEADER_HEADER = 0xA1,
-    MSGHEADER_NUMBER,
-    MSGHEADER_STRING,
-    MSGHEADER_BINARY,
-    MSGHEADER_END,
-    MSGHEADER_MAX
-};
-
-struct MessageBlock {
-
-    uint16_t sign{SIGNATURE};
-    uint16_t type{MSGHEADER_HEADER};
-    uint32_t size{};
-};
-
 class MessageBase {
 
     uint64_t iter = 1;
@@ -63,7 +46,7 @@ class MessageBase {
 
     uint32_t crc{};
 
-    MessageBlock block;
+    MessageBlock block{MSGHEADER_MAX, 0};
 
     MessageHeader header;
 
@@ -71,19 +54,16 @@ class MessageBase {
 
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 
-    static inline CRC::Table<std::uint32_t, 32> crcTable{CRC::CRC_32()};
-
 protected:
 
     std::deque<uint64_t> numbers;
     std::deque<std::string> strings;
 
 public:
-
-    uv_write_t* writeReq;
-
+    uv_stream_t* writeHandle;
     explicit MessageBase(const TypeHostUnit&);
     MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
+    ~MessageBase();
 
     bool onRead(const TypeComponentUnit&, ssize_t, const uv_buf_t *);
 
@@ -104,10 +84,10 @@ public:
     virtual bool build(const TypeComponentUnit&) = 0;
 
 
-	bool writeBlock(const TypeComponentUnit&, const uint8_t *, size_t);
+	bool onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
 
 	bool writeHeader(const TypeComponentUnit&);
-	bool writeBlockBase(const TypeComponentUnit&, const MessageBlock&);
+	bool writeBlock(const TypeComponentUnit &target, const MessageBlock &baseHeader);
 	bool writeString(const TypeComponentUnit&, const std::string&);
 	bool writeNumber(const TypeComponentUnit&, uint64_t);
 	bool writeBinary(const TypeComponentUnit&, const TypeFileItem&);

@@ -32,8 +32,6 @@ int TestApp::run() {
     auto &c = componentController->getCollector(0);
     auto &n = componentController->getNode(0);
 
-    testSendProcessID(d, c, n);
-
     int in;
     do {
 
@@ -69,6 +67,9 @@ int TestApp::run() {
                 break;
             case 'a':
                 testSendID(d, c, n);
+                break;
+            case 'b':
+                testCRC(d, c, n);
                 break;
 
 
