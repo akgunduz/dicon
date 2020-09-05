@@ -30,7 +30,7 @@ public:
     const std::filesystem::path& getRootPath();
 
     TypeID getID();
-    void setID(TypeID);
+    void setID(TypeID&);
 
     ARCH getArch();
 

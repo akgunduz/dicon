@@ -22,7 +22,7 @@
 
 class MessageBase;
 typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);
-typedef size_t (*TypeWriteCB) (const TypeComponentUnit&, const uint8_t*, size_t);
+typedef bool (*TypeWriteCB) (const TypeComponentUnit&, const uint8_t*, size_t);
 typedef bool (MessageBase::*TypeMsgReadParser)(const TypeComponentUnit&, const uint8_t*, size_t);
 
 enum MSG_STATE {
@@ -53,6 +53,8 @@ class MessageBase {
     const TypeHostUnit host;
 
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
+
+    TypeWriteCB writeCB;
 
 protected:
 
@@ -86,7 +88,7 @@ public:
 
     bool writeEndStream(const TypeComponentUnit&);
 
-	bool writeToStream(const TypeComponentUnit&);
+	bool writeToStream(const TypeComponentUnit&, TypeWriteCB);
 
     virtual bool writeMessageStream(const TypeComponentUnit&) = 0;
     

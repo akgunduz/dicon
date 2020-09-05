@@ -233,7 +233,7 @@ void ProcessItem::setAssigned(long _assignedComponent) {
 	assignedComponent = _assignedComponent;
 }
 
-void ProcessItem::setID(long _id) {
+void ProcessItem::setID(TypeID _id) {
 
     ContentItem::setID(_id);
 

@@ -28,7 +28,7 @@ protected:
 
     bool initialized{false};
 
-    App(enum APPTYPE, int *, LOGLEVEL, std::vector<int>, bool);
+    App(enum APPTYPE, int *, const LogInfo&, std::vector<int>, bool);
 
 public:
 

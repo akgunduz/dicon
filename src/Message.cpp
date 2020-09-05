@@ -25,6 +25,16 @@ bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName)
     return true;
 }
 
+bool Message::readID(const TypeComponentUnit& source, TypeID& id) {
+
+    id = (TypeID)numbers.front();
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "ID[%ld] is read successfully", id);
+
+    return true;
+}
+
 bool Message::readFileBinary(const TypeComponentUnit& source, const TypeFileItem& fileItem) {
 
     fileItem->setName(strings.front());
@@ -40,10 +50,20 @@ bool Message::readFileBinary(const TypeComponentUnit& source, const TypeFileItem
 
 bool Message::readProcessID(const TypeComponentUnit& source, const TypeProcessItem& processItem) {
 
-    processItem->setID((long)numbers.front());
+    processItem->setID((TypeID)numbers.front());
     numbers.pop_front();
 
     LOGS_D(getHost(), "Process[%ld] is read successfully", processItem->getID());
+
+    return true;
+}
+
+bool Message::readProcessCount(const TypeComponentUnit& source, uint32_t& processCount) {
+
+    processCount = (uint32_t)numbers.front();
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "Process Count is read successfully => %d", processCount);
 
     return true;
 }
@@ -206,6 +226,12 @@ bool Message::build(const TypeComponentUnit& source) {
 
     switch(getHeader().getStream()) {
 
+        case STREAM_ID:
+
+            readID(source, data.getID());
+
+            break;
+
         case STREAM_JOBNAME:
 
             readJobName(source, data.getJobName());
@@ -221,6 +247,12 @@ bool Message::build(const TypeComponentUnit& source) {
         case STREAM_PROCESS_ID:
 
             readProcessID(source, data.getProcess());
+
+            break;
+
+        case STREAM_PROCESS_COUNT:
+
+            readProcessCount(source, data.getProcessCount());
 
             break;
 
@@ -263,6 +295,18 @@ bool Message::build(const TypeComponentUnit& source) {
     return true;
 }
 
+bool Message::writeID(const TypeComponentUnit& target, const TypeID& id) {
+
+    if (!writeNumber(target, id)) {
+        LOGS_E(getHost(), "writeID can not write job info");
+        return false;
+    }
+
+    LOGS_D(getHost(), "ID is written successfully => %d", id);
+
+    return true;
+}
+
 bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName) {
 
     if (!writeString(target, jobName)) {
@@ -299,7 +343,19 @@ bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessI
         return false;
     }
 
-    LOGS_D(getHost(), "Process ID is written successfully => ID : %ld", processItem->getID());
+    LOGS_D(getHost(), "Process ID is written successfully => %ld", processItem->getID());
+
+    return true;
+}
+
+bool Message::writeProcessCount(const TypeComponentUnit& target, const uint32_t& processCount) {
+
+    if (!writeNumber(target, processCount)) {
+        LOGS_E(getHost(), "writeProcessCount can not write process ID");
+        return false;
+    }
+
+    LOGS_D(getHost(), "Process Count is written successfully => %ld", processCount);
 
     return true;
 }
@@ -499,6 +555,14 @@ bool Message::writeMessageStream(const TypeComponentUnit& target) {
 
     switch(getHeader().getStream()) {
 
+        case STREAM_ID:
+
+            if (!writeID(target, data.getID())) {
+                return false;
+            }
+
+            break;
+
         case STREAM_JOBNAME:
 
             if (!writeJobName(target, data.getJobName())) {
@@ -520,6 +584,16 @@ bool Message::writeMessageStream(const TypeComponentUnit& target) {
             if (!writeProcessID(target, data.getProcess())) {
                 return false;
             }
+
+            break;
+
+        case STREAM_PROCESS_COUNT:
+
+            if (!writeProcessCount(target, data.getProcessCount())) {
+                return false;
+            }
+
+            break;
 
         case STREAM_PROCESS_INFO:
 

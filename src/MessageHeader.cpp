@@ -45,23 +45,23 @@ void MessageHeader::grabOwner(const TypeCommUnit& unit) {
     unit->set(owner);
 }
 
-uint64_t MessageHeader::getVariant(int id) {
-
-    if (id < MAX_VARIANT) {
-        return variant[id];
-    }
-
-    return 0;
-}
-
-void MessageHeader::setVariant(int id, uint64_t _variant) {
-
-    if (id >= MAX_VARIANT) {
-        return;
-    }
-
-    this->variant[id] = _variant;
-}
+//uint64_t MessageHeader::getVariant(int id) {
+//
+//    if (id < MAX_VARIANT) {
+//        return variant[id];
+//    }
+//
+//    return 0;
+//}
+//
+//void MessageHeader::setVariant(int id, uint64_t _variant) {
+//
+//    if (id >= MAX_VARIANT) {
+//        return;
+//    }
+//
+//    this->variant[id] = _variant;
+//}
 
 int MessageHeader::getPriority() {
 
@@ -101,9 +101,9 @@ bool MessageHeader::deSerialize(const uint8_t* buffer) {
     owner.address.getUI().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
     owner.address.getUI().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
 
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        variant[i] = ntohll(*((uint64_t *) buffer)); buffer += 8;
-    }
+//    for (int i = 0; i < MAX_VARIANT; i++) {
+//        variant[i] = ntohll(*((uint64_t *) buffer)); buffer += 8;
+//    }
 
     return true;
 }
@@ -122,7 +122,7 @@ void MessageHeader::serialize(uint8_t *buffer) {
     *((uint16_t *) buffer) = htons(owner.address.getUI().port); buffer += 2;
     *((uint32_t *) buffer) = htonl(owner.address.getUI().base); buffer += 4;
 
-    for (int i = 0; i < MAX_VARIANT; i++) {
-        *((uint64_t *) buffer) = htonll(variant[i]); buffer += 8;
-    }
+//    for (int i = 0; i < MAX_VARIANT; i++) {
+//        *((uint64_t *) buffer) = htonll(variant[i]); buffer += 8;
+//    }
 }

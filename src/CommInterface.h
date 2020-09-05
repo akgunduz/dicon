@@ -60,7 +60,7 @@ protected :
     ReceiveData receiveData[2];
     SendData sendData[2];
 
-    virtual bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) = 0;
+ //   virtual bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 

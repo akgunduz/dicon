@@ -5,7 +5,7 @@
 
 #include "ContentItem.h"
 
-ContentItem::ContentItem(const TypeHostUnit& _host, long _id, long _assignedJob) :
+ContentItem::ContentItem(const TypeHostUnit& _host, TypeID _id, long _assignedJob) :
         host(_host), id(_id), assignedJob(_assignedJob) {
 }
 
@@ -16,12 +16,12 @@ const TypeHostUnit& ContentItem::getHost() {
     return host;
 }
 
-long ContentItem::getID() {
+TypeID ContentItem::getID() {
 
     return id;
 }
 
-void ContentItem::setID(long _id) {
+void ContentItem::setID(TypeID _id) {
 
     id = _id;
 }

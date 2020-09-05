@@ -19,7 +19,7 @@ class UnixSocket : public CommInterface {
 
 	bool initUnixSocket();
 
-    bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) override;
+    bool onRead(ReceiveData&, const uint8_t *, size_t);
     bool runSender(const TypeComponentUnit& , TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
@@ -31,9 +31,6 @@ public :
     COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
-
-    static TypeReadCB getReadCB(const TypeComponentUnit&);
-    static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };
 
 #endif //DICON_UNIXSOCKET_H

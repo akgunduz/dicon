@@ -35,7 +35,7 @@ MessageBase::~MessageBase() {
 
 bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uint8_t *buffer) {
 
-    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
+    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
            nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
@@ -262,35 +262,23 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 
 bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buf, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
-
     crc = CRC::Calculate(buf, size, Util::crcTable, crc);
 
-    auto *writeReq = (uv_write_t*) malloc(sizeof(uv_write_t));
-    uv_write(writeReq, target->getHandle(), &bufPtr, 1, [](uv_write_t* req, int status) {
-
-        if (status) {
-            LOGP_E("Write request problem, error : %d!!!", status);
-        }
-
-        free(req);
-    });
-
-	return true;
+    return writeCB(target, buf, size);
 }
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const MessageBlock& baseHeader) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "BlockBase write process is started");
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Block write process is started");
 
     baseHeader.fillBuffer(tmpBuf);
 
     if (!onWrite(target, tmpBuf, sizeof(MessageBlock))) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write BlockBase to stream");
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Block to stream");
         return false;
     }
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "BlockBase is written successfully");
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Block is written successfully");
 
     return true;
 }
@@ -434,7 +422,11 @@ bool MessageBase::writeEndStream(const TypeComponentUnit& target) {
 	return true;
 }
 
-bool MessageBase::writeToStream(const TypeComponentUnit& target) {
+bool MessageBase::writeToStream(const TypeComponentUnit& target, TypeWriteCB _writeCB) {
+
+    assert(_writeCB != nullptr);
+
+    writeCB = _writeCB;
 
 	if (!writeHeader(target)) {
 		return false;

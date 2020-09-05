@@ -76,7 +76,7 @@ bool UnixSocket::initUnixSocket() {
     return false;
 }
 
-bool UnixSocket::onRead(ReceiveData& receiveData, ssize_t nRead, const uv_buf_t *buf) {
+bool UnixSocket::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
 
         return true;
 }
@@ -165,7 +165,25 @@ bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
  //   target->setSocket(clientSocket);
 
-    msg->writeToStream(target);
+    msg->writeToStream(target,
+                       [](const TypeComponentUnit &target, const uint8_t *buf,
+                                                          size_t size) -> bool {
+
+        uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+
+        auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+        uv_write(writeReq, target->getHandle(), &bufPtr, 1,
+                 [](uv_write_t *req, int status) {
+
+                     if (status) {
+                         LOGP_E("Write request problem, error : %d!!!", status);
+                     }
+
+                     free(req);
+                 });
+
+        return true;
+    });
 
     shutdown(clientSocket, SHUT_RDWR);
     close(clientSocket);

@@ -42,7 +42,7 @@ bool Collector::processDistributorWakeupMsg(const TypeComponentUnit& owner, Type
 
 bool Collector::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (!setID((long)msg->getHeader().getVariant(0))) {
+    if (!setID(msg->getData().getID())) {
 
         return false;
     }
@@ -167,11 +167,11 @@ bool Collector::send2DistributorIDMsg(const TypeComponentUnit& target) {
     return send(target, std::move(msg));
 }
 
-bool Collector::send2DistributorNodeMsg(const TypeComponentUnit& target, long readyProcessCount) {
+bool Collector::send2DistributorNodeMsg(const TypeComponentUnit& target, uint32_t readyProcessCount) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE, STREAM_PROCESS_COUNT);
 
-    msg->getHeader().setVariant(0, readyProcessCount);
+    msg->getData().setProcessCount(readyProcessCount);
 
     return send(target, std::move(msg));
 }
@@ -195,7 +195,7 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
     return send(target, std::move(msg));
 }
 
-bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
+bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, TypeID processID, const TypeProcessFileList &fileList) {
 
     auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
 

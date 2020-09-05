@@ -5,10 +5,10 @@
 
 #include "Application.h"
 
-App::App(enum APPTYPE type, int *interfaces, LOGLEVEL logLevel, std::vector<int> componentCount, bool autoWake) :
+App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vector<int> componentCount, bool autoWake) :
         type(type) {
 
-    Log::init(logLevel);
+    Log::init(_logInfo);
 
     deviceList = DeviceList::getInstance();
 

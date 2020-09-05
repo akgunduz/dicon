@@ -25,10 +25,10 @@ TypeID HostUnit::getID() {
     return id;
 }
 
-void HostUnit::setID(TypeID _id) {
+void HostUnit::setID(TypeID& _id) {
 
     id = _id;
-
+//TODO
 //    rootPath = basePath / std::to_string(_id);
 //
 //    if (std::filesystem::exists(rootPath)) {

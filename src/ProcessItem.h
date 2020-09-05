@@ -60,7 +60,7 @@ public:
     long getAssigned();
     void setAssigned(long);
 
-    void setID(long) override;
+    void setID(TypeID) override;
 
     long getDuration();
     void setDuration(long duration);

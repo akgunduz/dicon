@@ -74,7 +74,7 @@ public:
     static void registerNotify(void*, TypeNotifyCB);
     static void deRegisterNotify();
 
-    bool setID(long);
+    bool setID(TypeID&);
     bool isInitialized();
 
     bool addProcessHandler(COMPONENT, MSG_TYPE, TypeProcessComponentMsg);

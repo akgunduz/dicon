@@ -34,7 +34,7 @@ bool CommTCP::initTCP() {
 
     tcpServer.data = this;
 
-    while(tryCount--) {
+    while (tryCount--) {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(address);
 
@@ -59,19 +59,21 @@ bool CommTCP::initTCP() {
         return false;
     }
 
-    result = uv_listen((uv_stream_t *) &tcpServer, MAX_SIMUL_CLIENTS,
-               [](uv_stream_t *serverPtr, int status) {
+    result = uv_listen(
+            (uv_stream_t *) &tcpServer, 1000,
 
-                   auto commInterface = ((CommTCP *) serverPtr->data);
+            [](uv_stream_t *serverPtr, int status) {
 
-                   if (status < 0) {
-                       LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
-                       return;
-                   }
+                auto commInterface = ((CommTCP *) serverPtr->data);
 
-                   ((CommTCP *) serverPtr->data)->onConnection();
+                if (status < 0) {
+                    LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
+                    return;
+                }
 
-               });
+                ((CommTCP *) serverPtr->data)->onConnection();
+
+            });
 
     if (result < 0) {
 
@@ -100,7 +102,7 @@ bool CommTCP::initMulticast() {
 
     multicastServer.data = this;
 
-    while(tryCount--) {
+    while (tryCount--) {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
 
@@ -128,34 +130,36 @@ bool CommTCP::initMulticast() {
     uv_udp_set_membership(&multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
                           NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
-    uv_udp_recv_start(&multicastServer,
+    uv_udp_recv_start(
 
-                      [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+            &multicastServer,
 
-                          buf->base = (char *) malloc(suggested_size);
-                          assert(buf->base != nullptr);
-                          buf->len = suggested_size;
+            [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
-                      },
+                buf->base = (char *) malloc(suggested_size);
+                assert(buf->base != nullptr);
+                buf->len = suggested_size;
 
-                      [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
-                         const struct sockaddr *addr, unsigned flags) {
+            },
 
-                          //LOGP_E("Data received, count : %d, bufPtr : %s",
-                           //      nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
+            [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
+               const struct sockaddr *addr, unsigned flags) {
 
-                          auto commInterface = (CommTCP *) client->data;
+                //LOGP_E("Data received, count : %d, bufPtr : %s",
+                //      nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
 
-                          commInterface->onRead(commInterface->receiveData[1], nRead, buf);
+                auto commInterface = (CommTCP *) client->data;
 
-                      });
+                commInterface->onRead(commInterface->receiveData[1], (uint8_t *) buf->base, nRead);
+
+            });
 
     LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(getMulticastAddress().get()).c_str());
 
     return true;
 }
 
-bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *buf) {
+bool CommTCP::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
 
     if (nRead == 0 || nRead == UV_EOF) {
 
@@ -171,7 +175,7 @@ bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
         receiveData.state = DATASTATE_PROCESS;
     }
 
-    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, (uint8_t*)buf->base);
+    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, buf);
 
     if (isDone) {
 
@@ -185,6 +189,11 @@ bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
     }
 
     return isDone;
+}
+
+bool CommTCP::onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_t size) {
+
+    return true;
 }
 
 bool CommTCP::onConnection() {
@@ -204,31 +213,33 @@ bool CommTCP::onConnection() {
         return false;
     }
 
-    uv_read_start((uv_stream_t *) client,
+    uv_read_start(
 
-                  [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+            (uv_stream_t *) client,
 
-                      buf->base = (char *) malloc(suggested_size);
-                      assert(buf->base != nullptr);
-                      buf->len = suggested_size;
+            [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
 
-                  },
+                buf->base = (char *) malloc(suggested_size);
+                assert(buf->base != nullptr);
+                buf->len = suggested_size;
 
-                  [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
+            },
 
-                      auto commInterface = (CommTCP *) client->data;
+            [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
-                      bool done = commInterface->onRead(commInterface->receiveData[0], nRead, buf);
+                auto commInterface = (CommTCP *) client->data;
 
-                      if (done) {
+                bool done = commInterface->onRead(commInterface->receiveData[0], (uint8_t *) buf->base, nRead);
 
-                          uv_close((uv_handle_t*)client, [](uv_handle_t* handle) {
+                if (done) {
 
-                              free(handle);
+                    uv_close((uv_handle_t *) client, [](uv_handle_t *handle) {
 
-                          });
-                      }
-                  });
+                        free(handle);
+
+                    });
+                }
+            });
 
     return true;
 }
@@ -238,24 +249,50 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
     sendData[0].msg = std::move(msg);
     sendData[0].unit = target;
 
-    auto* client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
+    auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
     uv_tcp_init(scheduler->getLoop(), client);
 
     client->data = this;
 
-    auto* connect = (uv_connect_t*)malloc(sizeof(uv_connect_t));
+    auto *connect = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    int result = uv_tcp_connect(connect, client, (const struct sockaddr*)&clientAddress, [] (uv_connect_t* req, int status) {
+    int result = uv_tcp_connect(
 
-        auto commInterface = (CommTCP *) req->handle->data;
+            connect, client, (const struct sockaddr *) &clientAddress,
 
-        commInterface->sendData->unit->setHandle(req->handle);
-        commInterface->sendData->msg->writeToStream(commInterface->sendData->unit);
+            [](uv_connect_t *req, int status) {
 
-    });
+                auto commInterface = (CommTCP *) req->handle->data;
+
+                commInterface->sendData->unit->setHandle(req->handle);
+
+                commInterface->sendData->msg->writeToStream(
+
+                        commInterface->sendData->unit,
+
+                        [](const TypeComponentUnit &target, const uint8_t *buf,
+                           size_t size) -> bool {
+
+                            uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+
+                            auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+                            uv_write(writeReq, target->getHandle(), &bufPtr, 1,
+                                     [](uv_write_t *req, int status) {
+
+                                         if (status) {
+                                             LOGP_E("Write request problem, error : %d!!!", status);
+                                         }
+
+                                         free(req);
+                                     });
+
+                            return true;
+                        });
+
+            });
 
     if (result != 0) {
 
@@ -286,9 +323,27 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
     struct in_addr interface_addr = NetUtil::getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, (const char *) &interface_addr, sizeof(interface_addr));
 
-   // target->setSocket(clientSocket);
 
-    msg->writeToStream(target);
+    msg->writeToStream(target,
+
+                       [](const TypeComponentUnit &target, const uint8_t *buf,
+                          size_t size) -> bool {
+
+                           uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+
+                           auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+                           uv_write(writeReq, target->getHandle(), &bufPtr, 1,
+                                    [](uv_write_t *req, int status) {
+
+                                        if (status) {
+                                            LOGP_E("Write request problem, error : %d!!!", status);
+                                        }
+
+                                        free(req);
+                                    });
+
+                           return true;
+                       });
 
     shutdown(clientSocket, SHUT_RDWR);
 

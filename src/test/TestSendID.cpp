@@ -11,11 +11,11 @@ bool send2DistributorIDMsg(const TypeComponent& owner, const TypeComponentUnit& 
     return owner->send(target, std::move(msg));
 }
 
-bool sendIDMsg(const TypeComponent& owner, const TypeComponentUnit& target, long id) {
+bool sendIDMsg(const TypeComponent& owner, const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID, STREAM_ID);
 
-    msg->getHeader().setVariant(0, id);
+    msg->getData().setID(id);
 
     return owner->send(target, std::move(msg));
 }
@@ -30,7 +30,7 @@ bool processOtherIDMsg(const TypeComponent& component, const TypeComponentUnit& 
 
 bool processDistIDMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (!component->setID(msg->getHeader().getVariant(0))) {
+    if (!component->setID(msg->getData().getID())) {
 
         LOGC_E(component->getHost(), owner, MSGDIR_RECEIVE, "New ID : 0 is tried to assigned, it should not!!!");
 

@@ -4,8 +4,8 @@
 
 #include "TestApp.h"
 
-TestApp::TestApp(int *_interfaces, LOGLEVEL _logLevel, std::vector<int>& _componentCount)
-        : App(APPTYPE_TEST, _interfaces, _logLevel, {1, 1, 1}, false) {
+TestApp::TestApp(int *_interfaces, const LogInfo& _logInfo, std::vector<int>& _componentCount)
+        : App(APPTYPE_TEST, _interfaces, _logInfo, {1, 1, 1}, false) {
 
     help();
 }

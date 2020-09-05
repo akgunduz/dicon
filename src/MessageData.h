@@ -12,6 +12,10 @@ class MessageData {
 
     std::string jobName;
 
+    uint32_t processCount;
+
+    TypeID id;
+
     TypeProcessItem process;
 
     TypeFileItem file;
@@ -25,10 +29,13 @@ public:
     explicit MessageData(const TypeHostUnit&);
     ~MessageData() = default;
 
+    TypeID& getID();
+    void setID(TypeID&);
+
     const TypeProcessItem& getProcess();
     void setProcess(const TypeProcessItem&);
-    void setProcess(long, const TypeProcessFileList&);
-    void setProcess(long, const TypeProcessFile&);
+    void setProcess(TypeID, const TypeProcessFileList&);
+    void setProcess(TypeID, const TypeProcessFile&);
 
     const TypeFileItem& getFile();
     void setFile(const TypeFileItem&);
@@ -41,6 +48,9 @@ public:
 
     TypeComponentUnitList& getComponentList();
     void setComponentList(TypeComponentUnitList&);
+
+    uint32_t& getProcessCount();
+    void setProcessCount(uint32_t&);
 };
 
 #endif //DICON_MESSAGEDATA_H

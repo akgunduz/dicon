@@ -52,7 +52,7 @@ bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessa
 
 bool Node::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (!setID(msg->getHeader().getVariant(0))) {
+    if (!setID(msg->getData().getID())) {
 
         LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "New ID : 0 is tried to assigned, it should not!!!");
 
@@ -212,11 +212,11 @@ bool Node::send2DistributorIDMsg(const TypeComponentUnit& target) {
     return send(target, std::move(msg));
 }
 
-bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, long collID) {
+bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, TypeID collID) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BUSY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BUSY, STREAM_ID);
 
-    msg->getHeader().setVariant(0, collID);
+    msg->getData().setID(collID);
 
     return send(target, std::move(msg));
 }

@@ -5,6 +5,8 @@
 
 #include "MessageType.h"
 
+#include <utility>
+
 std::map<int, std::string> msgNameList = {
         {MSGTYPE_NODE, "NODE"},
         {MSGTYPE_JOB, "JOB"},
@@ -26,6 +28,7 @@ std::map<int, std::string> msgDirNameList = {
 };
 
 std::map<int, std::string> streamNameList = {
+        {STREAM_ID, "STREAM_ID"},
         {STREAM_JOBNAME, "STREAM_JOBNAME"},
         {STREAM_COMPONENT, "STREAM_COMPONENT"},
         {STREAM_COMPONENTS, "STREAM_COMPONENTS"},
@@ -34,6 +37,7 @@ std::map<int, std::string> streamNameList = {
         {STREAM_PROCESS, "STREAM_PROCESS"},
         {STREAM_PROCESSES, "STREAM_PROCESSES"},
         {STREAM_PROCESS_ID, "STREAM_PROCESS_ID"},
+        {STREAM_PROCESS_COUNT, "STREAM_PROCESS_COUNT"},
         {STREAM_PROCESS_INFO, "STREAM_PROCESS_INFO"},
         {STREAM_PROCESS_FILE_INFO, "STREAM_PROCESS_FILE_INFO"},
         {STREAM_PROCESS_FILE_BINARY, "STREAM_PROCESS_FILE_BINARY"},
@@ -65,7 +69,7 @@ const char* MessageType::getMsgDirName(int type) {
 
 void MessageType::addMsg(int type, std::string str) {
 
-    msgNameList[type] = str;
+    msgNameList[type] = std::move(str);
 }
 
 const char* MessageType::getStreamName(int type) {
@@ -75,7 +79,7 @@ const char* MessageType::getStreamName(int type) {
 
 void MessageType::addStream(int type, std::string str) {
 
-    streamNameList[type] = str;
+    streamNameList[type] = std::move(str);
 }
 
 const char* MessageType::getBlockName(int type) {
@@ -85,5 +89,5 @@ const char* MessageType::getBlockName(int type) {
 
 void MessageType::addBlock(int type, std::string str) {
 
-    blockNameList[type] = str;
+    blockNameList[type] = std::move(str);
 }

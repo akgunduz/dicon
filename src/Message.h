@@ -15,9 +15,11 @@ class Message : public MessageBase {
 
     MessageData data;
 
+    bool readID(const TypeComponentUnit&, TypeID&);
     bool readJobName(const TypeComponentUnit&, std::string&);
     bool readFileBinary(const TypeComponentUnit&, const TypeFileItem&);
     bool readProcessID(const TypeComponentUnit&, const TypeProcessItem&);
+    bool readProcessCount(const TypeComponentUnit&, uint32_t&);
     bool readProcessInfo(const TypeComponentUnit&, const TypeProcessItem&);
     bool readProcessFileCount(const TypeComponentUnit&, long&);
     bool readProcessFile(const TypeComponentUnit&, const TypeProcessFile&);
@@ -25,9 +27,11 @@ class Message : public MessageBase {
     bool readProcess(const TypeComponentUnit&, const TypeProcessItem&);
     bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&);
 
+    bool writeID(const TypeComponentUnit&, const TypeID&);
     bool writeJobName(const TypeComponentUnit&, const std::string&);
     bool writeFileBinary(const TypeComponentUnit&, const TypeFileItem&);
     bool writeProcessID(const TypeComponentUnit&, const TypeProcessItem&);
+    bool writeProcessCount(const TypeComponentUnit&, const uint32_t&);
     bool writeProcessInfo(const TypeComponentUnit&, const TypeProcessItem&);
     bool writeProcessFileCount(const TypeComponentUnit&, const TypeProcessItem&);
     bool writeProcessFile(const TypeComponentUnit&, const TypeProcessFile&, bool);

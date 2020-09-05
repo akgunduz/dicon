@@ -44,16 +44,16 @@ void MessageData::setProcess(const TypeProcessItem& _process) {
     process = _process;
 }
 
-void MessageData::setProcess(long id, const TypeProcessFileList& _fileList) {
+void MessageData::setProcess(TypeID _id, const TypeProcessFileList& _fileList) {
 
     process->addFileList(_fileList);
-    process->setID(id);
+    process->setID(_id);
 }
 
-void MessageData::setProcess(long id, const TypeProcessFile& _file) {
+void MessageData::setProcess(TypeID _id, const TypeProcessFile& _file) {
 
     process->addFile(_file);
-    process->setID(id);
+    process->setID(_id);
 }
 
 std::string& MessageData::getJobName() {
@@ -66,12 +66,32 @@ void MessageData::setJobName(const std::string& _jobName) {
     jobName = _jobName;
 }
 
-TypeComponentUnitList &MessageData::getComponentList() {
+TypeComponentUnitList& MessageData::getComponentList() {
 
     return componentList;
 }
 
-void MessageData::setComponentList(TypeComponentUnitList &list) {
+void MessageData::setComponentList(TypeComponentUnitList& list) {
 
     componentList = list;
+}
+
+TypeID& MessageData::getID() {
+
+    return id;
+}
+
+void MessageData::setID(TypeID& _id) {
+
+    id = _id;
+}
+
+uint32_t& MessageData::getProcessCount() {
+
+    return processCount;
+}
+
+void MessageData::setProcessCount(uint32_t& _count) {
+
+    processCount = _count;
 }
