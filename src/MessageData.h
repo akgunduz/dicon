@@ -14,6 +14,8 @@ class MessageData {
 
     std::string jobName;
 
+    TypeID id;
+
     TypeProcessItem process;
 
     TypeComponentUnitList componentList;
@@ -22,6 +24,9 @@ public:
 
     explicit MessageData(const TypeHostUnit&);
     ~MessageData() = default;
+
+    TypeID& getID();
+    void setID(TypeID&);
 
     int getStreamType();
     void setStreamType(int);

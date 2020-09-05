@@ -64,6 +64,9 @@ int TestApp::run() {
             case 'e':
                 testPipeControl(d, c, n);
                 break;
+            case 'a':
+                testSendID(d, c, n);
+                break;
             case 'h':
                 help();
                 break;

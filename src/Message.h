@@ -17,6 +17,7 @@ class Message : public MessageBase {
     MessageData data;
 
     bool readComponentList(const TypeComponentUnit&, TypeComponentUnitList&, MessageBlockHeader&, uint32_t&);
+    bool readID(const TypeComponentUnit&, TypeID&, MessageBlockHeader&, uint32_t&);
     bool readJobName(const TypeComponentUnit&, std::string&, MessageBlockHeader&, uint32_t&);
     bool readProcess(const TypeComponentUnit&, const TypeProcessItem&, MessageBlockHeader&, uint32_t&);
     bool readProcessID(const TypeComponentUnit&, long&, MessageBlockHeader&, uint32_t&);
@@ -24,6 +25,7 @@ class Message : public MessageBase {
     bool readMessageBlock(const TypeComponentUnit& in, MessageBlockHeader&, uint32_t&) override;
 
     bool writeComponentList(const TypeComponentUnit&, TypeComponentUnitList&, uint32_t&);
+    bool writeID(const TypeComponentUnit&, long, uint32_t&);
     bool writeJobName(const TypeComponentUnit&, const std::string&, uint32_t&);
     bool writeProcess(const TypeComponentUnit&, const TypeProcessItem&, uint32_t&);
     bool writeProcessID(const TypeComponentUnit&, long, uint32_t&);

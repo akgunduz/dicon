@@ -108,7 +108,7 @@ set(TEST_FILES
         ${TEST_PATH}/TestWakeUp.cpp
         ${TEST_PATH}/TestPipeControl.cpp
         ${SOURCE_PATH}/Entry.cpp
-        )
+        src/test/TestSendID.cpp)
 
 add_definitions(-DDISABLE_LOGFILEINFO)
 add_definitions(-DMULTICAST_ENABLED)

@@ -49,6 +49,26 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
     return true;
 }
 
+bool Message::readID(const TypeComponentUnit& source, TypeID& id, MessageBlockHeader& block, uint32_t& crc) {
+
+    if (block.getType() != BLOCK_ID) {
+        LOGS_E(getHost(), "readJobName can not read other blocks");
+        return false;
+    }
+
+    uint64_t number;
+    if (!readNumber(source, number, crc)) {
+        LOGS_E(getHost(), "readFile can not read jobID data");
+        return false;
+    }
+
+    id = (TypeID)number;
+
+    LOGS_D(getHost(), "Process ID is read successfully => ID : %ld", id);
+
+    return true;
+}
+
 bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName, MessageBlockHeader& block, uint32_t& crc) {
 
     if (block.getType() != BLOCK_JOB) {
@@ -187,6 +207,18 @@ bool Message::readMessageBlock(const TypeComponentUnit& source, MessageBlockHead
 
     switch(block.getType()) {
 
+        case BLOCK_ID: {
+
+            TypeID id;
+
+            if (!readID(source, id, block, crc)) {
+                return false;
+            }
+
+            data.setID(id);
+        }
+            break;
+
         case BLOCK_PROCESSINFO: {
 
             if (!readProcess(source, data.getProcess(), block, crc)) {
@@ -285,6 +317,25 @@ bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentU
     for (auto& item : componentList) {
         LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
     }
+
+    return true;
+}
+
+bool Message::writeID(const TypeComponentUnit& target, long id, uint32_t& crc) {
+
+    MessageBlockHeader blockHeader(BLOCK_ID);
+
+    if (!writeBlockHeader(target, blockHeader, crc)) {
+        LOGS_E(getHost(), "writeProcessID can not write block header");
+        return false;
+    }
+
+    if (!writeNumber(target, id, crc)) {
+        LOGS_E(getHost(), "writeProcess can not write process ID");
+        return false;
+    }
+
+    LOGS_D(getHost(), "ID is written successfully => ID : %ld", id);
 
     return true;
 }
@@ -429,6 +480,14 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
     switch(data.getStreamType()) {
 
+        case STREAM_ID:
+
+            if (!writeID(target, data.getID(), crc)) {
+                return false;
+            }
+
+            break;
+
         case STREAM_PROCESS:
 
             if (!writeProcess(target, data.getProcess(), crc)) {
@@ -444,8 +503,8 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             break;
 
-        case STREAM_FILEINFO:
-        case STREAM_FILEBINARY:
+        case STREAM_FILE_INFO:
+        case STREAM_FILE_BINARY:
 
             if (!writeProcessID(target, data.getProcess()->getID(), crc)) {
                 return false;
@@ -453,14 +512,14 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
             for (const auto& processFile : data.getProcess()->getFileList()) {
 
-                if (!writeFile(target, processFile, data.getStreamType() == STREAM_FILEBINARY, crc)) {
+                if (!writeFile(target, processFile, data.getStreamType() == STREAM_FILE_BINARY, crc)) {
                     return false;
                 }
             }
 
             break;
 
-        case STREAM_JOB:
+        case STREAM_JOBNAME:
 
             if (!writeJobName(target, data.getJobName(), crc)) {
                 return false;
