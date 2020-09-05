@@ -28,10 +28,13 @@ bool Scheduler::push(TypeSchedulerItem item) {
 
     if (endFlag || items.size() >= capacity) {
 
+        LOGP_E("Scheduler at full capacity");
+
         return false;
     }
 
     if (item->type == END_ITEM) {
+
         endFlag = true;
     }
 

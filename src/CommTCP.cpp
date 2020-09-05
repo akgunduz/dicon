@@ -24,13 +24,18 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
 
 bool CommTCP::initTCP() {
 
-    int result;
-
     int tryCount = 10;
 
     Address address(getDevice()->getBase(), lastFreeTCPPort);
 
-    uv_tcp_init(&receiveLoop, &tcpServer);
+    int result = uv_tcp_init(&receiveLoop, &tcpServer);
+
+    if (result != 0) {
+
+        LOGS_E(getHost(), "Could not init TCP socket!!!");
+
+        return false;
+    }
 
     tcpServer.data = this;
 
@@ -75,9 +80,14 @@ bool CommTCP::initTCP() {
 
             });
 
-    if (result < 0) {
+    if (result != 0) {
 
         LOGS_E(getHost(), "Socket listen with err : %d!!!", result);
+
+        uv_close((uv_handle_t *) &tcpServer, [](uv_handle_t *handle) {
+
+            LOGP_I("TCP handle is closed!!!");
+        });
 
         return false;
     }
@@ -92,13 +102,18 @@ bool CommTCP::initTCP() {
 
 bool CommTCP::initMulticast() {
 
-    int result;
-
     int tryCount = 10;
 
     Address address(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
 
-    uv_udp_init(&receiveLoop, &multicastServer);
+    int result = uv_udp_init(&receiveLoop, &multicastServer);
+
+    if (result != 0) {
+
+        LOGS_E(getHost(), "Could not init Multicast socket!!!");
+
+        return false;
+    }
 
     multicastServer.data = this;
 
@@ -161,9 +176,14 @@ bool CommTCP::initMulticast() {
 
 bool CommTCP::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
 
-    if (nRead == 0 || nRead == UV_EOF) {
+    if (nRead == 0) {
 
         return false;
+    }
+
+    if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
+
+        return true;
     }
 
     if (receiveData.state == DATASTATE_INIT) {
@@ -200,20 +220,33 @@ bool CommTCP::onConnection() {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
-    uv_tcp_init(&receiveLoop, client);
+    int result = uv_tcp_init(&receiveLoop, client);
+
+    if (result != 0) {
+
+        LOGS_E(getHost(), "Could not init TCP client socket!!!");
+
+        return false;
+    }
 
     client->data = this;
 
-    int result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
+    result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
+        uv_close((uv_handle_t *) &client, [](uv_handle_t *handle) {
+
+            free(handle);
+
+        });
+
         return false;
     }
 
-    uv_read_start(
+    result = uv_read_start(
 
             (uv_stream_t *) client,
 
@@ -241,73 +274,118 @@ bool CommTCP::onConnection() {
                 }
             });
 
+    if (result != 0) {
+
+        LOGS_E(getHost(), "Read start with err : %d!!!", result);
+
+        uv_close((uv_handle_t *) &client, [](uv_handle_t *handle) {
+
+            free(handle);
+
+        });
+
+        return false;
+    }
+
     return true;
 }
 
 bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
-    sendData[0].msg = std::move(msg);
-    sendData[0].unit = target;
-
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
-    uv_tcp_init(scheduler->getLoop(), client);
+    int result = uv_tcp_init(scheduler->getLoop(), client);
+
+    if (result != 0) {
+
+        LOGS_E(getHost(), "Could not init TCP client socket!!!");
+
+        return false;
+    }
 
     client->data = this;
+
+    sendData[0].msg = std::move(msg);
+    sendData[0].unit = target;
 
     auto *connect = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    int result = uv_tcp_connect(
+    result = uv_tcp_connect(
 
             connect, client, (const struct sockaddr *) &clientAddress,
 
             [](uv_connect_t *req, int status) {
 
+                if (status) {
+
+                    LOGP_E("TCP Connect problem, error : %d!!!", status);
+
+                    uv_close((uv_handle_t *) &req->handle, [](uv_handle_t *handle) {
+
+                        free(handle);
+
+                    });
+
+                    return;
+                }
+
                 auto commInterface = (CommTCP *) req->handle->data;
 
                 commInterface->sendData->unit->setHandle(req->handle);
 
-                commInterface->sendData->msg->writeToStream(
+                bool res = commInterface->sendData->msg->writeToStream(
 
                         commInterface->sendData->unit,
 
-                        [](const TypeComponentUnit &target, const uint8_t *buf,
-                           size_t size) -> bool {
+                        [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> bool {
 
                             uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
 
                             auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
-                            uv_write(writeReq, target->getHandle(), &bufPtr, 1,
-                                     [](uv_write_t *req, int status) {
 
-                                         if (status) {
-                                             LOGP_E("Write request problem, error : %d!!!", status);
-                                         }
+                            int result = uv_write(
 
-                                         free(req);
-                                     });
+                                    writeReq, target->getHandle(), &bufPtr, 1,
+
+                                    [](uv_write_t *req, int status) {
+
+                                        if (status) {
+                                            LOGP_E("Write request problem, error : %d!!!", status);
+                                        }
+
+                                        free(req);
+                                    });
+
+                            if (result != 0) {
+
+                                LOGP_E("Write problem, error : %d!!!", result);
+                                return false;
+                            }
 
                             return true;
                         });
+
+                if (!res) {
+
+                    LOGP_E("Write stream is failed!!!");
+                }
 
             });
 
     if (result != 0) {
 
-        LOGS_E(getHost(), "Can not connect to server!!!");
+        LOGS_E(getHost(), "Can not connect to server!!!, error : %d", result);
+
+        uv_close((uv_handle_t *) &client, [](uv_handle_t *handle) {
+
+            free(handle);
+
+        });
+
         return false;
     }
-
-
-
-//    uv_close((uv_handle_t*)client, nullptr);
-//
-//    free(connect);
-//    free(client);
-
-
 
     return true;
 }
@@ -324,30 +402,32 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, (const char *) &interface_addr, sizeof(interface_addr));
 
 
-    msg->writeToStream(target,
+    msg->writeToStream(
 
-                       [](const TypeComponentUnit &target, const uint8_t *buf,
-                          size_t size) -> bool {
+            target,
 
-                           uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+            [](const TypeComponentUnit &target, const uint8_t *buf,
+               size_t size) -> bool {
 
-                           auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
-                           uv_write(writeReq, target->getHandle(), &bufPtr, 1,
-                                    [](uv_write_t *req, int status) {
+                uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
 
-                                        if (status) {
-                                            LOGP_E("Write request problem, error : %d!!!", status);
-                                        }
+                auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+                uv_write(writeReq, target->getHandle(), &bufPtr, 1,
+                         [](uv_write_t *req, int status) {
 
-                                        free(req);
-                                    });
+                             if (status) {
+                                 LOGP_E("Write request problem, error : %d!!!", status);
+                             }
 
-                           return true;
-                       });
+                             free(req);
+                         });
 
-    shutdown(clientSocket, SHUT_RDWR);
+                return true;
+            });
 
-    close(clientSocket);
+//    shutdown(clientSocket, SHUT_RDWR);
+//
+//    close(clientSocket);
 
     return true;
 }
@@ -358,9 +438,6 @@ CommTCP::~CommTCP() {
 
     end();
 
-    close(multicastSocket);
-
-    close(netSocket);
 }
 
 COMM_INTERFACE CommTCP::getType() {
