@@ -40,7 +40,7 @@ public:
 
     bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t, uint32_t&);
 
-	bool readBlock(const TypeComponentUnit&, uint8_t*, size_t, uint32_t&);
+	bool readData(const TypeComponentUnit &source, uint8_t *buf, size_t size, uint32_t &crc);
 
 	bool readSignature(const TypeComponentUnit&, uint32_t&);
 	bool readHeader(const TypeComponentUnit&, uint32_t&);
@@ -55,7 +55,7 @@ public:
     virtual bool readMessageBlock(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
 
 
-	bool writeBlock(const TypeComponentUnit&, const uint8_t *, size_t, uint32_t&);
+	bool writeData(const TypeComponentUnit &target, const uint8_t *buf, size_t size, uint32_t &crc);
 
 	bool writeSignature(const TypeComponentUnit&, uint32_t&);
 	bool writeHeader(const TypeComponentUnit&, uint32_t&);
