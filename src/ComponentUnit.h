@@ -5,11 +5,12 @@
 #ifndef DICON_COMPONENTUNIT_H
 #define DICON_COMPONENTUNIT_H
 
+#include <uv/include/uv.h>
 #include "CommUnit.h"
 
 class ComponentUnit : public CommUnit {
 
-    int socket{};
+    uv_stream_t* handle{};
     long long checkTime{};
 
 public:
@@ -20,11 +21,10 @@ public:
     explicit ComponentUnit(COMPONENT);
     ComponentUnit(const ComponentUnit&);
     explicit ComponentUnit(const TypeCommUnit&);
-    explicit ComponentUnit(int, int);
     virtual ~ComponentUnit();
 
-    int getSocket() const;
-    void setSocket(int);
+    uv_stream_t* getHandle() const;
+    void setHandle(uv_stream_t*);
 
     long long getCheckTime() const;
     void setCheckTime(long long checkTime);

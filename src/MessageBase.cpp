@@ -33,40 +33,15 @@ MessageBase::~MessageBase() {
 
 }
 
-TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
+bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uint8_t *buffer) {
 
-    if (source->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
-
-        return CommTCP::getReadCB(source);
-    }
-
-    return UnixSocket::getReadCB(source);
-}
-
-TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
-
-    if (target->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
-
-        return CommTCP::getWriteCB(target);
-    }
-
-    return UnixSocket::getWriteCB(target);
-}
-
-bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uv_buf_t *buf) {
-
-    if (nRead == 0 || nRead == UV_EOF) {
-
-        return false;
-    }
-
-//    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
-//           nRead, Util::hex2str((uint8_t*)buf->base, nRead).c_str());
+    LOGS_E(getHost(), "%ld : Data received, count : %d, bufPtr : %s", iter++,
+           nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
 
-    auto *bufPtr = (uint8_t*)buf->base;
+    auto *bufPtr = buffer;
 
     do {
 
@@ -184,25 +159,32 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
 
     block.parseBuffer(buffer);
 
-    if (block.getSize() == 0 || block.getSign() != SIGNATURE) {
+    if (block.getSize() == 0 || block.getType() == MSGHEADER_MAX) {
 
-        LOGS_E(getHost(), "Block is invalid, type : %d, size : %d",
-               block.getType(), block.getSize());
+        LOGS_E(getHost(), "Block is invalid, type : %d, size : %d, data : %s",
+               block.getType(), block.getSize(), Util::hex2str(buffer, size).c_str());
+
+        assert(false);
+
+        return false;
 
     }
 
     if (block.getSign() != SIGNATURE) {
 
-        LOGS_E(getHost(), "Block Signature Mismatch, expected : 0x%X, read : 0x%X",
-               SIGNATURE, block.getSign());
+        LOGS_E(getHost(), "Block Signature Mismatch, expected : 0x%X, read : 0x%X, data : %s",
+               SIGNATURE, block.getSign(), Util::hex2str(buffer, size).c_str());
 
-    } else {
+        assert(false);
 
-        LOGS_T(getHost(), "Block is read successfully, Following block type : %d, size : %d",
-               block.getType(), block.getSize());
+        return false;
+
     }
 
-    return block.getSign() == SIGNATURE;
+    LOGS_T(getHost(), "Block is read successfully, Following block type : %d, size : %d",
+               block.getType(), block.getSize());
+
+    return true;
 }
 
 bool MessageBase::readHeader(const TypeComponentUnit& source, const uint8_t* buffer, size_t size) {
@@ -285,7 +267,7 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buf, s
     crc = CRC::Calculate(buf, size, Util::crcTable, crc);
 
     auto *writeReq = (uv_write_t*) malloc(sizeof(uv_write_t));
-    uv_write(writeReq, writeHandle, &bufPtr, 1, [](uv_write_t* req, int status) {
+    uv_write(writeReq, target->getHandle(), &bufPtr, 1, [](uv_write_t* req, int status) {
 
         if (status) {
             LOGP_E("Write request problem, error : %d!!!", status);

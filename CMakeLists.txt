@@ -123,9 +123,6 @@ set(TEST_FILES
         ${SOURCE_PATH}/Entry.cpp
         )
 
-add_definitions(-DDISABLE_LOGFILEINFO)
-add_definitions(-DMULTICAST_ENABLED)
-
 include_directories(${SOURCE_PATH} ${UI_PATH} ${EXTERNAL_PATH})
 include_directories(${EXTERNAL_PATH}/uv/include)
 
@@ -152,6 +149,7 @@ target_link_libraries(dicon-framework PRIVATE uv_a)
 add_executable(dicon-generator ${GENERATOR_FILES})
 
 ##################################################
+
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
 target_link_libraries(dicon-console dicon-framework miniz ${LIBRARIES})

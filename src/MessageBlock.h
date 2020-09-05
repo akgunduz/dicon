@@ -17,13 +17,13 @@ enum MSG_HEADER {
     MSGHEADER_STRING,
     MSGHEADER_BINARY,
     MSGHEADER_END,
-    MSGHEADER_MAX
+    MSGHEADER_MAX = 0xFF
 };
 
 class MessageBlock {
 
     uint16_t sign{SIGNATURE};
-    uint16_t type{MSGHEADER_HEADER};
+    uint16_t type{MSGHEADER_MAX};
     uint32_t size{};
 
 public:

@@ -163,7 +163,7 @@ bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
         return false;
     }
 
-    target->setSocket(clientSocket);
+ //   target->setSocket(clientSocket);
 
     msg->writeToStream(target);
 
@@ -176,22 +176,6 @@ bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 bool UnixSocket::runMulticastSender(const TypeComponentUnit& target, TypeMessage message) {
 
     return false;
-}
-
-TypeReadCB UnixSocket::getReadCB(const TypeComponentUnit& source) {
-
-    return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
-
-        return read(source->getSocket(), buf, size);
-    };
-}
-
-TypeWriteCB UnixSocket::getWriteCB(const TypeComponentUnit& source) {
-
-    return [] (const TypeComponentUnit& target, const uint8_t *buf, size_t size) -> size_t {
-
-        return write(target->getSocket(), buf, size);
-    };
 }
 
 UnixSocket::~UnixSocket() {

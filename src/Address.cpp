@@ -11,10 +11,10 @@ Address::Address(COMM_INTERFACE _interface) {
     flag = SET(flag, _interface, INTERFACE_POS, INTERFACE_MASK);
 }
 
-Address::Address(uint32_t _base, uint16_t _port, COMM_INTERFACE _interface)
+Address::Address(uint32_t _base, uint16_t _port, bool _multicast)
     : self(_base, _port) {
 
-    flag = SET(flag, _interface, INTERFACE_POS, INTERFACE_MASK);
+    flag = SET(flag, _multicast, MULTICAST_POS, MULTICAST_MASK);
 }
 
 Address::Address(BaseAddress _self)

@@ -41,7 +41,7 @@ public:
     static Address invalid;
 
     Address(COMM_INTERFACE = COMMINTERFACE_TCPIP);
-    Address(uint32_t, uint16_t, COMM_INTERFACE = COMMINTERFACE_TCPIP);
+    Address(uint32_t, uint16_t, bool = false);
     explicit Address(BaseAddress);
     Address(BaseAddress, BaseAddress);
 

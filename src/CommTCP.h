@@ -48,9 +48,6 @@ public :
 	bool isSupportMulticast() override;
 
     TypeAddressList getAddressList() override;
-
-    static TypeReadCB getReadCB(const TypeComponentUnit&);
-    static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };
 
 #endif //DICON_COMMTCP_H

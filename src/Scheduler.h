@@ -23,7 +23,7 @@ class Scheduler {
 
     std::thread thread;
 
-    uv_loop_t loop;
+    uv_loop_t sendLoop;
 
 	std::list<TypeSchedulerItem> items;
 

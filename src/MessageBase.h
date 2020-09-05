@@ -60,19 +60,12 @@ protected:
     std::deque<std::string> strings;
 
 public:
-    uv_stream_t* writeHandle;
+
     explicit MessageBase(const TypeHostUnit&);
     MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
     ~MessageBase();
 
-    bool onRead(const TypeComponentUnit&, ssize_t, const uv_buf_t *);
-
-    TypeReadCB getReadCB(const TypeComponentUnit& source);
-    TypeWriteCB getWriteCB(const TypeComponentUnit& source);
-
-    bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t);
-
-	bool readBlockDeprecated(const TypeComponentUnit&, uint8_t*, size_t);
+    bool onRead(const TypeComponentUnit&, ssize_t, const uint8_t*);
 
 	bool readBlock(const TypeComponentUnit&, const uint8_t*, size_t);
 	bool readHeader(const TypeComponentUnit&, const uint8_t*, size_t);
@@ -82,7 +75,6 @@ public:
     bool readEndStream(const TypeComponentUnit&, const uint8_t*, size_t);
 
     virtual bool build(const TypeComponentUnit&) = 0;
-
 
 	bool onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
 

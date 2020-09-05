@@ -30,7 +30,7 @@ bool CommTCP::initTCP() {
 
     Address address(getDevice()->getBase(), lastFreeTCPPort);
 
-    uv_tcp_init(&loop, &tcpServer);
+    uv_tcp_init(&receiveLoop, &tcpServer);
 
     tcpServer.data = this;
 
@@ -94,9 +94,9 @@ bool CommTCP::initMulticast() {
 
     int tryCount = 10;
 
-    Address address(MULTICAST_ADDRESS, lastFreeMulticastPort);
+    Address address(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
 
-    uv_udp_init(&loop, &multicastServer);
+    uv_udp_init(&receiveLoop, &multicastServer);
 
     multicastServer.data = this;
 
@@ -123,11 +123,10 @@ bool CommTCP::initMulticast() {
         return false;
     }
 
-    uv_udp_set_membership(&multicastServer, NetUtil::getIPString(address.get()).c_str(),
-                          NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
-
-    address.setMulticast(true);
     setMulticastAddress(address);
+
+    uv_udp_set_membership(&multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
+                          NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
     uv_udp_recv_start(&multicastServer,
 
@@ -151,47 +150,17 @@ bool CommTCP::initMulticast() {
 
                       });
 
-    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(address.get()).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(getMulticastAddress().get()).c_str());
 
     return true;
 }
 
-TypeReadCB CommTCP::getReadCB(const TypeComponentUnit &source) {
-
-    if (!source->getAddress().isMulticast()) {
-
-        return [](const TypeComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
-
-            return read(source->getSocket(), buf, size);
-        };
-    }
-
-    return [](const TypeComponentUnit &source, uint8_t *buf, size_t size) -> size_t {
-
-        return recvfrom(source->getSocket(), (char *) buf, size, 0, nullptr, nullptr);
-    };
-}
-
-TypeWriteCB CommTCP::getWriteCB(const TypeComponentUnit &target) {
-
-    if (!target->getAddress().isMulticast()) {
-
-        return [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
-
-            return write(target->getSocket(), buf, size);
-        };
-    }
-
-    return [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> size_t {
-
-        struct sockaddr_in datagramAddress = NetUtil::getInetAddressByAddress(target->getAddress());
-
-        return sendto(target->getSocket(), (const char *) buf, size, 0,
-                      (struct sockaddr *) &datagramAddress, sizeof(struct sockaddr));
-    };
-}
-
 bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *buf) {
+
+    if (nRead == 0 || nRead == UV_EOF) {
+
+        return false;
+    }
 
     if (receiveData.state == DATASTATE_INIT) {
 
@@ -202,7 +171,7 @@ bool CommTCP::onRead(ReceiveData &receiveData, ssize_t nRead, const uv_buf_t *bu
         receiveData.state = DATASTATE_PROCESS;
     }
 
-    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, buf);
+    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, (uint8_t*)buf->base);
 
     if (isDone) {
 
@@ -222,7 +191,7 @@ bool CommTCP::onConnection() {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
-    uv_tcp_init(&loop, client);
+    uv_tcp_init(&receiveLoop, client);
 
     client->data = this;
 
@@ -253,10 +222,12 @@ bool CommTCP::onConnection() {
 
                       if (done) {
 
-                          uv_close((uv_handle_t*)client, nullptr);
-                          free(client);
-                      }
+                          uv_close((uv_handle_t*)client, [](uv_handle_t* handle) {
 
+                              free(handle);
+
+                          });
+                      }
                   });
 
     return true;
@@ -281,7 +252,7 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
         auto commInterface = (CommTCP *) req->handle->data;
 
-        commInterface->sendData->msg->writeHandle = req->handle;
+        commInterface->sendData->unit->setHandle(req->handle);
         commInterface->sendData->msg->writeToStream(commInterface->sendData->unit);
 
     });
@@ -315,7 +286,7 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
     struct in_addr interface_addr = NetUtil::getInetAddressByAddress(getAddress()).sin_addr;
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, (const char *) &interface_addr, sizeof(interface_addr));
 
-    target->setSocket(clientSocket);
+   // target->setSocket(clientSocket);
 
     msg->writeToStream(target);
 

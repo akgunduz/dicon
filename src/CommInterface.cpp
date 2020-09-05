@@ -9,7 +9,7 @@ CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _devic
                              const InterfaceSchedulerCB *receiveCB)
         : host(_host), device(_device) {
 
-    uv_loop_init(&loop);
+    uv_loop_init(&receiveLoop);
 
     scheduler = new Scheduler();
 
@@ -57,7 +57,7 @@ void CommInterface::end() {
 
     threadRcv.join();
 
-    uv_loop_close(&loop);
+    uv_loop_close(&receiveLoop);
 
 }
 
@@ -72,7 +72,7 @@ bool CommInterface::initThread() {
 
     threadRcv = std::thread([](CommInterface *commInterface) {
 
-        return uv_run(&commInterface->loop, UV_RUN_DEFAULT);
+        return uv_run(&commInterface->receiveLoop, UV_RUN_DEFAULT);
 
     }, this);
 

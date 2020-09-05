@@ -51,9 +51,9 @@ class CommInterface {
 
 protected :
 
-    uv_loop_t loop{};
-    uv_loop_t clientLoop{};
-	Scheduler *scheduler;
+    uv_loop_t receiveLoop{};
+
+	Scheduler *scheduler{};
 	std::thread threadRcv;
 	int notifierPipe[2]{};
 

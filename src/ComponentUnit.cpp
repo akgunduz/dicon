@@ -16,24 +16,20 @@ ComponentUnit::ComponentUnit(COMPONENT _type)
         : CommUnit(_type) {
 }
 
-ComponentUnit::ComponentUnit(int _socket, int dump)
-    : socket(_socket) {
-}
-
 ComponentUnit::ComponentUnit(const ComponentUnit &copy) = default;
 
 ComponentUnit::ComponentUnit(const TypeCommUnit &copy)
     : CommUnit(*copy) {
 }
 
-int ComponentUnit::getSocket() const {
+uv_stream_t* ComponentUnit::getHandle() const {
 
-    return socket;
+    return handle;
 }
 
-void ComponentUnit::setSocket(int _socket) {
+void ComponentUnit::setHandle(uv_stream_t* _handle) {
 
-    socket = _socket;
+    handle = _handle;
 }
 
 long long ComponentUnit::getCheckTime() const {
