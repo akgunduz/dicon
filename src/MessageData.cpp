@@ -20,6 +20,16 @@ void MessageData::setStreamType(int _streamFlag) {
     streamType = _streamFlag;
 }
 
+TypeID& MessageData::getID() {
+
+    return id;
+}
+
+void MessageData::setID(TypeID& _id) {
+
+    id = _id;
+}
+
 const TypeProcessItem& MessageData::getProcess() {
 
     return process;

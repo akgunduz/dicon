@@ -7,7 +7,7 @@
 
 void sendComponentList(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS);
 
     TypeComponentUnitList nodes;
     Address address({999, 1}, {1999, 2});
@@ -35,9 +35,9 @@ bool processComponentListMsg(const TypeComponent& component, const TypeComponent
 
 void TestApp::testComponentList(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_COMPLIST, "TEST_COMPLIST");
+    MessageType::addMsg(MSG_TYPE_TEST_COMPONENTS, "TEST_COMPLIST");
 
-    collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPLIST, processComponentListMsg);
+    collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS, processComponentListMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
                          collector->getHost()->getAddress(COMP_DISTRIBUTOR));

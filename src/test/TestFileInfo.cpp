@@ -6,13 +6,13 @@
 
 void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILE_INFO);
 
     auto *job = new JobItem(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     auto list = job->getProcess(0)->getFileList();
 
-    msg->getData().setStreamType(STREAM_FILEINFO);
+    msg->getData().setStreamType(STREAM_FILE_INFO);
     msg->getData().setProcess(job->getProcess(0)->getID(), list);
 
     owner->send(target, std::move(msg));
@@ -35,9 +35,9 @@ bool processFileInfoMsg(const TypeComponent& component, const TypeComponentUnit&
 
 void TestApp::testFileInfo(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_FILEINFO, "TEST_FILEINFO");
+    MessageType::addMsg(MSG_TYPE_TEST_FILE_INFO, "TEST_FILEINFO");
 
-    collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILEINFO, processFileInfoMsg);
+    collector->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_FILE_INFO, processFileInfoMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
                          collector->getHost()->getAddress(COMP_NODE));
