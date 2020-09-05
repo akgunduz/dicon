@@ -26,7 +26,6 @@ MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& targ
     header.setType(msgType);
     header.setStream(streamType);
     header.setOwner(host->getUnit(target->getType()));
-
 }
 
 MessageBase::~MessageBase() {
