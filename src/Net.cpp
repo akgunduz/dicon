@@ -211,6 +211,8 @@ bool Net::runReceiver() {
 
                 if (msg->readData(source)) {
 
+                    msg->build(source);
+
                     auto owner = msg->getHeader().getOwner();
 
                     commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
