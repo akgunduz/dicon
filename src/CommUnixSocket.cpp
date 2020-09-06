@@ -3,10 +3,10 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "UnixSocket.h"
+#include "CommUnixSocket.h"
 #include "NetUtil.h"
 
-UnixSocket::UnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
+CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
 
     if (!initUnixSocket()) {
@@ -20,7 +20,7 @@ UnixSocket::UnixSocket(const TypeHostUnit& host, const TypeDevice& device, const
     }
 }
 
-bool UnixSocket::initUnixSocket() {
+bool CommUnixSocket::initUnixSocket() {
 
     unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (unixSocket < 0) {
@@ -76,7 +76,31 @@ bool UnixSocket::initUnixSocket() {
     return false;
 }
 
-bool UnixSocket::runReceiver() {
+bool CommUnixSocket::onRead(int socket, bool isMulticast) {
+
+    auto source = std::make_shared<ComponentUnit>();
+    source->setSocket(socket);
+    source->getAddress().setMulticast(isMulticast);
+
+    auto msg = std::make_unique<Message>(getHost());
+
+    auto buffer = new uint8_t[65536];
+    size_t size = sizeof(buffer);
+
+    while(!msg->readData(source, buffer, size));
+
+    msg->build(source);
+
+    auto owner = msg->getHeader().getOwner();
+
+    push(MSGDIR_RECEIVE, owner, std::move(msg));
+
+    delete[] buffer;
+
+    return true;
+}
+
+bool CommUnixSocket::runReceiver() {
 
     bool thread_started = true;
     std::thread threadAccept;
@@ -109,17 +133,10 @@ bool UnixSocket::runReceiver() {
 
             threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
-                auto source = std::make_shared<ComponentUnit>();
-                source->setSocket(acceptSocket);
+                commInterface->onRead(acceptSocket, false);
 
-                auto msg = std::make_unique<Message>(commInterface->getHost());
+                close(acceptSocket);
 
-                if (msg->readData(source)) {
-
-                    auto owner = msg->getHeader().getOwner();
-
-                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-                }
             }, this, acceptSocket);
 
             threadAccept.detach();
@@ -142,7 +159,7 @@ bool UnixSocket::runReceiver() {
     return true;
 }
 
-bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
+bool CommUnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (clientSocket < 0) {
@@ -170,12 +187,12 @@ bool UnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
     return true;
 }
 
-bool UnixSocket::runMulticastSender(const TypeComponentUnit& target, TypeMessage message) {
+bool CommUnixSocket::runMulticastSender(const TypeComponentUnit& target, TypeMessage message) {
 
     return false;
 }
 
-TypeReadCB UnixSocket::getReadCB(const TypeComponentUnit& source) {
+TypeReadCB CommUnixSocket::getReadCB(const TypeComponentUnit& source) {
 
     return [] (const TypeComponentUnit& source, uint8_t *buf, size_t size) -> size_t {
 
@@ -183,7 +200,7 @@ TypeReadCB UnixSocket::getReadCB(const TypeComponentUnit& source) {
     };
 }
 
-TypeWriteCB UnixSocket::getWriteCB(const TypeComponentUnit& source) {
+TypeWriteCB CommUnixSocket::getWriteCB(const TypeComponentUnit& source) {
 
     return [] (const TypeComponentUnit& target, const uint8_t *buf, size_t size) -> size_t {
 
@@ -191,7 +208,7 @@ TypeWriteCB UnixSocket::getWriteCB(const TypeComponentUnit& source) {
     };
 }
 
-UnixSocket::~UnixSocket() {
+CommUnixSocket::~CommUnixSocket() {
 
     LOGP_T("Deallocating UnixSocket");
 
@@ -200,18 +217,18 @@ UnixSocket::~UnixSocket() {
     close(unixSocket);
 }
 
-COMM_INTERFACE UnixSocket::getType() {
+COMM_INTERFACE CommUnixSocket::getType() {
 
     return COMMINTERFACE_UNIXSOCKET;
 
 }
 
-bool UnixSocket::isSupportMulticast() {
+bool CommUnixSocket::isSupportMulticast() {
 
     return false;
 }
 
-TypeAddressList UnixSocket::getAddressList() {
+TypeAddressList CommUnixSocket::getAddressList() {
 
     TypeAddressList list;
 

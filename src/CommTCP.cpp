@@ -208,6 +208,30 @@ TypeWriteCB CommTCP::getWriteCB(const TypeComponentUnit& target) {
     };
 }
 
+bool CommTCP::onRead(int socket, bool isMulticast) {
+
+    auto source = std::make_shared<ComponentUnit>();
+    source->setSocket(socket);
+    source->getAddress().setMulticast(isMulticast);
+
+    auto msg = std::make_unique<Message>(getHost());
+
+    auto buffer = new uint8_t[65536];
+    size_t size = 65536;
+
+    while(!msg->readData(source, buffer, size));
+
+    msg->build(source);
+
+    auto owner = msg->getHeader().getOwner();
+
+    push(MSGDIR_RECEIVE, owner, std::move(msg));
+
+    delete[] buffer;
+
+    return true;
+}
+
 bool CommTCP::runReceiver() {
 
     bool thread_started = true;
@@ -248,19 +272,7 @@ bool CommTCP::runReceiver() {
 
             threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
-                auto source = std::make_shared<ComponentUnit>();
-                source->setSocket(acceptSocket);
-
-                auto msg = std::make_unique<Message>(commInterface->getHost());
-
-                if (msg->readData(source)) {
-
-                    msg->build(source);
-
-                    auto owner = msg->getHeader().getOwner();
-
-                    commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
-                }
+                commInterface->onRead(acceptSocket, false);
 
                 close(acceptSocket);
 
@@ -271,18 +283,7 @@ bool CommTCP::runReceiver() {
 
         if (FD_ISSET(multicastSocket, &readFS)) {
 
-            auto source = std::make_shared<ComponentUnit>();
-            source->setSocket(multicastSocket);
-            source->getAddress().setMulticast(true);
-
-            auto msg = std::make_unique<Message>(getHost());
-
-            if (msg->readData(source)) {
-
-                auto owner = msg->getHeader().getOwner();
-
-                push(MSGDIR_RECEIVE, owner, std::move(msg));
-            }
+            onRead(multicastSocket, true);
         }
 
         if (FD_ISSET(notifierPipe[0], &readFS)) {
@@ -417,3 +418,5 @@ TypeAddressList CommTCP::getAddressList() {
 
     return list;
 }
+
+

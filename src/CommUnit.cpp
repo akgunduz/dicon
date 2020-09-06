@@ -56,9 +56,7 @@ Address& CommUnit::getAddress() {
 void CommUnit::setAddress(Address _address, bool isMulticast) {
 
     address = _address;
-    if (isMulticast) {
-        address.setMulticast(true);
-    }
+    address.setMulticast(isMulticast);
 }
 
 COMPONENT CommUnit::next(COMPONENT component) {
