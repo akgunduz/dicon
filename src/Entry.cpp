@@ -123,11 +123,11 @@ int main(int argc, char** argv) {
 
 #if defined(CONSOLE)
 
-    app = new ConsoleApp(interfaceID, logLevel, componentCount);
+    app = new ConsoleApp(interfaceID, logInfo, componentCount);
 
 #elif defined(WEB)
 
-    app = new WebApp(interfaceID, logLevel, componentCount);
+    app = new WebApp(interfaceID, logInfo, componentCount);
 
 #elif defined(TEST)
 

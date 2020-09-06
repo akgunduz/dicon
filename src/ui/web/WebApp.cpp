@@ -119,8 +119,8 @@ int WebApp::quitHandler(struct mg_connection *conn) {
     return true;
 }
 
-WebApp::WebApp(int *interfaceID, LOGLEVEL logLevel, std::vector<int>& componentCount)
-    : App(APPTYPE_WEB, interfaceID, logLevel, componentCount, true) {
+WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& componentCount)
+    : App(APPTYPE_WEB, interfaceID, _logInfo, componentCount, true) {
 
 
     if (!initialized) {
