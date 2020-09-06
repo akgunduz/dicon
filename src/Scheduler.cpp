@@ -93,7 +93,9 @@ void *Scheduler::run(void *arg) {
         }
 
         const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
+
         if (iCB != nullptr) {
+
             iCB->schedulerCB(iCB->arg, std::move(item));
         }
 	}

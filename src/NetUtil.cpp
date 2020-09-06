@@ -24,7 +24,9 @@ std::string NetUtil::getIPString(uint32_t address) {
 
     return std::string(cIP);
 }
+
 std::string NetUtil::getIPString(BaseAddress& address) {
+
     return getIPString(address.base);
 }
 

@@ -33,6 +33,7 @@ public:
 
     STREAM_TYPE getStream();
     void setStream(STREAM_TYPE stream);
+
     void setType(MSG_TYPE);
     MSG_TYPE getType();
 
@@ -50,7 +51,6 @@ public:
 
     bool deSerialize(const uint8_t*);
     void serialize(uint8_t*);
-
 };
 #pragma pack(pop)
 
