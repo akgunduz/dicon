@@ -4,24 +4,20 @@
 
 #include "TestApp.h"
 
-void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target) {
+void sendProcess(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, STREAM_FILE_BINARY);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, STREAM_PROCESS);
 
-    auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
+    auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_ZIP, JobItem::jobID++);
 
-    auto list = job->getProcess(0)->getFileList();
+    job->getProcess(0)->check();
 
-    for (const auto& processFile : list) {
-        processFile->get()->check();
-    }
-
-    msg->getData().setProcess(job->getProcess(0)->getID(), list);
+    msg->getData().setProcess(job->getProcess(0));
 
     owner->send(target, std::move(msg));
 }
 
-bool processFileBinaryMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
+bool processProcessMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto list = msg->getData().getProcess()->getFileList();
 
@@ -35,13 +31,15 @@ bool processFileBinaryMsg(const TypeComponent& component, const TypeComponentUni
     return true;
 }
 
-void TestApp::testFileBinary(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testSendProcess(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_FILE_BINARY, "TEST_FILEBINARY");
+    MessageType::addMsg(MSG_TYPE_TEST_PROCESS, "TEST_PROCESS");
 
-    node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, processFileBinaryMsg);
+    node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, processProcessMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
                          node->getHost()->getAddress(COMP_COLLECTOR));
-    sendFileBinary((TypeComponent&) collector, target);
+
+    for (int i = 0; i < 1000; i++)
+    sendProcess((TypeComponent&) collector, target);
 }

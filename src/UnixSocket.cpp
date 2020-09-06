@@ -109,7 +109,8 @@ bool UnixSocket::runReceiver() {
 
             threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
-                auto source = std::make_shared<ComponentUnit>(acceptSocket);
+                auto source = std::make_shared<ComponentUnit>();
+                source->setSocket(acceptSocket);
 
                 auto msg = std::make_unique<Message>(commInterface->getHost());
 
@@ -120,6 +121,7 @@ bool UnixSocket::runReceiver() {
                     commInterface->push(MSGDIR_RECEIVE, owner, std::move(msg));
                 }
             }, this, acceptSocket);
+
             threadAccept.detach();
         }
 

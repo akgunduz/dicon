@@ -24,7 +24,7 @@ class ContentItem : public SchedulerItem {
     long assignedJob{};
 
 public:
-    explicit ContentItem(const TypeHostUnit&, long = 0, long = 0);
+    explicit ContentItem(const TypeHostUnit&, TypeID = 0, long = 0);
     ContentItem(const ContentItem&);
 
     virtual CONTENT_TYPES getType() = 0;
@@ -33,9 +33,9 @@ public:
 
     const TypeHostUnit& getHost();
 
-    long getID();
+    TypeID getID();
 
-    virtual void setID(long);
+    virtual void setID(TypeID);
 
     long getAssignedJob();
     void setAssignedJob(long);

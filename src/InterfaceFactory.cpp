@@ -4,7 +4,7 @@
 //
 
 #include "InterfaceFactory.h"
-#include "Net.h"
+#include "CommTCP.h"
 #include "UnixSocket.h"
 
 TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
@@ -17,7 +17,7 @@ TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const 
         switch (device->getType()) {
 
             case COMMINTERFACE_TCPIP:
-                commInterface = std::make_shared<Net>(host, device, schedulerCB);
+                commInterface = std::make_shared<CommTCP>(host, device, schedulerCB);
                 break;
 
             case COMMINTERFACE_UNIXSOCKET:

@@ -6,7 +6,7 @@
 #include "MessageBase.h"
 #include "Log.h"
 #include "Util.h"
-#include "Net.h"
+#include "CommTCP.h"
 #include "UnixSocket.h"
 
 MessageBase::MessageBase(const TypeHostUnit& host)
@@ -35,7 +35,7 @@ TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
 
     if (source->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
-        return Net::getReadCB(source);
+        return CommTCP::getReadCB(source);
     }
 
     return UnixSocket::getReadCB(source);
@@ -45,46 +45,11 @@ TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
 
     if (target->getAddress().getInterface() == COMMINTERFACE_TCPIP) {
 
-        return Net::getWriteCB(target);
+        return CommTCP::getWriteCB(target);
     }
 
     return UnixSocket::getWriteCB(target);
 }
-
-//bool MessageBase::transferBinary(const TypeComponentUnit& source, const TypeComponentUnit& target, size_t size) {
-//
-//    uint8_t buf[BUFFER_SIZE] = {};
-//
-//    bool error = false;
-//    size_t readSize = 0;
-//
-//    do {
-//
-//        if (size > BUFFER_SIZE) {
-//            readSize = BUFFER_SIZE;
-//            size -= readSize;
-//        } else {
-//            readSize = size;
-//            size = 0;
-//        }
-//
-//        if (!readData(source, buf, readSize)) {
-//			LOGS_E(getHost(), "Can not read data in transferBinary");
-//            error = true;
-//            break;
-//        }
-//
-//        if (!writeData(target, buf, readSize)) {
-//			LOGS_E(getHost(), "Can not write data in transferBinary");
-//            error = true;
-//            break;
-//        }
-//
-//    } while(size > 0);
-//
-//    return !error;
-//
-//}
 
 bool MessageBase::readData(const TypeComponentUnit& source) {
 
@@ -117,11 +82,9 @@ bool MessageBase::readData(const TypeComponentUnit& source) {
 		}
 
 		if (count == 0) {
-			//LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Empty read operation");
+
 			return true;
 		}
-
-   //     crc = CRC::Calculate(buf + offset, count, Util::crcTable, crc);
 
 		onRead(source, buf + offset, count);
 
@@ -174,7 +137,7 @@ bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf,
         }
 
         if (count == 0) {
-         //   LOGC_E(getHost(), target, MSGDIR_SEND, "Empty write operation");
+
             return false;
         }
 
@@ -307,6 +270,10 @@ bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer,
                 bufPtr += readSize;
 
                 strings.pop_back();
+
+            } else {
+
+                break;
             }
 
         }

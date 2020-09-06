@@ -9,8 +9,14 @@
 #include <Log.h>
 #include <Util.h>
 #include <ComponentFactory.h>
+#include "Application.h"
+
+#define TEST_JOB_ZIP "../sample/Job1_x86_linux.zip"
+#define TEST_JOB_PATH "../scratch/Job1_x86_linux"
+#define TEST_JOB_FILE "matrop-multiply"
 
 enum MSG_TYPE_TEST {
+
     MSG_TYPE_TEST_JOBNAME = 100,
     MSG_TYPE_TEST_COMPONENT,
     MSG_TYPE_TEST_COMPONENTS,
@@ -31,27 +37,57 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING,
 };
 
-#include "Application.h"
+class TestApp;
+
+typedef void (TestApp::*TypeTestRoutine)(TypeDistributor&, TypeCollector&, TypeNode&);
+typedef std::pair<std::string, TypeTestRoutine> TypeTest;
+typedef std::map<char, TypeTest> TypeTestList;
 
 class TestApp : public App {
 
     int overrideCount[COMP_MAX] {1, 1, 1};
+    TypeTestList list;
+
+    inline void addRoutine(char id, const std::string& name, TypeTestRoutine routine) {
+
+        list[id] = std::make_pair(name, routine);
+    }
+
+    inline bool callRoutine(char id, TypeDistributor& d, TypeCollector& c, TypeNode& n) {
+
+        auto test = list.find(id);
+        if (test == list.end()) {
+
+            return false;
+        }
+
+        (this->*test->second.second)(d, c, n);
+
+        return true;
+    }
 
 public:
     TestApp(int *, const LogInfo&, std::vector<int>&);
 
-    void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testProcess(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testJobName(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
-    void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
-
+    void testSendJobName(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendFileInfo(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcessID(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcessInfo(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcessFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcessFilesBinary(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendProcess(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendComponentList(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testSendWakeUp(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendID(TypeDistributor&, TypeCollector&, TypeNode&);
 
+    void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
+
+
+    void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testCRC(TypeDistributor&, TypeCollector&, TypeNode&);
+
+    void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
 
     int run() override;
 

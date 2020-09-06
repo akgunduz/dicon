@@ -151,7 +151,7 @@ bool Component::notifyUI(NOTIFYTYPE state) {
     return false;
 }
 
-bool Component::setID(long id) {
+bool Component::setID(TypeID& id) {
 
     if (id == 0) {
         LOGS_E(getHost(), "Can not assign ID with 0!!!");

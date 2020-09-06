@@ -16,8 +16,15 @@ set(GENERATED_PATH "${SOURCE_PATH}/gen")
 
 set(TEST_PATH "${SOURCE_PATH}/test")
 
+set(CIVETWEB_FILES
+        ${EXTERNAL_PATH}/civetweb/civetweb.c
+        )
+
+set(MINIZ_FILES
+        ${EXTERNAL_PATH}/miniz/miniz.c
+        )
+
 set(FRAMEWORK_FILES
-        ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/Address.cpp
         ${SOURCE_PATH}/Application.cpp
         ${SOURCE_PATH}/Collector.cpp
@@ -26,6 +33,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/CollectorUnit.cpp
         ${SOURCE_PATH}/CommInterface.cpp
+        ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/ComponentFactory.cpp
@@ -47,13 +55,11 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
         ${SOURCE_PATH}/MessageBlock.cpp
-        ${SOURCE_PATH}/MessageBlockHeader.cpp
         ${SOURCE_PATH}/MessageData.cpp
         ${SOURCE_PATH}/MessageHeader.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageType.cpp
-        ${SOURCE_PATH}/Net.cpp
         ${SOURCE_PATH}/NetUtil.cpp
         ${SOURCE_PATH}/Node.cpp
         ${SOURCE_PATH}/NodeHost.cpp
@@ -81,7 +87,6 @@ set(CONSOLE_FILES
         )
 
 set(WEB_FILES
-        ${EXTERNAL_PATH}/civetweb/civetweb.c
         ${UI_PATH}/web/WebApp.cpp
         ${UI_PATH}/web/WebOption.cpp
         ${UI_PATH}/web/WebDistributor.cpp
@@ -92,51 +97,63 @@ set(WEB_FILES
         )
 
 set(GENERATOR_FILES
-        ${EXTERNAL_PATH}/miniz/miniz.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/Generator.cpp
         )
 
 set(TEST_FILES
         ${TEST_PATH}/TestApp.cpp
+        ${TEST_PATH}/TestSendJobName.cpp
+        ${TEST_PATH}/TestSendFileBinary.cpp
+        ${TEST_PATH}/TestSendFileInfo.cpp
+        ${TEST_PATH}/TestSendProcessID.cpp
+        ${TEST_PATH}/TestSendProcessInfo.cpp
+        ${TEST_PATH}/TestSendProcessFileBinary.cpp
+        ${TEST_PATH}/TestSendProcessFilesBinary.cpp
+        ${TEST_PATH}/TestSendProcess.cpp
+        ${TEST_PATH}/TestSendComponentList.cpp
+        ${TEST_PATH}/TestSendWakeUp.cpp
+        ${TEST_PATH}/TestSendID.cpp
+
         ${TEST_PATH}/TestPing.cpp
-        ${TEST_PATH}/TestComponentList.cpp
-        ${TEST_PATH}/TestProcess.cpp
-        ${TEST_PATH}/TestFileInfo.cpp
-        ${TEST_PATH}/TestFileBinary.cpp
-        ${TEST_PATH}/TestJobName.cpp
         ${TEST_PATH}/TestLoadJob.cpp
-        ${TEST_PATH}/TestWakeUp.cpp
+        ${TEST_PATH}/TestCRC.cpp
+
         ${TEST_PATH}/TestPipeControl.cpp
         ${SOURCE_PATH}/Entry.cpp
-        src/test/TestSendID.cpp)
-
-add_definitions(-DDISABLE_LOGFILEINFO)
-add_definitions(-DMULTICAST_ENABLED)
+        )
 
 include_directories(${SOURCE_PATH} ${UI_PATH} ${EXTERNAL_PATH})
+include_directories(${EXTERNAL_PATH}/uv/include)
+
+set(LIBRARIES miniz)
 
 if(WIN32)
-    set(LIBRARIES ws2_32 Iphlpapi)
+    list(APPEND LIBRARIES ws2_32 Iphlpapi)
 else()
-    set(LIBRARIES pthread)
+    list(APPEND LIBRARIES pthread)
 endif()
 
+##################################################
+add_library(civetweb STATIC ${CIVETWEB_FILES})
+target_link_libraries(civetweb dl)
+##################################################
+add_library(miniz STATIC ${MINIZ_FILES})
+##################################################
+
 add_library(dicon-framework ${FRAMEWORK_FILES})
+target_link_libraries(dicon-framework PRIVATE)
+##################################################
 
 add_executable(dicon-generator ${GENERATOR_FILES})
+
+##################################################
 
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
 target_link_libraries(dicon-console dicon-framework ${LIBRARIES})
 
-add_executable(dicon-web ${WEB_FILES})
-target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework ${LIBRARIES})
-
-add_executable(dicon-test ${TEST_FILES})
-target_compile_definitions(dicon-test PUBLIC -DTEST)
-target_link_libraries(dicon-test dicon-framework ${LIBRARIES})
+##################################################
 
 add_custom_command(
         OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
@@ -144,11 +161,14 @@ add_custom_command(
         DEPENDS dicon-generator
 )
 
-message(STATUS "summary of build options:
-    Install prefix:  ${CMAKE_INSTALL_PREFIX}
-    Target system:   ${CMAKE_SYSTEM_NAME}
-    Compiler:
-      C compiler:    ${CMAKE_C_COMPILER}
-      CFLAGS:        ${CMAKE_C_FLAGS_${_build_type}} ${CMAKE_C_FLAGS}
-      LDFLAGS:       ${CMAKE_EXE_LINKER_FLAGS}
-")
+add_executable(dicon-web ${WEB_FILES})
+target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
+target_link_libraries(dicon-web dicon-framework civetweb ${LIBRARIES})
+
+##################################################
+
+add_executable(dicon-test ${TEST_FILES})
+target_compile_definitions(dicon-test PUBLIC -DTEST)
+target_link_libraries(dicon-test dicon-framework ${LIBRARIES})
+
+##################################################

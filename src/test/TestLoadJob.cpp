@@ -6,7 +6,8 @@
 
 void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    auto job = collector->loadJob("../sample/Job1_x86_linux");
+    auto job = std::make_shared<JobItem>(collector->getHost(), TEST_JOB_PATH, JobItem::jobID++);
+
     if (!job) {
         LOGP_E("Job could not initialized");
         return;

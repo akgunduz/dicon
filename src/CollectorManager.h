@@ -16,7 +16,7 @@ typedef struct CollectorRequest {
 
     size_t reqCount;
 
-    CollectorRequest(TypeID _collID, size_t _reqCount)
+    CollectorRequest(TypeID _collID, uint32_t _reqCount)
         : collID(_collID), reqCount(_reqCount){
 
     };
@@ -42,9 +42,9 @@ public:
     COLLSTATES getState(TypeID);
     void setState(TypeID, COLLSTATES);
 
-    bool addRequest(TypeID, size_t);
+    bool addRequest(TypeID, uint32_t);
     CollectorRequest* getRequest();
-    void updateRequest(size_t);
+    void updateRequest(uint32_t);
     void removeRequest();
 };
 

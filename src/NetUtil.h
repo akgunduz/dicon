@@ -14,12 +14,13 @@ class NetUtil {
 
 public:
 
+    static std::string getIPString(uint32_t);
     static std::string getIPString(BaseAddress&);
     static std::string getIPString(const sockaddr_in *);
     static long parseIPAddress(const std::string&);
     static sockaddr_in getInetAddressByAddress(Address&);
     static sockaddr_in getInetAddressByPort(int);
-    static ip_mreq getInetMulticastAddress(Address&, uint32_t);
+    static ip_mreq getInetMulticastAddress(Address&, Address&);
     static BaseAddress parseIPPortString(std::string);
     static std::string getIPPortString(BaseAddress&);
 
