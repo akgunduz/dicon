@@ -32,7 +32,7 @@ class Node : public Component {
     bool send2DistributorReadyMsg(const TypeComponentUnit&);
     bool send2DistributorAliveMsg(const TypeComponentUnit&);
     bool send2DistributorIDMsg(const TypeComponentUnit&);
-    bool send2DistributorBusyMsg(const TypeComponentUnit&, long);
+    bool send2DistributorBusyMsg(const TypeComponentUnit&, TypeID);
 
     bool send2CollectorInfoMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);

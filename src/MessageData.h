@@ -10,13 +10,17 @@
 
 class MessageData {
 
-    int streamType{STREAM_NONE};
-
     std::string jobName;
+
+    uint32_t processCount;
 
     TypeID id;
 
     TypeProcessItem process;
+
+    TypeFileItem file;
+
+    TypeProcessFile processFile;
 
     TypeComponentUnitList componentList;
 
@@ -28,18 +32,25 @@ public:
     TypeID& getID();
     void setID(TypeID&);
 
-    int getStreamType();
-    void setStreamType(int);
-
     const TypeProcessItem& getProcess();
     void setProcess(const TypeProcessItem&);
-    void setProcess(long, const TypeProcessFileList&);
+    void setProcess(TypeID, const TypeProcessFileList&);
+    void setProcess(TypeID, const TypeProcessFile&);
+
+    const TypeFileItem& getFile();
+    void setFile(const TypeFileItem&);
+
+    const TypeProcessFile& getProcessFile();
+    void setProcessFile(const TypeProcessFile&);
 
     std::string& getJobName();
     void setJobName(const std::string&);
 
     TypeComponentUnitList& getComponentList();
     void setComponentList(TypeComponentUnitList&);
+
+    uint32_t& getProcessCount();
+    void setProcessCount(uint32_t&);
 };
 
 #endif //DICON_MESSAGEDATA_H

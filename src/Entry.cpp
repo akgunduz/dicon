@@ -30,7 +30,7 @@ void listDevices() {
 }
 
 APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
-                     LOGLEVEL& logLevel, std::vector<int>& componentCount) {
+                         LogInfo& logInfo, std::vector<int>& componentCount) {
 
     for (int i = 1; i < argc; i++) {
 
@@ -88,7 +88,7 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
             if (argc > i + 1) {
 
                 if (isdigit(argv[++i][0])) {
-                    logLevel = (LOGLEVEL)atoi(argv[i]);
+                    logInfo.level = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
                     return APPPARAM_ERROR;
@@ -104,11 +104,11 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LOGLEVEL logLevel = LEVEL_INFO;
+    LogInfo logInfo{LEVEL_INFO, LOG_ALL};
 
     std::vector<int> componentCount = {0, 0, 0};
 
-    APPPARAM res = parseParameters(argc, argv, interfaceID, logLevel, componentCount);
+    APPPARAM res = parseParameters(argc, argv, interfaceID, logInfo, componentCount);
 
     if (res != APPPARAM_OK) {
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 
 #elif defined(TEST)
 
-    app = new TestApp(interfaceID, logLevel, componentCount);
+    app = new TestApp(interfaceID, logInfo, componentCount);
 
 #else
 

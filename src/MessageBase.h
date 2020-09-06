@@ -8,76 +8,99 @@
 #define DICON_MESSAGEBASE_H
 
 #include "crc/CRC.h"
-#include "MessageBlockHeader.h"
+#include "MessageBlock.h"
 #include "MessageType.h"
 #include "HostUnit.h"
 #include "Address.h"
+#include "MessageHeader.h"
+#include "FileItem.h"
 
-#define SIGNATURE 0x55AA
-#define SIGNATURE_SIZE 2
 
 #define TMP_BUFFER_SIZE 1000
 
 #define BUSY_SLEEP_TIME 200
 
+class MessageBase;
 typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);
 typedef size_t (*TypeWriteCB) (const TypeComponentUnit&, const uint8_t*, size_t);
+typedef bool (MessageBase::*TypeMsgReadParser)(const TypeComponentUnit&, const uint8_t*, size_t);
+
+enum MSG_STATE {
+
+    MSGSTATE_INIT,
+    MSGSTATE_DATA,
+    MSGSTATE_BINARY,
+    MSGSTATE_MAX
+};
 
 class MessageBase {
+    uint64_t iter = 1;
+
+    MSG_STATE state{MSGSTATE_INIT};
 
 	uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
+    size_t tmpBufPos = 0;
+    size_t binBufPos = 0;
+
+    uint32_t crc{};
+
+    MessageBlock block{MSGHEADER_MAX, 0};
+
+    MessageHeader header;
+
     const TypeHostUnit host;
 
-    static CRC::Table<std::uint32_t, 32> crcTable;
+    std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 
+protected:
+    std::deque<uint64_t> numbers;
+    std::deque<std::string> strings;
 public:
 
     explicit MessageBase(const TypeHostUnit&);
 
+    MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
+    ~MessageBase();
+
     TypeReadCB getReadCB(const TypeComponentUnit& source);
     TypeWriteCB getWriteCB(const TypeComponentUnit& source);
 
-    bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t, uint32_t&);
+    bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t);
 
-	bool readData(const TypeComponentUnit &source, uint8_t *buf, size_t size, uint32_t &crc);
+	bool readData(const TypeComponentUnit&);
+    bool onRead(const TypeComponentUnit&, const uint8_t*, size_t);
 
-	bool readSignature(const TypeComponentUnit&, uint32_t&);
-	bool readHeader(const TypeComponentUnit&, uint32_t&);
-	bool readBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool readString(const TypeComponentUnit&, std::string&, size_t, uint32_t&);
-	bool readNumber(const TypeComponentUnit&, uint64_t&, uint32_t&);
-    bool readNumberList(const TypeComponentUnit&, std::vector<uint64_t> &, size_t, uint32_t&);
-    bool readBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
-    bool readCRC(const TypeComponentUnit&, uint32_t&);
-	bool readFromStream(const TypeComponentUnit&);
+	bool readBlock(const TypeComponentUnit&, const uint8_t*, size_t);
+	bool readHeader(const TypeComponentUnit&, const uint8_t*, size_t);
+	bool readString(const TypeComponentUnit&, const uint8_t*, size_t);
+	bool readNumber(const TypeComponentUnit&, const uint8_t*, size_t);
+    bool readBinary(const TypeComponentUnit&, const uint8_t*, size_t);
+    bool readEndStream(const TypeComponentUnit&, const uint8_t*, size_t);
 
-    virtual bool readMessageBlock(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&) = 0;
+    virtual bool build(const TypeComponentUnit&) = 0;
 
+	bool writeData(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
+	bool onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
 
-	bool writeData(const TypeComponentUnit &target, const uint8_t *buf, size_t size, uint32_t &crc);
+	bool writeHeader(const TypeComponentUnit&);
+	bool writeBlock(const TypeComponentUnit &target, const MessageBlock &baseHeader);
+	bool writeString(const TypeComponentUnit&, const std::string&);
+	bool writeNumber(const TypeComponentUnit&, uint64_t);
+	bool writeBinary(const TypeComponentUnit&, const TypeFileItem&);
 
-	bool writeSignature(const TypeComponentUnit&, uint32_t&);
-	bool writeHeader(const TypeComponentUnit&, uint32_t&);
-	bool writeBlockHeader(const TypeComponentUnit&, MessageBlockHeader&, uint32_t&);
-	bool writeString(const TypeComponentUnit&, const std::string&, uint32_t&);
-	bool writeNumber(const TypeComponentUnit&, uint64_t, uint32_t&);
-    bool writeNumberList(const TypeComponentUnit&, std::vector<uint64_t>&, uint32_t&);
-	bool writeBinary(const TypeComponentUnit&, const std::filesystem::path&, size_t, uint32_t&);
-    bool writeCRC(const TypeComponentUnit&, uint32_t&);
+    bool writeEndStream(const TypeComponentUnit&);
 
 	bool writeToStream(const TypeComponentUnit&);
 
-    bool writeEndStream(const TypeComponentUnit&, uint32_t&);
+    virtual bool writeMessageStream(const TypeComponentUnit&) = 0;
 
-    virtual bool writeMessageStream(const TypeComponentUnit&, uint32_t&) = 0;
-
-    virtual void deSerializeHeader(const uint8_t*) = 0;
-    virtual void serializeHeader(uint8_t *) = 0;
-    virtual void grabOwner(const TypeCommUnit&) = 0;
-    virtual long getHeaderSize() = 0;
+    bool deSerializeHeader(const uint8_t*);
+    void serializeHeader(uint8_t *);
+    void grabOwner(const TypeCommUnit&);
 
     const TypeHostUnit& getHost();
+    MessageHeader& getHeader();
 };
 
 #endif //DICON_MESSAGEBASE_H

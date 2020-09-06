@@ -43,12 +43,12 @@ class Distributor : public Component {
     bool processNodeReadyMsg(const TypeComponentUnit&, TypeMessage);
 
 	bool send2CollectorWakeupMsg(const TypeComponentUnit&);
-	bool send2CollectorIDMsg(const TypeComponentUnit&, long);
+	bool send2CollectorIDMsg(const TypeComponentUnit&, TypeID);
 	bool send2CollectorNodeMsg(const TypeComponentUnit&, TypeComponentUnitList&);
 	bool send2CollectorReplaceMsg(const TypeComponentUnit&, TypeComponentUnitList&);
 
     bool send2NodeWakeupMsg(const TypeComponentUnit&);
-    bool send2NodeIDMsg(const TypeComponentUnit&, long);
+    bool send2NodeIDMsg(const TypeComponentUnit&, TypeID);
 	bool send2NodeProcessMsg(const TypeComponentUnit&);
 
 public:

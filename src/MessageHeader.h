@@ -15,20 +15,24 @@
 
 #define MESSAGE_DEFAULT_PRIORITY 3
 
+#pragma pack(push, 2)
 class MessageHeader {
 
     uint16_t type{};
     uint16_t priority{MESSAGE_DEFAULT_PRIORITY};
+    uint16_t stream{};
 
     CommUnit owner;
 
-    uint64_t variant[MAX_VARIANT]{};
+   // uint64_t variant[MAX_VARIANT]{};
 
 public:
     MessageHeader() = default;
 
     long getSize();
 
+    STREAM_TYPE getStream();
+    void setStream(STREAM_TYPE stream);
     void setType(MSG_TYPE);
     MSG_TYPE getType();
 
@@ -36,17 +40,18 @@ public:
     void setOwner(const TypeCommUnit&);
     void grabOwner(const TypeCommUnit&);
 
-    uint64_t getVariant(int id);
-    void setVariant(int id, uint64_t _variant);
+//    uint64_t getVariant(int id);
+//    void setVariant(int id, uint64_t _variant);
 
     int getPriority();
     void setPriority(int);
     void normalizePriority();
     int iteratePriority();
 
-    void deSerialize(const uint8_t*);
+    bool deSerialize(const uint8_t*);
     void serialize(uint8_t*);
 
 };
+#pragma pack(pop)
 
 #endif //DICON_MESSAGEHEADER_H

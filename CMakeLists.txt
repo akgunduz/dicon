@@ -46,6 +46,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
+        ${SOURCE_PATH}/MessageBlock.cpp
         ${SOURCE_PATH}/MessageBlockHeader.cpp
         ${SOURCE_PATH}/MessageData.cpp
         ${SOURCE_PATH}/MessageHeader.cpp

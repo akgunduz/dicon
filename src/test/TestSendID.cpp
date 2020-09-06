@@ -13,9 +13,8 @@ bool send2DistributorIDMsg(const TypeComponent& owner, const TypeComponentUnit& 
 
 bool sendIDMsg(const TypeComponent& owner, const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID, STREAM_ID);
 
-    msg->getData().setStreamType(STREAM_ID);
     msg->getData().setID(id);
 
     return owner->send(target, std::move(msg));
@@ -63,8 +62,10 @@ void TestApp::testSendID(TypeDistributor& distributor, TypeCollector& collector,
                                                       node->getHost()->getID(),
                                                       node->getHost()->getAddress(COMP_DISTRIBUTOR));
 
-    for (int i = 1; i < 300; i++) {
-        sendIDMsg((TypeComponent &) distributor, collTarget, i);
-        sendIDMsg((TypeComponent &) distributor, nodeTarget, i);
-    }
+//    for (int i = 1; i < 1000; i++) {
+//        sendIDMsg((TypeComponent &) distributor, collTarget, i);
+//        sendIDMsg((TypeComponent &) distributor, nodeTarget, i);
+//    }
+
+    sendIDMsg((TypeComponent &) distributor, collTarget, 1);
 }

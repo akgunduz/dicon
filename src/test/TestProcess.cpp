@@ -6,13 +6,12 @@
 
 void sendProcess(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS, STREAM_PROCESS);
 
     auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
     job->getProcess(0)->check();
 
-    msg->getData().setStreamType(STREAM_PROCESS);
     msg->getData().setProcess(job->getProcess(0));
 
     owner->send(target, std::move(msg));
