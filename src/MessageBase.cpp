@@ -7,7 +7,7 @@
 #include "Log.h"
 #include "Util.h"
 #include "CommTCP.h"
-#include "UnixSocket.h"
+#include "CommUnixSocket.h"
 
 MessageBase::MessageBase(const TypeHostUnit& host)
 		: host(host) {
@@ -32,7 +32,7 @@ MessageBase::~MessageBase() {
 
 }
 
-bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const uint8_t *buffer) {
+bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
     LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
            nRead, Util::hex2str(buffer, nRead).c_str());
@@ -139,6 +139,10 @@ bool MessageBase::onRead(const TypeComponentUnit& source, ssize_t nRead, const u
                 bufPtr += readSize;
 
                 strings.pop_back();
+
+            } else {
+
+                break;
             }
 
         }

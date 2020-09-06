@@ -171,7 +171,7 @@ public:
         }
 
         char logout[PATH_MAX];
-        std::sprintf(logout, "%s", format);
+        std::snprintf(logout, PATH_MAX - 1, "%s", format);
 
         _logS(level, host, logout);
     }
@@ -184,7 +184,7 @@ public:
         }
 
         char logout[PATH_MAX];
-        std::sprintf(logout, format, args...);
+        std::snprintf(logout, PATH_MAX - 1, format, args...);
 
         _logS(level, host, logout);
     }

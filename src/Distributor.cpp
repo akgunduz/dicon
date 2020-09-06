@@ -363,11 +363,8 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
     if (isSupportMulticast(targetType)) {
 
         auto target = std::make_shared<ComponentUnit>(targetType, getInterfaceMulticastAddress(targetType));
-        target->getAddress().setMulticast(true);
 
         auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
-
-        target->setAddress(getInterfaceMulticastAddress(targetType), true);
 
         send(target, std::move(msg));
 

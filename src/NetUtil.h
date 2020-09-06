@@ -20,7 +20,7 @@ public:
     static long parseIPAddress(const std::string&);
     static sockaddr_in getInetAddressByAddress(Address&);
     static sockaddr_in getInetAddressByPort(int);
-    static ip_mreq getInetMulticastAddress(Address&, uint32_t);
+    static ip_mreq getInetMulticastAddress(Address&, Address&);
     static BaseAddress parseIPPortString(std::string);
     static std::string getIPPortString(BaseAddress&);
 

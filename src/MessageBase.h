@@ -67,7 +67,7 @@ public:
     MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
     ~MessageBase();
 
-    bool onRead(const TypeComponentUnit&, ssize_t, const uint8_t*);
+    bool onRead(const TypeComponentUnit&, const uint8_t*, size_t);
 
 	bool readBlock(const TypeComponentUnit&, const uint8_t*, size_t);
 	bool readHeader(const TypeComponentUnit&, const uint8_t*, size_t);

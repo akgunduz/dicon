@@ -89,12 +89,12 @@ sockaddr_in NetUtil::getInetAddressByPort(int port) {
     return inet_addr;
 }
 
-ip_mreq NetUtil::getInetMulticastAddress(Address& address, uint32_t multicastAddress) {
+ip_mreq NetUtil::getInetMulticastAddress(Address& address, Address& multicastAddress) {
 
     ip_mreq imreq;
     memset((char *) &imreq, 0, sizeof(imreq));
 
-    imreq.imr_multiaddr.s_addr = htonl(multicastAddress);
+    imreq.imr_multiaddr.s_addr = htonl(multicastAddress.get().base);
     imreq.imr_interface.s_addr = htonl(address.get().base);
     return imreq;
 }

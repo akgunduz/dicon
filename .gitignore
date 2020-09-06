@@ -42,6 +42,7 @@ thumbs.db
 .depend
 
 /.idea/
+/.vscode/
 *build*/
 *scratch*/
 *gen*/

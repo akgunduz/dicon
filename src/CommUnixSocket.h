@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DICON_UNIXSOCKET_H
-#define DICON_UNIXSOCKET_H
+#ifndef DICON_COMMUNIXSOCKET_H
+#define DICON_COMMUNIXSOCKET_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -13,7 +13,7 @@
 
 #define UNIXSOCKETADDRESS_MASK 0xFFFFFFFFFFFFFF
 
-class UnixSocket : public CommInterface {
+class CommUnixSocket : public CommInterface {
 
 	int unixSocket{};
 
@@ -25,12 +25,12 @@ class UnixSocket : public CommInterface {
 
 public :
 
-	UnixSocket(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
-	~UnixSocket() override;
+	CommUnixSocket(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
+	~CommUnixSocket() override;
 
     COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
 };
 
-#endif //DICON_UNIXSOCKET_H
+#endif //DICON_COMMUNIXSOCKET_H

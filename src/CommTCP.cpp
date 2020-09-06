@@ -24,10 +24,6 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
 
 bool CommTCP::initTCP() {
 
-    int tryCount = 10;
-
-    Address address(getDevice()->getBase(), lastFreeTCPPort);
-
     int result = uv_tcp_init(&receiveLoop, &tcpServer);
 
     if (result != 0) {
@@ -38,6 +34,10 @@ bool CommTCP::initTCP() {
     }
 
     tcpServer.data = this;
+	
+    int tryCount = TRY_COUNT;
+
+    Address address(getDevice()->getBase(), lastFreeTCPPort);
 
     while (tryCount--) {
 

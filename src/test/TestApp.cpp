@@ -7,23 +7,34 @@
 TestApp::TestApp(int *_interfaces, const LogInfo& _logInfo, std::vector<int>& _componentCount)
         : App(APPTYPE_TEST, _interfaces, _logInfo, {1, 1, 1}, false) {
 
+    addRoutine('1', "SendWakeUp", &TestApp::testSendWakeUp);
+    addRoutine('2', "SendID", &TestApp::testSendID);
+    addRoutine('3', "SendJobName", &TestApp::testSendJobName);
+    addRoutine('4', "SendFileBinary", &TestApp::testSendFileBinary);
+    addRoutine('5', "SendProcessID", &TestApp::testSendProcessID);
+    addRoutine('6', "SendProcessInfo", &TestApp::testSendProcessInfo);
+    addRoutine('7', "SendProcessFileBinary", &TestApp::testSendProcessFileBinary);
+    addRoutine('8', "SendProcessFilesBinary", &TestApp::testSendProcessFilesBinary);
+    addRoutine('9', "SendProcess", &TestApp::testSendProcess);
+    addRoutine('a', "SendComponentList", &TestApp::testSendComponentList);
+    addRoutine('b', "CRC", &TestApp::testCRC);
+    addRoutine('c', "Ping", &TestApp::testPing);
+    addRoutine('d', "LoadJob", &TestApp::testLoadJob);
+    addRoutine('e', "PipeControl", &TestApp::testPipeControl);
+
     help();
 }
 
 void TestApp::help() {
 
     LOGP_I("Commands : ");
-    LOGP_I("\tTest Ping           : 'p'");
-    LOGP_I("\tTest Component List : 'c'");
-    LOGP_I("\tTest Process        : 's'");
-    LOGP_I("\tTest File Info      : 'i'");
-    LOGP_I("\tTest File Binary    : 'b'");
-    LOGP_I("\tTest Job Name       : 'j'");
-    LOGP_I("\tTest Load Job       : 'l'");
-    LOGP_I("\tTest WakeUp         : 'w'");
-    LOGP_I("\tTest Pipe           : 'e'");
-    LOGP_I("\tHelp                : 'h'");
-    LOGP_I("\tQuit                : 'q'");
+    for (const auto& test : list) {
+
+        LOGP_I("\tTest %25s: '%c'", test.second.first.c_str(), test.first);
+    }
+
+    LOGP_I("\tHelp                          : 'h'");
+    LOGP_I("\tQuit                          : 'q'");
 }
 
 int TestApp::run() {
@@ -37,58 +48,13 @@ int TestApp::run() {
 
         in = getchar();
         switch(in) {
-
-            case '1':
-                testSendJobName(d, c, n);
-                break;
-            case '2':
-                testSendFileBinary(d, c, n);
-                break;
-            case '3':
-                testSendProcessID(d, c, n);
-                break;
-            case '4':
-                testSendProcessInfo(d, c, n);
-                break;
-            case '5':
-                testSendProcessFileBinary(d, c, n);
-                break;
-            case '6':
-                testSendProcessFilesBinary(d, c, n);
-                break;
-            case '7':
-                testSendProcess(d, c, n);
-                break;
-            case '8':
-                testSendComponentList(d, c, n);
-                break;
-            case '9':
-                testSendWakeUp(d, c, n);
-                break;
-            case 'a':
-                testSendID(d, c, n);
-                break;
-            case 'b':
-                testCRC(d, c, n);
-                break;
-
-
-            case 'p':
-                testPing(d, c, n);
-                break;
-            case 'l':
-                testLoadJob(d, c, n);
-                break;
-
-            case 'e':
-                testPipeControl(d, c, n);
-                break;
             case 'h':
                 help();
                 break;
             case 'q':
                 return 0;
             default:
+                callRoutine((char)in, d, c, n);
                 break;
         }
 

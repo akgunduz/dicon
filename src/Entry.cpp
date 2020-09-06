@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 
     int interfaceID[2] = {0, 0};
 
-    LogInfo logInfo{LEVEL_INFO, LOG_DIST};
+    LogInfo logInfo{LEVEL_INFO, LOG_ALL};
 
     std::vector<int> componentCount = {0, 0, 0};
 
@@ -123,11 +123,11 @@ int main(int argc, char** argv) {
 
 #if defined(CONSOLE)
 
-    app = new ConsoleApp(interfaceID, logLevel, componentCount);
+    app = new ConsoleApp(interfaceID, logInfo, componentCount);
 
 #elif defined(WEB)
 
-    app = new WebApp(interfaceID, logLevel, componentCount);
+    app = new WebApp(interfaceID, logInfo, componentCount);
 
 #elif defined(TEST)
 

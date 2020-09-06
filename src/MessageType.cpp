@@ -5,8 +5,6 @@
 
 #include "MessageType.h"
 
-#include <utility>
-
 std::map<int, std::string> msgNameList = {
         {MSGTYPE_NODE, "NODE"},
         {MSGTYPE_JOB, "JOB"},
@@ -46,17 +44,6 @@ std::map<int, std::string> streamNameList = {
         {STREAM_NONE, "STREAM_NONE"},
 };
 
-std::map<int, std::string> blockNameList = {
-        {BLOCK_JOB, "BLOCK_JOB"},
-        {BLOCK_COMPONENT, "BLOCK_COMPONENT"},
-        {BLOCK_FILEINFO, "BLOCK_FILEINFO"},
-        {BLOCK_FILEBINARY, "BLOCK_FILEBINARY"},
-        {BLOCK_PROCESSINFO, "BLOCK_PROCESSINFO"},
-        {BLOCK_PROCESS, "BLOCK_PROCESS"},
-        {BLOCK_END_STREAM, "BLOCK_END_STREAM"},
-        {BLOCK_NONE, "BLOCK_NONE"},
-};
-
 const char* MessageType::getMsgName(int type) {
 
     return msgNameList[type].c_str();
@@ -80,14 +67,4 @@ const char* MessageType::getStreamName(int type) {
 void MessageType::addStream(int type, std::string str) {
 
     streamNameList[type] = std::move(str);
-}
-
-const char* MessageType::getBlockName(int type) {
-
-    return blockNameList[type].c_str();
-}
-
-void MessageType::addBlock(int type, std::string str) {
-
-    blockNameList[type] = std::move(str);
 }

@@ -37,9 +37,34 @@ enum MSG_TYPE_TEST {
     MSG_TYPE_TEST_PING,
 };
 
+class TestApp;
+
+typedef void (TestApp::*TypeTestRoutine)(TypeDistributor&, TypeCollector&, TypeNode&);
+typedef std::pair<std::string, TypeTestRoutine> TypeTest;
+typedef std::map<char, TypeTest> TypeTestList;
+
 class TestApp : public App {
 
     int overrideCount[COMP_MAX] {1, 1, 1};
+    TypeTestList list;
+
+    inline void addRoutine(char id, const std::string& name, TypeTestRoutine routine) {
+
+        list[id] = std::make_pair(name, routine);
+    }
+
+    inline bool callRoutine(char id, TypeDistributor& d, TypeCollector& c, TypeNode& n) {
+
+        auto test = list.find(id);
+        if (test == list.end()) {
+
+            return false;
+        }
+
+        (this->*test->second.second)(d, c, n);
+
+        return true;
+    }
 
 public:
     TestApp(int *, const LogInfo&, std::vector<int>&);

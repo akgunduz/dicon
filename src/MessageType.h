@@ -29,20 +29,6 @@ enum STREAM_TYPE {
     STREAM_NONE = 0xFFFF
 };
 
-enum BLOCK_TYPE {
-
-    BLOCK_JOB,
-    BLOCK_COMPONENT,
-    BLOCK_FILEINFO,
-    BLOCK_FILEBINARY,
-    BLOCK_PROCESSINFO,
-    BLOCK_PROCESSID,
-    BLOCK_PROCESS,
-    BLOCK_END_STREAM,
-
-    BLOCK_NONE = 0xFFFF
-};
-
 enum MSG_TYPE {
     MSGTYPE_NODE,
     MSGTYPE_JOB,
@@ -73,8 +59,6 @@ public:
     static void addMsg(int, std::string);
     static const char* getStreamName(int);
     static void addStream(int, std::string);
-    static const char* getBlockName(int);
-    static void addBlock(int, std::string);
 };
 
 #endif //DICON_MESSAGETYPE_H

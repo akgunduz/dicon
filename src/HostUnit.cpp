@@ -29,13 +29,13 @@ void HostUnit::setID(TypeID& _id) {
 
     id = _id;
 //TODO
-//    rootPath = basePath / std::to_string(_id);
+    rootPath = basePath / std::to_string(_id);
 //
-//    if (std::filesystem::exists(rootPath)) {
-//        std::filesystem::remove_all(rootPath);
-//    }
+    if (std::filesystem::exists(rootPath)) {
+        std::filesystem::remove_all(rootPath);
+    }
 //
-//    std::filesystem::create_directories(rootPath);
+    std::filesystem::create_directories(rootPath);
 }
 
 ARCH HostUnit::getArch() {

@@ -1,5 +1,5 @@
 //
-// Created by Haluk AKGUNDUZ on 23.07.2020.
+// Created by akgun on 5.09.2020.
 //
 
 #include "TestApp.h"
@@ -62,8 +62,6 @@ void TestApp::testSendID(TypeDistributor& distributor, TypeCollector& collector,
                                                       node->getHost()->getID(),
                                                       node->getHost()->getAddress(COMP_DISTRIBUTOR));
 
-    for (int i = 1; i < 10000; i++) {
-        sendIDMsg((TypeComponent &) distributor, collTarget, i);
-        sendIDMsg((TypeComponent &) distributor, nodeTarget, i);
-    }
+    sendIDMsg((TypeComponent &) distributor, collTarget, 61);
+    sendIDMsg((TypeComponent &) distributor, nodeTarget, 79);
 }

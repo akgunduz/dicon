@@ -126,10 +126,12 @@ set(TEST_FILES
 include_directories(${SOURCE_PATH} ${UI_PATH} ${EXTERNAL_PATH})
 include_directories(${EXTERNAL_PATH}/uv/include)
 
+set(LIBRARIES miniz uv_a)
+
 if(WIN32)
-    set(LIBRARIES ws2_32 Iphlpapi)
+    list(APPEND LIBRARIES ws2_32 Iphlpapi)
 else()
-    set(LIBRARIES pthread)
+    list(APPEND LIBRARIES pthread)
 endif()
 
 ##################################################
@@ -143,7 +145,7 @@ set (LIBUV_BUILD_BENCH OFF)
 add_subdirectory(${EXTERNAL_PATH}/uv EXCLUDE_FROM_ALL)
 ##################################################
 add_library(dicon-framework ${FRAMEWORK_FILES})
-target_link_libraries(dicon-framework PRIVATE uv_a)
+target_link_libraries(dicon-framework PRIVATE)
 ##################################################
 
 add_executable(dicon-generator ${GENERATOR_FILES})
@@ -152,7 +154,7 @@ add_executable(dicon-generator ${GENERATOR_FILES})
 
 add_executable(dicon-console ${CONSOLE_FILES})
 target_compile_definitions(dicon-console PUBLIC -DCONSOLE)
-target_link_libraries(dicon-console dicon-framework miniz ${LIBRARIES})
+target_link_libraries(dicon-console dicon-framework ${LIBRARIES})
 
 ##################################################
 
@@ -164,12 +166,12 @@ add_custom_command(
 
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
-target_link_libraries(dicon-web dicon-framework civetweb miniz ${LIBRARIES})
+target_link_libraries(dicon-web dicon-framework civetweb ${LIBRARIES})
 
 ##################################################
 
 add_executable(dicon-test ${TEST_FILES})
 target_compile_definitions(dicon-test PUBLIC -DTEST)
-target_link_libraries(dicon-test dicon-framework miniz ${LIBRARIES})
+target_link_libraries(dicon-test dicon-framework ${LIBRARIES})
 
 ##################################################
