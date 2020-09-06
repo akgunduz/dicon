@@ -366,8 +366,6 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
         auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
 
- //       target->setAddress(getInterfaceMulticastAddress(targetType), true);
-
         send(target, std::move(msg));
 
     } else {
