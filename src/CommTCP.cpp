@@ -195,7 +195,7 @@ bool CommTCP::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead)
         receiveData.state = DATASTATE_PROCESS;
     }
 
-    bool isDone = receiveData.msg->onRead(receiveData.unit, nRead, buf);
+    bool isDone = receiveData.msg->onRead(receiveData.unit, buf, nRead);
 
     if (isDone) {
 
