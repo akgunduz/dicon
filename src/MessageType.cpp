@@ -44,18 +44,6 @@ std::map<int, std::string> streamNameList = {
         {STREAM_NONE, "STREAM_NONE"},
 };
 
-std::map<int, std::string> blockNameList = {
-        {BLOCK_ID, "BLOCK_ID"},
-        {BLOCK_JOB, "BLOCK_JOB"},
-        {BLOCK_COMPONENT, "BLOCK_COMPONENT"},
-        {BLOCK_FILEINFO, "BLOCK_FILEINFO"},
-        {BLOCK_FILEBINARY, "BLOCK_FILEBINARY"},
-        {BLOCK_PROCESSINFO, "BLOCK_PROCESSINFO"},
-        {BLOCK_PROCESS, "BLOCK_PROCESS"},
-        {BLOCK_END_STREAM, "BLOCK_END_STREAM"},
-        {BLOCK_NONE, "BLOCK_NONE"},
-};
-
 const char* MessageType::getMsgName(int type) {
 
     return msgNameList[type].c_str();
@@ -68,7 +56,7 @@ const char* MessageType::getMsgDirName(int type) {
 
 void MessageType::addMsg(int type, std::string str) {
 
-    msgNameList[type] = str;
+    msgNameList[type] = std::move(str);
 }
 
 const char* MessageType::getStreamName(int type) {
@@ -78,15 +66,5 @@ const char* MessageType::getStreamName(int type) {
 
 void MessageType::addStream(int type, std::string str) {
 
-    streamNameList[type] = str;
-}
-
-const char* MessageType::getBlockName(int type) {
-
-    return blockNameList[type].c_str();
-}
-
-void MessageType::addBlock(int type, std::string str) {
-
-    blockNameList[type] = str;
+    streamNameList[type] = std::move(str);
 }

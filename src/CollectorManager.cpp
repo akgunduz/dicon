@@ -43,7 +43,7 @@ TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, Address& ad
     return std::make_shared<CollectorUnit>(arch, id, address);
 }
 
-bool CollectorManager::addRequest(TypeID id, size_t reqNodeCount) {
+bool CollectorManager::addRequest(TypeID id, uint32_t reqNodeCount) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 
@@ -73,7 +73,7 @@ CollectorRequest* CollectorManager::getRequest() {
     return request;
 }
 
-void CollectorManager::updateRequest(size_t reqCount) {
+void CollectorManager::updateRequest(uint32_t reqCount) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 

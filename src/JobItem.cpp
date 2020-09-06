@@ -28,6 +28,7 @@ JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath,
     } else {
         char absPath[PATH_MAX];
         sprintf(absPath, "%s/%ld", getHost()->getRootPath().string().c_str(), _jobID);
+        std::filesystem::create_directories(absPath);
         std::filesystem::copy(jobPath, absPath,
                 std::filesystem::copy_options::recursive |
                 std::filesystem::copy_options::update_existing);
@@ -548,7 +549,7 @@ bool JobItem::extract(const std::string& zipFile, long& _jobID) {
         std::filesystem::remove_all(path);
     }
 
-    std::filesystem::create_directory(path);
+    std::filesystem::create_directories(path);
 
     for (int i = 0; i < fileCount; i++) {
 

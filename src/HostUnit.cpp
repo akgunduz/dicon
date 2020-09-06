@@ -25,7 +25,7 @@ TypeID HostUnit::getID() {
     return id;
 }
 
-void HostUnit::setID(TypeID _id) {
+void HostUnit::setID(TypeID& _id) {
 
     id = _id;
 

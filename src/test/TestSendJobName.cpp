@@ -8,7 +8,7 @@ void sendJobName(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, STREAM_JOBNAME);
 
-    auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
+    auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
     msg->getData().setJobName(job->getJobName());
 
@@ -25,7 +25,7 @@ bool processJobNameMsg(const TypeComponent& component, const TypeComponentUnit& 
     return true;
 }
 
-void TestApp::testJobName(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testSendJobName(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     MessageType::addMsg(MSG_TYPE_TEST_JOBNAME, "TEST_JOBNAME");
 

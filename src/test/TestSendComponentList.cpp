@@ -32,9 +32,9 @@ bool processComponentListMsg(const TypeComponent& component, const TypeComponent
     return true;
 }
 
-void TestApp::testComponentList(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testSendComponentList(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_COMPONENTS, "TEST_COMPLIST");
+    MessageType::addMsg(MSG_TYPE_TEST_COMPONENTS, "TEST_COMPONENTS");
 
     collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS, processComponentListMsg);
 

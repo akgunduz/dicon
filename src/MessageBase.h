@@ -66,8 +66,6 @@ public:
     TypeReadCB getReadCB(const TypeComponentUnit& source);
     TypeWriteCB getWriteCB(const TypeComponentUnit& source);
 
-    bool transferBinary(const TypeComponentUnit&, const TypeComponentUnit&, size_t);
-
 	bool readData(const TypeComponentUnit&);
     bool onRead(const TypeComponentUnit&, const uint8_t*, size_t);
 

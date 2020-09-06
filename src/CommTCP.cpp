@@ -3,10 +3,10 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "Net.h"
+#include "CommTCP.h"
 #include "NetUtil.h"
 
-Net::Net(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
+CommTCP::CommTCP(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
 
     if (!initTCP()) {
@@ -22,7 +22,7 @@ Net::Net(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSche
     }
 }
 
-bool Net::initTCP() {
+bool CommTCP::initTCP() {
 
     netSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (netSocket < 0) {
@@ -37,100 +37,143 @@ bool Net::initTCP() {
         return false;
     }
 
-    int tryCount = 10;
-    int lastFreePort = DEFAULT_PORT;
+    int tryCount = TRY_COUNT;
 
-    for (int j = tryCount; j > 0; j--) {
+    Address address(getDevice()->getBase(), lastFreeTCPPort);
 
-        Address new_address(getDevice()->getBase(), lastFreePort);
+    while (tryCount--) {
 
-        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(new_address);
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(address);
 
         if (bind(netSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
-            lastFreePort++;
+            address.setPort(++lastFreeTCPPort);
+
             continue;
         }
 
-        if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
-            LOGS_E(getHost(), "Socket listen with err : %d!!!", errno);
-            close(netSocket);
-            return false;
-        }
+        break;
+    }
+
+    lastFreeTCPPort++;
+
+    if (!tryCount) {
+
+        LOGS_E(getHost(), "Could not bind to socket!!!");
+
+        close(netSocket);
+
+        return false;
+    }
+
+    if (listen(netSocket, MAX_SIMUL_CLIENTS) < 0) {
+
+        LOGS_E(getHost(), "Socket listen with err : %d!!!", errno);
+
+        close(netSocket);
+
+        return false;
+    }
 
 #ifndef WIN32
-        if (fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
+    if (fcntl(netSocket, F_SETFD, O_NONBLOCK) < 0) {
 #else
-        u_long nonblocking_enabled = true;
-        if (ioctlsocket( netSocket, FIONBIO, &nonblocking_enabled ) != 0) {
+    u_long nonblocking_enabled = true;
+    if (ioctlsocket( netSocket, FIONBIO, &nonblocking_enabled ) != 0) {
 #endif
-            LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
-            close(netSocket);
-            return false;
-        }
+        LOGS_E(getHost(), "Could not set socket Non-Blocking!!!");
 
-        setAddress(new_address);
+        close(netSocket);
 
-        LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(new_address.get()).c_str());
-
-        return true;
-    }
-
-
-    LOGS_E(getHost(), "Could not set create tcp net socket!!!");
-
-    close(netSocket);
-
-    return false;
-}
-
-bool Net::initMulticast() {
-
-    Address multicastAddress(MULTICAST_ADDRESS, DEFAULT_MULTICAST_PORT);
-
-    multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (multicastSocket < 0) {
-        LOGS_E(getHost(), "Socket receiver open with err : %d!!!", errno);
         return false;
     }
 
-    int on = 1;
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
+    setAddress(address);
 
-    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char *) &on, sizeof(int)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
-
-    struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(DEFAULT_MULTICAST_PORT);
-    if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
-        LOGS_E(getHost(), "Socket bind with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
-
-    ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), MULTICAST_ADDRESS);
-
-    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *) &imreq, sizeof(ip_mreq)) < 0) {
-        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
-        close(multicastSocket);
-        return false;
-    }
-
-    multicastAddress.setMulticast(true);
-    setMulticastAddress(multicastAddress);
-
-    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress.get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address.get()).c_str());
 
     return true;
 }
 
-TypeReadCB Net::getReadCB(const TypeComponentUnit& source) {
+bool CommTCP::initMulticast() {
+
+    multicastSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+    if (multicastSocket < 0) {
+
+        LOGS_E(getHost(), "Socket receiver open with err : %d!!!", errno);
+
+        return false;
+    }
+
+    int on = 1;
+
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(int)) < 0) {
+
+        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
+
+        close(multicastSocket);
+
+        return false;
+    }
+
+    if (setsockopt(multicastSocket, SOL_SOCKET, SO_REUSEPORT, (char *) &on, sizeof(int)) < 0) {
+
+        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
+
+        close(multicastSocket);
+
+        return false;
+    }
+
+    int tryCount = TRY_COUNT;
+
+    Address address(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
+
+    while (tryCount--) {
+
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
+
+        if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
+
+            address.setPort(++lastFreeMulticastPort);
+
+            continue;
+        }
+
+        break;
+    }
+
+    lastFreeTCPPort++;
+
+    if (!tryCount) {
+
+        LOGS_E(getHost(), "Could not bind to socket!!!, err : %d", errno);
+
+        close(multicastSocket);
+
+        return false;
+    }
+
+    setMulticastAddress(address);
+
+    ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), getMulticastAddress());
+
+    if (setsockopt(multicastSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *) &imreq, sizeof(ip_mreq)) < 0) {
+
+        LOGS_E(getHost(), "Socket option with err : %d!!!", errno);
+
+        close(multicastSocket);
+
+        return false;
+    }
+
+    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(getMulticastAddress().get()).c_str());
+
+    return true;
+}
+
+TypeReadCB CommTCP::getReadCB(const TypeComponentUnit& source) {
 
     if (!source->getAddress().isMulticast()) {
 
@@ -146,7 +189,7 @@ TypeReadCB Net::getReadCB(const TypeComponentUnit& source) {
     };
 }
 
-TypeWriteCB Net::getWriteCB(const TypeComponentUnit& target) {
+TypeWriteCB CommTCP::getWriteCB(const TypeComponentUnit& target) {
 
     if (!target->getAddress().isMulticast()) {
 
@@ -165,7 +208,7 @@ TypeWriteCB Net::getWriteCB(const TypeComponentUnit& target) {
     };
 }
 
-bool Net::runReceiver() {
+bool CommTCP::runReceiver() {
 
     bool thread_started = true;
     std::thread threadAccept;
@@ -205,7 +248,8 @@ bool Net::runReceiver() {
 
             threadAccept = std::thread([](CommInterface *commInterface, int acceptSocket) {
 
-                auto source = std::make_shared<ComponentUnit>(acceptSocket);
+                auto source = std::make_shared<ComponentUnit>();
+                source->setSocket(acceptSocket);
 
                 auto msg = std::make_unique<Message>(commInterface->getHost());
 
@@ -227,7 +271,8 @@ bool Net::runReceiver() {
 
         if (FD_ISSET(multicastSocket, &readFS)) {
 
-            auto source = std::make_shared<ComponentUnit>(multicastSocket);
+            auto source = std::make_shared<ComponentUnit>();
+            source->setSocket(multicastSocket);
             source->getAddress().setMulticast(true);
 
             auto msg = std::make_unique<Message>(getHost());
@@ -257,7 +302,7 @@ bool Net::runReceiver() {
     return true;
 }
 
-bool Net::runSender(const TypeComponentUnit& target, TypeMessage msg) {
+bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     int clientSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (clientSocket < 0) {
@@ -284,7 +329,7 @@ bool Net::runSender(const TypeComponentUnit& target, TypeMessage msg) {
     return true;
 }
 
-bool Net::runMulticastSender(const TypeComponentUnit& target, TypeMessage msg) {
+bool CommTCP::runMulticastSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     int clientSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket < 0) {
@@ -306,7 +351,7 @@ bool Net::runMulticastSender(const TypeComponentUnit& target, TypeMessage msg) {
     return true;
 }
 
-Net::~Net() {
+CommTCP::~CommTCP() {
 
     LOGP_T("Deallocating Net");
 
@@ -317,17 +362,17 @@ Net::~Net() {
     close(netSocket);
 }
 
-COMM_INTERFACE Net::getType() {
+COMM_INTERFACE CommTCP::getType() {
 
     return COMMINTERFACE_TCPIP;
 }
 
-bool Net::isSupportMulticast() {
+bool CommTCP::isSupportMulticast() {
 
     return true;
 }
 
-TypeAddressList Net::getAddressList() {
+TypeAddressList CommTCP::getAddressList() {
 
     TypeAddressList list;
 
@@ -347,9 +392,9 @@ TypeAddressList Net::getAddressList() {
 
     } else {
 
-        uint32_t range = (1 << (32 - getDevice()->getMask())) - 2;
+        uint32_t range = (1u << (32u - getDevice()->getMask())) - 2u;
 
-        uint32_t mask = ((int) 0x80000000) >> (getDevice()->getMask() - 1);
+        uint32_t mask = 0x80000000 >> (getDevice()->getMask() - 1u);
 
         uint32_t net = mask & getDevice()->getBase();
 

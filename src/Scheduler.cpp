@@ -26,12 +26,20 @@ bool Scheduler::push(TypeSchedulerItem item) {
 
     std::unique_lock<std::mutex> lock(mutex);
 
-    if (endFlag || items.size() >= capacity) {
+    if (endFlag) {
+
+        return false;
+    }
+
+    if (items.size() >= capacity) {
+
+        LOGP_E("Scheduler at full capacity");
 
         return false;
     }
 
     if (item->type == END_ITEM) {
+
         endFlag = true;
     }
 

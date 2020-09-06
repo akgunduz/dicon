@@ -27,11 +27,11 @@ class CommInterface {
     Address address{};
     Address multicastAddress{};
 
-    const InterfaceSchedulerCB *schedulerCB{};
+    const InterfaceSchedulerCB *senderCB{};
 
 protected :
 
-	Scheduler *scheduler;
+	Scheduler *scheduler{};
 	std::thread threadRcv;
 	int notifierPipe[2]{};
 

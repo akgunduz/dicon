@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DICON_NET_H
-#define DICON_NET_H
+#ifndef DICON_COMMTCP_H
+#define DICON_COMMTCP_H
 
 #include "Common.h"
 #include "Scheduler.h"
@@ -17,8 +17,12 @@
 #define MULTICAST_ADDRESS 0xE9010101
 #define DEFAULT_PORT 61001
 #define DEFAULT_MULTICAST_PORT 62001
+#define TRY_COUNT 10
 
-class Net : public CommInterface {
+class CommTCP : public CommInterface {
+
+    static inline int lastFreeTCPPort = DEFAULT_PORT;
+    static inline int lastFreeMulticastPort = DEFAULT_MULTICAST_PORT;
 
 	int netSocket{};
 	int multicastSocket{};
@@ -31,9 +35,9 @@ class Net : public CommInterface {
 
 public :
 
-	Net(const TypeHostUnit&, const TypeDevice&,
-        const InterfaceSchedulerCB *);
-	~Net() override;
+	CommTCP(const TypeHostUnit&, const TypeDevice&,
+            const InterfaceSchedulerCB *);
+	~CommTCP() override;
 
     COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
@@ -44,4 +48,4 @@ public :
     static TypeWriteCB getWriteCB(const TypeComponentUnit&);
 };
 
-#endif //DICON_NET_H
+#endif //DICON_COMMTCP_H
