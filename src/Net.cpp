@@ -209,7 +209,7 @@ bool Net::runReceiver() {
 
                 auto msg = std::make_unique<Message>(commInterface->getHost());
 
-                if (msg->readFromStream(source)) {
+                if (msg->readData(source)) {
 
                     auto owner = msg->getHeader().getOwner();
 
@@ -230,7 +230,7 @@ bool Net::runReceiver() {
 
             auto msg = std::make_unique<Message>(getHost());
 
-            if (msg->readFromStream(source)) {
+            if (msg->readData(source)) {
 
                 auto owner = msg->getHeader().getOwner();
 

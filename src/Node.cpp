@@ -13,7 +13,7 @@ Node::Node(int _commInterface) {
 
     host = std::make_shared<NodeHost>();
 
-    LOGS_T(getHost(), "Node[%d] is initializing", host->getID());
+    LOGS_T(getHost(), "Node is initializing");
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Node::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Node::processDistributorIDMsg));
@@ -52,7 +52,7 @@ bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessa
 
 bool Node::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    if (!setID(msg->getHeader().getVariant(0))) {
+    if (!setID(msg->getData().getID())) {
 
         LOGC_E(getHost(), owner, MSGDIR_RECEIVE, "New ID : 0 is tried to assigned, it should not!!!");
 
@@ -212,20 +212,19 @@ bool Node::send2DistributorIDMsg(const TypeComponentUnit& target) {
     return send(target, std::move(msg));
 }
 
-bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, long collID) {
+bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, TypeID collID) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BUSY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BUSY, STREAM_ID);
 
-    msg->getHeader().setVariant(0, collID);
+    msg->getData().setID(collID);
 
     return send(target, std::move(msg));
 }
 
 bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO);
+	auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_INFO, STREAM_PROCESS_FILES_INFO);
 
-    msg->getData().setStreamType(STREAM_FILE_INFO);
     msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d]'s missing files are requested, total %d files",
@@ -238,9 +237,8 @@ bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID
 
 bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
 
-    msg->getData().setStreamType(STREAM_FILE_BINARY);
     msg->getData().setProcess(processID, fileList);
 
     LOGC_I(getHost(), target, MSGDIR_SEND, "Collector[%d]:Process[%d] is successfully executed, sending back output data",

@@ -6,6 +6,7 @@
 #ifndef DICON_UTIL_H
 #define DICON_UTIL_H
 
+#include <external/crc/CRC.h>
 #include "Common.h"
 
 #define BUFFER_SIZE 512
@@ -48,6 +49,8 @@ public:
         }
         return stm.str();
     }
+
+    static inline CRC::Table<std::uint32_t, 32> crcTable{CRC::CRC_32()};
 };
 
 #endif //DICON_UTIL_H

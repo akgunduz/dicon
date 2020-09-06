@@ -10,35 +10,208 @@ Message::Message(const TypeHostUnit& host)
 		: MessageBase(host), data(host) {
 }
 
-Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE type)
-		: MessageBase(host), data(host) {
+Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE msgType, STREAM_TYPE streamType)
+		: MessageBase(host, target, msgType, streamType), data(host) {
 
-    header.setType(type);
-    header.setOwner(host->getUnit(target->getType()));
 }
 
-bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUnitList &componentList,
-                                MessageBlockHeader& block, uint32_t& crc) {
+bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName) {
 
-    if (block.getType() != BLOCK_COMPONENT) {
-        LOGS_E(getHost(), "readComponentList can not read other blocks");
-        return false;
+    jobName = strings.front();
+    strings.pop_front();
+
+    LOGS_D(getHost(), "Job Name is read successfully => Name : %s", jobName.c_str());
+
+    return true;
+}
+
+bool Message::readID(const TypeComponentUnit& source, TypeID& id) {
+
+    id = (TypeID)numbers.front();
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "ID[%ld] is read successfully", id);
+
+    return true;
+}
+
+bool Message::readFileBinary(const TypeComponentUnit& source, const TypeFileItem& fileItem) {
+
+    fileItem->setName(strings.front());
+    strings.pop_front();
+
+    bool status = fileItem->check();
+
+    LOGS_D(getHost(), "File is read successfully => Name : %s, Size : %ld, Health : %s",
+           fileItem->getName().c_str(), fileItem->getSize(), status ? "OK" : "NOK");
+
+    return true;
+}
+
+bool Message::readProcessID(const TypeComponentUnit& source, const TypeProcessItem& processItem) {
+
+    processItem->setID((TypeID)numbers.front());
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "Process[%ld] is read successfully", processItem->getID());
+
+    return true;
+}
+
+bool Message::readProcessCount(const TypeComponentUnit& source, uint32_t& processCount) {
+
+    processCount = (uint32_t)numbers.front();
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "Process Count is read successfully => %d", processCount);
+
+    return true;
+}
+
+bool Message::readProcessInfo(const TypeComponentUnit& source, const TypeProcessItem& processItem) {
+
+    processItem->setID((long)numbers.front());
+    numbers.pop_front();
+
+    processItem->setAssignedJob((long)numbers.front());
+    numbers.pop_front();
+
+    processItem->setParsedProcess(strings.front());
+    strings.pop_front();
+
+    LOGS_D(getHost(), "Process[%ld] is read successfully => jobID : %ld, Process : %s",
+           processItem->getID(), processItem->getAssignedJob(),
+           processItem->getParsedProcess().c_str());
+
+    return true;
+}
+
+bool Message::readProcessFileCount(const TypeComponentUnit& source, long& count) {
+
+    count = numbers.front();
+    numbers.pop_front();
+
+    LOGS_D(getHost(), "Process has %ld files", count);
+
+    return true;
+}
+
+bool Message::readProcessFile(const TypeComponentUnit& source, const TypeProcessFile& processFile) {
+
+    processFile->get()->setID((long)numbers.front());
+    numbers.pop_front();
+
+    processFile->setOutputState((bool)numbers.front());
+    numbers.pop_front();
+
+    processFile->get()->setAssignedJob((long)numbers.front());
+    numbers.pop_front();
+
+    processFile->setAssignedProcess((long)numbers.front());
+    numbers.pop_front();
+
+    processFile->get()->setName(strings.front());
+    strings.pop_front();
+
+    LOGS_D(getHost(), "Process[%d] File[%d] is read successfully => State : %s, Job : %d, Name : %s",
+           processFile->getAssignedProcess(), processFile->get()->getID(),
+           processFile->isOutput() ? "output" : "input", processFile->get()->getAssignedJob(),
+           processFile->get()->getName().c_str());
+
+    return true;
+}
+
+bool Message::readProcessFiles(const TypeComponentUnit& source, const TypeProcessItem& processItem) {
+
+    readProcessID(source, processItem);
+
+    long fileCount;
+    readProcessFileCount(source, fileCount);
+
+    for (long i = 0; i < fileCount; i++) {
+
+        auto processFile = std::make_shared<ProcessFile>(std::make_shared<FileItem>(getHost()));
+
+        readProcessFile(source, processFile);
+
+        if (processFile->getAssignedProcess() != processItem->getID()) {
+
+            LOGS_E(getHost(), "Mismatch ID with process and associated file, process : %d, file : %d",
+                   processItem->getID(), processFile->getAssignedProcess());
+
+            return false;
+        }
+
+        processItem->addFile(processFile);
     }
 
-    std::vector<uint64_t> list;
+    return true;
+}
 
-    if (!readNumberList(source, list, block.get(1), crc)) {
-        LOGS_E(getHost(), "readNumberList can not read number");
-        return false;
+bool Message::readProcess(const TypeComponentUnit& source, const TypeProcessItem& processItem) {
+
+    readProcessInfo(source, processItem);
+
+    long fileCount;
+    readProcessFileCount(source, fileCount);
+
+    for (long i = 0; i < fileCount; i++) {
+
+        auto processFile = std::make_shared<ProcessFile>(std::make_shared<FileItem>(getHost()));
+
+        readProcessFile(source, processFile);
+
+        if (processFile->getAssignedProcess() != processItem->getID()) {
+
+            LOGS_E(getHost(), "Mismatch ID with process and associated file, process : %d, file : %d",
+                   processItem->getID(), processFile->getAssignedProcess());
+
+            return false;
+        }
+
+        processItem->addFile(processFile);
     }
 
-    for (uint32_t i = 0; i < list.size(); i = i + 6) {
+    return true;
+}
 
-        Address address(BaseAddress((uint32_t)list[i + 2], (uint16_t)list[i + 3]),
-                        BaseAddress((uint32_t)list[i + 4], (uint16_t)list[i + 5]));
+bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUnitList& componentList) {
 
-        componentList.emplace_back(ComponentUnitFactory::create((COMPONENT)block.get(0),
-                                                                (ARCH)list[i], list[i + 1], address));
+    auto type = (COMPONENT) numbers.front();
+    numbers.pop_front();
+
+    long componentCount = numbers.front();
+    numbers.pop_front();
+
+    for (long i = 0; i < componentCount; i++) {
+
+        auto compUnit = std::make_shared<ComponentUnit>(type);
+
+        compUnit->setArch((ARCH)numbers.front());
+        numbers.pop_front();
+
+        compUnit->setID(numbers.front());
+        numbers.pop_front();
+
+        uint32_t base = numbers.front();
+        numbers.pop_front();
+
+        uint16_t port = numbers.front();
+        numbers.pop_front();
+
+        compUnit->getAddress().set(base, port);
+
+        base = numbers.front();
+        numbers.pop_front();
+
+        port = numbers.front();
+        numbers.pop_front();
+
+        compUnit->getAddress().setUI(base, port);
+
+        componentList.emplace_back(ComponentUnitFactory::create(type, compUnit->getArch(),
+                                                                compUnit->getID(), compUnit->getAddress()));
+
     }
 
     LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
@@ -49,309 +222,94 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
     return true;
 }
 
-bool Message::readID(const TypeComponentUnit& source, TypeID& id, MessageBlockHeader& block, uint32_t& crc) {
+bool Message::build(const TypeComponentUnit& source) {
 
-    if (block.getType() != BLOCK_ID) {
-        LOGS_E(getHost(), "readJobName can not read other blocks");
-        return false;
-    }
+    switch(getHeader().getStream()) {
 
-    uint64_t number;
-    if (!readNumber(source, number, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
+        case STREAM_ID:
 
-    id = (TypeID)number;
-
-    LOGS_D(getHost(), "Process ID is read successfully => ID : %ld", id);
-
-    return true;
-}
-
-bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName, MessageBlockHeader& block, uint32_t& crc) {
-
-    if (block.getType() != BLOCK_JOB) {
-        LOGS_E(getHost(), "readJobName can not read other blocks");
-        return false;
-    }
-
-    if (!readString(source, jobName, block.get(0), crc)) {
-        LOGS_E(getHost(), "readJobName can not read job name");
-        return false;
-    }
-
-    LOGS_D(getHost(), "Job Name is read successfully => Name : %s", jobName.c_str());
-
-    return true;
-}
-
-bool Message::readProcessID(const TypeComponentUnit& source, long& processID, MessageBlockHeader& block, uint32_t& crc) {
-
-    if (block.getType() != BLOCK_PROCESSID) {
-        LOGS_E(getHost(), "readJobName can not read other blocks");
-        return false;
-    }
-
-    uint64_t number;
-    if (!readNumber(source, number, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
-
-    processID = (long)number;
-
-    LOGS_D(getHost(), "Process ID is read successfully => ID : %ld", processID);
-
-    return true;
-}
-
-bool Message::readProcess(const TypeComponentUnit& source, const TypeProcessItem& content,
-                          MessageBlockHeader& block, uint32_t& crc) {
-
-    if (block.getType() != BLOCK_PROCESSINFO) {
-        LOGS_E(getHost(), "readProcessInfo can not read other blocks");
-        return false;
-    }
-
-    uint64_t id;
-    if (!readNumber(source, id, crc)) {
-        LOGS_E(getHost(), "readProcessInfo can not read process id");
-        return false;
-    }
-    content->setID((long)id);
-
-    uint64_t jobID;
-    if (!readNumber(source, jobID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
-    content->setAssignedJob((long)jobID);
-
-    std::string process;
-    if (!readString(source, process, block.get(0), crc)) {
-        LOGS_E(getHost(), "readProcessInfo can not read process info");
-        return false;
-    }
-    content->setParsedProcess(process);
-
-    LOGS_D(getHost(), "Process is read successfully => ID : %ld, jobID : %ld, Process : %s",
-            id, jobID, process.c_str());
-
-    return true;
-}
-
-bool Message::readFile(const TypeComponentUnit& source, const TypeProcessFile& content, MessageBlockHeader &block, uint32_t& crc) {
-
-    if (block.getType() != BLOCK_FILEBINARY && block.getType() != BLOCK_FILEINFO) {
-        LOGS_E(getHost(), "readFile can not read other blocks");
-        return false;
-    }
-
-    uint64_t id;
-    if (!readNumber(source, id, crc)) {
-        LOGS_E(getHost(), "readFile can not read id data");
-        return false;
-    }
-    content->get()->setID((long)id);
-
-    uint64_t state;
-    if (!readNumber(source, state, crc)) {
-        LOGS_E(getHost(), "readFile can not read state data");
-        return false;
-    }
-    content->setOutputState((bool)state);
-
-    uint64_t jobID;
-    if (!readNumber(source, jobID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
-    content->get()->setAssignedJob((long)jobID);
-
-    uint64_t processID;
-    if (!readNumber(source, processID, crc)) {
-        LOGS_E(getHost(), "readFile can not read jobID data");
-        return false;
-    }
-    content->setAssignedProcess((long)processID);
-
-    std::string fileName;
-    if (!readString(source, fileName, block.get(0), crc)) {
-        LOGS_E(getHost(), "readFile can not read path data");
-        return false;
-    }
-    content->get()->setName(fileName);
-
-    if (block.getType() == BLOCK_FILEINFO || content->isOutput()) {
-
-        LOGS_D(getHost(), "File Info is read successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
-               id, state? "output" : "input", jobID, processID, fileName.c_str());
-
-        return true;
-    }
-
-    std::filesystem::path filePath = getHost()->getRootPath() / std::to_string(jobID) / fileName;
-    if (!readBinary(source, filePath.c_str(), block.get(1), crc)) {
-        LOGS_E(getHost(), "readFile can not read Binary data");
-        return false;
-    }
-
-    LOGS_D(getHost(), "File Binary is read successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
-           id, state? "output" : "input", jobID, processID, fileName.c_str());
-
-    return true;
-}
-
-bool Message::readMessageBlock(const TypeComponentUnit& source, MessageBlockHeader &block, uint32_t& crc) {
-
-    switch(block.getType()) {
-
-        case BLOCK_ID: {
-
-            TypeID id;
-
-            if (!readID(source, id, block, crc)) {
-                return false;
-            }
-
-            data.setID(id);
-        }
-            break;
-
-        case BLOCK_PROCESSINFO: {
-
-            if (!readProcess(source, data.getProcess(), block, crc)) {
-                return false;
-            }
-        }
-            break;
-
-        case BLOCK_PROCESSID: {
-
-            long processID;
-
-            if (!readProcessID(source, processID, block, crc)) {
-                return false;
-            }
-
-            data.getProcess()->setID(processID);
-        }
-            break;
-
-        case BLOCK_FILEINFO:
-        case BLOCK_FILEBINARY: {
-
-            auto processFile = std::make_shared<ProcessFile>(std::make_shared<FileItem>(getHost()));
-
-            if (!readFile(source, processFile, block, crc)) {
-
-                return false;
-            }
-
-            if (processFile->getAssignedProcess() != data.getProcess()->getID()) {
-
-                LOGS_E(getHost(), "Mismatch ID with process and associated file, process : %d, file : %d",
-                       data.getProcess()->getID(), processFile->getAssignedProcess());
-                return false;
-            }
-
-            data.getProcess()->addFile(processFile);
-        }
-            break;
-
-        case BLOCK_JOB: {
-
-            if (!readJobName(source, data.getJobName(), block, crc)) {
-                return false;
-            }
-        }
-            break;
-
-        case BLOCK_COMPONENT: {
-
-            if (!readComponentList(source, data.getComponentList(), block, crc)) {
-                return false;
-            }
+            readID(source, data.getID());
 
             break;
-        }
+
+        case STREAM_JOBNAME:
+
+            readJobName(source, data.getJobName());
+
+            break;
+
+        case STREAM_FILE_BINARY:
+
+            readFileBinary(source, data.getFile());
+
+            break;
+
+        case STREAM_PROCESS_ID:
+
+            readProcessID(source, data.getProcess());
+
+            break;
+
+        case STREAM_PROCESS_COUNT:
+
+            readProcessCount(source, data.getProcessCount());
+
+            break;
+
+        case STREAM_PROCESS_INFO:
+
+            readProcessInfo(source, data.getProcess());
+
+            break;
+
+        case STREAM_PROCESS_FILE_INFO:
+        case STREAM_PROCESS_FILE_BINARY:
+
+            readProcessFile(source, data.getProcessFile());
+
+            break;
+
+        case STREAM_PROCESS_FILES_INFO:
+        case STREAM_PROCESS_FILES_BINARY:
+
+            readProcessFiles(source, data.getProcess());
+
+            break;
+
+        case STREAM_PROCESS:
+
+            readProcess(source, data.getProcess());
+
+            break;
+
+        case STREAM_COMPONENTS:
+
+            readComponentList(source, data.getComponentList());
+
+            break;
 
         default:
-            return false;
+            break;
     }
 
     return true;
 }
 
-bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList, uint32_t& crc) {
+bool Message::writeID(const TypeComponentUnit& target, const TypeID& id) {
 
-    std::vector<uint64_t> list;
-
-    for (auto &component : componentList) {
-
-        list.emplace_back(component->getArch());
-        list.emplace_back(component->getID());
-        list.emplace_back(component->getAddress().get().base);
-        list.emplace_back(component->getAddress().get().port);
-        list.emplace_back(component->getAddress().getUI().base);
-        list.emplace_back(component->getAddress().getUI().port);
-    }
-
-    MessageBlockHeader blockHeader(BLOCK_COMPONENT);
-
-    blockHeader.add(componentList[0]->getType());
-    blockHeader.add(list.size());
-
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeComponentList can not write block header");
+    if (!writeNumber(target, id)) {
+        LOGS_E(getHost(), "writeID can not write job info");
         return false;
     }
 
-    if (!writeNumberList(target, list, crc)) {
-        LOGS_E(getHost(), "writeNumberList can not write component list");
-        return false;
-    }
-
-    LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
-    for (auto& item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
-    }
+    LOGS_D(getHost(), "ID is written successfully => %d", id);
 
     return true;
 }
 
-bool Message::writeID(const TypeComponentUnit& target, long id, uint32_t& crc) {
+bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName) {
 
-    MessageBlockHeader blockHeader(BLOCK_ID);
-
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeProcessID can not write block header");
-        return false;
-    }
-
-    if (!writeNumber(target, id, crc)) {
-        LOGS_E(getHost(), "writeProcess can not write process ID");
-        return false;
-    }
-
-    LOGS_D(getHost(), "ID is written successfully => ID : %ld", id);
-
-    return true;
-}
-
-bool Message::writeJobName(const TypeComponentUnit& target, const std::string& jobName, uint32_t& crc) {
-
-    MessageBlockHeader blockHeader(BLOCK_JOB);
-
-    blockHeader.add(jobName.size());
-
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeJobName can not write block header");
-        return false;
-    }
-
-    if (!writeString(target, jobName, crc)) {
+    if (!writeString(target, jobName)) {
         LOGS_E(getHost(), "writeJobName can not write job info");
         return false;
     }
@@ -361,128 +319,305 @@ bool Message::writeJobName(const TypeComponentUnit& target, const std::string& j
     return true;
 }
 
-bool Message::writeProcessID(const TypeComponentUnit& target, long processID, uint32_t& crc) {
+bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileItem& file) {
 
-    MessageBlockHeader blockHeader(BLOCK_PROCESSID);
-
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeProcessID can not write block header");
+    if (!writeString(target, file->getName())) {
+        LOGS_E(getHost(), "writeFileBinary can not write file name");
         return false;
     }
 
-    if (!writeNumber(target, processID, crc)) {
-        LOGS_E(getHost(), "writeProcess can not write process ID");
+    if (!writeBinary(target, file)) {
+        LOGS_E(getHost(), "writeFileBinary can not write file binary");
         return false;
     }
 
-    LOGS_D(getHost(), "Process ID is written successfully => ID : %ld", processID);
+    LOGS_D(getHost(), "File Binary is written successfully => Name : %s", file->getName().c_str());
 
     return true;
 }
 
-bool Message::writeProcess(const TypeComponentUnit& target, const TypeProcessItem& processItem, uint32_t& crc) {
+bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    MessageBlockHeader blockHeader(BLOCK_PROCESSINFO);
-
-    blockHeader.add(processItem->getParsedProcess().size());
-
-    if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeProcess can not write block header");
+    if (!writeNumber(target, processItem->getID())) {
+        LOGS_E(getHost(), "writeProcessID can not write process ID");
         return false;
     }
 
-    if (!writeNumber(target, processItem->getID(), crc)) {
-        LOGS_E(getHost(), "writeProcess can not write process ID");
+    LOGS_D(getHost(), "Process ID is written successfully => %ld", processItem->getID());
+
+    return true;
+}
+
+bool Message::writeProcessCount(const TypeComponentUnit& target, const uint32_t& processCount) {
+
+    if (!writeNumber(target, processCount)) {
+        LOGS_E(getHost(), "writeProcessCount can not write process ID");
         return false;
     }
 
-    if (!writeNumber(target, processItem->getAssignedJob(), crc)) {
-        LOGS_E(getHost(), "writeProcess can not write job ID");
+    LOGS_D(getHost(), "Process Count is written successfully => %ld", processCount);
+
+    return true;
+}
+
+bool Message::writeProcessInfo(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
+
+    if (!writeNumber(target, processItem->getID())) {
+        LOGS_E(getHost(), "writeProcessInfo can not write process ID");
         return false;
     }
 
-    if (!writeString(target, processItem->getParsedProcess(), crc)) {
-        LOGS_E(getHost(), "writeProcess can not write process info");
+    if (!writeNumber(target, processItem->getAssignedJob())) {
+        LOGS_E(getHost(), "writeProcessInfo can not write job ID");
         return false;
     }
 
-    LOGS_D(getHost(), "Process is written successfully => ID : %ld, jobID : %ld, Process : %s",
+    if (!writeString(target, processItem->getParsedProcess())) {
+        LOGS_E(getHost(), "writeProcessInfo can not write process info");
+        return false;
+    }
+
+    LOGS_D(getHost(), "Process Info is written successfully => ID : %ld, jobID : %ld, Process : %s",
            processItem->getID(), processItem->getAssignedJob(), processItem->getParsedProcess().c_str());
 
     return true;
 }
 
-bool Message::writeFile(const TypeComponentUnit& target, const TypeProcessFile& content, bool isBinary, uint32_t& crc) {
+bool Message::writeProcessFileCount(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    std::filesystem::path filePath = content->get()->getHost()->getRootPath() /
-            std::to_string(content->get()->getAssignedJob()) / content->get()->getName();
-
-    bool isBinaryTransfer = !content->isOutput() && isBinary;
-
-    MessageBlockHeader blockHeader(!isBinaryTransfer ? BLOCK_FILEINFO : BLOCK_FILEBINARY);
-
-    blockHeader.add(content->get()->getName().size());
-    blockHeader.add(content->get()->getSize());
-
-	if (!writeBlockHeader(target, blockHeader, crc)) {
-        LOGS_E(getHost(), "writeFile can not write block header");
-		return false;
-	}
-
-    if (!writeNumber(target, content->get()->getID(), crc)) {
-        LOGS_E(getHost(), "writeFile can not write file ID");
+    if (!writeNumber(target, processItem->getFileCount())) {
+        LOGS_E(getHost(), "writeProcessFileCount can not write process ID");
         return false;
     }
 
-    if (!writeNumber(target, content->isOutput(), crc)) {
-        LOGS_E(getHost(), "writeFile can not write file state");
+    LOGS_D(getHost(), "Process File Count is written successfully => Count : %ld", processItem->getFileCount());
+
+    return true;
+}
+
+bool Message::writeProcessFile(const TypeComponentUnit& target,
+                               const TypeProcessFile& file, bool isBinary) {
+
+    bool isBinaryTransfer = !file->isOutput() && isBinary;
+
+    if (!writeNumber(target, file->get()->getID())) {
+        LOGS_E(getHost(), "writeProcessFile can not write file ID");
         return false;
     }
 
-    if (!writeNumber(target, content->get()->getAssignedJob(), crc)) {
-        LOGS_E(getHost(), "writeFile can not write assigned job");
+    if (!writeNumber(target, file->isOutput())) {
+        LOGS_E(getHost(), "writeProcessFile can not write file state");
         return false;
     }
 
-    if (!writeNumber(target, content->getAssignedProcess(), crc)) {
-        LOGS_E(getHost(), "writeFile can not write assigned job");
+    if (!writeNumber(target, file->get()->getAssignedJob())) {
+        LOGS_E(getHost(), "writeProcessFile can not write assigned job");
         return false;
     }
 
-	if (!writeString(target, content->get()->getName(), crc)) {
-        LOGS_E(getHost(), "writeFile can not write file name");
+    if (!writeNumber(target, file->getAssignedProcess())) {
+        LOGS_E(getHost(), "writeProcessFile can not write assigned job");
+        return false;
+    }
+
+    if (!writeString(target, file->get()->getName())) {
+        LOGS_E(getHost(), "writeProcessFile can not write file name");
         return false;
     }
 
     if (isBinaryTransfer) {
 
-        if (!writeBinary(target, filePath.c_str(), content->get()->getSize(), crc)) {
-            LOGS_E(getHost(), "writeFile can not write Binary data");
+        if (!writeBinary(target, file->get())) {
+            LOGS_E(getHost(), "writeProcessFile can not write file binary");
             return false;
         }
 
-        LOGS_D(getHost(), "File Binary is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
-               content->get()->getID(), content->isOutput()? "output" : "input",
-               content->get()->getAssignedJob(), content->getAssignedProcess(), content->get()->getName().c_str());
+        LOGS_D(getHost(), "Process File Binary is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+               file->get()->getID(), file->isOutput()? "output" : "input",
+               file->get()->getAssignedJob(), file->getAssignedProcess(), file->get()->getName().c_str());
 
         return true;
     }
 
-    LOGS_D(getHost(), "File Info is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
-           content->get()->getID(), content->isOutput()? "output" : "input",
-           content->get()->getAssignedJob(), content->getAssignedProcess(), content->get()->getName().c_str());
+    LOGS_D(getHost(), "Process File Info is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+           file->get()->getID(), file->isOutput()? "output" : "input",
+           file->get()->getAssignedJob(), file->getAssignedProcess(), file->get()->getName().c_str());
 
-	return true;
-
+    return true;
 }
 
-bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc) {
+bool Message::writeProcessFiles(const TypeComponentUnit& target,
+                                const TypeProcessItem& processItem, bool isBinary) {
 
-    switch(data.getStreamType()) {
+    if (!writeProcessID(target, processItem)) {
+        return false;
+    }
+
+    if (!writeProcessFileCount(target, processItem)) {
+        return false;
+    }
+
+    for (const auto& processFile : processItem->getFileList()) {
+
+        if (!writeProcessFile(target, processFile, isBinary)) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Message::writeProcess(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
+
+    if (!writeProcessInfo(target, processItem)) {
+        return false;
+    }
+
+    if (!writeProcessFileCount(target, processItem)) {
+        return false;
+    }
+
+    for (const auto& processFile : processItem->getFileList()) {
+
+        if (!writeProcessFile(target, processFile, false)) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentUnitList& componentList) {
+
+    if (componentList.empty()) {
+        LOGS_E(getHost(), "writeComponentList list is empty");
+        return false;
+    }
+
+    if (!writeNumber(target, componentList[0]->getType())) {
+        LOGS_E(getHost(), "writeComponentList can not write component type");
+        return false;
+    }
+
+    if (!writeNumber(target, componentList.size())) {
+        LOGS_E(getHost(), "writeComponentList can not write component count");
+        return false;
+    }
+
+    for (auto &component : componentList) {
+
+        if (!writeNumber(target, component->getArch())) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+        if (!writeNumber(target, component->getID())) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+        if (!writeNumber(target, component->getAddress().get().base)) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+        if (!writeNumber(target, component->getAddress().get().port)) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+        if (!writeNumber(target, component->getAddress().getUI().base)) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+        if (!writeNumber(target, component->getAddress().getUI().port)) {
+            LOGS_E(getHost(), "writeComponentList can not write component item");
+            return false;
+        }
+
+    }
+
+    LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
+
+    for (auto& item : componentList) {
+
+        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
+
+    }
+
+    return true;
+}
+
+bool Message::writeMessageStream(const TypeComponentUnit& target) {
+
+    switch(getHeader().getStream()) {
 
         case STREAM_ID:
 
-            if (!writeID(target, data.getID(), crc)) {
+            if (!writeID(target, data.getID())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_JOBNAME:
+
+            if (!writeJobName(target, data.getJobName())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_FILE_BINARY:
+
+            if (!writeFileBinary(target, data.getFile())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_PROCESS_ID:
+
+            if (!writeProcessID(target, data.getProcess())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_PROCESS_COUNT:
+
+            if (!writeProcessCount(target, data.getProcessCount())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_PROCESS_INFO:
+
+            if (!writeProcessInfo(target, data.getProcess())) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_PROCESS_FILE_INFO:
+        case STREAM_PROCESS_FILE_BINARY:
+
+            if (!writeProcessFile(target, data.getProcessFile(),
+                                  getHeader().getStream() == STREAM_PROCESS_FILE_BINARY)) {
+                return false;
+            }
+
+            break;
+
+        case STREAM_PROCESS_FILES_INFO:
+        case STREAM_PROCESS_FILES_BINARY:
+
+            if (!writeProcessFiles(target, data.getProcess(),
+                                  getHeader().getStream() == STREAM_PROCESS_FILES_BINARY)) {
                 return false;
             }
 
@@ -490,46 +625,15 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
 
         case STREAM_PROCESS:
 
-            if (!writeProcess(target, data.getProcess(), crc)) {
-                return false;
-            }
-
-            for (const auto& processFile : data.getProcess()->getFileList()) {
-
-                if (!writeFile(target, processFile, false, crc)) {
-                    return false;
-                }
-            }
-
-            break;
-
-        case STREAM_FILE_INFO:
-        case STREAM_FILE_BINARY:
-
-            if (!writeProcessID(target, data.getProcess()->getID(), crc)) {
-                return false;
-            }
-
-            for (const auto& processFile : data.getProcess()->getFileList()) {
-
-                if (!writeFile(target, processFile, data.getStreamType() == STREAM_FILE_BINARY, crc)) {
-                    return false;
-                }
-            }
-
-            break;
-
-        case STREAM_JOBNAME:
-
-            if (!writeJobName(target, data.getJobName(), crc)) {
+            if (!writeProcess(target, data.getProcess())) {
                 return false;
             }
 
             break;
 
-        case STREAM_COMPONENT: {
+        case STREAM_COMPONENTS: {
 
-            if (!writeComponentList(target, data.getComponentList(), crc)) {
+            if (!writeComponentList(target, data.getComponentList())) {
                 return false;
             }
 
@@ -542,35 +646,10 @@ bool Message::writeMessageStream(const TypeComponentUnit& target, uint32_t& crc)
     }
 
     return true;
-
-}
-
-MessageHeader& Message::getHeader() {
-
-    return header;
-}
-
-void Message::deSerializeHeader(const uint8_t *buffer) {
-
-    header.deSerialize(buffer);
-}
-
-void Message::grabOwner(const TypeCommUnit& unit) {
-
-    header.grabOwner(unit);
-}
-
-void Message::serializeHeader(uint8_t *buffer) {
-
-    header.serialize(buffer);
-}
-
-long Message::getHeaderSize() {
-
-    return header.getSize();
 }
 
 MessageData& Message::getData() {
 
     return data;
 }
+

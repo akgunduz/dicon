@@ -221,7 +221,7 @@ bool Distributor::processCollectorIDMsg(const TypeComponentUnit& owner, TypeMess
 
 bool Distributor::processCollectorNodeMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    collectorManager->addRequest(owner->getID(), (int)msg->getHeader().getVariant(0));
+    collectorManager->addRequest(owner->getID(), msg->getData().getProcessCount());
 
     notifyUI(NOTIFYTYPE_ONCE);
 
@@ -273,13 +273,12 @@ bool Distributor::processNodeBusyMsg(const TypeComponentUnit& owner, TypeMessage
         return false;
     }
 
-    int collID = (int) msg->getHeader().getVariant(0);
-
     nodeManager->setState(owner->getID(), NODESTATE_BUSY);
 
     notifyUI(NOTIFYTYPE_ONCE);
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is Busy with Collector[%d]\'s process", owner->getID(), collID);
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] is Busy with Collector[%d]\'s process",
+           owner->getID(), msg->getData().getID());
 
     return send2NodeProcessMsg(owner);
 }
@@ -309,20 +308,19 @@ bool Distributor::send2CollectorWakeupMsg(const TypeComponentUnit& target) {
     return send(target, std::move(msg));
 }
 
-bool Distributor::send2CollectorIDMsg(const TypeComponentUnit& target, long id) {
+bool Distributor::send2CollectorIDMsg(const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID, STREAM_ID);
 
-    msg->getHeader().setVariant(0, id);
+    msg->getData().setID(id);
 
     return send(target, std::move(msg));
 }
 
 bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE, STREAM_COMPONENTS);
 
-    msg->getData().setStreamType(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
     return send(target, std::move(msg));
@@ -330,9 +328,8 @@ bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeCom
 
 bool Distributor::send2CollectorReplaceMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE, STREAM_COMPONENTS);
 
-    msg->getData().setStreamType(STREAM_COMPONENT);
     msg->getData().setComponentList(nodes);
 
     return send(target, std::move(msg));
@@ -345,11 +342,11 @@ bool Distributor::send2NodeWakeupMsg(const TypeComponentUnit& target) {
     return send(target, std::move(msg));
 }
 
-bool Distributor::send2NodeIDMsg(const TypeComponentUnit& target, long id) {
+bool Distributor::send2NodeIDMsg(const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID, STREAM_ID);
 
-    msg->getHeader().setVariant(0, id);
+    msg->getData().setID(id);
 
     return send(target, std::move(msg));
 }

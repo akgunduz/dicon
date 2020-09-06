@@ -9,6 +9,11 @@
 #include "HostUnit.h"
 #include "MessageType.h"
 
+#define LOG_DIST (1u << COMP_DISTRIBUTOR)
+#define LOG_COLL (1u << COMP_COLLECTOR)
+#define LOG_NODE (1u << COMP_NODE)
+#define LOG_ALL LOG_DIST | LOG_COLL | LOG_NODE
+
 #define LOGP_E(a, ...) Log::logP(LEVEL_ERROR, a, ##__VA_ARGS__)
 #define LOGP_W(a, ...) Log::logP(LEVEL_WARN, a, ##__VA_ARGS__)
 #define LOGP_I(a, ...) Log::logP(LEVEL_INFO, a, ##__VA_ARGS__)
@@ -60,6 +65,12 @@ enum PRINT_COLOR {
     COLOR_MAX
 };
 
+struct LogInfo {
+
+    LOGLEVEL level;
+    uint8_t filter;
+};
+
 struct LogLevel {
 
     const char* name;
@@ -68,7 +79,7 @@ struct LogLevel {
 
 class Log {
 
-	inline static LOGLEVEL logLevel = LEVEL_INFO;
+    static inline LogInfo logInfo = {LEVEL_INFO, LOG_ALL};
 
     static constexpr const char* sColorCodes[COLOR_MAX] = {
             "[0m",
@@ -92,21 +103,26 @@ class Log {
             {"ASSERT  ", sColorCodes[COLOR_RESET]},
     };
 
+    static inline bool checkLevel(LOGLEVEL level) {
+
+        return logInfo.level >= level;
+    }
+
+    static inline bool checkFilter(COMPONENT type) {
+
+        return (1u << type) & logInfo.filter;
+    }
+
 public:
 
-    static void init(LOGLEVEL level) {
+    static void init(const LogInfo& _logInfo) {
 
-        setLogLevel(level);
-    };
-
-	static void setLogLevel(LOGLEVEL level) {
-
-        logLevel = level;
+        logInfo = _logInfo;
 
         setbuf(stdout, nullptr);
 
-        printf("Log Level Set to %s\n", sLogLevels[level].name);
-	};
+        printf("Log Level Set to %s\n", sLogLevels[logInfo.level].name);
+    };
 
 	static inline void _logP(LOGLEVEL level, const char* logout) {
 
@@ -115,7 +131,7 @@ public:
 
     static void logP(LOGLEVEL level, const char* format) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level)) {
             return;
         }
 
@@ -128,7 +144,7 @@ public:
     template<typename... Args>
     static void logP(LOGLEVEL level, const char* format, Args&&... args) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level)) {
             return;
         }
 
@@ -150,7 +166,7 @@ public:
 
     static void logS(LOGLEVEL level, const TypeHostUnit& host, const char* format) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level) || !checkFilter(host->getType())) {
             return;
         }
 
@@ -163,7 +179,7 @@ public:
     template<typename... Args>
     static void logS(LOGLEVEL level, const TypeHostUnit& host, const char* format, Args&&... args) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level) || !checkFilter(host->getType())) {
             return;
         }
 
@@ -192,7 +208,7 @@ public:
                      const TypeCommUnit& target, MSG_DIR direction,
                      const char* format) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level) || !checkFilter(host->getType())) {
             return;
         }
 
@@ -207,7 +223,7 @@ public:
                      const TypeCommUnit& target, MSG_DIR direction,
                      const char* format, Args&&... args) {
 
-        if (logLevel < level) {
+        if (!checkLevel(level) || !checkFilter(host->getType())) {
             return;
         }
 

@@ -6,11 +6,10 @@
 
 void sendJobName(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME);
+    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, STREAM_JOBNAME);
 
     auto job = std::make_shared<JobItem>(owner->getHost(), "../sample/Job1_x86_linux.zip", JobItem::jobID++);
 
-    msg->getData().setStreamType(STREAM_JOBNAME);
     msg->getData().setJobName(job->getJobName());
 
     owner->send(target, std::move(msg));
