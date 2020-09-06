@@ -173,8 +173,8 @@ bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf,
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
-    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
-           nRead, Util::hex2str(buffer, nRead).c_str());
+//    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
+//           nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
@@ -524,9 +524,6 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     do {
 
         int count = std::fread(tmpBuf, 1, std::min((size_t)TMP_BUFFER_SIZE, remaining), file);
-        if (count < TMP_BUFFER_SIZE) {
-            LOGP_E("test");
-        }
 
         onWrite(target, tmpBuf, count);
 
