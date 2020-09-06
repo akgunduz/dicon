@@ -19,7 +19,6 @@ class CommUnixSocket : public CommInterface {
 
 	bool initUnixSocket();
 
-    bool onRead(ReceiveData&, const uint8_t *, size_t);
     bool runSender(const TypeComponentUnit& , TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 

@@ -76,10 +76,10 @@ bool CommUnixSocket::initUnixSocket() {
     return false;
 }
 
-bool CommUnixSocket::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
-
-        return true;
-}
+//bool CommUnixSocket::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
+//
+//        return true;
+//}
 
 //bool UnixSocket::runReceiver() {
 //

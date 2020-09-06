@@ -33,8 +33,11 @@ class CommTCP : public CommInterface {
 	bool initTCP();
 	bool initMulticast();
 
+	bool onAlloc(size_t suggested_size, uv_buf_t *buf);
+	bool onFree(const uv_buf_t *);
     bool onConnection();
-    bool onRead(ReceiveData&, const uint8_t*, size_t);
+    bool onShutdown(uv_stream_t*);
+    bool onRead(TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
     bool onWrite(const TypeComponentUnit& target, const uint8_t*, size_t);
 
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
@@ -51,5 +54,13 @@ public :
 
     TypeAddressList getAddressList() override;
 };
+
+struct CommData {
+
+    TypeMessage msg;
+    TypeComponentUnit component;
+    CommTCP *interface;
+};
+
 
 #endif //DICON_COMMTCP_H

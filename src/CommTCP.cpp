@@ -34,7 +34,7 @@ bool CommTCP::initTCP() {
     }
 
     tcpServer.data = this;
-	
+
     int tryCount = TRY_COUNT;
 
     Address address(getDevice()->getBase(), lastFreeTCPPort);
@@ -115,8 +115,6 @@ bool CommTCP::initMulticast() {
         return false;
     }
 
-    multicastServer.data = this;
-
     while (tryCount--) {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
@@ -145,15 +143,18 @@ bool CommTCP::initMulticast() {
     uv_udp_set_membership(&multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
                           NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
+    multicastServer.data = new CommData{std::make_unique<Message>(getHost()),
+                                        std::make_shared<ComponentUnit>(), this};
+
     uv_udp_recv_start(
 
             &multicastServer,
 
-            [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+            [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                buf->base = (char *) malloc(suggested_size);
-                assert(buf->base != nullptr);
-                buf->len = suggested_size;
+                auto data = (CommData *) client->data;
+
+                data->interface->onAlloc(suggested_size, buf);
 
             },
 
@@ -163,9 +164,22 @@ bool CommTCP::initMulticast() {
                 //LOGP_E("Data received, count : %d, bufPtr : %s",
                 //      nRead, Util::hex2str((uint8_t *) buf->base, nRead).c_str());
 
-                auto commInterface = (CommTCP *) client->data;
+                if (nRead == 0) {
 
-                commInterface->onRead(commInterface->receiveData[1], (uint8_t *) buf->base, nRead);
+                    return;
+                }
+
+                auto data = (CommData *) client->data;
+
+                if (nRead == UV_ECONNRESET) {
+
+                    data->interface->onFree(buf);
+
+                    return;
+                }
+
+                data->interface->onRead(data->component,
+                                        data->msg, (uint8_t *) buf->base, nRead);
 
             });
 
@@ -174,38 +188,33 @@ bool CommTCP::initMulticast() {
     return true;
 }
 
-bool CommTCP::onRead(ReceiveData &receiveData, const uint8_t *buf, size_t nRead) {
+bool CommTCP::onAlloc(size_t suggested_size, uv_buf_t *buf) {
 
-    if (nRead == 0) {
+    buf->base = (char *) malloc(suggested_size);
+    assert(buf->base != nullptr);
+    buf->len = suggested_size;
 
-        return false;
-    }
+    return true;
+}
 
-    if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
+bool CommTCP::onFree(const uv_buf_t *buf) {
 
-        return true;
-    }
+    free(buf->base);
 
-    if (receiveData.state == DATASTATE_INIT) {
+    return true;
+}
 
-        receiveData.msg = std::make_unique<Message>(getHost());
+bool CommTCP::onRead(TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
 
-        receiveData.unit = std::make_shared<ComponentUnit>();
-
-        receiveData.state = DATASTATE_PROCESS;
-    }
-
-    bool isDone = receiveData.msg->onRead(receiveData.unit, buf, nRead);
+    bool isDone = msg->onRead(component, buf, nRead);
 
     if (isDone) {
 
-        receiveData.msg->build(receiveData.unit);
+        msg->build(component);
 
-        auto owner = receiveData.msg->getHeader().getOwner();
+        auto owner = msg->getHeader().getOwner();
 
-        push(MSGDIR_RECEIVE, owner, std::move(receiveData.msg));
-
-        receiveData.state = DATASTATE_INIT;
+        push(MSGDIR_RECEIVE, owner, std::move(msg));
     }
 
     return isDone;
@@ -229,8 +238,6 @@ bool CommTCP::onConnection() {
         return false;
     }
 
-    client->data = this;
-
     result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
 
     if (result != 0) {
@@ -246,32 +253,41 @@ bool CommTCP::onConnection() {
         return false;
     }
 
+    client->data = new CommData{std::make_unique<Message>(getHost()),
+            std::make_shared<ComponentUnit>(), this};
+
     result = uv_read_start(
 
             (uv_stream_t *) client,
 
-            [](uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
+            [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                buf->base = (char *) malloc(suggested_size);
-                assert(buf->base != nullptr);
-                buf->len = suggested_size;
+                auto data = (CommData *) client->data;
+
+                data->interface->onAlloc(suggested_size, buf);
 
             },
 
             [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
-                auto commInterface = (CommTCP *) client->data;
+                if (nRead == 0) {
 
-                bool done = commInterface->onRead(commInterface->receiveData[0], (uint8_t *) buf->base, nRead);
-
-                if (done) {
-
-                    uv_close((uv_handle_t *) client, [](uv_handle_t *handle) {
-
-                        free(handle);
-
-                    });
+                    return;
                 }
+
+                auto data = (CommData *) client->data;
+
+                if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
+
+                    data->interface->onShutdown(client);
+
+                    data->interface->onFree(buf);
+
+                    return;
+                }
+
+                data->interface->onRead(data->component,
+                                        data->msg, (uint8_t *) buf->base, nRead);
             });
 
     if (result != 0) {
@@ -290,6 +306,25 @@ bool CommTCP::onConnection() {
     return true;
 }
 
+bool CommTCP::onShutdown(uv_stream_t* client) {
+
+    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
+
+    uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
+
+        if (status) {
+
+            LOGP_E("Shutdown problem : %d!!!", status);
+        }
+
+        free(req->handle->data);
+        free(req->handle);
+        free(req);
+    });
+
+    return false;
+}
+
 bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
@@ -303,26 +338,24 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
         return false;
     }
 
-    client->data = this;
-
-    sendData[0].msg = std::move(msg);
-    sendData[0].unit = target;
-
-    auto *connect = (uv_connect_t *) malloc(sizeof(uv_connect_t));
-
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+
+    client->data = new CommData{std::move(msg), target, this};
+
+    auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
     result = uv_tcp_connect(
 
-            connect, client, (const struct sockaddr *) &clientAddress,
+            connectReq, client, (const struct sockaddr *) &clientAddress,
 
-            [](uv_connect_t *req, int status) {
+            [](uv_connect_t *connectReq, int status) {
 
                 if (status) {
 
                     LOGP_E("TCP Connect problem, error : %d!!!", status);
 
-                    uv_close((uv_handle_t *) &req->handle, [](uv_handle_t *handle) {
+                    uv_close((uv_handle_t *) &connectReq->handle,
+                             [](uv_handle_t *handle) {
 
                         free(handle);
 
@@ -331,13 +364,15 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
                     return;
                 }
 
-                auto commInterface = (CommTCP *) req->handle->data;
+                auto data = (CommData *) connectReq->handle->data;
 
-                commInterface->sendData->unit->setHandle(req->handle);
+                data->component->setHandle(connectReq->handle);
 
-                bool res = commInterface->sendData->msg->writeToStream(
+                free(connectReq);
 
-                        commInterface->sendData->unit,
+                bool res = data->msg->writeToStream(
+
+                        data->component,
 
                         [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> bool {
 
@@ -349,13 +384,13 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
                                     writeReq, target->getHandle(), &bufPtr, 1,
 
-                                    [](uv_write_t *req, int status) {
+                                    [](uv_write_t *writeReq, int status) {
+
+                                        free(writeReq);
 
                                         if (status) {
                                             LOGP_E("Write request problem, error : %d!!!", status);
                                         }
-
-                                        free(req);
                                     });
 
                             if (result != 0) {

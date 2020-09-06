@@ -58,7 +58,6 @@ void CommInterface::end() {
     threadRcv.join();
 
     uv_loop_close(&receiveLoop);
-
 }
 
 bool CommInterface::initThread() {

@@ -91,7 +91,7 @@ public:
 	bool writeToStream(const TypeComponentUnit&, TypeWriteCB);
 
     virtual bool writeMessageStream(const TypeComponentUnit&) = 0;
-    
+
     bool deSerializeHeader(const uint8_t*);
     void serializeHeader(uint8_t *);
     void grabOwner(const TypeCommUnit&);

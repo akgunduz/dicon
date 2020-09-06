@@ -19,26 +19,6 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-enum DATA_STATE {
-
-    DATASTATE_INIT,
-    DATASTATE_PROCESS
-};
-
-struct ReceiveData {
-
-    TypeMessage msg;
-    TypeComponentUnit unit;
-    DATA_STATE state;
-};
-
-struct SendData {
-
-    TypeMessage msg;
-    TypeComponentUnit unit;
-    DATA_STATE state;
-};
-
 class CommInterface {
 
     const TypeHostUnit host;
@@ -57,10 +37,6 @@ protected :
 	std::thread threadRcv;
 	int notifierPipe[2]{};
 
-    ReceiveData receiveData[2];
-    SendData sendData[2];
-
- //   virtual bool onRead(ReceiveData&, ssize_t, const uv_buf_t*) = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 
