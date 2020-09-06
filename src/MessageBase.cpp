@@ -7,7 +7,7 @@
 #include "Log.h"
 #include "Util.h"
 #include "CommTCP.h"
-#include "UnixSocket.h"
+#include "CommUnixSocket.h"
 
 MessageBase::MessageBase(const TypeHostUnit& host)
 		: host(host) {
@@ -38,7 +38,7 @@ TypeReadCB MessageBase::getReadCB(const TypeComponentUnit& source) {
         return CommTCP::getReadCB(source);
     }
 
-    return UnixSocket::getReadCB(source);
+    return CommUnixSocket::getReadCB(source);
 }
 
 TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
@@ -48,20 +48,17 @@ TypeWriteCB MessageBase::getWriteCB(const TypeComponentUnit&  target) {
         return CommTCP::getWriteCB(target);
     }
 
-    return UnixSocket::getWriteCB(target);
+    return CommUnixSocket::getWriteCB(target);
 }
 
-bool MessageBase::readData(const TypeComponentUnit& source) {
-
-    auto *buf = new uint8_t[65536];
-    size_t size = 65536;
+bool MessageBase::readData(const TypeComponentUnit& source, uint8_t* buffer, size_t size) {
 
     size_t offset = 0;
 	bool busy = false;
 
 	do {
 
-        size_t count = getReadCB(source)(source, buf + offset, size);
+        size_t count = getReadCB(source)(source, buffer + offset, size);
 
 		if (count == -1) {
 
@@ -77,18 +74,26 @@ bool MessageBase::readData(const TypeComponentUnit& source) {
 				continue;
 			}
 
-			LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read data block");
+            if (errno == ECONNRESET) {
+
+                LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Connection is closed by peer");
+                return false;
+            }
+
+			LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Can not read data block, err : %d", errno);
 			return false;
 		}
 
-		if (count == 0) {
+		assert(count != 0);
 
-			return true;
+		bool isDone = onRead(source, buffer + offset, count);
+
+		if (isDone) {
+
+		    return true;
 		}
 
-		onRead(source, buf + offset, count);
-
-		if (count < size) {
+		if (count <= size) {
 			size -= count;
 			offset += count;
 
@@ -104,9 +109,7 @@ bool MessageBase::readData(const TypeComponentUnit& source) {
 
 	} while(true);
 
-	delete[] buf;
-
-	return true;
+	return false;
 }
 
 bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf, size_t size) {
@@ -132,7 +135,14 @@ bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf,
                 continue;
             }
 
-            LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write data block");
+            if (errno == ECONNRESET) {
+
+                LOGC_E(getHost(), target, MSGDIR_SEND, "Connection is closed by peer");
+                return false;
+            }
+
+            LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write data block, err : %d", errno);
+
             return false;
         }
 
@@ -140,8 +150,6 @@ bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf,
 
             return false;
         }
-
-        crc = CRC::Calculate(buf + offset, count, Util::crcTable, crc);
 
         if (count < size) {
             size -= count;
@@ -165,8 +173,8 @@ bool MessageBase::writeData(const TypeComponentUnit& target, const uint8_t *buf,
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
-//    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
-//           nRead, Util::hex2str(buffer, nRead).c_str());
+    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
+           nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
@@ -516,6 +524,9 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     do {
 
         int count = std::fread(tmpBuf, 1, std::min((size_t)TMP_BUFFER_SIZE, remaining), file);
+        if (count < TMP_BUFFER_SIZE) {
+            LOGP_E("test");
+        }
 
         onWrite(target, tmpBuf, count);
 

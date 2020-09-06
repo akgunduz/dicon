@@ -45,6 +45,7 @@ protected :
 
 public :
 
+    virtual bool onRead(int, bool) = 0;
     virtual ~CommInterface();
 
 	bool push(MSG_DIR, const TypeCommUnit&, TypeMessage);

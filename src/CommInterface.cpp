@@ -121,6 +121,7 @@ void CommInterface::setAddress(Address &_address) {
 void CommInterface::setMulticastAddress(Address &_multicastAddress) {
 
     multicastAddress = _multicastAddress;
+    multicastAddress.setMulticast(true);
 }
 
 const TypeHostUnit& CommInterface::getHost() {

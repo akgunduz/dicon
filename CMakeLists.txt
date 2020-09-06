@@ -35,6 +35,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CommInterface.cpp
         ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp
+        ${SOURCE_PATH}/CommUnixSocket.cpp
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/ComponentFactory.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
@@ -74,7 +75,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/StopWatch.cpp
-        ${SOURCE_PATH}/UnixSocket.cpp
         ${SOURCE_PATH}/Util.cpp
         )
 

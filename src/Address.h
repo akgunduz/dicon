@@ -57,9 +57,9 @@ public:
     void setUI(BaseAddress&);
 
     bool isMulticast();
-    COMM_INTERFACE getInterface() const;
-
     void setMulticast(bool);
+
+    COMM_INTERFACE getInterface() const;
     void setInterface(COMM_INTERFACE);
 
     bool operator==(const Address& ref) const

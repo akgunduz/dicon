@@ -66,7 +66,7 @@ public:
     TypeReadCB getReadCB(const TypeComponentUnit& source);
     TypeWriteCB getWriteCB(const TypeComponentUnit& source);
 
-	bool readData(const TypeComponentUnit&);
+	bool readData(const TypeComponentUnit&, uint8_t*, size_t);
     bool onRead(const TypeComponentUnit&, const uint8_t*, size_t);
 
 	bool readBlock(const TypeComponentUnit&, const uint8_t*, size_t);
