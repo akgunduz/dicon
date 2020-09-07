@@ -72,17 +72,17 @@ bool CommTCP::initTCP() {
                 auto commInterface = ((CommTCP *) serverPtr->data);
 
                 if (status < 0) {
-                    LOGS_E(commInterface->getHost(), "Socket listen with err : %d!!!", status);
+                    LOGS_E(commInterface->getHost(), "Socket listen with err : %s", uv_err_name(status));
                     return;
                 }
 
-                ((CommTCP *) serverPtr->data)->onConnection();
+                ((CommTCP *) serverPtr->data)->onServerConnect();
 
             });
 
     if (result != 0) {
 
-        LOGS_E(getHost(), "Socket listen with err : %d!!!", result);
+        LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
         uv_close((uv_handle_t *) &tcpServer, [](uv_handle_t *handle) {
 
@@ -204,7 +204,26 @@ bool CommTCP::onFree(const uv_buf_t *buf) {
     return true;
 }
 
-bool CommTCP::onRead(TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
+bool CommTCP::onShutdown(uv_stream_t* client) {
+
+    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
+
+    uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
+
+        if (status) {
+
+            LOGP_E("Shutdown problem : %d!!!", status);
+        }
+
+        free(req->handle->data);
+        free(req->handle);
+        free(req);
+    });
+
+    return false;
+}
+
+bool CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
 
     bool isDone = msg->onRead(component, buf, nRead);
 
@@ -225,7 +244,7 @@ bool CommTCP::onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_
     return true;
 }
 
-bool CommTCP::onConnection() {
+bool CommTCP::onServerConnect() {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
@@ -292,7 +311,7 @@ bool CommTCP::onConnection() {
 
     if (result != 0) {
 
-        LOGS_E(getHost(), "Read start with err : %d!!!", result);
+        LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
         uv_close((uv_handle_t *) &client, [](uv_handle_t *handle) {
 
@@ -306,24 +325,50 @@ bool CommTCP::onConnection() {
     return true;
 }
 
-bool CommTCP::onShutdown(uv_stream_t* client) {
 
-    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
 
-    uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
+bool CommTCP::onClientConnect(const TypeComponentUnit& target, TypeMessage& msg, uv_stream_t* handle) {
 
-        if (status) {
+    target->setHandle(handle);
 
-            LOGP_E("Shutdown problem : %d!!!", status);
-        }
+    bool res = msg->writeToStream(target,
 
-        free(req->handle->data);
-        free(req->handle);
-        free(req);
-    });
+            [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> bool {
 
-    return false;
+                uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+
+                auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+
+                int result = uv_write(
+
+                        writeReq, target->getHandle(), &bufPtr, 1,
+
+                        [](uv_write_t *writeReq, int status) {
+
+                            free(writeReq);
+
+                            if (status) {
+                                LOGP_E("Write request problem, error : %d!!!", status);
+                            }
+                        });
+
+                if (result != 0) {
+
+                    LOGP_E("Write problem, error : %d!!!", result);
+                    return false;
+                }
+
+                return true;
+            });
+
+    if (!res) {
+
+        LOGP_E("Write stream is failed!!!");
+    }
+
+    return true;
 }
+
 
 bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
@@ -344,85 +389,55 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
     auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
-    result = uv_tcp_connect(
+    int tryCount = TRY_COUNT;
 
-            connectReq, client, (const struct sockaddr *) &clientAddress,
+    while (tryCount--) {
 
-            [](uv_connect_t *connectReq, int status) {
+        result = uv_tcp_connect(
 
-                if (status) {
+                connectReq, client, (const struct sockaddr *) &clientAddress,
 
-                    LOGP_E("TCP Connect problem, error : %d!!!", status);
+                [](uv_connect_t *connectReq, int status) {
 
-                    uv_close((uv_handle_t *) &connectReq->handle,
-                             [](uv_handle_t *handle) {
+                    if (status) {
 
-                        free(handle);
+                        LOGP_E("TCP Connect problem, error : %d!!!", status);
 
-                    });
+                        uv_close((uv_handle_t *) &connectReq->handle,
+                                 [](uv_handle_t *handle) {
 
-                    return;
-                }
+                                     free(handle);
 
-                auto data = (CommData *) connectReq->handle->data;
+                                 });
 
-                data->component->setHandle(connectReq->handle);
+                        return;
+                    }
 
-                free(connectReq);
+                    auto data = (CommData *) connectReq->handle->data;
 
-                bool res = data->msg->writeToStream(
+                    data->interface->onClientConnect(data->component, data->msg, connectReq->handle);
 
-                        data->component,
+                    free(connectReq);
 
-                        [](const TypeComponentUnit &target, const uint8_t *buf, size_t size) -> bool {
+                });
 
-                            uv_buf_t bufPtr = uv_buf_init((char *) buf, size);
+        if (result != 0) {
 
-                            auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+            if (result == UV_EMFILE) {
 
-                            int result = uv_write(
+                std::this_thread::sleep_for(std::chrono::seconds(1));
 
-                                    writeReq, target->getHandle(), &bufPtr, 1,
+                continue;
+            }
 
-                                    [](uv_write_t *writeReq, int status) {
+            LOGS_E(getHost(), "Can not connect to server!!!, error : %s", uv_err_name(result));
 
-                                        free(writeReq);
+        }
 
-                                        if (status) {
-                                            LOGP_E("Write request problem, error : %d!!!", status);
-                                        }
-                                    });
-
-                            if (result != 0) {
-
-                                LOGP_E("Write problem, error : %d!!!", result);
-                                return false;
-                            }
-
-                            return true;
-                        });
-
-                if (!res) {
-
-                    LOGP_E("Write stream is failed!!!");
-                }
-
-            });
-
-    if (result != 0) {
-
-        LOGS_E(getHost(), "Can not connect to server!!!, error : %d", result);
-
-        uv_close((uv_handle_t *) &client, [](uv_handle_t *handle) {
-
-            free(handle);
-
-        });
-
-        return false;
+        break;
     }
 
-    return true;
+    return tryCount != 0;
 }
 
 bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage msg) {
