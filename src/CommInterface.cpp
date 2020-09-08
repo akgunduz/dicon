@@ -6,76 +6,21 @@
 #include "CommInterface.h"
 
 CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _device,
-                             const InterfaceSchedulerCB *receiveCB)
+                             const InterfaceSchedulerCB *receiverCB)
         : host(_host), device(_device) {
 
-    uv_loop_init(&receiveLoop);
+    uv_loop_init(&produceLoop);
 
     scheduler = new Scheduler();
 
     senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
-        bool status;
-        auto *commInterface = (CommInterface *) arg;
-
-        auto msgItem = std::static_pointer_cast<MessageItem>(item);
-
-        auto msgType = msgItem->getMessage()->getHeader().getType();
-
-        LOGC_T(commInterface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
-               "\"%s\" is sending",
-               MessageType::getMsgName(msgType));
-
-        auto target = std::make_shared<ComponentUnit>(msgItem->getUnit());
-
-        if (msgItem->getUnit()->getAddress() != commInterface->getMulticastAddress()) {
-
-            status = commInterface->runSender(target, std::move(msgItem->getMessage()));
-
-        } else {
-
-            status = commInterface->runMulticastSender(target, std::move(msgItem->getMessage()));
-        }
-
-        LOGC_D(commInterface->getHost(), msgItem->getUnit(), MSGDIR_SEND,
-               "\"%s\" is sent",
-               MessageType::getMsgName(msgType));
-
-        return status;
+        return ((CommInterface*) arg)->send(item);
 
     }, this);
 
-    scheduler->setCB(MSGDIR_RECEIVE, receiveCB);
+    scheduler->setCB(MSGDIR_RECEIVE, receiverCB);
     scheduler->setCB(MSGDIR_SEND, senderCB);
-}
-
-void CommInterface::end() {
-
-    char buf[1] = {SHUTDOWN_NOTIFIER};
-
-    write(notifierPipe[1], buf, 1);
-
-    threadRcv.join();
-
-    uv_loop_close(&receiveLoop);
-}
-
-bool CommInterface::initThread() {
-
-    if (pipe(notifierPipe) < 0) {
-        LOGS_E(getHost(), "Notifier Pipe Init failed with err : %d!!!", errno);
-        return false;
-    }
-
-    LOGS_T(getHost(), "Init Notifier PIPE OK!!!");
-
-    threadRcv = std::thread([](CommInterface *commInterface) {
-
-        return uv_run(&commInterface->receiveLoop, UV_RUN_DEFAULT);
-
-    }, this);
-
-    return true;
 }
 
 CommInterface::~CommInterface() {
@@ -86,9 +31,56 @@ CommInterface::~CommInterface() {
 
     delete scheduler;
 
-    close(notifierPipe[1]);
-    close(notifierPipe[0]);
 }
+
+void CommInterface::end() {
+
+//    char buf[1] = {SHUTDOWN_NOTIFIER};
+//
+//    write(notifierPipe[1], buf, 1);
+
+    threadProduce.join();
+
+    threadConsume.join();
+}
+
+bool CommInterface::initThread() {
+
+    threadProduce = std::thread([](CommInterface *commInterface) {
+
+        uv_loop_init(&commInterface->produceLoop);
+
+        commInterface->initInterface();
+
+        uv_run(&commInterface->produceLoop, UV_RUN_DEFAULT);
+
+        uv_loop_close(&commInterface->produceLoop);
+
+    }, this);
+
+    threadConsume = std::thread([](CommInterface *commInterface) {
+
+        uv_loop_init(&commInterface->consumeLoop);
+
+        while(true) {
+
+            if (!commInterface->scheduler->process()) {
+
+                break;
+            }
+
+            uv_run(&commInterface->consumeLoop, UV_RUN_ONCE);
+
+        }
+
+        uv_loop_close(&commInterface->consumeLoop);
+
+    }, this);
+
+    return true;
+}
+
+
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage msg) {
 
@@ -104,6 +96,36 @@ bool CommInterface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage m
     LOGS_E(getHost(), "Interface is not suitable for target : %d", target->getAddress().get().base);
 
     return false;
+}
+
+bool CommInterface::send(const TypeSchedulerItem &item) {
+
+    bool status;
+
+    auto msgItem = std::static_pointer_cast<MessageItem>(item);
+
+    auto msgType = msgItem->getMessage()->getHeader().getType();
+
+    LOGC_T(getHost(), msgItem->getUnit(), MSGDIR_SEND,
+           "\"%s\" is sending",
+           MessageType::getMsgName(msgType));
+
+    auto target = std::make_shared<ComponentUnit>(msgItem->getUnit());
+
+    if (msgItem->getUnit()->getAddress() != getMulticastAddress()) {
+
+        status = runSender(target, std::move(msgItem->getMessage()));
+
+    } else {
+
+        status = runMulticastSender(target, std::move(msgItem->getMessage()));
+    }
+
+    LOGC_D(getHost(), msgItem->getUnit(), MSGDIR_SEND,
+           "\"%s\" is sent",
+           MessageType::getMsgName(msgType));
+
+    return status;
 }
 
 Address &CommInterface::getAddress() {

@@ -29,14 +29,19 @@ class CommInterface {
 
     const InterfaceSchedulerCB *senderCB{};
 
+    bool send(const TypeSchedulerItem& item);
+
 protected :
 
-    uv_loop_t receiveLoop{};
-
 	Scheduler *scheduler{};
-	std::thread threadRcv;
-	int notifierPipe[2]{};
 
+	std::thread threadProduce;
+	std::thread threadConsume;
+
+    uv_loop_t produceLoop{};
+    uv_loop_t consumeLoop{};
+
+    virtual bool initInterface() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 

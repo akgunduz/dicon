@@ -39,10 +39,15 @@ class CommTCP : public CommInterface {
     bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
     bool onShutdown(uv_stream_t*);
     bool onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
-    bool onWrite(const TypeComponentUnit&, const uint8_t*, size_t);
+
+    static bool onTCPWrite(const TypeComponentUnit&, const uint8_t*, size_t);
+    static bool onMulticastWrite(const TypeComponentUnit&, const uint8_t*, size_t);
 
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
+
+protected:
+    bool initInterface() override;
 
 public :
 

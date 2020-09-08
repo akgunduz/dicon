@@ -5,13 +5,6 @@
 
 #include "Scheduler.h"
 
-Scheduler::Scheduler() {
-
-	thread = std::thread(run, this);
-
-	initialized = true;
-}
-
 Scheduler::~Scheduler() {
 
     LOGP_T("Deallocating Scheduler");
@@ -80,45 +73,10 @@ TypeSchedulerItem Scheduler::pull() {
     return item;
 }
 
-void *Scheduler::run(void *arg) {
-
-	auto *scheduler = (Scheduler *) arg;
-
-    uv_loop_init(&scheduler->sendLoop);
-
-	while(true) {
-
-        TypeSchedulerItem item = scheduler->pull();
-
-        if (item->type == END_ITEM) {
-            break;
-        }
-
-        const InterfaceSchedulerCB *iCB = scheduler->callbacks[item->type];
-
-        if (iCB != nullptr) {
-
-            iCB->schedulerCB(iCB->arg, std::move(item));
-
-            uv_run(&scheduler->sendLoop, UV_RUN_ONCE);
-        }
-	}
-
-    uv_loop_close(&scheduler->sendLoop);
-
-	return nullptr;
-}
-
 void Scheduler::end() {
 
-    if (!initialized) {
-        return;
-    }
-
     push(std::make_shared<SchedulerItem>());
-    thread.join();
 
-    items.clear();
 }
 
 void Scheduler::setCB(int id, const InterfaceSchedulerCB *cb) {
@@ -126,7 +84,18 @@ void Scheduler::setCB(int id, const InterfaceSchedulerCB *cb) {
 	callbacks[id] = cb;
 }
 
-uv_loop_t *Scheduler::getLoop() {
+bool Scheduler::process() {
 
-    return &sendLoop;
+    TypeSchedulerItem item = pull();
+
+    const InterfaceSchedulerCB *iCB = callbacks[item->type];
+
+    if (item->type == END_ITEM || !iCB) {
+
+        return false;
+    }
+
+    iCB->schedulerCB(iCB->arg, std::move(item));
+
+    return true;
 }

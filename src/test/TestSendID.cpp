@@ -62,8 +62,6 @@ void TestApp::testSendID(TypeDistributor& distributor, TypeCollector& collector,
                                                       node->getHost()->getID(),
                                                       node->getHost()->getAddress(COMP_DISTRIBUTOR));
 
-    for (int i = 0; i < 1000; i++) {
-        sendIDMsg((TypeComponent &) distributor, collTarget, 61 + i);
-        sendIDMsg((TypeComponent &) distributor, nodeTarget, 79 + i);
-    }
+    sendIDMsg((TypeComponent &) distributor, collTarget, 61);
+    sendIDMsg((TypeComponent &) distributor, nodeTarget, 79);
 }

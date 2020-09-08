@@ -22,12 +22,12 @@ ComponentUnit::ComponentUnit(const TypeCommUnit &copy)
     : CommUnit(*copy) {
 }
 
-uv_stream_t* ComponentUnit::getHandle() const {
+void* ComponentUnit::getHandle() const {
 
     return handle;
 }
 
-void ComponentUnit::setHandle(uv_stream_t* _handle) {
+void ComponentUnit::setHandle(void* _handle) {
 
     handle = _handle;
 }

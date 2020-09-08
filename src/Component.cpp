@@ -12,7 +12,7 @@ TypeComponent Component::nullComponent = nullptr;
 
 Component::Component() {
 
-    schedulerCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
+    receiverCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         auto *component = (Component *) arg;
 
@@ -34,9 +34,9 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = InterfaceFactory::createInterface(host, nodeDevice, schedulerCB);
+    interfaces[COMP_NODE] = InterfaceFactory::createInterface(host, nodeDevice, receiverCB);
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   InterfaceFactory::createInterface(host, otherDevice, schedulerCB) :
+                                   InterfaceFactory::createInterface(host, otherDevice, receiverCB) :
                                    interfaces[COMP_NODE];
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
@@ -55,7 +55,7 @@ Component::~Component() {
 
     LOGP_T("Deallocating Component");
 
-    delete schedulerCB;
+    delete receiverCB;
 }
 
 bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, TypeMessage msg) {

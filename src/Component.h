@@ -42,7 +42,7 @@ protected :
 
     TypeStaticProcessMsgMap processStaticMsg[COMP_MAX];
 
-    const InterfaceSchedulerCB *schedulerCB;
+    const InterfaceSchedulerCB *receiverCB;
 
     StopWatch componentWatch;
 

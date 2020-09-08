@@ -8,7 +8,7 @@
 #include "CommUnixSocket.h"
 
 TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
-                                                const InterfaceSchedulerCB *schedulerCB) {
+                                                const InterfaceSchedulerCB *receiverCB) {
 
     TypeInterface commInterface = nullptr;
 
@@ -17,12 +17,12 @@ TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const 
         switch (device->getType()) {
 
             case COMMINTERFACE_TCPIP:
-                commInterface = std::make_shared<CommTCP>(host, device, schedulerCB);
+                commInterface = std::make_shared<CommTCP>(host, device, receiverCB);
                 break;
 
-            case COMMINTERFACE_UNIXSOCKET:
-                commInterface = std::make_shared<CommUnixSocket>(host, device, schedulerCB);
-                break;
+//            case COMMINTERFACE_UNIXSOCKET:
+//                commInterface = std::make_shared<CommUnixSocket>(host, device, receiverCB);
+//                break;
 
             default:
                 break;

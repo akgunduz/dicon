@@ -5,12 +5,11 @@
 #ifndef DICON_COMPONENTUNIT_H
 #define DICON_COMPONENTUNIT_H
 
-#include <uv/include/uv.h>
 #include "CommUnit.h"
 
 class ComponentUnit : public CommUnit {
 
-    uv_stream_t* handle{};
+    void* handle{};
     long long checkTime{};
 
 public:
@@ -23,11 +22,11 @@ public:
     explicit ComponentUnit(const TypeCommUnit&);
     virtual ~ComponentUnit();
 
-    uv_stream_t* getHandle() const;
-    void setHandle(uv_stream_t*);
+    void* getHandle() const;
+    void setHandle(void*);
 
     long long getCheckTime() const;
-    void setCheckTime(long long checkTime);
+    void setCheckTime(long long);
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;
