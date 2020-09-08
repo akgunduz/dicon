@@ -9,8 +9,6 @@ CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _devic
                              const InterfaceSchedulerCB *receiverCB)
         : host(_host), device(_device) {
 
-    uv_loop_init(&produceLoop);
-
     scheduler = new Scheduler();
 
     senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
@@ -38,6 +36,8 @@ void CommInterface::end() {
 //    char buf[1] = {SHUTDOWN_NOTIFIER};
 //
 //    write(notifierPipe[1], buf, 1);
+
+    scheduler->end();
 
     threadProduce.join();
 
@@ -79,8 +79,6 @@ bool CommInterface::initThread() {
 
     return true;
 }
-
-
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage msg) {
 

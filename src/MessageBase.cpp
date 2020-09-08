@@ -270,7 +270,7 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buf, s
 
     crc = CRC::Calculate(buf, size, Util::crcTable, crc);
 
-    return writeCB(target, buf, size);
+    return writeData(target, buf, size);
 }
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const MessageBlock& baseHeader) {
@@ -428,11 +428,11 @@ bool MessageBase::writeEndStream(const TypeComponentUnit& target) {
 	return true;
 }
 
-bool MessageBase::writeToStream(const TypeComponentUnit& target, TypeWriteCB _writeCB) {
+bool MessageBase::writeToStream(const TypeComponentUnit& target, TypeWriteCB _writeData) {
 
-    assert(_writeCB != nullptr);
+    assert(_writeData != nullptr);
 
-    writeCB = _writeCB;
+    writeData = _writeData;
 
 	if (!writeHeader(target)) {
 		return false;

@@ -54,7 +54,7 @@ class MessageBase {
 
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 
-    TypeWriteCB writeCB;
+    TypeWriteCB writeData;
 
 protected:
 

@@ -14,17 +14,16 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const Inter
     }
 }
 
-bool CommTCP::initInterface() {
-
-    return initTCP() && initMulticast();
-}
-
 CommTCP::~CommTCP() {
 
     LOGP_T("Deallocating TCP Interface");
 
     end();
+}
 
+bool CommTCP::initInterface() {
+
+    return initTCP() && initMulticast();
 }
 
 bool CommTCP::initTCP() {
@@ -52,8 +51,8 @@ bool CommTCP::initTCP() {
 
         if (result < 0 || tcpServer.delayed_error != 0) {
 
-            lastFreeTCPPort++;
-            address.setPort(lastFreeTCPPort);
+            address.setPort(++lastFreeTCPPort);
+
             continue;
         }
 
@@ -102,7 +101,6 @@ bool CommTCP::initTCP() {
     LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address.get()).c_str());
 
     return true;
-
 }
 
 bool CommTCP::initMulticast() {
@@ -128,8 +126,8 @@ bool CommTCP::initMulticast() {
 
         if (result < 0) {
 
-            lastFreeMulticastPort++;
-            address.setPort(lastFreeMulticastPort);
+            address.setPort(++lastFreeMulticastPort);
+
             continue;
         }
 
@@ -398,8 +396,7 @@ bool CommTCP::onClientConnect(const TypeComponentUnit &target, TypeMessage &msg,
     return true;
 }
 
-
-bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
+bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
@@ -430,14 +427,7 @@ bool CommTCP::runSender(const TypeComponentUnit &target, TypeMessage msg) {
 
                     if (status) {
 
-                        LOGP_E("TCP Connect problem, error : %d!!!", status);
-
-                        uv_close((uv_handle_t *) &connectReq->handle,
-                                 [](uv_handle_t *handle) {
-
-                                     free(handle);
-
-                                 });
+                        LOGP_E("TCP Connect problem, error : %s!!!", uv_strerror(status));
 
                         return;
                     }

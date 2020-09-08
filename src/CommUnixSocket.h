@@ -18,9 +18,13 @@ class CommUnixSocket : public CommInterface {
 	int unixSocket{};
 
 	bool initUnixSocket();
-
+    bool runReceiver();
     bool runSender(const TypeComponentUnit& , TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
+
+protected:
+
+    bool initInterface() override;
 
 public :
 
@@ -30,6 +34,8 @@ public :
     COMM_INTERFACE getType() override;
 	bool isSupportMulticast() override;
     TypeAddressList getAddressList() override;
+
+    bool onRead(int i, bool b);
 };
 
 #endif //DICON_COMMUNIXSOCKET_H

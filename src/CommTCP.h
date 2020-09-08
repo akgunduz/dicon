@@ -21,14 +21,11 @@
 
 class CommTCP : public CommInterface {
 
-    uv_tcp_t tcpServer{};
-    uv_udp_t multicastServer{};
-
     static inline int lastFreeTCPPort = DEFAULT_PORT;
     static inline int lastFreeMulticastPort = DEFAULT_MULTICAST_PORT;
 
-	int netSocket{};
-	int multicastSocket{};
+    uv_tcp_t tcpServer{};
+    uv_udp_t multicastServer{};
 
 	bool initTCP();
 	bool initMulticast();
@@ -47,6 +44,7 @@ class CommTCP : public CommInterface {
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
 protected:
+
     bool initInterface() override;
 
 public :

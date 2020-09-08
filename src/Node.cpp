@@ -276,6 +276,16 @@ bool Node::processCommand(long collID, long processID, const std::string& cmd) {
 
     std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), cmd);
 
+    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
+
+    std::filesystem::permissions(executable,
+                                 std::filesystem::perms::owner_all |
+                                         std::filesystem::perms::group_read |
+                                         std::filesystem::perms::group_exec |
+                                         std::filesystem::perms::others_read |
+                                         std::filesystem::perms::others_exec,
+                                 std::filesystem::perm_options::add);
+
     LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
            collID, processID, parsedCmd.c_str());
 
