@@ -37,6 +37,7 @@ class CommTCP : public CommInterface {
     bool onShutdown(uv_stream_t*);
     bool onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
+    static void onClose(uv_handle_t*);
     static bool onTCPWrite(const TypeComponentUnit&, const uint8_t*, size_t);
     static bool onMulticastWrite(const TypeComponentUnit&, const uint8_t*, size_t);
 

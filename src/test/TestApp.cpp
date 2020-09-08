@@ -5,7 +5,7 @@
 #include "TestApp.h"
 
 TestApp::TestApp(int *_interfaces, const LogInfo& _logInfo, std::vector<int>& _componentCount)
-        : App(APPTYPE_TEST, _interfaces, _logInfo, {1, 1, 1}, false) {
+        : App(APPTYPE_TEST, _interfaces, _logInfo, {1, 0, 0}, false) {
 
     addRoutine('1', "SendWakeUp", &TestApp::testSendWakeUp);
     addRoutine('2', "SendID", &TestApp::testSendID);

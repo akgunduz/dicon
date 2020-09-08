@@ -266,11 +266,14 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 }
 
 
-bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buf, size_t size) {
+bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buffer, size_t size) {
 
-    crc = CRC::Calculate(buf, size, Util::crcTable, crc);
+    LOGS_E(getHost(), "%ld : Data sent, count : %3d, bufPtr : %s", iter++,
+           size, Util::hex2str(buffer, size).c_str());
 
-    return writeData(target, buf, size);
+    crc = CRC::Calculate(buffer, size, Util::crcTable, crc);
+
+    return writeData(target, buffer, size);
 }
 
 bool MessageBase::writeBlock(const TypeComponentUnit& target, const MessageBlock& baseHeader) {
