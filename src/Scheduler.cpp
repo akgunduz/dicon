@@ -9,8 +9,6 @@ Scheduler::~Scheduler() {
 
     LOGP_T("Deallocating Scheduler");
 
-    end();
-
 }
 
 bool Scheduler::push(TypeSchedulerItem item) {
