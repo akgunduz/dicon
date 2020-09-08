@@ -21,29 +21,25 @@ class Scheduler {
 
     std::condition_variable cond;
 
-    std::thread thread;
-
 	std::list<TypeSchedulerItem> items;
 
 	std::map<int, const InterfaceSchedulerCB*> callbacks;
 
 	int capacity {MAX_SCHEDULER_CAPACITY};
 
-	bool initialized{false};
-
 	bool endFlag{false};
-
-	static void* run(void *);
 
 public:
 
-	Scheduler();
+	Scheduler() = default;
 
     void setCB(int, const InterfaceSchedulerCB*);
 
 	bool push(TypeSchedulerItem item);
 
     TypeSchedulerItem pull();
+
+    bool process();
 
 	void end();
 

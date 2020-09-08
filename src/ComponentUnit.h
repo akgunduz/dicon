@@ -26,7 +26,7 @@ public:
     void setSocket(int);
 
     long long getCheckTime() const;
-    void setCheckTime(long long checkTime);
+    void setCheckTime(long long);
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;

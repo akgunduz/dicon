@@ -9,15 +9,24 @@
 CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
         : CommInterface(host, device, schedulerCB) {
 
-    if (!initUnixSocket()) {
-        LOGS_E(getHost(), "initUnixSocket failed!!!");
-        throw std::runtime_error("UnixSocket : initUnixSocket failed!!!");
-    }
-
     if (!initThread()) {
         LOGS_E(getHost(), "initThread failed!!!");
         throw std::runtime_error("UnixSocket : initThread failed!!!");
     }
+}
+
+CommUnixSocket::~CommUnixSocket() {
+
+    LOGP_T("Deallocating UnixSocket");
+
+    end();
+
+    close(unixSocket);
+}
+
+bool CommUnixSocket::initInterface() {
+
+    return initUnixSocket();
 }
 
 bool CommUnixSocket::initUnixSocket() {
@@ -206,15 +215,6 @@ TypeWriteCB CommUnixSocket::getWriteCB(const TypeComponentUnit& source) {
 
         return write(target->getSocket(), buf, size);
     };
-}
-
-CommUnixSocket::~CommUnixSocket() {
-
-    LOGP_T("Deallocating UnixSocket");
-
-    end();
-
-    close(unixSocket);
 }
 
 COMM_INTERFACE CommUnixSocket::getType() {

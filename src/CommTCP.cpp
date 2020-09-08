@@ -6,20 +6,28 @@
 #include "CommTCP.h"
 #include "NetUtil.h"
 
-CommTCP::CommTCP(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
-        : CommInterface(host, device, schedulerCB) {
-
-    if (!initTCP()) {
-        throw std::runtime_error("Net : initTCP failed!!!");
-    }
-
-    if (!initMulticast()) {
-        throw std::runtime_error("Net : initMulticast failed!!!");
-    }
+CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *receiverCB)
+        : CommInterface(host, device, receiverCB) {
 
     if (!initThread()) {
-        throw std::runtime_error("Net : initThread failed!!!");
+        throw std::runtime_error("TCP Interface : initThread failed!!!");
     }
+}
+
+CommTCP::~CommTCP() {
+
+    LOGP_T("Deallocating TCP Interface");
+
+    end();
+
+    close(multicastSocket);
+
+    close(netSocket);
+}
+
+bool CommTCP::initInterface() {
+
+    return initTCP() && initMulticast();
 }
 
 bool CommTCP::initTCP() {
@@ -143,8 +151,6 @@ bool CommTCP::initMulticast() {
 
         break;
     }
-
-    lastFreeTCPPort++;
 
     if (!tryCount) {
 
@@ -314,7 +320,7 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
     if (connect(clientSocket, (struct sockaddr *) &clientAddress, sizeof(sockaddr_in)) == -1) {
-        LOGS_E(getHost(), "Socket can not connect!!!");
+        LOGS_E(getHost(), "Socket can not connect!!!, err : %d", errno);
         close(clientSocket);
         return false;
     }
@@ -350,17 +356,6 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit& target, TypeMessage ms
     close(clientSocket);
 
     return true;
-}
-
-CommTCP::~CommTCP() {
-
-    LOGP_T("Deallocating Net");
-
-    end();
-
-    close(multicastSocket);
-
-    close(netSocket);
 }
 
 COMM_INTERFACE CommTCP::getType() {
@@ -418,5 +413,3 @@ TypeAddressList CommTCP::getAddressList() {
 
     return list;
 }
-
-

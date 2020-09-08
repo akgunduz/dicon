@@ -34,11 +34,12 @@ enum MSG_STATE {
 };
 
 class MessageBase {
+
     uint64_t iter = 1;
 
     MSG_STATE state{MSGSTATE_INIT};
 
-	uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
+    uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
 
     size_t tmpBufPos = 0;
     size_t binBufPos = 0;
@@ -54,8 +55,10 @@ class MessageBase {
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 
 protected:
+
     std::deque<uint64_t> numbers;
     std::deque<std::string> strings;
+
 public:
 
     explicit MessageBase(const TypeHostUnit&);

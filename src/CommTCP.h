@@ -36,6 +36,10 @@ class CommTCP : public CommInterface {
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
+protected:
+
+    bool initInterface() override;
+
 public :
 
 	CommTCP(const TypeHostUnit&, const TypeDevice&,

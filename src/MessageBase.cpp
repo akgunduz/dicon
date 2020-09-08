@@ -22,6 +22,7 @@ MessageBase::MessageBase(const TypeHostUnit& host)
 MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target,
                          MSG_TYPE msgType, STREAM_TYPE streamType)
 		: MessageBase(host) {
+
     header.setType(msgType);
     header.setStream(streamType);
     header.setOwner(host->getUnit(target->getType()));
@@ -217,7 +218,14 @@ bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer,
 
             crc = CRC::Calculate(ptr, sizeof(MessageBlock), Util::crcTable, crc);
 
-            readBlock(source, ptr, sizeof(MessageBlock));
+            if (!readBlock(source, ptr, sizeof(MessageBlock))) {
+
+                tmpBufPos = 0;
+
+                crc = 0;
+
+                return false;
+            }
 
             if (block.getType() == MSGHEADER_BINARY) {
 
@@ -306,8 +314,6 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
         LOGS_E(getHost(), "Block is invalid, type : %d, size : %d, data : %s",
                block.getType(), block.getSize(), Util::hex2str(buffer, size).c_str());
 
-        assert(false);
-
         return false;
 
     }
@@ -316,8 +322,6 @@ bool MessageBase::readBlock(const TypeComponentUnit& source, const uint8_t* buff
 
         LOGS_E(getHost(), "Block Signature Mismatch, expected : 0x%X, read : 0x%X, data : %s",
                SIGNATURE, block.getSign(), Util::hex2str(buffer, size).c_str());
-
-        assert(false);
 
         return false;
 

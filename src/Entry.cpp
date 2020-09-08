@@ -119,19 +119,17 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    App *app = nullptr;
-
 #if defined(CONSOLE)
 
-    app = new ConsoleApp(interfaceID, logInfo, componentCount);
+    App *app = new ConsoleApp(interfaceID, logInfo, componentCount);
 
 #elif defined(WEB)
 
-    app = new WebApp(interfaceID, logInfo, componentCount);
+    App *app = new WebApp(interfaceID, logInfo, componentCount);
 
 #elif defined(TEST)
 
-    app = new TestApp(interfaceID, logInfo, componentCount);
+    App *app = new TestApp(interfaceID, logInfo, componentCount);
 
 #else
 
