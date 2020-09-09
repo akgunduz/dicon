@@ -8,6 +8,12 @@ MessageBlock::MessageBlock(uint16_t _type, uint32_t _size) :
     type(_type), size(_size) {
 }
 
+void MessageBlock::set(uint16_t _type, uint32_t _size) {
+
+    type = _type;
+    size = _size;
+}
+
 uint16_t MessageBlock::getSign() {
 
     return sign;

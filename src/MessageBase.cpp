@@ -9,8 +9,8 @@
 #include "CommTCP.h"
 #include "CommUnixSocket.h"
 
-MessageBase::MessageBase(const TypeHostUnit& host)
-		: host(host) {
+MessageBase::MessageBase(TypeHostUnit host)
+		: host(std::move(host)) {
 
     readParser[MSGHEADER_HEADER] = &MessageBase::readHeader;
     readParser[MSGHEADER_STRING] = &MessageBase::readString;
@@ -34,7 +34,7 @@ MessageBase::~MessageBase() {
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
-    LOGS_T(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
+    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
            nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
@@ -265,29 +265,59 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
     return resCrc == crc;
 }
 
+bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType, const uint8_t *buffer, size_t size) {
 
-bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buffer, size_t size) {
+    if (blockType == MSGHEADER_MAX) {
 
-    LOGS_T(getHost(), "%ld : Data sent, count : %3d, bufPtr : %s", iter++,
-           size, Util::hex2str(buffer, size).c_str());
+        crc = CRC::Calculate(buffer, size, Util::crcTable, crc);
 
-    crc = CRC::Calculate(buffer, size, Util::crcTable, crc);
+        writeData(target, buffer, size);
 
-    return writeData(target, buffer, size);
-}
+        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+               size, Util::hex2str(buffer, size).c_str());
 
-bool MessageBase::writeBlock(const TypeComponentUnit& target, const MessageBlock& baseHeader) {
+        return true;
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Block write process is started");
-
-    baseHeader.fillBuffer(tmpBuf);
-
-    if (!onWrite(target, tmpBuf, sizeof(MessageBlock))) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Block to stream");
-        return false;
     }
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Block is written successfully");
+    size_t newPos = tmpBufPos + sizeof(MessageBlock) + size;
+
+    if (newPos > TMP_BUFFER_SIZE) {
+
+        writeData(target, tmpBuf, tmpBufPos);
+
+        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+
+        tmpBufPos = 0;
+    }
+
+    block.set(blockType, size);
+
+    block.fillBuffer(tmpBuf + tmpBufPos);
+
+    crc = CRC::Calculate(tmpBuf + tmpBufPos, sizeof(MessageBlock), Util::crcTable, crc);
+
+    tmpBufPos += sizeof(MessageBlock);
+
+    if (blockType != MSGHEADER_BINARY) {
+
+        memcpy(tmpBuf + tmpBufPos, buffer, size);
+
+        crc = CRC::Calculate(buffer, size, Util::crcTable, crc);
+
+        tmpBufPos += size;
+    }
+
+    if (blockType == MSGHEADER_BINARY || blockType == MSGHEADER_END) {
+
+        writeData(target, tmpBuf, tmpBufPos);
+
+        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+
+        tmpBufPos = 0;
+    }
 
     return true;
 }
@@ -296,16 +326,11 @@ bool MessageBase::writeHeader(const TypeComponentUnit& target) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Header write process is started");
 
-    MessageBlock baseHeader(MSGHEADER_HEADER, sizeof(MessageHeader));
+    uint8_t buffer[sizeof(MessageHeader)] = {};
 
-    if (!writeBlock(target, baseHeader)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Header BlockBase to stream");
-        return false;
-    }
+    serializeHeader(buffer);
 
-    serializeHeader(tmpBuf);
-
-	if (!onWrite(target, tmpBuf, header.getSize())) {
+	if (!onWrite(target, MSGHEADER_HEADER, buffer, sizeof(MessageHeader))) {
 		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Header to stream");
 		return false;
 	}
@@ -319,14 +344,7 @@ bool MessageBase::writeString(const TypeComponentUnit& target, const std::string
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "String write process is started => String : %s", str.c_str());
 
-    MessageBlock baseHeader(MSGHEADER_STRING, str.size());
-
-    if (!writeBlock(target, baseHeader)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write String BlockBase to stream");
-        return false;
-    }
-
-	if (!onWrite(target, (uint8_t *) str.c_str(), str.size())) {
+	if (!onWrite(target, MSGHEADER_STRING, (uint8_t *) str.c_str(), str.size())) {
 		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write String to stream");
 		return false;
 	}
@@ -340,17 +358,11 @@ bool MessageBase::writeNumber(const TypeComponentUnit& target, uint64_t number) 
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "Number write process is started => Number : %ld", number);
 
-    MessageBlock baseHeader(MSGHEADER_NUMBER, sizeof(uint64_t));
+    uint8_t buffer[sizeof(uint64_t)] = {};
 
-    if (!writeBlock(target, baseHeader)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number BlockBase to stream");
-        return false;
-    }
-
-    uint8_t buffer[8] = {};
     *((uint64_t *) buffer) = htonll(number);
 
-	if (!onWrite(target, buffer, 8)) {
+	if (!onWrite(target, MSGHEADER_NUMBER, buffer, sizeof(uint64_t))) {
 		LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number to stream");
 		return false;
 	}
@@ -371,14 +383,10 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
         return false;
     }
 
-    MessageBlock baseHeader(MSGHEADER_BINARY, fileItem->getSize());
-
-    if (!writeBlock(target, baseHeader)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Binary BlockBase to stream");
+    if (!onWrite(target, MSGHEADER_BINARY, nullptr, fileItem->getSize())) {
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number to stream");
         return false;
     }
-
-    size_t remaining = fileItem->getSize();
 
     FILE *file = std::fopen(fileItem->getPath().string().c_str(), "rb");
 
@@ -388,11 +396,13 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
         return false;
     }
 
+    size_t remaining = fileItem->getSize();
+
     do {
 
         int count = std::fread(tmpBuf, 1, std::min((size_t)TMP_BUFFER_SIZE, remaining), file);
 
-        onWrite(target, tmpBuf, count);
+        onWrite(target, MSGHEADER_MAX, tmpBuf, count);
 
         remaining -= count;
 
@@ -411,17 +421,11 @@ bool MessageBase::writeEndStream(const TypeComponentUnit& target) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND, "EndStream write process is started => CRC : 0x%X", crc);
 
-    MessageBlock baseHeader(MSGHEADER_END, sizeof(uint32_t));
+    uint8_t buffer[sizeof(uint32_t)] = {};
 
-    if (!writeBlock(target, baseHeader)) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write EndStream BlockBase to stream");
-        return false;
-    }
-
-    uint8_t buffer[4] = {};
     *((uint32_t *) buffer) = htonl(crc);
 
-    if (!onWrite(target, buffer, 4)) {
+    if (!onWrite(target, MSGHEADER_END, buffer, sizeof(uint32_t))) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write EndStream to stream");
         return false;
     }

@@ -53,7 +53,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/HostUnit.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
-        ${SOURCE_PATH}/InterfaceFactory.cpp
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp
