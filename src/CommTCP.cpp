@@ -5,8 +5,6 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
-#include "Util.h"
-#include "CommData.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *receiverCB)
         : CommInterface(host, device, receiverCB) {

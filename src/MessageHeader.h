@@ -24,9 +24,8 @@ class MessageHeader {
 
     CommUnit owner;
 
-   // uint64_t variant[MAX_VARIANT]{};
-
 public:
+
     MessageHeader() = default;
 
     long getSize();
@@ -40,9 +39,6 @@ public:
     TypeCommUnit getOwner();
     void setOwner(const TypeCommUnit&);
     void grabOwner(const TypeCommUnit&);
-
-//    uint64_t getVariant(int id);
-//    void setVariant(int id, uint64_t _variant);
 
     int getPriority();
     void setPriority(int);

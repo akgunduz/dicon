@@ -15,7 +15,6 @@
 #include "MessageHeader.h"
 #include "FileItem.h"
 
-
 #define TMP_BUFFER_SIZE 1000
 
 #define BUSY_SLEEP_TIME 200
@@ -61,8 +60,7 @@ protected:
 
 public:
 
-    explicit MessageBase(const TypeHostUnit&);
-
+    explicit MessageBase(TypeHostUnit);
     MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
     ~MessageBase();
 
@@ -82,10 +80,9 @@ public:
     virtual bool build(const TypeComponentUnit&) = 0;
 
 	bool writeData(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
-	bool onWrite(const TypeComponentUnit &target, const uint8_t *buf, size_t size);
+	bool onWrite(const TypeComponentUnit&, MSG_HEADER, const uint8_t*, size_t);
 
 	bool writeHeader(const TypeComponentUnit&);
-	bool writeBlock(const TypeComponentUnit &target, const MessageBlock &baseHeader);
 	bool writeString(const TypeComponentUnit&, const std::string&);
 	bool writeNumber(const TypeComponentUnit&, uint64_t);
 	bool writeBinary(const TypeComponentUnit&, const TypeFileItem&);

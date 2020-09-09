@@ -30,6 +30,8 @@ public:
     MessageBlock(uint16_t, uint32_t);
     ~MessageBlock() = default;
 
+    void set(uint16_t, uint32_t);
+
     MSG_HEADER getType();
     size_t getSize();
     uint16_t getSign();
