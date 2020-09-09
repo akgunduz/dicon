@@ -45,6 +45,10 @@ class CommTCP : public CommInterface {
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
 
+protected:
+
+    bool initInterface() override;
+
 public :
 
 	CommTCP(const TypeHostUnit&, const TypeDevice&,
@@ -55,11 +59,6 @@ public :
 	bool isSupportMulticast() override;
 
     TypeAddressList getAddressList() override;
-
-    bool initInterface() override;
 };
-
-
-
 
 #endif //DICON_COMMTCP_H

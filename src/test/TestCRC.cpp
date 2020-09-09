@@ -22,5 +22,5 @@ void TestApp::testCRC(TypeDistributor& distributor, TypeCollector& collector, Ty
 
     crc = CRC::Calculate(out, size, Util::crcTable, crc);
 
-    LOGP_E("CRC : 0x%X", crc);
+    LOGS_I(distributor->getHost(), "CRC : 0x%X", crc);
 }

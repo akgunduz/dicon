@@ -34,6 +34,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorUnit.cpp
         ${SOURCE_PATH}/CommData.cpp
         ${SOURCE_PATH}/CommInterface.cpp
+        ${SOURCE_PATH}/CommInterfaceFactory.cpp
         ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp
 #        ${SOURCE_PATH}/CommUnixSocket.cpp

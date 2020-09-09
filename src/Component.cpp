@@ -39,7 +39,7 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
                                    CommInterfaceFactory::createInterface(host, otherDevice, receiverCB) :
                                    interfaces[COMP_NODE];
-    
+
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
     if (!interfaces[COMP_NODE] || !interfaces[COMP_DISTRIBUTOR]) {
