@@ -34,10 +34,12 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = InterfaceFactory::createInterface(host, nodeDevice, receiverCB);
+    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(host, nodeDevice, receiverCB);
+
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   InterfaceFactory::createInterface(host, otherDevice, receiverCB) :
+                                   CommInterfaceFactory::createInterface(host, otherDevice, receiverCB) :
                                    interfaces[COMP_NODE];
+
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
 
     if (!interfaces[COMP_NODE] || !interfaces[COMP_DISTRIBUTOR]) {

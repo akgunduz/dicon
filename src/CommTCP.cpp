@@ -5,13 +5,12 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
+#include "Util.h"
+#include "CommData.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *receiverCB)
         : CommInterface(host, device, receiverCB) {
 
-    if (!initThread()) {
-        throw std::runtime_error("TCP Interface : initThread failed!!!");
-    }
 }
 
 CommTCP::~CommTCP() {

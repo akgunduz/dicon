@@ -7,7 +7,7 @@
 #define	DICON_COLLECTOR_H
 
 #include "Component.h"
-#include "InterfaceFactory.h"
+#include "CommInterfaceFactory.h"
 #include "Message.h"
 #include "JobItem.h"
 #include "DistributorObject.h"

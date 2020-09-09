@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#ifndef DICON_INTERFACEFACTORY_H
-#define DICON_INTERFACEFACTORY_H
+#ifndef DICON_COMMINTERFACEFACTORY_H
+#define DICON_COMMINTERFACEFACTORY_H
 
 #include "Log.h"
 #include "Scheduler.h"
@@ -12,9 +12,9 @@
 #include "Message.h"
 #include "Address.h"
 
-class InterfaceFactory {
+class CommInterfaceFactory {
 
-    InterfaceFactory()= default;
+    CommInterfaceFactory()= default;
 
 public:
 
@@ -22,4 +22,4 @@ public:
                                          const InterfaceSchedulerCB *);
 };
 
-#endif //DICON_INTERFACEFACTORY_H
+#endif //DICON_COMMINTERFACEFACTORY_H

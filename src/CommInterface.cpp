@@ -55,15 +55,16 @@ bool CommInterface::initThread() {
 
     LOGS_T(getHost(), "Init Notifier PIPE OK!!!");
 
-    threadProduce = std::thread([](CommInterface *commInterface) {
+    threadProduce = std::thread([](const TypeInterface& commInterface) {
 
         commInterface->initInterface();
 
         commInterface->runReceiver();
 
-    }, this);
+    }, shared_from_this());
 
-    threadConsume = std::thread([](CommInterface *commInterface) {
+
+    threadConsume = std::thread([](const TypeInterface& commInterface) {
 
         while(true) {
 
@@ -74,7 +75,7 @@ bool CommInterface::initThread() {
 
         }
 
-    }, this);
+    }, shared_from_this());
 
     return true;
 }
