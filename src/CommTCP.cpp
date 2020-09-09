@@ -209,7 +209,6 @@ bool CommTCP::onAlloc(size_t suggested_size, uv_buf_t *buf) {
     buf->base = (char *) malloc(suggested_size);
     assert(buf->base != nullptr);
     buf->len = suggested_size;
-    memset(buf->base, 0x61, suggested_size);
 
     LOGS_E(getHost(), "Allocated Buffer, Pointer : %p, Len : %d !!!", buf, suggested_size);
 
@@ -294,11 +293,21 @@ bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer,
     return true;
 }
 
+char haluk[] = "haluk";
+
 bool CommTCP::onMulticastWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+    uv_buf_t bufPtr;
+    bufPtr.base = (char*)malloc(size);
+    memcpy(bufPtr.base, buffer, size);
+
+    //uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+
+
 
     auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
+
+    writeReq->data = haluk;
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
