@@ -22,7 +22,7 @@ bool processWakeUpMsg(const TypeComponent& component, const TypeComponentUnit& o
 
     LOGC_I(component->getHost(), owner, MSGDIR_SEND, "Sending Alive");
 
- //   sendAlive(component, owner);
+    sendAlive(component, owner);
     return true;
 }
 
@@ -36,11 +36,11 @@ void TestApp::testSendWakeUp(TypeDistributor& distributor, TypeCollector& collec
     MessageType::addMsg(MSG_TYPE_TEST_WAKEUP, "TEST_WAKEUP");
     MessageType::addMsg(MSG_TYPE_TEST_ALIVE, "TEST_ALIVE");
 
-//    collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
-//    node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
-//
-//    distributor->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
-//    distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
+    collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
+    node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_WAKEUP, processWakeUpMsg);
+
+    distributor->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
+    distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, distributor->getInterfaceMulticastAddress(COMP_NODE));
     target->getAddress().setMulticast(true);

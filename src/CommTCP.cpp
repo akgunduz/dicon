@@ -6,13 +6,11 @@
 #include "CommTCP.h"
 #include "NetUtil.h"
 #include "Util.h"
+#include "CommData.h"
 
 CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *receiverCB)
         : CommInterface(host, device, receiverCB) {
 
-    if (!initThread()) {
-        throw std::runtime_error("Net : initThread failed!!!");
-    }
 }
 
 CommTCP::~CommTCP() {
@@ -155,16 +153,13 @@ bool CommTCP::initMulticast() {
         return false;
     }
 
-    multicastServer.data = new CommData{std::make_unique<Message>(getHost()),
-                                        std::make_shared<ComponentUnit>(), this};
+    multicastServer.data = new CommData(shared_from_this());
 
     result = uv_udp_recv_start(&multicastServer,
 
             [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                auto data = (CommData *) client->data;
-
-                data->interface->onAlloc(suggested_size, buf);
+                onAlloc(buf, suggested_size);
 
             },
 
@@ -176,18 +171,24 @@ bool CommTCP::initMulticast() {
                     return;
                 }
 
-                auto data = (CommData *) client->data;
-
                 if (nRead == UV_ECONNRESET) {
 
-                    data->interface->onFree(buf);
+                    onFree(buf);
 
                     return;
                 }
 
-                data->interface->onRead(data->component,
-                                        data->msg, (uint8_t *) buf->base, nRead);
+                auto commData = (CommData *) client->data;
 
+                auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+
+                bool isDone = commInterface->onRead(commData->getComponent(),
+                                                    commData->getMsg(), (uint8_t *) buf->base, nRead);
+
+                if (isDone) {
+
+                    commData->reInitialize();
+                }
             });
 
     if (result != 0) {
@@ -204,18 +205,27 @@ bool CommTCP::initMulticast() {
     return true;
 }
 
-bool CommTCP::onAlloc(size_t suggested_size, uv_buf_t *buf) {
+bool CommTCP::onAlloc(uv_buf_t *buf, size_t size, const uint8_t* copy) {
 
-    buf->base = (char *) malloc(suggested_size);
+    buf->base = (char *) malloc(size);
+
     assert(buf->base != nullptr);
-    buf->len = suggested_size;
 
-    LOGS_E(getHost(), "Allocated Buffer, Pointer : %p, Len : %d !!!", buf, suggested_size);
+    buf->len = size;
+
+    if (copy) {
+
+        memcpy(buf->base, copy, size);
+    }
+
+    //LOGP_E("Allocated Buffer, Pointer : %p, Len : %d !!!", buf, size);
 
     return true;
 }
 
 bool CommTCP::onFree(const uv_buf_t *buf) {
+
+    //LOGP_E("DeAllocating Buffer, Pointer : %p", buf->base);
 
     free(buf->base);
 
@@ -266,7 +276,8 @@ bool CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const
 
 bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+    uv_buf_t bufPtr;
+    onAlloc(&bufPtr, size, buffer);
 
     auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
 
@@ -293,21 +304,12 @@ bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer,
     return true;
 }
 
-char haluk[] = "haluk";
-
 bool CommTCP::onMulticastWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
     uv_buf_t bufPtr;
-    bufPtr.base = (char*)malloc(size);
-    memcpy(bufPtr.base, buffer, size);
-
-    //uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
-
-
+    onAlloc(&bufPtr, size, buffer);
 
     auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
-
-    writeReq->data = haluk;
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
@@ -358,8 +360,7 @@ bool CommTCP::onServerConnect() {
         return false;
     }
 
-    client->data = new CommData{std::make_unique<Message>(getHost()),
-                                std::make_shared<ComponentUnit>(), this};
+    client->data = new CommData(shared_from_this());
 
     result = uv_read_start(
 
@@ -367,9 +368,7 @@ bool CommTCP::onServerConnect() {
 
             [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                auto data = (CommData *) client->data;
-
-                data->interface->onAlloc(suggested_size, buf);
+                onAlloc(buf, suggested_size);
 
             },
 
@@ -380,19 +379,26 @@ bool CommTCP::onServerConnect() {
                     return;
                 }
 
-                auto data = (CommData *) client->data;
-
                 if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-                    data->interface->onShutdown(client);
+                    onShutdown(client);
 
-                    data->interface->onFree(buf);
+                    onFree(buf);
 
                     return;
                 }
 
-                data->interface->onRead(data->component,
-                                        data->msg, (uint8_t *) buf->base, nRead);
+                auto commData = (CommData *) client->data;
+
+                auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+
+                bool isDone = commInterface->onRead(commData->getComponent(),
+                                                    commData->getMsg(), (uint8_t *) buf->base, nRead);
+
+                if (isDone) {
+
+                    commData->reInitialize();
+                }
             });
 
     if (result != 0) {
@@ -438,7 +444,7 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    client->data = new CommData{std::move(msg), target, this};
+    client->data = new CommData(shared_from_this(), target, msg);
 
     auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
@@ -459,9 +465,11 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
                         return;
                     }
 
-                    auto data = (CommData *) connectReq->handle->data;
+                    auto commData = (CommData *) connectReq->handle->data;
 
-                    data->interface->onClientConnect(data->component, data->msg, connectReq->handle);
+                    auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+
+                    commInterface->onClientConnect(commData->getComponent(), commData->getMsg(), connectReq->handle);
 
                     free(connectReq);
 

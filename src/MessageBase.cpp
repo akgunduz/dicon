@@ -34,7 +34,7 @@ MessageBase::~MessageBase() {
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
-    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
+    LOGS_T(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
            nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
@@ -268,7 +268,7 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 
 bool MessageBase::onWrite(const TypeComponentUnit& target, const uint8_t *buffer, size_t size) {
 
-    LOGS_E(getHost(), "%ld : Data sent, count : %3d, bufPtr : %s", iter++,
+    LOGS_T(getHost(), "%ld : Data sent, count : %3d, bufPtr : %s", iter++,
            size, Util::hex2str(buffer, size).c_str());
 
     crc = CRC::Calculate(buffer, size, Util::crcTable, crc);

@@ -32,6 +32,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/CollectorUnit.cpp
+        ${SOURCE_PATH}/CommData.cpp
         ${SOURCE_PATH}/CommInterface.cpp
         ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp

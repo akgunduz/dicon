@@ -12,27 +12,21 @@ TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const 
 
     TypeInterface commInterface = nullptr;
 
-    try {
+    switch (device->getType()) {
 
-        switch (device->getType()) {
-
-            case COMMINTERFACE_TCPIP:
-                commInterface = std::make_shared<CommTCP>(host, device, receiverCB);
-                break;
+        case COMMINTERFACE_TCPIP:
+            commInterface = std::make_shared<CommTCP>(host, device, receiverCB);
+            break;
 
 //            case COMMINTERFACE_UNIXSOCKET:
 //                commInterface = std::make_shared<CommUnixSocket>(host, device, receiverCB);
 //                break;
 
-            default:
-                break;
-        }
-    } catch (std::exception &e) {
-
-        LOGS_E(host, "%s", e.what());
-
-        return nullptr;
+        default:
+            return nullptr;
     }
+
+    commInterface->initThread();
 
     return commInterface;
 }

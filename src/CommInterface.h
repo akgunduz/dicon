@@ -19,7 +19,7 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-class CommInterface {
+class CommInterface : public std::enable_shared_from_this<CommInterface> {
 
     const TypeHostUnit host;
     const TypeDevice device;
@@ -45,7 +45,6 @@ protected :
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 
-	bool initThread();
 	void end();
 	CommInterface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 
@@ -65,6 +64,8 @@ public :
     virtual COMM_INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;
+
+    bool initThread();
 };
 
 typedef std::shared_ptr<CommInterface> TypeInterface;

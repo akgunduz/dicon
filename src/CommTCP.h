@@ -30,11 +30,12 @@ class CommTCP : public CommInterface {
 	bool initTCP();
 	bool initMulticast();
 
-	bool onAlloc(size_t suggested_size, uv_buf_t *buf);
-	bool onFree(const uv_buf_t *);
+	static bool onAlloc(uv_buf_t*, size_t, const uint8_t* = nullptr);
+	static bool onFree(const uv_buf_t *);
+    static bool onShutdown(uv_stream_t*);
+
     bool onServerConnect();
     bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
-    bool onShutdown(uv_stream_t*);
     bool onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
     static void onClose(uv_handle_t*);
@@ -43,10 +44,6 @@ class CommTCP : public CommInterface {
 
 	bool runSender(const TypeComponentUnit&, TypeMessage) override;
     bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
-
-protected:
-
-    bool initInterface() override;
 
 public :
 
@@ -58,14 +55,11 @@ public :
 	bool isSupportMulticast() override;
 
     TypeAddressList getAddressList() override;
+
+    bool initInterface() override;
 };
 
-struct CommData {
 
-    TypeMessage msg;
-    TypeComponentUnit component;
-    CommTCP *interface;
-};
 
 
 #endif //DICON_COMMTCP_H
