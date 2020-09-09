@@ -344,6 +344,7 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit& target, TypeMessage ms
     }
 
     struct in_addr interface_addr = NetUtil::getInetAddressByAddress(getAddress()).sin_addr;
+
     setsockopt(clientSocket, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&interface_addr, sizeof(interface_addr));
 
     target->setSocket(clientSocket);
