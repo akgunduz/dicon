@@ -3,12 +3,12 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include "InterfaceFactory.h"
+#include "CommInterfaceFactory.h"
 #include "CommTCP.h"
 #include "CommUnixSocket.h"
 
-TypeInterface InterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
-                                                const InterfaceSchedulerCB *receiverCB) {
+TypeInterface CommInterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
+                                                    const InterfaceSchedulerCB *receiverCB) {
 
     TypeInterface commInterface = nullptr;
 

@@ -5,7 +5,7 @@
 #ifndef DICON_COMPONENT_H
 #define DICON_COMPONENT_H
 
-#include "InterfaceFactory.h"
+#include "CommInterfaceFactory.h"
 #include "DeviceList.h"
 #include "MessageType.h"
 #include "HostUnit.h"

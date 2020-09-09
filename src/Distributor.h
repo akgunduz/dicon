@@ -8,7 +8,7 @@
 
 #include "Component.h"
 #include "Node.h"
-#include "InterfaceFactory.h"
+#include "CommInterfaceFactory.h"
 #include "Util.h"
 #include "NodeManager.h"
 #include "CollectorManager.h"
