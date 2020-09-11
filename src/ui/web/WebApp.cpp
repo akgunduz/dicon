@@ -168,7 +168,7 @@ WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& comp
         }, this);
 
 
-        componentController->getDistributor()->getBaseHost()->setAllUIAddress(webPort);
+        componentController->getDistributor()->setAllUIAddress(webPort);
 
         LOGP_I("Link : http://localhost:%d", webPort);
     }
@@ -177,7 +177,7 @@ WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& comp
 
         for (auto &coll : componentController->getCollectors()) {
 
-            coll->getBaseHost()->setAllUIAddress(webPort);
+            coll->setAllUIAddress(webPort);
         }
     }
 
@@ -185,7 +185,7 @@ WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& comp
 
         for (auto &node : componentController->getNodes()) {
 
-            node->getBaseHost()->setAllUIAddress(webPort);
+            node->setAllUIAddress(webPort);
         }
     }
 }

@@ -10,7 +10,7 @@ TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component(TypeHost _host) {
+Component::Component(TypeHostUnit _host) {
 
     host = std::move(_host);
 
@@ -48,16 +48,6 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
 
         return false;
     }
-
-    host->setInterface(COMP_DISTRIBUTOR, interfaces[COMP_DISTRIBUTOR]);
-    host->setInterface(COMP_COLLECTOR, interfaces[COMP_COLLECTOR]);
-    host->setInterface(COMP_NODE, interfaces[COMP_NODE]);
-
-    LOGS_I(getHost(), "Host Addresses:");
-    LOGS_I(getHost(), "\t%s : %s", ComponentType::getName(ComponentUnit::next(type)),
-           NetUtil::getIPString(host->getAddress(ComponentUnit::next(type)).get()).c_str());
-    LOGS_I(getHost(), "\t%s : %s", ComponentType::getName(ComponentUnit::prev(type)),
-           NetUtil::getIPString(host->getAddress(ComponentUnit::prev(type)).get()).c_str());
 
     return true;
 }
@@ -136,19 +126,18 @@ bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
     return interfaces[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
-TypeHost& Component::getBaseHost() {
+TypeHostUnit& Component::getHost() {
 
     return host;
 }
 
-TypeHostUnit& Component::getHost() {
-
-    return host->get();
-}
-
 TypeHostUnit Component::getHost(COMPONENT _out) {
 
-    return host->get(_out);
+    TypeHostUnit unit = std::make_unique<HostUnit>(*host);
+
+    unit->setAddress(getInterfaceAddress(_out));
+
+    return std::move(unit);
 }
 
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {

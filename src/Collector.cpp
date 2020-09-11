@@ -7,7 +7,7 @@
 #include "CollectorHost.h"
 
 Collector::Collector(int _commInterfaceOther, int _commInterfaceNode)  :
-        Component(std::make_shared<CollectorHost>()) {
+        Component(std::make_unique<CollectorHost>()) {
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
@@ -123,7 +123,7 @@ bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessa
 
 bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
+    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries",
            owner->getID(), msg->getData().getProcess()->getFileCount());
@@ -217,7 +217,7 @@ void Collector::setDistributor(const TypeComponentUnit& _distributor) {
 
 bool Collector::processJob() {
 
-    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
+    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
 
     if (job->getStatus() != JOBSTATUS_OK) {
 

@@ -10,7 +10,7 @@
 #define PROCESS_SLEEP_TIME 1000
 
 Node::Node(int _commInterface) :
-    Component(std::make_shared<NodeHost>()) {
+    Component(std::make_unique<NodeHost>()) {
 
     LOGS_T(getHost(), "Node is initializing");
 
@@ -65,7 +65,7 @@ bool Node::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage m
 
 bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] is approved by distributor",
            nodeHost->getAssigned()->getID(),
@@ -106,7 +106,7 @@ bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMess
 
 bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] request is received ",
            owner->getID(), processItem->getID());
@@ -130,7 +130,7 @@ bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessag
 
 bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received",
            owner->getID(), processItem->getID());
@@ -144,7 +144,7 @@ bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage
 
 bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
 
     nodeHost->setState(NODESTATE_IDLE);
 
@@ -162,7 +162,7 @@ bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage 
 
 bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
            nodeHost->getAssigned()->getID(),

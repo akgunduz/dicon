@@ -8,7 +8,7 @@
 #include "CommInterfaceFactory.h"
 #include "DeviceList.h"
 #include "MessageType.h"
-#include "Host.h"
+#include "HostUnit.h"
 #include "StopWatch.h"
 #include "NotifyType.h"
 
@@ -34,7 +34,7 @@ class Component : public std::enable_shared_from_this<Component> {
 
 protected :
 
-    TypeHost host;
+    TypeHostUnit host;
 
     bool initialized{false};
 
@@ -54,10 +54,9 @@ public:
 
     static TypeComponent nullComponent;
 
-    Component(TypeHost);
+    explicit Component(TypeHostUnit);
     virtual ~Component();
 
-    TypeHost& getBaseHost();
     TypeHostUnit& getHost();
     TypeHostUnit getHost(COMPONENT);
 
@@ -67,6 +66,21 @@ public:
     TypeAddressList getInterfaceAddressList(COMPONENT);
     COMM_INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
+
+    template <class T>
+    void setUIAddress(COMPONENT _out, T _address) {
+
+        getInterfaceAddress(_out).setUI(_address);
+    }
+
+    template <class T>
+    void setAllUIAddress(T _address) {
+
+        getInterfaceAddress(COMP_DISTRIBUTOR).setUI(_address);
+        getInterfaceAddress(COMP_COLLECTOR).setUI(_address);
+        getInterfaceAddress(COMP_NODE).setUI(_address);
+    }
+
     bool onReceive(const TypeComponentUnit&, MSG_TYPE, TypeMessage);
 
     bool send(const TypeComponentUnit&, TypeMessage);

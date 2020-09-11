@@ -6,21 +6,21 @@
 #define DICON_NODEHOST_H
 
 #include "NodeState.h"
-#include "Host.h"
+#include "HostUnit.h"
 #include "ProcessItem.h"
 #include "NodeObject.h"
 
-class NodeHost : public Host, public NodeObject {
+class NodeHost : public HostUnit, public NodeObject {
 
 public:
 
     explicit NodeHost(long = 0, NODESTATES = NODESTATE_IDLE, int = 0);
 
-    //NodeHost(const NodeHost &);
+    NodeHost(const NodeHost &);
 
     ~NodeHost() override;
 };
 
-typedef std::shared_ptr<NodeHost> TypeNodeHost;
+typedef std::unique_ptr<NodeHost> TypeNodeHost;
 
 #endif //DICON_NODEHOST_H

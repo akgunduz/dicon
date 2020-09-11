@@ -5,9 +5,9 @@
 #include "CollectorHost.h"
 
 CollectorHost::CollectorHost(long _id, COLLSTATES _state)
-        : CollectorObject(_state), Host(COMP_COLLECTOR, _id) {
+        : CollectorObject(_state), HostUnit(COMP_COLLECTOR, _id) {
 }
 
-//CollectorHost::CollectorHost(const CollectorHost &copy) = default;
+CollectorHost::CollectorHost(const CollectorHost &copy) = default;
 
 CollectorHost::~CollectorHost() = default;

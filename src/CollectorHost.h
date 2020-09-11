@@ -5,19 +5,19 @@
 #ifndef DICON_COLLECTORHOST_H
 #define DICON_COLLECTORHOST_H
 
-#include "Host.h"
+#include "HostUnit.h"
 #include "CollectorObject.h"
 
-class CollectorHost : public Host, public CollectorObject {
+class CollectorHost : public HostUnit, public CollectorObject {
 
 public:
     explicit CollectorHost(long = 0, COLLSTATES = COLLSTATE_IDLE);
 
-    //CollectorHost(const CollectorHost &);
+    CollectorHost(const CollectorHost &);
 
     ~CollectorHost() override;
 };
 
-typedef std::shared_ptr<CollectorHost> TypeCollectorHost;
+typedef std::unique_ptr<CollectorHost> TypeCollectorHost;
 
 #endif //DICON_COLLECTORHOST_H
