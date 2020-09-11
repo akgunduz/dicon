@@ -57,10 +57,6 @@ public :
     const TypeDevice& getDevice();
     Address& getAddress();
     Address& getMulticastAddress();
-
-    //void setAddress(Address&);
-//    void setMulticastAddress(Address&);
-
     virtual COMM_INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;
