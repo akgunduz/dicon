@@ -8,9 +8,8 @@
 #include "NetUtil.h"
 #include "CollectorUnit.h"
 
-Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) {
-
-    host = std::make_shared<DistributorHost>();
+Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) :
+        Component(std::make_shared<DistributorHost>()) {
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
@@ -27,9 +26,9 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
         return;
     }
 
-    nodeManager = new NodeManager(host, false);
+    nodeManager = new NodeManager(getHost(), false);
 
-    collectorManager = new CollectorManager(host, true);
+    collectorManager = new CollectorManager(getHost(), true);
 
     collThread = std::thread([](Distributor *distributor){
 
@@ -303,14 +302,14 @@ bool Distributor::processNodeReadyMsg(const TypeComponentUnit& owner, TypeMessag
 
 bool Distributor::send2CollectorWakeupMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_WAKEUP);
 
     return send(target, std::move(msg));
 }
 
 bool Distributor::send2CollectorIDMsg(const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID, STREAM_ID);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ID, STREAM_ID);
 
     msg->getData().setID(id);
 
@@ -319,7 +318,7 @@ bool Distributor::send2CollectorIDMsg(const TypeComponentUnit& target, TypeID id
 
 bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE, STREAM_COMPONENTS);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_NODE, STREAM_COMPONENTS);
 
     msg->getData().setComponentList(nodes);
 
@@ -328,7 +327,7 @@ bool Distributor::send2CollectorNodeMsg(const TypeComponentUnit& target, TypeCom
 
 bool Distributor::send2CollectorReplaceMsg(const TypeComponentUnit& target, TypeComponentUnitList& nodes) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_REPLACE, STREAM_COMPONENTS);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_REPLACE, STREAM_COMPONENTS);
 
     msg->getData().setComponentList(nodes);
 
@@ -337,14 +336,14 @@ bool Distributor::send2CollectorReplaceMsg(const TypeComponentUnit& target, Type
 
 bool Distributor::send2NodeWakeupMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_WAKEUP);
 
     return send(target, std::move(msg));
 }
 
 bool Distributor::send2NodeIDMsg(const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID, STREAM_ID);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ID, STREAM_ID);
 
     msg->getData().setID(id);
 
@@ -353,7 +352,7 @@ bool Distributor::send2NodeIDMsg(const TypeComponentUnit& target, TypeID id) {
 
 bool Distributor::send2NodeProcessMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_PROCESS);
 
     return send(target, std::move(msg));
 }
@@ -364,7 +363,7 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
         auto target = std::make_shared<ComponentUnit>(targetType, getInterfaceMulticastAddress(targetType));
 
-        auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
+        auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_WAKEUP);
 
         send(target, std::move(msg));
 
@@ -376,7 +375,7 @@ bool Distributor::sendWakeupMessage(COMPONENT targetType) {
 
             auto target = std::make_shared<ComponentUnit>(targetType, address);
 
-            auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_WAKEUP);
+            auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_WAKEUP);
 
             send(target, std::move(msg));
         }

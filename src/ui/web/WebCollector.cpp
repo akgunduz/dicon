@@ -139,7 +139,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto collectorHost = std::static_pointer_cast<CollectorHost>(collector->getHost());
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(collector->getBaseHost());
 
     auto job = collector->getJob();
     if (!job) {

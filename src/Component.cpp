@@ -3,14 +3,16 @@
 //
 
 #include "Component.h"
-#include "Util.h"
+#include "NetUtil.h"
 
 void *Component::notifyContext = nullptr;
 TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component() {
+Component::Component(TypeHost _host) {
+
+    host = std::move(_host);
 
     receiverCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
@@ -34,10 +36,10 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(host, nodeDevice, receiverCB);
+    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(getHost(), nodeDevice, receiverCB);
 
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   CommInterfaceFactory::createInterface(host, otherDevice, receiverCB) :
+                                   CommInterfaceFactory::createInterface(getHost(), otherDevice, receiverCB) :
                                    interfaces[COMP_NODE];
 
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
@@ -49,6 +51,12 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
 
     host->setAddress(ComponentUnit::next(type), getInterfaceAddress(ComponentUnit::next(type)));
     host->setAddress(ComponentUnit::prev(type), getInterfaceAddress(ComponentUnit::prev(type)));
+
+    LOGS_I(getHost(), "Host Addresses:");
+    LOGS_I(getHost(), "\t%s : %s", ComponentType::getName(ComponentUnit::next(type)),
+           NetUtil::getIPString(host->getAddress(ComponentUnit::next(type)).get()).c_str());
+    LOGS_I(getHost(), "\t%s : %s", ComponentType::getName(ComponentUnit::prev(type)),
+           NetUtil::getIPString(host->getAddress(ComponentUnit::prev(type)).get()).c_str());
 
     return true;
 }
@@ -127,9 +135,19 @@ bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
     return interfaces[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
-TypeHostUnit& Component::getHost() {
+TypeHost& Component::getBaseHost() {
 
     return host;
+}
+
+TypeHostUnit& Component::getHost() {
+
+    return host->get();
+}
+
+TypeHostUnit Component::getHost(COMPONENT _out) {
+
+    return host->get(_out);
 }
 
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
@@ -185,5 +203,3 @@ bool Component::isInitialized() {
 
     return initialized;
 }
-
-

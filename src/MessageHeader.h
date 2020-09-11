@@ -37,7 +37,7 @@ public:
     MSG_TYPE getType();
 
     TypeCommUnit getOwner();
-    void setOwner(const TypeCommUnit&);
+    void setOwner(const CommUnit&);
     void grabOwner(const TypeCommUnit&);
 
     int getPriority();

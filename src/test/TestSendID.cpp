@@ -6,14 +6,14 @@
 
 bool send2DistributorIDMsg(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID);
+    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_ID);
 
     return owner->send(target, std::move(msg));
 }
 
 bool sendIDMsg(const TypeComponent& owner, const TypeComponentUnit& target, TypeID id) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_ID, STREAM_ID);
+    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_ID, STREAM_ID);
 
     msg->getData().setID(id);
 
@@ -37,7 +37,8 @@ bool processDistIDMsg(const TypeComponent& component, const TypeComponentUnit& o
         return false;
     }
 
-    LOGC_I(component->getHost(), owner, MSGDIR_RECEIVE, "New ID : %d is assigned by Distributor", component->getHost()->getID());
+    LOGC_I(component->getHost(), owner, MSGDIR_RECEIVE, "New ID : %d is assigned by Distributor",
+           component->getHost()->getID());
 
     return send2DistributorIDMsg(component, owner);
 }
@@ -55,12 +56,12 @@ void TestApp::testSendID(TypeDistributor& distributor, TypeCollector& collector,
     auto collTarget = std::make_shared<ComponentUnit>(COMP_COLLECTOR,
                                                       collector->getHost()->getArch(),
                                                       collector->getHost()->getID(),
-                                                      collector->getHost()->getAddress(COMP_DISTRIBUTOR));
+                                                      collector->getHost(COMP_DISTRIBUTOR)->getAddress());
 
     auto nodeTarget = std::make_shared<ComponentUnit>(COMP_NODE,
                                                       node->getHost()->getArch(),
                                                       node->getHost()->getID(),
-                                                      node->getHost()->getAddress(COMP_DISTRIBUTOR));
+                                                      node->getHost(COMP_DISTRIBUTOR)->getAddress());
 
     sendIDMsg((TypeComponent &) distributor, collTarget, 61);
     sendIDMsg((TypeComponent &) distributor, nodeTarget, 79);

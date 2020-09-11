@@ -6,17 +6,17 @@
 #define DICON_NODEHOST_H
 
 #include "NodeState.h"
-#include "HostUnit.h"
+#include "Host.h"
 #include "ProcessItem.h"
 #include "NodeObject.h"
 
-class NodeHost : public HostUnit, public NodeObject {
+class NodeHost : public Host, public NodeObject {
 
 public:
 
     explicit NodeHost(long = 0, NODESTATES = NODESTATE_IDLE, int = 0);
 
-    NodeHost(const NodeHost &);
+    //NodeHost(const NodeHost &);
 
     ~NodeHost() override;
 };

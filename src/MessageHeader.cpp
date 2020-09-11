@@ -35,33 +35,15 @@ TypeCommUnit MessageHeader::getOwner() {
     return std::make_shared<CommUnit>(owner);
 }
 
-void MessageHeader::setOwner(const TypeCommUnit& _owner) {
+void MessageHeader::setOwner(const CommUnit& _owner) {
 
-    owner = *_owner;
+    owner = _owner;
 }
 
 void MessageHeader::grabOwner(const TypeCommUnit& unit) {
 
     unit->set(owner);
 }
-
-//uint64_t MessageHeader::getVariant(int id) {
-//
-//    if (id < MAX_VARIANT) {
-//        return variant[id];
-//    }
-//
-//    return 0;
-//}
-//
-//void MessageHeader::setVariant(int id, uint64_t _variant) {
-//
-//    if (id >= MAX_VARIANT) {
-//        return;
-//    }
-//
-//    this->variant[id] = _variant;
-//}
 
 int MessageHeader::getPriority() {
 

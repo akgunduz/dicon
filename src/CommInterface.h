@@ -21,7 +21,7 @@ enum NOTIFIER_TYPE {
 
 class CommInterface : public std::enable_shared_from_this<CommInterface> {
 
-    const TypeHostUnit host;
+    const TypeHostUnit& host;
     const TypeDevice device;
 
     Address address{};

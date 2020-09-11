@@ -9,56 +9,23 @@
 #include "ComponentUnit.h"
 #include "Address.h"
 
-class HostUnit {
+class HostUnit : public CommUnit {
 
     const std::filesystem::path basePath;
     std::filesystem::path rootPath;
 
-    TypeID id{};
-
-    COMPONENT type{COMP_MAX};
-
-    Address address[COMP_MAX]{};
-
 public:
 
-    HostUnit(COMPONENT, TypeID = 0);
+    explicit HostUnit(COMPONENT, TypeID = 0);
     HostUnit(const HostUnit&);
 
     virtual ~HostUnit();
 
     const std::filesystem::path& getRootPath();
 
-    TypeID getID();
-    void setID(TypeID&);
-
-    ARCH getArch();
-
-    TypeCommUnit getUnit(COMPONENT);
-
-    COMPONENT getType();
-    void setType(COMPONENT);
-
-    Address& getAddress(COMPONENT);
-    void setAddress(COMPONENT, Address);
-
-    template <class T>
-    void setUIAddress(COMPONENT _out, T _address) {
-
-        assert(_out != type);
-        address[_out].setUI(_address);
-    }
-
-    template <class T>
-    void setAllUIAddress(T _address) {
-
-        address[ComponentUnit::next(type)].setUI(_address);
-        address[ComponentUnit::prev(type)].setUI(_address);
-    }
-
-    void set(COMPONENT, TypeID, COMPONENT, Address);
+    void setID(TypeID) final;
 };
 
-typedef std::shared_ptr<HostUnit> TypeHostUnit;
+typedef std::unique_ptr<HostUnit> TypeHostUnit;
 
 #endif //DICON_HOSTUNIT_H

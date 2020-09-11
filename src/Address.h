@@ -14,6 +14,7 @@
 
 #define GET(a, b, c) (((a) & (c)) >> (b))
 #define SET(a, b, c, d) (((a) & ~(d)) | ((((uint64_t)(b)) << (c)) & (d)))
+#define MAP(a, b, c) ((c) - 1 - (((b) + (c) - (a)) % (c)))
 
 struct BaseAddress {
 

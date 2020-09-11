@@ -7,12 +7,11 @@
 #include "ComponentUnitFactory.h"
 
 Message::Message(const TypeHostUnit& host)
-		: MessageBase(host), data(host) {
+		: MessageBase(host), data(getHost()) {
 }
 
-Message::Message(const TypeHostUnit& host, const TypeComponentUnit& target, MSG_TYPE msgType, STREAM_TYPE streamType)
-		: MessageBase(host, target, msgType, streamType), data(host) {
-
+Message::Message(const TypeHostUnit& host, MSG_TYPE msgType, STREAM_TYPE streamType)
+		: MessageBase(host, msgType, streamType), data(getHost()) {
 }
 
 bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName) {

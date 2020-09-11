@@ -13,7 +13,7 @@
 
 class ComponentManager {
 
-    const TypeHostUnit host;
+    const TypeHostUnit& host;
 
     TypeID idCounter;
 

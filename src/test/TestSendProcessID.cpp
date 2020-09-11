@@ -6,7 +6,7 @@
 
 void sendProcessID(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_PROCESS_ID, STREAM_PROCESS_ID);
+    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_PROCESS_ID, STREAM_PROCESS_ID);
 
     auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
@@ -35,6 +35,6 @@ void TestApp::testSendProcessID(TypeDistributor& distributor, TypeCollector& col
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS_ID, processProcessIDMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                         node->getHost()->getAddress(COMP_COLLECTOR));
+                                                  node->getHost(COMP_COLLECTOR)->getAddress());
     sendProcessID((TypeComponent&) collector, target);
 }

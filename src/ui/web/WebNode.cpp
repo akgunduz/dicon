@@ -34,7 +34,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         return false;
     }
 
-    auto nodeHost = std::static_pointer_cast<NodeHost>(node->getHost());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(node->getBaseHost());
 
     nlohmann::json nodeInfo;
 

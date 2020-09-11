@@ -18,9 +18,9 @@ TypeInterface CommInterfaceFactory::createInterface(const TypeHostUnit& host, co
             commInterface = std::make_shared<CommTCP>(host, device, receiverCB);
             break;
 
-//            case COMMINTERFACE_UNIXSOCKET:
-//                commInterface = std::make_shared<CommUnixSocket>(host, device, receiverCB);
-//                break;
+        case COMMINTERFACE_UNIXSOCKET:
+            commInterface = std::make_shared<CommUnixSocket>(host, device, receiverCB);
+            break;
 
         default:
             return nullptr;

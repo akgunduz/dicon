@@ -8,7 +8,7 @@
 #include "CommInterfaceFactory.h"
 #include "DeviceList.h"
 #include "MessageType.h"
-#include "HostUnit.h"
+#include "Host.h"
 #include "StopWatch.h"
 #include "NotifyType.h"
 
@@ -34,7 +34,7 @@ class Component : public std::enable_shared_from_this<Component> {
 
 protected :
 
-    TypeHostUnit host;
+    TypeHost host;
 
     bool initialized{false};
 
@@ -54,10 +54,12 @@ public:
 
     static TypeComponent nullComponent;
 
-    Component();
+    Component(TypeHost);
     virtual ~Component();
 
+    TypeHost& getBaseHost();
     TypeHostUnit& getHost();
+    TypeHostUnit getHost(COMPONENT);
 
     const TypeDevice& getDevice(COMPONENT);
     Address& getInterfaceAddress(COMPONENT);

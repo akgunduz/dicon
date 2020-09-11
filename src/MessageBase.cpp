@@ -4,13 +4,10 @@
 //
 
 #include "MessageBase.h"
-#include "Log.h"
 #include "Util.h"
-#include "CommTCP.h"
-#include "CommUnixSocket.h"
 
-MessageBase::MessageBase(TypeHostUnit host)
-		: host(std::move(host)) {
+MessageBase::MessageBase(const TypeHostUnit& _host)
+		: host(_host) {
 
     readParser[MSGHEADER_HEADER] = &MessageBase::readHeader;
     readParser[MSGHEADER_STRING] = &MessageBase::readString;
@@ -19,13 +16,12 @@ MessageBase::MessageBase(TypeHostUnit host)
     readParser[MSGHEADER_END] = &MessageBase::readEndStream;
 }
 
-MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target,
-                         MSG_TYPE msgType, STREAM_TYPE streamType)
+MessageBase::MessageBase(const TypeHostUnit& host, MSG_TYPE msgType, STREAM_TYPE streamType)
 		: MessageBase(host) {
 
     header.setType(msgType);
     header.setStream(streamType);
-    header.setOwner(host->getUnit(target->getType()));
+    header.setOwner(*getHost());
 }
 
 MessageBase::~MessageBase() {
@@ -34,8 +30,8 @@ MessageBase::~MessageBase() {
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 
-    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
-           nRead, Util::hex2str(buffer, nRead).c_str());
+//    LOGS_E(getHost(), "%ld : Data received, count : %3d, bufPtr : %s", iter++,
+//           nRead, Util::hex2str(buffer, nRead).c_str());
 
     uint32_t minContDataLength;
     size_t remaining = 0;
@@ -273,8 +269,8 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
         writeData(target, buffer, size);
 
-        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
-               size, Util::hex2str(buffer, size).c_str());
+//        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+//               size, Util::hex2str(buffer, size).c_str());
 
         return true;
 
@@ -286,8 +282,8 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
         writeData(target, tmpBuf, tmpBufPos);
 
-        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
-               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+//        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+//               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
 
         tmpBufPos = 0;
     }
@@ -313,8 +309,8 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
         writeData(target, tmpBuf, tmpBufPos);
 
-        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
-               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
+//        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
+//               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
 
         tmpBufPos = 0;
     }

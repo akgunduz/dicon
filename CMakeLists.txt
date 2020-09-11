@@ -37,7 +37,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CommInterfaceFactory.cpp
         ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp
-#        ${SOURCE_PATH}/CommUnixSocket.cpp
+        ${SOURCE_PATH}/CommUnixSocket.cpp
         ${SOURCE_PATH}/Component.cpp
         ${SOURCE_PATH}/ComponentFactory.cpp
         ${SOURCE_PATH}/ComponentManager.cpp
@@ -51,6 +51,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/DistributorHost.cpp
         ${SOURCE_PATH}/DistributorObject.cpp
         ${SOURCE_PATH}/FileItem.cpp
+        ${SOURCE_PATH}/Host.cpp
         ${SOURCE_PATH}/HostUnit.cpp
         ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/JobItem.cpp
@@ -77,7 +78,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/Util.cpp
-        )
+        src/Host.cpp src/Host.h)
 
 set(CONSOLE_FILES
         ${UI_PATH}/console/ConsoleApp.cpp

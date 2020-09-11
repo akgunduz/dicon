@@ -7,7 +7,7 @@
 
 void sendComponentList(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS, STREAM_COMPONENTS);
+    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS, STREAM_COMPONENTS);
 
     TypeComponentUnitList nodes;
     Address address({999, 1}, {1999, 2});
@@ -38,7 +38,8 @@ void TestApp::testSendComponentList(TypeDistributor& distributor, TypeCollector&
 
     collector->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_COMPONENTS, processComponentListMsg);
 
-    auto target = std::make_shared<ComponentUnit>(COMP_COLLECTOR, collector->getHost()->getArch(), collector->getHost()->getID(),
-                         collector->getHost()->getAddress(COMP_DISTRIBUTOR));
+    auto target = std::make_shared<ComponentUnit>(COMP_COLLECTOR, collector->getHost()->getArch(),
+                                                  collector->getHost()->getID(),
+                                                  collector->getHost(COMP_DISTRIBUTOR)->getAddress());
     sendComponentList((TypeComponent &) distributor, target);
 }
