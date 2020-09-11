@@ -6,12 +6,15 @@
 #define DICON_HOST_H
 
 #include "HostUnit.h"
+#include "CommInterface.h"
 
 class Host {
 
     TypeHostUnit self;
 
-    Address address[COMP_MAX]{};
+   // Address address[COMP_MAX]{};
+
+    TypeInterface commInterface[COMP_MAX];
 
 public:
 
@@ -20,7 +23,7 @@ public:
     virtual ~Host() = 0;
 
     Address& getAddress(COMPONENT);
-    void setAddress(COMPONENT, Address);
+   // void setAddress(COMPONENT, Address);
 
     TypeHostUnit& get();
     TypeHostUnit get(COMPONENT);
@@ -33,16 +36,19 @@ public:
     void setUIAddress(COMPONENT _out, T _address) {
 
         assert(_out != self->getType());
-        address[_out].setUI(_address);
+
+        getAddress(_out).setUI(_address);
     }
 
     template <class T>
     void setAllUIAddress(T _address) {
 
-        address[COMP_DISTRIBUTOR].setUI(_address);
-        address[COMP_COLLECTOR].setUI(_address);
-        address[COMP_NODE].setUI(_address);
+        getAddress(COMP_DISTRIBUTOR).setUI(_address);
+        getAddress(COMP_COLLECTOR).setUI(_address);
+        getAddress(COMP_NODE).setUI(_address);
     }
+
+    void setInterface(COMPONENT, const TypeInterface&);
 };
 
 typedef std::shared_ptr<Host> TypeHost;

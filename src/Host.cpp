@@ -15,15 +15,17 @@ Host::~Host()
 
 Address &Host::getAddress(COMPONENT _out) {
 
-    assert(_out != self->getType());
-    return address[MAP(self->getType(), _out, COMP_MAX)];
+//    assert(_out != self->getType());
+
+    return commInterface[_out]->getAddress();
 }
 
-void Host::setAddress(COMPONENT _out, Address _address) {
-
-    assert(_out != self->getType());
-    address[MAP(self->getType(), _out, COMP_MAX)] = _address;
-}
+//void Host::setAddress(COMPONENT _out, Address _address) {
+//
+//    assert(_out != self->getType());
+//
+//    commInterface[_out]->setAddress(_address);
+//}
 
 TypeHostUnit& Host::get() {
 
@@ -47,4 +49,10 @@ const std::filesystem::path& Host::getRootPath() {
 void Host::setID(TypeID _id) {
 
     self->setID(_id);
+}
+
+void Host::setInterface(COMPONENT _type, const TypeInterface& _interface) {
+
+    commInterface[_type] = _interface;
+
 }

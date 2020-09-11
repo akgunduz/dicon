@@ -49,7 +49,7 @@ public:
     BaseAddress& get();
     BaseAddress& getUI();
 
-    void set(uint32_t, uint16_t);
+    void set(uint32_t, uint16_t, bool = false);
     void setPort(uint16_t);
     void setUI(uint32_t, uint16_t);
     void setUI(uint16_t);

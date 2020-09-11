@@ -136,16 +136,16 @@ Address &CommInterface::getMulticastAddress() {
     return multicastAddress;
 }
 
-void CommInterface::setAddress(Address &_address) {
+//void CommInterface::setAddress(Address &_address) {
+//
+//    address = _address;
+//}
 
-    address = _address;
-}
-
-void CommInterface::setMulticastAddress(Address &_multicastAddress) {
-
-    multicastAddress = _multicastAddress;
-    multicastAddress.setMulticast(true);
-}
+//void CommInterface::setMulticastAddress(Address &_multicastAddress) {
+//
+//    multicastAddress = _multicastAddress;
+//    multicastAddress.setMulticast(true);
+//}
 
 const TypeHostUnit& CommInterface::getHost() {
 

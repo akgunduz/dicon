@@ -49,8 +49,9 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
         return false;
     }
 
-    host->setAddress(ComponentUnit::next(type), getInterfaceAddress(ComponentUnit::next(type)));
-    host->setAddress(ComponentUnit::prev(type), getInterfaceAddress(ComponentUnit::prev(type)));
+    host->setInterface(COMP_DISTRIBUTOR, interfaces[COMP_DISTRIBUTOR]);
+    host->setInterface(COMP_COLLECTOR, interfaces[COMP_COLLECTOR]);
+    host->setInterface(COMP_NODE, interfaces[COMP_NODE]);
 
     LOGS_I(getHost(), "Host Addresses:");
     LOGS_I(getHost(), "\t%s : %s", ComponentType::getName(ComponentUnit::next(type)),

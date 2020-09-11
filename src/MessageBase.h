@@ -12,6 +12,7 @@
 #include "MessageBlock.h"
 #include "MessageType.h"
 #include "HostUnit.h"
+#include "ComponentUnit.h"
 #include "Address.h"
 #include "MessageHeader.h"
 #include "FileItem.h"

@@ -5,8 +5,7 @@
 #ifndef DICON_HOSTUNIT_H
 #define DICON_HOSTUNIT_H
 
-#include "Common.h"
-#include "ComponentUnit.h"
+#include "CommUnit.h"
 #include "Address.h"
 
 class HostUnit : public CommUnit {
