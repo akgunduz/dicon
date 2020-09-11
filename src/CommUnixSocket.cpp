@@ -6,13 +6,9 @@
 #include "CommUnixSocket.h"
 #include "NetUtil.h"
 
-CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *schedulerCB)
-        : CommInterface(host, device, schedulerCB) {
+CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device, const InterfaceSchedulerCB *receiverCB)
+        : CommInterface(host, device, receiverCB) {
 
-    if (!initThread()) {
-        LOGS_E(getHost(), "initThread failed!!!");
-        throw std::runtime_error("UnixSocket : initThread failed!!!");
-    }
 }
 
 CommUnixSocket::~CommUnixSocket() {
@@ -33,7 +29,7 @@ bool CommUnixSocket::initUnixSocket() {
 
     unixSocket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (unixSocket < 0) {
-        LOGS_E(getHost(), "Socket receiver open with err : %d!!!", errno);
+        LOGS_E(getHost(), "Socket open with err : %d!!!", errno);
         return false;
     }
 
