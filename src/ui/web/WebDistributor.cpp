@@ -56,7 +56,7 @@ bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
     auto &collector = componentController->startCollector();
 
-    collector->getHost()->setAllUIAddress(webPort);
+    collector->setAllUIAddress(webPort);
 
     sendOK(distributor->getHost(), conn, "New Collector is Added");
 
@@ -69,7 +69,7 @@ bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
     auto &node = componentController->startNode();
 
-    node->getHost()->setAllUIAddress(webPort);
+    node->setAllUIAddress(webPort);
 
     sendOK(distributor->getHost(), conn, "New Node is Added");
 

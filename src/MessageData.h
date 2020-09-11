@@ -7,6 +7,7 @@
 #define DICON_MESSAGEDATA_H
 
 #include "ProcessItem.h"
+#include "ComponentUnit.h"
 
 class MessageData {
 

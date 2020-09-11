@@ -28,18 +28,20 @@ protected:
 public:
 
     CommUnit() = default;
-    explicit CommUnit(COMPONENT);
-    CommUnit(COMPONENT, Address);
     CommUnit(COMPONENT, ARCH, TypeID, Address);
-    CommUnit(const CommUnit&);
+    CommUnit(COMPONENT, ARCH, TypeID);
+    CommUnit(COMPONENT, Address);
+    explicit CommUnit(COMPONENT);
+  //  CommUnit(const CommUnit&);
 
-    TypeID getID() const;
-    void setID(TypeID);
+    TypeID getID();
 
-    ARCH getArch() const;
+    virtual void setID(TypeID);
+
+    ARCH getArch();
     void setArch(ARCH);
 
-    COMPONENT getType() const;
+    COMPONENT getType();
     void setType(COMPONENT);
 
     Address& getAddress();

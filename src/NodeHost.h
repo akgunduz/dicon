@@ -21,6 +21,6 @@ public:
     ~NodeHost() override;
 };
 
-typedef std::shared_ptr<NodeHost> TypeNodeHost;
+typedef std::unique_ptr<NodeHost> TypeNodeHost;
 
 #endif //DICON_NODEHOST_H

@@ -18,6 +18,6 @@ public:
     ~CollectorHost() override;
 };
 
-typedef std::shared_ptr<CollectorHost> TypeCollectorHost;
+typedef std::unique_ptr<CollectorHost> TypeCollectorHost;
 
 #endif //DICON_COLLECTORHOST_H

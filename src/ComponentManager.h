@@ -7,13 +7,14 @@
 
 #include "Common.h"
 #include "HostUnit.h"
+#include "ComponentUnit.h"
 
 #define ALIVE_INTERVAL 8
 #define CHECK_INTERVAL ALIVE_INTERVAL + 2
 
 class ComponentManager {
 
-    const TypeHostUnit host;
+    const TypeHostUnit& host;
 
     TypeID idCounter;
 

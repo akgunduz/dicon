@@ -11,6 +11,7 @@
 #include "MessageBlock.h"
 #include "MessageType.h"
 #include "HostUnit.h"
+#include "ComponentUnit.h"
 #include "Address.h"
 #include "MessageHeader.h"
 #include "FileItem.h"
@@ -49,7 +50,7 @@ class MessageBase {
 
     MessageHeader header;
 
-    const TypeHostUnit host;
+    const TypeHostUnit& host;
 
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 
@@ -60,8 +61,8 @@ protected:
 
 public:
 
-    explicit MessageBase(TypeHostUnit);
-    MessageBase(const TypeHostUnit&, const TypeComponentUnit&, MSG_TYPE, STREAM_TYPE);
+    explicit MessageBase(const TypeHostUnit&);
+    MessageBase(const TypeHostUnit&, MSG_TYPE, STREAM_TYPE);
     ~MessageBase();
 
     TypeReadCB getReadCB(const TypeComponentUnit& source);

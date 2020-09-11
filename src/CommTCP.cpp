@@ -44,7 +44,7 @@ bool CommTCP::initTCP() {
 
     int tryCount = TRY_COUNT;
 
-    Address address(getDevice()->getBase(), lastFreeTCPPort);
+    address.set(getDevice()->getBase(), lastFreeTCPPort);
 
     while (tryCount--) {
 
@@ -93,9 +93,7 @@ bool CommTCP::initTCP() {
         return false;
     }
 
-    setAddress(address);
-
-    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address.get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(getAddress().get()).c_str());
 
     return true;
 }
@@ -133,7 +131,7 @@ bool CommTCP::initMulticast() {
 
     int tryCount = TRY_COUNT;
 
-    Address address(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
+    multicastAddress.set(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
 
     while (tryCount--) {
 
@@ -141,7 +139,7 @@ bool CommTCP::initMulticast() {
 
         if (bind(multicastSocket, (struct sockaddr *) &serverAddress, sizeof(sockaddr_in)) < 0) {
 
-            address.setPort(++lastFreeMulticastPort);
+            multicastAddress.setPort(++lastFreeMulticastPort);
 
             continue;
         }
@@ -157,8 +155,6 @@ bool CommTCP::initMulticast() {
 
         return false;
     }
-
-    setMulticastAddress(address);
 
     ip_mreq imreq = NetUtil::getInetMulticastAddress(getAddress(), getMulticastAddress());
 

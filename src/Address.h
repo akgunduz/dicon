@@ -14,6 +14,7 @@
 
 #define GET(a, b, c) (((a) & (c)) >> (b))
 #define SET(a, b, c, d) (((a) & ~(d)) | ((((uint64_t)(b)) << (c)) & (d)))
+#define MAP(a, b, c) ((c) - 1 - (((b) + (c) - (a)) % (c)))
 
 struct BaseAddress {
 
@@ -48,7 +49,7 @@ public:
     BaseAddress& get();
     BaseAddress& getUI();
 
-    void set(uint32_t, uint16_t);
+    void set(uint32_t, uint16_t, bool = false);
     void setPort(uint16_t);
     void setUI(uint32_t, uint16_t);
     void setUI(uint16_t);

@@ -4,15 +4,12 @@
 //
 
 #include "MessageBase.h"
-
-#include <utility>
-#include "Log.h"
 #include "Util.h"
 #include "CommTCP.h"
 #include "CommUnixSocket.h"
 
-MessageBase::MessageBase(TypeHostUnit host)
-		: host(std::move(host)) {
+MessageBase::MessageBase(const TypeHostUnit& _host)
+		: host(_host) {
 
     readParser[MSGHEADER_HEADER] = &MessageBase::readHeader;
     readParser[MSGHEADER_STRING] = &MessageBase::readString;
@@ -21,13 +18,12 @@ MessageBase::MessageBase(TypeHostUnit host)
     readParser[MSGHEADER_END] = &MessageBase::readEndStream;
 }
 
-MessageBase::MessageBase(const TypeHostUnit& host, const TypeComponentUnit& target,
-                         MSG_TYPE msgType, STREAM_TYPE streamType)
+MessageBase::MessageBase(const TypeHostUnit& host, MSG_TYPE msgType, STREAM_TYPE streamType)
 		: MessageBase(host) {
 
     header.setType(msgType);
     header.setStream(streamType);
-    header.setOwner(host->getUnit(target->getType()));
+    header.setOwner(*getHost());
 }
 
 MessageBase::~MessageBase() {

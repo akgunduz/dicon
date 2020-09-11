@@ -6,9 +6,8 @@
 #include "Collector.h"
 #include "CollectorHost.h"
 
-Collector::Collector(int _commInterfaceOther, int _commInterfaceNode) {
-
-    host = std::make_shared<CollectorHost>();
+Collector::Collector(int _commInterfaceOther, int _commInterfaceNode)  :
+        Component(std::make_unique<CollectorHost>()) {
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));
@@ -100,7 +99,7 @@ bool Collector::processDistributorReplaceMsg(const TypeComponentUnit& owner, Typ
 bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d]:Process[%d] requested %d missing files",
-            owner->getID(), msg->getData().getProcess()->getID(), msg->getData().getProcess()->getFileCount());
+           owner->getID(), msg->getData().getProcess()->getID(), msg->getData().getProcess()->getFileCount());
 
     auto processItem = job->getProcessByID(msg->getData().getProcess()->getID());
 
@@ -124,7 +123,7 @@ bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessa
 
 bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
+    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries",
            owner->getID(), msg->getData().getProcess()->getFileCount());
@@ -155,21 +154,21 @@ bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMes
 
 bool Collector::send2DistributorAliveMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ALIVE);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ALIVE);
 
     return send(target, std::move(msg));
 }
 
 bool Collector::send2DistributorIDMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ID);
 
     return send(target, std::move(msg));
 }
 
 bool Collector::send2DistributorNodeMsg(const TypeComponentUnit& target, uint32_t readyProcessCount) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_NODE, STREAM_PROCESS_COUNT);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_NODE, STREAM_PROCESS_COUNT);
 
     msg->getData().setProcessCount(readyProcessCount);
 
@@ -178,14 +177,14 @@ bool Collector::send2DistributorNodeMsg(const TypeComponentUnit& target, uint32_
 
 bool Collector::send2DistributorReadyMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_READY);
 
     return send(target, std::move(msg));
 }
 
 bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeProcessItem& processItem) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_PROCESS, STREAM_PROCESS);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_PROCESS, STREAM_PROCESS);
 
     msg->getData().setProcess(processItem);
 
@@ -197,7 +196,7 @@ bool Collector::send2NodeProcessMsg(const TypeComponentUnit& target, const TypeP
 
 bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, TypeID processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
 
     msg->getData().setProcess(processID, fileList);
 
@@ -206,7 +205,7 @@ bool Collector::send2NodeBinaryMsg(const TypeComponentUnit& target, TypeID proce
 
 bool Collector::send2NodeReadyMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(), target, MSGTYPE_READY);
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_READY);
 
     return send(target, std::move(msg));
 }
@@ -218,7 +217,7 @@ void Collector::setDistributor(const TypeComponentUnit& _distributor) {
 
 bool Collector::processJob() {
 
-    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
+    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
 
     if (job->getStatus() != JOBSTATUS_OK) {
 

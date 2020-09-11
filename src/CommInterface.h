@@ -24,15 +24,15 @@ class CommInterface : public std::enable_shared_from_this<CommInterface> {
     const TypeHostUnit& host;
     const TypeDevice device;
 
-    Address address{};
-    Address multicastAddress{};
-
     const InterfaceSchedulerCB *senderCB{};
 
     bool send(const TypeSchedulerItem& item);
 
 protected :
 
+    Address address{};
+    Address multicastAddress{};
+	
 	int notifierPipe[2]{};
 
 	Scheduler *scheduler{};
@@ -58,10 +58,6 @@ public :
     const TypeDevice& getDevice();
     Address& getAddress();
     Address& getMulticastAddress();
-
-    void setAddress(Address&);
-    void setMulticastAddress(Address&);
-
     virtual COMM_INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;

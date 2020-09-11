@@ -29,6 +29,9 @@ CommInterface::~CommInterface() {
 
     delete scheduler;
 
+    close(notifierPipe[0]);
+    close(notifierPipe[1]);
+
 }
 
 void CommInterface::end() {
@@ -57,12 +60,11 @@ bool CommInterface::initThread() {
 
     threadProduce = std::thread([](const TypeInterface& commInterface) {
 
-        commInterface->initInterface();
-
-        commInterface->runReceiver();
+//        commInterface->initInterface();
+//
+//        commInterface->runReceiver();
 
     }, shared_from_this());
-
 
     threadConsume = std::thread([](const TypeInterface& commInterface) {
 
@@ -134,17 +136,6 @@ Address &CommInterface::getAddress() {
 Address &CommInterface::getMulticastAddress() {
 
     return multicastAddress;
-}
-
-void CommInterface::setAddress(Address &_address) {
-
-    address = _address;
-}
-
-void CommInterface::setMulticastAddress(Address &_multicastAddress) {
-
-    multicastAddress = _multicastAddress;
-    multicastAddress.setMulticast(true);
 }
 
 const TypeHostUnit& CommInterface::getHost() {

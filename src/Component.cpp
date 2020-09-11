@@ -3,14 +3,16 @@
 //
 
 #include "Component.h"
-#include "Util.h"
+#include "NetUtil.h"
 
 void *Component::notifyContext = nullptr;
 TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component() {
+Component::Component(TypeHostUnit _host) {
+
+    host = std::move(_host);
 
     receiverCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
@@ -34,10 +36,10 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(host, nodeDevice, receiverCB);
+    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(getHost(), nodeDevice, receiverCB);
 
     interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   CommInterfaceFactory::createInterface(host, otherDevice, receiverCB) :
+                                   CommInterfaceFactory::createInterface(getHost(), otherDevice, receiverCB) :
                                    interfaces[COMP_NODE];
 
     interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
@@ -46,9 +48,6 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
 
         return false;
     }
-
-    host->setAddress(ComponentUnit::next(type), getInterfaceAddress(ComponentUnit::next(type)));
-    host->setAddress(ComponentUnit::prev(type), getInterfaceAddress(ComponentUnit::prev(type)));
 
     return true;
 }
@@ -132,6 +131,15 @@ TypeHostUnit& Component::getHost() {
     return host;
 }
 
+TypeHostUnit Component::getHost(COMPONENT _out) {
+
+    TypeHostUnit unit = std::make_unique<HostUnit>(*host);
+
+    unit->setAddress(getInterfaceAddress(_out));
+
+    return std::move(unit);
+}
+
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {
 
     notifyContext = _notifyContext;
@@ -185,5 +193,3 @@ bool Component::isInitialized() {
 
     return initialized;
 }
-
-

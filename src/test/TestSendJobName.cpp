@@ -6,7 +6,7 @@
 
 void sendJobName(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, STREAM_JOBNAME);
+    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, STREAM_JOBNAME);
 
     auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
@@ -32,7 +32,7 @@ void TestApp::testSendJobName(TypeDistributor& distributor, TypeCollector& colle
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_JOBNAME, processJobNameMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                         node->getHost()->getAddress(COMP_COLLECTOR));
+                                                  node->getHost(COMP_COLLECTOR)->getAddress());
 
     sendJobName((TypeComponent&) collector, target);
 }

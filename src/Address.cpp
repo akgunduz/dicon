@@ -33,17 +33,18 @@ BaseAddress& Address::getUI() {
     return ui;
 }
 
-void Address::set(uint32_t _base, uint16_t _port) {
+void Address::set(uint32_t _base, uint16_t _port, bool _multicast) {
 
     self.base = _base;
     self.port = _port;
+
+    flag = SET(flag, _multicast, MULTICAST_POS, MULTICAST_MASK);
 }
 
 void Address::setPort(uint16_t _port) {
 
     self.port = _port;
 }
-
 
 void Address::setUI(uint32_t _base, uint16_t _port) {
 

@@ -35,18 +35,18 @@ bool CommUnixSocket::initUnixSocket() {
 
     int tryCount = 10;
     int lastFreePort = 0;
+	
+	address.set(getDevice()->getBase(), lastFreePort, getDevice()->getType());
 
     for (int j = tryCount; j > 0; j--) {
 
-        Address newAddress(getDevice()->getBase(), lastFreePort, getDevice()->getType());
-
-        sockaddr_un serverAddress = NetUtil::getUnixAddress(newAddress);
+        sockaddr_un serverAddress = NetUtil::getUnixAddress(address);
 
         socklen_t len = offsetof(struct sockaddr_un, sun_path) + (uint32_t) strlen(serverAddress.sun_path);
 
         if (bind(unixSocket, (struct sockaddr *) &serverAddress, len) < 0) {
 
-            lastFreePort++;
+            address.setPort(lastFreePort++);
             continue;
         }
 
@@ -67,9 +67,7 @@ bool CommUnixSocket::initUnixSocket() {
             return false;
         }
 
-        setAddress(newAddress);
-
-        LOGS_I(getHost(), "Using address : %s", NetUtil::getUnixString(newAddress.get()).c_str());
+        LOGS_I(getHost(), "Using address : %s", NetUtil::getUnixString(getAddress().get()).c_str());
 
         return true;
     }

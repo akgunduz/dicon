@@ -8,6 +8,10 @@ CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id, Address _address)
         : id(_id), type(_type), arch(_arch), address(_address) {
 }
 
+CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id)
+        : id(_id), type(_type), arch(_arch) {
+}
+
 CommUnit::CommUnit(COMPONENT _type, Address _address)
         : type(_type), address(_address) {
 }
@@ -16,9 +20,9 @@ CommUnit::CommUnit(COMPONENT _type)
         : type(_type) {
 }
 
-CommUnit::CommUnit(const CommUnit &copy) = default;
+//CommUnit::CommUnit(const CommUnit &copy) = default;
 
-TypeID CommUnit::getID() const {
+TypeID CommUnit::getID() {
 
     return id;
 }
@@ -28,7 +32,7 @@ void CommUnit::setID(TypeID _id) {
     id = _id;
 }
 
-ARCH CommUnit::getArch() const {
+ARCH CommUnit::getArch() {
 
     return (ARCH) arch;
 }
@@ -38,7 +42,7 @@ void CommUnit::setArch(ARCH _arch) {
     arch = _arch;
 }
 
-COMPONENT CommUnit::getType() const {
+COMPONENT CommUnit::getType() {
 
     return (COMPONENT)type;
 }
