@@ -271,8 +271,7 @@ bool CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const
 
 bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr;
-    onAlloc(&bufPtr, size, buffer);
+    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
 
     auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
 
@@ -371,6 +370,8 @@ bool CommTCP::onServerConnect() {
 
                 if (nRead == 0) {
 
+                    onFree(buf);
+
                     return;
                 }
 
@@ -394,6 +395,8 @@ bool CommTCP::onServerConnect() {
 
                     commData->reInitialize();
                 }
+
+                onFree(buf);
             });
 
     if (result != 0) {

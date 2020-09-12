@@ -46,7 +46,7 @@ void CommInterface::end() {
 
 bool CommInterface::initThread() {
 
-    threadProduce = std::thread([](const TypeInterface& commInterface) {
+    threadProduce = std::thread([](CommInterface* commInterface) {
 
         uv_loop_init(&commInterface->produceLoop);
 
@@ -56,9 +56,9 @@ bool CommInterface::initThread() {
 
         uv_loop_close(&commInterface->produceLoop);
 
-    }, shared_from_this());
+    }, this);
 
-    threadConsume = std::thread([](const TypeInterface& commInterface) {
+    threadConsume = std::thread([](CommInterface* commInterface) {
 
         uv_loop_init(&commInterface->consumeLoop);
 
@@ -75,7 +75,7 @@ bool CommInterface::initThread() {
 
         uv_loop_close(&commInterface->consumeLoop);
 
-    }, shared_from_this());
+    }, this);
 
     return true;
 }
