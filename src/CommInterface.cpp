@@ -60,9 +60,9 @@ bool CommInterface::initThread() {
 
     threadProduce = std::thread([](const TypeInterface& commInterface) {
 
-//        commInterface->initInterface();
-//
-//        commInterface->runReceiver();
+        commInterface->initInterface();
+
+        commInterface->runReceiver();
 
     }, shared_from_this());
 

@@ -32,7 +32,6 @@ public:
     CommUnit(COMPONENT, ARCH, TypeID);
     CommUnit(COMPONENT, Address);
     explicit CommUnit(COMPONENT);
-  //  CommUnit(const CommUnit&);
 
     TypeID getID();
 

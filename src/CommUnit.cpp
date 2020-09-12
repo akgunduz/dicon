@@ -20,8 +20,6 @@ CommUnit::CommUnit(COMPONENT _type)
         : type(_type) {
 }
 
-//CommUnit::CommUnit(const CommUnit &copy) = default;
-
 TypeID CommUnit::getID() {
 
     return id;
