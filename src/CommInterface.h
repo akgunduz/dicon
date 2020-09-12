@@ -19,7 +19,7 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-class CommInterface : public std::enable_shared_from_this<CommInterface> {
+class CommInterface {
 
     const TypeHostUnit& host;
     const TypeDevice device;
