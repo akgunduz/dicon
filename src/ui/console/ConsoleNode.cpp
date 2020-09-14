@@ -9,7 +9,7 @@
 
 bool ConsoleApp::nodeStateHandler(long id) {
 
-    auto &node = componentController->getNode(id);
+    auto &node = componentFactory->getNode(id);
     if (!node) {
         LOGP_E("Can not find the node with ID : %d !!!", id);
         return false;

@@ -24,7 +24,7 @@ class App {
 
 protected:
 
-    ComponentFactory* componentController;
+    ComponentFactory* componentFactory;
 
     bool initialized{false};
 

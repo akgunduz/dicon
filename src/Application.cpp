@@ -16,7 +16,7 @@ App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vecto
           deviceList->get(interfaces[0])->getName().c_str(),
           deviceList->get(interfaces[1])->getName().c_str());
 
-    componentController = ComponentFactory::newInstance(interfaces);
+    componentFactory = ComponentFactory::newInstance(interfaces);
 
     if (!componentCount[COMP_DISTRIBUTOR] &&
         !componentCount[COMP_COLLECTOR] &&
@@ -25,19 +25,19 @@ App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vecto
     }
 
     if (componentCount[COMP_DISTRIBUTOR]) {
-        if (!componentController->startDistributor(autoWake)) {
+        if (!componentFactory->startDistributor(autoWake)) {
             return;
         }
     }
 
     if (componentCount[COMP_COLLECTOR]) {
-        if (!componentController->startCollector(componentCount[COMP_COLLECTOR])) {
+        if (!componentFactory->startCollector(componentCount[COMP_COLLECTOR])) {
             return;
         }
     }
 
     if (componentCount[COMP_NODE]) {
-        if (!componentController->startNode(componentCount[COMP_NODE])) {
+        if (!componentFactory->startNode(componentCount[COMP_NODE])) {
             return;
         }
     }
@@ -60,7 +60,7 @@ App::~App() {
 
     LOGP_T("Deallocating App");
 
-    delete componentController;
+    delete componentFactory;
 
     delete deviceList;
 

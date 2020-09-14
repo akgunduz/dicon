@@ -7,7 +7,7 @@
 
 bool ConsoleApp::collLoadJobHandler(long id) {
 
-    auto &collector = componentController->getCollector(id);
+    auto &collector = componentFactory->getCollector(id);
     if (collector != nullptr) {
         std::filesystem::path zipFile = "../sample/Job1_x86_linux.zip";
         collector->loadJob(zipFile);
@@ -18,7 +18,7 @@ bool ConsoleApp::collLoadJobHandler(long id) {
 
 bool ConsoleApp::collProcessHandler(long id) {
 
-    auto &collector = componentController->getCollector(id);
+    auto &collector = componentFactory->getCollector(id);
     if (collector != nullptr) {
         collector->processJob();
     }
@@ -28,7 +28,7 @@ bool ConsoleApp::collProcessHandler(long id) {
 
 bool ConsoleApp::collStateHandler(long id) {
 
-    auto &collector = componentController->getCollector(id);
+    auto &collector = componentFactory->getCollector(id);
     if (!collector) {
         LOGP_E("Can not find the collector with ID : %d !!!", id);
         return false;

@@ -11,7 +11,7 @@
 
 bool ConsoleApp::distPollHandler() {
 
-    componentController->getDistributor()->sendWakeupMessagesAll(false);
+    componentFactory->getDistributor()->sendWakeupMessagesAll(false);
 
     return true;
 }
@@ -20,7 +20,7 @@ bool ConsoleApp::distStateHandler() {
 
     LOGP_I("Collector List : ");
 
-    for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
+    for (auto& collectorPair : componentFactory->getDistributor()->getCollectors()->get()) {
 
         auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
 
@@ -29,7 +29,7 @@ bool ConsoleApp::distStateHandler() {
 
     LOGP_I("Node List : ");
 
-    for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
+    for (auto& nodePair : componentFactory->getDistributor()->getNodes()->get()) {
 
         auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 

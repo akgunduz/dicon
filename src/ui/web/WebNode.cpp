@@ -28,7 +28,7 @@ bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {
 
 bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
 
-    auto &node = componentController->getNode(id);
+    auto &node = componentFactory->getNode(id);
     if (!node) {
         sendError(conn, "Can not find the node with ID : %d !!!", id);
         return false;

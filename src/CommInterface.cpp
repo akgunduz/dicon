@@ -31,21 +31,6 @@ CommInterface::~CommInterface() {
 
 }
 
-void CommInterface::shutdown() {
-
-//    char buf[1] = {SHUTDOWN_NOTIFIER};
-//
-//    write(notifierPipe[1], buf, 1);
-
-    onShutdown();
-
-    scheduler->end();
-
-    threadProduce.join();
-
-    threadConsume.join();
-}
-
 bool CommInterface::initThread() {
 
     threadProduce = std::thread([](CommInterface* commInterface) {
@@ -80,6 +65,21 @@ bool CommInterface::initThread() {
     }, this);
 
     return true;
+}
+
+void CommInterface::shutdown() {
+
+//    char buf[1] = {SHUTDOWN_NOTIFIER};
+//
+//    write(notifierPipe[1], buf, 1);
+
+    onShutdown();
+
+    scheduler->end();
+
+    threadProduce.join();
+
+    threadConsume.join();
 }
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage msg) {

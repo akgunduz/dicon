@@ -39,9 +39,9 @@ void TestApp::help() {
 
 int TestApp::run() {
 
-    auto &d = componentController->getDistributor();
-    auto &c = componentController->getCollector(0);
-    auto &n = componentController->getNode(0);
+    auto &d = componentFactory->getDistributor();
+    auto &c = componentFactory->getCollector(0);
+    auto &n = componentFactory->getNode(0);
 
     int in;
     do {

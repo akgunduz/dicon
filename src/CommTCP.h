@@ -32,7 +32,7 @@ class CommTCP : public CommInterface {
 
 	static bool onAlloc(uv_buf_t*, size_t, const uint8_t* = nullptr);
 	static bool onFree(const uv_buf_t *);
-    static bool onShutdown(uv_stream_t*);
+    static bool onTCPShutdown(uv_stream_t*);
 
     bool onServerConnect();
     bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
@@ -48,6 +48,8 @@ class CommTCP : public CommInterface {
 protected:
 
     bool initInterface() override;
+
+    bool onShutdown() override;
 
 public :
 

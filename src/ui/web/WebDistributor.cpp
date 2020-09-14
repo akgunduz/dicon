@@ -41,7 +41,7 @@ bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 
 bool WebApp::distPollHandler(struct mg_connection *conn) {
 
-    auto &distributor = componentController->getDistributor();
+    auto &distributor = componentFactory->getDistributor();
 
     distributor->sendWakeupMessagesAll(false);
 
@@ -52,9 +52,9 @@ bool WebApp::distPollHandler(struct mg_connection *conn) {
 
 bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
-    auto &distributor = componentController->getDistributor();
+    auto &distributor = componentFactory->getDistributor();
 
-    auto &collector = componentController->startCollector();
+    auto &collector = componentFactory->startCollector();
 
     collector->setAllUIAddress(webPort);
 
@@ -65,9 +65,9 @@ bool WebApp::distAddCollHandler(struct mg_connection *conn) {
 
 bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
-    auto &distributor = componentController->getDistributor();
+    auto &distributor = componentFactory->getDistributor();
 
-    auto &node = componentController->startNode();
+    auto &node = componentFactory->startNode();
 
     node->setAllUIAddress(webPort);
 
@@ -78,7 +78,7 @@ bool WebApp::distAddNodeHandler(struct mg_connection *conn) {
 
 bool WebApp::distStateHandler(struct mg_connection *conn) {
 
-    auto &distributor = componentController->getDistributor();
+    auto &distributor = componentFactory->getDistributor();
     if (!distributor) {
         sendError(conn, "Can not find the distributor !!!");
         return false;
@@ -86,7 +86,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     nlohmann::json collList;
 
-    for (auto& collectorPair : componentController->getDistributor()->getCollectors()->get()) {
+    for (auto& collectorPair : componentFactory->getDistributor()->getCollectors()->get()) {
 
         auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
 
@@ -104,7 +104,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     nlohmann::json nodeList;
 
-    for (auto& nodePair : componentController->getDistributor()->getNodes()->get()) {
+    for (auto& nodePair : componentFactory->getDistributor()->getNodes()->get()) {
 
         auto node = std::static_pointer_cast<NodeUnit>(nodePair.second);
 

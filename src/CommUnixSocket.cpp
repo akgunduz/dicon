@@ -16,9 +16,13 @@ CommUnixSocket::~CommUnixSocket() {
 
     LOGP_T("Deallocating UnixSocket");
 
-    end();
+    //end();
 
     close(unixSocket);
+}
+
+bool CommUnixSocket::onShutdown() {
+    return false;
 }
 
 bool CommUnixSocket::initInterface() {

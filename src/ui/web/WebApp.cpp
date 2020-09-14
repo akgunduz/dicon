@@ -168,22 +168,22 @@ WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& comp
         }, this);
 
 
-        componentController->getDistributor()->setAllUIAddress(webPort);
+        componentFactory->getDistributor()->setAllUIAddress(webPort);
 
         LOGP_I("Link : http://localhost:%d", webPort);
     }
 
-    if (componentController->getCollectorCount()) {
+    if (componentFactory->getCollectorCount()) {
 
-        for (auto &coll : componentController->getCollectors()) {
+        for (auto &coll : componentFactory->getCollectors()) {
 
             coll->setAllUIAddress(webPort);
         }
     }
 
-    if (componentController->getNodeCount()) {
+    if (componentFactory->getNodeCount()) {
 
-        for (auto &node : componentController->getNodes()) {
+        for (auto &node : componentFactory->getNodes()) {
 
             node->setAllUIAddress(webPort);
         }

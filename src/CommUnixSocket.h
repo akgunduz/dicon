@@ -25,6 +25,8 @@ protected:
 
     bool initInterface() override;
 
+    bool onShutdown() override;
+
 public :
 
 	CommUnixSocket(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);

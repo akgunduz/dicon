@@ -56,8 +56,10 @@ bool Component::shutdownInterfaces() {
 
     if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
 
-        interfaces[COMP_DISTRIBUTOR]->end();
+        interfaces[COMP_DISTRIBUTOR]->shutdown();
     }
+
+    interfaces[COMP_NODE]->shutdown();
 
     return false;
 }
@@ -68,7 +70,7 @@ Component::~Component() {
 
     sendShutdownMsg(getComponent(getHost()->getType()));
 
- //   while(true);
+    while(true);
 
     delete receiverCB;
 }
@@ -102,6 +104,8 @@ bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, Type
 bool Component::shutdownProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
     LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "Shutdown is received");
+
+    shutdownInterfaces();
 
     return true;
 }
@@ -166,7 +170,7 @@ TypeHostUnit& Component::getHost() {
 
 TypeHostUnit Component::getHost(COMPONENT _out) {
 
-    TypeHostUnit unit = std::make_unique<HostUnit>(*host);
+    auto unit = std::make_unique<HostUnit>(*host);
 
     unit->setAddress(getInterfaceAddress(_out));
 
@@ -175,7 +179,7 @@ TypeHostUnit Component::getHost(COMPONENT _out) {
 
 TypeComponentUnit Component::getComponent(COMPONENT _out) {
 
-    TypeComponentUnit unit = std::make_shared<ComponentUnit>(host.get());
+    auto unit = std::make_shared<ComponentUnit>(host.get());
 
     unit->setAddress(getInterfaceAddress(_out));
 
