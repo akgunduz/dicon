@@ -31,11 +31,13 @@ CommInterface::~CommInterface() {
 
 }
 
-void CommInterface::end() {
+void CommInterface::shutdown() {
 
 //    char buf[1] = {SHUTDOWN_NOTIFIER};
 //
 //    write(notifierPipe[1], buf, 1);
+
+    onShutdown();
 
     scheduler->end();
 

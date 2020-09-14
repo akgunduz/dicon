@@ -48,6 +48,8 @@ protected :
 
     bool initInterfaces(COMPONENT type, int, int);
 
+    bool shutdownInterfaces();
+
     bool notifyUI(NOTIFYTYPE);
 
 public:
@@ -59,6 +61,7 @@ public:
 
     TypeHostUnit& getHost();
     TypeHostUnit getHost(COMPONENT);
+    TypeComponentUnit getComponent(COMPONENT);
 
     const TypeDevice& getDevice(COMPONENT);
     Address& getInterfaceAddress(COMPONENT);
@@ -85,6 +88,8 @@ public:
 
     bool send(const TypeComponentUnit&, TypeMessage);
 
+    bool sendShutdownMsg(const TypeComponentUnit&);
+    bool shutdownProcessMsg(const TypeComponentUnit&, TypeMessage);
     bool defaultProcessMsg(const TypeComponentUnit&, TypeMessage);
 
     static void registerNotify(void*, TypeNotifyCB);

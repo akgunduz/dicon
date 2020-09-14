@@ -44,8 +44,9 @@ protected :
     virtual bool initInterface() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
+	virtual bool onShutdown() = 0;
 
-	void end();
+
 	CommInterface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 
 public :
@@ -62,6 +63,7 @@ public :
     virtual TypeAddressList getAddressList() = 0;
 
     bool initThread();
+    void shutdown();
 };
 
 typedef std::shared_ptr<CommInterface> TypeInterface;

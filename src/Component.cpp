@@ -52,9 +52,23 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     return true;
 }
 
+bool Component::shutdownInterfaces() {
+
+    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
+
+        interfaces[COMP_DISTRIBUTOR]->end();
+    }
+
+    return false;
+}
+
 Component::~Component() {
 
     LOGP_T("Deallocating Component");
+
+    sendShutdownMsg(getComponent(getHost()->getType()));
+
+ //   while(true);
 
     delete receiverCB;
 }
@@ -71,6 +85,11 @@ bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, Type
         auto processStaticCB = processStaticMsg[owner->getType()].find(msgType);
         if (processStaticCB == processStaticMsg[owner->getType()].end()) {
 
+            if (msgType == MSGTYPE_SHUTDOWN) {
+
+                return shutdownProcessMsg(owner, std::move(msg));
+            }
+
             return defaultProcessMsg(owner, std::move(msg));
         }
 
@@ -78,6 +97,13 @@ bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, Type
     }
 
     return (this->*processMsg[owner->getType()][msgType])(owner, std::move(msg));
+}
+
+bool Component::shutdownProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
+
+    LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "Shutdown is received");
+
+    return true;
 }
 
 bool Component::defaultProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -126,6 +152,13 @@ bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
     return interfaces[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
+bool Component::sendShutdownMsg(const TypeComponentUnit& target) {
+
+    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_SHUTDOWN);
+
+    return send(target, std::move(msg));
+}
+
 TypeHostUnit& Component::getHost() {
 
     return host;
@@ -134,6 +167,15 @@ TypeHostUnit& Component::getHost() {
 TypeHostUnit Component::getHost(COMPONENT _out) {
 
     TypeHostUnit unit = std::make_unique<HostUnit>(*host);
+
+    unit->setAddress(getInterfaceAddress(_out));
+
+    return std::move(unit);
+}
+
+TypeComponentUnit Component::getComponent(COMPONENT _out) {
+
+    TypeComponentUnit unit = std::make_shared<ComponentUnit>(host.get());
 
     unit->setAddress(getInterfaceAddress(_out));
 

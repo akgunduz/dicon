@@ -22,6 +22,10 @@ ComponentUnit::ComponentUnit(const TypeCommUnit &copy)
     : CommUnit(*copy) {
 }
 
+ComponentUnit::ComponentUnit(const CommUnit *copy)
+    : CommUnit(*copy) {
+}
+
 void* ComponentUnit::getHandle() const {
 
     return handle;

@@ -20,6 +20,7 @@ public:
     explicit ComponentUnit(COMPONENT);
     ComponentUnit(const ComponentUnit&);
     explicit ComponentUnit(const TypeCommUnit&);
+    explicit ComponentUnit(const CommUnit*);
     virtual ~ComponentUnit();
 
     void* getHandle() const;
