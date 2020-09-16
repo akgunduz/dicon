@@ -25,7 +25,9 @@ bool CommTCP::initInterface() {
 
 bool CommTCP::initTCP() {
 
-    int result = uv_tcp_init(&produceLoop, &tcpServer);
+    tcpServer = (uv_tcp_t*) malloc(sizeof(uv_tcp_t));
+
+    int result = uv_tcp_init(&produceLoop, tcpServer);
 
     if (result != 0) {
 
@@ -34,7 +36,7 @@ bool CommTCP::initTCP() {
         return false;
     }
 
-    tcpServer.data = this;
+    tcpServer->data = new CommData(this);
 
     int tryCount = TRY_COUNT;
 
@@ -44,9 +46,9 @@ bool CommTCP::initTCP() {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(address);
 
-        result = uv_tcp_bind(&tcpServer, (const struct sockaddr *) &serverAddress, 0);
+        result = uv_tcp_bind(tcpServer, (const struct sockaddr *) &serverAddress, 0);
 
-        if (result < 0 || tcpServer.delayed_error != 0) {
+        if (result < 0 || tcpServer->delayed_error != 0) {
 
             address.setPort(++lastFreeTCPPort);
 
@@ -66,18 +68,18 @@ bool CommTCP::initTCP() {
     }
 
     result = uv_listen(
-            (uv_stream_t *) &tcpServer, 1000,
+            (uv_stream_t *) tcpServer, 1000,
 
-            [](uv_stream_t *serverPtr, int status) {
+            [](uv_stream_t *server, int status) {
 
-                auto commInterface = ((CommTCP *) serverPtr->data);
+                auto commData = (CommData *) server->data;
 
-                if (status < 0) {
-                    LOGS_E(commInterface->getHost(), "Socket listen with err : %s", uv_err_name(status));
+                   if (status < 0) {
+                    LOGS_E(commData->getInterface()->getHost(), "Socket listen with err : %s", uv_err_name(status));
                     return;
                 }
 
-                ((CommTCP *) serverPtr->data)->onServerConnect();
+                ((CommTCP *) commData->getInterface())->onServerConnect();
 
             });
 
@@ -85,7 +87,7 @@ bool CommTCP::initTCP() {
 
         LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
-        onTCPShutdown((uv_stream_t *)&tcpServer);
+        onClose((uv_handle_t *)tcpServer);
 
         return false;
     }
@@ -97,7 +99,9 @@ bool CommTCP::initTCP() {
 
 bool CommTCP::initMulticast() {
 
-    int result = uv_udp_init(&produceLoop, &multicastServer);
+    multicastServer = (uv_udp_t*) malloc(sizeof(uv_udp_t));
+
+    int result = uv_udp_init(&produceLoop, multicastServer);
 
     if (result != 0) {
 
@@ -114,7 +118,7 @@ bool CommTCP::initMulticast() {
 
         struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
 
-        result = uv_udp_bind(&multicastServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
+        result = uv_udp_bind(multicastServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
 
         if (result < 0) {
 
@@ -130,26 +134,26 @@ bool CommTCP::initMulticast() {
 
         LOGS_E(getHost(), "Could not bind to socket!!!");
 
-        onClose((uv_handle_t*)&multicastServer);
+        onClose((uv_handle_t*)multicastServer);
 
         return false;
     }
 
-    result = uv_udp_set_membership(&multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
+    result = uv_udp_set_membership(multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
                           NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Can not join to multicast group!!!");
 
-        onClose((uv_handle_t*)&multicastServer);
+        onClose((uv_handle_t*)multicastServer);
 
         return false;
     }
 
-    multicastServer.data = new CommData(shared_from_this());
+    multicastServer->data = new CommData(this);
 
-    result = uv_udp_recv_start(&multicastServer,
+    result = uv_udp_recv_start(multicastServer,
 
             [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
@@ -174,22 +178,28 @@ bool CommTCP::initMulticast() {
 
                 auto commData = (CommData *) client->data;
 
-                auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+                auto commInterface = (CommTCP*)commData->getInterface();
 
-                bool isDone = commInterface->onRead(commData->getComponent(),
+                STATUS status = commInterface->onRead(commData->getComponent(),
                                                     commData->getMsg(), (uint8_t *) buf->base, nRead);
 
-                if (isDone) {
+                if (status == STATUS_DONE) {
 
                     commData->reInitialize();
+
+                } else if (status == STATUS_SHUTDOWN) {
+
+                    commInterface->shutdown();
                 }
+
+                onFree(buf);
             });
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Can not start receiving UDP data!!!");
 
-        onClose((uv_handle_t*)&multicastServer);
+        onClose((uv_handle_t*)multicastServer);
 
         return false;
     }
@@ -203,11 +213,11 @@ bool CommTCP::onShutdown() {
 
     LOGP_T("Triggering TCP Shutdown");
 
-    onTCPShutdown((uv_stream_t*)&tcpServer);
-
-    onClose((uv_handle_t*)&tcpServer);
-
-    onClose((uv_handle_t*)&multicastServer);
+//    onTCPShutdown((uv_stream_t*)tcpServer);
+//
+//    onClose((uv_handle_t*)tcpServer);
+//
+//    onClose((uv_handle_t*)multicastServer);
 
     return true;
 }
@@ -237,17 +247,6 @@ bool CommTCP::onFree(const uv_buf_t *buf) {
     free(buf->base);
 
     return true;
-}
-
-void CommTCP::onClose(uv_handle_t* handle) {
-
-    uv_close(handle, [] (uv_handle_t* _handle) {
-
-        LOGP_I("Handle is closed!!!");
-
-        free(_handle);
-    });
-
 }
 
 bool CommTCP::onTCPShutdown(uv_stream_t *client) {
@@ -280,7 +279,7 @@ bool CommTCP::onTCPShutdown(uv_stream_t *client) {
     return true;
 }
 
-bool CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
+STATUS CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
 
     bool isDone = msg->onRead(component, buf, nRead);
 
@@ -290,10 +289,17 @@ bool CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const
 
         auto owner = msg->getHeader().getOwner();
 
+        if (msg->getHeader().getType() == MSGTYPE_SHUTDOWN) {
+
+            return STATUS_SHUTDOWN;
+        }
+
         push(MSGDIR_RECEIVE, owner, std::move(msg));
+
+        return STATUS_DONE;
     }
 
-    return isDone;
+    return STATUS_PROGRESS;
 }
 
 bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
@@ -370,18 +376,20 @@ bool CommTCP::onServerConnect() {
         return false;
     }
 
-    result = uv_accept((uv_stream_t *) &tcpServer, (uv_stream_t *) client);
+    result = uv_accept((uv_stream_t *) tcpServer, (uv_stream_t *) client);
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        onTCPShutdown((uv_stream_t *)&client);
+        //onTCPShutdown((uv_stream_t *)&client);
+
+        onClose((uv_handle_t *)&client);
 
         return false;
     }
 
-    client->data = new CommData(shared_from_this());
+    client->data = new CommData(this);
 
     result = uv_read_start(
 
@@ -404,7 +412,11 @@ bool CommTCP::onServerConnect() {
 
                 if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-                    onTCPShutdown(client);
+                    //delete (CommData*)client->data;
+
+                    //onTCPShutdown(client);
+
+                    onClose((uv_handle_t*)client);
 
                     onFree(buf);
 
@@ -413,14 +425,24 @@ bool CommTCP::onServerConnect() {
 
                 auto commData = (CommData *) client->data;
 
-                auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+                auto commInterface = (CommTCP*)commData->getInterface();
 
-                bool isDone = commInterface->onRead(commData->getComponent(),
+                STATUS status = commInterface->onRead(commData->getComponent(),
                                                     commData->getMsg(), (uint8_t *) buf->base, nRead);
 
-                if (isDone) {
+                if (status == STATUS_DONE) {
 
                     commData->reInitialize();
+
+                } else if (status == STATUS_SHUTDOWN) {
+
+                //    delete (CommData*)client->data;
+
+//                    onTCPShutdown(client);
+//
+//                    onClose((uv_handle_t*)client);
+
+                    commInterface->shutdown();
                 }
 
                 onFree(buf);
@@ -430,7 +452,9 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
-        onTCPShutdown((uv_stream_t *) &client);
+        //onTCPShutdown((uv_stream_t *) &client);
+
+        onClose((uv_handle_t *)&client);
 
         return false;
     }
@@ -446,7 +470,7 @@ bool CommTCP::onClientConnect(const TypeComponentUnit &target, TypeMessage &msg,
 
     if (!res) {
 
-        LOGP_E("Write stream is failed!!!");
+        LOGS_E(getHost(), "Write stream is failed!!!");
 
         return false;
     }
@@ -469,7 +493,7 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    client->data = new CommData(shared_from_this(), target, msg);
+    client->data = new CommData(this, target, msg);
 
     auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
@@ -492,11 +516,13 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
                     auto commData = (CommData *) connectReq->handle->data;
 
-                    auto commInterface = std::static_pointer_cast<CommTCP>(commData->getInterface());
+                    auto commInterface = (CommTCP*)commData->getInterface();
 
                     commInterface->onClientConnect(commData->getComponent(), commData->getMsg(), connectReq->handle);
 
                     free(connectReq);
+
+                   // delete commData;
 
                 });
 

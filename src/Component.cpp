@@ -10,9 +10,8 @@ TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component(TypeHostUnit _host) {
-
-    host = std::move(_host);
+Component::Component(const TypeHostUnit& _host)
+    : host(_host) {
 
     receiverCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
@@ -52,25 +51,23 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     return true;
 }
 
-bool Component::shutdownInterfaces() {
-
-    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
-
-        interfaces[COMP_DISTRIBUTOR]->shutdown();
-    }
-
-    interfaces[COMP_NODE]->shutdown();
-
-    return false;
-}
-
 Component::~Component() {
 
     LOGP_T("Deallocating Component");
 
     sendShutdownMsg(getComponent(getHost()->getType()));
 
-    while(true);
+    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
+
+        interfaces[COMP_DISTRIBUTOR]->waitThread();
+
+        delete interfaces[COMP_DISTRIBUTOR];
+
+    }
+
+    interfaces[COMP_NODE]->waitThread();
+
+    delete interfaces[COMP_NODE];
 
     delete receiverCB;
 }
@@ -87,11 +84,6 @@ bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, Type
         auto processStaticCB = processStaticMsg[owner->getType()].find(msgType);
         if (processStaticCB == processStaticMsg[owner->getType()].end()) {
 
-            if (msgType == MSGTYPE_SHUTDOWN) {
-
-                return shutdownProcessMsg(owner, std::move(msg));
-            }
-
             return defaultProcessMsg(owner, std::move(msg));
         }
 
@@ -99,15 +91,6 @@ bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, Type
     }
 
     return (this->*processMsg[owner->getType()][msgType])(owner, std::move(msg));
-}
-
-bool Component::shutdownProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
-
-    LOGC_W(getHost(), owner, MSGDIR_RECEIVE, "Shutdown is received");
-
-    shutdownInterfaces();
-
-    return true;
 }
 
 bool Component::defaultProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -170,11 +153,11 @@ TypeHostUnit& Component::getHost() {
 
 TypeHostUnit Component::getHost(COMPONENT _out) {
 
-    auto unit = std::make_unique<HostUnit>(*host);
+    auto unit = std::make_shared<HostUnit>(host.get());
 
     unit->setAddress(getInterfaceAddress(_out));
 
-    return std::move(unit);
+    return unit;
 }
 
 TypeComponentUnit Component::getComponent(COMPONENT _out) {
@@ -183,7 +166,7 @@ TypeComponentUnit Component::getComponent(COMPONENT _out) {
 
     unit->setAddress(getInterfaceAddress(_out));
 
-    return std::move(unit);
+    return unit;
 }
 
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {

@@ -10,7 +10,7 @@
 #define PROCESS_SLEEP_TIME 1000
 
 Node::Node(int _commInterface) :
-    Component(std::make_unique<NodeHost>()) {
+    Component(std::make_shared<NodeHost>()) {
 
     LOGS_T(getHost(), "Node is initializing");
 

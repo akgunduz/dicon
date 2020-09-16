@@ -7,7 +7,7 @@
 #include "CollectorHost.h"
 
 Collector::Collector(int _commInterfaceOther, int _commInterfaceNode)  :
-        Component(std::make_unique<CollectorHost>()) {
+        Component(std::make_shared<CollectorHost>()) {
 
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_WAKEUP, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorWakeupMsg));
     addProcessHandler(COMP_DISTRIBUTOR, MSGTYPE_NODE, static_cast<TypeProcessComponentMsg>(&Collector::processDistributorNodeMsg));

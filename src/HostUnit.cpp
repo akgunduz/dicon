@@ -13,6 +13,10 @@ HostUnit::HostUnit(COMPONENT _type, TypeID _id)
 
 HostUnit::HostUnit(const HostUnit &copy) = default;
 
+HostUnit::HostUnit(const HostUnit *copy)
+    : CommUnit(*copy), basePath(copy->basePath), rootPath(copy->rootPath) {
+}
+
 HostUnit::~HostUnit() = default;
 
 const std::filesystem::path& HostUnit::getRootPath() {

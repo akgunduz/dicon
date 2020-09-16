@@ -41,7 +41,7 @@ public:
 
     bool process();
 
-	void end();
+	void shutdown();
 
     virtual ~Scheduler();
 

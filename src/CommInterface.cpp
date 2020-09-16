@@ -4,16 +4,17 @@
 //
 
 #include "CommInterface.h"
+#include "CommData.h"
 
-CommInterface::CommInterface(const TypeHostUnit& _host, const TypeDevice& _device,
+CommInterface::CommInterface(const TypeHostUnit &_host, const TypeDevice &_device,
                              const InterfaceSchedulerCB *receiverCB)
         : host(_host), device(_device) {
 
     scheduler = new Scheduler();
 
-    senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
+    senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem &item) -> bool {
 
-        return ((CommInterface*) arg)->send(item);
+        return ((CommInterface *) arg)->send(item);
 
     }, this);
 
@@ -33,23 +34,51 @@ CommInterface::~CommInterface() {
 
 bool CommInterface::initThread() {
 
-    threadProduce = std::thread([](CommInterface* commInterface) {
+    threadProduce = std::thread([](CommInterface *commInterface) {
 
-        uv_loop_init(&commInterface->produceLoop);
+        int status = uv_loop_init(&commInterface->produceLoop);
+
+        if (status != 0) {
+
+            LOGS_E(commInterface->getHost(), "Produce Loop can not created, returning, status : %s !!!",
+                   uv_err_name(status));
+
+            return false;
+        }
 
         commInterface->initInterface();
 
         uv_run(&commInterface->produceLoop, UV_RUN_DEFAULT);
 
-        uv_loop_close(&commInterface->produceLoop);
+        status = uv_loop_close(&commInterface->produceLoop);
+
+        if (status != 0) {
+
+            LOGS_E(commInterface->getHost(), "Produce Loop does not gracefully closed, status : %s, returning!!!",
+                   uv_err_name(status));
+
+            return false;
+        }
+
+        LOGS_T(commInterface->getHost(), "Produce Loop is Done, returning!!!");
+
+        return true;
 
     }, this);
 
-    threadConsume = std::thread([](CommInterface* commInterface) {
+    threadConsume = std::thread([](CommInterface *commInterface) {
 
-        uv_loop_init(&commInterface->consumeLoop);
+        int status = uv_loop_init(&commInterface->consumeLoop);
 
-        while(true) {
+        if (status != 0) {
+
+            LOGS_E(commInterface->getHost(), "Consume Loop can not created, status : %s returning!!!",
+                   uv_err_name(status));
+
+            return false;
+        }
+
+        while (true) {
 
             if (!commInterface->scheduler->process()) {
 
@@ -60,12 +89,44 @@ bool CommInterface::initThread() {
 
         }
 
-        uv_loop_close(&commInterface->consumeLoop);
+        uv_walk(&commInterface->consumeLoop, [](uv_handle_t *handle, void *arg) {
+
+            if (!uv_is_closing(handle)) {
+                onClose(handle);
+            }
+
+        }, commInterface);
+
+        uv_run(&commInterface->consumeLoop, UV_RUN_ONCE);
+
+        status = uv_loop_close(&commInterface->consumeLoop);
+
+        if (status != 0) {
+
+            LOGS_E(commInterface->getHost(), "Consume Loop does not gracefully closed, status : %s returning!!!",
+                   uv_err_name(status));
+
+            return false;
+        }
+
+        LOGS_T(commInterface->getHost(), "Consume Loop is Done, returning!!!");
+
+        return true;
 
     }, this);
 
     return true;
 }
+
+bool CommInterface::waitThread() {
+
+    threadProduce.join();
+
+    threadConsume.join();
+
+    return true;
+}
+
 
 void CommInterface::shutdown() {
 
@@ -75,20 +136,46 @@ void CommInterface::shutdown() {
 
     onShutdown();
 
-    scheduler->end();
+    scheduler->shutdown();
 
-    threadProduce.join();
+    uv_walk(&produceLoop, [](uv_handle_t *handle, void *arg) {
 
-    threadConsume.join();
+        if (!uv_is_closing(handle)) {
+            onClose(handle);
+        }
+
+    }, this);
 }
 
-bool CommInterface::push(MSG_DIR type, const TypeCommUnit& target, TypeMessage msg) {
+void CommInterface::onClose(uv_handle_t* handle) {
+
+    if (!handle) {
+        return;
+    }
+
+    uv_close(handle, [] (uv_handle_t* _handle) {
+
+        LOGP_I("Handle is closed!!!");
+
+        if (_handle->data != nullptr) {
+
+            delete (CommData *) _handle->data;
+
+            _handle->data = nullptr;
+        }
+
+        free(_handle);
+    });
+
+}
+
+bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage msg) {
 
     if (target->getAddress().getInterface() == getType()) {
 
         auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
 
-        scheduler->push(std::move(msgItem));
+        scheduler->push(msgItem);
 
         return true;
     }
@@ -138,12 +225,12 @@ Address &CommInterface::getMulticastAddress() {
     return multicastAddress;
 }
 
-const TypeHostUnit& CommInterface::getHost() {
+const TypeHostUnit &CommInterface::getHost() {
 
     return host;
 }
 
-const TypeDevice& CommInterface::getDevice() {
+const TypeDevice &CommInterface::getDevice() {
 
     return device;
 }

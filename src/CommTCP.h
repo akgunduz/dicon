@@ -24,8 +24,8 @@ class CommTCP : public CommInterface {
     static inline int lastFreeTCPPort = DEFAULT_PORT;
     static inline int lastFreeMulticastPort = DEFAULT_MULTICAST_PORT;
 
-    uv_tcp_t tcpServer{};
-    uv_udp_t multicastServer{};
+    uv_tcp_t *tcpServer{};
+    uv_udp_t *multicastServer{};
 
 	bool initTCP();
 	bool initMulticast();
@@ -36,9 +36,8 @@ class CommTCP : public CommInterface {
 
     bool onServerConnect();
     bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
-    bool onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
+    STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
-    static void onClose(uv_handle_t*);
     static bool onTCPWrite(const TypeComponentUnit&, const uint8_t*, size_t);
     static bool onMulticastWrite(const TypeComponentUnit&, const uint8_t*, size_t);
 

@@ -15,18 +15,22 @@ TypeInterface CommInterfaceFactory::createInterface(const TypeHostUnit& host, co
     switch (device->getType()) {
 
         case COMMINTERFACE_TCPIP:
-            commInterface = std::make_shared<CommTCP>(host, device, receiverCB);
+            commInterface = new CommTCP(host, device, receiverCB);
             break;
 
         case COMMINTERFACE_UNIXSOCKET:
-            commInterface = std::make_shared<CommUnixSocket>(host, device, receiverCB);
+            commInterface = new CommUnixSocket(host, device, receiverCB);
             break;
 
         default:
             return nullptr;
     }
 
+   // LOGP_E("Interface[%s] Use Count : %d", ComponentType::getName(host->getType()), commInterface.use_count());
+
     commInterface->initThread();
+
+   // LOGP_E("Interface[%s] Use Count : %d", ComponentType::getName(host->getType()), commInterface.use_count());
 
     return commInterface;
 }

@@ -19,9 +19,15 @@ enum NOTIFIER_TYPE {
 	NOTIFIER_WRITE
 };
 
-class CommInterface : public std::enable_shared_from_this<CommInterface> {
+enum STATUS {
+    STATUS_PROGRESS,
+    STATUS_DONE,
+    STATUS_SHUTDOWN,
+};
 
-    const TypeHostUnit& host;
+class CommInterface {
+
+    const TypeHostUnit host;
     const TypeDevice device;
 
     const InterfaceSchedulerCB *senderCB{};
@@ -41,11 +47,12 @@ protected :
     uv_loop_t produceLoop{};
     uv_loop_t consumeLoop{};
 
+    static void onClose(uv_handle_t*);
+
     virtual bool initInterface() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool onShutdown() = 0;
-
 
 	CommInterface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
 
@@ -63,10 +70,11 @@ public :
     virtual TypeAddressList getAddressList() = 0;
 
     bool initThread();
+    bool waitThread();
     void shutdown();
 };
 
-typedef std::shared_ptr<CommInterface> TypeInterface;
+typedef CommInterface* TypeInterface;
 typedef std::map<COMPONENT, TypeInterface> TypeInterfaceList;
 
 #endif //DICON_COMMINTERFACE_H

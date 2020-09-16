@@ -9,7 +9,7 @@
 #include "CollectorUnit.h"
 
 Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) :
-        Component(std::make_unique<DistributorHost>()) {
+        Component(std::make_shared<DistributorHost>()) {
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));

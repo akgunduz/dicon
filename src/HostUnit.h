@@ -17,6 +17,7 @@ public:
 
     explicit HostUnit(COMPONENT, TypeID = 0);
     HostUnit(const HostUnit&);
+    explicit HostUnit(const HostUnit*);
 
     virtual ~HostUnit();
 
@@ -25,6 +26,6 @@ public:
     void setID(TypeID) final;
 };
 
-typedef std::unique_ptr<HostUnit> TypeHostUnit;
+typedef std::shared_ptr<HostUnit> TypeHostUnit;
 
 #endif //DICON_HOSTUNIT_H

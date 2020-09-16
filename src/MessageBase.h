@@ -51,7 +51,7 @@ class MessageBase {
 
     MessageHeader header;
 
-    const TypeHostUnit& host;
+    const TypeHostUnit host;
 
     std::map<MSG_HEADER, TypeMsgReadParser> readParser;
 

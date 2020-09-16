@@ -34,7 +34,7 @@ bool Scheduler::push(TypeSchedulerItem item) {
         endFlag = true;
     }
 
-    items.push_back(std::move(item));
+    items.push_back(item);
 
     cond.notify_one();
 
@@ -64,14 +64,14 @@ TypeSchedulerItem Scheduler::pull() {
         }
     }
 
-    TypeSchedulerItem item = std::move(*(ref));
+    TypeSchedulerItem item = *ref;
 
     items.erase(ref);
 
     return item;
 }
 
-void Scheduler::end() {
+void Scheduler::shutdown() {
 
     push(std::make_shared<SchedulerItem>());
 
@@ -93,7 +93,7 @@ bool Scheduler::process() {
         return false;
     }
 
-    iCB->schedulerCB(iCB->arg, std::move(item));
+    iCB->schedulerCB(iCB->arg, item);
 
     return true;
 }

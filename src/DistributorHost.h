@@ -18,6 +18,6 @@ public:
     ~DistributorHost() override;
 };
 
-typedef std::unique_ptr<DistributorHost> TypeDistributorHost;
+typedef std::shared_ptr<DistributorHost> TypeDistributorHost;
 
 #endif //DICON_DISTRIBUTORHOST_H
