@@ -30,7 +30,7 @@ class CommTCP : public CommInterface {
 	bool initTCP();
 	bool initMulticast();
 
-	static bool onAlloc(uv_buf_t*, size_t, const uint8_t* = nullptr);
+	static bool onAlloc(uv_buf_t*, size_t, const char*, const uint8_t* = nullptr);
 	static bool onFree(const uv_buf_t *);
     static bool onTCPShutdown(uv_stream_t*);
 

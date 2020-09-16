@@ -155,13 +155,11 @@ void CommInterface::onClose(uv_handle_t* handle) {
 
     uv_close(handle, [] (uv_handle_t* _handle) {
 
-        LOGP_I("Handle is closed!!!");
+      //  LOGP_I("Handle is closed!!!");
 
         if (_handle->data != nullptr) {
 
             delete (CommData *) _handle->data;
-
-            _handle->data = nullptr;
         }
 
         free(_handle);

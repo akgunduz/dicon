@@ -157,7 +157,7 @@ bool CommTCP::initMulticast() {
 
             [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                onAlloc(buf, suggested_size);
+                onAlloc(buf, suggested_size, "UDP receive");
 
             },
 
@@ -165,6 +165,8 @@ bool CommTCP::initMulticast() {
                const struct sockaddr *addr, unsigned flags) {
 
                 if (nRead == 0) {
+
+                    onFree(buf);
 
                     return;
                 }
@@ -222,7 +224,7 @@ bool CommTCP::onShutdown() {
     return true;
 }
 
-bool CommTCP::onAlloc(uv_buf_t *buf, size_t size, const uint8_t* copy) {
+bool CommTCP::onAlloc(uv_buf_t *buf, size_t size, const char* id, const uint8_t* copy) {
 
     buf->base = (char *) malloc(size);
 
@@ -235,7 +237,7 @@ bool CommTCP::onAlloc(uv_buf_t *buf, size_t size, const uint8_t* copy) {
         memcpy(buf->base, copy, size);
     }
 
-    //LOGP_E("Allocated Buffer, Pointer : %p, Len : %d !!!", buf, size);
+    //LOGP_E("%s => Allocated Buffer, Pointer : %p, Len : %d !!!", id, buf->base, size);
 
     return true;
 }
@@ -333,8 +335,10 @@ bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer,
 
 bool CommTCP::onMulticastWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr;
-    onAlloc(&bufPtr, size, buffer);
+//    uv_buf_t bufPtr;
+//    onAlloc(&bufPtr, size, buffer);
+
+    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
 
     auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
 
@@ -397,7 +401,7 @@ bool CommTCP::onServerConnect() {
 
             [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
 
-                onAlloc(buf, suggested_size);
+                onAlloc(buf, suggested_size, "TCP receive");
 
             },
 
@@ -491,9 +495,11 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
         return false;
     }
 
-    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+    target->setHandle(client);
 
     client->data = new CommData(this, target, msg);
+
+    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
     auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
@@ -518,11 +524,17 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
                     auto commInterface = (CommTCP*)commData->getInterface();
 
-                    commInterface->onClientConnect(commData->getComponent(), commData->getMsg(), connectReq->handle);
+                    auto target = commData->getComponent();
+
+                    bool res = commData->getMsg()->writeToStream(target, onTCPWrite);
+
+                    if (!res) {
+
+                        LOGS_E(commInterface->getHost(), "Write TCP is failed!!!");
+
+                    }
 
                     free(connectReq);
-
-                   // delete commData;
 
                 });
 
@@ -574,7 +586,15 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
 
     target->setHandle(client);
 
-    msg->writeToStream(target, onMulticastWrite);
+    client->data = nullptr;
+
+    bool res = msg->writeToStream(target, onMulticastWrite);
+
+    if (!res) {
+
+        LOGS_E(getHost(), "Write UDP is failed!!!");
+
+    }
 
     return true;
 }
