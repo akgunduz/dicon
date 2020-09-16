@@ -36,12 +36,12 @@ void ComponentUnit::setHandle(void* _handle) {
     handle = _handle;
 }
 
-long long ComponentUnit::getCheckTime() const {
+TypeTime& ComponentUnit::getCheckTime() {
 
     return checkTime;
 }
 
-void ComponentUnit::setCheckTime(long long _checkTime) {
+void ComponentUnit::setCheckTime(TypeTime _checkTime) {
 
     checkTime = _checkTime;
 }

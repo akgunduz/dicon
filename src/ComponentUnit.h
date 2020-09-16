@@ -7,10 +7,12 @@
 
 #include "CommUnit.h"
 
+typedef std::chrono::steady_clock::time_point TypeTime;
+
 class ComponentUnit : public CommUnit {
 
     void* handle{};
-    long long checkTime{};
+    TypeTime checkTime{};
 
 public:
 
@@ -26,8 +28,8 @@ public:
     void* getHandle() const;
     void setHandle(void*);
 
-    long long getCheckTime() const;
-    void setCheckTime(long long);
+    TypeTime& getCheckTime();
+    void setCheckTime(TypeTime);
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;

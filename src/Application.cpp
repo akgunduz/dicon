@@ -44,6 +44,11 @@ App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vecto
 
     Component::registerNotify(this, [] (void *context, COMPONENT target, NOTIFYTYPE state) -> bool {
 
+        if (!context) {
+
+            return false;
+        }
+
         LOGP_T("Notifying Application UI, target : %s, state : %s",
                ComponentType::getName(target), NotifyType::getName(state));
         return ((App*) context)->notifyHandler(target, state);
@@ -60,6 +65,8 @@ App::~App() {
 
     LOGP_T("Deallocating App");
 
+    Component::deRegisterNotify();
+
     delete componentFactory;
 
     delete deviceList;
@@ -67,8 +74,6 @@ App::~App() {
     if (!initialized) {
         return;
     }
-
-    Component::deRegisterNotify();
 
 }
 

@@ -31,11 +31,12 @@ void ComponentManager::checkDead() {
 
     std::unique_lock<std::mutex> lock(mutex);
 
-    long long curTime = time(nullptr);
+    TypeTime curTime = std::chrono::steady_clock::now();
 
     for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
 
-        if (curTime - iterator->second->getCheckTime() > ALIVE_INTERVAL) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(curTime
+                - iterator->second->getCheckTime()).count() > ALIVE_INTERVAL) {
 
             LOGS_I(host, "%s[%d] is removed from network",
                    ComponentType::getName(iterator->second->getType()), iterator->second->getID());
@@ -122,7 +123,7 @@ TypeID ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) 
 
         isAlreadyAdded = true;
 
-        component.second->setCheckTime(std::chrono::system_clock::now().time_since_epoch().count());
+        component.second->setCheckTime(std::chrono::steady_clock::now());
 
         return component.second->getID();
 
@@ -132,7 +133,7 @@ TypeID ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) 
 
     auto object = createUnit(arch, newID, address);
 
-    object->setCheckTime(std::chrono::system_clock::now().time_since_epoch().count());
+    object->setCheckTime(std::chrono::steady_clock::now());
 
     LOGS_I(host, "%s[%d] is added to network",
            ComponentType::getName(object->getType()), object->getID());
