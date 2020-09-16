@@ -3,6 +3,8 @@
 //
 
 #include "Component.h"
+
+#include <utility>
 #include "NetUtil.h"
 
 void *Component::notifyContext = nullptr;
@@ -10,8 +12,8 @@ TypeNotifyCB Component::notifyCB = nullptr;
 
 TypeComponent Component::nullComponent = nullptr;
 
-Component::Component(const TypeHostUnit& _host)
-    : host(_host) {
+Component::Component(TypeHostUnit _host)
+    : host(std::move(_host)) {
 
     receiverCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 

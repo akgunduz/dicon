@@ -54,7 +54,7 @@ public:
 
     static TypeComponent nullComponent;
 
-    explicit Component(const TypeHostUnit&);
+    explicit Component(TypeHostUnit );
     virtual ~Component();
 
     TypeHostUnit& getHost();
