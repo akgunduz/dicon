@@ -15,30 +15,30 @@
 
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101
-#define DEFAULT_PORT 61001
-#define DEFAULT_MULTICAST_PORT 62001
+#define DEFAULT_TCP_PORT 61001
+#define DEFAULT_UDP_PORT 62001
 #define TRY_COUNT 10
 
 class CommTCP : public CommInterface {
 
-    static inline int lastFreeTCPPort = DEFAULT_PORT;
-    static inline int lastFreeMulticastPort = DEFAULT_MULTICAST_PORT;
+    static inline int lastFreeTCPPort = DEFAULT_TCP_PORT;
+    static inline int lastFreeUDPPort = DEFAULT_UDP_PORT;
 
     uv_tcp_t *tcpServer{};
-    uv_udp_t *multicastServer{};
+    uv_udp_t *udpServer{};
 
 	bool initTCP();
-	bool initMulticast();
+	bool initUDP();
 
+	static bool onReceive(uv_handle_t*, ssize_t, const uv_buf_t *);
     bool onServerConnect();
-    bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
-    STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
-    static bool onTCPWrite(const TypeComponentUnit&, const uint8_t*, size_t);
-    static bool onMulticastWrite(const TypeComponentUnit&, const uint8_t*, size_t);
+    static bool onTCPSendCB(const TypeComponentUnit&, const uint8_t*, size_t);
+    static bool onUDPSendCB(const TypeComponentUnit&, const uint8_t*, size_t);
 
-	bool runSender(const TypeComponentUnit&, TypeMessage) override;
-    bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
+	bool onTCPSend(const TypeComponentUnit&, TypeMessage);
+    bool onUDPSend(const TypeComponentUnit&, TypeMessage);
+    bool onSend(const TypeComponentUnit&, TypeMessage) override;
 
 protected:
 

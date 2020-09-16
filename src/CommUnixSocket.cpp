@@ -165,7 +165,7 @@ bool CommUnixSocket::initUnixSocket() {
 //    return true;
 //}
 
-bool CommUnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg) {
+bool CommUnixSocket::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
 //    int clientSocket = socket(AF_UNIX, SOCK_STREAM, 0);
 //    if (clientSocket < 0) {
@@ -191,11 +191,6 @@ bool CommUnixSocket::runSender(const TypeComponentUnit& target, TypeMessage msg)
 //    close(clientSocket);
 
     return true;
-}
-
-bool CommUnixSocket::runMulticastSender(const TypeComponentUnit& target, TypeMessage message) {
-
-    return false;
 }
 
 //TypeReadCB CommUnixSocket::getReadCB(const TypeComponentUnit& source) {

@@ -51,10 +51,12 @@ protected :
     static void onFree(const uv_buf_t *);
     static void onClose(uv_handle_t*);
     void onCloseAll(uv_loop_t*);
+    STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
     virtual bool initInterface() = 0;
-	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
-	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
+//	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
+//	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
+    virtual bool onSend(const TypeComponentUnit&, TypeMessage) = 0;
 
 	CommInterface(const TypeHostUnit&, const TypeDevice&, const CommInterfaceCB *);
 

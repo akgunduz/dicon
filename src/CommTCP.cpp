@@ -14,15 +14,15 @@ CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const CommI
 
 CommTCP::~CommTCP() {
 
-    LOGS_T(getHost(), "Deallocating TCP/Multicast Interface");
+    LOGS_T(getHost(), "Deallocating TCP/UDP Interface");
 
 }
 
 bool CommTCP::initInterface() {
 
-    LOGS_T(getHost(), "Initializing TCP/Multicast Interface");
+    LOGS_T(getHost(), "Initializing TCP/UDP Interface");
 
-    return initTCP() && initMulticast();
+    return initTCP() && initUDP();
 }
 
 bool CommTCP::initTCP() {
@@ -98,11 +98,11 @@ bool CommTCP::initTCP() {
     return true;
 }
 
-bool CommTCP::initMulticast() {
+bool CommTCP::initUDP() {
 
-    multicastServer = (uv_udp_t*) malloc(sizeof(uv_udp_t));
+    udpServer = (uv_udp_t*) malloc(sizeof(uv_udp_t));
 
-    int result = uv_udp_init(&produceLoop, multicastServer);
+    int result = uv_udp_init(&produceLoop, udpServer);
 
     if (result != 0) {
 
@@ -113,17 +113,17 @@ bool CommTCP::initMulticast() {
 
     int tryCount = TRY_COUNT;
 
-    multicastAddress.set(MULTICAST_ADDRESS, lastFreeMulticastPort, true);
+    multicastAddress.set(MULTICAST_ADDRESS, lastFreeUDPPort, true);
 
     while (tryCount--) {
 
-        struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeMulticastPort);
+        struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeUDPPort);
 
-        result = uv_udp_bind(multicastServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
+        result = uv_udp_bind(udpServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
 
         if (result < 0) {
 
-            multicastAddress.setPort(++lastFreeMulticastPort);
+            multicastAddress.setPort(++lastFreeUDPPort);
 
             continue;
         }
@@ -135,58 +135,38 @@ bool CommTCP::initMulticast() {
 
         LOGS_E(getHost(), "Could not bind to socket!!!");
 
-        onClose((uv_handle_t*)multicastServer);
+        onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
-    result = uv_udp_set_membership(multicastServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
+    result = uv_udp_set_membership(udpServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
                           NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Can not join to multicast group!!!");
 
-        onClose((uv_handle_t*)multicastServer);
+        onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
-    multicastServer->data = new CommData(this);
+    udpServer->data = new CommData(this);
 
-    result = uv_udp_recv_start(multicastServer, onAlloc,
+    result = uv_udp_recv_start(udpServer, onAlloc,
 
             [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags) {
 
-                if (nRead == 0 || nRead == UV_ECONNRESET) {
-
-                    onFree(buf);
-
-                    return;
-                }
-
-                auto commData = (CommData *) client->data;
-
-                auto commInterface = (CommTCP*)commData->getInterface();
-
-                STATUS status = commInterface->onRead(commData->getComponent(),
-                                                    commData->getMsg(), (uint8_t *) buf->base, nRead);
-
-                if (status == STATUS_DONE) {
-
-                    commData->reInitialize();
-
-                }
-
-                onFree(buf);
+                onReceive((uv_handle_t*)client, nRead, buf);
             });
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Can not start receiving UDP data!!!");
 
-        onClose((uv_handle_t*)multicastServer);
+        onClose((uv_handle_t*)udpServer);
 
         return false;
     }
@@ -196,30 +176,46 @@ bool CommTCP::initMulticast() {
     return true;
 }
 
-STATUS CommTCP::onRead(const TypeComponentUnit &component, TypeMessage &msg, const uint8_t *buf, size_t nRead) {
+bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf) {
 
-    bool isDone = msg->onRead(component, buf, nRead);
+    if (nRead == 0) {
 
-    if (isDone) {
+        onFree(buf);
 
-        msg->build(component);
-
-        auto owner = msg->getHeader().getOwner();
-
-        if (msg->getHeader().getType() == MSGTYPE_SHUTDOWN) {
-
-            return STATUS_SHUTDOWN;
-        }
-
-        push(MSGDIR_RECEIVE, owner, std::move(msg));
-
-        return STATUS_DONE;
+        return false;
     }
 
-    return STATUS_PROGRESS;
+    if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
+
+        onClose((uv_handle_t*)client);
+
+        onFree(buf);
+
+        return true;
+    }
+
+    auto commData = (CommData *) client->data;
+
+    auto commInterface = (CommTCP*)commData->getInterface();
+
+    STATUS status = commInterface->onRead(commData->getComponent(),
+                                          commData->getMsg(), (uint8_t *) buf->base, nRead);
+
+    if (status == STATUS_DONE) {
+
+        commData->reInitialize();
+
+    } else if (status == STATUS_SHUTDOWN) {
+
+        commInterface->shutdown();
+    }
+
+    onFree(buf);
+
+    return false;
 }
 
-bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
+bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
 
@@ -248,7 +244,7 @@ bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer,
     return true;
 }
 
-bool CommTCP::onMulticastWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
+bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
 
@@ -309,39 +305,7 @@ bool CommTCP::onServerConnect() {
 
             [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
-                if (nRead == 0) {
-
-                    onFree(buf);
-
-                    return;
-                }
-
-                if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
-
-                    onClose((uv_handle_t*)client);
-
-                    onFree(buf);
-
-                    return;
-                }
-
-                auto commData = (CommData *) client->data;
-
-                auto commInterface = (CommTCP*)commData->getInterface();
-
-                STATUS status = commInterface->onRead(commData->getComponent(),
-                                                    commData->getMsg(), (uint8_t *) buf->base, nRead);
-
-                if (status == STATUS_DONE) {
-
-                    commData->reInitialize();
-
-                } else if (status == STATUS_SHUTDOWN) {
-
-                    commInterface->shutdown();
-                }
-
-                onFree(buf);
+                onReceive((uv_handle_t*)client, nRead, buf);
             });
 
     if (result != 0) {
@@ -356,23 +320,7 @@ bool CommTCP::onServerConnect() {
     return true;
 }
 
-bool CommTCP::onClientConnect(const TypeComponentUnit &target, TypeMessage &msg, uv_stream_t *handle) {
-
-    target->setHandle(handle);
-
-    bool res = msg->writeToStream(target, onTCPWrite);
-
-    if (!res) {
-
-        LOGS_E(getHost(), "Write stream is failed!!!");
-
-        return false;
-    }
-
-    return true;
-}
-
-bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
+bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
 
@@ -416,7 +364,7 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
 
                     auto target = commData->getComponent();
 
-                    bool res = commData->getMsg()->writeToStream(target, onTCPWrite);
+                    bool res = commData->getMsg()->writeToStream(target, onTCPSendCB);
 
                     if (!res) {
 
@@ -452,7 +400,7 @@ bool CommTCP::runSender(const TypeComponentUnit& target, TypeMessage msg) {
     return tryCount != 0;
 }
 
-bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage msg) {
+bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
 
     auto *client = (uv_udp_t *) malloc(sizeof(uv_udp_t));
 
@@ -478,7 +426,7 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
 
     client->data = nullptr;
 
-    bool res = msg->writeToStream(target, onMulticastWrite);
+    bool res = msg->writeToStream(target, onUDPSendCB);
 
     if (!res) {
 
@@ -488,6 +436,18 @@ bool CommTCP::runMulticastSender(const TypeComponentUnit &target, TypeMessage ms
 
     return true;
 }
+
+bool CommTCP::onSend(const TypeComponentUnit &target, TypeMessage msg) {
+
+    if (target->getAddress() != getMulticastAddress()) {
+
+        return onTCPSend(target, std::move(msg));
+
+    }
+
+    return onUDPSend(target, std::move(msg));
+}
+
 
 COMM_INTERFACE CommTCP::getType() {
 
@@ -507,7 +467,7 @@ TypeAddressList CommTCP::getAddressList() {
 
         for (int i = 0; i < LOOPBACK_RANGE; i++) {
 
-            Address destAddress(getDevice()->getBase(), DEFAULT_PORT + i);
+            Address destAddress(getDevice()->getBase(), DEFAULT_TCP_PORT + i);
 
             if (destAddress != getAddress()) {
 
@@ -531,7 +491,7 @@ TypeAddressList CommTCP::getAddressList() {
 
             if (startIP != getAddress().get().base) {
 
-                Address destAddress(startIP, DEFAULT_PORT);
+                Address destAddress(startIP, DEFAULT_TCP_PORT);
 
                 list.push_back(destAddress);
 

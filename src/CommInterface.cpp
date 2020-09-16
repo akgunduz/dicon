@@ -177,6 +177,30 @@ void CommInterface::onCloseAll(uv_loop_t *loop) {
     }, this);
 }
 
+STATUS CommInterface::onRead(const TypeComponentUnit &component, TypeMessage &msg,
+                             const uint8_t *buf, size_t nRead) {
+
+    bool isDone = msg->onRead(component, buf, nRead);
+
+    if (isDone) {
+
+        msg->build(component);
+
+        auto owner = msg->getHeader().getOwner();
+
+        if (msg->getHeader().getType() == MSGTYPE_SHUTDOWN) {
+
+            return STATUS_SHUTDOWN;
+        }
+
+        push(MSGDIR_RECEIVE, owner, std::move(msg));
+
+        return STATUS_DONE;
+    }
+
+    return STATUS_PROGRESS;
+}
+
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage msg) {
 
     if (target->getAddress().getInterface() == getType()) {
@@ -195,8 +219,6 @@ bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage m
 
 bool CommInterface::send(const TypeSchedulerItem &item) {
 
-    bool status;
-
     auto msgItem = std::static_pointer_cast<MessageItem>(item);
 
     auto msgType = msgItem->getMessage()->getHeader().getType();
@@ -207,20 +229,11 @@ bool CommInterface::send(const TypeSchedulerItem &item) {
 
     auto target = std::make_shared<ComponentUnit>(msgItem->getUnit());
 
-    if (msgItem->getUnit()->getAddress() != getMulticastAddress()) {
-
-        status = runSender(target, std::move(msgItem->getMessage()));
-
-    } else {
-
-        status = runMulticastSender(target, std::move(msgItem->getMessage()));
-    }
-
-    LOGC_D(getHost(), msgItem->getUnit(), MSGDIR_SEND,
+    LOGC_D(getHost(), target, MSGDIR_SEND,
            "\"%s\" is sent",
            MessageType::getMsgName(msgType));
 
-    return status;
+    return onSend(target, std::move(msgItem->getMessage()));
 }
 
 Address &CommInterface::getAddress() {

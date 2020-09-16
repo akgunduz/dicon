@@ -18,8 +18,7 @@ class CommUnixSocket : public CommInterface {
 	int unixSocket{};
 
 	bool initUnixSocket();
-    bool runSender(const TypeComponentUnit& , TypeMessage) override;
-    bool runMulticastSender(const TypeComponentUnit&, TypeMessage) override;
+    bool onSend(const TypeComponentUnit&, TypeMessage) override;
 
 protected:
 
