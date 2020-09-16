@@ -13,7 +13,7 @@ TypeComponent Component::nullComponent = nullptr;
 Component::Component(const TypeHostUnit& _host)
     : host(_host) {
 
-    receiverCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem& item) -> bool {
+    receiverCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         auto *component = (Component *) arg;
 

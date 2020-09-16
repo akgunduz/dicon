@@ -9,7 +9,7 @@
 #include "Common.h"
 #include "Message.h"
 #include "Address.h"
-#include "InterfaceCallback.h"
+#include "CommInterfaceCB.h"
 #include "MessageType.h"
 #include "SchedulerItem.h"
 
@@ -23,7 +23,7 @@ class Scheduler {
 
 	std::list<TypeSchedulerItem> items;
 
-	std::map<int, const InterfaceSchedulerCB*> callbacks;
+	std::map<int, const CommInterfaceCB*> callbacks;
 
 	int capacity {MAX_SCHEDULER_CAPACITY};
 
@@ -33,9 +33,9 @@ public:
 
 	Scheduler() = default;
 
-    void setCB(int, const InterfaceSchedulerCB*);
+    void setCB(int, const CommInterfaceCB*);
 
-	bool push(TypeSchedulerItem item);
+	bool push(const TypeSchedulerItem& item);
 
     TypeSchedulerItem pull();
 

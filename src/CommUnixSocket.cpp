@@ -7,7 +7,7 @@
 #include "NetUtil.h"
 
 CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device,
-                               const InterfaceSchedulerCB *receiverCB)
+                               const CommInterfaceCB *receiverCB)
         : CommInterface(host, device, receiverCB) {
 
 }
@@ -19,10 +19,6 @@ CommUnixSocket::~CommUnixSocket() {
     //end();
 
     close(unixSocket);
-}
-
-bool CommUnixSocket::onShutdown() {
-    return false;
 }
 
 bool CommUnixSocket::initInterface() {

@@ -8,9 +8,9 @@
 #include "CommUnixSocket.h"
 
 TypeInterface CommInterfaceFactory::createInterface(const TypeHostUnit& host, const TypeDevice& device,
-                                                    const InterfaceSchedulerCB *receiverCB) {
+                                                    const CommInterfaceCB *receiverCB) {
 
-    TypeInterface commInterface = nullptr;
+    TypeInterface commInterface;
 
     switch (device->getType()) {
 
@@ -26,11 +26,7 @@ TypeInterface CommInterfaceFactory::createInterface(const TypeHostUnit& host, co
             return nullptr;
     }
 
-   // LOGP_E("Interface[%s] Use Count : %d", ComponentType::getName(host->getType()), commInterface.use_count());
-
     commInterface->initThread();
-
-   // LOGP_E("Interface[%s] Use Count : %d", ComponentType::getName(host->getType()), commInterface.use_count());
 
     return commInterface;
 }

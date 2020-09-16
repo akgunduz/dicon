@@ -30,7 +30,7 @@ class CommInterface {
     const TypeHostUnit host;
     const TypeDevice device;
 
-    const InterfaceSchedulerCB *senderCB{};
+    const CommInterfaceCB *senderCB{};
 
     bool send(const TypeSchedulerItem& item);
 
@@ -47,14 +47,15 @@ protected :
     uv_loop_t produceLoop{};
     uv_loop_t consumeLoop{};
 
+    static void onAlloc(uv_handle_t*, size_t,uv_buf_t*);
+    static void onFree(const uv_buf_t *);
     static void onClose(uv_handle_t*);
 
     virtual bool initInterface() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
 	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
-	virtual bool onShutdown() = 0;
 
-	CommInterface(const TypeHostUnit&, const TypeDevice&, const InterfaceSchedulerCB *);
+	CommInterface(const TypeHostUnit&, const TypeDevice&, const CommInterfaceCB *);
 
 public :
 

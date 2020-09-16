@@ -7,18 +7,20 @@
 #include "NetUtil.h"
 #include "CommData.h"
 
-CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const InterfaceSchedulerCB *receiverCB)
+CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const CommInterfaceCB *receiverCB)
         : CommInterface(host, device, receiverCB) {
 
 }
 
 CommTCP::~CommTCP() {
 
-    LOGP_T("Deallocating TCP Interface");
+    LOGS_T(getHost(), "Deallocating TCP/Multicast Interface");
 
 }
 
 bool CommTCP::initInterface() {
+
+    LOGS_T(getHost(), "Initializing TCP/Multicast Interface");
 
     return initTCP() && initMulticast();
 }
@@ -67,8 +69,7 @@ bool CommTCP::initTCP() {
         return false;
     }
 
-    result = uv_listen(
-            (uv_stream_t *) tcpServer, 1000,
+    result = uv_listen((uv_stream_t *) tcpServer, 1000,
 
             [](uv_stream_t *server, int status) {
 
@@ -153,25 +154,12 @@ bool CommTCP::initMulticast() {
 
     multicastServer->data = new CommData(this);
 
-    result = uv_udp_recv_start(multicastServer,
-
-            [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
-
-                onAlloc(buf, suggested_size, "UDP receive");
-
-            },
+    result = uv_udp_recv_start(multicastServer, onAlloc,
 
             [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags) {
 
-                if (nRead == 0) {
-
-                    onFree(buf);
-
-                    return;
-                }
-
-                if (nRead == UV_ECONNRESET) {
+                if (nRead == 0 || nRead == UV_ECONNRESET) {
 
                     onFree(buf);
 
@@ -189,9 +177,6 @@ bool CommTCP::initMulticast() {
 
                     commData->reInitialize();
 
-                } else if (status == STATUS_SHUTDOWN) {
-
-                    commInterface->shutdown();
                 }
 
                 onFree(buf);
@@ -207,76 +192,6 @@ bool CommTCP::initMulticast() {
     }
 
     LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(getMulticastAddress().get()).c_str());
-
-    return true;
-}
-
-bool CommTCP::onShutdown() {
-
-    LOGP_T("Triggering TCP Shutdown");
-
-//    onTCPShutdown((uv_stream_t*)tcpServer);
-//
-//    onClose((uv_handle_t*)tcpServer);
-//
-//    onClose((uv_handle_t*)multicastServer);
-
-    return true;
-}
-
-bool CommTCP::onAlloc(uv_buf_t *buf, size_t size, const char* id, const uint8_t* copy) {
-
-    buf->base = (char *) malloc(size);
-
-    assert(buf->base != nullptr);
-
-    buf->len = size;
-
-    if (copy) {
-
-        memcpy(buf->base, copy, size);
-    }
-
-    //LOGP_E("%s => Allocated Buffer, Pointer : %p, Len : %d !!!", id, buf->base, size);
-
-    return true;
-}
-
-bool CommTCP::onFree(const uv_buf_t *buf) {
-
-    //LOGP_E("DeAllocating Buffer, Pointer : %p", buf->base);
-
-    free(buf->base);
-
-    return true;
-}
-
-bool CommTCP::onTCPShutdown(uv_stream_t *client) {
-
-    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
-
-    int result = uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
-
-        if (status) {
-
-            LOGP_E("Shutdown error : %d!!!", status);
-
-        } else {
-
-            LOGP_T("Shutdown OK");
-        }
-
-        free(req->handle->data);
-        free(req->handle);
-        free(req);
-    });
-
-    if (result != 0) {
-
-        LOGP_E("Shutdown error : %s!!!", uv_err_name(result));
-
-        return false;
-    }
 
     return true;
 }
@@ -335,9 +250,6 @@ bool CommTCP::onTCPWrite(const TypeComponentUnit &target, const uint8_t *buffer,
 
 bool CommTCP::onMulticastWrite(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-//    uv_buf_t bufPtr;
-//    onAlloc(&bufPtr, size, buffer);
-
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
 
     auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
@@ -386,8 +298,6 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        //onTCPShutdown((uv_stream_t *)&client);
-
         onClose((uv_handle_t *)&client);
 
         return false;
@@ -395,15 +305,7 @@ bool CommTCP::onServerConnect() {
 
     client->data = new CommData(this);
 
-    result = uv_read_start(
-
-            (uv_stream_t *) client,
-
-            [](uv_handle_t *client, size_t suggested_size, uv_buf_t *buf) {
-
-                onAlloc(buf, suggested_size, "TCP receive");
-
-            },
+    result = uv_read_start((uv_stream_t *) client, onAlloc,
 
             [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
@@ -415,10 +317,6 @@ bool CommTCP::onServerConnect() {
                 }
 
                 if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
-
-                    //delete (CommData*)client->data;
-
-                    //onTCPShutdown(client);
 
                     onClose((uv_handle_t*)client);
 
@@ -440,12 +338,6 @@ bool CommTCP::onServerConnect() {
 
                 } else if (status == STATUS_SHUTDOWN) {
 
-                //    delete (CommData*)client->data;
-
-//                    onTCPShutdown(client);
-//
-//                    onClose((uv_handle_t*)client);
-
                     commInterface->shutdown();
                 }
 
@@ -455,8 +347,6 @@ bool CommTCP::onServerConnect() {
     if (result != 0) {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
-
-        //onTCPShutdown((uv_stream_t *) &client);
 
         onClose((uv_handle_t *)&client);
 

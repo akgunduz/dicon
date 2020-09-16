@@ -34,6 +34,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/CollectorUnit.cpp
         ${SOURCE_PATH}/CommData.cpp
         ${SOURCE_PATH}/CommInterface.cpp
+        ${SOURCE_PATH}/CommInterfaceCB.cpp
         ${SOURCE_PATH}/CommInterfaceFactory.cpp
         ${SOURCE_PATH}/CommTCP.cpp
         ${SOURCE_PATH}/CommUnit.cpp
@@ -52,7 +53,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/DistributorObject.cpp
         ${SOURCE_PATH}/FileItem.cpp
         ${SOURCE_PATH}/HostUnit.cpp
-        ${SOURCE_PATH}/InterfaceCallback.cpp
         ${SOURCE_PATH}/JobItem.cpp
         ${SOURCE_PATH}/Message.cpp
         ${SOURCE_PATH}/MessageBase.cpp

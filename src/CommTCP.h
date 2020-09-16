@@ -30,10 +30,6 @@ class CommTCP : public CommInterface {
 	bool initTCP();
 	bool initMulticast();
 
-	static bool onAlloc(uv_buf_t*, size_t, const char*, const uint8_t* = nullptr);
-	static bool onFree(const uv_buf_t *);
-    static bool onTCPShutdown(uv_stream_t*);
-
     bool onServerConnect();
     bool onClientConnect(const TypeComponentUnit&, TypeMessage&, uv_stream_t*);
     STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
@@ -48,12 +44,10 @@ protected:
 
     bool initInterface() override;
 
-    bool onShutdown() override;
-
 public :
 
 	CommTCP(const TypeHostUnit&, const TypeDevice&,
-            const InterfaceSchedulerCB *);
+            const CommInterfaceCB *);
 	~CommTCP() override;
 
     COMM_INTERFACE getType() override;

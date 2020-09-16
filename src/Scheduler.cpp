@@ -8,10 +8,9 @@
 Scheduler::~Scheduler() {
 
     LOGP_T("Deallocating Scheduler");
-
 }
 
-bool Scheduler::push(TypeSchedulerItem item) {
+bool Scheduler::push(const TypeSchedulerItem& item) {
 
     assert(item != nullptr);
 
@@ -77,7 +76,7 @@ void Scheduler::shutdown() {
 
 }
 
-void Scheduler::setCB(int id, const InterfaceSchedulerCB *cb) {
+void Scheduler::setCB(int id, const CommInterfaceCB *cb) {
 
 	callbacks[id] = cb;
 }
@@ -86,14 +85,14 @@ bool Scheduler::process() {
 
     TypeSchedulerItem item = pull();
 
-    const InterfaceSchedulerCB *iCB = callbacks[item->type];
+    const CommInterfaceCB *commInterfaceCB = callbacks[item->type];
 
-    if (item->type == END_ITEM || !iCB) {
+    if (item->type == END_ITEM || !commInterfaceCB) {
 
         return false;
     }
 
-    iCB->schedulerCB(iCB->arg, item);
+    commInterfaceCB->schedulerCB(commInterfaceCB->arg, item);
 
     return true;
 }

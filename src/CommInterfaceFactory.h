@@ -9,8 +9,6 @@
 #include "Log.h"
 #include "Scheduler.h"
 #include "CommInterface.h"
-#include "Message.h"
-#include "Address.h"
 
 class CommInterfaceFactory {
 
@@ -19,7 +17,7 @@ class CommInterfaceFactory {
 public:
 
     static TypeInterface createInterface(const TypeHostUnit&, const TypeDevice&,
-                                         const InterfaceSchedulerCB *);
+                                         const CommInterfaceCB *);
 };
 
 #endif //DICON_COMMINTERFACEFACTORY_H

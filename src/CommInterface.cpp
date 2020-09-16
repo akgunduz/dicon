@@ -7,12 +7,12 @@
 #include "CommData.h"
 
 CommInterface::CommInterface(const TypeHostUnit &_host, const TypeDevice &_device,
-                             const InterfaceSchedulerCB *receiverCB)
+                             const CommInterfaceCB *receiverCB)
         : host(_host), device(_device) {
 
     scheduler = new Scheduler();
 
-    senderCB = new InterfaceSchedulerCB([](void *arg, const TypeSchedulerItem &item) -> bool {
+    senderCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem &item) -> bool {
 
         return ((CommInterface *) arg)->send(item);
 
@@ -130,12 +130,6 @@ bool CommInterface::waitThread() {
 
 void CommInterface::shutdown() {
 
-//    char buf[1] = {SHUTDOWN_NOTIFIER};
-//
-//    write(notifierPipe[1], buf, 1);
-
-    onShutdown();
-
     scheduler->shutdown();
 
     uv_walk(&produceLoop, [](uv_handle_t *handle, void *arg) {
@@ -147,6 +141,26 @@ void CommInterface::shutdown() {
     }, this);
 }
 
+void CommInterface::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
+
+    buf->base = (char *) malloc(size);
+
+    assert(buf->base != nullptr);
+
+    buf->len = size;
+
+    //LOGP_E("%s => Allocated Buffer, Pointer : %p, Len : %d !!!", id, buf->base, size);
+
+}
+
+void CommInterface::onFree(const uv_buf_t *buf) {
+
+    //LOGP_E("DeAllocating Buffer, Pointer : %p", buf->base);
+
+    free(buf->base);
+
+}
+
 void CommInterface::onClose(uv_handle_t* handle) {
 
     if (!handle) {
@@ -154,8 +168,6 @@ void CommInterface::onClose(uv_handle_t* handle) {
     }
 
     uv_close(handle, [] (uv_handle_t* _handle) {
-
-      //  LOGP_I("Handle is closed!!!");
 
         if (_handle->data != nullptr) {
 

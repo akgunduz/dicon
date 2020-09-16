@@ -22,5 +22,6 @@ public:
 };
 
 typedef std::shared_ptr<SchedulerItem> TypeSchedulerItem;
+typedef bool (*TypeSchedulerCB)(void*, const TypeSchedulerItem&);
 
 #endif //DICON_SCHEDULERITEM_H
