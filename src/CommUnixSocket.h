@@ -26,7 +26,7 @@ protected:
 
 public :
 
-	CommUnixSocket(const TypeHostUnit&, const TypeDevice&, const CommInterfaceCB *);
+	CommUnixSocket(TypeHostUnit, const TypeDevice&, const CommInterfaceCB *);
 	~CommUnixSocket() override;
 
     COMM_INTERFACE getType() override;

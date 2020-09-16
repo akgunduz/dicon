@@ -16,7 +16,7 @@ class CommInterfaceFactory {
 
 public:
 
-    static TypeInterface createInterface(const TypeHostUnit&, const TypeDevice&,
+    static TypeInterface createInterface(TypeHostUnit, const TypeDevice&,
                                          const CommInterfaceCB *);
 };
 

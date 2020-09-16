@@ -58,7 +58,7 @@ protected :
 //	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
     virtual bool onSend(const TypeComponentUnit&, TypeMessage) = 0;
 
-	CommInterface(const TypeHostUnit&, const TypeDevice&, const CommInterfaceCB *);
+	CommInterface(TypeHostUnit , const TypeDevice&, const CommInterfaceCB *);
 
 public :
 

@@ -4,11 +4,13 @@
 //
 
 #include "CommInterface.h"
+
+#include <utility>
 #include "CommData.h"
 
-CommInterface::CommInterface(const TypeHostUnit &_host, const TypeDevice &_device,
+CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice &_device,
                              const CommInterfaceCB *receiverCB)
-        : host(_host), device(_device) {
+        : host(std::move(_host)), device(_device) {
 
     scheduler = new Scheduler();
 

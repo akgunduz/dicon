@@ -46,7 +46,7 @@ protected:
 
 public :
 
-	CommTCP(const TypeHostUnit&, const TypeDevice&,
+	CommTCP(TypeHostUnit, const TypeDevice&,
             const CommInterfaceCB *);
 	~CommTCP() override;
 

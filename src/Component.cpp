@@ -7,11 +7,6 @@
 #include <utility>
 #include "NetUtil.h"
 
-void *Component::notifyContext = nullptr;
-TypeNotifyCB Component::notifyCB = nullptr;
-
-TypeComponent Component::nullComponent = nullptr;
-
 Component::Component(TypeHostUnit _host)
     : host(std::move(_host)) {
 

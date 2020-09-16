@@ -29,8 +29,8 @@ class Component : public std::enable_shared_from_this<Component> {
 
     TypeInterfaceList interfaces;
 
-    static void *notifyContext;
-    static TypeNotifyCB notifyCB;
+    static inline void *notifyContext{};
+    static inline TypeNotifyCB notifyCB{};
 
 protected :
 
@@ -52,7 +52,7 @@ protected :
 
 public:
 
-    static TypeComponent nullComponent;
+    static inline TypeComponent nullComponent;
 
     explicit Component(TypeHostUnit );
     virtual ~Component();

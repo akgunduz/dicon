@@ -7,8 +7,8 @@
 #include "NetUtil.h"
 #include "CommData.h"
 
-CommTCP::CommTCP(const TypeHostUnit &host, const TypeDevice &device, const CommInterfaceCB *receiverCB)
-        : CommInterface(host, device, receiverCB) {
+CommTCP::CommTCP(TypeHostUnit host, const TypeDevice &device, const CommInterfaceCB *receiverCB)
+        : CommInterface(std::move(host), device, receiverCB) {
 
 }
 

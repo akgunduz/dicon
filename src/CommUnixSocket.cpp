@@ -6,9 +6,9 @@
 #include "CommUnixSocket.h"
 #include "NetUtil.h"
 
-CommUnixSocket::CommUnixSocket(const TypeHostUnit& host, const TypeDevice& device,
+CommUnixSocket::CommUnixSocket(TypeHostUnit host, const TypeDevice& device,
                                const CommInterfaceCB *receiverCB)
-        : CommInterface(host, device, receiverCB) {
+        : CommInterface(std::move(host), device, receiverCB) {
 
 }
 
