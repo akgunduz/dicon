@@ -89,13 +89,7 @@ bool CommInterface::initThread() {
 
         }
 
-        uv_walk(&commInterface->consumeLoop, [](uv_handle_t *handle, void *arg) {
-
-            if (!uv_is_closing(handle)) {
-                onClose(handle);
-            }
-
-        }, commInterface);
+        commInterface->onCloseAll(&commInterface->consumeLoop);
 
         uv_run(&commInterface->consumeLoop, UV_RUN_ONCE);
 
@@ -127,18 +121,11 @@ bool CommInterface::waitThread() {
     return true;
 }
 
-
 void CommInterface::shutdown() {
 
     scheduler->shutdown();
 
-    uv_walk(&produceLoop, [](uv_handle_t *handle, void *arg) {
-
-        if (!uv_is_closing(handle)) {
-            onClose(handle);
-        }
-
-    }, this);
+    onCloseAll(&produceLoop);
 }
 
 void CommInterface::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
@@ -177,6 +164,17 @@ void CommInterface::onClose(uv_handle_t* handle) {
         free(_handle);
     });
 
+}
+
+void CommInterface::onCloseAll(uv_loop_t *loop) {
+
+    uv_walk(loop, [](uv_handle_t *handle, void *arg) {
+
+        if (!uv_is_closing(handle)) {
+            onClose(handle);
+        }
+
+    }, this);
 }
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage msg) {

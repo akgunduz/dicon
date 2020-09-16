@@ -50,6 +50,7 @@ protected :
     static void onAlloc(uv_handle_t*, size_t,uv_buf_t*);
     static void onFree(const uv_buf_t *);
     static void onClose(uv_handle_t*);
+    void onCloseAll(uv_loop_t*);
 
     virtual bool initInterface() = 0;
 	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
