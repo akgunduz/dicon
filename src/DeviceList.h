@@ -11,7 +11,7 @@
 
 class DeviceList {
 
-    static DeviceList *instance;
+    static inline DeviceList *instance = nullptr;
 
     DeviceList();
 

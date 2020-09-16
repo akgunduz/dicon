@@ -7,8 +7,6 @@
 #include "Address.h"
 #include "Log.h"
 
-DeviceList* DeviceList::instance = nullptr;
-
 int createMask(uint32_t baseAddress) {
 
     int i = 0;
@@ -90,11 +88,12 @@ DeviceList::DeviceList() {
 
 #endif
 
-    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(static_cast<unsigned int>(seed));
-    std::uniform_int_distribution<unsigned int> distribution(1, static_cast<unsigned int>(seed));
-
-    add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, distribution(generator)));
+//    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+//    std::default_random_engine generator(static_cast<unsigned int>(seed));
+//    std::uniform_int_distribution<unsigned int> distribution(1, static_cast<unsigned int>(seed));
+//
+//    add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, distribution(generator)));
+    add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, FAKE_US_ADDRESS, FAKE_US_MASK, true));
 }
 
 DeviceList *DeviceList::getInstance() {

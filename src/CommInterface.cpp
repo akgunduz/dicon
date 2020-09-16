@@ -209,9 +209,7 @@ bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage m
 
         auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
 
-        scheduler->push(msgItem);
-
-        return true;
+        return scheduler->push(msgItem);
     }
 
     LOGS_E(getHost(), "Interface is not suitable for target : %d", target->getAddress().get().base);
@@ -231,11 +229,13 @@ bool CommInterface::send(const TypeSchedulerItem &item) {
 
     auto target = std::make_shared<ComponentUnit>(msgItem->getUnit());
 
+    bool status = onSend(target, std::move(msgItem->getMessage()));
+
     LOGC_D(getHost(), target, MSGDIR_SEND,
            "\"%s\" is sent",
            MessageType::getMsgName(msgType));
 
-    return onSend(target, std::move(msgItem->getMessage()));
+    return status;
 }
 
 Address &CommInterface::getAddress() {
