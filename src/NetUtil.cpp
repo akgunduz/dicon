@@ -3,6 +3,7 @@
 //
 
 #include "NetUtil.h"
+#include "Util.h"
 
 std::string NetUtil::getIPPortString(BaseAddress& address) {
 
@@ -103,10 +104,11 @@ sockaddr_un NetUtil::getUnixAddress(Address& address) {
 
     sockaddr_un unix_addr{};
     unix_addr.sun_family = AF_UNIX;
-    sprintf(unix_addr.sun_path, "%s%s%u%s",
-            std::filesystem::temp_directory_path().string().c_str(),
+    sprintf(unix_addr.sun_path, "%s/%s%u_%u%s",
+            Util::tmpPath.string().c_str(),
             UNIXSOCKET_FILE_PREFIX,
             address.get().base,
+            address.get().port,
             UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }

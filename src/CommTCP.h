@@ -17,7 +17,6 @@
 #define MULTICAST_ADDRESS 0xE9010101
 #define DEFAULT_TCP_PORT 61001
 #define DEFAULT_UDP_PORT 62001
-#define TRY_COUNT 10
 
 class CommTCP : public CommInterface {
 

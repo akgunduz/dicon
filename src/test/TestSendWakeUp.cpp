@@ -43,7 +43,6 @@ void TestApp::testSendWakeUp(TypeDistributor& distributor, TypeCollector& collec
     distributor->addStaticProcessHandler(COMP_NODE, (MSG_TYPE)MSG_TYPE_TEST_ALIVE, processAliveMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, distributor->getInterfaceMulticastAddress(COMP_NODE));
-    target->getAddress().setMulticast(true);
 
     sendWakeUp((TypeComponent &) distributor, target);
 }

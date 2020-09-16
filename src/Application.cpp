@@ -10,6 +10,8 @@ App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vecto
 
     Log::init(_logInfo);
 
+    LOGP_I("Using Temp path : %s ", Util::tmpPath.c_str());
+
     deviceList = DeviceList::getInstance();
 
     LOGP_I("Using network interfaces : %s and %s",

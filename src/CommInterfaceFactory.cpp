@@ -5,7 +5,7 @@
 
 #include "CommInterfaceFactory.h"
 #include "CommTCP.h"
-#include "CommUnixSocket.h"
+#include "CommPipe.h"
 
 TypeInterface CommInterfaceFactory::createInterface(TypeHostUnit host, const TypeDevice& device,
                                                     const CommInterfaceCB *receiverCB) {
@@ -19,7 +19,7 @@ TypeInterface CommInterfaceFactory::createInterface(TypeHostUnit host, const Typ
             break;
 
         case COMMINTERFACE_UNIXSOCKET:
-            commInterface = new CommUnixSocket(std::move(host), device, receiverCB);
+            commInterface = new CommPipe(std::move(host), device, receiverCB);
             break;
 
         default:

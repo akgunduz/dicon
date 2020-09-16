@@ -59,7 +59,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
     char buffer[TMP_BUFFER_SIZE];
     int len = 0;
 
-    std::filesystem::path tmpFile = std::filesystem::temp_directory_path() / fileName;
+    std::filesystem::path tmpFile = Util::tmpPath / fileName;
 
     std::FILE* uploadJobFile = std::fopen(tmpFile.string().c_str(), "w");
 

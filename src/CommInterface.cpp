@@ -8,13 +8,13 @@
 #include <utility>
 #include "CommData.h"
 
-CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice &_device,
+CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice& _device,
                              const CommInterfaceCB *receiverCB)
         : host(std::move(_host)), device(_device) {
 
     scheduler = new Scheduler();
 
-    senderCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem &item) -> bool {
+    senderCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem& item) -> bool {
 
         return ((CommInterface *) arg)->send(item);
 

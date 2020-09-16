@@ -11,6 +11,7 @@
 #include "Device.h"
 #include "MessageItem.h"
 
+#define TRY_COUNT 10
 #define MAX_SIMUL_CLIENTS 100
 #define DEFAULT_WEB_PORT 8081
 
@@ -54,8 +55,6 @@ protected :
     STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
     virtual bool initInterface() = 0;
-//	virtual bool runSender(const TypeComponentUnit&, TypeMessage) = 0;
-//	virtual bool runMulticastSender(const TypeComponentUnit&, TypeMessage) = 0;
     virtual bool onSend(const TypeComponentUnit&, TypeMessage) = 0;
 
 	CommInterface(TypeHostUnit , const TypeDevice&, const CommInterfaceCB *);
