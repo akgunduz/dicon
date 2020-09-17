@@ -4,8 +4,6 @@
 //
 
 #include "CommInterface.h"
-
-#include <utility>
 #include "CommData.h"
 
 CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice& _device,

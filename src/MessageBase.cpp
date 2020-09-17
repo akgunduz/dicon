@@ -294,6 +294,11 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
     tmpBufPos += sizeof(MessageBlock);
 
+    if (blockType == MSGHEADER_END) {
+
+        *((uint32_t *) buffer) = htonl(crc);
+    }
+
     if (blockType != MSGHEADER_BINARY) {
 
         memcpy(tmpBuf + tmpBufPos, buffer, size);
@@ -413,18 +418,14 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
 
 bool MessageBase::writeEndStream(const TypeComponentUnit& target) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "EndStream write process is started => CRC : 0x%X", crc);
-
     uint8_t buffer[sizeof(uint32_t)] = {};
-
-    *((uint32_t *) buffer) = htonl(crc);
 
     if (!onWrite(target, MSGHEADER_END, buffer, sizeof(uint32_t))) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write EndStream to stream");
         return false;
     }
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream is written successfully => CRC : 0x%X", crc);
+    LOGC_T(getHost(), target, MSGDIR_SEND, "End Stream is written successfully");
 
 	return true;
 }
