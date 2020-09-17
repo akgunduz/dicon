@@ -11,6 +11,7 @@
 #define INTERFACE_MASK 0x00FF
 #define MULTICAST_POS 8
 #define MULTICAST_MASK 0x0100
+#define LOCALHOST_ADDRESS 0x7F000001
 
 #define GET(a, b, c) (((a) & (c)) >> (b))
 #define SET(a, b, c, d) (((a) & ~(d)) | ((((uint64_t)(b)) << (c)) & (d)))
