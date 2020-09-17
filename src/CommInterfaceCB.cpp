@@ -12,5 +12,5 @@ CommInterfaceCB::CommInterfaceCB(TypeSchedulerCB _schedulerCB, void *_arg)
 
 CommInterfaceCB::~CommInterfaceCB() {
 
-    LOGP_T("Deallocating InterfaceSchedulerCB");
+    LOGP_T("Deallocating CommInterfaceCB");
 }

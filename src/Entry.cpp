@@ -3,12 +3,11 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
+#include "NetUtil.h"
 #if defined(CONSOLE)
 #include <ui/console/ConsoleApp.h>
 #elif defined(WEB)
 #include <ui/web/WebApp.h>
-#include "NetUtil.h"
-
 #elif defined(TEST)
 #include <test/TestApp.h>
 #endif
