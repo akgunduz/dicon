@@ -7,6 +7,8 @@
 #include <ui/console/ConsoleApp.h>
 #elif defined(WEB)
 #include <ui/web/WebApp.h>
+#include "NetUtil.h"
+
 #elif defined(TEST)
 #include <test/TestApp.h>
 #endif
@@ -58,6 +60,10 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
                     return APPPARAM_ERROR;
                 }
             }
+
+        } else if (!strcmp(argv[i], "-x")) {
+
+            NetUtil::cleanUnixPath();
 
         } else if (!strcmp(argv[i], "-d")) {
 

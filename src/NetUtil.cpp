@@ -118,3 +118,16 @@ std::string NetUtil::getUnixString(BaseAddress& address) {
     sprintf(sAddress, "%u", address.base);
     return std::string(sAddress);
 }
+
+void NetUtil::cleanUnixPath() {
+
+    for (const auto& entry : std::filesystem::directory_iterator(Util::tmpPath)) {
+
+        if (!entry.is_socket() ||
+            entry.path().filename().string().find(UNIXSOCKET_FILE_PREFIX) == std::string::npos) {
+            continue;
+        }
+
+        std::filesystem::remove(entry.path());
+    }
+}

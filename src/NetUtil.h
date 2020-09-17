@@ -26,6 +26,7 @@ public:
 
     static sockaddr_un getUnixAddress(TypeAddress&);
     static std::string getUnixString(BaseAddress&);
+    static void cleanUnixPath();
 };
 
 #endif //DICON_NETUTIL_H
