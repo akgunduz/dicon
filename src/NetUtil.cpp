@@ -55,7 +55,7 @@ long NetUtil::parseIPAddress(const std::string& address) {
     return ntohl(addr.s_addr);
 }
 
-BaseAddress NetUtil::parseIPPortString(std::string address) {
+BaseAddress NetUtil::parseIPPortString(const std::string& address) {
 
     size_t pos = address.find(':');
 
@@ -70,45 +70,44 @@ BaseAddress NetUtil::parseIPPortString(std::string address) {
 }
 
 
-sockaddr_in NetUtil::getInetAddressByAddress(Address& address) {
+sockaddr_in NetUtil::getInetAddressByAddress(TypeAddress& address) {
 
-    sockaddr_in inet_addr;
-    memset((char *) &inet_addr, 0, sizeof(inet_addr));
+    sockaddr_in inet_addr{};
+
     inet_addr.sin_family = AF_INET;
-    inet_addr.sin_port = htons(address.get().port);
-    inet_addr.sin_addr.s_addr = htonl(address.get().base);
+    inet_addr.sin_port = htons(address->get().port);
+    inet_addr.sin_addr.s_addr = htonl(address->get().base);
     return inet_addr;
 }
 
 sockaddr_in NetUtil::getInetAddressByPort(int port) {
 
-    sockaddr_in inet_addr;
-    memset((char *) &inet_addr, 0, sizeof(inet_addr));
+    sockaddr_in inet_addr{};
+
     inet_addr.sin_family = AF_INET;
     inet_addr.sin_port = htons(port);
     inet_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     return inet_addr;
 }
 
-ip_mreq NetUtil::getInetMulticastAddress(Address& address, Address& multicastAddress) {
+ip_mreq NetUtil::getInetMulticastAddress(TypeAddress& address, TypeAddress& multicastAddress) {
 
-    ip_mreq imreq;
-    memset((char *) &imreq, 0, sizeof(imreq));
+    ip_mreq imReq{};
 
-    imreq.imr_multiaddr.s_addr = htonl(multicastAddress.get().base);
-    imreq.imr_interface.s_addr = htonl(address.get().base);
-    return imreq;
+    imReq.imr_multiaddr.s_addr = htonl(multicastAddress->get().base);
+    imReq.imr_interface.s_addr = htonl(address->get().base);
+    return imReq;
 }
 
-sockaddr_un NetUtil::getUnixAddress(Address& address) {
+sockaddr_un NetUtil::getUnixAddress(TypeAddress& address) {
 
     sockaddr_un unix_addr{};
     unix_addr.sun_family = AF_UNIX;
     sprintf(unix_addr.sun_path, "%s/%s%u_%u%s",
             Util::tmpPath.string().c_str(),
             UNIXSOCKET_FILE_PREFIX,
-            address.get().base,
-            address.get().port,
+            address->get().base,
+            address->get().port,
             UNIXSOCKET_FILE_SUFFIX);
     return unix_addr;
 }

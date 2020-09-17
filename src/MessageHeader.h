@@ -22,7 +22,7 @@ class MessageHeader {
     uint16_t priority{MESSAGE_DEFAULT_PRIORITY};
     uint16_t stream{};
 
-    CommUnit owner;
+    CommUnit owner{COMP_MAX};
 
 public:
 

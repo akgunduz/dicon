@@ -6,7 +6,7 @@
 
 void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_FILE_INFO, STREAM_FILE_INFO);
+    auto msg = std::make_unique<Message>(owner->getHost(), target->getType(), (MSG_TYPE)MSG_TYPE_TEST_FILE_INFO, STREAM_FILE_INFO);
 
     auto file = std::make_shared<FileItem>(owner->getHost(), 99, ".", TEST_JOB_FILE);
 
@@ -36,6 +36,6 @@ void TestApp::testSendFileInfo(TypeDistributor& distributor, TypeCollector& coll
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILE_INFO, processFileInfoMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                                                  node->getHost(COMP_COLLECTOR)->getAddress());
+                                                  node->getHost()->getAddress(COMP_COLLECTOR));
     sendFileInfo((TypeComponent&) collector, target);
 }

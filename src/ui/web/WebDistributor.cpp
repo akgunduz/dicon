@@ -95,8 +95,8 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         collItem["_id"] = collector->getID();
         collItem["_arch"] = collector->getArch();
         collItem["_state"] = collector->getState();
-        collItem["_address"] = NetUtil::getIPPortString(collector->getAddress().get());
-        collItem["_webAddress"] = NetUtil::getIPPortString(collector->getAddress().getUI());
+        collItem["_address"] = NetUtil::getIPPortString(collector->getAddress()->get());
+        collItem["_webAddress"] = NetUtil::getIPPortString(collector->getAddress()->getUI());
 
         collList += collItem;
 
@@ -113,8 +113,8 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         nodeItem["_id"] = node->getID();
         nodeItem["_arch"] = node->getArch();
         nodeItem["_state"] = node->getState();
-        nodeItem["_address"] = NetUtil::getIPPortString(node->getAddress().get());
-        nodeItem["_webAddress"] = NetUtil::getIPPortString(node->getAddress().getUI());
+        nodeItem["_address"] = NetUtil::getIPPortString(node->getAddress()->get());
+        nodeItem["_webAddress"] = NetUtil::getIPPortString(node->getAddress()->getUI());
 
         nodeList += nodeItem;
 

@@ -12,7 +12,7 @@
 class ComponentUnitFactory {
 public:
 
-    static TypeComponentUnit create(COMPONENT, ARCH, long, Address&);
+    static TypeComponentUnit create(COMPONENT, ARCH, long, TypeAddress&);
 };
 
 

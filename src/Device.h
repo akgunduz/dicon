@@ -7,7 +7,7 @@
 
 #include "CommInterfaceType.h"
 
-#define FAKE_US_ADDRESS 0x0A0B0C01
+#define FAKE_US_ADDRESS 0xFFFFFFFF
 #define FAKE_US_MASK 24
 
 class Device {

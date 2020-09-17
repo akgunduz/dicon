@@ -32,7 +32,7 @@ class CollectorManager : public ComponentManager {
 
 protected:
 
-    TypeComponentUnit createUnit(ARCH, TypeID, Address&) final;
+    TypeComponentUnit createUnit(ARCH, TypeID, TypeAddress&) final;
 
 public:
 

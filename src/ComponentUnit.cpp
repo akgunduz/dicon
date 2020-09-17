@@ -4,12 +4,14 @@
 
 #include "ComponentUnit.h"
 
-ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, TypeID _id, Address _address)
-    : CommUnit(_type, _arch, _id, _address) {
+#include <utility>
+
+ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, TypeID _id, TypeAddress _address)
+    : CommUnit(_type, _arch, _id, std::move(_address)) {
 }
 
-ComponentUnit::ComponentUnit(COMPONENT _type, Address _address)
-        : CommUnit(_type, _address) {
+ComponentUnit::ComponentUnit(COMPONENT _type, TypeAddress _address)
+        : CommUnit(_type, std::move(_address)) {
 }
 
 ComponentUnit::ComponentUnit(COMPONENT _type)
@@ -24,6 +26,10 @@ ComponentUnit::ComponentUnit(const TypeCommUnit &copy)
 
 ComponentUnit::ComponentUnit(const CommUnit *copy)
     : CommUnit(*copy) {
+}
+
+ComponentUnit::ComponentUnit(const BaseUnit *copy)
+    : CommUnit(copy) {
 }
 
 void* ComponentUnit::getHandle() const {

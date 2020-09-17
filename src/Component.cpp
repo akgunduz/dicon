@@ -45,6 +45,10 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
         return false;
     }
 
+    host->setAddress(COMP_DISTRIBUTOR, getInterfaceAddress(COMP_DISTRIBUTOR));
+    host->setAddress(COMP_COLLECTOR, getInterfaceAddress(COMP_COLLECTOR));
+    host->setAddress(COMP_NODE, getInterfaceAddress(COMP_NODE));
+
     return true;
 }
 
@@ -52,7 +56,7 @@ Component::~Component() {
 
     LOGP_T("Deallocating Component");
 
-    sendShutdownMsg(getComponent(getHost()->getType()));
+    sendShutdownMsg(getHost()->forkComponent());
 
     if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
 
@@ -106,12 +110,12 @@ const TypeDevice& Component::getDevice(COMPONENT target) {
     return interfaces[target]->getDevice();
 }
 
-Address &Component::getInterfaceAddress(COMPONENT target) {
+TypeAddress& Component::getInterfaceAddress(COMPONENT target) {
 
     return interfaces[target]->getAddress();
 }
 
-Address &Component::getInterfaceMulticastAddress(COMPONENT target) {
+TypeAddress& Component::getInterfaceMulticastAddress(COMPONENT target) {
 
     return interfaces[target]->getMulticastAddress();
 }
@@ -138,7 +142,7 @@ bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
 
 bool Component::sendShutdownMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_SHUTDOWN);
+    auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_SHUTDOWN);
 
     return send(target, std::move(msg));
 }
@@ -146,24 +150,6 @@ bool Component::sendShutdownMsg(const TypeComponentUnit& target) {
 TypeHostUnit& Component::getHost() {
 
     return host;
-}
-
-TypeHostUnit Component::getHost(COMPONENT _out) {
-
-    auto unit = std::make_shared<HostUnit>(host.get());
-
-    unit->setAddress(getInterfaceAddress(_out));
-
-    return unit;
-}
-
-TypeComponentUnit Component::getComponent(COMPONENT _out) {
-
-    auto unit = std::make_shared<ComponentUnit>(host.get());
-
-    unit->setAddress(getInterfaceAddress(_out));
-
-    return unit;
 }
 
 void Component::registerNotify(void *_notifyContext, TypeNotifyCB _notifyCB) {

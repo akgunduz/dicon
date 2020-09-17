@@ -38,7 +38,7 @@ void CollectorManager::setState(TypeID id, COLLSTATES state) {
     }
 }
 
-TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, Address& address) {
+TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, TypeAddress& address) {
 
     return std::make_shared<CollectorUnit>(arch, id, address);
 }

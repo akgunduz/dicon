@@ -192,28 +192,28 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
 bool Node::send2DistributorReadyMsg(const TypeComponentUnit& target) {
 
-	auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_READY);
+	auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_READY);
 
 	return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorAliveMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ALIVE);
+    auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_ALIVE);
 
     return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorIDMsg(const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_ID);
+    auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_ID);
 
     return send(target, std::move(msg));
 }
 
 bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, TypeID collID) {
 
-    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_BUSY, STREAM_ID);
+    auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_BUSY, STREAM_ID);
 
     msg->getData().setID(collID);
 
@@ -222,7 +222,7 @@ bool Node::send2DistributorBusyMsg(const TypeComponentUnit& target, TypeID collI
 
 bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-	auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_INFO, STREAM_PROCESS_FILES_INFO);
+	auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_INFO, STREAM_PROCESS_FILES_INFO);
 
     msg->getData().setProcess(processID, fileList);
 
@@ -236,7 +236,7 @@ bool Node::send2CollectorInfoMsg(const TypeComponentUnit& target, long processID
 
 bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long processID, const TypeProcessFileList &fileList) {
 
-    auto msg = std::make_unique<Message>(getHost(target->getType()), MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
+    auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_BINARY, STREAM_PROCESS_FILES_BINARY);
 
     msg->getData().setProcess(processID, fileList);
 

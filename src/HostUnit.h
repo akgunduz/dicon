@@ -5,13 +5,15 @@
 #ifndef DICON_HOSTUNIT_H
 #define DICON_HOSTUNIT_H
 
-#include "CommUnit.h"
 #include "Address.h"
+#include "ComponentUnit.h"
 
-class HostUnit : public CommUnit {
+class HostUnit : public BaseUnit {
 
     const std::filesystem::path basePath;
     std::filesystem::path rootPath;
+
+    TypeAddress address[COMP_MAX]{};
 
 public:
 
@@ -19,11 +21,19 @@ public:
     HostUnit(const HostUnit&);
     explicit HostUnit(const HostUnit*);
 
-    virtual ~HostUnit();
+    ~HostUnit() override;
 
     const std::filesystem::path& getRootPath();
 
     void setID(TypeID) final;
+
+    TypeAddress& getAddress(COMPONENT);
+    void setAddress(COMPONENT, TypeAddress, bool = false);
+
+    TypeComponentUnit forkComponent(COMPONENT);
+    TypeComponentUnit forkComponent();
+    TypeCommUnit forkCommUnit(COMPONENT);
+    TypeCommUnit forkCommUnit();
 };
 
 typedef std::shared_ptr<HostUnit> TypeHostUnit;

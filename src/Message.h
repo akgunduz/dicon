@@ -44,7 +44,7 @@ class Message : public MessageBase {
 public:
 
 	explicit Message(const TypeHostUnit&);
-	Message(const TypeHostUnit&, MSG_TYPE, STREAM_TYPE = STREAM_NONE);
+	Message(const TypeHostUnit&, COMPONENT, MSG_TYPE, STREAM_TYPE = STREAM_NONE);
 	~Message() = default;
 
 	MessageData& getData();

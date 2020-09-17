@@ -6,7 +6,7 @@
 
 void sendProcessFilesBinary(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_PROCESS_FILES_BINARY, STREAM_PROCESS_FILES_BINARY);
+    auto msg = std::make_unique<Message>(owner->getHost(), target->getType(), (MSG_TYPE)MSG_TYPE_TEST_PROCESS_FILES_BINARY, STREAM_PROCESS_FILES_BINARY);
 
     auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_ZIP, JobItem::jobID++);
 
@@ -38,6 +38,6 @@ void TestApp::testSendProcessFilesBinary(TypeDistributor& distributor, TypeColle
     node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_PROCESS_FILES_BINARY, processProcessFilesBinaryMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                                                  node->getHost(COMP_COLLECTOR)->getAddress());
+                                                  node->getHost()->getAddress(COMP_COLLECTOR));
     sendProcessFilesBinary((TypeComponent&) collector, target);
 }

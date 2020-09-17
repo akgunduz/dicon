@@ -32,7 +32,7 @@ class ComponentManager {
 
 protected:
 
-    virtual TypeComponentUnit createUnit(ARCH, TypeID, Address&) = 0;
+    virtual TypeComponentUnit createUnit(ARCH, TypeID, TypeAddress&) = 0;
 
 public:
 
@@ -47,7 +47,7 @@ public:
     void clear();
 
     void process();
-    TypeID add(ARCH, Address&, bool&);
+    TypeID add(ARCH, TypeAddress&, bool&);
 };
 
 #endif //DICON_COMPONENTMANAGER_H

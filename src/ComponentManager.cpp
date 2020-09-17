@@ -109,7 +109,7 @@ TypeComponentUnit ComponentManager::getDead(size_t index) {
     return nullptr;
 }
 
-TypeID ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) {
+TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdded) {
 
     std::unique_lock<std::mutex> lock(mutex);
 
@@ -117,7 +117,7 @@ TypeID ComponentManager::add(ARCH arch, Address& address, bool& isAlreadyAdded) 
 
     for (auto &component : componentsMapID) {
 
-        if (component.second->getAddress() != address) {
+        if (*component.second->getAddress() != *address) {
             continue;
         }
 

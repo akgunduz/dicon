@@ -6,7 +6,7 @@
 #include "NodeUnit.h"
 #include "CollectorUnit.h"
 
-TypeComponentUnit ComponentUnitFactory::create(COMPONENT type, ARCH arch, long id, Address &address) {
+TypeComponentUnit ComponentUnitFactory::create(COMPONENT type, ARCH arch, long id, TypeAddress& address) {
 
     switch(type) {
 

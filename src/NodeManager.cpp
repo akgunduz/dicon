@@ -101,7 +101,7 @@ size_t NodeManager::getBusyDeadCount() {
     return count;
 }
 
-Address& NodeManager::getAddress(TypeID id) {
+TypeAddress NodeManager::getAddress(TypeID id) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -111,7 +111,7 @@ Address& NodeManager::getAddress(TypeID id) {
         return node->getAddress();
     }
 
-    return Address::invalid;
+    return nullptr;
 }
 
 NODESTATES NodeManager::getState(TypeID id) {
@@ -148,7 +148,6 @@ TypeComponentUnit NodeManager::getAssigned(TypeID id) {
         return node->getAssigned();
     }
 
-
     return nullptr;
 }
 
@@ -163,7 +162,7 @@ void NodeManager::setAssigned(TypeID id, TypeComponentUnit& assigned) {
     }
 }
 
-void NodeManager::setAssigned(TypeID id, ARCH assignedArch, TypeID assignedID, Address& assignedAddress) {
+void NodeManager::setAssigned(TypeID id, ARCH assignedArch, TypeID assignedID, TypeAddress& assignedAddress) {
 
     std::unique_lock<std::mutex> lock(nodeMutex);
 
@@ -188,7 +187,7 @@ void NodeManager::releaseAssigned(TypeID id) {
 }
 
 
-TypeComponentUnit NodeManager::createUnit(ARCH arch, TypeID id, Address& address) {
+TypeComponentUnit NodeManager::createUnit(ARCH arch, TypeID id, TypeAddress& address) {
 
     return std::make_shared<NodeUnit>(arch, id, address);
 }

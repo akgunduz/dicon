@@ -18,13 +18,13 @@ public:
     static std::string getIPString(BaseAddress&);
     static std::string getIPString(const sockaddr_in *);
     static long parseIPAddress(const std::string&);
-    static sockaddr_in getInetAddressByAddress(Address&);
+    static sockaddr_in getInetAddressByAddress(TypeAddress&);
     static sockaddr_in getInetAddressByPort(int);
-    static ip_mreq getInetMulticastAddress(Address&, Address&);
-    static BaseAddress parseIPPortString(std::string);
+    static ip_mreq getInetMulticastAddress(TypeAddress&, TypeAddress&);
+    static BaseAddress parseIPPortString(const std::string&);
     static std::string getIPPortString(BaseAddress&);
 
-    static sockaddr_un getUnixAddress(Address&);
+    static sockaddr_un getUnixAddress(TypeAddress&);
     static std::string getUnixString(BaseAddress&);
 };
 

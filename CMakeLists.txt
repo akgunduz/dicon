@@ -27,12 +27,12 @@ set(MINIZ_FILES
 set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Address.cpp
         ${SOURCE_PATH}/Application.cpp
+        ${SOURCE_PATH}/BaseUnit.cpp
         ${SOURCE_PATH}/Collector.cpp
         ${SOURCE_PATH}/CollectorHost.cpp
         ${SOURCE_PATH}/CollectorManager.cpp
         ${SOURCE_PATH}/CollectorObject.cpp
         ${SOURCE_PATH}/CollectorUnit.cpp
-        ${SOURCE_PATH}/CommData.cpp
         ${SOURCE_PATH}/CommInterface.cpp
         ${SOURCE_PATH}/CommInterfaceCB.cpp
         ${SOURCE_PATH}/CommInterfaceFactory.cpp

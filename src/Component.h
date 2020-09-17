@@ -58,12 +58,10 @@ public:
     virtual ~Component();
 
     TypeHostUnit& getHost();
-    TypeHostUnit getHost(COMPONENT);
-    TypeComponentUnit getComponent(COMPONENT);
 
     const TypeDevice& getDevice(COMPONENT);
-    Address& getInterfaceAddress(COMPONENT);
-    Address& getInterfaceMulticastAddress(COMPONENT);
+    TypeAddress& getInterfaceAddress(COMPONENT);
+    TypeAddress& getInterfaceMulticastAddress(COMPONENT);
     TypeAddressList getInterfaceAddressList(COMPONENT);
     COMM_INTERFACE getInterfaceType(COMPONENT);
     bool isSupportMulticast(COMPONENT);
@@ -71,15 +69,15 @@ public:
     template <class T>
     void setUIAddress(COMPONENT _out, T _address) {
 
-        getInterfaceAddress(_out).setUI(_address);
+        getInterfaceAddress(_out)->setUI(_address);
     }
 
     template <class T>
     void setAllUIAddress(T _address) {
 
-        getInterfaceAddress(COMP_DISTRIBUTOR).setUI(_address);
-        getInterfaceAddress(COMP_COLLECTOR).setUI(_address);
-        getInterfaceAddress(COMP_NODE).setUI(_address);
+        getInterfaceAddress(COMP_DISTRIBUTOR)->setUI(_address);
+        getInterfaceAddress(COMP_COLLECTOR)->setUI(_address);
+        getInterfaceAddress(COMP_NODE)->setUI(_address);
     }
 
     bool onReceive(const TypeComponentUnit&, MSG_TYPE, TypeMessage);

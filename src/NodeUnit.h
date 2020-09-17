@@ -13,8 +13,8 @@
 class NodeUnit : public ComponentUnit, public NodeObject {
 
 public:
-    NodeUnit(NODESTATES, int, ARCH, long, Address);
-    explicit NodeUnit(ARCH, long, Address);
+    NodeUnit(NODESTATES, int, ARCH, long, TypeAddress);
+    explicit NodeUnit(ARCH, long, TypeAddress);
     NodeUnit(const NodeUnit &);
 
     ~NodeUnit() override;

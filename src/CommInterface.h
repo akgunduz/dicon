@@ -37,8 +37,8 @@ class CommInterface {
 
 protected :
 
-    Address address{};
-    Address multicastAddress{};
+    TypeAddress address{};
+    TypeAddress multicastAddress{};
 
 	Scheduler *scheduler{};
 
@@ -66,8 +66,8 @@ public :
 	bool push(MSG_DIR, const TypeCommUnit&, TypeMessage);
     const TypeHostUnit& getHost();
     const TypeDevice& getDevice();
-    Address& getAddress();
-    Address& getMulticastAddress();
+    TypeAddress& getAddress();
+    TypeAddress& getMulticastAddress();
     virtual COMM_INTERFACE getType() = 0;
     virtual bool isSupportMulticast() = 0;
     virtual TypeAddressList getAddressList() = 0;

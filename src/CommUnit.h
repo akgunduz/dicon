@@ -5,52 +5,32 @@
 #ifndef DICON_COMMUNIT_H
 #define DICON_COMMUNIT_H
 
-#include "Address.h"
-#include "ComponentType.h"
-#include "ArchType.h"
+#include "BaseUnit.h"
 
-typedef uint32_t TypeID;
-
-class CommUnit {
+class CommUnit : public BaseUnit {
 
 protected:
 
-    TypeID id{};
-
-    uint16_t arch{ARCH_MAX};
-
-    uint16_t type{COMP_MAX};
-
-    Address address{};
-
-    friend class MessageHeader;
+    TypeAddress address;
 
 public:
 
-    CommUnit() = default;
-    CommUnit(COMPONENT, ARCH, TypeID, Address);
+    CommUnit(COMPONENT, ARCH, TypeID, TypeAddress);
     CommUnit(COMPONENT, ARCH, TypeID);
-    CommUnit(COMPONENT, Address);
-    explicit CommUnit(COMPONENT);
-    CommUnit(const CommUnit&);
+    CommUnit(COMPONENT, TypeAddress);
+    explicit CommUnit(COMPONENT = COMP_MAX);
+    explicit CommUnit(const BaseUnit*);
 
-    TypeID getID();
-
-    virtual void setID(TypeID);
-
-    ARCH getArch();
-    void setArch(ARCH);
-
-    COMPONENT getType();
-    void setType(COMPONENT);
-
-    Address& getAddress();
-    void setAddress(Address, bool = false);
+    TypeAddress& getAddress();
+    void setAddress(const TypeAddress&, bool = false);
 
     void set(const CommUnit&);
 
-    static COMPONENT next(COMPONENT);
-    static COMPONENT prev(COMPONENT);
+    ~CommUnit() override;
+
+    void setID(TypeID id) override;
+    bool deSerialize(const uint8_t*);
+    void serialize(uint8_t*);
 };
 
 typedef std::shared_ptr<CommUnit> TypeCommUnit;

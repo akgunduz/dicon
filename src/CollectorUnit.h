@@ -13,8 +13,8 @@
 class CollectorUnit : public ComponentUnit, public CollectorObject {
 
 public:
-    CollectorUnit(COLLSTATES, ARCH, long, Address);
-    CollectorUnit(ARCH, long, Address);
+    CollectorUnit(COLLSTATES, ARCH, long, TypeAddress);
+    CollectorUnit(ARCH, long, TypeAddress);
     CollectorUnit(const CollectorUnit &);
 
     ~CollectorUnit() override;

@@ -39,17 +39,16 @@ protected:
 
 public:
 
-    static Address invalid;
-
     Address(COMM_INTERFACE = COMMINTERFACE_TCPIP);
-    Address(uint32_t, uint16_t, bool = false);
+    Address(COMM_INTERFACE, uint32_t, uint16_t, bool = false);
     explicit Address(BaseAddress);
     Address(BaseAddress, BaseAddress);
 
     BaseAddress& get();
     BaseAddress& getUI();
+    uint16_t& getFlag();
 
-    void set(uint32_t, uint16_t, bool = false);
+    void set(COMM_INTERFACE, uint32_t, uint16_t, bool = false);
     void setPort(uint16_t);
     void setUI(uint32_t, uint16_t);
     void setUI(uint16_t);
@@ -87,6 +86,7 @@ template<> struct std::less<Address>
     }
 };
 
-typedef std::vector<Address> TypeAddressList;
+typedef std::shared_ptr<Address> TypeAddress;
+typedef std::vector<TypeAddress> TypeAddressList;
 
 #endif //DICON_ADDRESS_H

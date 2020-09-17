@@ -16,17 +16,15 @@ MessageBase::MessageBase(const TypeHostUnit& _host)
     readParser[MSGHEADER_END] = &MessageBase::readEndStream;
 }
 
-MessageBase::MessageBase(const TypeHostUnit& host, MSG_TYPE msgType, STREAM_TYPE streamType)
+MessageBase::MessageBase(const TypeHostUnit& host, COMPONENT targetType, MSG_TYPE msgType, STREAM_TYPE streamType)
 		: MessageBase(host) {
 
     header.setType(msgType);
     header.setStream(streamType);
-    header.setOwner(*getHost());
+    header.setOwner(*getHost()->forkCommUnit(targetType));
 }
 
-MessageBase::~MessageBase() {
-
-}
+MessageBase::~MessageBase() = default;
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 

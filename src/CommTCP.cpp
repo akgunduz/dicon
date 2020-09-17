@@ -42,7 +42,7 @@ bool CommTCP::initTCP() {
 
     int tryCount = TRY_COUNT;
 
-    address.set(getDevice()->getBase(), lastFreeTCPPort);
+    address->set(COMMINTERFACE_TCPIP, getDevice()->getBase(), lastFreeTCPPort);
 
     while (tryCount--) {
 
@@ -52,7 +52,7 @@ bool CommTCP::initTCP() {
 
         if (result < 0 || tcpServer->delayed_error != 0) {
 
-            address.setPort(++lastFreeTCPPort);
+            address->setPort(++lastFreeTCPPort);
 
             continue;
         }
@@ -93,7 +93,7 @@ bool CommTCP::initTCP() {
         return false;
     }
 
-    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(getAddress().get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address->get()).c_str());
 
     return true;
 }
@@ -113,7 +113,7 @@ bool CommTCP::initUDP() {
 
     int tryCount = TRY_COUNT;
 
-    multicastAddress.set(MULTICAST_ADDRESS, lastFreeUDPPort, true);
+    multicastAddress->set(COMMINTERFACE_TCPIP, MULTICAST_ADDRESS, lastFreeUDPPort, true);
 
     while (tryCount--) {
 
@@ -123,7 +123,7 @@ bool CommTCP::initUDP() {
 
         if (result < 0) {
 
-            multicastAddress.setPort(++lastFreeUDPPort);
+            multicastAddress->setPort(++lastFreeUDPPort);
 
             continue;
         }
@@ -140,8 +140,8 @@ bool CommTCP::initUDP() {
         return false;
     }
 
-    result = uv_udp_set_membership(udpServer, NetUtil::getIPString(getMulticastAddress().get()).c_str(),
-                          NetUtil::getIPString(getAddress().get()).c_str(), UV_JOIN_GROUP);
+    result = uv_udp_set_membership(udpServer, NetUtil::getIPString(multicastAddress->get()).c_str(),
+                          NetUtil::getIPString(address->get()).c_str(), UV_JOIN_GROUP);
 
     if (result != 0) {
 
@@ -171,7 +171,7 @@ bool CommTCP::initUDP() {
         return false;
     }
 
-    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(getMulticastAddress().get()).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress->get()).c_str());
 
     return true;
 }
@@ -413,7 +413,7 @@ bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
         return false;
     }
 
-    result = uv_udp_set_multicast_interface(client, NetUtil::getIPString(getAddress().get()).c_str());
+    result = uv_udp_set_multicast_interface(client, NetUtil::getIPString(address->get()).c_str());
 
     if (result != 0) {
 
@@ -439,7 +439,7 @@ bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
 
 bool CommTCP::onSend(const TypeComponentUnit &target, TypeMessage msg) {
 
-    if (target->getAddress() != getMulticastAddress()) {
+    if (*target->getAddress() != *getMulticastAddress()) {
 
         return onTCPSend(target, std::move(msg));
 
@@ -467,9 +467,10 @@ TypeAddressList CommTCP::getAddressList() {
 
         for (int i = 0; i < LOOPBACK_RANGE; i++) {
 
-            Address destAddress(getDevice()->getBase(), DEFAULT_TCP_PORT + i);
+            TypeAddress destAddress = std::make_shared<Address>(COMMINTERFACE_TCPIP,
+                                                                getDevice()->getBase(), DEFAULT_TCP_PORT + i);
 
-            if (destAddress != getAddress()) {
+            if (*destAddress != *address) {
 
                 list.push_back(destAddress);
 
@@ -489,9 +490,9 @@ TypeAddressList CommTCP::getAddressList() {
 
         for (uint32_t i = 0; i < range; i++) {
 
-            if (startIP != getAddress().get().base) {
+            if (startIP != address->get().base) {
 
-                Address destAddress(startIP, DEFAULT_TCP_PORT);
+                TypeAddress destAddress = std::make_shared<Address>(COMMINTERFACE_TCPIP, startIP, DEFAULT_TCP_PORT);
 
                 list.push_back(destAddress);
 

@@ -14,7 +14,7 @@ class ComponentObject {
 public:
 
     TypeComponentUnit& getAssigned();
-    void setAssigned(COMPONENT, ARCH, long, Address);
+    void setAssigned(COMPONENT, ARCH, long, TypeAddress);
     void setAssigned(const TypeComponentUnit&);
 
 };

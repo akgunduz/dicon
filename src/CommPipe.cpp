@@ -43,17 +43,17 @@ bool CommPipe::initPipe() {
 
     int tryCount = TRY_COUNT;
 
-    address.set(getDevice()->getBase(), lastFreePipePort);
+    address->set(COMMINTERFACE_UNIXSOCKET, getDevice()->getBase(), lastFreePipePort);
 
     while (tryCount--) {
 
-        struct sockaddr_un serverAddress = NetUtil::getUnixAddress(address);
+        sockaddr_un serverAddress = NetUtil::getUnixAddress(address);
 
         result = uv_pipe_bind(pipeServer, serverAddress.sun_path);
 
         if (result < 0 || pipeServer->delayed_error != 0) {
 
-            address.setPort(++lastFreePipePort);
+            address->setPort(++lastFreePipePort);
 
             continue;
         }
@@ -94,7 +94,7 @@ bool CommPipe::initPipe() {
         return false;
     }
 
-    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(getAddress().get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address->get()).c_str());
 
     return true;
 }
@@ -169,9 +169,9 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
 bool CommPipe::onServerConnect() {
 
-    auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
+    auto *client = (uv_pipe_t *) malloc(sizeof(uv_pipe_t));
 
-    int result = uv_tcp_init(&produceLoop, client);
+    int result = uv_pipe_init(&produceLoop, client, false);
 
     if (result != 0) {
 
@@ -214,9 +214,9 @@ bool CommPipe::onServerConnect() {
 
 bool CommPipe::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
-    auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
+    auto *client = (uv_pipe_t *) malloc(sizeof(uv_pipe_t));
 
-    int result = uv_tcp_init(&consumeLoop, client);
+    int result = uv_pipe_init(&consumeLoop, client, false);
 
     if (result != 0) {
 
@@ -229,67 +229,42 @@ bool CommPipe::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     client->data = new CommData(this, target, msg);
 
-    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+    sockaddr_un clientAddress = NetUtil::getUnixAddress(target->getAddress());
 
     auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
 
-    int tryCount = TRY_COUNT;
+    uv_pipe_connect(
 
-    while (tryCount--) {
+        connectReq, client, clientAddress.sun_path,
 
-        result = uv_tcp_connect(
+        [](uv_connect_t *connectReq, int status) {
 
-                connectReq, client, (const struct sockaddr *) &clientAddress,
+            if (status) {
 
-                [](uv_connect_t *connectReq, int status) {
+                LOGP_E("Pipe Connect problem, error : %s!!!", uv_strerror(status));
 
-                    if (status) {
+                return;
+            }
 
-                        LOGP_E("Pipe Connect problem, error : %s!!!", uv_strerror(status));
+            auto commData = (CommData *) connectReq->handle->data;
 
-                        return;
-                    }
+            auto commInterface = (CommPipe*)commData->getInterface();
 
-                    auto commData = (CommData *) connectReq->handle->data;
+            auto target = commData->getComponent();
 
-                    auto commInterface = (CommPipe*)commData->getInterface();
+            bool res = commData->getMsg()->writeToStream(target, onSendCB);
 
-                    auto target = commData->getComponent();
+            if (!res) {
 
-                    bool res = commData->getMsg()->writeToStream(target, onSendCB);
+                LOGS_E(commInterface->getHost(), "Write Pipe is failed!!!");
 
-                    if (!res) {
+            }
 
-                        LOGS_E(commInterface->getHost(), "Write Pipe is failed!!!");
+            free(connectReq);
 
-                    }
+        });
 
-                    free(connectReq);
-
-                });
-
-        if (result == UV_EMFILE) {
-
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-
-            continue;
-        }
-
-        if (result != 0) {
-
-            LOGS_E(getHost(), "Can not connect to server!!!, error : %s", uv_err_name(result));
-
-        }
-
-        break;
-    }
-
-    if (!tryCount) {
-
-        LOGS_E(getHost(), "System still has too many open files!!!");
-    }
-
-    return tryCount != 0;
+    return true;
 }
 
 COMM_INTERFACE CommPipe::getType() {
@@ -308,16 +283,26 @@ TypeAddressList CommPipe::getAddressList() {
 
     for (const auto& entry : std::filesystem::directory_iterator(Util::tmpPath)) {
 
-        if (!entry.is_regular_file() || entry.path().filename().string().find(UNIXSOCKET_FILE_PREFIX) != 0) {
+        if (!entry.is_socket() ||
+                entry.path().filename().string().find(UNIXSOCKET_FILE_PREFIX) == std::string::npos) {
             continue;
         }
 
-        uint32_t start = (uint32_t) entry.path().filename().string().find('_') + 1;
-        uint32_t end = (uint32_t) entry.path().filename().string().find('.');
-        std::string sAddress = entry.path().filename().string().substr(start, end - start);
-        Address address(atol(sAddress.c_str()), 0);
+        BaseAddress base;
 
-        list.push_back(address);
+        uint32_t start = (uint32_t) entry.path().filename().string().find('_') + 1;
+
+        uint32_t end = (uint32_t) entry.path().filename().string().find('.');
+
+        std::string sAddress = entry.path().filename().string().substr(start, end - start);
+
+        std::sscanf(sAddress.c_str(), "%u_%hu", &base.base, &base.port);
+
+        TypeAddress found = std::make_shared<Address>(COMMINTERFACE_UNIXSOCKET, base.base, base.port);
+
+        if (*address != *found) {
+            list.push_back(found);
+        }
     }
 
     return list;

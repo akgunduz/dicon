@@ -6,7 +6,7 @@
 
 void sendPing(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(target->getType()), (MSG_TYPE)MSG_TYPE_TEST_PING);
+    auto msg = std::make_unique<Message>(owner->getHost(), target->getType(), (MSG_TYPE)MSG_TYPE_TEST_PING);
 
     owner->send(target, std::move(msg));
 }
@@ -29,7 +29,7 @@ void TestApp::testPing(TypeDistributor& distributor, TypeCollector& collector, T
     node->addStaticProcessHandler(COMP_DISTRIBUTOR, (MSG_TYPE)MSG_TYPE_TEST_PING, processPingMsg);
 
     auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                                                  node->getHost(COMP_DISTRIBUTOR)->getAddress());
+                                                  node->getHost()->getAddress(COMP_DISTRIBUTOR));
 
     sendPing((TypeComponent &)distributor, target);
 }

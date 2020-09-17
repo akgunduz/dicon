@@ -10,8 +10,8 @@ Message::Message(const TypeHostUnit& host)
 		: MessageBase(host), data(getHost()) {
 }
 
-Message::Message(const TypeHostUnit& host, MSG_TYPE msgType, STREAM_TYPE streamType)
-		: MessageBase(host, msgType, streamType), data(getHost()) {
+Message::Message(const TypeHostUnit& host, COMPONENT targetType, MSG_TYPE msgType, STREAM_TYPE streamType)
+		: MessageBase(host, targetType, msgType, streamType), data(getHost()) {
 }
 
 bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName) {
@@ -198,7 +198,8 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
         uint16_t port = numbers.front();
         numbers.pop_front();
 
-        compUnit->getAddress().set(base, port);
+        //TODO comm interface type
+        compUnit->getAddress()->set(COMMINTERFACE_TCPIP, base, port);
 
         base = numbers.front();
         numbers.pop_front();
@@ -206,7 +207,7 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
         port = numbers.front();
         numbers.pop_front();
 
-        compUnit->getAddress().setUI(base, port);
+        compUnit->getAddress()->setUI(base, port);
 
         componentList.emplace_back(ComponentUnitFactory::create(type, compUnit->getArch(),
                                                                 compUnit->getID(), compUnit->getAddress()));
@@ -517,22 +518,22 @@ bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentU
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().get().base)) {
+        if (!writeNumber(target, component->getAddress()->get().base)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().get().port)) {
+        if (!writeNumber(target, component->getAddress()->get().port)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().getUI().base)) {
+        if (!writeNumber(target, component->getAddress()->getUI().base)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }
 
-        if (!writeNumber(target, component->getAddress().getUI().port)) {
+        if (!writeNumber(target, component->getAddress()->getUI().port)) {
             LOGS_E(getHost(), "writeComponentList can not write component item");
             return false;
         }

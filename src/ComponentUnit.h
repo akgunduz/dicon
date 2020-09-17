@@ -17,12 +17,13 @@ class ComponentUnit : public CommUnit {
 public:
 
     ComponentUnit() = default;
-    ComponentUnit(COMPONENT, ARCH, TypeID, Address);
-    ComponentUnit(COMPONENT, Address);
+    ComponentUnit(COMPONENT, ARCH, TypeID, TypeAddress);
+    ComponentUnit(COMPONENT, TypeAddress);
     explicit ComponentUnit(COMPONENT);
     ComponentUnit(const ComponentUnit&);
     explicit ComponentUnit(const TypeCommUnit&);
     explicit ComponentUnit(const CommUnit*);
+    explicit ComponentUnit(const BaseUnit*);
     virtual ~ComponentUnit();
 
     void* getHandle() const;

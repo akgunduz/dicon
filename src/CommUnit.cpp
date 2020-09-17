@@ -4,76 +4,78 @@
 
 #include "CommUnit.h"
 
-CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id, Address _address)
-        : id(_id), type(_type), arch(_arch), address(_address) {
+#include <utility>
+
+CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id, TypeAddress _address)
+        : BaseUnit(_type, _arch, _id), address(std::move(_address)) {
 }
 
 CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id)
-        : id(_id), type(_type), arch(_arch) {
+        : BaseUnit(_type, _arch, _id) {
+
+    address = std::make_shared<Address>();
 }
 
-CommUnit::CommUnit(COMPONENT _type, Address _address)
-        : type(_type), address(_address) {
+CommUnit::CommUnit(COMPONENT _type, TypeAddress _address)
+        : BaseUnit(_type), address(std::move(_address)) {
 }
 
 CommUnit::CommUnit(COMPONENT _type)
-        : type(_type) {
+        : BaseUnit(_type) {
+
+    address = std::make_shared<Address>();
 }
 
-CommUnit::CommUnit(const CommUnit &copy) = default;
-
-TypeID CommUnit::getID() {
-
-    return id;
+CommUnit::CommUnit(const BaseUnit *copy)
+        : BaseUnit(*copy) {
 }
 
-void CommUnit::setID(TypeID _id) {
+CommUnit::~CommUnit() = default;
 
-    id = _id;
+void CommUnit::setID(TypeID id) {
+
+    BaseUnit::setID(id);
 }
 
-ARCH CommUnit::getArch() {
-
-    return (ARCH) arch;
-}
-
-void CommUnit::setArch(ARCH _arch) {
-
-    arch = _arch;
-}
-
-COMPONENT CommUnit::getType() {
-
-    return (COMPONENT)type;
-}
-
-void CommUnit::setType(COMPONENT _type) {
-
-    type = _type;
-}
-
-Address& CommUnit::getAddress() {
+TypeAddress& CommUnit::getAddress() {
 
     return address;
 }
 
-void CommUnit::setAddress(Address _address, bool isMulticast) {
+void CommUnit::setAddress(const TypeAddress& _address, bool isMulticast) {
 
     address = _address;
-    address.setMulticast(isMulticast);
-}
-
-COMPONENT CommUnit::next(COMPONENT component) {
-
-    return COMPONENT (((int)component + 1) % COMP_MAX);
-}
-
-COMPONENT CommUnit::prev(COMPONENT component) {
-
-    return COMPONENT (((int)component + COMP_MAX - 1) % COMP_MAX);
+    address->setMulticast(isMulticast);
 }
 
 void CommUnit::set(const CommUnit &unit) {
 
     *this = unit;
+}
+
+bool CommUnit::deSerialize(const uint8_t* buffer) {
+
+    type = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    arch = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    id = ntohl(*((TypeID *) buffer)); buffer += sizeof(TypeID);
+    address->getFlag() = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    address->get().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    address->get().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
+    address->getUI().port = ntohs(*((uint16_t *) buffer)); buffer += 2;
+    address->getUI().base = ntohl(*((uint32_t *) buffer)); buffer += 4;
+
+    return true;
+}
+
+void CommUnit::serialize(uint8_t *buffer) {
+
+    *((uint16_t *) buffer) = htons(type); buffer += 2;
+    *((uint16_t *) buffer) = htons(arch); buffer += 2;
+    *((TypeID *) buffer) = htonl(id); buffer += sizeof(TypeID);
+    *((uint16_t *) buffer) = htons(address->getFlag()); buffer += 2;
+    *((uint16_t *) buffer) = htons(address->get().port); buffer += 2;
+    *((uint32_t *) buffer) = htonl(address->get().base); buffer += 4;
+    *((uint16_t *) buffer) = htons(address->getUI().port); buffer += 2;
+    *((uint32_t *) buffer) = htonl(address->getUI().base); buffer += 4;
+
 }

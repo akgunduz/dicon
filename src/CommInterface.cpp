@@ -12,6 +12,9 @@ CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice& _device,
                              const CommInterfaceCB *receiverCB)
         : host(std::move(_host)), device(_device) {
 
+    address = std::make_shared<Address>();
+    multicastAddress = std::make_shared<Address>();
+
     scheduler = new Scheduler();
 
     senderCB = new CommInterfaceCB([](void *arg, const TypeSchedulerItem& item) -> bool {
@@ -205,14 +208,16 @@ STATUS CommInterface::onRead(const TypeComponentUnit &component, TypeMessage &ms
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage msg) {
 
-    if (target->getAddress().getInterface() == getType()) {
+    if (getHost()->getAddress(target->getType())->getInterface() == getType()) {
 
         auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
 
         return scheduler->push(msgItem);
     }
 
-    LOGS_E(getHost(), "Interface is not suitable for target : %d", target->getAddress().get().base);
+    LOGC_T(getHost(), target, type, "Configured Interface[%s] does not match with ongoing Interface[%s]",
+           CommInterfaceType::getName(getHost()->getAddress(target->getType())->getInterface()),
+           CommInterfaceType::getName(getType()));
 
     return false;
 }
@@ -238,22 +243,22 @@ bool CommInterface::send(const TypeSchedulerItem &item) {
     return status;
 }
 
-Address &CommInterface::getAddress() {
+TypeAddress& CommInterface::getAddress() {
 
     return address;
 }
 
-Address &CommInterface::getMulticastAddress() {
+TypeAddress& CommInterface::getMulticastAddress() {
 
     return multicastAddress;
 }
 
-const TypeHostUnit &CommInterface::getHost() {
+const TypeHostUnit& CommInterface::getHost() {
 
     return host;
 }
 
-const TypeDevice &CommInterface::getDevice() {
+const TypeDevice& CommInterface::getDevice() {
 
     return device;
 }

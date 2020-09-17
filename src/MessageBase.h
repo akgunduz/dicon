@@ -65,7 +65,7 @@ protected:
 public:
 
     explicit MessageBase(const TypeHostUnit&);
-    MessageBase(const TypeHostUnit&, MSG_TYPE, STREAM_TYPE);
+    MessageBase(const TypeHostUnit&, COMPONENT, MSG_TYPE, STREAM_TYPE);
     ~MessageBase();
 
     bool onRead(const TypeComponentUnit&, const uint8_t*, size_t);
