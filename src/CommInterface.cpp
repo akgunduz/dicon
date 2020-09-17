@@ -210,7 +210,7 @@ bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage m
 
     if (target->getAddress()->getInterface() != getType()) {
 
-        LOGC_E(getHost(), target, type, "Target Interface[%s] does not match with Host Interface[%s]",
+        LOGC_T(getHost(), target, type, "Target Interface[%s] does not match with Host Interface[%s]",
                CommInterfaceType::getName(target->getAddress()->getInterface()),
                CommInterfaceType::getName(getType()));
 
@@ -220,7 +220,7 @@ bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage m
     if (getHost()->getType() != target->getType() &&
             getHost()->getAddress(target->getType())->getInterface() != getType()) {
 
-        LOGC_E(getHost(), target, type, "Configured Interface[%s] does not match with Host Interface[%s]",
+        LOGC_T(getHost(), target, type, "Configured Interface[%s] does not match with Host Interface[%s]",
                CommInterfaceType::getName(getHost()->getAddress(target->getType())->getInterface()),
                CommInterfaceType::getName(getType()));
 
