@@ -27,7 +27,8 @@ typedef bool (*TypeNotifyCB)(void*, COMPONENT, NOTIFYTYPE);
 
 class Component : public std::enable_shared_from_this<Component> {
 
-    TypeInterfaceList interfaces;
+    TypeInterfaceMap interfaceMap;
+    TypeInterfaceList interfaceList;
 
     static inline void *notifyContext{};
     static inline TypeNotifyCB notifyCB{};

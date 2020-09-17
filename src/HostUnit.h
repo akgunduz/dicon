@@ -13,6 +13,7 @@ class HostUnit : public BaseUnit {
     const std::filesystem::path basePath;
     std::filesystem::path rootPath;
 
+    TypeAddress iFaceAddress[COMMINTERFACE_MAX]{};
     TypeAddress address[COMP_MAX]{};
 
 public:
@@ -29,8 +30,10 @@ public:
 
     TypeAddress& getAddress(COMPONENT);
     void setAddress(COMPONENT, TypeAddress, bool = false);
+    void setIFaceAddress(COMM_INTERFACE, TypeAddress);
 
     TypeComponentUnit forkComponent(COMPONENT);
+    TypeComponentUnit forkComponent(COMM_INTERFACE);
     TypeComponentUnit forkComponent();
     TypeCommUnit forkCommUnit(COMPONENT);
     TypeCommUnit forkCommUnit();

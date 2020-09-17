@@ -208,18 +208,28 @@ STATUS CommInterface::onRead(const TypeComponentUnit &component, TypeMessage &ms
 
 bool CommInterface::push(MSG_DIR type, const TypeCommUnit &target, TypeMessage msg) {
 
-    if (getHost()->getAddress(target->getType())->getInterface() == getType()) {
+    if (target->getAddress()->getInterface() != getType()) {
 
-        auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
+        LOGC_E(getHost(), target, type, "Target Interface[%s] does not match with Host Interface[%s]",
+               CommInterfaceType::getName(target->getAddress()->getInterface()),
+               CommInterfaceType::getName(getType()));
 
-        return scheduler->push(msgItem);
+        return false;
     }
 
-    LOGC_T(getHost(), target, type, "Configured Interface[%s] does not match with ongoing Interface[%s]",
-           CommInterfaceType::getName(getHost()->getAddress(target->getType())->getInterface()),
-           CommInterfaceType::getName(getType()));
+    if (getHost()->getType() != target->getType() &&
+            getHost()->getAddress(target->getType())->getInterface() != getType()) {
 
-    return false;
+        LOGC_E(getHost(), target, type, "Configured Interface[%s] does not match with Host Interface[%s]",
+               CommInterfaceType::getName(getHost()->getAddress(target->getType())->getInterface()),
+               CommInterfaceType::getName(getType()));
+
+        return false;
+    }
+
+    auto msgItem = std::make_shared<MessageItem>(type, target, std::move(msg));
+
+    return scheduler->push(msgItem);
 }
 
 bool CommInterface::send(const TypeSchedulerItem &item) {

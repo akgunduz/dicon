@@ -78,6 +78,7 @@ public :
 };
 
 typedef CommInterface* TypeInterface;
-typedef std::map<COMPONENT, TypeInterface> TypeInterfaceList;
+typedef std::map<COMPONENT, TypeInterface> TypeInterfaceMap;
+typedef std::map<COMM_INTERFACE, TypeInterface> TypeInterfaceList;
 
 #endif //DICON_COMMINTERFACE_H

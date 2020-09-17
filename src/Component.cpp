@@ -32,22 +32,25 @@ bool Component::initInterfaces(COMPONENT type, int interfaceOther, int interface
     auto &nodeDevice = deviceList->get(interfaceNode);
     auto &otherDevice = deviceList->get(interfaceOther);
 
-    interfaces[COMP_NODE] = CommInterfaceFactory::createInterface(getHost(), nodeDevice, receiverCB);
+    interfaceList[nodeDevice->getType()] = CommInterfaceFactory::createInterface(getHost(), nodeDevice, receiverCB);
+    interfaceMap[COMP_NODE] = interfaceList[nodeDevice->getType()];
+    host->setIFaceAddress(nodeDevice->getType(), interfaceList[nodeDevice->getType()]->getAddress());
+    host->setAddress(COMP_NODE, interfaceMap[COMP_NODE]->getAddress());
 
-    interfaces[COMP_DISTRIBUTOR] = otherDevice != nodeDevice && type != COMP_NODE ?
-                                   CommInterfaceFactory::createInterface(getHost(), otherDevice, receiverCB) :
-                                   interfaces[COMP_NODE];
+    if (otherDevice != nodeDevice && type != COMP_NODE) {
+        interfaceList[otherDevice->getType()] = CommInterfaceFactory::createInterface(getHost(), otherDevice, receiverCB);
+        interfaceMap[COMP_DISTRIBUTOR] = interfaceList[otherDevice->getType()];
+        host->setIFaceAddress(otherDevice->getType(), interfaceList[otherDevice->getType()]->getAddress());
 
-    interfaces[COMP_COLLECTOR] = interfaces[COMP_DISTRIBUTOR];
+    } else {
 
-    if (!interfaces[COMP_NODE] || !interfaces[COMP_DISTRIBUTOR]) {
-
-        return false;
+        interfaceMap[COMP_DISTRIBUTOR] = interfaceMap[COMP_NODE];
     }
 
-    host->setAddress(COMP_DISTRIBUTOR, getInterfaceAddress(COMP_DISTRIBUTOR));
-    host->setAddress(COMP_COLLECTOR, getInterfaceAddress(COMP_COLLECTOR));
-    host->setAddress(COMP_NODE, getInterfaceAddress(COMP_NODE));
+    host->setAddress(COMP_DISTRIBUTOR, interfaceMap[COMP_DISTRIBUTOR]->getAddress());
+
+    interfaceMap[COMP_COLLECTOR] = interfaceMap[COMP_DISTRIBUTOR];
+    host->setAddress(COMP_COLLECTOR, interfaceMap[COMP_COLLECTOR]->getAddress());
 
     return true;
 }
@@ -56,19 +59,13 @@ Component::~Component() {
 
     LOGP_T("Deallocating Component");
 
-    sendShutdownMsg(getHost()->forkComponent());
+    for (auto& _interface : interfaceList) {
 
-    if (interfaces[COMP_DISTRIBUTOR] != interfaces[COMP_NODE]) {
+        sendShutdownMsg(getHost()->forkComponent(_interface.first));
+        _interface.second->waitThread();
 
-        interfaces[COMP_DISTRIBUTOR]->waitThread();
-
-        delete interfaces[COMP_DISTRIBUTOR];
-
+        delete _interface.second;
     }
-
-    interfaces[COMP_NODE]->waitThread();
-
-    delete interfaces[COMP_NODE];
 
     delete receiverCB;
 }
@@ -107,44 +104,44 @@ bool Component::defaultProcessMsg(const TypeComponentUnit& owner, TypeMessage ms
 
 const TypeDevice& Component::getDevice(COMPONENT target) {
 
-    return interfaces[target]->getDevice();
+    return interfaceMap[target]->getDevice();
 }
 
 TypeAddress& Component::getInterfaceAddress(COMPONENT target) {
 
-    return interfaces[target]->getAddress();
+    return interfaceMap[target]->getAddress();
 }
 
 TypeAddress& Component::getInterfaceMulticastAddress(COMPONENT target) {
 
-    return interfaces[target]->getMulticastAddress();
+    return interfaceMap[target]->getMulticastAddress();
 }
 
 TypeAddressList Component::getInterfaceAddressList(COMPONENT target) {
 
-    return interfaces[target]->getAddressList();
+    return interfaceMap[target]->getAddressList();
 }
 
 COMM_INTERFACE Component::getInterfaceType(COMPONENT target) {
 
-    return interfaces[target]->getType();
+    return interfaceMap[target]->getType();
 }
 
 bool Component::isSupportMulticast(COMPONENT target) {
 
-    return interfaces[target]->isSupportMulticast();
+    return interfaceMap[target]->isSupportMulticast();
 }
 
 bool Component::send(const TypeComponentUnit& target, TypeMessage msg) {
 
-    return interfaces[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
+    return interfaceMap[target->getType()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
 bool Component::sendShutdownMsg(const TypeComponentUnit& target) {
 
     auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_SHUTDOWN);
 
-    return send(target, std::move(msg));
+    return interfaceList[target->getAddress()->getInterface()]->push(MSGDIR_SEND, target, std::move(msg));
 }
 
 TypeHostUnit& Component::getHost() {

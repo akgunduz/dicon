@@ -52,6 +52,11 @@ void HostUnit::setAddress(COMPONENT _type, TypeAddress _address, bool isMulticas
     address[_type]->setMulticast(isMulticast);
 }
 
+void HostUnit::setIFaceAddress(COMM_INTERFACE _type, TypeAddress _address) {
+
+    iFaceAddress[_type] = std::move(_address);
+}
+
 TypeCommUnit HostUnit::forkCommUnit(COMPONENT _type) {
 
     auto unit = std::make_shared<CommUnit>(this);
@@ -71,6 +76,15 @@ TypeComponentUnit HostUnit::forkComponent(COMPONENT _type) {
     auto unit = std::make_shared<ComponentUnit>(this);
 
     unit->setAddress(address[_type]);
+
+    return unit;
+}
+
+TypeComponentUnit HostUnit::forkComponent(COMM_INTERFACE _type) {
+
+    auto unit = std::make_shared<ComponentUnit>(this);
+
+    unit->setAddress(iFaceAddress[_type]);
 
     return unit;
 }
