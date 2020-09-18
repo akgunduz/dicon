@@ -227,6 +227,8 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
             [](uv_write_t *writeReq, int status) {
 
+                onClose((uv_handle_t*)writeReq->handle);
+
                 free(writeReq);
 
                 if (status) {
@@ -257,6 +259,8 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
         1, (const struct sockaddr *) &clientAddress,
 
          [](uv_udp_send_t *writeReq, int status) {
+
+             onClose((uv_handle_t*)writeReq->handle);
 
              free(writeReq);
 

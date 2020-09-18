@@ -51,7 +51,7 @@ bool CommPipe::initPipe() {
 
         result = uv_pipe_bind(pipeServer, serverAddress.sun_path);
 
-        if (result < 0 || pipeServer->delayed_error != 0) {
+        if (result < 0) {
 
             address->setPort(++lastFreePipePort);
 
@@ -149,6 +149,8 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
             writeReq, (uv_stream_t *) target->getHandle(), &bufPtr, 1,
 
             [](uv_write_t *writeReq, int status) {
+
+                onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 

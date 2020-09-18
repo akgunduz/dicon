@@ -157,6 +157,10 @@ void CommInterface::onClose(uv_handle_t* handle) {
         return;
     }
 
+    if (uv_is_closing(handle)) {
+        return;
+    }
+
     uv_close(handle, [] (uv_handle_t* _handle) {
 
         if (_handle->data != nullptr) {
@@ -178,6 +182,23 @@ void CommInterface::onCloseAll(uv_loop_t *loop) {
         }
 
     }, this);
+}
+
+void CommInterface::onShutdown(uv_stream_t* client) {
+
+    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
+
+    uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
+
+        if (status) {
+
+            LOGP_E("Shutdown problem : %d!!!", status);
+        }
+
+        onClose((uv_handle_t*)req->handle);
+
+        free(req);
+    });
 }
 
 STATUS CommInterface::onRead(const TypeComponentUnit &component, TypeMessage &msg,

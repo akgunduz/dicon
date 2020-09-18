@@ -51,7 +51,9 @@ protected :
     static void onAlloc(uv_handle_t*, size_t,uv_buf_t*);
     static void onFree(const uv_buf_t *);
     static void onClose(uv_handle_t*);
+    static void onShutdown(uv_stream_t*);
     void onCloseAll(uv_loop_t*);
+
     STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 
     virtual bool initInterface() = 0;
