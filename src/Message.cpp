@@ -87,7 +87,7 @@ bool Message::readProcessInfo(const TypeComponentUnit& source, const TypeProcess
 
 bool Message::readProcessFileCount(const TypeComponentUnit& source, long& count) {
 
-    count = numbers.front();
+    count = (long) numbers.front();
     numbers.pop_front();
 
     LOGS_D(getHost(), "Process has %ld files", count);
@@ -179,7 +179,7 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
     auto type = (COMPONENT) numbers.front();
     numbers.pop_front();
 
-    long componentCount = numbers.front();
+    long componentCount = (long) numbers.front();
     numbers.pop_front();
 
     for (long i = 0; i < componentCount; i++) {
@@ -189,22 +189,22 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
         compUnit->setArch((ARCH)numbers.front());
         numbers.pop_front();
 
-        compUnit->setID(numbers.front());
+        compUnit->setID((TypeID) numbers.front());
         numbers.pop_front();
 
-        uint32_t base = numbers.front();
+        uint32_t base = (uint32_t) numbers.front();
         numbers.pop_front();
 
-        uint16_t port = numbers.front();
+        uint16_t port = (uint16_t) numbers.front();
         numbers.pop_front();
 
         //TODO comm interface type
         compUnit->getAddress()->set(COMMINTERFACE_TCPIP, base, port);
 
-        base = numbers.front();
+        base = (uint32_t) numbers.front();
         numbers.pop_front();
 
-        port = numbers.front();
+        port = (uint16_t) numbers.front();
         numbers.pop_front();
 
         compUnit->getAddress()->setUI(base, port);

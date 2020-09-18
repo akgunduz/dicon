@@ -377,12 +377,12 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     LOGC_T(getHost(), target, MSGDIR_SEND,
            "File Binary write process is started at path : %s", fileItem->getPath().c_str());
 
-    if (!writeString(target, fileItem->getRefPath())) {
+    if (!writeString(target, fileItem->getRefPath().string())) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary can not write file path");
         return false;
     }
 
-    if (!onWrite(target, MSGHEADER_BINARY, nullptr, fileItem->getSize())) {
+    if (!onWrite(target, MSGHEADER_BINARY, nullptr, (size_t) fileItem->getSize())) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number to stream");
         return false;
     }
@@ -395,7 +395,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
         return false;
     }
 
-    size_t remaining = fileItem->getSize();
+    auto remaining = (size_t) fileItem->getSize();
 
     do {
 
