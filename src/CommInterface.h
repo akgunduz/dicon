@@ -10,6 +10,7 @@
 #include "Address.h"
 #include "Device.h"
 #include "MessageItem.h"
+#include "UvUtil.h"
 
 #define TRY_COUNT 10
 #define MAX_SIMUL_CLIENTS 100
@@ -47,12 +48,6 @@ protected :
 
     uv_loop_t produceLoop{};
     uv_loop_t consumeLoop{};
-
-    static void onAlloc(uv_handle_t*, size_t,uv_buf_t*);
-    static void onFree(const uv_buf_t *);
-    static void onClose(uv_handle_t*);
-    static void onShutdown(uv_stream_t*);
-    void onCloseAll(uv_loop_t*);
 
     STATUS onRead(const TypeComponentUnit&, TypeMessage&, const uint8_t*, size_t);
 

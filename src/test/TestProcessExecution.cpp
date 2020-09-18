@@ -5,9 +5,9 @@
 #include <pstreams/pstream.h>
 #include "TestApp.h"
 
-void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    auto job = collector->loadJob("../sample/Job1_x86_linux");
+    auto job = std::make_shared<JobItem>(collector->getHost(), TEST_JOB_PATH, JobItem::jobID++);
     if (!job) {
         LOGP_E("Job could not initialized");
         return;
@@ -42,5 +42,7 @@ void TestApp::testPipeControl(TypeDistributor& distributor, TypeCollector& colle
                 LOGP_I("Process[%d] Output : %s", process->getID(), childOut.c_str());
             }
         }
+
+        inProcess.close();
     }
 }

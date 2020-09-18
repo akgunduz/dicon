@@ -89,7 +89,7 @@ bool CommPipe::initPipe() {
 
         LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
-        onClose((uv_handle_t *)pipeServer);
+        UvUtil::onClose((uv_handle_t *)pipeServer);
 
         return false;
     }
@@ -103,16 +103,16 @@ bool CommPipe::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf
 
     if (nRead == 0) {
 
-        onFree(buf);
+        UvUtil::onFree(buf);
 
         return false;
     }
 
     if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-        onClose((uv_handle_t*)client);
+        UvUtil::onClose((uv_handle_t*)client);
 
-        onFree(buf);
+        UvUtil::onFree(buf);
 
         return true;
     }
@@ -133,7 +133,7 @@ bool CommPipe::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf
         commInterface->shutdown();
     }
 
-    onFree(buf);
+    UvUtil::onFree(buf);
 
     return false;
 }
@@ -150,7 +150,7 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
             [](uv_write_t *writeReq, int status) {
 
-                onClose((uv_handle_t*)writeReq->handle);
+                UvUtil::onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 
@@ -188,14 +188,14 @@ bool CommPipe::onServerConnect() {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        onClose((uv_handle_t *)&client);
+        UvUtil::onClose((uv_handle_t *)&client);
 
         return false;
     }
 
     client->data = new CommData(this);
 
-    result = uv_read_start((uv_stream_t *) client, onAlloc,
+    result = uv_read_start((uv_stream_t *) client, UvUtil::onAlloc,
 
             [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
@@ -206,7 +206,7 @@ bool CommPipe::onServerConnect() {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
-        onClose((uv_handle_t *)&client);
+        UvUtil::onClose((uv_handle_t *)&client);
 
         return false;
     }

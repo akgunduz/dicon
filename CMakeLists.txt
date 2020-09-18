@@ -77,6 +77,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/StopWatch.cpp
         ${SOURCE_PATH}/Util.cpp
+        ${SOURCE_PATH}/UvUtil.cpp
         )
 
 set(CONSOLE_FILES
@@ -120,7 +121,9 @@ set(TEST_FILES
         ${TEST_PATH}/TestLoadJob.cpp
         ${TEST_PATH}/TestCRC.cpp
 
-        ${TEST_PATH}/TestPipeControl.cpp
+        ${TEST_PATH}/TestFileExecution.cpp
+        ${TEST_PATH}/TestProcessExecution.cpp
+
         ${SOURCE_PATH}/Entry.cpp
         )
 

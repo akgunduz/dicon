@@ -20,7 +20,8 @@ TestApp::TestApp(int *_interfaces, const LogInfo& _logInfo, std::vector<int>& _c
     addRoutine('b', "CRC", &TestApp::testCRC);
     addRoutine('c', "Ping", &TestApp::testPing);
     addRoutine('d', "LoadJob", &TestApp::testLoadJob);
-    addRoutine('e', "PipeControl", &TestApp::testPipeControl);
+    addRoutine('x', "ProcessExecute", &TestApp::testProcessExecute);
+    addRoutine('y', "FileExecute", &TestApp::testFileExecute);
 
     help();
 }
@@ -42,6 +43,8 @@ int TestApp::run() {
     auto &d = componentFactory->getDistributor();
     auto &c = componentFactory->getCollector(0);
     auto &n = componentFactory->getNode(0);
+
+    testFileExecute(d, c, n);
 
     int in;
     do {

@@ -88,7 +88,7 @@ bool CommTCP::initTCP() {
 
         LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
-        onClose((uv_handle_t *)tcpServer);
+        UvUtil::onClose((uv_handle_t *)tcpServer);
 
         return false;
     }
@@ -135,7 +135,7 @@ bool CommTCP::initUDP() {
 
         LOGS_E(getHost(), "Could not bind to socket!!!");
 
-        onClose((uv_handle_t*)udpServer);
+        UvUtil::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
@@ -147,14 +147,14 @@ bool CommTCP::initUDP() {
 
         LOGS_E(getHost(), "Can not join to multicast group!!!");
 
-        onClose((uv_handle_t*)udpServer);
+        UvUtil::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
     udpServer->data = new CommData(this);
 
-    result = uv_udp_recv_start(udpServer, onAlloc,
+    result = uv_udp_recv_start(udpServer, UvUtil::onAlloc,
 
             [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags) {
@@ -166,7 +166,7 @@ bool CommTCP::initUDP() {
 
         LOGS_E(getHost(), "Can not start receiving UDP data!!!");
 
-        onClose((uv_handle_t*)udpServer);
+        UvUtil::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
@@ -180,16 +180,16 @@ bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf)
 
     if (nRead == 0) {
 
-        onFree(buf);
+        UvUtil::onFree(buf);
 
         return false;
     }
 
     if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-        onClose((uv_handle_t*)client);
+        UvUtil::onClose((uv_handle_t*)client);
 
-        onFree(buf);
+        UvUtil::onFree(buf);
 
         return true;
     }
@@ -210,7 +210,7 @@ bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf)
         commInterface->shutdown();
     }
 
-    onFree(buf);
+    UvUtil::onFree(buf);
 
     return false;
 }
@@ -227,7 +227,7 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
             [](uv_write_t *writeReq, int status) {
 
-                onClose((uv_handle_t*)writeReq->handle);
+                UvUtil::onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 
@@ -260,7 +260,7 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
          [](uv_udp_send_t *writeReq, int status) {
 
-             onClose((uv_handle_t*)writeReq->handle);
+             UvUtil::onClose((uv_handle_t*)writeReq->handle);
 
              free(writeReq);
 
@@ -298,14 +298,14 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        onClose((uv_handle_t *)&client);
+        UvUtil::onClose((uv_handle_t *)&client);
 
         return false;
     }
 
     client->data = new CommData(this);
 
-    result = uv_read_start((uv_stream_t *) client, onAlloc,
+    result = uv_read_start((uv_stream_t *) client, UvUtil::onAlloc,
 
             [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
@@ -316,7 +316,7 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
-        onClose((uv_handle_t *)&client);
+        UvUtil::onClose((uv_handle_t *)&client);
 
         return false;
     }

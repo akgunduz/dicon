@@ -19,6 +19,8 @@ class Node : public Component {
 
     TypeProcessList processList;
 
+    uv_loop_t* processLoop{};
+
 	void setDistributor(const TypeComponentUnit&);
 
     bool processDistributorWakeupMsg(const TypeComponentUnit&, TypeMessage);

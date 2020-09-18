@@ -87,7 +87,8 @@ public:
     void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
     void testCRC(TypeDistributor&, TypeCollector&, TypeNode&);
 
-    void testPipeControl(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testProcessExecute(TypeDistributor&, TypeCollector&, TypeNode&);
+    void testFileExecute(TypeDistributor&, TypeCollector&, TypeNode&);
 
     int run() override;
 
