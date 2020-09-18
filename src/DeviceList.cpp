@@ -3,6 +3,7 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
+#include "uv.h"
 #include "DeviceList.h"
 #include "Address.h"
 #include "Log.h"
@@ -21,78 +22,27 @@ int createMask(uint32_t baseAddress) {
 
 DeviceList::DeviceList() {
 
-#ifndef WIN32
+    int count;
+    uv_interface_address_t *info;
 
-    struct ifaddrs* ifAddrStruct = nullptr;
-    struct ifaddrs* loop = nullptr;
+    uv_interface_addresses(&info, &count);
 
-    getifaddrs(&ifAddrStruct);
-    if (ifAddrStruct == nullptr) {
-        return;
-    }
+    for (int i = 0; i < count; i++) {
 
-    for (loop = ifAddrStruct; loop != nullptr; loop = loop->ifa_next) {
+        uv_interface_address_t* iFace = &info[i];
 
-        if (loop->ifa_addr->sa_family == AF_INET) { // check if it is IP
-
-            if (!((loop->ifa_flags & IFF_UP) && (loop->ifa_flags & IFF_RUNNING))) {
-                continue;
-            }
-
-            add(std::make_shared<Device>(loop->ifa_name, COMMINTERFACE_TCPIP,
-                                         ntohl(((struct sockaddr_in *) loop->ifa_addr)->sin_addr.s_addr),
-                                         createMask(ntohl(((struct sockaddr_in *) loop->ifa_netmask)->sin_addr.s_addr)),
-                                         (loop->ifa_flags & IFF_LOOPBACK) > 0));
-        }
-    };
-
-    freeifaddrs(ifAddrStruct);
-
-#else
-
-    WSADATA wsaData;
-    int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-    if (iResult != 0) {
-        LOGP_E("WSAStartup failed: %d", iResult);
-        return;
-    }
-
-    unsigned long outBufLen = 15000;
-
-    auto pAddresses = (IP_ADAPTER_ADDRESSES *) malloc(outBufLen);
-
-    auto status = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_PREFIX, nullptr, pAddresses, &outBufLen);
-
-    if (status == ERROR_BUFFER_OVERFLOW) {
-        free(pAddresses);
-        return;
-    }
-
-    for (auto pCurrAddress = pAddresses; pCurrAddress; pCurrAddress = pCurrAddress->Next) {
-
-        if (pCurrAddress->OperStatus != IfOperStatusUp) {
+        if (iFace->address.address4.sin_family != AF_INET) {
             continue;
         }
 
-        auto *si = (sockaddr_in *)(pCurrAddress->FirstUnicastAddress->Address.lpSockaddr);
-
-        add(std::make_shared<Device>(Util::to_narrow(pCurrAddress->FriendlyName),
-                                     COMMINTERFACE_TCPIP,
-                                     ntohl(si->sin_addr.s_addr),
-                                     pCurrAddress->FirstUnicastAddress->OnLinkPrefixLength,
-                                     pCurrAddress->IfType == IF_TYPE_SOFTWARE_LOOPBACK));
-
+        add(std::make_shared<Device>(iFace->name, COMMINTERFACE_TCPIP,
+                                     ntohl(iFace->address.address4.sin_addr.s_addr),
+                                     createMask(ntohl(iFace->netmask.netmask4.sin_addr.s_addr)),
+                                     iFace->is_internal));
     }
 
-    free(pAddresses);
+    uv_free_interface_addresses(info, count);
 
-#endif
-
-//    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-//    std::default_random_engine generator(static_cast<unsigned int>(seed));
-//    std::uniform_int_distribution<unsigned int> distribution(1, static_cast<unsigned int>(seed));
-//
-//    add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, distribution(generator)));
     add(std::make_shared<Device>("us", COMMINTERFACE_UNIXSOCKET, FAKE_US_ADDRESS, FAKE_US_MASK, true));
 }
 
@@ -126,8 +76,4 @@ size_t DeviceList::getCount() {
 DeviceList::~DeviceList() {
 
     LOGP_T("Deallocating DeviceList");
-
-#ifdef WIN32
-    WSACleanup();
-#endif
 }
