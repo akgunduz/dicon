@@ -123,7 +123,7 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
 
         isAlreadyAdded = true;
 
-        component.second->setCheckTime(std::chrono::steady_clock::now());
+        component.second->setCheckTime();
 
         return component.second->getID();
 
@@ -133,7 +133,7 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
 
     auto object = createUnit(arch, newID, address);
 
-    object->setCheckTime(std::chrono::steady_clock::now());
+    object->setCheckTime();
 
     LOGS_I(host, "%s[%d] is added to network",
            ComponentType::getName(object->getType()), object->getID());

@@ -29,7 +29,7 @@ public:
     void setHandle(void*);
 
     TypeTime& getCheckTime();
-    void setCheckTime(TypeTime);
+    void setCheckTime();
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;

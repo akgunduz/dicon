@@ -47,9 +47,9 @@ TypeTime& ComponentUnit::getCheckTime() {
     return checkTime;
 }
 
-void ComponentUnit::setCheckTime(TypeTime _checkTime) {
+void ComponentUnit::setCheckTime() {
 
-    checkTime = _checkTime;
+    checkTime = std::chrono::steady_clock::now();
 }
 
 ComponentUnit::~ComponentUnit() = default;
