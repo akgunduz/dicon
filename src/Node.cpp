@@ -5,7 +5,6 @@
 
 #include "Node.h"
 #include "Util.h"
-#include "pstreams/pstream.h"
 
 #define PROCESS_SLEEP_TIME 1000
 
@@ -29,7 +28,7 @@ Node::Node(int _commInterface) :
 
     processItem = std::make_shared<ProcessItem>(getHost());
 
-    processLoop = uv_default_loop();
+  //  processLoop = uv_default_loop();
 
     initialized = true;
 
@@ -40,7 +39,7 @@ Node::~Node() {
 
     LOGP_T("Deallocating Node");
 
-    uv_loop_close(processLoop);
+   // uv_loop_close(processLoop);
 };
 
 bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -68,7 +67,7 @@ bool Node::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage m
 
 bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] is approved by distributor",
            nodeHost->getAssigned()->getID(),
@@ -109,7 +108,7 @@ bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMess
 
 bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] request is received ",
            owner->getID(), processItem->getID());
@@ -132,7 +131,7 @@ bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessag
 
 bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received",
            owner->getID(), processItem->getID());
@@ -146,7 +145,7 @@ bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage
 
 bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     nodeHost->setState(NODESTATE_IDLE);
 
@@ -161,35 +160,128 @@ bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage 
     return send2DistributorReadyMsg(distributor);
 }
 
-
 bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto nodeHost = dynamic_cast<NodeHost*>(host.get());
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
            nodeHost->getAssigned()->getID(),
            processItem->getID());
 
-    int result = processCommand(nodeHost->getAssigned()->getID(),
-                                processItem->getID(),
-                                processItem->getParsedProcess());
+    std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
 
-    if (!result) {
+    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
+
+    std::filesystem::permissions(executable,
+                                 std::filesystem::perms::owner_all |
+                                 std::filesystem::perms::group_read |
+                                 std::filesystem::perms::group_exec |
+                                 std::filesystem::perms::others_read |
+                                 std::filesystem::perms::others_exec,
+                                 std::filesystem::perm_options::add);
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
+           nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
+
+#if 0
+    char cmdPath[PATH_MAX];
+    char *cmdArg[MAX_INPUT];
+    int index = 0;
+    strcpy(cmdPath, parsedCmd.c_str());
+
+    char *token = strtok(cmdPath, " ");
+
+    while(token) {
+
+        cmdArg[index++] = token;
+        token = strtok(nullptr, " ");
+    }
+
+    cmdArg[index] = nullptr;
+
+    auto *childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
+    childProcess->data = this;
+
+    uv_process_options_t options{};
+    options.stdio_count = 3;
+    uv_stdio_container_t child_stdio[3];
+    child_stdio[0].flags = UV_IGNORE;
+    child_stdio[1].flags = UV_IGNORE;
+//    child_stdio[1].data.fd = 1;
+    child_stdio[2].flags = UV_IGNORE;
+//    child_stdio[2].data.fd = 2;
+    options.stdio = child_stdio;
+
+    options.exit_cb = [] (uv_process_t* handle, int64_t exit_status, int term_signal) {
+
+        auto node = (Node*) handle->data;
+
+        LOGP_E("PROCESS[%d], EXIT STATUS : %ld, TERM : %d", node->processItem->getID(), exit_status, term_signal);
+
+        ((Node*) handle->data)->onProcessSuccess();
+        handle->data = nullptr;
+
+        UvUtil::onClose((uv_handle_t*)handle);
+      // UvUtil::onCloseAll(handle->loop);
+    };
+
+    options.file = cmdArg[0];
+    options.args = cmdArg;
+
+    if (processItem->getID() == 12 || processItem->getID() == 7) {
+        LOGP_E("PROCESS %d starting.................", processItem->getID());
+    }
+    int result = uv_spawn(processLoop, childProcess, &options);
+    if (result != 0) {
+        LOGP_E("Process Spawn Failed : err", uv_err_name(result));
         return false;
     }
 
-    TypeProcessFileList outputList;
+    result = uv_run(processLoop, UV_RUN_ONCE);
+    LOGP_E("Process Loop Status : %d", result);
 
-    for (const auto& processFile : processItem->getFileList()) {
-        if (processFile->isOutput()) {
-            if (processFile->get()->check()) {
-                processFile->setOutputState(false);
-                outputList.emplace_back(processFile);
+    return true;
+
+#else
+    std::string childOut;
+
+    int tryCount = 1;
+    while(tryCount++ < TRY_COUNT) {
+
+        redi::ipstream inProcess(parsedCmd);
+
+        if (!inProcess.good()) {
+            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command",
+                   nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
+            return false;
+        }
+
+        while (std::getline(inProcess, childOut)) {
+            Util::trim(childOut);
+            if (!childOut.empty()) {
+                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s",
+                       nodeHost->getAssigned()->getID(), processItem->getID(), childOut.c_str());
             }
         }
+
+        int res = inProcess.close();
+        if (res == 0) {
+
+            return onProcessSuccess();
+        }
+
+        LOGS_E(getHost(), "Collector[%d]:Process[%d] has execution problem retrying",
+               nodeHost->getAssigned()->getID(), processItem->getID());
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
     }
 
-    return send2CollectorBinaryMsg(nodeHost->getAssigned(), processItem->getID(),outputList);
+    LOGS_E(getHost(), "Collector[%d]:Process[%d] is ended with error",
+           nodeHost->getAssigned()->getID(), processItem->getID());
+
+    return false;
+#endif
+
 }
 
 bool Node::send2DistributorReadyMsg(const TypeComponentUnit& target) {
@@ -271,109 +363,26 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processCommand(long collID, long processID, const std::string& cmd) {
+bool Node::onProcessSuccess() {
 
-    std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), cmd);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
-    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
+    TypeProcessFileList outputList;
 
-    std::filesystem::permissions(executable,
-                                 std::filesystem::perms::owner_all |
-                                 std::filesystem::perms::group_read |
-                                 std::filesystem::perms::group_exec |
-                                 std::filesystem::perms::others_read |
-                                 std::filesystem::perms::others_exec,
-                                 std::filesystem::perm_options::add);
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
-           collID, processID, parsedCmd.c_str());
-
-#if 0
-    char cmdPath[PATH_MAX];
-    char *cmdArg[MAX_INPUT];
-    int index = 0;
-    strcpy(cmdPath, parsedCmd.c_str());
-
-    char *token = strtok(cmdPath, " ");
-
-    while(token) {
-
-        cmdArg[index++] = token;
-        token = strtok(nullptr, " ");
-    }
-
-    cmdArg[index] = nullptr;
-
-    auto *childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
-
-    uv_process_options_t options{};
-    options.stdio_count = 3;
-    uv_stdio_container_t child_stdio[3];
-    child_stdio[0].flags = UV_IGNORE;
-    child_stdio[1].flags = UV_INHERIT_FD;
-    child_stdio[1].data.fd = 1;
-    child_stdio[2].flags = UV_INHERIT_FD;
-    child_stdio[2].data.fd = 2;
-    options.stdio = child_stdio;
-
-    options.exit_cb = [] (uv_process_t* handle, int64_t exit_status, int term_signal) {
-
-        handle->data = nullptr;
-
-        UvUtil::onClose((uv_handle_t*)handle);
-    };
-
-    options.file = cmdArg[0];
-    options.args = cmdArg;
-
-    int result = uv_spawn(processLoop, childProcess, &options);
-    if (result != 0) {
-        LOGP_E("Process Spawn Failed : err", uv_err_name(result));
-        return false;
-    }
-
-    uv_run(processLoop, UV_RUN_ONCE);
-
-    return true;
-
-#else
-    std::string childOut;
-
-    int tryCount = 1;
-    while(tryCount++ < TRY_COUNT) {
-
-        redi::ipstream inProcess(parsedCmd);
-
-        if (!inProcess.good()) {
-            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command",
-                   collID, processID, parsedCmd.c_str());
-            return false;
-        }
-
-        while (std::getline(inProcess, childOut)) {
-            Util::trim(childOut);
-            if (!childOut.empty()) {
-                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s", collID, processID, childOut.c_str());
+    for (const auto& processFile : processItem->getFileList()) {
+        if (processFile->isOutput()) {
+            if (processFile->get()->check()) {
+                processFile->setOutputState(false);
+                outputList.emplace_back(processFile);
             }
         }
-
-        int res = inProcess.close();
-        if (res == 0) {
-            return true;
-        }
-
-        LOGS_E(getHost(), "Collector[%d]:Process[%d] has execution problem retrying", collID, processID);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
     }
 
-    LOGS_E(getHost(), "Collector[%d]:Process[%d] is ended with error", collID, processID);
-
-    return false;
-#endif
+    return send2CollectorBinaryMsg(nodeHost->getAssigned(), processItem->getID(),outputList);
 }
 
 TypeProcessList& Node::getProcessList() {
 
     return processList;
 }
+

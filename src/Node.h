@@ -19,7 +19,7 @@ class Node : public Component {
 
     TypeProcessList processList;
 
-    uv_loop_t* processLoop{};
+   // uv_loop_t* processLoop{};
 
 	void setDistributor(const TypeComponentUnit&);
 
@@ -40,8 +40,8 @@ class Node : public Component {
 	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 
     bool processJob(const TypeComponentUnit&, TypeMessage);
+    bool onProcessSuccess();
     void parseCommand(char *cmd, char **argv);
-    bool processCommand(long, long, const std::string&);
 
 public:
 
