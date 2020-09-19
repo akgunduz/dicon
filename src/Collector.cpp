@@ -123,7 +123,7 @@ bool Collector::processNodeFileInfoMsg(const TypeComponentUnit& owner, TypeMessa
 
 bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Node[%d] sent %d File output binaries",
            owner->getID(), msg->getData().getProcess()->getFileCount());
@@ -217,7 +217,7 @@ void Collector::setDistributor(const TypeComponentUnit& _distributor) {
 
 bool Collector::processJob() {
 
-    auto collectorHost = dynamic_cast<CollectorHost*>(host.get());
+    auto collectorHost = std::static_pointer_cast<CollectorHost>(host);
 
     if (job->getStatus() != JOBSTATUS_OK) {
 
