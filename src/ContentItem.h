@@ -22,6 +22,7 @@ class ContentItem : public SchedulerItem {
     const TypeHostUnit host;
     long id{};
     long assignedJob{};
+    std::chrono::seconds duration{};
 
 public:
     explicit ContentItem(const TypeHostUnit&, TypeID = 0, long = 0);
@@ -39,6 +40,10 @@ public:
 
     long getAssignedJob();
     void setAssignedJob(long);
+
+    const std::chrono::seconds &getDuration() const;
+
+    void setDuration(const std::chrono::seconds &duration);
 };
 
 typedef std::shared_ptr<ContentItem> TypeContentItem;

@@ -36,6 +36,16 @@ void ContentItem::setAssignedJob(long _assignedJob) {
     assignedJob = _assignedJob;
 }
 
+const std::chrono::seconds &ContentItem::getDuration() const {
+
+    return duration;
+}
+
+void ContentItem::setDuration(const std::chrono::seconds &_duration) {
+
+    duration = _duration;
+}
+
 bool compareContentID(const TypeContentItem& ci1, const TypeContentItem& ci2)
 {
     return (ci1->getID() < ci2->getID());

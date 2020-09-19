@@ -241,13 +241,3 @@ void ProcessItem::setID(TypeID _id) {
         file->setAssignedProcess(_id);
     }
 }
-
-long ProcessItem::getDuration() {
-
-    return duration;
-}
-
-void ProcessItem::setDuration(long _duration) {
-
-    duration = _duration;
-}

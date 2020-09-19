@@ -151,7 +151,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     jobInfo["_jobName"] = job->getJobName();
     jobInfo["_state"] = collectorHost->getState();
-    jobInfo["_duration"] = job->getDuration();
+    jobInfo["_duration"] = job->getDuration().count();
     jobInfo["_processCount"] = job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED);
     jobInfo["_jobStatus"] = job->getStatus();
 

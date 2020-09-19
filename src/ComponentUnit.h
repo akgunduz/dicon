@@ -6,8 +6,7 @@
 #define DICON_COMPONENTUNIT_H
 
 #include "CommUnit.h"
-
-typedef std::chrono::steady_clock::time_point TypeTime;
+#include "StopWatch.h"
 
 class ComponentUnit : public CommUnit {
 

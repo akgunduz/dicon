@@ -41,8 +41,6 @@ protected:
 
     std::map<std::string, TypeJobParser> contentParser;
 
-    long long duration{};
-
     JOB_STATUS status{JOBSTATUS_OK};
 
     std::vector<long> errorFileIDList{};
@@ -65,9 +63,6 @@ public:
 
     const std::string& getJobName();
     void setJobName(const std::string&);
-
-    long long getDuration();
-    void setDuration(long long duration);
 
     int getProcessCount();
     int getProcessCount(PROCESS_STATE);

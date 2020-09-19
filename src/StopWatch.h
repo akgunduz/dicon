@@ -7,11 +7,13 @@
 
 #include "Common.h"
 
+typedef std::chrono::steady_clock::time_point TypeTime;
+
 class StopWatch {
 
     bool initiated;
-    long long tStart{};
-    long long tStop{};
+    TypeTime tStart{};
+    TypeTime tStop{};
 
 public:
 
@@ -19,7 +21,7 @@ public:
         initiated = false;
     };
     void start();
-    long long stop();
+    std::chrono::seconds stop();
     void reset();
     bool isInitiated();
 };
