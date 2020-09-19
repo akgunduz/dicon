@@ -16,4 +16,6 @@
 
 #include <IOKit/IOKitKeys.h>
 
+#include "pstreams/pstream.h"
+
 #endif //DICON_COMMONAPPLE_H

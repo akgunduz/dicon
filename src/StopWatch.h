@@ -19,7 +19,7 @@ public:
         initiated = false;
     };
     void start();
-    long stop();
+    long long stop();
     void reset();
     bool isInitiated();
 };

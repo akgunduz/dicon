@@ -11,7 +11,7 @@ void StopWatch::start() {
     initiated = true;
 }
 
-long StopWatch::stop() {
+long long StopWatch::stop() {
 
     if (!initiated) {
         return 0;

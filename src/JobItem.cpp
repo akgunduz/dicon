@@ -596,12 +596,12 @@ bool JobItem::check() {
     return true;
 }
 
-long JobItem::getDuration() {
+long long JobItem::getDuration() {
 
     return duration;
 }
 
-void JobItem::setDuration(long _duration) {
+void JobItem::setDuration(long long _duration) {
 
     duration = _duration;
 }

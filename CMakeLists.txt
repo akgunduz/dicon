@@ -143,7 +143,6 @@ endif()
 
 ##################################################
 add_library(civetweb STATIC ${CIVETWEB_FILES})
-target_link_libraries(civetweb dl)
 ##################################################
 add_library(miniz STATIC ${MINIZ_FILES})
 ##################################################

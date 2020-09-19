@@ -41,7 +41,7 @@ protected:
 
     std::map<std::string, TypeJobParser> contentParser;
 
-    long duration{};
+    long long duration{};
 
     JOB_STATUS status{JOBSTATUS_OK};
 
@@ -66,8 +66,8 @@ public:
     const std::string& getJobName();
     void setJobName(const std::string&);
 
-    long getDuration();
-    void setDuration(long duration);
+    long long getDuration();
+    void setDuration(long long duration);
 
     int getProcessCount();
     int getProcessCount(PROCESS_STATE);

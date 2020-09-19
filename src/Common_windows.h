@@ -9,6 +9,10 @@
 #define PATH_MAX 4096
 #endif
 
+#ifndef MAX_INPUT
+#define MAX_INPUT 256
+#endif
+
 #include <Winsock2.h>
 #include <Ws2ipdef.h>
 #include <Ws2tcpip.h>
