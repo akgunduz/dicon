@@ -46,12 +46,12 @@ bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessa
 
     LOGC_T(getHost(), owner, MSGDIR_RECEIVE, "Setting Distributor");
 
-    setDistributor(owner);
-
     return send2DistributorAliveMsg(owner);
 }
 
 bool Node::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
+
+    setDistributor(owner);
 
     if (!setID(msg->getData().getID())) {
 
@@ -343,7 +343,7 @@ bool Node::send2CollectorBinaryMsg(const TypeComponentUnit& target, long process
 
 void Node::setDistributor(const TypeComponentUnit& _distributor) {
 
-    this->distributor = _distributor;
+    distributor = std::make_shared<ComponentUnit>(_distributor);
 }
 
 void Node::parseCommand(char *cmd, char **argv) {

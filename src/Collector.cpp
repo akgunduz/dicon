@@ -34,12 +34,12 @@ Collector::~Collector() {
 
 bool Collector::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    setDistributor(owner);
-
     return send2DistributorAliveMsg(owner);
 }
 
 bool Collector::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMessage msg) {
+
+    setDistributor(owner);
 
     if (!setID(msg->getData().getID())) {
 
@@ -212,7 +212,7 @@ bool Collector::send2NodeReadyMsg(const TypeComponentUnit& target) {
 
 void Collector::setDistributor(const TypeComponentUnit& _distributor) {
 
-    distributor = _distributor;
+    distributor = std::make_shared<ComponentUnit>(_distributor);
 }
 
 bool Collector::processJob() {
