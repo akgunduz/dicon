@@ -15,10 +15,7 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
 
     LOGP_I("Execute Ready Processes");
 
-    auto process = job->getProcess(0);
-    if (process->getState() != PROCESS_STATE_READY) {
-        return;
-    }
+    auto process = job->getProcess(7);
 
     std::string parsedCmd = Util::parsePath(collector->getHost()->getRootPath(), process->getParsedProcess());
 
@@ -54,6 +51,8 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
     cmdArg[index] = nullptr;
 
     auto *childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
+    childProcess->data = nullptr;
+
     uv_process_options_t options{};
 
     options.stdio_count = 3;
@@ -67,18 +66,9 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
 
     options.exit_cb = [] (uv_process_t* handle, int64_t exit_status, int term_signal) {
 
-        if (!handle) {
-            return;
-        }
+        LOGP_E("EXIT STATUS : %ld, TERM : %d", exit_status, term_signal);
 
-        if (uv_is_closing((uv_handle_t*)handle)) {
-            return;
-        }
-
-        uv_close((uv_handle_t*)handle, [] (uv_handle_t* _handle) {
-
-            free(_handle);
-        });
+        UvUtil::onClose((uv_handle_t*) handle);
     };
 
     options.file = cmdArg[0];
@@ -90,7 +80,7 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
         return;
     }
 
-    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+    uv_run(uv_default_loop(), UV_RUN_ONCE);
 
-    uv_loop_close(uv_default_loop());
+ //   uv_loop_close(uv_default_loop());
 }
