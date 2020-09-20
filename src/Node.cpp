@@ -228,9 +228,14 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
         handle->data = nullptr;
         UvUtil::onClose((uv_handle_t*)handle);
 
-        if (exit_status == 0) {
-            node->onProcessSuccess();
+        if (exit_status != 0 || term_signal != 0) {
+            LOGS_E(node->getHost(), "Process Execution is failed : status => %d, signal => %d",
+                   exit_status, term_signal);
+            return;
         }
+
+        node->onProcessSuccess();
+
     };
 
     options.file = cmdArg[0];
@@ -238,7 +243,7 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
     int result = uv_spawn(&processLoop, childProcess, &options);
     if (result != 0) {
-        LOGS_E(getHost(), "Process Spawn Failed : err", uv_err_name(result));
+        LOGS_E(getHost(), "Process Spawn Failed : err => %s", uv_err_name(result));
         return false;
     }
 
