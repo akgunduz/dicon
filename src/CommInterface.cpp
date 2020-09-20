@@ -40,7 +40,6 @@ bool CommInterface::initThread() {
     threadProduce = std::thread([](CommInterface *commInterface) {
 
         int status = uv_loop_init(&commInterface->produceLoop);
-
         if (status != 0) {
 
             LOGS_E(commInterface->getHost(), "Produce Loop can not created, returning, status : %s !!!",
@@ -72,7 +71,6 @@ bool CommInterface::initThread() {
     threadConsume = std::thread([](CommInterface *commInterface) {
 
         int status = uv_loop_init(&commInterface->consumeLoop);
-
         if (status != 0) {
 
             LOGS_E(commInterface->getHost(), "Consume Loop can not created, status : %s returning!!!",

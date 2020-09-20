@@ -14,8 +14,6 @@
 #include "CollectorManager.h"
 #include "DistributorObject.h"
 
-#define WAKEUP_INTERVAL 5
-
 class Distributor : public Component {
 
     volatile bool runCollThread = true;

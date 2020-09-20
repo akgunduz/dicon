@@ -28,7 +28,14 @@ Node::Node(int _commInterface) :
 
     processItem = std::make_shared<ProcessItem>(getHost());
 
-  //  processLoop = uv_default_loop();
+    int status = uv_loop_init(&processLoop);
+    if (status != 0) {
+
+        LOGS_E(getHost(), "Process Loop can not created, returning, status : %s !!!",
+               uv_err_name(status));
+
+        return;
+    }
 
     initialized = true;
 
@@ -39,7 +46,7 @@ Node::~Node() {
 
     LOGP_T("Deallocating Node");
 
-   // uv_loop_close(processLoop);
+    uv_loop_close(&processLoop);
 };
 
 bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -183,7 +190,7 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
     LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
            nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
 
-#if 0
+#if 1
     char cmdPath[PATH_MAX];
     char *cmdArg[MAX_INPUT];
     int index = 0;
@@ -207,8 +214,10 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
     uv_stdio_container_t child_stdio[3];
     child_stdio[0].flags = UV_IGNORE;
     child_stdio[1].flags = UV_IGNORE;
+//    child_stdio[1].flags = UV_INHERIT_FD;
 //    child_stdio[1].data.fd = 1;
     child_stdio[2].flags = UV_IGNORE;
+//    child_stdio[2].flags = UV_INHERIT_FD;
 //    child_stdio[2].data.fd = 2;
     options.stdio = child_stdio;
 
@@ -216,31 +225,24 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
         auto node = (Node*) handle->data;
 
-        LOGP_E("PROCESS[%d], EXIT STATUS : %ld, TERM : %d", node->processItem->getID(), exit_status, term_signal);
-
-        ((Node*) handle->data)->onProcessSuccess();
         handle->data = nullptr;
-
         UvUtil::onClose((uv_handle_t*)handle);
-      // UvUtil::onCloseAll(handle->loop);
+
+        if (exit_status == 0) {
+            node->onProcessSuccess();
+        }
     };
 
     options.file = cmdArg[0];
     options.args = cmdArg;
 
-    if (processItem->getID() == 12 || processItem->getID() == 7) {
-        LOGP_E("PROCESS %d starting.................", processItem->getID());
-    }
-    int result = uv_spawn(processLoop, childProcess, &options);
+    int result = uv_spawn(&processLoop, childProcess, &options);
     if (result != 0) {
-        LOGP_E("Process Spawn Failed : err", uv_err_name(result));
+        LOGS_E(getHost(), "Process Spawn Failed : err", uv_err_name(result));
         return false;
     }
 
-    result = uv_run(processLoop, UV_RUN_ONCE);
-    LOGP_E("Process Loop Status : %d", result);
-
-    return true;
+    return uv_run(&processLoop, UV_RUN_DEFAULT);
 
 #else
     std::string childOut;

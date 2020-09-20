@@ -9,8 +9,9 @@
 #include "HostUnit.h"
 #include "ComponentUnit.h"
 
-#define ALIVE_INTERVAL 8
-#define CHECK_INTERVAL ALIVE_INTERVAL + 2
+#define WAKEUP_INTERVAL 5
+#define ALIVE_INTERVAL (WAKEUP_INTERVAL + 3)
+#define CHECK_INTERVAL (ALIVE_INTERVAL + 3)
 
 class ComponentManager {
 

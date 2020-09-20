@@ -35,11 +35,14 @@ void ComponentManager::checkDead() {
 
     for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
 
-        if (std::chrono::duration_cast<std::chrono::seconds>(curTime
-                - iterator->second->getCheckTime()).count() > ALIVE_INTERVAL) {
+        auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(curTime - iterator->second->getCheckTime()).count();
 
-            LOGS_I(host, "%s[%d] is removed from network",
-                   ComponentType::getName(iterator->second->getType()), iterator->second->getID());
+        if (timeDiff > ALIVE_INTERVAL) {
+
+            LOGS_W(host, "%s[%d] is removed from network, unresponsive time : %ld",
+                   ComponentType::getName(iterator->second->getType()),
+                   iterator->second->getID(),
+                   timeDiff);
 
             componentsMapDead.emplace_back(std::move(iterator->second));
 
