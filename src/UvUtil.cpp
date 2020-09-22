@@ -4,7 +4,7 @@
 
 #include "UvUtil.h"
 #include "Log.h"
-#include "CommData.h"
+#include "UserData.h"
 
 void UvUtil::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
 
@@ -40,8 +40,7 @@ void UvUtil::onClose(uv_handle_t* handle) {
 
         if (_handle->data != nullptr) {
 
-            //TODO change CommData
-            delete (CommData*)(_handle->data);
+            delete (UserData*)(_handle->data);
         }
 
         free(_handle);
@@ -51,7 +50,7 @@ void UvUtil::onClose(uv_handle_t* handle) {
 
 void UvUtil::onShutdown(uv_stream_t* client) {
 
-    auto *shutdown_req = (uv_shutdown_t *) malloc(sizeof(uv_shutdown_t));
+    auto *shutdown_req = (uv_shutdown_t *) calloc(1, sizeof(uv_shutdown_t));
 
     uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
 

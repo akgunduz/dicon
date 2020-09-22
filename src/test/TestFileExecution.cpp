@@ -49,8 +49,7 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
 
     cmdArg[index] = nullptr;
 
-    auto *childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
-    childProcess->data = nullptr;
+    auto *childProcess = (uv_process_t *) calloc(1, sizeof(uv_process_t));
 
     uv_process_options_t options{};
 

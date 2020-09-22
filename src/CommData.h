@@ -7,8 +7,9 @@
 
 #include "Message.h"
 #include "CommInterface.h"
+#include "UserData.h"
 
-class CommData {
+class CommData : public UserData {
 
     TypeMessage msg;
     TypeComponentUnit component;
@@ -16,7 +17,7 @@ class CommData {
 
 public:
 
-    CommData(const TypeInterface& _interface) {
+    explicit CommData(const TypeInterface& _interface) {
 
         commInterface = _interface;
         component = std::make_shared<ComponentUnit>();

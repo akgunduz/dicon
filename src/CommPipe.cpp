@@ -28,7 +28,7 @@ bool CommPipe::initInterface() {
 
 bool CommPipe::initPipe() {
 
-    pipeServer = (uv_pipe_t*) malloc(sizeof(uv_pipe_t));
+    pipeServer = (uv_pipe_t*) calloc(1, sizeof(uv_pipe_t));
 
     int result = uv_pipe_init(&produceLoop, pipeServer, false);
 
@@ -142,7 +142,7 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
-    auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+    auto *writeReq = (uv_write_t *) calloc(1, sizeof(uv_write_t));
 
     int result = uv_write(
 
@@ -171,7 +171,7 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
 bool CommPipe::onServerConnect() {
 
-    auto *client = (uv_pipe_t *) malloc(sizeof(uv_pipe_t));
+    auto *client = (uv_pipe_t *) calloc(1, sizeof(uv_pipe_t));
 
     int result = uv_pipe_init(&produceLoop, client, false);
 
@@ -216,7 +216,7 @@ bool CommPipe::onServerConnect() {
 
 bool CommPipe::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
-    auto *client = (uv_pipe_t *) malloc(sizeof(uv_pipe_t));
+    auto *client = (uv_pipe_t *) calloc(1, sizeof(uv_pipe_t));
 
     int result = uv_pipe_init(&consumeLoop, client, false);
 
@@ -233,7 +233,7 @@ bool CommPipe::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     sockaddr_un clientAddress = NetUtil::getUnixAddress(target->getAddress());
 
-    auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
+    auto *connectReq = (uv_connect_t *) calloc(1, sizeof(uv_connect_t));
 
     uv_pipe_connect(
 

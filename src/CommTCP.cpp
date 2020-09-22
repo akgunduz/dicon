@@ -27,7 +27,7 @@ bool CommTCP::initInterface() {
 
 bool CommTCP::initTCP() {
 
-    tcpServer = (uv_tcp_t*) malloc(sizeof(uv_tcp_t));
+    tcpServer = (uv_tcp_t*) calloc(1, sizeof(uv_tcp_t));
 
     int result = uv_tcp_init(&produceLoop, tcpServer);
 
@@ -100,7 +100,7 @@ bool CommTCP::initTCP() {
 
 bool CommTCP::initUDP() {
 
-    udpServer = (uv_udp_t*) malloc(sizeof(uv_udp_t));
+    udpServer = (uv_udp_t*) calloc(1, sizeof(uv_udp_t));
 
     int result = uv_udp_init(&produceLoop, udpServer);
 
@@ -219,7 +219,7 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
-    auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
+    auto *writeReq = (uv_write_t *) calloc(1, sizeof(uv_write_t));
 
     int result = uv_write(
 
@@ -250,7 +250,7 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
     uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
-    auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
+    auto *writeReq = (uv_udp_send_t *) calloc(1, sizeof(uv_udp_send_t));
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
@@ -281,7 +281,7 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
 bool CommTCP::onServerConnect() {
 
-    auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
+    auto *client = (uv_tcp_t *) calloc(1, sizeof(uv_tcp_t));
 
     int result = uv_tcp_init(&produceLoop, client);
 
@@ -326,7 +326,7 @@ bool CommTCP::onServerConnect() {
 
 bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
-    auto *client = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
+    auto *client = (uv_tcp_t *) calloc(1, sizeof(uv_tcp_t));
 
     int result = uv_tcp_init(&consumeLoop, client);
 
@@ -343,7 +343,7 @@ bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
 
-    auto *connectReq = (uv_connect_t *) malloc(sizeof(uv_connect_t));
+    auto *connectReq = (uv_connect_t *) calloc(1, sizeof(uv_connect_t));
 
     int tryCount = TRY_COUNT;
 
@@ -406,7 +406,7 @@ bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
 bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
 
-    auto *client = (uv_udp_t *) malloc(sizeof(uv_udp_t));
+    auto *client = (uv_udp_t *) calloc(1, sizeof(uv_udp_t));
 
     int result = uv_udp_init_ex(&consumeLoop, client, AF_INET);
 
@@ -427,8 +427,6 @@ bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
     }
 
     target->setHandle(client);
-
-    client->data = nullptr;
 
     bool res = msg->writeToStream(target, onUDPSendCB);
 

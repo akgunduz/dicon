@@ -5,6 +5,7 @@
 
 #include "Node.h"
 #include "Util.h"
+#include "UserData.h"
 
 #define PROCESS_SLEEP_TIME 1000
 
@@ -289,8 +290,9 @@ bool Node::executeJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
 bool Node::executeProcess() {
 
-    auto childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
-    childProcess->data = this;
+    auto childProcess = (uv_process_t *) calloc(1, sizeof(uv_process_t));
+
+    childProcess->data = new UserData(this);
 
     uv_process_options_t processOptions{};
     processOptions.stdio_count = 3;
@@ -333,9 +335,8 @@ bool Node::executeProcess() {
 
 void Node::onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal) {
 
-    auto node = (Node*) childProcess->data;
+    auto node = (Node*)((UserData*) childProcess->data)->data;
 
-    childProcess->data = nullptr;
     UvUtil::onClose((uv_handle_t*)childProcess);
 
     if (exit_status || term_signal) {
