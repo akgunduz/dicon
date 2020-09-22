@@ -14,8 +14,6 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 
-#include "pstreams/pstream.h"
-
 #define ntohll(x) be64toh(x)
 #define htonll(x) htobe64(x)
 
