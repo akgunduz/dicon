@@ -217,7 +217,7 @@ bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf)
 
 bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+    uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
     auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
 
@@ -248,7 +248,7 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
 bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+    uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
     auto *writeReq = (uv_udp_send_t *) malloc(sizeof(uv_udp_send_t));
 

@@ -73,7 +73,7 @@ CollectorRequest* CollectorManager::getRequest() {
     return request;
 }
 
-void CollectorManager::updateRequest(uint32_t reqCount) {
+void CollectorManager::updateRequest(size_t reqCount) {
 
     std::unique_lock<std::mutex> lock(collMutex);
 

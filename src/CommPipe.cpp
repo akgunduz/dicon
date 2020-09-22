@@ -140,7 +140,7 @@ bool CommPipe::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf
 
 bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, size_t size) {
 
-    uv_buf_t bufPtr = uv_buf_init((char *) buffer, size);
+    uv_buf_t bufPtr = uv_buf_init((char *) buffer, (unsigned int)size);
 
     auto *writeReq = (uv_write_t *) malloc(sizeof(uv_write_t));
 

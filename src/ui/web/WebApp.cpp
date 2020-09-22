@@ -81,7 +81,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     const struct mg_request_info *ri = mg_get_request_info(conn);
 
-    int restLen = strlen(REST_URI);
+    size_t restLen = strlen(REST_URI);
     if (0 != strncmp(ri->request_uri, REST_URI, restLen)) {
         LOGP_E("Wrong REST Call has came!!!");
         return 0;
@@ -89,7 +89,7 @@ int WebApp::restHandler(struct mg_connection *conn) {
 
     const char *pos = ri->request_uri + restLen;
 
-    int len = strlen(DIST_URI);
+    size_t len = strlen(DIST_URI);
     if (0 == strncmp(pos, DIST_URI, len)) {
         return distHandler(conn, pos + len);
     }

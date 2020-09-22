@@ -44,7 +44,7 @@ public:
 
     bool addRequest(TypeID, uint32_t);
     CollectorRequest* getRequest();
-    void updateRequest(uint32_t);
+    void updateRequest(size_t);
     void removeRequest();
 };
 

@@ -19,7 +19,7 @@ public:
 
     static inline const std::filesystem::path tmpPath = std::filesystem::temp_directory_path();
 	static std::string hex2str(const uint8_t *, size_t);
-	static bool str2hex(uint8_t *, const char *, uint32_t);
+	static bool str2hex(uint8_t *, const char *, size_t);
     static void replaceStr(std::string&, const std::string&, const std::string&);
     static std::string parsePath(const std::filesystem::path&, const std::string &);
 

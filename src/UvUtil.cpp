@@ -12,7 +12,7 @@ void UvUtil::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
 
     assert(buf->base != nullptr);
 
-    buf->len = size;
+    buf->len = (ULONG)size;
 
     //LOGP_E("%s => Allocated Buffer, Pointer : %p, Len : %d !!!", id, buf->base, size);
 

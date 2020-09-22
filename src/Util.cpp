@@ -23,7 +23,7 @@ std::string Util::hex2str(const uint8_t *in, size_t len) {
     return output;
 }
 
-bool Util::str2hex(uint8_t *out, const char *in, uint32_t len) {
+bool Util::str2hex(uint8_t *out, const char *in, size_t len) {
 
     static const char *const lut = "0123456789ABCDEF";
 
