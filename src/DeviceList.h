@@ -22,7 +22,7 @@ public:
     ~DeviceList();
     static DeviceList* getInstance();
     bool add(TypeDevice);
-    TypeDevice& get(int);
+    TypeDevice& get(size_t);
     size_t getCount();
 
 };

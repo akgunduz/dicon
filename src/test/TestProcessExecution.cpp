@@ -2,7 +2,6 @@
 // Created by Haluk AKGUNDUZ on 23.07.2020.
 //
 
-#include <pstreams/pstream.h>
 #include "TestApp.h"
 
 void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
@@ -29,20 +28,20 @@ void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& co
               process->getProcess().c_str(),
               parsed.c_str());
 
-        std::string childOut;
-
-        redi::ipstream inProcess(parsed);
-        if (!inProcess.good()) {
-            continue;
-        }
-
-        while (std::getline(inProcess, childOut)) {
-            Util::trim(childOut);
-            if (!childOut.empty()) {
-                LOGP_I("Process[%d] Output : %s", process->getID(), childOut.c_str());
-            }
-        }
-
-        inProcess.close();
+//        std::string childOut;
+//
+//        redi::ipstream inProcess(parsed);
+//        if (!inProcess.good()) {
+//            continue;
+//        }
+//
+//        while (std::getline(inProcess, childOut)) {
+//            Util::trim(childOut);
+//            if (!childOut.empty()) {
+//                LOGP_I("Process[%d] Output : %s", process->getID(), childOut.c_str());
+//            }
+//        }
+//
+//        inProcess.close();
     }
 }

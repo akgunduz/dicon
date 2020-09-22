@@ -2,7 +2,6 @@
 // Created by akgun on 18.09.2020.
 //
 
-#include <pstreams/pstream.h>
 #include "TestApp.h"
 
 void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
@@ -80,7 +79,7 @@ void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& colle
         return;
     }
 
-    uv_run(uv_default_loop(), UV_RUN_ONCE);
+    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
 
- //   uv_loop_close(uv_default_loop());
+    uv_loop_close(uv_default_loop());
 }

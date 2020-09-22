@@ -63,7 +63,7 @@ bool DeviceList::add(TypeDevice device) {
     return true;
 }
 
-TypeDevice& DeviceList::get(int index) {
+TypeDevice& DeviceList::get(size_t index) {
 
     return list[index];
 }
