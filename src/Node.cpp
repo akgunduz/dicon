@@ -167,130 +167,6 @@ bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage 
     return send2DistributorReadyMsg(distributor);
 }
 
-bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
-
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
-           nodeHost->getAssigned()->getID(),
-           processItem->getID());
-
-    std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
-
-    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
-
-    std::filesystem::permissions(executable,
-                                 std::filesystem::perms::owner_all |
-                                 std::filesystem::perms::group_read |
-                                 std::filesystem::perms::group_exec |
-                                 std::filesystem::perms::others_read |
-                                 std::filesystem::perms::others_exec,
-                                 std::filesystem::perm_options::add);
-
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
-           nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
-
-#if 1
-    char cmdPath[PATH_MAX];
-    char *cmdArg[MAX_INPUT];
-    int index = 0;
-    strcpy(cmdPath, parsedCmd.c_str());
-
-    char *token = strtok(cmdPath, " ");
-
-    while(token) {
-
-        cmdArg[index++] = token;
-        token = strtok(nullptr, " ");
-    }
-
-    cmdArg[index] = nullptr;
-
-    auto *childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
-    childProcess->data = this;
-
-    uv_process_options_t options{};
-    options.stdio_count = 3;
-    uv_stdio_container_t child_stdio[3];
-    child_stdio[0].flags = UV_IGNORE;
-    child_stdio[1].flags = UV_IGNORE;
-//    child_stdio[1].flags = UV_INHERIT_FD;
-//    child_stdio[1].data.fd = 1;
-    child_stdio[2].flags = UV_IGNORE;
-//    child_stdio[2].flags = UV_INHERIT_FD;
-//    child_stdio[2].data.fd = 2;
-    options.stdio = child_stdio;
-
-    options.exit_cb = [] (uv_process_t* handle, int64_t exit_status, int term_signal) {
-
-        auto node = (Node*) handle->data;
-
-        handle->data = nullptr;
-        UvUtil::onClose((uv_handle_t*)handle);
-
-        if (exit_status != 0 || term_signal != 0) {
-            LOGS_E(node->getHost(), "Process Execution is failed : status => %d, signal => %d",
-                   exit_status, term_signal);
-            return;
-        }
-
-        node->onProcessSuccess();
-
-    };
-
-    options.file = cmdArg[0];
-    options.args = cmdArg;
-
-    int result = uv_spawn(&processLoop, childProcess, &options);
-    if (result != 0) {
-        LOGS_E(getHost(), "Process Spawn Failed : err => %s", uv_err_name(result));
-        return false;
-    }
-
-    return uv_run(&processLoop, UV_RUN_DEFAULT);
-
-#else
-    std::string childOut;
-
-    int tryCount = 1;
-    while(tryCount++ < TRY_COUNT) {
-
-        redi::ipstream inProcess(parsedCmd);
-
-        if (!inProcess.good()) {
-            LOGS_E(getHost(), "Collector[%d]:Process[%d] Can not execute command",
-                   nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
-            return false;
-        }
-
-        while (std::getline(inProcess, childOut)) {
-            Util::trim(childOut);
-            if (!childOut.empty()) {
-                LOGS_I(getHost(), "Collector[%d]:Process[%d] Output : %s",
-                       nodeHost->getAssigned()->getID(), processItem->getID(), childOut.c_str());
-            }
-        }
-
-        int res = inProcess.close();
-        if (res == 0) {
-
-            return onProcessSuccess();
-        }
-
-        LOGS_E(getHost(), "Collector[%d]:Process[%d] has execution problem retrying",
-               nodeHost->getAssigned()->getID(), processItem->getID());
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
-    }
-
-    LOGS_E(getHost(), "Collector[%d]:Process[%d] is ended with error",
-           nodeHost->getAssigned()->getID(), processItem->getID());
-
-    return false;
-#endif
-
-}
-
 bool Node::send2DistributorReadyMsg(const TypeComponentUnit& target) {
 
 	auto msg = std::make_unique<Message>(getHost(), target->getType(), MSGTYPE_READY);
@@ -368,6 +244,115 @@ void Node::parseCommand(char *cmd, char **argv) {
         }
     }
     *argv = nullptr;
+}
+
+bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
+
+    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
+           nodeHost->getAssigned()->getID(),
+           processItem->getID());
+
+    std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
+
+    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
+
+    std::filesystem::permissions(executable,
+                                 std::filesystem::perms::owner_all |
+                                 std::filesystem::perms::group_read |
+                                 std::filesystem::perms::group_exec |
+                                 std::filesystem::perms::others_read |
+                                 std::filesystem::perms::others_exec,
+                                 std::filesystem::perm_options::add);
+
+    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
+           nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
+
+    char cmdPath[PATH_MAX];
+
+    int index = 0;
+    strcpy(cmdPath, parsedCmd.c_str());
+
+    char *token = strtok(cmdPath, " ");
+
+    while(token) {
+
+        processCmdArg[index++] = token;
+        token = strtok(nullptr, " ");
+    }
+
+    processCmdArg[index] = nullptr;
+
+    return executeProcess();
+}
+
+bool Node::executeProcess(uv_process_t *childProcess) {
+
+    if (childProcess == nullptr) {
+        childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
+        childProcess->data = this;
+    }
+
+    uv_process_options_t processOptions{};
+    processOptions.stdio_count = 3;
+    uv_stdio_container_t child_stdio[3];
+    child_stdio[0].flags = UV_IGNORE;
+    child_stdio[1].flags = UV_IGNORE;
+//    child_stdio[1].flags = UV_INHERIT_FD;
+//    child_stdio[1].data.fd = 1;
+    child_stdio[2].flags = UV_IGNORE;
+//    child_stdio[2].flags = UV_INHERIT_FD;
+//    child_stdio[2].data.fd = 2;
+    processOptions.stdio = child_stdio;
+    processOptions.file = processCmdArg[0];
+    processOptions.args = processCmdArg;
+    processOptions.exit_cb = onProcessExit;
+
+    int tryCount = 1;
+    while(tryCount++ < TRY_COUNT) {
+
+        int result = uv_spawn(&processLoop, childProcess, &processOptions);
+        if (result != 0) {
+
+            LOGS_E(getHost(), "Process Spawn Failed : err => %s, retrying", uv_err_name(result));
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
+
+            continue;
+        }
+
+        break;
+    }
+
+    if (tryCount == TRY_COUNT) {
+
+        return false;
+    }
+
+    return uv_run(&processLoop, UV_RUN_DEFAULT);
+}
+
+void Node::onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal) {
+
+    auto node = (Node*) childProcess->data;
+
+    childProcess->data = nullptr;
+    UvUtil::onClose((uv_handle_t*)childProcess);
+
+    if (exit_status || term_signal) {
+
+        LOGS_E(node->getHost(), "Process Execution is failed, retrying");
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME));
+
+        node->executeProcess();
+
+        return;
+
+    }
+
+    node->onProcessSuccess();
 }
 
 bool Node::onProcessSuccess() {

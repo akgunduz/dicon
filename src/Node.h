@@ -20,6 +20,7 @@ class Node : public Component {
     TypeProcessList processList;
 
     uv_loop_t processLoop{};
+    char *processCmdArg[MAX_INPUT];
 
 	void setDistributor(const TypeComponentUnit&);
 
@@ -40,6 +41,8 @@ class Node : public Component {
 	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 
     bool processJob(const TypeComponentUnit&, TypeMessage);
+    bool executeProcess(uv_process_t* = nullptr);
+    static void onProcessExit(uv_process_t*, int64_t, int);
     bool onProcessSuccess();
     void parseCommand(char *cmd, char **argv);
 
