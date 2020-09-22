@@ -109,7 +109,7 @@ bool Node::processDistributorProcessMsg(const TypeComponentUnit& owner, TypeMess
                nodeHost->getAssigned()->getID(),
                processItem->getID());
 
-        return processJob(owner, std::move(msg));
+        return executeJob(owner, std::move(msg));
     }
 }
 
@@ -147,7 +147,7 @@ bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage
            nodeHost->getAssigned()->getID(),
            processItem->getID());
 
-    return processJob(owner, std::move(msg));
+    return executeJob(owner, std::move(msg));
 }
 
 bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -246,7 +246,7 @@ void Node::parseCommand(char *cmd, char **argv) {
     *argv = nullptr;
 }
 
-bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
+bool Node::executeJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
@@ -287,12 +287,10 @@ bool Node::processJob(const TypeComponentUnit& owner, TypeMessage msg) {
     return executeProcess();
 }
 
-bool Node::executeProcess(uv_process_t *childProcess) {
+bool Node::executeProcess() {
 
-    if (childProcess == nullptr) {
-        childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
-        childProcess->data = this;
-    }
+    auto childProcess = (uv_process_t *) malloc(sizeof(uv_process_t));
+    childProcess->data = this;
 
     uv_process_options_t processOptions{};
     processOptions.stdio_count = 3;
