@@ -41,6 +41,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <random>
+#include <atomic>
 
 #include <sys/types.h>
 #include <sys/stat.h>

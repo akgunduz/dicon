@@ -43,6 +43,7 @@ thumbs.db
 
 /.idea/
 /.vscode/
+/.vs/
 *build*/
 *scratch*/
 *gen*/

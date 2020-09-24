@@ -42,7 +42,7 @@ bool CommTCP::initTCP() {
 
     int tryCount = TRY_COUNT;
 
-    address->set(COMMINTERFACE_TCPIP, getDevice()->getBase(), lastFreeTCPPort);
+    address->set(COMMINTERFACE_TCPIP, getDevice()->getBase(), lastFreeTCPPort++);
 
     while (tryCount--) {
 
@@ -52,15 +52,16 @@ bool CommTCP::initTCP() {
 
         if (result < 0 || tcpServer->delayed_error != 0) {
 
-            address->setPort(++lastFreeTCPPort);
+            LOGS_E(getHost(), "Could not bind to socket at address : %s, trying next one!!!",
+                   NetUtil::getIPPortString(address->get()).c_str());
+
+            address->setPort(lastFreeTCPPort++);
 
             continue;
         }
 
         break;
     }
-
-    lastFreeTCPPort++;
 
     if (!tryCount) {
 

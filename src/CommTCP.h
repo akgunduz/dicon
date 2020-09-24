@@ -20,8 +20,8 @@
 
 class CommTCP : public CommInterface {
 
-    static inline int lastFreeTCPPort = DEFAULT_TCP_PORT;
-    static inline int lastFreeUDPPort = DEFAULT_UDP_PORT;
+    static inline std::atomic_uint16_t lastFreeTCPPort = DEFAULT_TCP_PORT;
+    static inline std::atomic_uint16_t lastFreeUDPPort = DEFAULT_UDP_PORT;
 
     uv_tcp_t *tcpServer{};
     uv_udp_t *udpServer{};
