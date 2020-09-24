@@ -44,8 +44,6 @@ int TestApp::run() {
     auto &c = componentFactory->getCollector(0);
     auto &n = componentFactory->getNode(0);
 
-    testFileExecute(d, c, n);
-
     int in;
     do {
 

@@ -31,11 +31,19 @@ void ComponentManager::checkDead() {
 
     std::unique_lock<std::mutex> lock(mutex);
 
-    TypeTime curTime = std::chrono::steady_clock::now();
+    TypeTime curTime = time(nullptr);
 
     for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
 
-        auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(curTime - iterator->second->getCheckTime()).count();
+        //auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(curTime - iterator->second->getCheckTime()).count();
+        auto timeDiff = curTime - iterator->second->getCheckTime();
+
+//        LOGS_E(host, "%s[%d] time %ld, now : %ld, diff : %ld",
+//               ComponentType::getName(iterator->second->getType()),
+//               iterator->second->getID(),
+//               iterator->second->getCheckTime(),
+//               curTime,
+//               timeDiff);
 
         if (timeDiff > ALIVE_INTERVAL) {
 

@@ -9,7 +9,6 @@
 #include "civetweb/civetweb.h"
 #include "Application.h"
 
-#define DOCUMENT_ROOT "../data/html/"
 #define PORT "8081"
 #define MAIN_URI "/"
 #define REST_URI "/rest"

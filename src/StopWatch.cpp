@@ -6,20 +6,23 @@
 
 void StopWatch::start() {
 
-    tStart = std::chrono::steady_clock::now();
+//    tStart = std::chrono::steady_clock::now();
+    tStart = time(nullptr);
 
     initiated = true;
 }
 
-std::chrono::seconds StopWatch::stop() {
+uint64_t StopWatch::stop() {
 
     if (!initiated) {
-        return std::chrono::seconds(0);
+        return 0;
     }
 
-    tStop = std::chrono::steady_clock::now();
+    tStop = time(nullptr);
+//    tStop = std::chrono::steady_clock::now();
 
-    return std::chrono::duration_cast<std::chrono::seconds>(tStop - tStart);
+//    return std::chrono::duration_cast<std::chrono::seconds>(tStop - tStart).count();
+    return tStop - tStart;
 
 }
 

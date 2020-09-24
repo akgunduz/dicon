@@ -11,10 +11,6 @@
 #include <ComponentFactory.h>
 #include "Application.h"
 
-#define TEST_JOB_ZIP "../sample/Job1_x86_linux.zip"
-#define TEST_JOB_PATH "../scratch/Job1_x86_linux"
-#define TEST_JOB_FILE "matrop-multiply"
-
 enum MSG_TYPE_TEST {
 
     MSG_TYPE_TEST_JOBNAME = 0x100,

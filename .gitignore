@@ -40,6 +40,7 @@ thumbs.db
 .gitattributes
 .project
 .depend
+CMakeSettings.json
 
 /.idea/
 /.vscode/

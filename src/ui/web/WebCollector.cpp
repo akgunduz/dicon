@@ -61,7 +61,7 @@ bool WebApp::collLoadJobHandler(struct mg_connection *conn, int id, const char* 
 
     std::filesystem::path tmpFile = Util::tmpPath / fileName;
 
-    std::FILE* uploadJobFile = std::fopen(tmpFile.string().c_str(), "w");
+    std::FILE* uploadJobFile = std::fopen(tmpFile.string().c_str(), "wb");
 
     if (!uploadJobFile) {
         sendError(collector->getHost(), conn, "Can not open tmp file : %s!!!", tmpFile.c_str());
@@ -151,7 +151,7 @@ bool WebApp::collStateHandler(struct mg_connection *conn, int id) {
 
     jobInfo["_jobName"] = job->getJobName();
     jobInfo["_state"] = collectorHost->getState();
-    jobInfo["_duration"] = job->getDuration().count();
+    jobInfo["_duration"] = job->getDuration();
     jobInfo["_processCount"] = job->getProcessCount() - job->getProcessCount(PROCESS_STATE_ENDED);
     jobInfo["_jobStatus"] = job->getStatus();
 

@@ -36,12 +36,12 @@ void ContentItem::setAssignedJob(long _assignedJob) {
     assignedJob = _assignedJob;
 }
 
-const std::chrono::seconds &ContentItem::getDuration() const {
+uint64_t ContentItem::getDuration() const {
 
     return duration;
 }
 
-void ContentItem::setDuration(const std::chrono::seconds &_duration) {
+void ContentItem::setDuration(uint64_t _duration) {
 
     duration = _duration;
 }

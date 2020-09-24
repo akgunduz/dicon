@@ -53,7 +53,7 @@ bool WebApp::nodeStateHandler(struct mg_connection *conn, int id) {
         processItem["_collectorID"] = process->getAssigned();
         processItem["_jobID"] = process->getAssignedJob();
         processItem["_process"] = processCommand;
-        processItem["_duration"] = process->getDuration().count();
+        processItem["_duration"] = process->getDuration();
 
         processList += processItem;
 

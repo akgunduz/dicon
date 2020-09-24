@@ -7,7 +7,7 @@
 #include "WebApp.h"
 #include "WebOption.h"
 
-#define MAIN_PAGE DOCUMENT_ROOT "./index.html"
+#define MAIN_PAGE WEB_DOCUMENT_ROOT "./index.html"
 
 int WebApp::mainHandler(struct mg_connection *conn)
 {

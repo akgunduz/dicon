@@ -10,8 +10,8 @@
 #include "ComponentUnit.h"
 
 #define WAKEUP_INTERVAL 5
-#define ALIVE_INTERVAL (WAKEUP_INTERVAL + 3)
-#define CHECK_INTERVAL (ALIVE_INTERVAL + 3)
+#define ALIVE_INTERVAL (WAKEUP_INTERVAL + 2)
+#define CHECK_INTERVAL (ALIVE_INTERVAL + 2)
 
 class ComponentManager {
 

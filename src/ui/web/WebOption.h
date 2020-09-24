@@ -9,7 +9,7 @@
 
 class WebOption {
 
-    const char* list[10];
+    const char* list[10]{};
     std::map<std::string, std::string> options;
 
 public:
