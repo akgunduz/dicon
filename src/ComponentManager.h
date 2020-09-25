@@ -26,8 +26,9 @@ class ComponentManager {
     std::mutex mutex;
     std::thread thread;
 
-    TypeComponentMapIDList componentsMapID;
-    TypeComponentUnitList componentsMapDead;
+    TypeComponentMapIDList components;
+    TypeComponentMapIDList componentsDead;
+    TypeIDList deadList;
 
     void checkDead();
 
@@ -40,11 +41,9 @@ public:
     ComponentManager(const TypeHostUnit&, bool);
     virtual ~ComponentManager();
 
-    TypeComponentMapIDList& get();
-    TypeComponentUnitList& getDead();
+    void updateDead();
+    TypeComponentMapIDList& get(bool = false);
     TypeComponentUnit get(TypeID);
-    TypeComponentUnit getDead(size_t);
-    size_t size();
     void clear();
 
     void process();

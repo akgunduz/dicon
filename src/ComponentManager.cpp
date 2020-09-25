@@ -29,16 +29,15 @@ ComponentManager::~ComponentManager() {
 
 void ComponentManager::checkDead() {
 
-    std::unique_lock<std::mutex> lock(mutex);
-
     TypeTime curTime = time(nullptr);
 
-    for (auto iterator = componentsMapID.begin(); iterator != componentsMapID.end();) {
+    std::unique_lock<std::mutex> lock(mutex);
 
-        //auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(curTime - iterator->second->getCheckTime()).count();
-        auto timeDiff = curTime - iterator->second->getCheckTime();
+    for (auto& component : components) {
 
-//        LOGS_E(host, "%s[%d] time %ld, now : %ld, diff : %ld",
+        auto timeDiff = curTime - component.second->getCheckTime();
+
+        //        LOGS_E(host, "%s[%d] time %ld, now : %ld, diff : %ld",
 //               ComponentType::getName(iterator->second->getType()),
 //               iterator->second->getID(),
 //               iterator->second->getCheckTime(),
@@ -48,20 +47,32 @@ void ComponentManager::checkDead() {
         if (timeDiff > ALIVE_INTERVAL) {
 
             LOGS_W(host, "%s[%d] is removed from network, unresponsive time : %ld",
-                   ComponentType::getName(iterator->second->getType()),
-                   iterator->second->getID(),
+                   ComponentType::getName(component.second->getType()),
+                   component.second->getID(),
                    timeDiff);
 
-            componentsMapDead.emplace_back(std::move(iterator->second));
-
-            iterator = componentsMapID.erase(iterator);
-
-        } else {
-
-            ++iterator;
+            deadList.push_back(component.second->getID());
         }
     }
 }
+
+void ComponentManager::updateDead() {
+
+    std::unique_lock<std::mutex> lock(mutex);
+
+    if (!deadList.empty()) {
+
+        for(auto id : deadList) {
+
+            componentsDead[id] = std::move(components[id]);
+
+            components.erase(id);
+        }
+
+        deadList.clear();
+    }
+}
+
 
 void ComponentManager::process() {
 
@@ -81,40 +92,25 @@ void ComponentManager::process() {
     }
 }
 
-size_t ComponentManager::size() {
+TypeComponentMapIDList& ComponentManager::get(bool is_dead) {
 
-    return componentsMapID.size();
-}
+    if (!is_dead) {
 
-TypeComponentMapIDList& ComponentManager::get() {
+        return components;
 
-    return componentsMapID;
+    } else {
+
+        return componentsDead;
+    }
 }
 
 TypeComponentUnit ComponentManager::get(TypeID id) {
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto search = components.find(id);
 
-    auto search = componentsMapID.find(id);
-    if (search != componentsMapID.end()) {
+    if (search != components.end()) {
 
-        return componentsMapID[id];
-    }
-
-    return nullptr;
-}
-
-TypeComponentUnitList& ComponentManager::getDead() {
-
-    return componentsMapDead;
-}
-
-TypeComponentUnit ComponentManager::getDead(size_t index) {
-
-    std::unique_lock<std::mutex> lock(mutex);
-
-    if (index < componentsMapDead.size()) {
-        return componentsMapDead[index];
+        return components[id];
     }
 
     return nullptr;
@@ -122,11 +118,9 @@ TypeComponentUnit ComponentManager::getDead(size_t index) {
 
 TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdded) {
 
-    std::unique_lock<std::mutex> lock(mutex);
-
     isAlreadyAdded = false;
 
-    for (auto &component : componentsMapID) {
+    for (auto &component : components) {
 
         if (*component.second->getAddress() != *address) {
             continue;
@@ -149,15 +143,13 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
     LOGS_I(host, "%s[%d] is added to network",
            ComponentType::getName(object->getType()), object->getID());
 
-    componentsMapID[newID] = std::move(object);
+    components[newID] = std::move(object);
 
     return newID;
 }
 
 void ComponentManager::clear() {
 
-    std::unique_lock<std::mutex> lock(mutex);
-
-    componentsMapID.clear();
-    componentsMapDead.clear();
+    components.clear();
+    componentsDead.clear();
 }

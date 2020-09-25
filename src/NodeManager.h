@@ -11,8 +11,6 @@
 
 class NodeManager : public ComponentManager {
 
-    std::mutex nodeMutex;
-
 public:
 
 	explicit NodeManager(TypeHostUnit&, bool);

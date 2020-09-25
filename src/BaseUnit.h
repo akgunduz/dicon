@@ -40,5 +40,6 @@ public:
     static COMPONENT prev(COMPONENT);
 };
 
+typedef std::vector<TypeID> TypeIDList;
 
 #endif //DICON_BASEUNIT_H

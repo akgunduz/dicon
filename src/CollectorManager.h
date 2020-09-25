@@ -25,8 +25,6 @@ typedef struct CollectorRequest {
 
 class CollectorManager : public ComponentManager {
 
-    std::mutex collMutex;
-
     std::map<TypeID, CollectorObject> collList;
     std::deque<TypeCollectorRequest> collReqList;
 

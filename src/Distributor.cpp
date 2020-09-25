@@ -103,10 +103,14 @@ void Distributor::collProcess() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
+        nodeManager->updateDead();
+
         auto nodeCount = nodeManager->getIdleCount();
         if (nodeCount == 0) {
             continue;
         }
+
+        collectorManager->updateDead();
 
         size_t busyDeadCount = nodeManager->getBusyDeadCount();
 

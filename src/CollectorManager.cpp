@@ -14,8 +14,6 @@ CollectorManager::~CollectorManager() = default;
 
 COLLSTATES CollectorManager::getState(TypeID id) {
 
-    std::unique_lock<std::mutex> lock(collMutex);
-
     auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
 
     if (coll) {
@@ -27,8 +25,6 @@ COLLSTATES CollectorManager::getState(TypeID id) {
 }
 
 void CollectorManager::setState(TypeID id, COLLSTATES state) {
-
-    std::unique_lock<std::mutex> lock(collMutex);
 
     auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
 
@@ -44,8 +40,6 @@ TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, TypeAddress
 }
 
 bool CollectorManager::addRequest(TypeID id, uint32_t reqNodeCount) {
-
-    std::unique_lock<std::mutex> lock(collMutex);
 
     auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
 
@@ -63,8 +57,6 @@ CollectorRequest* CollectorManager::getRequest() {
 
     CollectorRequest* request = nullptr;
 
-    std::unique_lock<std::mutex> lock(collMutex);
-
     if (!collReqList.empty()) {
 
         request = &collReqList.front();
@@ -75,14 +67,10 @@ CollectorRequest* CollectorManager::getRequest() {
 
 void CollectorManager::updateRequest(size_t reqCount) {
 
-    std::unique_lock<std::mutex> lock(collMutex);
-
     collReqList.front().reqCount = reqCount;
 }
 
 void CollectorManager::removeRequest() {
-
-    std::unique_lock<std::mutex> lock(collMutex);
 
     collReqList.pop_front();
 }
