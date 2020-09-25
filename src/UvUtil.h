@@ -8,6 +8,10 @@
 
 #include <uv.h>
 #include "Common.h"
+#include "ProcessData.h"
+
+#define PROCESS_SLEEP_TIME 1000
+#define PROCESS_TRY_COUNT 10
 
 class UvUtil {
 
@@ -18,6 +22,9 @@ class UvUtil {
     static void onClose(uv_handle_t*);
     static void onShutdown(uv_stream_t*);
     static void onCloseAll(uv_loop_t*);
+    static bool executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void *data, TypeOnProcessSuccess onProcessSuccessCB);
+    static bool onExecuteProcess(uv_loop_t* loop, ProcessData*);
+    static void onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal);
 };
 
 

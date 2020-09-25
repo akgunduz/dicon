@@ -40,9 +40,7 @@ class Node : public Component {
 	bool send2CollectorBinaryMsg(const TypeComponentUnit&, long, const TypeProcessFileList&);
 
     bool executeJob(const TypeComponentUnit&, TypeMessage);
-    bool executeProcess();
-    static void onProcessExit(uv_process_t*, int64_t, int);
-    bool onProcessSuccess();
+    static bool onProcessSuccess(void*);
     void parseCommand(char *cmd, char **argv);
 
 public:

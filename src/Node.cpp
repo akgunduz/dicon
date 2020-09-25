@@ -7,8 +7,6 @@
 #include "Util.h"
 #include "UserData.h"
 
-#define PROCESS_SLEEP_TIME 1000
-
 Node::Node(int _commInterface) :
     Component(std::make_shared<NodeHost>()) {
 
@@ -251,116 +249,23 @@ bool Node::executeJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] starts execution",
-           nodeHost->getAssigned()->getID(),
-           processItem->getID());
-
     std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
-
-    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
-
-    std::filesystem::permissions(executable,
-                                 std::filesystem::perms::owner_all |
-                                 std::filesystem::perms::group_read |
-                                 std::filesystem::perms::group_exec |
-                                 std::filesystem::perms::others_read |
-                                 std::filesystem::perms::others_exec,
-                                 std::filesystem::perm_options::add);
 
     LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
            nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
 
-    char cmdPath[PATH_MAX];
-
-    int index = 0;
-    strcpy(cmdPath, parsedCmd.c_str());
-
-    char *token = strtok(cmdPath, " ");
-
-    while(token) {
-
-        processCmdArg[index++] = token;
-        token = strtok(nullptr, " ");
-    }
-
-    processCmdArg[index] = nullptr;
-
-    return executeProcess();
+    return UvUtil::executeProcess(parsedCmd, &processLoop, this, onProcessSuccess);
 }
 
-bool Node::executeProcess() {
+bool Node::onProcessSuccess(void *data) {
 
-    auto childProcess = (uv_process_t *) calloc(1, sizeof(uv_process_t));
+    auto node = (Node*) data;
 
-    childProcess->data = new UserData(this);
-
-    uv_process_options_t processOptions{};
-    processOptions.stdio_count = 3;
-    uv_stdio_container_t child_stdio[3];
-    child_stdio[0].flags = UV_IGNORE;
-    child_stdio[1].flags = UV_IGNORE;
-//    child_stdio[1].flags = UV_INHERIT_FD;
-//    child_stdio[1].data.fd = 1;
-    child_stdio[2].flags = UV_IGNORE;
-//    child_stdio[2].flags = UV_INHERIT_FD;
-//    child_stdio[2].data.fd = 2;
-    processOptions.stdio = child_stdio;
-    processOptions.file = processCmdArg[0];
-    processOptions.args = processCmdArg;
-    processOptions.exit_cb = onProcessExit;
-
-    int tryCount = 1;
-    while(tryCount++ < TRY_COUNT) {
-
-        int result = uv_spawn(&processLoop, childProcess, &processOptions);
-        if (result != 0) {
-
-            LOGS_E(getHost(), "Process Spawn Failed : err => %s, retrying", uv_err_name(result));
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME * tryCount));
-
-            continue;
-        }
-
-        break;
-    }
-
-    if (tryCount == TRY_COUNT) {
-
-        return false;
-    }
-
-    return uv_run(&processLoop, UV_RUN_DEFAULT);
-}
-
-void Node::onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal) {
-
-    auto node = (Node*)((UserData*) childProcess->data)->data;
-
-    UvUtil::onClose((uv_handle_t*)childProcess);
-
-    if (exit_status || term_signal) {
-
-        LOGS_E(node->getHost(), "Process Execution is failed, retrying");
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(PROCESS_SLEEP_TIME));
-
-        node->executeProcess();
-
-        return;
-
-    }
-
-    node->onProcessSuccess();
-}
-
-bool Node::onProcessSuccess() {
-
-    auto nodeHost = std::static_pointer_cast<NodeHost>(host);
+    auto nodeHost = std::static_pointer_cast<NodeHost>(node->getHost());
 
     TypeProcessFileList outputList;
 
-    for (const auto& processFile : processItem->getFileList()) {
+    for (const auto& processFile : node->processItem->getFileList()) {
         if (processFile->isOutput()) {
             if (processFile->get()->check()) {
                 processFile->setOutputState(false);
@@ -369,7 +274,7 @@ bool Node::onProcessSuccess() {
         }
     }
 
-    return send2CollectorBinaryMsg(nodeHost->getAssigned(), processItem->getID(),outputList);
+    return node->send2CollectorBinaryMsg(nodeHost->getAssigned(), node->processItem->getID(),outputList);
 }
 
 TypeProcessList& Node::getProcessList() {
