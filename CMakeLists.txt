@@ -121,8 +121,8 @@ set(TEST_FILES
         ${TEST_PATH}/TestLoadJob.cpp
         ${TEST_PATH}/TestCRC.cpp
 
-        ${TEST_PATH}/TestFileExecution.cpp
-        ${TEST_PATH}/TestProcessExecution.cpp
+        ${TEST_PATH}/TestProcessList.cpp
+        ${TEST_PATH}/TestProcessExecute.cpp
 
         ${SOURCE_PATH}/Entry.cpp
         )

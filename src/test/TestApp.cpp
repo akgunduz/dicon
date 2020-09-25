@@ -20,8 +20,8 @@ TestApp::TestApp(int *_interfaces, const LogInfo& _logInfo, std::vector<int>& _c
     addRoutine('b', "CRC", &TestApp::testCRC);
     addRoutine('c', "Ping", &TestApp::testPing);
     addRoutine('d', "LoadJob", &TestApp::testLoadJob);
+    addRoutine('p', "ProcessList", &TestApp::testProcessList);
     addRoutine('x', "ProcessExecute", &TestApp::testProcessExecute);
-    addRoutine('y', "FileExecute", &TestApp::testFileExecute);
 
     help();
 }

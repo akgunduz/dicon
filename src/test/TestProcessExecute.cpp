@@ -4,7 +4,7 @@
 
 #include "TestApp.h"
 
-void TestApp::testFileExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
     auto job = std::make_shared<JobItem>(collector->getHost(), TEST_JOB_PATH, JobItem::jobID++);
     if (!job) {

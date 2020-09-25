@@ -139,12 +139,8 @@ bool Node::processCollectorBinaryMsg(const TypeComponentUnit& owner, TypeMessage
 
     auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
-    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received",
+    LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] binaries are received, starting process",
            owner->getID(), processItem->getID());
-
-    LOGC_T(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] Processing....",
-           nodeHost->getAssigned()->getID(),
-           processItem->getID());
 
     return executeJob(owner, std::move(msg));
 }

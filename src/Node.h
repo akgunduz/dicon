@@ -19,7 +19,6 @@ class Node : public Component {
     TypeProcessList processList;
 
     uv_loop_t processLoop{};
-    char *processCmdArg[MAX_INPUT]{};
 
 	void setDistributor(const TypeComponentUnit&);
 
