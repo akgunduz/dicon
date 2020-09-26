@@ -120,6 +120,8 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
 
     isAlreadyAdded = false;
 
+    std::unique_lock<std::mutex> lock(mutex);
+
     for (auto &component : components) {
 
         if (*component.second->getAddress() != *address) {

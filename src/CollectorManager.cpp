@@ -28,10 +28,12 @@ void CollectorManager::setState(TypeID id, COLLSTATES state) {
 
     auto coll = std::static_pointer_cast<CollectorUnit>(get(id));
 
-    if (coll) {
-
-        coll->setState(state);
+    if (!coll) {
+        LOGP_E("Collector[%d] is not exist, can not set its state to %s", id, CollState::getName(state));
+        return;
     }
+
+    coll->setState(state);
 }
 
 TypeComponentUnit CollectorManager::createUnit(ARCH arch, TypeID id, TypeAddress& address) {

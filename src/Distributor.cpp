@@ -41,8 +41,10 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
     }
 
     pollThread = std::thread([](Distributor *distributor){
+
             distributor->pollProcess();
-        }, this);
+
+    }, this);
 
     initialized = true;
 

@@ -14,11 +14,23 @@ class Node : public Component {
 
     TypeComponentUnit distributor;
 
+    std::thread processThread;
+
+    volatile bool runProcessThread = true;
+
     TypeProcessItem processItem;
 
     TypeProcessList processList;
 
     uv_loop_t processLoop{};
+
+    std::mutex mutex;
+
+    std::condition_variable cond;
+
+    std::atomic<bool> processReady{false};
+
+    void spawnProcess();
 
 	void setDistributor(const TypeComponentUnit&);
 

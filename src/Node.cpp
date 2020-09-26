@@ -27,14 +27,11 @@ Node::Node(int _commInterface) :
 
     processItem = std::make_shared<ProcessItem>(getHost());
 
-    int status = uv_loop_init(&processLoop);
-    if (status != 0) {
+    processThread = std::thread([](Node *node){
 
-        LOGS_E(getHost(), "Process Loop can not created, returning, status : %s !!!",
-               uv_err_name(status));
+        node->spawnProcess();
 
-        return;
-    }
+    }, this);
 
     initialized = true;
 
@@ -45,7 +42,13 @@ Node::~Node() {
 
     LOGP_T("Deallocating Node");
 
-    uv_loop_close(&processLoop);
+    runProcessThread = false;
+
+    processReady = true;
+
+    cond.notify_one();
+
+    processThread.join();
 };
 
 bool Node::processDistributorWakeupMsg(const TypeComponentUnit& owner, TypeMessage msg) {
@@ -243,14 +246,49 @@ void Node::parseCommand(char *cmd, char **argv) {
 
 bool Node::executeJob(const TypeComponentUnit& owner, TypeMessage msg) {
 
+    processReady = true;
+
+    cond.notify_one();
+
+    return true;
+}
+
+void Node::spawnProcess() {
+
     auto nodeHost = std::static_pointer_cast<NodeHost>(host);
 
-    std::string parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
+    int status = uv_loop_init(&processLoop);
+    if (status != 0) {
 
-    LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
-           nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
+        LOGS_E(getHost(), "Process Loop can not created, returning, status : %s !!!",
+               uv_err_name(status));
 
-    return UvUtil::executeProcess(parsedCmd, &processLoop, this, onProcessSuccess);
+        return;
+    }
+
+    while (runProcessThread) {
+
+        std::unique_lock<std::mutex> lock(mutex);
+
+        cond.wait(lock, [this] {
+            return processReady.load();
+        });
+
+        if (!runProcessThread) {
+            break;
+        }
+
+        processReady = false;
+
+        auto parsedCmd = Util::parsePath(getHost()->getRootPath(), processItem->getParsedProcess());
+
+        LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
+               nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
+
+        UvUtil::executeProcess(parsedCmd, &processLoop, this, onProcessSuccess);
+    }
+
+    uv_loop_close(&processLoop);
 }
 
 bool Node::onProcessSuccess(void *data) {
@@ -277,4 +315,3 @@ TypeProcessList& Node::getProcessList() {
 
     return processList;
 }
-
