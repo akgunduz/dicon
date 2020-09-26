@@ -93,8 +93,9 @@ bool UvUtil::executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void 
 bool UvUtil::onExecuteProcess(uv_loop_t* loop, ProcessData* processData) {
 
     auto childProcess = (uv_process_t *) calloc(1, sizeof(uv_process_t));
-
-    childProcess->data = processData;
+    if (childProcess) {
+        childProcess->data = processData;
+    }
 
     int tryCount = 1;
     while(tryCount++ < PROCESS_TRY_COUNT) {

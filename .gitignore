@@ -45,6 +45,7 @@ CMakeSettings.json
 /.idea/
 /.vscode/
 /.vs/
+/vs/
 *build*/
 *scratch*/
 *gen*/
