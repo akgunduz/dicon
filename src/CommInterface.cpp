@@ -85,13 +85,9 @@ bool CommInterface::initThread() {
                 break;
             }
 
-            uv_run(&commInterface->consumeLoop, UV_RUN_ONCE);
+            uv_run(&commInterface->consumeLoop, UV_RUN_DEFAULT);
 
         }
-
-        UvUtil::onCloseAll(&commInterface->consumeLoop);
-
-        uv_run(&commInterface->consumeLoop, UV_RUN_ONCE);
 
         status = uv_loop_close(&commInterface->consumeLoop);
 

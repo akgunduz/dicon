@@ -64,6 +64,11 @@ void Address::setUI(uint16_t _port) {
     ui.port = _port;
 }
 
+void Address::setUI() {
+
+    ui.base = getInterface() == COMMINTERFACE_TCPIP ? self.base : LOCALHOST_ADDRESS;
+}
+
 void Address::set(BaseAddress &ref) {
 
     self = ref;

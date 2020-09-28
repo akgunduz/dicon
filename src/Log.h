@@ -130,7 +130,7 @@ public:
 	static inline void _logP(LOGLEVEL level, const char* logout) {
 
         logInfo.timeStamp ?
-        printf("\033%sT : %lu, %s\033%s\n", sLogLevels[level].color, timer.duration(), logout, sColorCodes[COLOR_RESET])
+        printf("\033%sT : %" PRIu64 ", %s\033%s\n", sLogLevels[level].color, timer.duration(), logout, sColorCodes[COLOR_RESET])
         :
         printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
 	}
@@ -163,7 +163,7 @@ public:
     static inline void _logS(LOGLEVEL level, const TypeHostUnit& host, const char* logout) {
 
         logInfo.timeStamp ?
-        printf("\033%sT : %lu, %11s[%d]                    : %s\033%s\n",
+        printf("\033%sT : %" PRIu64 ", %11s[%d]                    : %s\033%s\n",
                sLogLevels[level].color,
                timer.duration(),
                ComponentType::getName(host->getType()),
@@ -209,7 +209,7 @@ public:
                              const char* logout) {
 
 	    logInfo.timeStamp ?
-        printf("\033%sT : %lu, %11s[%d] %s %11s[%d] : %s\033%s\n",
+        printf("\033%sT : %" PRIu64 ", %11s[%d] %s %11s[%d] : %s\033%s\n",
                sLogLevels[level].color,
                timer.duration(),
                ComponentType::getName(host->getType()),

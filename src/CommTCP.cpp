@@ -70,6 +70,8 @@ bool CommTCP::initTCP() {
         return false;
     }
 
+    address->setUI();
+
     result = uv_listen((uv_stream_t *) tcpServer, 1000,
 
             [](uv_stream_t *server, int status) {
