@@ -6,12 +6,12 @@
 #define DICON_COMPONENTUNIT_H
 
 #include "CommUnit.h"
-#include "StopWatch.h"
+#include "UtilTime.h"
 
 class ComponentUnit : public CommUnit {
 
     void* handle{};
-    TypeTime checkTime{};
+    UtilTime timer{};
 
 public:
 
@@ -28,8 +28,8 @@ public:
     void* getHandle() const;
     void setHandle(void*);
 
-    TypeTime& getCheckTime();
-    void setCheckTime();
+    TypeTimeDuration getDuration();
+    void resetTimer();
 };
 
 typedef std::shared_ptr<ComponentUnit> TypeComponentUnit;

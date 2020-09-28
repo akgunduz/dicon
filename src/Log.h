@@ -69,6 +69,7 @@ struct LogInfo {
 
     LOGLEVEL level;
     uint8_t filter;
+    bool timeStamp;
 };
 
 struct LogLevel {
@@ -79,7 +80,9 @@ struct LogLevel {
 
 class Log {
 
-    static inline LogInfo logInfo = {LEVEL_INFO, LOG_ALL};
+    static inline LogInfo logInfo = {LEVEL_INFO, LOG_ALL, false};
+
+    static inline UtilTime timer;
 
     static constexpr const char* sColorCodes[COLOR_MAX] = {
             "[0m",
@@ -126,6 +129,9 @@ public:
 
 	static inline void _logP(LOGLEVEL level, const char* logout) {
 
+        logInfo.timeStamp ?
+        printf("\033%sT : %lu, %s\033%s\n", sLogLevels[level].color, timer.duration(), logout, sColorCodes[COLOR_RESET])
+        :
         printf("\033%s%s\033%s\n", sLogLevels[level].color, logout, sColorCodes[COLOR_RESET]);
 	}
 
@@ -156,6 +162,15 @@ public:
 
     static inline void _logS(LOGLEVEL level, const TypeHostUnit& host, const char* logout) {
 
+        logInfo.timeStamp ?
+        printf("\033%sT : %lu, %11s[%d]                    : %s\033%s\n",
+               sLogLevels[level].color,
+               timer.duration(),
+               ComponentType::getName(host->getType()),
+               host->getID(),
+               logout,
+               sColorCodes[COLOR_RESET])
+       :
         printf("\033%s%11s[%d]                    : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),
@@ -193,6 +208,18 @@ public:
                              const TypeCommUnit& target, MSG_DIR direction,
                              const char* logout) {
 
+	    logInfo.timeStamp ?
+        printf("\033%sT : %lu, %11s[%d] %s %11s[%d] : %s\033%s\n",
+               sLogLevels[level].color,
+               timer.duration(),
+               ComponentType::getName(host->getType()),
+               host->getID(),
+               MessageType::getMsgDirName(direction),
+               ComponentType::getName(target->getType()),
+               target->getID(),
+               logout,
+               sColorCodes[COLOR_RESET])
+       :
         printf("\033%s%11s[%d] %s %11s[%d] : %s\033%s\n",
                sLogLevels[level].color,
                ComponentType::getName(host->getType()),

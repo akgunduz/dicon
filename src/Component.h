@@ -9,7 +9,7 @@
 #include "DeviceList.h"
 #include "MessageType.h"
 #include "HostUnit.h"
-#include "StopWatch.h"
+#include "UtilTime.h"
 #include "NotifyType.h"
 
 class Component;
@@ -45,7 +45,7 @@ protected :
 
     const CommInterfaceCB *receiverCB;
 
-    StopWatch componentWatch;
+    UtilTime timer;
 
     bool initInterfaces(COMPONENT type, int, int);
 

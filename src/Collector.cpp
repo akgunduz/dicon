@@ -142,7 +142,7 @@ bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMes
 
         collectorHost->setState(COLLSTATE_IDLE);
 
-        job->setDuration(componentWatch.stop());
+        job->setDuration(timer.duration());
 
         notifyUI(NOTIFYTYPE_PASSIVE);
 
@@ -224,7 +224,7 @@ bool Collector::processJob() {
         return false;
     }
 
-    componentWatch.start();
+    timer.reset();
 
     notifyUI(NOTIFYTYPE_ACTIVE);
 

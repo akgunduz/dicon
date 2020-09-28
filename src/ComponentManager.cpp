@@ -29,13 +29,11 @@ ComponentManager::~ComponentManager() {
 
 void ComponentManager::checkDead() {
 
-    TypeTime curTime = time(nullptr);
-
     std::unique_lock<std::mutex> lock(mutex);
 
     for (auto& component : components) {
 
-        auto timeDiff = curTime - component.second->getCheckTime();
+        auto timeDiff = component.second->getDuration();
 
         //        LOGS_E(host, "%s[%d] time %ld, now : %ld, diff : %ld",
 //               ComponentType::getName(iterator->second->getType()),
@@ -44,7 +42,7 @@ void ComponentManager::checkDead() {
 //               curTime,
 //               timeDiff);
 
-        if (timeDiff > ALIVE_INTERVAL) {
+        if (timeDiff / 1000 > ALIVE_INTERVAL) {
 
             LOGS_W(host, "%s[%d] is removed from network, unresponsive time : %ld",
                    ComponentType::getName(component.second->getType()),
@@ -94,14 +92,7 @@ void ComponentManager::process() {
 
 TypeComponentMapIDList& ComponentManager::get(bool is_dead) {
 
-    if (!is_dead) {
-
-        return components;
-
-    } else {
-
-        return componentsDead;
-    }
+    return !is_dead ? components : componentsDead;
 }
 
 TypeComponentUnit ComponentManager::get(TypeID id) {
@@ -130,7 +121,7 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
 
         isAlreadyAdded = true;
 
-        component.second->setCheckTime();
+        component.second->resetTimer();
 
         return component.second->getID();
 
@@ -140,7 +131,7 @@ TypeID ComponentManager::add(ARCH arch, TypeAddress& address, bool& isAlreadyAdd
 
     auto object = createUnit(arch, newID, address);
 
-    object->setCheckTime();
+    object->resetTimer();
 
     LOGS_I(host, "%s[%d] is added to network",
            ComponentType::getName(object->getType()), object->getID());
