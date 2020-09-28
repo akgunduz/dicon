@@ -42,15 +42,14 @@ void ComponentUnit::setHandle(void* _handle) {
     handle = _handle;
 }
 
-TypeTime& ComponentUnit::getCheckTime() {
+TypeTimeDuration ComponentUnit::getDuration() {
 
-    return checkTime;
+    return timer.duration();
 }
 
-void ComponentUnit::setCheckTime() {
+void ComponentUnit::resetTimer() {
 
-//    checkTime = std::chrono::steady_clock::now();
-    checkTime = time(nullptr);
+    timer.reset();
 }
 
 ComponentUnit::~ComponentUnit() = default;

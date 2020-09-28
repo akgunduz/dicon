@@ -688,7 +688,7 @@
             let data = JSON.parse(this.responseText);
             document.getElementById("coll-state").innerHTML = COLL_STATES[data._state];
             document.getElementById("coll-job-name").innerHTML = data._jobName;
-            document.getElementById("coll-duration").innerHTML = data._duration + " sn";
+            document.getElementById("coll-duration").innerHTML = (data._duration / 1000).toFixed(3) + " sn";
             document.getElementById("coll-process-count").innerHTML = data._processCount;
             document.getElementById("coll-process-btn").disabled = data._jobStatus !== JOBSTATUS_OK;
 
@@ -867,7 +867,7 @@
             newRow.insertCell().innerHTML = processItem._collectorID;
             newRow.insertCell().innerHTML = processItem._jobID;
             newRow.insertCell().innerHTML = processItem._process;
-            newRow.insertCell().innerHTML = processItem._duration + " sn";
+            newRow.insertCell().innerHTML = (processItem._duration / 1000).toFixed(3) + " sn";
         }
     }
 

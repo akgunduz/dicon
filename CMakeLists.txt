@@ -75,7 +75,7 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/StopWatch.cpp
+        ${SOURCE_PATH}/UtilTime.cpp
         ${SOURCE_PATH}/Util.cpp
         ${SOURCE_PATH}/UvUtil.cpp
         )

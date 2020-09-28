@@ -122,7 +122,7 @@ bool Node::processCollectorProcessMsg(const TypeComponentUnit& owner, TypeMessag
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Collector[%d]:Process[%d] request is received ",
            owner->getID(), processItem->getID());
 
-    componentWatch.start();
+    timer.reset();
 
     nodeHost->setState(NODESTATE_BUSY);
     nodeHost->setAssigned(owner->getType(), owner->getArch(), owner->getID(), owner->getAddress());
@@ -156,7 +156,7 @@ bool Node::processCollectorReadyMsg(const TypeComponentUnit& owner, TypeMessage 
 
     processItem->setState(PROCESS_STATE_ENDED);
 
-    processItem->setDuration(componentWatch.stop());
+    processItem->setDuration(timer.duration());
 
     processList.emplace_back(processItem);
 
