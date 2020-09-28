@@ -64,6 +64,10 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
 
             NetUtil::cleanUnixPath();
 
+        } else if (!strcmp(argv[i], "-t")) {
+
+            logInfo.timeStamp = true;
+
         } else if (!strcmp(argv[i], "-d")) {
 
             componentCount[COMP_DISTRIBUTOR] = 1;
