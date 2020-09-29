@@ -8,7 +8,7 @@ Development cycle has still open points and needs substantial improvements to co
 
 ### Quick Overview
 
-Architecture's main operation is based on collecting a target large-scale applications subtasks (processes) and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into processes. At this point a rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsable for defining the rules and decompose the target application to subtasks. Analyze process step includes dependency tracking functionality based on **Kahn's** algorithm and it creates dependency map of the rules that depends each other.
+Architecture's main operation is based on collecting a target large-scale applications subtasks (processes) and distribute them to available embedded computers to be processed. In order to achieve that, first the application itself should be analyzed and divide into processes. At this point a rule based structure is needed to make the architecture transparent to the target application. In this way application creator is the main responsible for defining the rules and decompose the target application to subtasks. Analyze process step includes dependency tracking functionality based on **Kahn's** algorithm and it creates dependency map of the rules that depends each other.
 
 The architecture consist of three main modules; **Distributor, Collector(s), Node(s)**
 
@@ -22,17 +22,25 @@ The architecture consist of three main modules; **Distributor, Collector(s), Nod
 
 ### Requirements
 
-System can build on **Linux**, **macOS** and **Windows (via WSL 2)** operating systems using **gcc**, **clang** vs toolchains to produce application executables. CMake and GNU make is used as compile platform which have wide range of usage.
+System can build on **Linux**, **macOS** and **Windows (via WSL 2 or MSVC)** operating systems using **gcc**, **clang**, **cl** vs toolchains to produce application executables. [**CMake**](https://cmake.org) and [**GNU Make**](https://www.gnu.org/software/make) is used as compile platform which have wide range of usage.
 
 [**Civetweb**](https://github.com/civetweb/civetweb) library is selected for  application's UI. Its main advantage is to serve the UI in a web page, which allows to access the UI even from embedded devices. It provide cross-platform support and written in C++ to have high response and wide range support.
 
-[**Json-c**](https://github.com/json-c/json-c) library is selected for json-parsing, used as job description interface.
+[**Json for Modern C++**](https://github.com/nlohmann/json) by nlohmann library is selected for JSON parsing, to define job description interface.
+
+[**CRC++**](https://github.com/d-bahr/CRCpp) by d-bahr library is selected for CRC calculations
+
+[**miniz**](https://github.com/richgel999/miniz) by richgel999 library is selected for zip file support
+
+[**libuv**](https://github.com/libuv/libuv)  library is selected for asynchronous I/O operations
+
+
 
 ### Getting Started 
 
 The architecture source code is bundled with the UI code, which will be seperated in the future. But for now, it simplifies the whole compile process in one step. 
 
-Compile process is carried out with **CMake** build system and **gcc** or **clang** toolchains.
+Compile process is carried out with **CMake** build system using **gcc,** **clang**  or **cl** toolchains.
 
 #### Install Prerequisities
 
@@ -51,13 +59,7 @@ Install build utilities
 	brew install g++
 ```
 
-Install dependencies
-
-```
-	brew install json-c
-```
-
-On **Linux** and **Windows (WSL 2)** Platform;
+On **Linux** or **Windows (WSL 2)** Platform;
 
 Install build utilities
 
@@ -66,11 +68,11 @@ Install build utilities
 	apt install cmake
 ```
 
-Install dependencies
+On **Windows (MSVC)** Platform;
 
-```
-	apt install json-c
-```
+Install [**Microsoft Visual Studio**](https://visualstudio.microsoft.com/) 
+
+
 
 #### Build Process
 
@@ -83,11 +85,18 @@ Create build directory
 	cd build
 ```
 
-- for target ==> MacOS, Linux, Windows
+- for target ==> MacOS, Linux, Windows (WSL 2)
 
 ```
 	cmake ..
 	cmake --build .
+```
+
+- for target ==> Windows (MSVC)
+
+```
+	cmake ..
+	#Then open **Dicon.sln** file in **Microsoft Visual Studio IDE**
 ```
 
 - for target ==> ARM based Linux
@@ -136,7 +145,7 @@ The workflow of the whole process starts at computers running collectors and fin
 
 The communication interface is structured based on sockets and it includes messaging related common tasks which are summarized as;
 
-- Creates the messaging channels seperate for send and receive.
+- Creates the messaging channels separate for send and receive.
 - Creates a queue mechanism to hold and sort all send/receive messages to be executed based on their priorities.
 - Setups all message execution callbacks
 - Finalize the messaging mechanism
@@ -149,7 +158,7 @@ The communication interface is structured based on sockets and it includes messa
 
 ### Jobs
 
-The tasks of the applications that are going to execute in nodes are defined in job files.  In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplied as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface.
+The tasks of the applications that are going to execute in nodes are defined in job files.  In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplified as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface.
 
 Job files includes all of the dependencies and process details of the tasks in order to execute properly.
 
@@ -170,7 +179,7 @@ There are four types of contents that can be defined in job files;
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
 
-In order to demonstrate the application running properly, sample job is created based on matrix operations; **multiply**, **scan** and **convolution**. Hypothetical dependencies are created between tasks to show the application is sorts the processes by dependecies and warns if any dependency loop is exists between tasks. Sample dependency map is as follows;
+In order to demonstrate the application running properly, sample job is created based on matrix operations; **multiply**, **scan** and **convolution**. Hypothetical dependencies are created between tasks to show the application sorts the processes by dependencies and warns if any dependency loop is exists between tasks. Sample dependency map is as follows;
 
 ![alt text](docs/Dependency_Graph.png)
 
@@ -241,7 +250,7 @@ $ matrop-scan -w 1000 -m MatrixInput_5 MatrixInput_12 MatrixInput_9 MatrixInput_
 
 There are two different types of user interface is designed to test the architecture. First one is based on **civetweb** library which is a platform independent C++ based web UI library, the second is works interactively through terminal.
 
-To test the whole architecture, all distributor, collectors and nodes should be initialized. If they are going to test with single UI, then all the initialize actions should be triggered in all tabs. Address bind operation is based on the availability of the ethernet NICs and unix sockets. If there is limited number of NIC is available then differentiation is handled with selecting different port numbers automatically.
+To test the whole architecture, all distributor, collectors and nodes should be initialized. If they are going to test with single UI, then all the initialize actions should be triggered in all tabs. Address bind operation is based on the availability of the ethernet NICs and Unix sockets. If there is limited number of NIC is available then differentiation is handled with selecting different port numbers automatically.
 
 After the application is initialized it opens web interface through **8081** port, then operator can trig the polling command with **Poll** button through distributor UI. Whenever a collector or node returns alive messages, a dedicated tab created for them on the left side of the screen.
 
