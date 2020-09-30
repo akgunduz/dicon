@@ -1,10 +1,12 @@
-# Dicon - An HPC architecture for embedded systems
+# DiCoN - An HPC architecture for embedded systems
 
 The goal of this architecture is to divide a large-scale application into small chunks of work that are executed on embedded computers. The advantage of the system is that the increased number of computers that constitute the system helps distribute the risks associated with system sustainability across a larger number of sub-systems, improving the overall system reliability, performance and efficiency.
 
 The architecture is designed as part of a master thesis for academical purposes, however it is applicable for any kind of distributed task driven projects using low cost embedded devices.
 
 Development cycle has still open points and needs substantial improvements to cover all corner cases, So all contributions and suggestions in architectural design and help in development are welcome :)
+
+
 
 ### Quick Overview
 
@@ -19,6 +21,8 @@ The architecture consist of three main modules; **Distributor, Collector(s), Nod
 - **Nodes** Runs the application subtasks that comes from collectors as defined in their rule files.
 
 ![alt text](docs/DomainModel.png)
+
+
 
 ### Requirements
 
@@ -38,11 +42,13 @@ System can build on **Linux**, **macOS** and **Windows (via WSL 2 or MSVC)** ope
 
 ### Getting Started 
 
-The architecture source code is bundled with the UI code, which will be seperated in the future. But for now, it simplifies the whole compile process in one step. 
+The architecture source code is bundled with the UI code, which will be separated in the future. But for now, it simplifies the whole compile process in one step. 
 
 Compile process is carried out with **CMake** build system using **gcc,** **clang**  or **cl** toolchains.
 
-#### Install Prerequisities
+
+
+#### Install Prerequisites
 
 On **MacOS** Platform;
 
@@ -70,7 +76,7 @@ Install build utilities
 
 On **Windows (MSVC)** Platform;
 
-Install [**Microsoft Visual Studio**](https://visualstudio.microsoft.com/) 
+Install [**Microsoft Visual Studio**](https://visualstudio.microsoft.com/) and [**CMake**](https://cmake.org)
 
 
 
@@ -78,12 +84,14 @@ Install [**Microsoft Visual Studio**](https://visualstudio.microsoft.com/)
 
 To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
 
-Create build directory
+###### Create build directory
 
 ```
 	mkdir build
 	cd build
 ```
+
+###### Compile
 
 - for target ==> MacOS, Linux, Windows (WSL 2)
 
@@ -95,7 +103,7 @@ Create build directory
 - for target ==> Windows (MSVC)
 
 ```
-	cmake ..
+	cmake.exe ..
 	#Then open **Dicon.sln** file in **Microsoft Visual Studio IDE**
 ```
 
@@ -113,9 +121,25 @@ Create build directory
 	cmake --build . --target dicon
 ```
 
+
+
+#### Application Types & Parameters
+
+There are three types of application executables; 
+
+- **dicon-web** : Main application type; has a control interface via **html** on port **8081**
+- **dicon-console** : It has control interface through console I/O, suggested for nodes with low resource.
+- **dicon-test** : It is the secondary application type to test the dicon framework components individually.
+
+A single application process can have multiple distributor, collector and node roles via using threads. All individual components have their own communication interfaces with other components both thread-wise and process-wise.
+
+
+
 #### Locating Job Files
 
-Application gets the target job files as a single compressed zip file through Web UI and extracts on the server. As soon as operator triggers the process command via Collector, system parse the job file and starts the distributed execution process across the node devices.
+Application gets the target job files as a single compressed zip file through Web UI and extracts on the server. As soon as operator triggers the process command via Collector, system parse the job file and starts the distributed execution process across the node devices. Sample job files can be found under **sample** folder for all **Linux**, **MacOS** and **Windows** OSs.
+
+
 
 #### Workflow
 
@@ -141,6 +165,8 @@ The workflow of the whole process starts at computers running collectors and fin
 
 ![alt text](docs/Sequence.png)
 
+
+
 #### Communication Interface
 
 The communication interface is structured based on sockets and it includes messaging related common tasks which are summarized as;
@@ -152,9 +178,12 @@ The communication interface is structured based on sockets and it includes messa
 - Creates the notification related tasks
 
 
+
 #### Message Transfer Flow
 
 ![alt text](docs/MessageTransferFlow.png)
+
+
 
 ### Jobs
 
@@ -246,6 +275,8 @@ $ matrop-conv -w 1000 -f Filter_8 MatrixInput_7 MatrixInput_9
 $ matrop-scan -w 1000 -m MatrixInput_5 MatrixInput_12 MatrixInput_9 MatrixInput_13
 ```
 
+
+
 ### User Interface
 
 There are two different types of user interface is designed to test the architecture. First one is based on **civetweb** library which is a platform independent C++ based web UI library, the second is works interactively through terminal.
@@ -264,14 +295,20 @@ Finally on Node side, after the initialization is done, node get interacts with 
 
 ![alt text](docs/Node.png)
 
+
+
 ### Open Issues
 
 - Project is in still early development stage therefore lots of corner cases and scenarios should be tested.
 - Demo application is developed just for testing the architecture purpose and can only be used as a reference; it is not suitable to be used in a final product.
 
+
+
 ### Contributing
 
 You are welcome to contribute to this project in all manner, involving in the development, making suggestions, notifying of wrong or missing design related parts or testing.
+
+
 
 ### License
 

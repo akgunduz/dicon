@@ -14,6 +14,25 @@
 #define LOG_NODE (1u << COMP_NODE)
 #define LOG_ALL LOG_DIST | LOG_COLL | LOG_NODE
 
+#ifdef NDEBUG
+#define LOGP_E(a, ...)
+#define LOGP_W(a, ...)
+#define LOGP_I(a, ...)
+#define LOGP_D(a, ...)
+#define LOGP_T(a, ...)
+
+#define LOGS_E(a, b, ...)
+#define LOGS_W(a, b, ...)
+#define LOGS_I(a, b, ...)
+#define LOGS_D(a, b, ...)
+#define LOGS_T(a, b, ...)
+
+#define LOGC_E(a, b, c, d, ...)
+#define LOGC_W(a, b, c, d, ...)
+#define LOGC_I(a, b, c, d, ...)
+#define LOGC_D(a, b, c, d, ...)
+#define LOGC_T(a, b, c, d, ...)
+#else
 #define LOGP_E(a, ...) Log::logP(LEVEL_ERROR, a, ##__VA_ARGS__)
 #define LOGP_W(a, ...) Log::logP(LEVEL_WARN, a, ##__VA_ARGS__)
 #define LOGP_I(a, ...) Log::logP(LEVEL_INFO, a, ##__VA_ARGS__)
@@ -31,6 +50,7 @@
 #define LOGC_I(a, b, c, d, ...) Log::logC(LEVEL_INFO, a, b, c, d, ##__VA_ARGS__)
 #define LOGC_D(a, b, c, d, ...) Log::logC(LEVEL_DEBUG, a, b, c, d, ##__VA_ARGS__)
 #define LOGC_T(a, b, c, d, ...) Log::logC(LEVEL_TRACE, a, b, c, d, ##__VA_ARGS__)
+#endif
 
 enum LOGLEVEL {
 

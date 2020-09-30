@@ -98,7 +98,7 @@ public:
     void sendResponse(const TypeHostUnit& host, struct mg_connection *conn,
             const std::string& type, const char* format) {
 
-        char response[PATH_MAX];
+        char response[PATH_MAX - NAME_MAX];
         std::sprintf(response, "%s", format);
 
         sendFormatted(host, conn, type, response);
@@ -108,7 +108,7 @@ public:
     void sendResponse(const TypeHostUnit& host, struct mg_connection *conn,
             const std::string& type, const char* format, Args&&... args) {
 
-        char response[PATH_MAX];
+        char response[PATH_MAX - NAME_MAX];
         std::sprintf(response, format, args...);
 
         sendFormatted(host, conn, type, response);
@@ -117,7 +117,7 @@ public:
     void sendResponse(struct mg_connection *conn,
                       const std::string& type, const char* format) {
 
-        char response[PATH_MAX];
+        char response[PATH_MAX - NAME_MAX];
         std::sprintf(response, "%s", format);
 
         sendFormatted(conn, type, response);
@@ -127,7 +127,7 @@ public:
     void sendResponse(struct mg_connection *conn, const std::string& type,
                       const char* format, Args&&... args) {
 
-        char response[PATH_MAX];
+        char response[PATH_MAX - NAME_MAX];
         std::sprintf(response, format, args...);
 
         sendFormatted(conn, type, response);
