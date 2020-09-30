@@ -131,7 +131,48 @@ There are three types of application executables;
 - **dicon-console** : It has control interface through console I/O, suggested for nodes with low resource.
 - **dicon-test** : It is the secondary application type to test the dicon framework components individually.
 
-A single application process can have multiple distributor, collector and node roles via using threads. All individual components have their own communication interfaces with other components both thread-wise and process-wise.
+A single application process can have multiple distributor, collector and node roles via using threads. All individual components have their own communication interfaces with other components both thread-wise, process-wise and device-wise.
+
+![alt text](docs/Topology.png)
+
+Each component has separate communication interface with other types of components; as it can be seen on the above image, Distributor and Collector may communicate over **Unix Socket**, while they both can communicate with nodes over **TCP/IP** interface. 
+
+Application can be configured through command line parameters;
+
+**"-l"** : to list the available interfaces, application will return after listing the interfaces;
+
+**"-i"** : to select the communication interfaces for components, two IDs that is listed with -l command should be concatenate this parameter;
+
+```
+$ dicon-web -l
+
+Listing Interfaces .....
+0 -> TCP : lo
+1 -> TCP : eth0
+2 -> UnixSocket : us
+
+$ dicon-web -i 2 0 
+```
+First parameter **2** means; the communication interface between Distributor and Collectors will be **Unix Socket**, 
+
+Second parameter **0** means; the communication interface with Nodes will be **TCP/IP** over **Loopback** Interface, 
+
+**"-d"** : to specify if the executed process has distributor role.
+
+**"-c"** : to specify if the executed process has collector role. Number of collector should be concatenate to this parameter.
+
+**"-n"** : to specify if the executed process has node role. Number of node should be concatenate to this parameter.
+
+In the following example, the process has distributor, 1 collector and 2 nodes role
+
+```
+$ dicon-web -d -c 1 -n 2
+```
+**"-g"** : to select one of the debug level for debug builds. Preferred debug level should be concatenate to this parameter. It can be from **1** to **5**, 1 is to log only Errors, 5 for everything.
+
+**"-t"** : to add timestamp to the log outputs.
+
+**"-x"** : to cleanup the Unix socket files from previous sessions or created by other dicon processes.
 
 
 
@@ -187,7 +228,7 @@ The communication interface is structured based on sockets and it includes messa
 
 ### Jobs
 
-The tasks of the applications that are going to execute in nodes are defined in job files.  In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is choosed to define the whole structure of job file. Basic operation can be simplified as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface.
+The tasks of the applications that are going to execute in nodes are defined in job files.  In Job directories all the task specific files and job files are located in their predefined locations. JSON file format is chosen to define the whole structure of job file. Basic operation can be simplified as; the user initiates the execution process through user interface of collector, then collector loads the **"Job.json"** file resides in the application folder which is selected through user interface.
 
 Job files includes all of the dependencies and process details of the tasks in order to execute properly.
 
