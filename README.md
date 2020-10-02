@@ -245,7 +245,10 @@ There are four types of contents that can be defined in job files;
 	The definition of the macro items are;
 	
 	- **"$"** : Start of the macro
-	- **"F/I"** : Reference to the file list in the rule file
+	- **"F/I/O"** : Reference to the file list in the rule file
+	  - **F** : represents the **Executable** file, necessary to arrange executable permissions on the target nodes, also it should be exist before processing the macro.
+	  - **I** : represents the **Input** file, it should be exist before processing the macro
+	  - **O** : represents the **Output** file, expected to be created by the process after execution.
 	- **"P"** : Reference to the parameter list in the rule file
 	- **"INDEX"** : Index of the corresponding list
 
@@ -310,9 +313,27 @@ Corresponding job description file provided with the project is as follows;
 
 In this sample the node executes the following processes at one of their assignment. 
 
+- **$F1 $P1 $I4 $I5 $I6 $O7** :
+
+  ​	**matrop_multiply** will take **MatrixInput_4**, **MatrixInput_5** and **MatrixInput_6** as **input** and creates **MatrixInput_7** as **output**  
+
 ```sh
 $ matrop-multiply -w 1000 MatrixInput_4 MatrixInput_5 MatrixInput_6 MatrixInput_7
+```
+
+- **$F2 $P1 -f $I8 $I7 $O9** : 
+
+  ​	**matrop_conv** will take **Filter_8** and **MatrixInput_7** as **input** and creates **MatrixInput_9** as **output** 
+
+```sh
 $ matrop-conv -w 1000 -f Filter_8 MatrixInput_7 MatrixInput_9
+```
+
+- **$F3 $P1 -m $I5 $O12 $I9 $O13** :  
+
+  ​	**matrop_scan** will take **MatrixInput_5** and **MatrixInput_9** as **input** and creates **MatrixInput_12** and **MatrixInput_13** as **output**
+
+```sh
 $ matrop-scan -w 1000 -m MatrixInput_5 MatrixInput_12 MatrixInput_9 MatrixInput_13
 ```
 
