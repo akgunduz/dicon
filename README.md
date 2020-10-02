@@ -359,8 +359,13 @@ Finally on Node side, after the initialization is done, node get interacts with 
 
 ### Open Issues
 
-- Project is in still early development stage therefore lots of corner cases and scenarios should be tested.
-- Demo application is developed just for testing the architecture purpose and can only be used as a reference; it is not suitable to be used in a final product.
+- Arch based (ARM, x86, MIPS etc) node filtering & assignment is in development stage.
+- Server UI notifications are handled by Server Sent Events, still has update problems.
+- Asynchronized file operations are added to roadmap.
+- Full LockFree thread implementations are added to roadmap
+- Configuration based on file/DB is in roadmap
+- Debug output in Web Interface is planning
+- Test structure will be refactored based on Google Test
 
 
 
