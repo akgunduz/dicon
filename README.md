@@ -208,7 +208,7 @@ The workflow of the whole process starts at computers running collectors and fin
 
 
 
-#### Communication Interface
+#### Message Transfer Flow
 
 The communication interface is structured based on sockets and it includes messaging related common tasks which are summarized as;
 
@@ -218,9 +218,7 @@ The communication interface is structured based on sockets and it includes messa
 - Finalize the messaging mechanism
 - Creates the notification related tasks
 
-
-
-#### Message Transfer Flow
+Each message created or get from network, processes in a queue with **predefined priority**. In each pull iteration, an **aging algorithm** is executed to reprioritize the messages in the queue. The queue is designed with **producer/consumer** pattern using separate asynchronized I/O loops.
 
 ![alt text](docs/MessageTransferFlow.png)
 
