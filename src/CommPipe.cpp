@@ -5,8 +5,10 @@
 
 #include "CommPipe.h"
 #include "NetUtil.h"
-#include "CommData.h"
+#include "UvUtil.h"
 #include "Util.h"
+#include "CommData.h"
+#include "Log.h"
 
 CommPipe::CommPipe(TypeHostUnit host, const TypeDevice &device, const CommInterfaceCB *receiverCB)
         : CommInterface(std::move(host), device, receiverCB) {

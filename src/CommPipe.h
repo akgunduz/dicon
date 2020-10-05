@@ -6,25 +6,15 @@
 #ifndef DICON_COMMPIPE_H
 #define DICON_COMMPIPE_H
 
-#include "Common.h"
-#include "Scheduler.h"
+#include <atomic>
 #include "CommInterface.h"
-#include "Message.h"
-#include "Component.h"
-#include "CommInterfaceType.h"
-
-//#define LOOPBACK_RANGE 256
-//#define MULTICAST_ADDRESS 0xE9010101
-
-//#define DEFAULT_UDP_PORT 62001
-//#define TRY_COUNT 10
 
 #define DEFAULT_PIPE_PORT 63001
 #define UNIXSOCKETADDRESS_MASK 0xFFFFFFFFFFFFFF
 
 class CommPipe : public CommInterface {
 
-    static inline int lastFreePipePort = DEFAULT_PIPE_PORT;
+    static inline std::atomic_uint16_t lastFreePipePort = DEFAULT_PIPE_PORT;
 
     uv_pipe_t *pipeServer{};
 

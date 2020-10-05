@@ -3,7 +3,9 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cassert>
 #include "NodeManager.h"
+#include "Log.h"
 
 NodeManager::NodeManager(TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {

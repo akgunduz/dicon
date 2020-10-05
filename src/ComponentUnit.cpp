@@ -4,8 +4,6 @@
 
 #include "ComponentUnit.h"
 
-#include <utility>
-
 ComponentUnit::ComponentUnit(COMPONENT _type, ARCH _arch, TypeID _id, TypeAddress _address)
     : CommUnit(_type, _arch, _id, std::move(_address)) {
 }

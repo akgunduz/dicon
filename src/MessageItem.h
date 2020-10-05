@@ -5,10 +5,7 @@
 #ifndef DICON_MESSAGEITEM_H
 #define DICON_MESSAGEITEM_H
 
-#include "Address.h"
 #include "Message.h"
-#include "MessageType.h"
-#include "SchedulerItem.h"
 
 class MessageItem : public SchedulerItem {
 

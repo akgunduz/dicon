@@ -3,8 +3,8 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
+#include <Util.h>
 #include <CollectorHost.h>
-#include "JobItem.h"
 #include "WebApp.h"
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {

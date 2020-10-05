@@ -2,10 +2,8 @@
 // Created by Haluk Akgunduz on 10/12/15.
 //
 
-#include "Device.h"
-
-#include <utility>
 #include "Log.h"
+#include "Device.h"
 
 Device::Device(std::string _name, COMM_INTERFACE _type, uint32_t _base, uint8_t _mask, bool _loopback)
     : name(std::move(_name)), type(_type), base(_base), mask(_mask), loopback(_loopback) {

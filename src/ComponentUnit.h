@@ -5,6 +5,7 @@
 #ifndef DICON_COMPONENTUNIT_H
 #define DICON_COMPONENTUNIT_H
 
+#include <map>
 #include "CommUnit.h"
 #include "UtilTime.h"
 

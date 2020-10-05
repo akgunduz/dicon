@@ -3,8 +3,13 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cstring>
+#include <cassert>
+
 #include "MessageBase.h"
+#include "Log.h"
 #include "Util.h"
+#include "Platform.h"
 
 MessageBase::MessageBase(const TypeHostUnit& _host)
 		: host(_host) {

@@ -9,6 +9,7 @@
 #include <Log.h>
 #include <Util.h>
 #include <ComponentFactory.h>
+#include <Platform.h>
 #include "Application.h"
 
 enum MSG_TYPE_TEST {

@@ -6,6 +6,9 @@
 #ifndef DICON_LOG_H
 #define DICON_LOG_H
 
+#include <cinttypes>
+
+#include "Platform.h"
 #include "HostUnit.h"
 #include "MessageType.h"
 

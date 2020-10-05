@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Log.h>
-#include <NodeState.h>
+#include <Util.h>
+#include <NodeHost.h>
 #include "WebApp.h"
 
 bool WebApp::nodeHandler(struct mg_connection *conn, const char * uri) {

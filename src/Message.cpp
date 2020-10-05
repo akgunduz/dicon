@@ -5,6 +5,7 @@
 
 #include "Message.h"
 #include "ComponentUnitFactory.h"
+#include "Log.h"
 
 Message::Message(const TypeHostUnit& host)
 		: MessageBase(host), data(getHost()) {

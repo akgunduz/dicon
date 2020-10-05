@@ -6,7 +6,7 @@
 #ifndef DICON_MESSAGETYPE_H
 #define DICON_MESSAGETYPE_H
 
-#include <Common.h>
+#include <string>
 
 enum STREAM_TYPE {
 

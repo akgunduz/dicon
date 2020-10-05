@@ -7,19 +7,14 @@
 #ifndef DICON_MESSAGEBASE_H
 #define DICON_MESSAGEBASE_H
 
-#include "crc/CRC.h"
-#include "uv.h"
-#include "MessageBlock.h"
-#include "MessageType.h"
-#include "HostUnit.h"
-#include "ComponentUnit.h"
-#include "Address.h"
+#include <deque>
+
 #include "MessageHeader.h"
+#include "MessageBlock.h"
+#include "HostUnit.h"
 #include "FileItem.h"
 
 #define TMP_BUFFER_SIZE 1000
-
-#define BUSY_SLEEP_TIME 200
 
 class MessageBase;
 typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);

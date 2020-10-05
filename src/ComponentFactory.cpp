@@ -3,6 +3,7 @@
 //
 
 #include "ComponentFactory.h"
+#include "Log.h"
 
 ComponentFactory *ComponentFactory::instance = nullptr;
 

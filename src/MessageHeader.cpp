@@ -4,6 +4,7 @@
 //
 
 #include "MessageHeader.h"
+#include "Platform.h"
 
 long MessageHeader::getSize() {
 

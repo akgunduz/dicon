@@ -5,12 +5,9 @@
 #ifndef DICON_COMPONENT_H
 #define DICON_COMPONENT_H
 
-#include "CommInterfaceFactory.h"
-#include "DeviceList.h"
-#include "MessageType.h"
-#include "HostUnit.h"
-#include "UtilTime.h"
+#include "Message.h"
 #include "NotifyType.h"
+#include "CommInterface.h"
 
 class Component;
 
@@ -55,7 +52,7 @@ public:
 
     static inline TypeComponent nullComponent;
 
-    explicit Component(TypeHostUnit );
+    explicit Component(TypeHostUnit);
     virtual ~Component();
 
     TypeHostUnit& getHost();

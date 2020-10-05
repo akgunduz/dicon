@@ -3,6 +3,7 @@
 //
 
 #include "MessageBlock.h"
+#include "Platform.h"
 
 MessageBlock::MessageBlock(uint16_t _type, uint32_t _size) :
     type(_type), size(_size) {

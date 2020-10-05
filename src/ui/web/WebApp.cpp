@@ -3,9 +3,9 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <NetUtil.h>
 #include "WebApp.h"
 #include "WebOption.h"
+#include "Platform.h"
 
 #define MAIN_PAGE WEB_DOCUMENT_ROOT "./index.html"
 

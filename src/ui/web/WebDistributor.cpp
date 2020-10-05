@@ -3,12 +3,9 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <CollectorUnit.h>
-#include <NodeUnit.h>
 #include <NetUtil.h>
 #include <DistributorHost.h>
 #include "WebApp.h"
-#include "WebOption.h"
 
 bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {
 

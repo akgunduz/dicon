@@ -3,6 +3,7 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
+#include <map>
 #include "MessageType.h"
 
 std::map<int, std::string> msgNameList = {

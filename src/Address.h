@@ -5,6 +5,9 @@
 #ifndef DICON_ADDRESS_H
 #define DICON_ADDRESS_H
 
+#include <cstdint>
+#include <memory>
+#include <vector>
 #include "CommInterfaceType.h"
 
 #define INTERFACE_POS 0
@@ -40,7 +43,7 @@ protected:
 
 public:
 
-    Address(COMM_INTERFACE = COMMINTERFACE_TCPIP);
+    explicit Address(COMM_INTERFACE = COMMINTERFACE_TCPIP);
     Address(COMM_INTERFACE, uint32_t, uint16_t, bool = false);
     explicit Address(BaseAddress);
     Address(BaseAddress, BaseAddress);

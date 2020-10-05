@@ -4,7 +4,7 @@
 //
 
 #include "CollectorManager.h"
-#include "CollectorUnit.h"
+#include "Log.h"
 
 CollectorManager::CollectorManager(const TypeHostUnit& _host, bool _protect)
     : ComponentManager(_host, _protect) {

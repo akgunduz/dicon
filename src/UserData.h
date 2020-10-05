@@ -6,7 +6,6 @@
 #ifndef DICON_USERDATA_H
 #define DICON_USERDATA_H
 
-
 class UserData {
 
 public:

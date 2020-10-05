@@ -5,10 +5,8 @@
 #ifndef DICON_NODEOBJECT_H
 #define DICON_NODEOBJECT_H
 
-#include "NodeState.h"
-#include "ComponentUnit.h"
-#include "ProcessItem.h"
 #include "ComponentObject.h"
+#include "NodeState.h"
 
 class NodeObject : public ComponentObject {
 

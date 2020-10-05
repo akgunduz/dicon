@@ -5,6 +5,9 @@
 #ifndef DICON_DEVICE_H
 #define DICON_DEVICE_H
 
+#include <string>
+#include <memory>
+#include <vector>
 #include "CommInterfaceType.h"
 
 #define FAKE_US_ADDRESS 0xFFFFFFFF

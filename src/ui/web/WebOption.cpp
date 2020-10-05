@@ -15,10 +15,10 @@ const char **WebOption::getOptions() {
     return list;
 }
 
-void WebOption::setOption(std::string key, int value) {
+void WebOption::setOption(const std::string& key, int value) {
     options[key] = std::to_string(value);
 };
 
-void WebOption::setOption(std::string key, std::string value) {
-    options[key] = value;
+void WebOption::setOption(const std::string& key, std::string value) {
+    options[key] = std::move(value);
 };

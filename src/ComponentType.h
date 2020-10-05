@@ -5,8 +5,6 @@
 #ifndef DICON_COMPONENTTYPE_H
 #define DICON_COMPONENTTYPE_H
 
-#include "Common.h"
-
 enum COMPONENT {
 
     COMP_DISTRIBUTOR,

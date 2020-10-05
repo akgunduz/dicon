@@ -5,11 +5,9 @@
 #ifndef DICON_JOBITEM_H
 #define DICON_JOBITEM_H
 
+#include <mutex>
 #include "nlohmann/json.hpp"
-#include "miniz/miniz.h"
 
-#include "SchedulerItem.h"
-#include "FileItem.h"
 #include "ProcessItem.h"
 #include "ParameterItem.h"
 #include "JobStatus.h"

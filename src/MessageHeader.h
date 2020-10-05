@@ -6,8 +6,8 @@
 #ifndef DICON_MESSAGEHEADER_H
 #define DICON_MESSAGEHEADER_H
 
+#include "CommUnit.h"
 #include "MessageType.h"
-#include "HostUnit.h"
 
 #define MAX_VARIANT 2
 

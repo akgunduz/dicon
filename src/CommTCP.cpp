@@ -5,7 +5,9 @@
 
 #include "CommTCP.h"
 #include "NetUtil.h"
+#include "UvUtil.h"
 #include "CommData.h"
+#include "Log.h"
 
 CommTCP::CommTCP(TypeHostUnit host, const TypeDevice &device, const CommInterfaceCB *receiverCB)
         : CommInterface(std::move(host), device, receiverCB) {

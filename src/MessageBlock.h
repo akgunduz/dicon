@@ -5,8 +5,8 @@
 #ifndef DICON_MESSAGEBLOCK_H
 #define DICON_MESSAGEBLOCK_H
 
-#include "Common.h"
-#include "MessageType.h"
+#include <cstdint>
+#include <cstddef>
 
 #define SIGNATURE 0x55AA
 
@@ -22,9 +22,9 @@ enum MSG_HEADER {
 
 class MessageBlock {
 
-    uint16_t sign{SIGNATURE};
-    uint16_t type{MSGHEADER_MAX};
-    uint32_t size{};
+    uint16_t sign {SIGNATURE};
+    uint16_t type {MSGHEADER_MAX};
+    uint32_t size {};
 
 public:
     MessageBlock(uint16_t, uint32_t);

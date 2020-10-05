@@ -6,12 +6,8 @@
 #ifndef DICON_COMMTCP_H
 #define DICON_COMMTCP_H
 
-#include "Common.h"
-#include "Scheduler.h"
+#include <atomic>
 #include "CommInterface.h"
-#include "Message.h"
-#include "Component.h"
-#include "CommInterfaceType.h"
 
 #define LOOPBACK_RANGE 256
 #define MULTICAST_ADDRESS 0xE9010101

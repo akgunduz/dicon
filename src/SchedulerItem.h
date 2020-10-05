@@ -5,7 +5,7 @@
 #ifndef DICON_SCHEDULERITEM_H
 #define DICON_SCHEDULERITEM_H
 
-#include "Common.h"
+#include <memory>
 
 #define END_ITEM -1
 #define DEFAULT_PRIORITY 3
@@ -16,7 +16,7 @@ public:
     int type;
     int priority;
     SchedulerItem(int, int);
-    SchedulerItem(int);
+    explicit SchedulerItem(int);
     SchedulerItem();
     virtual ~SchedulerItem();
 };

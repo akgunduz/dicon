@@ -33,5 +33,4 @@ public:
     }
 };
 
-
 #endif //DICON_PROCESSSTATE_H

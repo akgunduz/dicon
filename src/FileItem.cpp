@@ -4,9 +4,7 @@
 //
 
 #include "FileItem.h"
-
-#include <utility>
-#include "Util.h"
+#include "Log.h"
 
 FileItem::FileItem(const TypeHostUnit& host, long _id, long _assignedJob, std::string _name)
         : ContentItem (host, _id, _assignedJob),

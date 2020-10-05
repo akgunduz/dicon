@@ -3,6 +3,7 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cstring>
 #include "Util.h"
 
 std::string Util::hex2str(const uint8_t *in, size_t len) {

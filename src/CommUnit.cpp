@@ -3,8 +3,7 @@
 //
 
 #include "CommUnit.h"
-
-#include <utility>
+#include "Platform.h"
 
 CommUnit::CommUnit(COMPONENT _type, ARCH _arch, TypeID _id, TypeAddress _address)
         : BaseUnit(_type, _arch, _id), address(std::move(_address)) {

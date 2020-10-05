@@ -2,9 +2,8 @@
 // Created by Haluk AKGUNDUZ on 28.04.2018.
 //
 
+#include <string>
 #include "HostUnit.h"
-
-#include <utility>
 
 HostUnit::HostUnit(COMPONENT _type, TypeID _id)
         : BaseUnit(_type, ArchType::get(), _id),

@@ -3,8 +3,8 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Log.h>
-#include <NodeState.h>
+#include <Util.h>
+#include <NodeHost.h>
 #include "ConsoleApp.h"
 
 bool ConsoleApp::nodeStateHandler(long id) {

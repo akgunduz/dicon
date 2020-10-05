@@ -7,6 +7,7 @@
 #include "DistributorHost.h"
 #include "NetUtil.h"
 #include "CollectorUnit.h"
+#include "Log.h"
 
 Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) :
         Component(std::make_shared<DistributorHost>()) {

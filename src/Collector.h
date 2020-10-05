@@ -7,11 +7,7 @@
 #define	DICON_COLLECTOR_H
 
 #include "Component.h"
-#include "CommInterfaceFactory.h"
-#include "Message.h"
 #include "JobItem.h"
-#include "DistributorObject.h"
-#include "CollectorObject.h"
 
 class Collector : public Component {
 

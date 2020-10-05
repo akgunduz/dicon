@@ -6,8 +6,8 @@
 #ifndef DICON_CONTENTITEM_H
 #define DICON_CONTENTITEM_H
 
-#include "Log.h"
 #include "SchedulerItem.h"
+#include "HostUnit.h"
 
 enum CONTENT_TYPES {
     CONTENT_NAME,

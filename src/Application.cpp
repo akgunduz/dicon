@@ -4,6 +4,7 @@
 //
 
 #include "Application.h"
+#include "Util.h"
 
 App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vector<int> componentCount, bool autoWake) :
         type(type) {

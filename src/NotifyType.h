@@ -5,8 +5,6 @@
 #ifndef DICON_NOTIFYTYPE_H
 #define DICON_NOTIFYTYPE_H
 
-#include "Common.h"
-
 enum NOTIFYTYPE {
     NOTIFYTYPE_PASSIVE,
     NOTIFYTYPE_ACTIVE,

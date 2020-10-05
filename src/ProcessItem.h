@@ -6,8 +6,6 @@
 #ifndef DICON_PROCESSITEM_H
 #define DICON_PROCESSITEM_H
 
-#include "ContentItem.h"
-#include "FileItem.h"
 #include "ProcessState.h"
 #include "ProcessFile.h"
 

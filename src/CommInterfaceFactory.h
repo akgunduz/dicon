@@ -6,8 +6,6 @@
 #ifndef DICON_COMMINTERFACEFACTORY_H
 #define DICON_COMMINTERFACEFACTORY_H
 
-#include "Log.h"
-#include "Scheduler.h"
 #include "CommInterface.h"
 
 class CommInterfaceFactory {

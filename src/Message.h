@@ -3,12 +3,10 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_MESSAGE_H
 #define DICON_MESSAGE_H
 
 #include "MessageBase.h"
-#include "MessageHeader.h"
 #include "MessageData.h"
 
 class Message : public MessageBase {

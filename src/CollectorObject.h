@@ -5,7 +5,7 @@
 #ifndef DICON_COLLECTOROBJECT_H
 #define DICON_COLLECTOROBJECT_H
 
-#include "NodeHost.h"
+#include "ComponentObject.h"
 #include "CollectorState.h"
 
 class CollectorObject : public ComponentObject {

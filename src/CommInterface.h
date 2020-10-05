@@ -5,12 +5,11 @@
 #ifndef DICON_COMMINTERFACE_H
 #define DICON_COMMINTERFACE_H
 
-#include "Scheduler.h"
+#include <uv.h>
+#include <thread>
 #include "Message.h"
-#include "Address.h"
+#include "Scheduler.h"
 #include "Device.h"
-#include "MessageItem.h"
-#include "UvUtil.h"
 
 #define TRY_COUNT 10
 #define MAX_SIMUL_CLIENTS 100

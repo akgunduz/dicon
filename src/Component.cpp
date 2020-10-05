@@ -3,9 +3,10 @@
 //
 
 #include "Component.h"
-
-#include <utility>
-#include "NetUtil.h"
+#include "CommInterfaceFactory.h"
+#include "DeviceList.h"
+#include "MessageItem.h"
+#include "Log.h"
 
 Component::Component(TypeHostUnit _host)
     : host(std::move(_host)) {

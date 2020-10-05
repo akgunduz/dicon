@@ -7,6 +7,8 @@
 #define DICON_APPLICATION_H
 
 #include "ComponentFactory.h"
+#include "DeviceList.h"
+#include "Log.h"
 
 enum APPTYPE {
 

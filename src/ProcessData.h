@@ -5,9 +5,11 @@
 #ifndef DICON_PROCESSDATA_H
 #define DICON_PROCESSDATA_H
 
-#include "Message.h"
-#include "CommInterface.h"
+#include <string>
+#include <cstring>
+#include <uv.h>
 #include "UserData.h"
+#include "Platform.h"
 
 typedef bool (*TypeOnProcessSuccess)(void*);
 

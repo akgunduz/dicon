@@ -5,7 +5,7 @@
 #ifndef DICON_UTILTIME_H
 #define DICON_UTILTIME_H
 
-#include "Common.h"
+#include <chrono>
 
 typedef std::chrono::high_resolution_clock::time_point TypeTime;
 typedef uint64_t TypeTimeDuration;

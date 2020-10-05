@@ -4,8 +4,10 @@
 //
 
 #include "Node.h"
+#include "NodeHost.h"
+#include "Log.h"
 #include "Util.h"
-#include "UserData.h"
+#include "UvUtil.h"
 
 Node::Node(int _commInterface) :
     Component(std::make_shared<NodeHost>()) {

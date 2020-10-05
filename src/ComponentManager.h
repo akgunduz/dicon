@@ -5,9 +5,9 @@
 #ifndef DICON_COMPONENTMANAGER_H
 #define DICON_COMPONENTMANAGER_H
 
-#include "Common.h"
+#include <mutex>
+#include <thread>
 #include "HostUnit.h"
-#include "ComponentUnit.h"
 
 #define WAKEUP_INTERVAL 5
 #define ALIVE_INTERVAL (WAKEUP_INTERVAL + 2)

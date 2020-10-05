@@ -6,12 +6,11 @@
 #ifndef DICON_SCHEDULER_H
 #define	DICON_SCHEDULER_H
 
-#include "Common.h"
-#include "Message.h"
-#include "Address.h"
+#include <mutex>
+#include <condition_variable>
+#include <map>
+#include <list>
 #include "CommInterfaceCB.h"
-#include "MessageType.h"
-#include "SchedulerItem.h"
 
 #define MAX_SCHEDULER_CAPACITY 10000
 

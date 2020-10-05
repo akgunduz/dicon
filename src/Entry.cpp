@@ -3,7 +3,6 @@
 // Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
-#include "NetUtil.h"
 #if defined(CONSOLE)
 #include <ui/console/ConsoleApp.h>
 #elif defined(WEB)
@@ -11,6 +10,8 @@
 #elif defined(TEST)
 #include <test/TestApp.h>
 #endif
+
+#include "NetUtil.h"
 
 enum APPPARAM {
     APPPARAM_OK,

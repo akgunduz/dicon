@@ -5,6 +5,7 @@
 
 #include "Collector.h"
 #include "CollectorHost.h"
+#include "Log.h"
 
 Collector::Collector(int _commInterfaceOther, int _commInterfaceNode)  :
         Component(std::make_shared<CollectorHost>()) {

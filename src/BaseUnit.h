@@ -5,9 +5,10 @@
 #ifndef DICON_BASEUNIT_H
 #define DICON_BASEUNIT_H
 
-#include "Address.h"
-#include "ComponentType.h"
+#include <cstdint>
+#include <vector>
 #include "ArchType.h"
+#include "ComponentType.h"
 
 typedef uint32_t TypeID;
 

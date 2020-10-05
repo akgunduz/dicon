@@ -5,7 +5,8 @@
 #ifndef DICON_WEBOPTION_H
 #define DICON_WEBOPTION_H
 
-#include "Common.h"
+#include <string>
+#include <map>
 
 class WebOption {
 
@@ -14,8 +15,8 @@ class WebOption {
 
 public:
      const char** getOptions();
-    void setOption(std::string, int);
-    void setOption(std::string, std::string);
+    void setOption(const std::string&, int);
+    void setOption(const std::string&, std::string);
 
 };
 

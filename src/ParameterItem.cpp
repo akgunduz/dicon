@@ -30,5 +30,3 @@ bool ParameterItem::check() {
 
     return !param.empty();
 }
-
-

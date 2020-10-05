@@ -6,9 +6,9 @@
 #ifndef DICON_COLLECTORMANAGER_H
 #define DICON_COLLECTORMANAGER_H
 
+#include <deque>
 #include "ComponentManager.h"
-#include "NodeHost.h"
-#include "CollectorObject.h"
+#include "CollectorUnit.h"
 
 typedef struct CollectorRequest {
 

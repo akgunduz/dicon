@@ -6,10 +6,11 @@
 #ifndef DICON_UTIL_H
 #define DICON_UTIL_H
 
-#include <external/crc/CRC.h>
-#include "Common.h"
+#include <filesystem>
+#include <algorithm>
+#include <sstream>
 
-#define BUFFER_SIZE 512
+#include <external/crc/CRC.h>
 
 #define ROOT_SIGN "@@@root@@@"
 

@@ -3,7 +3,9 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cassert>
 #include "Scheduler.h"
+#include "Log.h"
 
 Scheduler::~Scheduler() {
 

@@ -5,9 +5,7 @@
 #ifndef DICON_UVUTIL_H
 #define DICON_UVUTIL_H
 
-
 #include <uv.h>
-#include "Common.h"
 #include "ProcessData.h"
 
 #define PROCESS_SLEEP_TIME 1000

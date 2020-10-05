@@ -6,9 +6,8 @@
 #ifndef DICON_NODE_H
 #define DICON_NODE_H
 
+#include <atomic>
 #include "Component.h"
-#include "NodeHost.h"
-#include "DistributorObject.h"
 
 class Node : public Component {
 

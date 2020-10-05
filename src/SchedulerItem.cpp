@@ -3,7 +3,6 @@
 //
 
 #include "SchedulerItem.h"
-#include "Log.h"
 
 SchedulerItem::SchedulerItem(int _type, int _priority)
     : type(_type), priority(_priority) {

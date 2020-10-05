@@ -5,9 +5,7 @@
 #ifndef DICON_NODEHOST_H
 #define DICON_NODEHOST_H
 
-#include "NodeState.h"
 #include "HostUnit.h"
-#include "ProcessItem.h"
 #include "NodeObject.h"
 
 class NodeHost : public HostUnit, public NodeObject {

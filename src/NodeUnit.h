@@ -5,8 +5,6 @@
 #ifndef DICON_NODEUNIT_H
 #define DICON_NODEUNIT_H
 
-#include "Address.h"
-#include "NodeState.h"
 #include "ComponentUnit.h"
 #include "NodeObject.h"
 

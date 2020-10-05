@@ -35,5 +35,4 @@ public:
     }
 };
 
-
 #endif //DICON_JOBSTATUS_H

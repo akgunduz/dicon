@@ -5,7 +5,10 @@
 #ifndef DICON_NETUTIL_H
 #define DICON_NETUTIL_H
 
+#include <string>
+
 #include "Address.h"
+#include "Platform.h"
 
 #define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"

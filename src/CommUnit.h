@@ -6,6 +6,7 @@
 #define DICON_COMMUNIT_H
 
 #include "BaseUnit.h"
+#include "Address.h"
 
 class CommUnit : public BaseUnit {
 

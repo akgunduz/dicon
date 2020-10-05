@@ -2,7 +2,13 @@
 // Created by akgunduz on 26.10.2015.
 //
 
+#include <list>
+#include <climits>
+#include <fstream>
+#include <miniz/miniz.h>
+
 #include "JobItem.h"
+#include "Log.h"
 
 JobItem::JobItem(const TypeHostUnit& host, const std::filesystem::path& jobPath, long _jobID)
         : FileItem(host, _jobID, _jobID, JOB_FILE) {

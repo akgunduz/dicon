@@ -4,8 +4,6 @@
 
 #include "CollectorUnit.h"
 
-#include <utility>
-
 CollectorUnit::CollectorUnit(COLLSTATES _state, ARCH _arch, long _id, TypeAddress _address)
         : CollectorObject(_state), ComponentUnit(COMP_COLLECTOR, _arch, _id, std::move(_address)) {
 }
