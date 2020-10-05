@@ -6,7 +6,9 @@
 #include "CommInterface.h"
 #include "Log.h"
 #include "UvUtil.h"
+#include "Scheduler.h"
 #include "MessageItem.h"
+#include "CommInterfaceCB.h"
 
 CommInterface::CommInterface(TypeHostUnit _host, const TypeDevice& _device,
                              const CommInterfaceCB *receiverCB)

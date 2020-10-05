@@ -11,7 +11,9 @@
 #include <test/TestApp.h>
 #endif
 
+#include "DeviceList.h"
 #include "NetUtil.h"
+#include "Log.h"
 
 enum APPPARAM {
     APPPARAM_OK,

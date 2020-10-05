@@ -5,6 +5,9 @@
 
 #include <NetUtil.h>
 #include <DistributorHost.h>
+#include "ComponentFactory.h"
+#include "NodeManager.h"
+#include "CollectorManager.h"
 #include "WebApp.h"
 
 bool WebApp::distHandler(struct mg_connection *conn, const char * uri) {

@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include "Scheduler.h"
+#include "CommInterfaceCB.h"
 #include "Log.h"
 
 Scheduler::~Scheduler() {

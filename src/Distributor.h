@@ -7,8 +7,9 @@
 #define	DICON_DISTRIBUTOR_H
 
 #include "Component.h"
-#include "NodeManager.h"
-#include "CollectorManager.h"
+
+class CollectorManager;
+class NodeManager;
 
 class Distributor : public Component {
 

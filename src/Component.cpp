@@ -4,6 +4,7 @@
 
 #include "Component.h"
 #include "CommInterfaceFactory.h"
+#include "CommInterfaceCB.h"
 #include "DeviceList.h"
 #include "MessageItem.h"
 #include "Log.h"

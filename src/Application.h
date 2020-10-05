@@ -6,9 +6,9 @@
 #ifndef DICON_APPLICATION_H
 #define DICON_APPLICATION_H
 
-#include "ComponentFactory.h"
-#include "DeviceList.h"
-#include "Log.h"
+#include <vector>
+#include "ComponentType.h"
+#include "NotifyType.h"
 
 enum APPTYPE {
 
@@ -17,6 +17,10 @@ enum APPTYPE {
     APPTYPE_TEST,
     APPTYPE_MAX
 };
+
+struct LogInfo;
+class ComponentFactory;
+class DeviceList;
 
 class App {
 

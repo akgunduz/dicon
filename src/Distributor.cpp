@@ -6,7 +6,8 @@
 #include "Distributor.h"
 #include "DistributorHost.h"
 #include "NetUtil.h"
-#include "CollectorUnit.h"
+#include "NodeManager.h"
+#include "CollectorManager.h"
 #include "Log.h"
 
 Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) :

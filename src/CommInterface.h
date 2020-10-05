@@ -8,7 +8,6 @@
 #include <uv.h>
 #include <thread>
 #include "Message.h"
-#include "Scheduler.h"
 #include "Device.h"
 
 #define TRY_COUNT 10
@@ -25,6 +24,9 @@ enum STATUS {
     STATUS_DONE,
     STATUS_SHUTDOWN,
 };
+
+class CommInterfaceCB;
+class Scheduler;
 
 class CommInterface {
 

@@ -4,7 +4,10 @@
 //
 
 #include "Application.h"
+#include "ComponentFactory.h"
+#include "DeviceList.h"
 #include "Util.h"
+#include "Log.h"
 
 App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vector<int> componentCount, bool autoWake) :
         type(type) {

@@ -6,8 +6,12 @@
 #ifndef DICON_WEBAPP_H
 #define DICON_WEBAPP_H
 
+#include <mutex>
+#include <HostUnit.h>
+#include <CommInterface.h>
 #include "civetweb/civetweb.h"
 #include "Application.h"
+#include "Platform.h"
 
 #define PORT "8081"
 #define MAIN_URI "/"

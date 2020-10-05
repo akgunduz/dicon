@@ -7,6 +7,8 @@
 #define DICON_NODE_H
 
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 #include "Component.h"
 
 class Node : public Component {

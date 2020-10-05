@@ -3,9 +3,11 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cstring>
 #include <Util.h>
 #include <CollectorHost.h>
 #include "WebApp.h"
+#include "ComponentFactory.h"
 
 bool WebApp::collHandler(struct mg_connection *conn, const char * uri) {
 

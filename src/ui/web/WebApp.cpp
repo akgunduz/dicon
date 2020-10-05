@@ -3,9 +3,11 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
+#include "ComponentFactory.h"
 #include "WebApp.h"
 #include "WebOption.h"
 #include "Platform.h"
+#include "Log.h"
 
 #define MAIN_PAGE WEB_DOCUMENT_ROOT "./index.html"
 
