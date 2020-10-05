@@ -132,6 +132,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     nlohmann::json componentList;
 
+    componentList["_distItem"] = distItem;
     componentList["_collList"] = collList;
     componentList["_nodeList"] = nodeList;
 
