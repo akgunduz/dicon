@@ -52,7 +52,7 @@ bool CommTCP::initTCP() {
 
         if (result < 0 || tcpServer->delayed_error != 0) {
 
-            LOGS_E(getHost(), "Could not bind to socket at address : %s, trying next one!!!",
+            LOGS_D(getHost(), "Could not bind to socket at address : %s, trying next one!!!",
                    NetUtil::getIPPortString(address->get()).c_str());
 
             address->setPort(lastFreeTCPPort++);

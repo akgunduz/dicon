@@ -609,9 +609,11 @@
             }
 
             let data = JSON.parse(this.responseText);
+
             document.getElementById("dist-address").innerHTML = data._distItem._address;
             document.getElementById("dist-web-address").innerHTML = data._distItem._webAddress;
             document.getElementById("dist-arch").innerHTML = ARCH_TYPES[data._distItem._arch];
+
             onDistUpdateCollList(data);
             onDistUpdateNodeList(data);
         };
