@@ -6,6 +6,7 @@
 #include <CollectorUnit.h>
 #include <NodeUnit.h>
 #include <NetUtil.h>
+#include <DistributorHost.h>
 #include "WebApp.h"
 #include "WebOption.h"
 
@@ -84,14 +85,14 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         return false;
     }
 
-    auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
+    auto distributorHost = std::static_pointer_cast<DistributorHost>(distributor->getHost());
 
     nlohmann::json distItem;
 
-    distItem["_id"] = distributor->getID();
-    distItem["_arch"] = distributor->getArch();
-    distItem["_address"] = NetUtil::getIPPortString(collector->getAddress()->get());
-    distItem["_webAddress"] = NetUtil::getIPPortString(collector->getAddress()->getUI());
+    distItem["_id"] = distributorHost->getID();
+    distItem["_arch"] = distributorHost->getArch();
+    distItem["_address"] = NetUtil::getIPPortString(distributorHost->getAddress(COMP_NODE)->get());
+    distItem["_webAddress"] = NetUtil::getIPPortString(distributorHost->getAddress(COMP_NODE)->getUI());
 
     nlohmann::json collList;
 
