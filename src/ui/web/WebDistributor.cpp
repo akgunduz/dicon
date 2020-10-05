@@ -84,6 +84,15 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         return false;
     }
 
+    auto collector = std::static_pointer_cast<CollectorUnit>(collectorPair.second);
+
+    nlohmann::json distItem;
+
+    distItem["_id"] = distributor->getID();
+    distItem["_arch"] = distributor->getArch();
+    distItem["_address"] = NetUtil::getIPPortString(collector->getAddress()->get());
+    distItem["_webAddress"] = NetUtil::getIPPortString(collector->getAddress()->getUI());
+
     nlohmann::json collList;
 
     for (auto& collectorPair : componentFactory->getDistributor()->getCollectors()->get()) {

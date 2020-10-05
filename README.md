@@ -343,7 +343,11 @@ There are two different types of user interface is designed to test the architec
 
 To test the whole architecture, all distributor, collectors and nodes should be initialized. If they are going to test with single UI, then all the initialize actions should be triggered in all tabs. Address bind operation is based on the availability of the ethernet NICs and Unix sockets. If there is limited number of NIC is available then differentiation is handled with selecting different port numbers automatically.
 
-After the application is initialized it opens web interface through **8081** port, then operator can trig the polling command with **Poll** button through distributor UI. Whenever a collector or node returns alive messages, a dedicated tab created for them on the left side of the screen.
+After the application is initialized it opens web interface through **8081** port, distributor starts to send **Wakeup** messages to network from all open communication interfaces. It resend these messages at every 5 seconds, every component in the network replies to these messages with **Alive** messages.
+
+If a component does not send a reply message in 2 seconds, then distributor marks the corresponding component as dead. If its type is Node and was in Busy state, then distributor initiates the **recovery** procedure, replaces the node with another node and reinitiates the node assignment process. 
+
+Whenever a collector or node returns alive messages, a dedicated tab created for them on the left side of the screen.
 
 ![alt text](docs/Distributor.png)
 

@@ -148,9 +148,22 @@
 
 <div id="distributor-block" class="component-block" style="display: block;">
     <h1  style="margin-bottom: 1rem;">Distributor</h1>
-    <button type="button" class="button btn-full-width" onclick="onDistPoll()" hidden>
-        Poll
-    </button>
+    <div class="standard-container" style="margin-bottom: 2rem;">
+        <div class="horizontal-container">
+            <div class="horizontal-container" style="margin-right: 1rem">
+                <h5>Address : </h5>
+                <h5 id="dist-address">0</h5>
+            </div>
+            <div class="horizontal-container" style="margin-left: 1rem">
+                <h5>Web Address : </h5>
+                <h5 id="dist-web-address">0</h5>
+            </div>
+        </div>
+        <div class="horizontal-container">
+            <h5>Architecture : </h5>
+            <h5 id="dist-arch">arm64-linux</h5>
+        </div>
+    </div>
     <div class="horizontal-container">
         <div class="single-container">
             <button id="dist-add-coll-btn" type="button" class="button btn-full-width"
@@ -545,7 +558,13 @@
     function onDistClick(component) {
 
         currentComponent = distributorComponent;
+
         componentPageSwitch(DISTRIBUTOR);
+
+        document.getElementById("dist-address").innerHTML = component.address;
+        document.getElementById("dist-web-address").innerHTML = component.webAddress;
+        document.getElementById("dist-arch").innerHTML = ARCH_TYPES[component.arch];
+
         onDistState();
     }
 
