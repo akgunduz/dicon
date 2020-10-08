@@ -10,6 +10,7 @@
 #include "ProcessFile.h"
 
 enum PROCESS_OPTIONS {
+	PROCESS_EXEC,
 	PROCESS_INPUT,
 	PROCESS_PARAM,
 	PROCESS_OUTPUT,
@@ -46,7 +47,7 @@ public:
     size_t getFileCount();
     TypeProcessFile getFile(const TypeProcessFile&);
     const TypeProcessFileList& getFileList();
-    void addFile(const TypeFileItem&, long, bool);
+    void addFile(const TypeFileItem&, long, PROCESS_FILE_OPTIONS);
     void addFile(const TypeProcessFile&);
     void addFileList(const TypeProcessFileList&);
 

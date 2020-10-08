@@ -36,6 +36,12 @@ bool ProcessItem::parse(void *job) {
                 //no break
 
             case 'F': case 'f':
+                if (cmdMode) {
+                    cmdType = PROCESS_EXEC;
+                    break;
+                }
+                //no break
+
             case 'I': case 'i':
                 if (cmdMode) {
                     cmdType = PROCESS_INPUT;
@@ -93,6 +99,7 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
     switch (cmdType) {
 
+        case PROCESS_EXEC:
         case PROCESS_INPUT:
 		case PROCESS_OUTPUT: {
 
@@ -103,7 +110,8 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
                 parsedProcess = parsedProcess + ROOT_SIGN + "/" +
                         std::to_string(content->getAssignedJob()) + "/" + content->getName();
 
-				addFile(content, getID(), cmdType == PROCESS_OUTPUT);
+				addFile(content, getID(), cmdType == PROCESS_OUTPUT ?
+				    PROCESS_FILE_OUTPUT : cmdType == PROCESS_EXEC ? PROCESS_FILE_EXEC : PROCESS_FILE_INPUT);
 
 				return true;
             }
@@ -197,9 +205,9 @@ const TypeProcessFileList& ProcessItem::getFileList() {
 	return fileList;
 }
 
-void ProcessItem::addFile(const TypeFileItem& file, long processID, bool isOutput) {
+void ProcessItem::addFile(const TypeFileItem& file, long processID, PROCESS_FILE_OPTIONS fileType) {
 
-    fileList.emplace_back(std::make_shared<ProcessFile>(file, processID, isOutput));
+    fileList.emplace_back(std::make_shared<ProcessFile>(file, processID, fileType));
 }
 
 void ProcessItem::addFile(const TypeProcessFile& processFile) {

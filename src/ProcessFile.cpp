@@ -4,8 +4,8 @@
 
 #include "ProcessFile.h"
 
-ProcessFile::ProcessFile(TypeFileItem _content, long _processID, bool _is_output)
-    : processID(_processID), content(_content), is_output(_is_output) {
+ProcessFile::ProcessFile(TypeFileItem _content, long _processID, PROCESS_FILE_OPTIONS _fileType)
+    : processID(_processID), content(std::move(_content)), fileType(_fileType) {
 }
 
 long ProcessFile::getAssignedProcess() const {
@@ -25,10 +25,23 @@ TypeFileItem ProcessFile::get() {
 
 bool ProcessFile::isOutput() const {
 
-    return is_output;
+    return fileType == PROCESS_FILE_OUTPUT;
 }
 
 void ProcessFile::setOutputState(bool _is_output) {
 
-    is_output = _is_output;
+    if (fileType == PROCESS_FILE_OUTPUT && !_is_output) {
+        fileType = PROCESS_FILE_INPUT;
+        return;
+    }
+
+    if (fileType == PROCESS_FILE_INPUT && _is_output) {
+        fileType = PROCESS_FILE_OUTPUT;
+        return;
+    }
+}
+
+bool ProcessFile::isExecutable() const {
+
+    return fileType == PROCESS_FILE_EXEC;
 }

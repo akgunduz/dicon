@@ -22,6 +22,7 @@ public:
 private:
     bool is_exist{};
 	bool is_required{};
+
     std::uintmax_t size{};
 
 public:

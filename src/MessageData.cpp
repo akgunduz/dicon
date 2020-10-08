@@ -11,7 +11,7 @@ MessageData::MessageData(const TypeHostUnit& host) {
 
     file = std::make_shared<FileItem>(host, true);
 
-    processFile = std::make_shared<ProcessFile>(file, 0, false);
+    processFile = std::make_shared<ProcessFile>(file);
 }
 
 const TypeFileItem& MessageData::getFile() {
