@@ -2,7 +2,7 @@
 // Created by akgun on 18.09.2020.
 //
 
-#include <UvUtil.h>
+#include <UtilUV.h>
 #include "TestApp.h"
 
 void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
@@ -26,7 +26,7 @@ void TestApp::testProcessExecute(TypeDistributor& distributor, TypeCollector& co
            process->getProcess().c_str(),
            parsedCmd.c_str());
 
-    UvUtil::executeProcess(parsedCmd, uv_default_loop(), (void *) collector.get(), [] (void *data) -> bool {
+    UtilUV::executeProcess(parsedCmd, uv_default_loop(), (void *) collector.get(), [] (void *data) -> bool {
 
         auto collector = (Collector*) data;
 

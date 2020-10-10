@@ -4,8 +4,8 @@
 //
 
 #include "CommPipe.h"
-#include "NetUtil.h"
-#include "UvUtil.h"
+#include "UtilNet.h"
+#include "UtilUV.h"
 #include "Util.h"
 #include "CommData.h"
 #include "Log.h"
@@ -49,7 +49,7 @@ bool CommPipe::initPipe() {
 
     while (tryCount--) {
 
-        sockaddr_un serverAddress = NetUtil::getUnixAddress(address);
+        sockaddr_un serverAddress = UtilNet::getUnixAddress(address);
 
         result = uv_pipe_bind(pipeServer, serverAddress.sun_path);
 
@@ -91,12 +91,12 @@ bool CommPipe::initPipe() {
 
         LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
-        UvUtil::onClose((uv_handle_t *)pipeServer);
+        UtilUV::onClose((uv_handle_t *)pipeServer);
 
         return false;
     }
 
-    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address->get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", UtilNet::getIPPortString(address->get()).c_str());
 
     return true;
 }
@@ -105,16 +105,16 @@ bool CommPipe::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf
 
     if (nRead == 0) {
 
-        UvUtil::onFree(buf);
+        UtilUV::onFree(buf);
 
         return false;
     }
 
     if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-        UvUtil::onClose((uv_handle_t*)client);
+        UtilUV::onClose((uv_handle_t*)client);
 
-        UvUtil::onFree(buf);
+        UtilUV::onFree(buf);
 
         return true;
     }
@@ -135,7 +135,7 @@ bool CommPipe::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf
         commInterface->shutdown();
     }
 
-    UvUtil::onFree(buf);
+    UtilUV::onFree(buf);
 
     return false;
 }
@@ -152,7 +152,7 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
             [](uv_write_t *writeReq, int status) {
 
-                UvUtil::onClose((uv_handle_t*)writeReq->handle);
+                UtilUV::onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 
@@ -190,16 +190,16 @@ bool CommPipe::onServerConnect() {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        UvUtil::onClose((uv_handle_t *)&client);
+        UtilUV::onClose((uv_handle_t *)&client);
 
         return false;
     }
 
     client->data = new CommData(this);
 
-    result = uv_read_start((uv_stream_t *) client, UvUtil::onAlloc,
+    result = uv_read_start((uv_stream_t *) client, UtilUV::onAlloc,
 
-            [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
+                           [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
                 onReceive((uv_handle_t*)client, nRead, buf);
             });
@@ -208,7 +208,7 @@ bool CommPipe::onServerConnect() {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
-        UvUtil::onClose((uv_handle_t *)&client);
+        UtilUV::onClose((uv_handle_t *)&client);
 
         return false;
     }
@@ -233,7 +233,7 @@ bool CommPipe::onSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     client->data = new CommData(this, target, msg);
 
-    sockaddr_un clientAddress = NetUtil::getUnixAddress(target->getAddress());
+    sockaddr_un clientAddress = UtilNet::getUnixAddress(target->getAddress());
 
     auto *connectReq = (uv_connect_t *) calloc(1, sizeof(uv_connect_t));
 

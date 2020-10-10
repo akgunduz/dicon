@@ -2,8 +2,8 @@
 // Created by akgun on 18.09.2020.
 //
 
-#ifndef DICON_UVUTIL_H
-#define DICON_UVUTIL_H
+#ifndef DICON_UTILUV_H
+#define DICON_UTILUV_H
 
 #include <uv.h>
 #include "ProcessData.h"
@@ -11,7 +11,7 @@
 #define PROCESS_SLEEP_TIME 1000
 #define PROCESS_TRY_COUNT 10
 
-class UvUtil {
+class UtilUV {
 
     public:
 
@@ -26,4 +26,4 @@ class UvUtil {
 };
 
 
-#endif //DICON_UVUTIL_H
+#endif //DICON_UTILUV_H

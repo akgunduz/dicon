@@ -4,10 +4,10 @@
 
 #include <cassert>
 #include <thread>
-#include "UvUtil.h"
+#include "UtilUV.h"
 #include "Log.h"
 
-void UvUtil::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
+void UtilUV::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
 
     buf->base = (char *) malloc(size);
 
@@ -19,7 +19,7 @@ void UvUtil::onAlloc(uv_handle_t* handle, size_t size, uv_buf_t* buf) {
 
 }
 
-void UvUtil::onFree(const uv_buf_t *buf) {
+void UtilUV::onFree(const uv_buf_t *buf) {
 
     //LOGP_E("DeAllocating Buffer, Pointer : %p", buf->base);
 
@@ -27,7 +27,7 @@ void UvUtil::onFree(const uv_buf_t *buf) {
 
 }
 
-void UvUtil::onClose(uv_handle_t* handle) {
+void UtilUV::onClose(uv_handle_t* handle) {
 
     if (!handle) {
         return;
@@ -49,7 +49,7 @@ void UvUtil::onClose(uv_handle_t* handle) {
 
 }
 
-void UvUtil::onShutdown(uv_stream_t* client) {
+void UtilUV::onShutdown(uv_stream_t* client) {
 
     auto *shutdown_req = (uv_shutdown_t *) calloc(1, sizeof(uv_shutdown_t));
 
@@ -66,7 +66,7 @@ void UvUtil::onShutdown(uv_stream_t* client) {
     });
 }
 
-void UvUtil::onCloseAll(uv_loop_t *loop) {
+void UtilUV::onCloseAll(uv_loop_t *loop) {
 
     uv_walk(loop, [](uv_handle_t *handle, void *arg) {
 
@@ -77,7 +77,7 @@ void UvUtil::onCloseAll(uv_loop_t *loop) {
     }, nullptr);
 }
 
-bool UvUtil::executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void *data, TypeOnProcessSuccess onProcessSuccessCB) {
+bool UtilUV::executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void *data, TypeOnProcessSuccess onProcessSuccessCB) {
 
     std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
 
@@ -92,7 +92,7 @@ bool UvUtil::executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void 
     return onExecuteProcess(loop, new ProcessData(parsedCmd, data, onProcessExit, onProcessSuccessCB));
 }
 
-bool UvUtil::onExecuteProcess(uv_loop_t* loop, ProcessData* processData) {
+bool UtilUV::onExecuteProcess(uv_loop_t* loop, ProcessData* processData) {
 
     auto childProcess = (uv_process_t *) calloc(1, sizeof(uv_process_t));
     if (childProcess) {
@@ -123,7 +123,7 @@ bool UvUtil::onExecuteProcess(uv_loop_t* loop, ProcessData* processData) {
     return uv_run(loop, UV_RUN_DEFAULT);
 }
 
-void UvUtil::onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal) {
+void UtilUV::onProcessExit(uv_process_t* childProcess, int64_t exit_status, int term_signal) {
 
     auto loop = childProcess->loop;
 

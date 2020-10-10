@@ -2,8 +2,8 @@
 // Created by Haluk AKGUNDUZ on 4.08.2020.
 //
 
-#ifndef DICON_NETUTIL_H
-#define DICON_NETUTIL_H
+#ifndef DICON_UTILNET_H
+#define DICON_UTILNET_H
 
 #include <string>
 
@@ -13,7 +13,7 @@
 #define UNIXSOCKET_FILE_PREFIX "dicon_"
 #define UNIXSOCKET_FILE_SUFFIX ".sock"
 
-class NetUtil {
+class UtilNet {
 
 public:
 
@@ -32,4 +32,4 @@ public:
     static void cleanUnixPath();
 };
 
-#endif //DICON_NETUTIL_H
+#endif //DICON_UTILNET_H

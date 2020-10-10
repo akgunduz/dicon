@@ -12,7 +12,7 @@
 #endif
 
 #include "DeviceList.h"
-#include "NetUtil.h"
+#include "UtilNet.h"
 #include "Log.h"
 
 enum APPPARAM {
@@ -65,7 +65,7 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
 
         } else if (!strcmp(argv[i], "-x")) {
 
-            NetUtil::cleanUnixPath();
+            UtilNet::cleanUnixPath();
 
         } else if (!strcmp(argv[i], "-t")) {
 

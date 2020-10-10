@@ -3,7 +3,7 @@
 // Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
-#include <NetUtil.h>
+#include <UtilNet.h>
 #include <DistributorHost.h>
 #include "ComponentFactory.h"
 #include "NodeManager.h"
@@ -91,8 +91,8 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
 
     distItem["_id"] = distributorHost->getID();
     distItem["_arch"] = distributorHost->getArch();
-    distItem["_address"] = NetUtil::getIPPortString(distributorHost->getAddress(COMP_NODE)->get());
-    distItem["_webAddress"] = NetUtil::getIPPortString(distributorHost->getAddress(COMP_NODE)->getUI());
+    distItem["_address"] = UtilNet::getIPPortString(distributorHost->getAddress(COMP_NODE)->get());
+    distItem["_webAddress"] = UtilNet::getIPPortString(distributorHost->getAddress(COMP_NODE)->getUI());
 
     nlohmann::json collList;
 
@@ -105,8 +105,8 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         collItem["_id"] = collector->getID();
         collItem["_arch"] = collector->getArch();
         collItem["_state"] = collector->getState();
-        collItem["_address"] = NetUtil::getIPPortString(collector->getAddress()->get());
-        collItem["_webAddress"] = NetUtil::getIPPortString(collector->getAddress()->getUI());
+        collItem["_address"] = UtilNet::getIPPortString(collector->getAddress()->get());
+        collItem["_webAddress"] = UtilNet::getIPPortString(collector->getAddress()->getUI());
 
         collList += collItem;
 
@@ -123,8 +123,8 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
         nodeItem["_id"] = node->getID();
         nodeItem["_arch"] = node->getArch();
         nodeItem["_state"] = node->getState();
-        nodeItem["_address"] = NetUtil::getIPPortString(node->getAddress()->get());
-        nodeItem["_webAddress"] = NetUtil::getIPPortString(node->getAddress()->getUI());
+        nodeItem["_address"] = UtilNet::getIPPortString(node->getAddress()->get());
+        nodeItem["_webAddress"] = UtilNet::getIPPortString(node->getAddress()->getUI());
 
         nodeList += nodeItem;
 

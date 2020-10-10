@@ -7,7 +7,7 @@
 #include "NodeHost.h"
 #include "Log.h"
 #include "Util.h"
-#include "UvUtil.h"
+#include "UtilUV.h"
 
 Node::Node(int _commInterface) :
     Component(std::make_shared<NodeHost>()) {
@@ -287,7 +287,7 @@ void Node::spawnProcess() {
         LOGS_I(getHost(), "Collector[%d]:Process[%d] Command : %s",
                nodeHost->getAssigned()->getID(), processItem->getID(), parsedCmd.c_str());
 
-        UvUtil::executeProcess(parsedCmd, &processLoop, this, onProcessSuccess);
+        UtilUV::executeProcess(parsedCmd, &processLoop, this, onProcessSuccess);
     }
 
     uv_loop_close(&processLoop);

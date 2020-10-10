@@ -62,7 +62,6 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageItem.cpp
         ${SOURCE_PATH}/MessageType.cpp
-        ${SOURCE_PATH}/NetUtil.cpp
         ${SOURCE_PATH}/Node.cpp
         ${SOURCE_PATH}/NodeHost.cpp
         ${SOURCE_PATH}/NodeManager.cpp
@@ -75,9 +74,10 @@ set(FRAMEWORK_FILES
         ${SOURCE_PATH}/Scheduler.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
         ${SOURCE_PATH}/SchedulerItem.cpp
-        ${SOURCE_PATH}/UtilTime.cpp
         ${SOURCE_PATH}/Util.cpp
-        ${SOURCE_PATH}/UvUtil.cpp
+        ${SOURCE_PATH}/UtilNet.cpp
+        ${SOURCE_PATH}/UtilTime.cpp
+        ${SOURCE_PATH}/UtilUV.cpp
         )
 
 set(CONSOLE_FILES

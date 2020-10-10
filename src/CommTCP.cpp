@@ -4,8 +4,8 @@
 //
 
 #include "CommTCP.h"
-#include "NetUtil.h"
-#include "UvUtil.h"
+#include "UtilNet.h"
+#include "UtilUV.h"
 #include "CommData.h"
 #include "Log.h"
 
@@ -48,14 +48,14 @@ bool CommTCP::initTCP() {
 
     while (tryCount--) {
 
-        struct sockaddr_in serverAddress = NetUtil::getInetAddressByAddress(address);
+        struct sockaddr_in serverAddress = UtilNet::getInetAddressByAddress(address);
 
         result = uv_tcp_bind(tcpServer, (const struct sockaddr *) &serverAddress, 0);
 
         if (result < 0 || tcpServer->delayed_error != 0) {
 
             LOGS_D(getHost(), "Could not bind to socket at address : %s, trying next one!!!",
-                   NetUtil::getIPPortString(address->get()).c_str());
+                   UtilNet::getIPPortString(address->get()).c_str());
 
             address->setPort(lastFreeTCPPort++);
 
@@ -93,12 +93,12 @@ bool CommTCP::initTCP() {
 
         LOGS_E(getHost(), "Socket listen with err : %s", uv_err_name(result));
 
-        UvUtil::onClose((uv_handle_t *)tcpServer);
+        UtilUV::onClose((uv_handle_t *)tcpServer);
 
         return false;
     }
 
-    LOGS_T(getHost(), "Using address : %s", NetUtil::getIPPortString(address->get()).c_str());
+    LOGS_T(getHost(), "Using address : %s", UtilNet::getIPPortString(address->get()).c_str());
 
     return true;
 }
@@ -122,7 +122,7 @@ bool CommTCP::initUDP() {
 
     while (tryCount--) {
 
-        struct sockaddr_in serverAddress = NetUtil::getInetAddressByPort(lastFreeUDPPort);
+        struct sockaddr_in serverAddress = UtilNet::getInetAddressByPort(lastFreeUDPPort);
 
         result = uv_udp_bind(udpServer, (const struct sockaddr *) &serverAddress, UV_UDP_REUSEADDR);
 
@@ -140,28 +140,28 @@ bool CommTCP::initUDP() {
 
         LOGS_E(getHost(), "Could not bind to socket!!!");
 
-        UvUtil::onClose((uv_handle_t*)udpServer);
+        UtilUV::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
-    result = uv_udp_set_membership(udpServer, NetUtil::getIPString(multicastAddress->get()).c_str(),
-                          NetUtil::getIPString(address->get()).c_str(), UV_JOIN_GROUP);
+    result = uv_udp_set_membership(udpServer, UtilNet::getIPString(multicastAddress->get()).c_str(),
+                                   UtilNet::getIPString(address->get()).c_str(), UV_JOIN_GROUP);
 
     if (result != 0) {
 
         LOGS_E(getHost(), "Can not join to multicast group!!!");
 
-        UvUtil::onClose((uv_handle_t*)udpServer);
+        UtilUV::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
     udpServer->data = new CommData(this);
 
-    result = uv_udp_recv_start(udpServer, UvUtil::onAlloc,
+    result = uv_udp_recv_start(udpServer, UtilUV::onAlloc,
 
-            [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
+                               [](uv_udp_t *client, ssize_t nRead, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags) {
 
                 onReceive((uv_handle_t*)client, nRead, buf);
@@ -171,12 +171,12 @@ bool CommTCP::initUDP() {
 
         LOGS_E(getHost(), "Can not start receiving UDP data!!!");
 
-        UvUtil::onClose((uv_handle_t*)udpServer);
+        UtilUV::onClose((uv_handle_t*)udpServer);
 
         return false;
     }
 
-    LOGS_T(getHost(), "Using multicast address : %s", NetUtil::getIPPortString(multicastAddress->get()).c_str());
+    LOGS_T(getHost(), "Using multicast address : %s", UtilNet::getIPPortString(multicastAddress->get()).c_str());
 
     return true;
 }
@@ -185,16 +185,16 @@ bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf)
 
     if (nRead == 0) {
 
-        UvUtil::onFree(buf);
+        UtilUV::onFree(buf);
 
         return false;
     }
 
     if (nRead == UV_EOF || nRead == UV_ECONNRESET) {
 
-        UvUtil::onClose((uv_handle_t*)client);
+        UtilUV::onClose((uv_handle_t*)client);
 
-        UvUtil::onFree(buf);
+        UtilUV::onFree(buf);
 
         return true;
     }
@@ -215,7 +215,7 @@ bool CommTCP::onReceive(uv_handle_t* client, ssize_t nRead, const uv_buf_t *buf)
         commInterface->shutdown();
     }
 
-    UvUtil::onFree(buf);
+    UtilUV::onFree(buf);
 
     return false;
 }
@@ -232,7 +232,7 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
             [](uv_write_t *writeReq, int status) {
 
-                UvUtil::onClose((uv_handle_t*)writeReq->handle);
+                UtilUV::onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 
@@ -257,7 +257,7 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
     auto *writeReq = (uv_udp_send_t *) calloc(1, sizeof(uv_udp_send_t));
 
-    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+    sockaddr_in clientAddress = UtilNet::getInetAddressByAddress(target->getAddress());
 
     int result = uv_udp_send(writeReq, (uv_udp_t *) target->getHandle(), &bufPtr,
 
@@ -265,7 +265,7 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
          [](uv_udp_send_t *writeReq, int status) {
 
-             UvUtil::onClose((uv_handle_t*)writeReq->handle);
+             UtilUV::onClose((uv_handle_t*)writeReq->handle);
 
              free(writeReq);
 
@@ -303,16 +303,16 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
 
-        UvUtil::onClose((uv_handle_t *)&client);
+        UtilUV::onClose((uv_handle_t *)&client);
 
         return false;
     }
 
     client->data = new CommData(this);
 
-    result = uv_read_start((uv_stream_t *) client, UvUtil::onAlloc,
+    result = uv_read_start((uv_stream_t *) client, UtilUV::onAlloc,
 
-            [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
+                           [](uv_stream_t *client, ssize_t nRead, const uv_buf_t *buf) {
 
                 onReceive((uv_handle_t*)client, nRead, buf);
             });
@@ -321,7 +321,7 @@ bool CommTCP::onServerConnect() {
 
         LOGS_E(getHost(), "Read start with err : %s!!!", uv_err_name(result));
 
-        UvUtil::onClose((uv_handle_t *)&client);
+        UtilUV::onClose((uv_handle_t *)&client);
 
         return false;
     }
@@ -346,7 +346,7 @@ bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
     client->data = new CommData(this, target, msg);
 
-    sockaddr_in clientAddress = NetUtil::getInetAddressByAddress(target->getAddress());
+    sockaddr_in clientAddress = UtilNet::getInetAddressByAddress(target->getAddress());
 
     auto *connectReq = (uv_connect_t *) calloc(1, sizeof(uv_connect_t));
 
@@ -422,7 +422,7 @@ bool CommTCP::onUDPSend(const TypeComponentUnit &target, TypeMessage msg) {
         return false;
     }
 
-    result = uv_udp_set_multicast_interface(client, NetUtil::getIPString(address->get()).c_str());
+    result = uv_udp_set_multicast_interface(client, UtilNet::getIPString(address->get()).c_str());
 
     if (result != 0) {
 

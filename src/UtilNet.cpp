@@ -2,17 +2,17 @@
 // Created by Haluk AKGUNDUZ on 4.08.2020.
 //
 
-#include "NetUtil.h"
+#include "UtilNet.h"
 #include "Util.h"
 
-std::string NetUtil::getIPPortString(BaseAddress& address) {
+std::string UtilNet::getIPPortString(BaseAddress& address) {
 
     char sAddress[50];
     sprintf(sAddress, "%s:%u", getIPString(address).c_str(), address.port);
     return std::string(sAddress);
 }
 
-std::string NetUtil::getIPString(uint32_t address) {
+std::string UtilNet::getIPString(uint32_t address) {
 
     struct in_addr addr{};
     addr.s_addr = htonl(address);
@@ -26,12 +26,12 @@ std::string NetUtil::getIPString(uint32_t address) {
     return std::string(cIP);
 }
 
-std::string NetUtil::getIPString(BaseAddress& address) {
+std::string UtilNet::getIPString(BaseAddress& address) {
 
     return getIPString(address.base);
 }
 
-std::string NetUtil::getIPString(const sockaddr_in *address) {
+std::string UtilNet::getIPString(const sockaddr_in *address) {
 
     char cIP[INET_ADDRSTRLEN];
 
@@ -43,7 +43,7 @@ std::string NetUtil::getIPString(const sockaddr_in *address) {
     return std::string(cIP);
 }
 
-long NetUtil::parseIPAddress(const std::string& address) {
+long UtilNet::parseIPAddress(const std::string& address) {
 
     struct in_addr addr{};
 
@@ -55,7 +55,7 @@ long NetUtil::parseIPAddress(const std::string& address) {
     return ntohl(addr.s_addr);
 }
 
-BaseAddress NetUtil::parseIPPortString(const std::string& address) {
+BaseAddress UtilNet::parseIPPortString(const std::string& address) {
 
     size_t pos = address.find(':');
 
@@ -70,7 +70,7 @@ BaseAddress NetUtil::parseIPPortString(const std::string& address) {
 }
 
 
-sockaddr_in NetUtil::getInetAddressByAddress(TypeAddress& address) {
+sockaddr_in UtilNet::getInetAddressByAddress(TypeAddress& address) {
 
     sockaddr_in inet_addr{};
 
@@ -80,7 +80,7 @@ sockaddr_in NetUtil::getInetAddressByAddress(TypeAddress& address) {
     return inet_addr;
 }
 
-sockaddr_in NetUtil::getInetAddressByPort(int port) {
+sockaddr_in UtilNet::getInetAddressByPort(int port) {
 
     sockaddr_in inet_addr{};
 
@@ -90,7 +90,7 @@ sockaddr_in NetUtil::getInetAddressByPort(int port) {
     return inet_addr;
 }
 
-ip_mreq NetUtil::getInetMulticastAddress(TypeAddress& address, TypeAddress& multicastAddress) {
+ip_mreq UtilNet::getInetMulticastAddress(TypeAddress& address, TypeAddress& multicastAddress) {
 
     ip_mreq imReq{};
 
@@ -99,7 +99,7 @@ ip_mreq NetUtil::getInetMulticastAddress(TypeAddress& address, TypeAddress& mult
     return imReq;
 }
 
-sockaddr_un NetUtil::getUnixAddress(TypeAddress& address) {
+sockaddr_un UtilNet::getUnixAddress(TypeAddress& address) {
 
     sockaddr_un unix_addr{};
     unix_addr.sun_family = AF_UNIX;
@@ -112,14 +112,14 @@ sockaddr_un NetUtil::getUnixAddress(TypeAddress& address) {
     return unix_addr;
 }
 
-std::string NetUtil::getUnixString(BaseAddress& address) {
+std::string UtilNet::getUnixString(BaseAddress& address) {
 
     char sAddress[50];
     sprintf(sAddress, "%u", address.base);
     return std::string(sAddress);
 }
 
-void NetUtil::cleanUnixPath() {
+void UtilNet::cleanUnixPath() {
 
     for (const auto& entry : std::filesystem::directory_iterator(Util::tmpPath)) {
 

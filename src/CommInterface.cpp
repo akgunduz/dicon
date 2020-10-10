@@ -5,7 +5,7 @@
 
 #include "CommInterface.h"
 #include "Log.h"
-#include "UvUtil.h"
+#include "UtilUV.h"
 #include "Scheduler.h"
 #include "MessageItem.h"
 #include "CommInterfaceCB.h"
@@ -126,7 +126,7 @@ void CommInterface::shutdown() {
 
     scheduler->shutdown();
 
-    UvUtil::onCloseAll(&produceLoop);
+    UtilUV::onCloseAll(&produceLoop);
 }
 
 STATUS CommInterface::onRead(const TypeComponentUnit &component, TypeMessage &msg,
