@@ -388,7 +388,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     }
 
     if (!onWrite(target, MSGHEADER_BINARY, nullptr, (size_t) fileItem->getSize())) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Number to stream");
+        LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Binary to stream");
         return false;
     }
 

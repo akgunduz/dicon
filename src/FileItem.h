@@ -14,10 +14,6 @@ class FileItem : public ContentItem {
     std::filesystem::path parentPath;
 
     bool is_independent{false};
-public:
-    bool isIndependent() const;
-
-    void setIndependent(bool isIndependent);
 
 private:
     bool is_exist{};
@@ -42,6 +38,9 @@ public:
 
     bool required() const;
     void setRequired(bool);
+
+    bool isIndependent() const;
+    void setIndependent(bool isIndependent);
 
     std::filesystem::path getParentPath();
     std::filesystem::path getParentRefPath();
