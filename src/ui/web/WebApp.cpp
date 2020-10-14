@@ -121,8 +121,8 @@ int WebApp::quitHandler(struct mg_connection *conn) {
     return true;
 }
 
-WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& componentCount)
-    : App(APPTYPE_WEB, interfaceID, _logInfo, componentCount, true) {
+WebApp::WebApp(AppParams& params)
+    : App(APPTYPE_WEB, params) {
 
     if (!initialized) {
         return;
@@ -158,7 +158,7 @@ WebApp::WebApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& comp
         return ((WebApp*) cbData)->restHandler(conn);
     }, this);
 
-    if (componentCount[COMP_DISTRIBUTOR]) {
+    if (params.componentCount[COMP_DISTRIBUTOR]) {
 
         mg_set_request_handler(context, MAIN_URI, [](struct mg_connection *conn, void *cbData) -> int {
             return ((WebApp *) cbData)->mainHandler(conn);

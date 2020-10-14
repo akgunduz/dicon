@@ -9,41 +9,41 @@
 #include "Util.h"
 #include "Log.h"
 
-App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vector<int> componentCount, bool autoWake) :
+App::App(enum APPTYPE type, AppParams& params) :
         type(type) {
 
-    Log::init(_logInfo);
+    Log::init(params.logInfo);
 
     LOGP_I("Using Temp path : %s ", Util::tmpPath.c_str());
 
     deviceList = DeviceList::getInstance();
 
     LOGP_I("Using network interfaces : %s and %s",
-          deviceList->get(interfaces[0])->getName().c_str(),
-          deviceList->get(interfaces[1])->getName().c_str());
+          deviceList->get(params.interfaceID[0])->getName().c_str(),
+          deviceList->get(params.interfaceID[1])->getName().c_str());
 
-    componentFactory = ComponentFactory::newInstance(interfaces);
+    componentFactory = ComponentFactory::newInstance(params.interfaceID);
 
-    if (!componentCount[COMP_DISTRIBUTOR] &&
-        !componentCount[COMP_COLLECTOR] &&
-        !componentCount[COMP_NODE]) {
+    if (!params.componentCount[COMP_DISTRIBUTOR] &&
+        !params.componentCount[COMP_COLLECTOR] &&
+        !params.componentCount[COMP_NODE]) {
             return;
     }
 
-    if (componentCount[COMP_DISTRIBUTOR]) {
-        if (!componentFactory->startDistributor(autoWake)) {
-            return;
-        }
-    }
-
-    if (componentCount[COMP_COLLECTOR]) {
-        if (!componentFactory->startCollector(componentCount[COMP_COLLECTOR])) {
+    if (params.componentCount[COMP_DISTRIBUTOR]) {
+        if (!componentFactory->startDistributor(params.autoWake)) {
             return;
         }
     }
 
-    if (componentCount[COMP_NODE]) {
-        if (!componentFactory->startNode(componentCount[COMP_NODE])) {
+    if (params.componentCount[COMP_COLLECTOR]) {
+        if (!componentFactory->startCollector(params.componentCount[COMP_COLLECTOR])) {
+            return;
+        }
+    }
+
+    if (params.componentCount[COMP_NODE]) {
+        if (!componentFactory->startNode(params.componentCount[COMP_NODE])) {
             return;
         }
     }
@@ -64,7 +64,9 @@ App::App(enum APPTYPE type, int *interfaces, const LogInfo& _logInfo, std::vecto
 
     LOGP_I("Running in %s Mode with %d Distributor, %d Collector and %d Node",
           type == APPTYPE_WEB ? "Web" : "Console",
-          componentCount[COMP_DISTRIBUTOR], componentCount[COMP_COLLECTOR], componentCount[COMP_NODE]);
+           params.componentCount[COMP_DISTRIBUTOR],
+           params.componentCount[COMP_COLLECTOR],
+           params.componentCount[COMP_NODE]);
 }
 
 App::~App() {

@@ -86,7 +86,7 @@ public:
     JOB_PATH checkPath(const std::filesystem::path&);
     bool extract(const std::string&, long&);
 
-    bool check() override;
+    bool check();
 
     JOB_STATUS getStatus();
 };

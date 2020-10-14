@@ -15,12 +15,6 @@
 #include "UtilNet.h"
 #include "Log.h"
 
-enum APPPARAM {
-    APPPARAM_OK,
-    APPPARAM_ERROR,
-    APPPARAM_LIST,
-};
-
 void listDevices() {
 
     DeviceList *deviceList = DeviceList::getInstance();
@@ -33,8 +27,7 @@ void listDevices() {
     }
 }
 
-APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
-                         LogInfo& logInfo, std::vector<int>& componentCount) {
+APPPARAM parseParameters(int argc, char** argv, AppParams& params) {
 
     for (int i = 1; i < argc; i++) {
 
@@ -49,14 +42,14 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
             if (argc > i + 1) {
 
                 if (isdigit(argv[++i][0])) {
-                    interfaceID[0] = atoi(argv[i]);
+                    params.interfaceID[0] = atoi(argv[i]);
 
                 } else {
                     return APPPARAM_ERROR;
                 }
 
                 if (isdigit(argv[++i][0])) {
-                    interfaceID[1] = atoi(argv[i]);
+                    params.interfaceID[1] = atoi(argv[i]);
 
                 } else {
                     return APPPARAM_ERROR;
@@ -69,16 +62,20 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
 
         } else if (!strcmp(argv[i], "-t")) {
 
-            logInfo.timeStamp = true;
+            params.logInfo.timeStamp = true;
+
+        } else if (!strcmp(argv[i], "-w")) {
+
+            params.autoWake = false;
 
         } else if (!strcmp(argv[i], "-d")) {
 
-            componentCount[COMP_DISTRIBUTOR] = 1;
+            params.componentCount[COMP_DISTRIBUTOR] = 1;
 
         } else if (!strcmp(argv[i], "-c")) {
 
             if (isdigit(argv[++i][0])) {
-                componentCount[COMP_COLLECTOR] =  atoi(argv[i]);
+                params.componentCount[COMP_COLLECTOR] =  atoi(argv[i]);
 
             } else {
 
@@ -88,7 +85,7 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
         } else if (!strcmp(argv[i], "-n")) {
 
             if (isdigit(argv[++i][0])) {
-                componentCount[COMP_NODE] =  atoi(argv[i]);
+                params.componentCount[COMP_NODE] =  atoi(argv[i]);
 
             } else {
 
@@ -100,7 +97,7 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
             if (argc > i + 1) {
 
                 if (isdigit(argv[++i][0])) {
-                    logInfo.level = (LOGLEVEL)atoi(argv[i]);
+                    params.logInfo.level = (LOGLEVEL)atoi(argv[i]);
 
                 } else {
                     return APPPARAM_ERROR;
@@ -114,13 +111,9 @@ APPPARAM parseParameters(int argc, char** argv, int *interfaceID,
 
 int main(int argc, char** argv) {
 
-    int interfaceID[2] = {0, 0};
+    AppParams params;
 
-    LogInfo logInfo{LEVEL_INFO, LOG_ALL};
-
-    std::vector<int> componentCount = {0, 0, 0};
-
-    APPPARAM res = parseParameters(argc, argv, interfaceID, logInfo, componentCount);
+    APPPARAM res = parseParameters(argc, argv, params);
 
     if (res != APPPARAM_OK) {
 
@@ -137,7 +130,7 @@ int main(int argc, char** argv) {
 
 #elif defined(WEB)
 
-    App *app = new WebApp(interfaceID, logInfo, componentCount);
+    App *app = new WebApp(params);
 
 #elif defined(TEST)
 

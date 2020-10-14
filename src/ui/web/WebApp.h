@@ -34,7 +34,7 @@ class WebApp : public App {
 
 public:
 
-    WebApp(int *, const LogInfo&, std::vector<int>&);
+    WebApp(AppParams&);
     ~WebApp();
 
     int restHandler(struct mg_connection *conn);

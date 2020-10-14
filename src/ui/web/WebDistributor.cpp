@@ -93,6 +93,7 @@ bool WebApp::distStateHandler(struct mg_connection *conn) {
     distItem["_arch"] = distributorHost->getArch();
     distItem["_address"] = UtilNet::getIPPortString(distributorHost->getAddress(COMP_NODE)->get());
     distItem["_webAddress"] = UtilNet::getIPPortString(distributorHost->getAddress(COMP_NODE)->getUI());
+    distItem["_autoWake"] = distributor->getAutoWake();
 
     nlohmann::json collList;
 

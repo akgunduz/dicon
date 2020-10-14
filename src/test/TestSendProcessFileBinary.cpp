@@ -9,13 +9,11 @@ void sendProcessFileBinary(const TypeComponent& owner, const TypeComponentUnit& 
     auto msg = std::make_unique<Message>(owner->getHost(), target->getType(),
                                          (MSG_TYPE)MSG_TYPE_TEST_PROCESS_FILE_BINARY, STREAM_PROCESS_FILE_BINARY);
 
-    auto file = std::make_shared<FileItem>(owner->getHost(), 99, "1", TEST_JOB_FILE);
+    auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
-    auto processFile = std::make_shared<ProcessFile>(file, 888, false);
+    job->getProcess(0)->check(target->getArch());
 
-    processFile->get()->check();
-
-    msg->getData().setProcessFile(processFile);
+    msg->getData().setProcessFile(job->getProcess(0)->getFileList()[0]);
 
     owner->send(target, std::move(msg));
 }
@@ -26,10 +24,10 @@ bool processProcessFileBinaryMsg(const TypeComponent& component, const TypeCompo
 
     LOGS_I(component->getHost(), "Message Process File Binary has came from : %s ",
            ComponentType::getName(owner->getType()));
-    LOGS_I(component->getHost(), "Process[%d] File[%d] => Name : %s, Size : %d, Path : %s",
+    LOGS_I(component->getHost(), "Process[%d] File[%d] => Name : %s, Path : %s",
            processFile->getAssignedProcess(),
            processFile->get()->getID(), processFile->get()->getName().c_str(),
-           processFile->get()->getSize(), processFile->get()->getPath().c_str());
+           processFile->get()->getPath().c_str());
 
     return true;
 }

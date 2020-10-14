@@ -29,7 +29,6 @@ public:
     ContentItem(const ContentItem&);
 
     virtual CONTENT_TYPES getType() = 0;
-    virtual bool check() = 0;
 	~ContentItem() override = default;
 
     const TypeHostUnit& getHost();

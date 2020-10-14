@@ -61,7 +61,7 @@ public:
 
 	CONTENT_TYPES getType() override;
 
-    bool check() override;
+    bool check(ARCH = ARCH_NONE);
 };
 
 typedef std::shared_ptr<ProcessItem> TypeProcessItem;

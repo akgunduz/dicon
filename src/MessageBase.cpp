@@ -387,17 +387,25 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
         return false;
     }
 
-    if (!onWrite(target, MSGHEADER_BINARY, nullptr, (size_t) fileItem->getSize())) {
+    if (!onWrite(target, MSGHEADER_BINARY, nullptr, (size_t) fileItem->getSize(target->getArch()))) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Binary to stream");
         return false;
     }
 
-    FILE *file = std::fopen(fileItem->getPath().string().c_str(), "rb");
+    FILE *file = std::fopen(fileItem->getPath(target->getArch()).string().c_str(), "rb");
 
     if (file == nullptr) {
-        LOGC_E(getHost(), target, MSGDIR_SEND, "File could not opened at path : %s",
-               fileItem->getPath().string().c_str());
-        return false;
+
+        //Fallback path
+   //     file = std::fopen(fileItem->getPath().string().c_str(), "rb");
+
+     //   if (file == nullptr) {
+
+            LOGC_E(getHost(), target, MSGDIR_SEND, "File could not opened at path : %s",
+                   fileItem->getPath(target->getArch()).string().c_str());
+
+            return false;
+       // }
     }
 
     auto remaining = (size_t) fileItem->getSize();
@@ -415,7 +423,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     std::fclose(file);
 
     LOGC_T(getHost(), target, MSGDIR_SEND,
-           "File Binary is written successfully at path : %s", fileItem->getPath().c_str());
+           "File Binary is written successfully at path : %s", fileItem->getPath(target->getArch()).c_str());
 
 	return true;
 

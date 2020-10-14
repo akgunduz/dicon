@@ -24,7 +24,7 @@ public:
 
 	CONTENT_TYPES getType() override;
 
-    bool check() override;
+    bool check();
 };
 
 typedef std::shared_ptr<ParameterItem> TypeParameterItem;

@@ -10,8 +10,8 @@
 #include "CollectorManager.h"
 #include "Log.h"
 
-Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool autoWake) :
-        Component(std::make_shared<DistributorHost>()) {
+Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool _autoWake) :
+        Component(std::make_shared<DistributorHost>()), autoWake(_autoWake) {
 
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ALIVE, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorAliveMsg));
     addProcessHandler(COMP_COLLECTOR, MSGTYPE_ID, static_cast<TypeProcessComponentMsg>(&Distributor::processCollectorIDMsg));
@@ -28,19 +28,15 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
         return;
     }
 
-    nodeManager = new NodeManager(getHost(), false);
+    nodeManager = new NodeManager(getHost(), !autoWake);
 
     collectorManager = new CollectorManager(getHost(), true);
 
-    collThread = std::thread([](Distributor *distributor){
+    collThread = std::thread([](Distributor *distributor) {
 
         distributor->collProcess();
 
     }, this);
-
-    if (!autoWake) {
-        runPollThread = false;
-    }
 
     pollThread = std::thread([](Distributor *distributor){
 
@@ -51,6 +47,11 @@ Distributor::Distributor(int _commInterfaceOther, int _commInterfaceNode, bool a
     initialized = true;
 
     LOGS_T(getHost(), "Distributor is initialized");
+}
+
+volatile bool Distributor::getAutoWake() const {
+
+    return autoWake;
 }
 
 Distributor::~Distributor() {
@@ -97,7 +98,10 @@ void Distributor::pollProcess() {
         }
 
         loop = 0;
-        sendWakeupMessagesAll(false);
+
+        if (autoWake) {
+            sendWakeupMessagesAll(false);
+        }
     }
 }
 
