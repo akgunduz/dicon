@@ -40,8 +40,3 @@ void ProcessFile::setOutputState(bool _is_output) {
         return;
     }
 }
-
-bool ProcessFile::isExecutable() const {
-
-    return fileType == PROCESS_FILE_EXEC;
-}

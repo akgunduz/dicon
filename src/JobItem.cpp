@@ -570,6 +570,7 @@ bool JobItem::extract(const std::string& zipFile, long& _jobID) {
         }
 
         std::filesystem::path filePath = path / file_stat.m_filename;
+        std::filesystem::create_directories(filePath.parent_path());
 
         zipStatus = mz_zip_reader_extract_to_file(&zip_archive, i, filePath.string().c_str(), 0);
         if (!zipStatus) {

@@ -140,14 +140,9 @@
     </div>
 </div>
 
-<div id="debug-block" class="component-block" hidden>
-    <h1>Debug</h1>
-    <p id="test-field">Test</p>
-    <button id="test-button" type="button" class="button btn-full-width" onclick="onTestClick()">Test</button>
-</div>
-
 <div id="distributor-block" class="component-block" style="display: block;">
     <h1  style="margin-bottom: 1rem;">Distributor</h1>
+    <button id="dist-poll-btn" type="button" class="button btn-full-width" onclick="onDistPoll()" hidden>Poll</button>
     <div class="standard-container" style="margin-bottom: 2rem;">
         <div class="horizontal-container">
             <div class="horizontal-container" style="margin-right: 1rem">
@@ -613,6 +608,7 @@
             document.getElementById("dist-address").innerHTML = data._distItem._address;
             document.getElementById("dist-web-address").innerHTML = data._distItem._webAddress;
             document.getElementById("dist-arch").innerHTML = ARCH_TYPES[data._distItem._arch];
+            document.getElementById("dist-poll-btn").hidden = data._distItem._autoWake;
 
             onDistUpdateCollList(data);
             onDistUpdateNodeList(data);
@@ -764,14 +760,14 @@
             .getElementsByTagName("tbody")[0];
         table.innerHTML = "";
 
-        for (let fileitem of data._fileList) {
+        for (let fileItem of data._fileList) {
             let newRow = table.insertRow();
-            newRow.insertCell().innerHTML = fileitem._name;
-            newRow.insertCell().innerHTML = fileitem._size;
-            newRow.insertCell().innerHTML = FILE_STATES[fileitem._state];
-            if (fileitem._state === 1) {
+            newRow.insertCell().innerHTML = fileItem._name;
+            newRow.insertCell().innerHTML = fileItem._size;
+            newRow.insertCell().innerHTML = FILE_STATES[fileItem._state];
+            if (fileItem._state === 1) {
                 newRow.style.backgroundColor = "#C00000";
-            } else if (fileitem._state === 0) {
+            } else if (fileItem._state === 0) {
                 newRow.style.backgroundColor = "#00C000";
             }
         }

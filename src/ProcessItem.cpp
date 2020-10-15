@@ -110,8 +110,12 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
                 parsedProcess = parsedProcess + ROOT_SIGN + "/" +
                         std::to_string(content->getAssignedJob()) + "/" + content->getName();
 
+                if (cmdType == PROCESS_EXEC) {
+                    content->setExecutable(true);
+                }
+
 				addFile(content, getID(), cmdType == PROCESS_OUTPUT ?
-				    PROCESS_FILE_OUTPUT : cmdType == PROCESS_EXEC ? PROCESS_FILE_EXEC : PROCESS_FILE_INPUT);
+				    PROCESS_FILE_OUTPUT : PROCESS_FILE_INPUT);
 
 				return true;
             }

@@ -8,7 +8,6 @@
 #include "FileItem.h"
 
 enum PROCESS_FILE_OPTIONS {
-    PROCESS_FILE_EXEC,
     PROCESS_FILE_INPUT,
     PROCESS_FILE_OUTPUT,
     PROCESS_FILE_MAX
@@ -27,7 +26,6 @@ public:
     explicit ProcessFile(TypeFileItem, long = 0, PROCESS_FILE_OPTIONS = PROCESS_FILE_INPUT);
     ~ProcessFile() = default;
     bool isOutput() const;
-    bool isExecutable() const;
     TypeFileItem get();
     long getAssignedProcess() const;
     void setAssignedProcess(long _processID);

@@ -123,3 +123,13 @@ void FileItem::setIndependent(bool _is_independent) {
 
     is_independent = _is_independent;
 }
+
+bool FileItem::isExecutable() const {
+
+    return is_executable;
+}
+
+void FileItem::setExecutable(bool _is_executable) {
+
+    is_executable = _is_executable;
+}

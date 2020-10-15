@@ -193,10 +193,10 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
         compUnit->setID((TypeID) numbers.front());
         numbers.pop_front();
 
-        uint32_t base = (uint32_t) numbers.front();
+        auto base = (uint32_t) numbers.front();
         numbers.pop_front();
 
-        uint16_t port = (uint16_t) numbers.front();
+        auto port = (uint16_t) numbers.front();
         numbers.pop_front();
 
         //TODO comm interface type

@@ -5,8 +5,8 @@
 
 #include "ConsoleApp.h"
 
-ConsoleApp::ConsoleApp(int *interfaceID, const LogInfo& _logInfo, std::vector<int>& componentCount)
-    : App(APPTYPE_CONSOLE, interfaceID, _logInfo, componentCount, true) {
+ConsoleApp::ConsoleApp(AppParams& params)
+    : App(APPTYPE_CONSOLE, params) {
 
     if (!initialized) {
         return;

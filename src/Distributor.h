@@ -17,6 +17,8 @@ class Distributor : public Component {
 
     volatile bool runPollThread = true;
 
+    volatile bool autoWake = true;
+
 	NodeManager *nodeManager;
 
 	CollectorManager *collectorManager;
@@ -57,6 +59,8 @@ public:
     bool clear();
     CollectorManager* getCollectors() const;
     NodeManager* getNodes() const;
+
+    volatile bool getAutoWake() const;
 };
 
 typedef std::shared_ptr<Distributor> TypeDistributor;

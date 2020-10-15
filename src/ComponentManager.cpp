@@ -35,13 +35,6 @@ void ComponentManager::checkDead() {
 
         auto timeDiff = component.second->getDuration();
 
-        //        LOGS_E(host, "%s[%d] time %ld, now : %ld, diff : %ld",
-//               ComponentType::getName(iterator->second->getType()),
-//               iterator->second->getID(),
-//               iterator->second->getCheckTime(),
-//               curTime,
-//               timeDiff);
-
         if (timeDiff / 1000 > ALIVE_INTERVAL) {
 
             LOGS_W(host, "%s[%d] is removed from network, unresponsive time : %ld",

@@ -9,6 +9,11 @@
 #include <vector>
 #include "ComponentType.h"
 #include "NotifyType.h"
+#include "Log.h"
+
+struct LogInfo;
+class ComponentFactory;
+class DeviceList;
 
 enum APPTYPE {
 
@@ -18,9 +23,23 @@ enum APPTYPE {
     APPTYPE_MAX
 };
 
-struct LogInfo;
-class ComponentFactory;
-class DeviceList;
+enum APPPARAM {
+    APPPARAM_OK,
+    APPPARAM_ERROR,
+    APPPARAM_LIST,
+};
+
+struct AppParams {
+
+    int interfaceID[2] {0, 0};
+
+    LogInfo logInfo {LEVEL_INFO, LOG_ALL};
+
+    std::vector<int> componentCount {0, 0, 0};
+
+    bool autoWake {true};
+
+};
 
 class App {
 
@@ -34,7 +53,7 @@ protected:
 
     bool initialized{false};
 
-    App(enum APPTYPE, int *, const LogInfo&, std::vector<int>, bool);
+    App(enum APPTYPE, AppParams&);
 
 public:
 

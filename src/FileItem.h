@@ -14,10 +14,9 @@ class FileItem : public ContentItem {
     std::filesystem::path parentPath;
 
     bool is_independent{false};
-
-private:
     bool is_exist{};
 	bool is_required{};
+	bool is_executable{};
 
     std::uintmax_t size{};
 
@@ -40,7 +39,10 @@ public:
     void setRequired(bool);
 
     bool isIndependent() const;
-    void setIndependent(bool isIndependent);
+    void setIndependent(bool);
+
+    bool isExecutable() const;
+    void setExecutable(bool);
 
     std::filesystem::path getParentPath();
     std::filesystem::path getParentRefPath();
