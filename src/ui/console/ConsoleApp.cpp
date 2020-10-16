@@ -3,7 +3,10 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include "ComponentFactory.h"
 #include "ConsoleApp.h"
+#include "Platform.h"
+#include "Log.h"
 
 ConsoleApp::ConsoleApp(AppParams& params)
     : App(APPTYPE_CONSOLE, params) {

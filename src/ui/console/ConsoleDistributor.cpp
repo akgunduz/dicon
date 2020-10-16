@@ -3,15 +3,18 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-#include <Log.h>
-#include <NodeState.h>
-#include <CollectorUnit.h>
+#include <UtilNet.h>
+#include <DistributorHost.h>
+#include "ComponentFactory.h"
+#include "NodeManager.h"
+#include "CollectorManager.h"
 #include "ConsoleApp.h"
-
 
 bool ConsoleApp::distPollHandler() {
 
-    componentFactory->getDistributor()->sendWakeupMessagesAll(false);
+    auto &distributor = componentFactory->getDistributor();
+
+    distributor->sendWakeupMessagesAll(false);
 
     return true;
 }

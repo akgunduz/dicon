@@ -3,7 +3,11 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cstring>
+#include <Util.h>
+#include <CollectorHost.h>
 #include "ConsoleApp.h"
+#include "ComponentFactory.h"
 
 bool ConsoleApp::collLoadJobHandler(long id) {
 

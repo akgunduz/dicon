@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 
 #if defined(CONSOLE)
 
-    App *app = new ConsoleApp(interfaceID, logInfo, componentCount);
+    App *app = new ConsoleApp(params);
 
 #elif defined(WEB)
 
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
 
 #elif defined(TEST)
 
-    App *app = new TestApp(interfaceID, logInfo, componentCount);
+    App *app = new TestApp(params);
 
 #else
 
