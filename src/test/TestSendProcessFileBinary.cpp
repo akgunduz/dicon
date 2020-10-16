@@ -13,7 +13,7 @@ void sendProcessFileBinary(const TypeComponent& owner, const TypeComponentUnit& 
 
     auto processFile = std::make_shared<ProcessFile>(file, 888, false);
 
-    processFile->get()->check();
+    processFile->get()->checkContent();
 
     msg->getData().setProcessFile(processFile);
 

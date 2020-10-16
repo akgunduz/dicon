@@ -146,7 +146,9 @@ bool ProcessItem::parseCommand(void *jobItem, int cmdType, int cmdIndex) {
 
 }
 
-bool ProcessItem::check() {
+bool ProcessItem::checkContent() {
+
+    is_valid = false;
 
 	for (const auto& file : fileList) {
 
@@ -154,10 +156,13 @@ bool ProcessItem::check() {
 	        continue;
 	    }
 
-	    if (!file->get()->check()) {
+	    if (!file->get()->checkContent()) {
+
 	        return false;
 	    }
 	}
+
+	is_valid = true;
 
     return true;
 }

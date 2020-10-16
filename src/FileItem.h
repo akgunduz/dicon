@@ -16,9 +16,8 @@ class FileItem : public ContentItem {
     std::filesystem::path parentPath;
 
     bool is_independent{false};
-    bool is_exist{};
-	bool is_required{};
-	bool is_executable{};
+    bool is_required{};
+    bool is_executable{};
 
     std::uintmax_t size[ARCH_MAX]{};
 
@@ -35,7 +34,7 @@ public:
 
 	CONTENT_TYPES getType() override;
 
-    bool check() override;
+    bool checkContent() override;
 
     bool required() const;
     void setRequired(bool);
@@ -46,10 +45,10 @@ public:
     bool isExecutable() const;
     void setExecutable(bool);
 
-    std::filesystem::path getParentPath(ARCH);
-    std::filesystem::path getParentRefPath(ARCH);
-    std::filesystem::path getPath(ARCH = ARCH_FREE);
-    std::filesystem::path getRefPath(ARCH = ARCH_FREE);
+    std::filesystem::path getParentPath(ARCH, bool);
+    std::filesystem::path getParentRefPath(ARCH, bool);
+    std::filesystem::path getPath(ARCH = ARCH_FREE, bool = true);
+    std::filesystem::path getRefPath(ARCH = ARCH_FREE, bool = true);
 };
 
 typedef std::shared_ptr<FileItem> TypeFileItem;

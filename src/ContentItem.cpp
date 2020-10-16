@@ -46,6 +46,16 @@ void ContentItem::setDuration(uint64_t _duration) {
     duration = _duration;
 }
 
+bool ContentItem::check(bool forced) {
+
+    if (!is_checked || forced) {
+        is_checked = true;
+        return checkContent();
+    }
+
+    return is_valid;
+}
+
 bool compareContentID(const TypeContentItem& ci1, const TypeContentItem& ci2)
 {
     return (ci1->getID() < ci2->getID());

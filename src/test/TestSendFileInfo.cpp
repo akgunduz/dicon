@@ -10,7 +10,7 @@ void sendFileInfo(const TypeComponent& owner, const TypeComponentUnit& target) {
 
     auto file = std::make_shared<FileItem>(owner->getHost(), 99, ".", TEST_JOB_FILE);
 
-    file->check();
+    file->checkContent();
 
     msg->getData().setFile(file);
 
