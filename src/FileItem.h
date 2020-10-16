@@ -8,6 +8,8 @@
 
 #include "ContentItem.h"
 
+#define ARCH_PATH "bin"
+
 class FileItem : public ContentItem {
 
 	std::string name;
@@ -18,7 +20,7 @@ class FileItem : public ContentItem {
 	bool is_required{};
 	bool is_executable{};
 
-    std::uintmax_t size{};
+    std::uintmax_t size[ARCH_MAX]{};
 
 public:
 	FileItem(const TypeHostUnit&, long, long = 0, std::string = "");
@@ -29,7 +31,7 @@ public:
     const std::string& getName();
     void setName(const std::string&);
 
-    std::uintmax_t getSize();
+    std::uintmax_t getSize(ARCH = ARCH_FREE);
 
 	CONTENT_TYPES getType() override;
 
@@ -44,10 +46,10 @@ public:
     bool isExecutable() const;
     void setExecutable(bool);
 
-    std::filesystem::path getParentPath();
-    std::filesystem::path getParentRefPath();
-    std::filesystem::path getPath();
-    std::filesystem::path getRefPath();
+    std::filesystem::path getParentPath(ARCH);
+    std::filesystem::path getParentRefPath(ARCH);
+    std::filesystem::path getPath(ARCH = ARCH_FREE);
+    std::filesystem::path getRefPath(ARCH = ARCH_FREE);
 };
 
 typedef std::shared_ptr<FileItem> TypeFileItem;

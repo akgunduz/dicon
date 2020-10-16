@@ -39,13 +39,13 @@ void FileItem::setName(const std::string& _name) {
     name = _name;
 }
 
-std::uintmax_t FileItem::getSize() {
+std::uintmax_t FileItem::getSize(ARCH arch) {
 
-    if (size == 0) {
+    if (size[arch] == 0 && !is_exist) {
         check();
     }
 
-    return size;
+    return size[arch];
 }
 
 bool FileItem::check() {
@@ -60,22 +60,26 @@ bool FileItem::check() {
         return false;
     }
 
-    try {
+    std::error_code ec;
 
-        size = std::filesystem::file_size(getPath());
+    size[ARCH_FREE] = std::filesystem::file_size(getPath(), ec);
 
-    } catch(std::filesystem::filesystem_error& e) {
+    size[ARCH_FREE] == -1 ? size[ARCH_FREE] = 0 : is_exist = true;
 
-        LOGS_T(getHost(), "FileContent %s could not opened, err : %s", name.c_str(), e.what());
-        return false;
+    if (is_executable) {
+
+        for (int i = ARCH_FREE + 1; i < ARCH_MAX; i++) {
+
+            size[i] = std::filesystem::file_size(getPath(static_cast<ARCH>(i)), ec);
+
+            size[i] == -1 ? size[i] = 0 : is_exist = true;
+        }
     }
 
-    if (size == 0) {
-        LOGS_T(getHost(), "FileContent %s is empty", name.c_str());
+    if (!is_exist) {
+        LOGS_T(getHost(), "FileContent %s could not opened or empty, err : %s", name.c_str());
         return false;
     }
-
-    is_exist = true;
 
     return true;
 }
@@ -90,28 +94,30 @@ void FileItem::setRequired(bool _is_required) {
     is_required = _is_required;
 }
 
-std::filesystem::path FileItem::getParentPath() {
+std::filesystem::path FileItem::getParentRefPath(ARCH arch) {
 
-    return is_independent
-        ? getHost()->getRootPath() / parentPath
-        : getHost()->getRootPath() / std::to_string(getAssignedJob());
-}
-
-std::filesystem::path FileItem::getParentRefPath() {
-
-    return is_independent
+    std::filesystem::path parent = is_independent
         ? parentPath
         : std::filesystem::path(std::to_string(getAssignedJob()));
+
+    return arch == ARCH_FREE
+           ? parent
+           : parent / ARCH_PATH / ArchType::getName(arch);
 }
 
-std::filesystem::path FileItem::getPath() {
+std::filesystem::path FileItem::getRefPath(ARCH arch) {
 
-    return getParentPath() / name;
+    return getParentRefPath(arch) / name;
 }
 
-std::filesystem::path FileItem::getRefPath() {
+std::filesystem::path FileItem::getParentPath(ARCH arch) {
 
-    return getParentRefPath() / name;
+    return getHost()->getRootPath() / getParentRefPath(arch);
+}
+
+std::filesystem::path FileItem::getPath(ARCH arch) {
+
+    return getParentPath(arch) / name;
 }
 
 bool FileItem::isIndependent() const {
