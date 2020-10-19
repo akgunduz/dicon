@@ -20,7 +20,7 @@ bool Message::readJobName(const TypeComponentUnit& source, std::string& jobName)
     jobName = strings.front();
     strings.pop_front();
 
-    LOGS_D(getHost(), "Job Name is read successfully => Name : %s", jobName.c_str());
+    LOGS_T(getHost(), "Job Name is read successfully => Name : %s", jobName.c_str());
 
     return true;
 }
@@ -30,7 +30,7 @@ bool Message::readID(const TypeComponentUnit& source, TypeID& id) {
     id = (TypeID)numbers.front();
     numbers.pop_front();
 
-    LOGS_D(getHost(), "ID[%ld] is read successfully", id);
+    LOGS_T(getHost(), "ID[%ld] is read successfully", id);
 
     return true;
 }
@@ -42,7 +42,7 @@ bool Message::readFileBinary(const TypeComponentUnit& source, const TypeFileItem
 
     bool status = fileItem->check();
 
-    LOGS_D(getHost(), "File is read successfully => Name : %s, Size : %ld, Health : %s",
+    LOGS_T(getHost(), "File is read successfully => Name : %s, Size : %ld, Health : %s",
            fileItem->getName().c_str(), fileItem->getSize(), status ? "OK" : "NOK");
 
     return true;
@@ -53,7 +53,7 @@ bool Message::readProcessID(const TypeComponentUnit& source, const TypeProcessIt
     processItem->setID((TypeID)numbers.front());
     numbers.pop_front();
 
-    LOGS_D(getHost(), "Process[%ld] is read successfully", processItem->getID());
+    LOGS_T(getHost(), "Process[%ld] is read successfully", processItem->getID());
 
     return true;
 }
@@ -63,7 +63,7 @@ bool Message::readProcessCount(const TypeComponentUnit& source, uint32_t& proces
     processCount = (uint32_t)numbers.front();
     numbers.pop_front();
 
-    LOGS_D(getHost(), "Process Count is read successfully => %d", processCount);
+    LOGS_T(getHost(), "Process Count is read successfully => %d", processCount);
 
     return true;
 }
@@ -79,7 +79,7 @@ bool Message::readProcessInfo(const TypeComponentUnit& source, const TypeProcess
     processItem->setParsedProcess(strings.front());
     strings.pop_front();
 
-    LOGS_D(getHost(), "Process[%ld] is read successfully => jobID : %ld, Process : %s",
+    LOGS_T(getHost(), "Process[%ld] is read successfully => jobID : %ld, Process : %s",
            processItem->getID(), processItem->getAssignedJob(),
            processItem->getParsedProcess().c_str());
 
@@ -91,7 +91,7 @@ bool Message::readProcessFileCount(const TypeComponentUnit& source, long& count)
     count = (long) numbers.front();
     numbers.pop_front();
 
-    LOGS_D(getHost(), "Process has %ld files", count);
+    LOGS_T(getHost(), "Process has %ld files", count);
 
     return true;
 }
@@ -113,7 +113,7 @@ bool Message::readProcessFile(const TypeComponentUnit& source, const TypeProcess
     processFile->get()->setName(strings.front());
     strings.pop_front();
 
-    LOGS_D(getHost(), "Process[%d] File[%d] is read successfully => State : %s, Job : %d, Name : %s",
+    LOGS_T(getHost(), "Process[%d] File[%d] is read successfully => State : %s, Job : %d, Name : %s",
            processFile->getAssignedProcess(), processFile->get()->getID(),
            processFile->isOutput() ? "output" : "input", processFile->get()->getAssignedJob(),
            processFile->get()->getName().c_str());
@@ -215,10 +215,11 @@ bool Message::readComponentList(const TypeComponentUnit& source, TypeComponentUn
 
     }
 
-    LOGS_D(getHost(), "Component list is read successfully => Count : %d", componentList.size());
-    for (auto &item : componentList) {
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
-    }
+    LOGS_T(getHost(), "Component list is read successfully => Count : %d", componentList.size());
+
+//    for (auto &item : componentList) {
+//        LOGS_T(getHost(), "ComponentList[%s] : %d", ComponentType::getName(item->getType()), item->getID());
+//    }
 
     return true;
 }
@@ -303,7 +304,7 @@ bool Message::writeID(const TypeComponentUnit& target, const TypeID& id) {
         return false;
     }
 
-    LOGS_D(getHost(), "ID is written successfully => %d", id);
+    LOGS_T(getHost(), "ID is written successfully => %d", id);
 
     return true;
 }
@@ -315,7 +316,7 @@ bool Message::writeJobName(const TypeComponentUnit& target, const std::string& j
         return false;
     }
 
-    LOGS_D(getHost(), "Job Name is written successfully => Name : %s", jobName.c_str());
+    LOGS_T(getHost(), "Job Name is written successfully => Name : %s", jobName.c_str());
 
     return true;
 }
@@ -332,7 +333,7 @@ bool Message::writeFileBinary(const TypeComponentUnit& target, const TypeFileIte
         return false;
     }
 
-    LOGS_D(getHost(), "File Binary is written successfully => Name : %s", file->getName().c_str());
+    LOGS_T(getHost(), "File Binary is written successfully => Name : %s", file->getName().c_str());
 
     return true;
 }
@@ -344,7 +345,7 @@ bool Message::writeProcessID(const TypeComponentUnit& target, const TypeProcessI
         return false;
     }
 
-    LOGS_D(getHost(), "Process ID is written successfully => %ld", processItem->getID());
+    LOGS_T(getHost(), "Process ID is written successfully => %ld", processItem->getID());
 
     return true;
 }
@@ -356,7 +357,7 @@ bool Message::writeProcessCount(const TypeComponentUnit& target, const uint32_t&
         return false;
     }
 
-    LOGS_D(getHost(), "Process Count is written successfully => %ld", processCount);
+    LOGS_T(getHost(), "Process Count is written successfully => %ld", processCount);
 
     return true;
 }
@@ -378,7 +379,7 @@ bool Message::writeProcessInfo(const TypeComponentUnit& target, const TypeProces
         return false;
     }
 
-    LOGS_D(getHost(), "Process Info is written successfully => ID : %ld, jobID : %ld, Process : %s",
+    LOGS_T(getHost(), "Process Info is written successfully => ID : %ld, jobID : %ld, Process : %s",
            processItem->getID(), processItem->getAssignedJob(), processItem->getParsedProcess().c_str());
 
     return true;
@@ -391,7 +392,7 @@ bool Message::writeProcessFileCount(const TypeComponentUnit& target, const TypeP
         return false;
     }
 
-    LOGS_D(getHost(), "Process File Count is written successfully => Count : %ld", processItem->getFileCount());
+    LOGS_T(getHost(), "Process File Count is written successfully => Count : %ld", processItem->getFileCount());
 
     return true;
 }
@@ -433,14 +434,14 @@ bool Message::writeProcessFile(const TypeComponentUnit& target,
             return false;
         }
 
-        LOGS_D(getHost(), "Process File Binary is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+        LOGS_T(getHost(), "Process File Binary is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
                file->get()->getID(), file->isOutput()? "output" : "input",
                file->get()->getAssignedJob(), file->getAssignedProcess(), file->get()->getName().c_str());
 
         return true;
     }
 
-    LOGS_D(getHost(), "Process File Info is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
+    LOGS_T(getHost(), "Process File Info is written successfully => ID : %ld, State : %s, jobID : %ld, processID : %ld, Name : %s",
            file->get()->getID(), file->isOutput()? "output" : "input",
            file->get()->getAssignedJob(), file->getAssignedProcess(), file->get()->getName().c_str());
 
@@ -541,13 +542,13 @@ bool Message::writeComponentList(const TypeComponentUnit& target, TypeComponentU
 
     }
 
-    LOGS_D(getHost(), "Component list is written successfully => Count : %d", componentList.size());
+    LOGS_T(getHost(), "Component list is written successfully => Count : %d", componentList.size());
 
-    for (auto& item : componentList) {
-
-        LOGS_D(getHost(), "Component[%s] : %d", ComponentType::getName(item->getType()), item->getID());
-
-    }
+//    for (auto& item : componentList) {
+//
+//        LOGS_T(getHost(), "ComponentList[%s] : %d", ComponentType::getName(item->getType()), item->getID());
+//
+//    }
 
     return true;
 }

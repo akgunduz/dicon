@@ -74,7 +74,7 @@ Component::~Component() {
 
 bool Component::onReceive(const TypeComponentUnit& owner, MSG_TYPE msgType, TypeMessage msg) {
 
-    LOGC_D(getHost(), owner, MSGDIR_RECEIVE,
+    LOGC_T(getHost(), owner, MSGDIR_RECEIVE,
            "\"%s\" is received",
            MessageType::getMsgName(msgType));
 

@@ -94,14 +94,23 @@ APPPARAM parseParameters(int argc, char** argv, AppParams& params) {
 
         } else if (!strcmp(argv[i], "-g")) {
 
-            if (argc > i + 1) {
+            if (isdigit(argv[++i][0])) {
+                params.logInfo.level = (LOGLEVEL)atoi(argv[i]);
 
-                if (isdigit(argv[++i][0])) {
-                    params.logInfo.level = (LOGLEVEL)atoi(argv[i]);
+            } else {
 
-                } else {
-                    return APPPARAM_ERROR;
-                }
+                return APPPARAM_ERROR;
+            }
+        }
+
+        else if (!strcmp(argv[i], "-f")) {
+
+            if (isdigit(argv[++i][0])) {
+                params.logInfo.filter = atoi(argv[i]);
+
+            } else {
+
+                return APPPARAM_ERROR;
             }
         }
     }

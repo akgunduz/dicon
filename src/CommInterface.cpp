@@ -193,7 +193,7 @@ bool CommInterface::send(const TypeSchedulerItem &item) {
 
     bool status = onSend(target, std::move(msgItem->getMessage()));
 
-    LOGC_D(getHost(), target, MSGDIR_SEND,
+    LOGC_T(getHost(), target, MSGDIR_SEND,
            "\"%s\" is sent",
            MessageType::getMsgName(msgType));
 

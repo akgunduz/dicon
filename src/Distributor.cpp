@@ -120,54 +120,26 @@ void Distributor::collProcess() {
 
         collectorManager->updateDead();
 
-        size_t busyDeadCount = nodeManager->getBusyDeadCount();
+        auto busyDeadCount = nodeManager->getBusyDeadCount();
 
         if (busyDeadCount) {
 
-            LOGS_W(getHost(), "Unresponsive node detected, count : %d", busyDeadCount);
-
-            TypeComponentListMapIDList replaceIdList;
-
-            size_t processDeadCount = std::min(nodeCount, busyDeadCount);
-
-            for (size_t i = 0; i < processDeadCount; i ++) {
-
-                auto nodeBusy = nodeManager->getBusyDead();
-
-                if (!nodeBusy->getAssigned()) {
-
-                    LOGS_W(getHost(), "Unresponsive Node[%d] is not assigned with any Collector", nodeBusy->getID());
-                    continue;
-                }
-
-                auto nodeIdle = nodeManager->getIdle(nodeBusy->getAssigned());
-
-                replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeBusy);
-                replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeIdle);
-
-                LOGS_W(getHost(), "Node[%d] is replaced with Node[%d] for Collector[%d]",
-                       nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned()->getID());
-            }
-
-            for (auto &collNodeDeadList : replaceIdList) {
-
-                send2CollectorReplaceMsg(collectorManager->get(collNodeDeadList.first), collNodeDeadList.second);
-            }
-
-            nodeCount = nodeManager->getIdleCount();
-            if (nodeCount == 0) {
-                continue;
-            }
+            processBusyDead(busyDeadCount, nodeCount);
+            continue;
         }
 
-        CollectorRequest *request = collectorManager->getRequest();
+        auto *request = collectorManager->getRequest();
         if (request == nullptr) {
+            LOGS_T(getHost(), "Request Queue is empty");
             continue;
         }
 
         TypeComponentUnitList nodes;
 
         auto coll = std::static_pointer_cast<CollectorUnit>(collectorManager->get(request->collID));
+
+        LOGS_D(getHost(), "Request is in progress for Collector[%d], count : %d, available node : %d",
+               request->collID, request->reqCount, nodeCount);
 
         size_t curReqCount = std::min(nodeCount, request->reqCount);
 
@@ -189,6 +161,41 @@ void Distributor::collProcess() {
 
         send2CollectorNodeMsg(coll, nodes);
     }
+}
+
+bool Distributor::processBusyDead(size_t busyDeadCount, size_t nodeCount) {
+
+    LOGS_W(getHost(), "Unresponsive node detected, count : %d", busyDeadCount);
+
+    TypeComponentListMapIDList replaceIdList;
+
+    auto processDeadCount = std::min(nodeCount, busyDeadCount);
+
+    for (size_t i = 0; i < processDeadCount; i ++) {
+
+        auto nodeBusy = nodeManager->getBusyDead();
+
+        if (!nodeBusy->getAssigned()) {
+
+            LOGS_W(getHost(), "Unresponsive Node[%d] is not assigned with any Collector", nodeBusy->getID());
+            continue;
+        }
+
+        auto nodeIdle = nodeManager->getIdle(nodeBusy->getAssigned());
+
+        replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeBusy);
+        replaceIdList[nodeBusy->getAssigned()->getID()].emplace_back(nodeIdle);
+
+        LOGS_W(getHost(), "Node[%d] is replaced with Node[%d] for Collector[%d]",
+               nodeBusy->getID(), nodeIdle->getID(), nodeBusy->getAssigned()->getID());
+    }
+
+    for (auto &collNodeDeadList : replaceIdList) {
+
+        send2CollectorReplaceMsg(collectorManager->get(collNodeDeadList.first), collNodeDeadList.second);
+    }
+
+    return true;
 }
 
 CollectorManager *Distributor::getCollectors() const {
@@ -231,6 +238,8 @@ bool Distributor::processCollectorIDMsg(const TypeComponentUnit& owner, TypeMess
 }
 
 bool Distributor::processCollectorNodeMsg(const TypeComponentUnit& owner, TypeMessage msg) {
+
+    LOGS_D(getHost(), "Collector[%d] make request, count : %d", owner->getID(), msg->getData().getProcessCount());
 
     collectorManager->addRequest(owner->getID(), msg->getData().getProcessCount());
 

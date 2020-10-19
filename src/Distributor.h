@@ -28,6 +28,7 @@ class Distributor : public Component {
 
 	void pollProcess();
     void collProcess();
+    bool processBusyDead(size_t, size_t);
 
     bool processCollectorAliveMsg(const TypeComponentUnit&, TypeMessage);
     bool processCollectorIDMsg(const TypeComponentUnit&, TypeMessage);
