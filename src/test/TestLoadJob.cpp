@@ -21,7 +21,7 @@ void TestApp::testLoadJob(TypeDistributor& distributor, TypeCollector& collector
         auto content = job->getFile(j);
 
         LOGP_I("\tFile : %s, State : %s", content->getName().c_str(), content->required() ? "required"
-            : content->check() ? "exists" : "output");
+            : content->checkContent() ? "exists" : "output");
     }
 
     LOGP_I("Processes");

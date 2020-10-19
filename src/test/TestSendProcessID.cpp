@@ -10,7 +10,7 @@ void sendProcessID(const TypeComponent& owner, const TypeComponentUnit& target) 
 
     auto job = std::make_shared<JobItem>(owner->getHost(), TEST_JOB_PATH, JobItem::jobID++);
 
-    job->getProcess(0)->check();
+    job->getProcess(0)->checkContent();
 
     msg->getData().setProcess(job->getProcess(0));
 

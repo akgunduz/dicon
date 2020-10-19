@@ -6,7 +6,11 @@
 #ifndef DICON_CONSOLEAPP_H
 #define DICON_CONSOLEAPP_H
 
+#include <mutex>
+#include <HostUnit.h>
+#include <CommInterface.h>
 #include "Application.h"
+#include "Platform.h"
 
 class ConsoleApp : public App {
 

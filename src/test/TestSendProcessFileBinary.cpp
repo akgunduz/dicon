@@ -11,9 +11,9 @@ void sendProcessFileBinary(const TypeComponent& owner, const TypeComponentUnit& 
 
     auto file = std::make_shared<FileItem>(owner->getHost(), 99, "1", TEST_JOB_FILE);
 
-    auto processFile = std::make_shared<ProcessFile>(file, 888, false);
+    auto processFile = std::make_shared<ProcessFile>(file, 888, PROCESS_FILE_INPUT);
 
-    processFile->get()->check();
+    processFile->get()->checkContent();
 
     msg->getData().setProcessFile(processFile);
 

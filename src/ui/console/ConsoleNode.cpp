@@ -3,9 +3,11 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
+#include <cstring>
 #include <Util.h>
 #include <NodeHost.h>
 #include "ConsoleApp.h"
+#include "ComponentFactory.h"
 
 bool ConsoleApp::nodeStateHandler(long id) {
 

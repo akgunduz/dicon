@@ -303,7 +303,7 @@ bool Node::onProcessSuccess(void *data) {
 
     for (const auto& processFile : node->processItem->getFileList()) {
         if (processFile->isOutput()) {
-            if (processFile->get()->check()) {
+            if (processFile->get()->check(true)) {
                 processFile->setOutputState(false);
                 outputList.emplace_back(processFile);
             }

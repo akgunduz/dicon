@@ -8,17 +8,18 @@
 
 #include "ContentItem.h"
 
+#define ARCH_PATH "bin"
+
 class FileItem : public ContentItem {
 
 	std::string name;
     std::filesystem::path parentPath;
 
     bool is_independent{false};
-    bool is_exist{};
-	bool is_required{};
-	bool is_executable{};
+    bool is_required{};
+    bool is_executable{};
 
-    std::uintmax_t size{};
+    std::uintmax_t size[ARCH_MAX]{};
 
 public:
 	FileItem(const TypeHostUnit&, long, long = 0, std::string = "");
@@ -29,11 +30,11 @@ public:
     const std::string& getName();
     void setName(const std::string&);
 
-    std::uintmax_t getSize();
+    std::uintmax_t getSize(ARCH = ARCH_FREE);
 
 	CONTENT_TYPES getType() override;
 
-    bool check() override;
+    bool checkContent() override;
 
     bool required() const;
     void setRequired(bool);
@@ -44,10 +45,10 @@ public:
     bool isExecutable() const;
     void setExecutable(bool);
 
-    std::filesystem::path getParentPath();
-    std::filesystem::path getParentRefPath();
-    std::filesystem::path getPath();
-    std::filesystem::path getRefPath();
+    std::filesystem::path getParentPath(ARCH, bool);
+    std::filesystem::path getParentRefPath(ARCH, bool);
+    std::filesystem::path getPath(ARCH = ARCH_FREE, bool = true);
+    std::filesystem::path getRefPath(ARCH = ARCH_FREE, bool = true);
 };
 
 typedef std::shared_ptr<FileItem> TypeFileItem;

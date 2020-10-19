@@ -26,7 +26,9 @@ void ParameterItem::set(const std::string& _param) {
     param = _param;
 }
 
-bool ParameterItem::check() {
+bool ParameterItem::checkContent() {
 
-    return !param.empty();
+    is_valid = !param.empty();
+
+    return is_valid;
 }

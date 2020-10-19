@@ -496,7 +496,7 @@ int JobItem::updateDependency(long id, int &totalCount) {
             totalCount++;
         }
 
-        if (process->getState() == PROCESS_STATE_DEPENDENT && process->check()) {
+        if (process->getState() == PROCESS_STATE_DEPENDENT && process->check(true)) {
             process->setState(PROCESS_STATE_READY);
             readyCount++;
         }
@@ -585,9 +585,11 @@ bool JobItem::extract(const std::string& zipFile, long& _jobID) {
     return true;
 }
 
-bool JobItem::check() {
+bool JobItem::checkContent() {
 
-    if (!FileItem::check()) {
+    is_valid = false;
+
+    if (!FileItem::checkContent()) {
         return false;
     }
 
@@ -599,6 +601,8 @@ bool JobItem::check() {
             return false;
         }
     }
+
+    is_valid = true;
 
     return true;
 }

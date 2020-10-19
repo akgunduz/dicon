@@ -7,6 +7,7 @@
 
 enum ARCH {
 
+    ARCH_FREE,
     ARCH_LINUX_X86_64,
     ARCH_DARWIN_X86_64,
     ARCH_LINUX_ARM_32,
@@ -18,6 +19,7 @@ enum ARCH {
 class ArchType {
 
     static constexpr const char *sArchTypes[ARCH_MAX] = {
+            "arch-free",
             "x86-64-linux",
             "x86-64-darwin",
             "arm32-linux",

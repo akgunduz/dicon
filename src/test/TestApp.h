@@ -64,7 +64,7 @@ class TestApp : public App {
     }
 
 public:
-    TestApp(int *, const LogInfo&, std::vector<int>&);
+    TestApp(AppParams&);
 
     void testSendJobName(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);

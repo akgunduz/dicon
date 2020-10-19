@@ -23,13 +23,19 @@ class ContentItem : public SchedulerItem {
     long id{};
     long assignedJob{};
     uint64_t duration{};
+    bool is_checked{false};
+
+protected:
+
+    bool is_valid{false};
 
 public:
     explicit ContentItem(const TypeHostUnit&, TypeID = 0, long = 0);
     ContentItem(const ContentItem&);
 
     virtual CONTENT_TYPES getType() = 0;
-    virtual bool check() = 0;
+    virtual bool checkContent() = 0;
+    bool check(bool = false);
 	~ContentItem() override = default;
 
     const TypeHostUnit& getHost();
