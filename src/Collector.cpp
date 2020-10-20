@@ -136,6 +136,8 @@ bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMes
 
     if (readyCount) {
 
+        LOGS_D(getHost(), "Making new request to Distributor, count : %d ", readyCount);
+
         return send2DistributorNodeMsg(distributor, readyCount);
     }
 

@@ -310,7 +310,7 @@ bool Node::onProcessSuccess(void *data) {
         }
     }
 
-    return node->send2CollectorBinaryMsg(nodeHost->getAssigned(), node->processItem->getID(),outputList);
+    return node->send2CollectorBinaryMsg(nodeHost->getAssigned(), node->processItem->getID(), outputList);
 }
 
 TypeProcessList& Node::getProcessList() {

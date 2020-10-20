@@ -237,13 +237,13 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
                 free(writeReq);
 
                 if (status) {
-                    LOGP_E("TCP Write request problem, error : %d!!!", status);
+                    LOGP_E("TCP Write request problem, error : %s!!!", uv_err_name(status));
                 }
             });
 
     if (result != 0) {
 
-        LOGP_E("TCP Write problem, error : %d!!!", result);
+        LOGP_E("TCP Write problem, error : %s!!!", uv_err_name(result));
 
         return false;
     }
@@ -270,13 +270,13 @@ bool CommTCP::onUDPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
              free(writeReq);
 
              if (status) {
-                 LOGP_E("Multicast Write request problem, error : %d!!!", status);
+                 LOGP_E("Multicast Write request problem, error : %s!!!", uv_err_name(status));
              }
          });
 
     if (result != 0) {
 
-        LOGP_E("Multicast Write problem, error : %d!!!", result);
+        LOGP_E("Multicast Write problem, error : %s!!!", uv_err_name(result));
 
         return false;
     }
@@ -301,7 +301,7 @@ bool CommTCP::onServerConnect() {
 
     if (result != 0) {
 
-        LOGS_E(getHost(), "Socket accept with err : %d!!!", result);
+        LOGS_E(getHost(), "Socket accept with err : %s!!!", uv_err_name(result));
 
         UtilUV::onClose((uv_handle_t *)&client);
 
@@ -362,7 +362,7 @@ bool CommTCP::onTCPSend(const TypeComponentUnit& target, TypeMessage msg) {
 
                     if (status) {
 
-                        LOGP_E("TCP Connect problem, error : %s!!!", uv_strerror(status));
+                        LOGP_E("TCP Connect problem, error : %s!!!", uv_err_name(status));
 
                         return;
                     }

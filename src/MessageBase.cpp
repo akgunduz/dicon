@@ -95,10 +95,6 @@ bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer,
 
                 assert(!filePath.empty());
 
-                filePath.make_preferred();
-
-                std::filesystem::remove(getHost()->getRootPath() / filePath);
-
             } else {
 
                 state = MSGSTATE_DATA;
@@ -232,7 +228,15 @@ bool MessageBase::readPath(const TypeComponentUnit& source, const uint8_t* buffe
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Path read process is started => Path Length: %d", size);
 
-    filePath = std::string((char *)buffer, size);
+    std::string refPath((char *)buffer, size);
+
+    std::replace(refPath.begin(), refPath.end(), '\\', '/' );
+
+    filePath = getHost()->getRootPath() / refPath;
+
+    filePath.make_preferred();
+
+    std::filesystem::remove(filePath);
 
     LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Path is read successfully => Path : %s", filePath.c_str());
 
@@ -241,16 +245,14 @@ bool MessageBase::readPath(const TypeComponentUnit& source, const uint8_t* buffe
 
 bool MessageBase::readBinary(const TypeComponentUnit& source, const uint8_t* buffer, size_t size) {
 
-    std::filesystem::path binPath = getHost()->getRootPath() / filePath;
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", filePath.c_str());
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "Read File is started at path : %s", binPath.c_str());
+    std::filesystem::create_directories(filePath.parent_path());
 
-    std::filesystem::create_directories(binPath.parent_path());
-
-    FILE *file = std::fopen(binPath.string().c_str(), "ab");
+    FILE *file = std::fopen(filePath.string().c_str(), "ab");
 
 	if (file == nullptr) {
-        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Read File could not created or opened at path : %s", binPath.c_str());
+        LOGC_E(getHost(), source, MSGDIR_RECEIVE, "Read File could not created or opened at path : %s", filePath.c_str());
 		return false;
 	}
 
@@ -258,7 +260,7 @@ bool MessageBase::readBinary(const TypeComponentUnit& source, const uint8_t* buf
 
     std::fclose(file);
 
-    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "File is read successfully => at path : %s", binPath.c_str());
+    LOGC_T(getHost(), source, MSGDIR_RECEIVE, "File is read successfully => at path : %s", filePath.c_str());
 
 	return true;
 
@@ -390,14 +392,14 @@ bool MessageBase::writeNumber(const TypeComponentUnit& target, uint64_t number) 
 
 bool MessageBase::writePath(const TypeComponentUnit& target, const std::filesystem::path& path) {
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Path write process is started => Path : %s", path.c_str());
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Path write process is started => Path : %s", path.string().c_str());
 
-    if (!onWrite(target, MSGHEADER_PATH, (uint8_t *) path.c_str(), path.string().size())) {
+    if (!onWrite(target, MSGHEADER_PATH, (uint8_t *) path.string().c_str(), path.string().size())) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "Can not write Path to stream");
         return false;
     }
 
-    LOGC_T(getHost(), target, MSGDIR_SEND, "Path is written successfully => Path : %s", path.c_str());
+    LOGC_T(getHost(), target, MSGDIR_SEND, "Path is written successfully => Path : %s", path.string().c_str());
 
     return true;
 }
@@ -406,7 +408,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
                               const TypeFileItem& fileItem) {
 
     LOGC_T(getHost(), target, MSGDIR_SEND,
-           "File Binary write process is started at path : %s", fileItem->getPath().c_str());
+           "File Binary write process is started at path : %s", fileItem->getPath().string().c_str());
 
     if (!writePath(target, fileItem->getRefPath())) {
         LOGC_E(getHost(), target, MSGDIR_SEND, "File Binary can not write file path");
@@ -441,7 +443,7 @@ bool MessageBase::writeBinary(const TypeComponentUnit& target,
     std::fclose(file);
 
     LOGC_T(getHost(), target, MSGDIR_SEND,
-           "File Binary is written successfully at path : %s", fileItem->getPath(target->getArch()).c_str());
+           "File Binary is written successfully at path : %s", fileItem->getPath(target->getArch()).string().c_str());
 
 	return true;
 

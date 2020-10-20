@@ -18,4 +18,6 @@
 #define TEST_JOB_PATH "../scratch/Job1_x86_linux"
 #define TEST_JOB_FILE "matrop-multiply"
 
+#define EXEC_EXT ""
+
 #endif //DICON_PLATFORM_LINUX_H

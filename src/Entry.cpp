@@ -101,9 +101,8 @@ APPPARAM parseParameters(int argc, char** argv, AppParams& params) {
 
                 return APPPARAM_ERROR;
             }
-        }
-
-        else if (!strcmp(argv[i], "-f")) {
+			
+        } else if (!strcmp(argv[i], "-f")) {
 
             if (isdigit(argv[++i][0])) {
                 params.logInfo.filter = atoi(argv[i]);

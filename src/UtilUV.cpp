@@ -79,16 +79,6 @@ void UtilUV::onCloseAll(uv_loop_t *loop) {
 
 bool UtilUV::executeProcess(const std::string& parsedCmd, uv_loop_t* loop, void *data, TypeOnProcessSuccess onProcessSuccessCB) {
 
-    std::filesystem::path executable = parsedCmd.substr(0, parsedCmd.find(' '));
-
-    std::filesystem::permissions(executable,
-                                 std::filesystem::perms::owner_all |
-                                 std::filesystem::perms::group_read |
-                                 std::filesystem::perms::group_exec |
-                                 std::filesystem::perms::others_read |
-                                 std::filesystem::perms::others_exec,
-                                 std::filesystem::perm_options::add);
-
     return onExecuteProcess(loop, new ProcessData(parsedCmd, data, onProcessExit, onProcessSuccessCB));
 }
 
