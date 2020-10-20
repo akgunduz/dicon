@@ -232,13 +232,14 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
 
             [](uv_write_t *writeReq, int status) {
 
+                if (status) {
+                    LOGP_E("TCP Write request problem, error : %s!!!", uv_err_name(status));
+                }
+
                 UtilUV::onClose((uv_handle_t*)writeReq->handle);
 
                 free(writeReq);
 
-                if (status) {
-                    LOGP_E("TCP Write request problem, error : %s!!!", uv_err_name(status));
-                }
             });
 
     if (result != 0) {
