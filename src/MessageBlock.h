@@ -15,6 +15,7 @@ enum MSG_HEADER {
     MSGHEADER_HEADER = 0xA1,
     MSGHEADER_NUMBER,
     MSGHEADER_STRING,
+    MSGHEADER_PATH,
     MSGHEADER_BINARY,
     MSGHEADER_END,
     MSGHEADER_MAX = 0xFF
@@ -35,6 +36,7 @@ public:
     MSG_HEADER getType();
     size_t getSize();
     uint16_t getSign();
+    const char* getName();
 
     bool fillBuffer(uint8_t*) const;
     bool parseBuffer(const uint8_t*);

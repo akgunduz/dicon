@@ -455,7 +455,6 @@ bool CommTCP::onSend(const TypeComponentUnit &target, TypeMessage msg) {
     return onUDPSend(target, std::move(msg));
 }
 
-
 COMM_INTERFACE CommTCP::getType() {
 
     return COMMINTERFACE_TCPIP;

@@ -56,6 +56,7 @@ protected:
 
     std::deque<uint64_t> numbers;
     std::deque<std::string> strings;
+    std::filesystem::path filePath;
 
 public:
 
@@ -69,6 +70,7 @@ public:
 	bool readHeader(const TypeComponentUnit&, const uint8_t*, size_t);
 	bool readString(const TypeComponentUnit&, const uint8_t*, size_t);
 	bool readNumber(const TypeComponentUnit&, const uint8_t*, size_t);
+	bool readPath(const TypeComponentUnit&, const uint8_t*, size_t);
     bool readBinary(const TypeComponentUnit&, const uint8_t*, size_t);
     bool readEndStream(const TypeComponentUnit&, const uint8_t*, size_t);
 
@@ -79,6 +81,7 @@ public:
 	bool writeHeader(const TypeComponentUnit&);
 	bool writeString(const TypeComponentUnit&, const std::string&);
 	bool writeNumber(const TypeComponentUnit&, uint64_t);
+	bool writePath(const TypeComponentUnit&, const std::filesystem::path&);
 	bool writeBinary(const TypeComponentUnit&, const TypeFileItem&);
 
     bool writeEndStream(const TypeComponentUnit&);

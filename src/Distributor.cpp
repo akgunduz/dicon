@@ -130,7 +130,7 @@ void Distributor::collProcess() {
 
         auto *request = collectorManager->getRequest();
         if (request == nullptr) {
-            LOGS_T(getHost(), "Request Queue is empty");
+          //  LOGS_T(getHost(), "Request Queue is empty");
             continue;
         }
 
