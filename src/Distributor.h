@@ -7,9 +7,8 @@
 #define	DICON_DISTRIBUTOR_H
 
 #include "Component.h"
-
-class CollectorManager;
-class NodeManager;
+#include "CollectorManager.h"
+#include "NodeManager.h"
 
 class Distributor : public Component {
 
@@ -55,7 +54,7 @@ public:
 	~Distributor() override;
 
     bool sendWakeupMessage(COMPONENT);
-    bool sendWakeupMessagesAll(bool);
+    bool sendWakeupMessagesAll(bool = false);
 
     bool clear();
     CollectorManager* getCollectors() const;

@@ -107,7 +107,8 @@ std::filesystem::path FileItem::getRefPath(ARCH arch, bool forwardDefault) {
 
 std::filesystem::path FileItem::getParentPath(ARCH arch, bool forwardDefault) {
 
-    return getHost()->getRootPath() / getParentRefPath(arch, forwardDefault);
+    return !is_independent ? getHost()->getRootPath() / getParentRefPath(arch, forwardDefault)
+        : getParentRefPath(arch, forwardDefault);
 }
 
 std::filesystem::path FileItem::getPath(ARCH arch, bool forwardDefault) {

@@ -20,6 +20,8 @@ MessageBase::MessageBase(const TypeHostUnit& _host)
     readParser[MSGHEADER_PATH] = &MessageBase::readPath;
     readParser[MSGHEADER_BINARY] = &MessageBase::readBinary;
     readParser[MSGHEADER_END] = &MessageBase::readEndStream;
+
+    tmpBuf = new uint8_t[TMP_BUFFER_SIZE];
 }
 
 MessageBase::MessageBase(const TypeHostUnit& host, COMPONENT targetType, MSG_TYPE msgType, STREAM_TYPE streamType)
@@ -30,7 +32,10 @@ MessageBase::MessageBase(const TypeHostUnit& host, COMPONENT targetType, MSG_TYP
     header.setOwner(*getHost()->forkCommUnit(targetType));
 }
 
-MessageBase::~MessageBase() = default;
+MessageBase::~MessageBase() {
+
+    delete[] tmpBuf;
+};
 
 bool MessageBase::onRead(const TypeComponentUnit& source, const uint8_t *buffer, size_t nRead) {
 

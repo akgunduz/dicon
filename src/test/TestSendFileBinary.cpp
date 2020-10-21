@@ -8,7 +8,7 @@ void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target)
 
     auto msg = std::make_unique<Message>(owner->getHost(), target->getType(), (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, STREAM_FILE_BINARY);
 
-    auto file = std::make_shared<FileItem>(owner->getHost(), 99, "1", TEST_JOB_FILE);
+    auto file = std::make_shared<FileItem>(owner->getHost(), 99, TEST_JOB_PATH, TEST_JOB_FILE);
 
     file->checkContent();
 
@@ -17,7 +17,7 @@ void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target)
     owner->send(target, std::move(msg));
 }
 
-bool processFileBinaryMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
+bool TestApp::processFileBinaryMsg(const TypeComponent& component, const TypeComponentUnit& owner, TypeMessage msg) {
 
     auto file = msg->getData().getFile();
 
@@ -31,11 +31,8 @@ bool processFileBinaryMsg(const TypeComponent& component, const TypeComponentUni
 
 void TestApp::testSendFileBinary(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
 
-    MessageType::addMsg(MSG_TYPE_TEST_FILE_BINARY, "TEST_FILE_BINARY");
+    for (const auto& targetNode : distributor->getNodes()->get()) {
 
-    node->addStaticProcessHandler(COMP_COLLECTOR, (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, processFileBinaryMsg);
-
-    auto target = std::make_shared<ComponentUnit>(COMP_NODE, node->getHost()->getArch(), node->getHost()->getID(),
-                                                  node->getHost()->getAddress(COMP_COLLECTOR));
-    sendFileBinary((TypeComponent&) collector, target);
+        sendFileBinary((TypeComponent&) collector, targetNode.second);
+    }
 }

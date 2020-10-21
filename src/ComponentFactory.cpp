@@ -29,6 +29,11 @@ ComponentFactory::ComponentFactory(const int *_interfaces) {
     commInterfaces[1] = _interfaces[1];
 }
 
+bool ComponentFactory::hasDistributor() {
+
+    return components[COMP_DISTRIBUTOR].size() > 0;
+}
+
 TypeDistributor& ComponentFactory::getDistributor() {
 
     return reinterpret_cast<TypeDistributor &>(components[COMP_DISTRIBUTOR][0]);

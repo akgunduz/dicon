@@ -152,13 +152,14 @@ bool CommPipe::onSendCB(const TypeComponentUnit &target, const uint8_t *buffer, 
 
             [](uv_write_t *writeReq, int status) {
 
-                UtilUV::onClose((uv_handle_t*)writeReq->handle);
-
-                free(writeReq);
-
                 if (status) {
                     LOGP_E("Pipe Write request problem, error : %d!!!", status);
                 }
+
+                UtilUV::onShutdown((uv_stream_t *)writeReq->handle);
+
+                free(writeReq);
+
             });
 
     if (result != 0) {

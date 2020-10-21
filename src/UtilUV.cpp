@@ -53,17 +53,24 @@ void UtilUV::onShutdown(uv_stream_t* client) {
 
     auto *shutdown_req = (uv_shutdown_t *) calloc(1, sizeof(uv_shutdown_t));
 
-    uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
+    int status = uv_shutdown(shutdown_req, client, [](uv_shutdown_t *req, int status) {
 
         if (status) {
 
-            LOGP_E("Shutdown problem : %d!!!", status);
+            LOGP_E("Shutdown req problem : %s!!!", uv_err_name(status));
         }
 
         onClose((uv_handle_t*)req->handle);
 
         free(req);
     });
+
+    if (status) {
+
+        //LOGP_E("Shutdown problem : %s!!!", uv_err_name(status));
+
+        free(shutdown_req);
+    }
 }
 
 void UtilUV::onCloseAll(uv_loop_t *loop) {

@@ -24,9 +24,6 @@
 #endif
 
 #define WEB_DOCUMENT_ROOT "../data/html/"
-#define TEST_JOB_ZIP "../sample/Job1_all_in_one.zip"
-#define TEST_JOB_PATH "../scratch/Job1"
-#define TEST_JOB_FILE "matrop-multiply"
 #define EXEC_EXT ".exe"
 
 #endif //DICON_PLATFORM_WINDOWS_H

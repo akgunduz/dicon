@@ -236,7 +236,7 @@ bool CommTCP::onTCPSendCB(const TypeComponentUnit &target, const uint8_t *buffer
                     LOGP_E("TCP Write request problem, error : %s!!!", uv_err_name(status));
                 }
 
-                UtilUV::onClose((uv_handle_t*)writeReq->handle);
+                UtilUV::onShutdown((uv_stream_t *)writeReq->handle);
 
                 free(writeReq);
 

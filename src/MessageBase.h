@@ -14,7 +14,7 @@
 #include "HostUnit.h"
 #include "FileItem.h"
 
-#define TMP_BUFFER_SIZE 1000
+#define TMP_BUFFER_SIZE 65536
 
 class MessageBase;
 typedef size_t (*TypeReadCB) (const TypeComponentUnit&, uint8_t*, size_t);
@@ -35,7 +35,7 @@ class MessageBase {
 
     MSG_STATE state{MSGSTATE_INIT};
 
-    uint8_t tmpBuf[TMP_BUFFER_SIZE]{};
+    uint8_t *tmpBuf;
 
     size_t tmpBufPos = 0;
     size_t binBufPos = 0;

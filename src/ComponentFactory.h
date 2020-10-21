@@ -24,6 +24,7 @@ public:
     static ComponentFactory* newInstance(int*);
     ~ComponentFactory();
 
+    bool hasDistributor();
     TypeDistributor& getDistributor();
     size_t getCollectorCount();
     TypeCollector& getCollector(long);

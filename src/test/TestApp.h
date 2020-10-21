@@ -12,6 +12,10 @@
 #include <Platform.h>
 #include "Application.h"
 
+#define TEST_JOB_ZIP "../sample/Job1_all_in_one.zip"
+#define TEST_JOB_PATH "../scratch/Job1_all_in_one"
+#define TEST_JOB_FILE "Project.eapx"
+
 enum MSG_TYPE_TEST {
 
     MSG_TYPE_TEST_JOBNAME = 0x100,
@@ -63,8 +67,20 @@ class TestApp : public App {
         return true;
     }
 
+    inline void poll(TypeDistributor& distributor, TypeCollector& collector, TypeNode& node) {
+
+        if (distributor) {
+            distributor->sendWakeupMessagesAll();
+        }
+    }
+
 public:
+
     TestApp(AppParams&);
+
+    void registerMessageCallbacks();
+
+    static bool processFileBinaryMsg(const TypeComponent&, const TypeComponentUnit&, TypeMessage);
 
     void testSendJobName(TypeDistributor&, TypeCollector&, TypeNode&);
     void testSendFileBinary(TypeDistributor&, TypeCollector&, TypeNode&);
@@ -79,7 +95,6 @@ public:
     void testSendID(TypeDistributor&, TypeCollector&, TypeNode&);
 
     void testPing(TypeDistributor&, TypeCollector&, TypeNode&);
-
 
     void testLoadJob(TypeDistributor&, TypeCollector&, TypeNode&);
     void testCRC(TypeDistributor&, TypeCollector&, TypeNode&);
