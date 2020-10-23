@@ -146,7 +146,7 @@ bool Collector::processNodeFileBinaryMsg(const TypeComponentUnit& owner, TypeMes
         job->setDuration(timer.duration());
 
         job->checkFiles();
-        
+
         collectorHost->setState(COLLSTATE_IDLE);
 
         notifyUI(NOTIFYTYPE_PASSIVE);

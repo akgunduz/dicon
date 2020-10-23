@@ -100,9 +100,14 @@ set(WEB_FILES
         ${SOURCE_PATH}/Entry.cpp
         )
 
+set_source_files_properties(
+        ${GENERATED_PATH}/WebPage.cpp
+        PROPERTIES GENERATED TRUE
+)
+
 set(GENERATOR_FILES
-        ${SOURCE_PATH}/Util.cpp
-        ${SOURCE_PATH}/Generator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_PATH}/Util.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_PATH}/Generator.cpp
         )
 
 set(TEST_FILES
@@ -156,7 +161,25 @@ add_library(dicon-framework ${FRAMEWORK_FILES})
 target_link_libraries(dicon-framework PRIVATE)
 ##################################################
 
-add_executable(dicon-generator ${GENERATOR_FILES})
+if (CMAKE_CROSSCOMPILING)
+    add_custom_target(dicon-generator
+       COMMAND g++ -std=c++17 ${GENERATOR_FILES} -I${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_PATH} -o dicon-generator
+    )
+    add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
+            COMMAND ./dicon-generator ${CMAKE_CURRENT_SOURCE_DIR}/data/html/index.html ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
+            DEPENDS dicon-generator ${CMAKE_CURRENT_SOURCE_DIR}/data/html/index.html
+    )
+else()
+    add_executable(dicon-generator ${GENERATOR_FILES})
+    add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
+            COMMAND dicon-generator ${CMAKE_CURRENT_SOURCE_DIR}/data/html/index.html ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
+            DEPENDS dicon-generator ${CMAKE_CURRENT_SOURCE_DIR}/data/html/index.html
+    )
+endif()
+
+
 
 ##################################################
 
@@ -166,15 +189,10 @@ target_link_libraries(dicon-console dicon-framework ${LIBRARIES})
 
 ##################################################
 
-add_custom_command(
-        OUTPUT  ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_PATH}/WebPage.cpp
-        COMMAND dicon-generator
-        DEPENDS dicon-generator
-)
-
 add_executable(dicon-web ${WEB_FILES})
 target_compile_definitions(dicon-web PUBLIC -DWEB -DNO_SSL)
 target_link_libraries(dicon-web dicon-framework civetweb ${LIBRARIES})
+#add_dependencies(dicon-web dicon-generate-web)
 
 ##################################################
 
