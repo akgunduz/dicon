@@ -597,12 +597,26 @@ bool JobItem::checkContent() {
 
         auto process = getProcess(i);
 
-        if (!process->check()) {
+        if (!process->checkContent()) {
             return false;
         }
     }
 
     is_valid = true;
+
+    return true;
+}
+
+bool JobItem::checkFiles() {
+
+    for (int i = 0; i < getFileCount(); i++) {
+
+        auto file = getFile(i);
+
+        if (!file->checkContent()) {
+            return false;
+        }
+    }
 
     return true;
 }

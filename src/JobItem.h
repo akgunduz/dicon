@@ -87,6 +87,7 @@ public:
     bool extract(const std::string&, long&);
 
     bool checkContent() override;
+    bool checkFiles();
 
     JOB_STATUS getStatus();
 };

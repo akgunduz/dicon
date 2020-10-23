@@ -6,7 +6,8 @@
 
 void sendFileBinary(const TypeComponent& owner, const TypeComponentUnit& target) {
 
-    auto msg = std::make_unique<Message>(owner->getHost(), target->getType(), (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, STREAM_FILE_BINARY);
+    auto msg = std::make_unique<Message>(owner->getHost(), target->getType(),
+                                         (MSG_TYPE)MSG_TYPE_TEST_FILE_BINARY, STREAM_FILE_BINARY);
 
     auto file = std::make_shared<FileItem>(owner->getHost(), 99, TEST_JOB_PATH, TEST_JOB_FILE);
 
