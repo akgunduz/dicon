@@ -82,7 +82,18 @@ Install [**Microsoft Visual Studio**](https://visualstudio.microsoft.com/) and [
 
 #### Build Process
 
-To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-linux-gnueabihf***, ***x86-linux-gnueabihf*** and put them under ***/usr/local/toolchains*** or update the **TOOLCHAIN_DIR** variable in the corresponding toolchain cmake files.
+To cross-compile for **ARM - Linux** based nodes; 
+###### Install ARM toolchains
+
+for **ARM-32** 
+```
+sudo apt install g++-arm-linux-gnueabihf
+```
+for **ARM-64** 
+
+```
+sudo apt install g++-aarch64-linux-gnu
+```
 
 ###### Create build directory
 
@@ -93,32 +104,32 @@ To cross-compile for linux based nodes; get sysroot enabled toolchains; ***arm-l
 
 ###### Compile
 
-- for target ==> MacOS, Linux, Windows (WSL 2)
+- for target ==> **MacOS, Linux, Windows (WSL 2)**
 
 ```
 	cmake ..
 	cmake --build .
 ```
 
-- for target ==> Windows (MSVC)
+- for target ==> **Windows (MSVC)**
 
 ```
 	cmake.exe ..
 	#Then open **Dicon.sln** file in **Microsoft Visual Studio IDE**
 ```
 
-- for target ==> ARM based Linux
+- for target ==> **ARM32 based Linux**
 
 ```
-	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-linux-arm.cmake
-	cmake --build . --target dicon
+	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-host-linux-target-arm32.cmake
+	cmake --build .
 ```
 
-- for target ==> x86 based Linux
+- for target ==> **ARM64 based Linux**
 
 ```
-	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-linux-x86.cmake
-	cmake --build . --target dicon
+	cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain-host-linux-target-aarch64.cmake
+	cmake --build .
 ```
 
 
@@ -168,11 +179,19 @@ In the following example, the process has distributor, 1 collector and 2 nodes r
 ```
 $ dicon-web -d -c 1 -n 2
 ```
-**"-g"** : to select one of the debug level for debug builds. Preferred debug level should be concatenate to this parameter. It can be from **1** to **5**, 1 is to log only Errors, 5 for everything.
+**"-g"** : to select one of the debug level for debug builds. Preferred debug level should be concatenate to this parameter. It can be from **1** to **5**, 
+
+​	1 is to log only Errors, 5 for everything.
+
+**"-f"** : to filter the log records based on component, 
+
+​	**Distributor : 1**, **Collector : 2** and **Node : 4**, default value is 7 (all Distributor, Collector and Node logs will be displayed)
 
 **"-t"** : to add timestamp to the log outputs.
 
 **"-x"** : to cleanup the Unix socket files from previous sessions or created by other dicon processes.
+
+**"-w"** : to manually poll the components in the network from Distributor UI, It will deactivate auto wakeup process
 
 
 
@@ -334,6 +353,22 @@ $ matrop-conv -w 1000 -f Filter_8 MatrixInput_7 MatrixInput_9
 ```sh
 $ matrop-scan -w 1000 -m MatrixInput_5 MatrixInput_12 MatrixInput_9 MatrixInput_13
 ```
+
+
+
+#### Multi Architecture Support
+Framework supports different types of nodes at the same time, if the required **binary** files are provided. System will automatically select the right binaries for the target node, to execute the task.
+
+To enable multiple architecture support, corresponding arch differentiated binaries should be located under **bin** folder reference to the location defined in **Job.json** file. As it can be seen in the **sample/Job1_all_in_one.zip** job, first three files, **matrop-multiply, matrop-conv** and **matrop-scan** files are executable files that responsible for the execution of the process and are located in **bin** folder multiple times under their corresponding arch folders. Currently 5 platforms are supported,
+
+- x86_64 Linux system => **bin/x86-64-linux**
+- x86_64 MacOS system => **bin/x86-64-darwin**
+- x86_64 Windows system => **bin\x86-64-windows**
+- ARM32 Linux system => **bin\arm32-linux**
+- ARM64 Linux system => **bin\arm64-linux**
+
+If all job binaries are provided for each platform, then all types of nodes can be exist and used by the system at the same time.
+
 
 
 
