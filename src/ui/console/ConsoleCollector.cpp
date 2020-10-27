@@ -45,7 +45,7 @@ bool ConsoleApp::collStateHandler(long id) {
 
     LOGP_I("Collector[%d] Status", id);
 
-    LOGP_I("Files of Job : %s", job->getName());
+    LOGP_I("Files of Job : %s", job->getName().c_str());
 
     for (int j = 0; j < job->getFileCount(); j++) {
 
@@ -60,7 +60,7 @@ bool ConsoleApp::collStateHandler(long id) {
 
         LOGP_I("\tID : %d, Process : %s, State : %s, Assigned Node : %d",
                 job->getProcess(j)->getID(),
-                job->getProcess(j)->getProcess(),
+                job->getProcess(j)->getProcess().c_str(),
                 ProcessState::getName(job->getProcess(j)->getState()),
                 job->getProcess(j)->getAssigned());
     }
