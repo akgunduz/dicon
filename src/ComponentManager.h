@@ -1,5 +1,6 @@
 //
 // Created by Haluk AKGUNDUZ on 28.04.2018.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_COMPONENTMANAGER_H

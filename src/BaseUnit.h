@@ -1,5 +1,6 @@
 //
-// Created by akgun on 17.09.2020.
+// Created by Haluk AKGUNDUZ on 17.09.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_BASEUNIT_H

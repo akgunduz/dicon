@@ -1,6 +1,8 @@
 //
-// Created by akgun on 18.09.2020.
+// Created by Haluk AKGUNDUZ on 18.09.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
+
 
 #include <UtilUV.h>
 #include "TestApp.h"

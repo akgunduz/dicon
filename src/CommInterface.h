@@ -2,6 +2,7 @@
 // Created by Haluk Akgunduz on 24/06/14.
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
+
 #ifndef DICON_COMMINTERFACE_H
 #define DICON_COMMINTERFACE_H
 

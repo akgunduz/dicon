@@ -1,5 +1,6 @@
 //
-// Created by akgun on 7.07.2020.
+// Created by Haluk AKGUNDUZ on 07.07.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_COMPONENTUNIT_H

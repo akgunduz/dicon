@@ -1,5 +1,6 @@
 //
 // Created by Haluk AKGUNDUZ on 14.08.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_COMPONENTUNITFACTORY_H

@@ -1,6 +1,8 @@
 //
-// Created by Haluk AKGUNDUZ on 4.08.2020.
+// Created by Haluk AKGUNDUZ on 04.08.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
+
 
 #include "UtilNet.h"
 #include "Util.h"

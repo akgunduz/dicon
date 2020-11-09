@@ -1,5 +1,6 @@
 //
-// Created by akgun on 18.09.2020.
+// Created by Haluk AKGUNDUZ on 18.09.2020.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #include <cassert>

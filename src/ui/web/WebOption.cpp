@@ -1,5 +1,6 @@
 //
-// Created by Haluk AKGUNDUZ on 3.08.2020.
+// Created by Haluk AKGUNDUZ on 03.08.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #include "WebOption.h"

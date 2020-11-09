@@ -1,5 +1,6 @@
 //
-// Created by Haluk AKGUNDUZ on 25/09/15.
+// Created by Haluk AKGUNDUZ on 25.09.2015.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_ADDRESS_H

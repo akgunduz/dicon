@@ -1,5 +1,6 @@
 //
-// Created by Haluk Akgunduz on 10/18/15.
+// Created by Haluk AKGUNDUZ on 18.10.2015.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_COMMINTERFACECB_H

@@ -1,5 +1,6 @@
 //
-// Created by akgunduz on 26.10.2015.
+// Created by Haluk AKGUNDUZ on 26.10.2015.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #include <list>

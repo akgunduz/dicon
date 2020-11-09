@@ -1,5 +1,6 @@
 //
-// Created by z003sc8r on 9/9/2020.
+// Created by Haluk AKGUNDUZ on 09.09.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_COMMDATA_H

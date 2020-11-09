@@ -3,7 +3,6 @@
 // Copyright (c) 2014 Haluk Akgunduz. All rights reserved.
 //
 
-
 #ifndef DICON_MESSAGEBASE_H
 #define DICON_MESSAGEBASE_H
 

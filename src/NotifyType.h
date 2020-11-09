@@ -1,5 +1,6 @@
 //
-// Created by akgun on 23.08.2020.
+// Created by Haluk AKGUNDUZ on 23.08.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_NOTIFYTYPE_H

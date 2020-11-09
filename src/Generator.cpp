@@ -1,5 +1,6 @@
 //
-// Created by akgun on 9.07.2020.
+// Created by Haluk AKGUNDUZ on 09.07.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #include <cstdarg>

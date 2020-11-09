@@ -1,5 +1,6 @@
 //
-// Created by akgunduz on 23.03.2018.
+// Created by Haluk AKGUNDUZ on 23.03.2018.
+// Copyright (c) 2018 Haluk Akgunduz. All rights reserved.
 //
 
 #ifndef DICON_MESSAGEBLOCK_H

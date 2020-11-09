@@ -1,5 +1,6 @@
 //
-// Created by Haluk Akgunduz on 10/12/15.
+// Created by Haluk AKGUNDUZ on 12.10.2015.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #include "Log.h"

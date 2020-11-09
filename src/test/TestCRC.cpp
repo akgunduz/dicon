@@ -1,5 +1,6 @@
 //
-// Created by akgun on 4.09.2020.
+// Created by Haluk AKGUNDUZ on 04.09.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #include "TestApp.h"

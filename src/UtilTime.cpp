@@ -1,5 +1,6 @@
 //
-// Created by Haluk Akgunduz on 10/17/15.
+// Created by Haluk AKGUNDUZ on 17.10.2015.
+// Copyright (c) 2015 Haluk Akgunduz. All rights reserved.
 //
 
 #include "UtilTime.h"

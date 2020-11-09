@@ -1,5 +1,6 @@
 //
-// Created by Haluk AKGUNDUZ on 1.08.2020.
+// Created by Haluk AKGUNDUZ on 01.08.2020.
+// Copyright (c) 2020 Haluk Akgunduz. All rights reserved.
 //
 
 #include "ComponentObject.h"

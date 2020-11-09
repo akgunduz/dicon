@@ -363,9 +363,9 @@ To enable multiple architecture support, corresponding arch differentiated binar
 
 - x86_64 Linux system => **bin/x86-64-linux**
 - x86_64 MacOS system => **bin/x86-64-darwin**
-- x86_64 Windows system => **bin\x86-64-windows**
-- ARM32 Linux system => **bin\arm32-linux**
-- ARM64 Linux system => **bin\arm64-linux**
+- x86_64 Windows system => **bin/x86-64-windows**
+- ARM32 Linux system => **bin/arm32-linux**
+- ARM64 Linux system => **bin/arm64-linux**
 
 If all job binaries are provided for each platform, then all types of nodes can be exist and used by the system at the same time.
 
