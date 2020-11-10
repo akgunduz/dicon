@@ -54,7 +54,7 @@ bool Collector::processDistributorIDMsg(const TypeComponentUnit& owner, TypeMess
 
 bool Collector::processDistributorNodeMsg(const TypeComponentUnit& owner, TypeMessage msg) {
 
-    TypeComponentUnitList& nodes = msg->getData().getComponentList();
+    TypeComponentUnitList nodes = msg->getData().getComponentList();
 
     LOGC_I(getHost(), owner, MSGDIR_RECEIVE, "Distributor assigned %d node", nodes.size());
 
