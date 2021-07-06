@@ -285,16 +285,12 @@ bool MessageBase::readEndStream(const TypeComponentUnit& source, const uint8_t* 
 
 bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType, const uint8_t *buffer, size_t size) {
 
+    bool result {false};
     if (blockType == MSGHEADER_MAX) {
 
         crc = CRC::Calculate(buffer, size, Util::crcTable, crc);
 
-        writeData(target, buffer, size);
-
-//        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
-//               size, Util::hex2str(buffer, size).c_str());
-
-        return true;
+        return writeData(target, buffer, size);
 
     }
 
@@ -302,8 +298,11 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
     if (newPos > TMP_BUFFER_SIZE) {
 
-        writeData(target, tmpBuf, tmpBufPos);
-
+        result = writeData(target, tmpBuf, tmpBufPos);
+        if (!result) {
+            LOGS_E(getHost(), "Data sent problem");
+            return false;
+        }
 //        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
 //               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
 
@@ -334,7 +333,11 @@ bool MessageBase::onWrite(const TypeComponentUnit& target, MSG_HEADER blockType,
 
     if (blockType == MSGHEADER_BINARY || blockType == MSGHEADER_END) {
 
-        writeData(target, tmpBuf, tmpBufPos);
+        result = writeData(target, tmpBuf, tmpBufPos);
+        if (!result) {
+            LOGS_E(getHost(), "Data sent problem");
+            return false;
+        }
 
 //        LOGS_E(getHost(), "%ld : Data     sent, count : %3d, bufPtr : %s", iter++,
 //               tmpBufPos, Util::hex2str(tmpBuf, tmpBufPos).c_str());
